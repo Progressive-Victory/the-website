@@ -1,21 +1,43 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700;900&display=swap");
+p {
+  font-family: "Merriweather", serif;
+  font-size: 1.2rem;
+}
+.animate-scroll {
+  display: flex;
+  animation: scroll 15s linear infinite;
+  will-change: transform;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.animate-scroll-inverse {
+  display: flex;
+  animation: scroll-inverse 15s linear infinite;
+  will-change: transform;
+}
+
+.black-text-outline {
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(50%);
+  }
+  100% {
+    /* Move only half the total content width */
+    transform: translateX(-50%);
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes scroll-inverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(50%);
+  }
 }
