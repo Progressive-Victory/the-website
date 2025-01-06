@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geist } from "next/font/google";
 
 import "./globals.css";
 
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Get involved!",
 };
 
-const inter = Inter({ subsets: ["latin"] });
+const geist = Geist({ subsets: ["latin"] });
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>{children}</body>
+      <body className={geist.className}>{children}</body>
     </html>
   );
 }

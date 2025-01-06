@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // set allowed image hosts
+  images: {
+    domains: ["picsum.photos"],
+  },
 };
 
 export default nextConfig;
