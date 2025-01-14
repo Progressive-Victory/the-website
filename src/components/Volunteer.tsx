@@ -21,7 +21,7 @@ function Card({
         delay,
         ease: "easeOut",
       }}
-      className="flex flex-col items-center justify-start w-[330px] h-[500px] p-4 bg-white rounded-md shadow-xl gap-y-4"
+      className="flex flex-col items-center justify-start w-full sm:w-2/3 h-full lg:w-[330px] lg:h-[500px] p-4 bg-white rounded-md shadow-xl gap-y-4 my-4"
     >
       <Image
         src={image}
@@ -61,24 +61,9 @@ export function Volunteer() {
   return (
     <div className="flex flex-col items-center justify-center bg-red-500 py-20 w-full gap-y-24">
       <h1 className="text-4xl font-bold text-white">
-        What Can{" "}
-        <span className="relative inline-block">
-          <span
-            className="absolute top-0 left-0 text-4xl font-bold text-blue-900 translate-y-1 translate-x-1"
-            style={{ zIndex: 1 }}
-          >
-            You
-          </span>
-          <span
-            className="text-4xl font-bold text-white"
-            style={{ zIndex: 2, position: "relative" }}
-          >
-            You
-          </span>
-        </span>{" "}
-        Do?
+        What Can <span className="bg-white text-black p-px">You</span> Do?
       </h1>
-      <div className="w-full flex flex-row items-center justify-center gap-x-10">
+      <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-x-10 px-4">
         {actions.map((action, index) => (
           <Card
             key={action.title}

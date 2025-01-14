@@ -1,0 +1,34 @@
+import Image from "next/image";
+import Link from "next/link";
+export function MapGraphic() {
+  return (
+    <div className="flex flex-col lg:flex-row items-center justify-center bg-black w-full gap-y-24 px-4 py-12">
+      <Image
+        src="/images/chalk-map.jpg"
+        alt="progressive-victory-map"
+        className="rounded-md order-last lg:order-first"
+        width={500}
+        height={500}
+      />
+      <div className="flex flex-col items-center justify-center gap-y-4 px-4 w-1/2">
+        <h1 className="text-4xl font-bold text-white text-center">
+          Thousands of{" "}
+          <span className="bg-white text-jasper p-px">Volunteers</span>
+          <br /> Across the US
+        </h1>
+        <p className="text-lg text-white text-center w-full lg:w-1/2">
+          The PV community is constantly growing! Our members are organizing in
+          their local communities, identifying campaigns in their area, and
+          using the shared resources, tactics, and people power of Progressive
+          Victory!
+        </p>
+        <Link
+          href="/volunteer"
+          className="text-xl bg-jasper px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out"
+        >
+          Get Involved
+        </Link>
+      </div>
+    </div>
+  );
+}
