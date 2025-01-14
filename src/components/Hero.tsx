@@ -8,7 +8,7 @@ export function Hero() {
     <div className="relative h-fit bg-steel-blue w-full flex flex-col items-center justify-start overflow-hidden py-20">
       {/* Animated Main Text */}
       <motion.div
-        className="text-center w-full lg:w-1/2"
+        className="text-center w-full lg:w-1/2 px-4"
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -48,19 +48,20 @@ export function Hero() {
         </motion.div>
         <motion.div
           initial={{ rotate: 7, y: 50, opacity: 0 }}
-          animate={{ rotate: 2, y: 0, opacity: 1 }}
+          animate={{ rotate: 1, y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
         >
           <Message
             avatar="https://picsum.photos/201"
             username="Jane Smith"
             nameColor="blue"
+            image="/images/protestors-ukraine.jpg"
             text="Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
           />
         </motion.div>
         <motion.div
           initial={{ rotate: -15, y: 50, opacity: 0 }}
-          animate={{ rotate: -3, y: 0, opacity: 1 }}
+          animate={{ rotate: 6, y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.6 }}
         >
           <Message

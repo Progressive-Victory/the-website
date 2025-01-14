@@ -11,6 +11,7 @@ export function Message({
   avatar,
   username,
   nameColor,
+  image,
   text,
   delay = 0, // Delay for staggering
 }: {
@@ -18,6 +19,7 @@ export function Message({
   username: string;
   nameColor?: string;
   text: string;
+  image?: string;
   delay?: number;
 }) {
   return (
@@ -44,6 +46,15 @@ export function Message({
         </p>
       </div>
       <p className="mt-2 text-left mr-auto max-w-md">{text}</p>
+      {image && (
+        <Image
+          src={image}
+          alt={username}
+          className="w-full h-1/2 rounded-lg"
+          width={256}
+          height={256}
+        />
+      )}
       <div className="flex flex-row items-center justify-end gap-x-4 mt-4 ml-auto">
         <ChatBubbleLeftRightIcon className="w-6 h-6" />
         <ArrowUpOnSquareIcon className="w-6 h-6" />
