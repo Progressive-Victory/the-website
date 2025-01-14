@@ -60,25 +60,32 @@ const actions = [
 export function Volunteer() {
   return (
     <div className="flex flex-col items-center justify-center bg-red-500 py-20 w-full gap-y-24">
-      <h1 className="text-4xl font-bold text-white">
-        What Can{" "}
-        <span className="relative inline-block">
-          <span
-            className="absolute top-0 left-0 text-4xl font-bold text-blue-900 translate-y-1 translate-x-1"
-            style={{ zIndex: 1 }}
-          >
-            You
-          </span>
-          <span
-            className="text-4xl font-bold text-white"
-            style={{ zIndex: 2, position: "relative" }}
-          >
-            You
-          </span>
-        </span>{" "}
-        Do?
-      </h1>
-      <div className="w-full flex flex-row items-center justify-center gap-x-10">
+      <motion.div
+        className="text-center w-1/2"
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
+        <h1 className="text-4xl font-bold text-white">
+          What Can{" "}
+          <span className="relative inline-block">
+            <span
+              className="absolute top-0 left-0 text-4xl font-bold text-blue-900 translate-y-1 translate-x-1"
+              style={{ zIndex: 1 }}
+            >
+              You
+            </span>
+            <span
+              className="text-4xl font-bold text-white"
+              style={{ zIndex: 2, position: "relative" }}
+            >
+              You
+            </span>
+          </span>{" "}
+          Do?
+        </h1>
+      </motion.div>
+      <div className="w-full flex flex-row flex-wrap items-center justify-center gap-10">
         {actions.map((action, index) => (
           <Card
             key={action.title}
