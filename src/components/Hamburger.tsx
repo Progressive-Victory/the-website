@@ -4,7 +4,7 @@ export default function Hamburger() {
   return (
     <button
       type="button"
-      className="hs-collapse-toggle flex h-8 w-8 items-center justify-center rounded-md text-sm font-bold text-neutral-600 transition duration-300 hover:bg-neutral-200 disabled:pointer-events-none disabled:opacity-50 dark:text-neutral-00 dark:hover:bg-neutral-700 dark:focus:outline-none"
+      className="hs-collapse-toggle flex h-8 w-8 items-center justify-center rounded-md text-sm font-bold transition duration-300 disabled:pointer-events-none disabled:opacity-50 dark:text-neutral-00 dark:focus:outline-none"
       data-hs-collapse="#navbar-collapse-with-animation"
       aria-controls="navbar-collapse-with-animation"
       aria-label="Toggle navigation"
