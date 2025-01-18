@@ -30,7 +30,7 @@ const navitems = [
 ];
 export function Header() {
   return (
-    <div className="sticky top-0 left-0 right-0 flex flex-row items-center justify-between w-full gap-x-4 px-6 md:px-12 py-4 z-10 bg-steel-blue">
+    <div className="sticky top-0 left-0 right-0 flex flex-row items-center justify-between w-full gap-x-4 px-6 md:px-12 py-4 z-10 bg-prussian">
       <div className="flex flex-row items-center justify-start gap-x-4 flex-0">
         <Logo className="w-12 h-12 bg-white p-1 rounded-full" />
       </div>
