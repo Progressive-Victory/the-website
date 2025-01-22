@@ -10,10 +10,9 @@ export function MapGraphic() {
         width={500}
         height={500}
       />
-      <div className="flex flex-col items-center justify-center gap-y-4 px-4 w-1/2">
+      <div className="flex flex-col items-center justify-center gap-y-4 px-4 sm:w-1/2 w-full">
         <h1 className="text-4xl font-bold text-white text-center">
-          Thousands of{" "}
-          <span className="bg-white text-jasper p-px">Volunteers</span>
+          Thousands of <span className="text-jasper">Volunteers</span>
           <br /> Across the US
         </h1>
         <p className="text-lg text-white text-center w-full lg:w-1/2">

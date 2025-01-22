@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 const geist = Geist({
   subsets: ["latin"],
-  weight: ["400"],
+  weight: ["400", "700", "900"],
   display: "swap",
 });
 export default function RootLayout({

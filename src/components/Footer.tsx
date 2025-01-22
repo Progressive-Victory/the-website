@@ -22,12 +22,12 @@ export function Footer() {
             <SocialIcon key={social} url={social} fgColor="white" />
           ))}
         </div>
-        <div className="p-1 border-2 border-white w-[400px] text-center text-steel-blue font-bold">
-          PAID FOR BY PROGRESSIVE VICTORY,{" "}
+        <div className="p-1 border-2 border-white w-[400px] text-center text-steel-blue font-bold mx-12 md:mx-0">
+          PAID FOR BY PROGRESSIVE VICTORY{" "}
           <Link href="https://progressivevictory.win" className="text-jasper">
             WWW.PROGRESSIVEVICTORY.WIN
-          </Link>
-          , NOT AUTHORIZED BY ANY CANDIDATE OR CANDIDATE’S COMMITTEE.
+          </Link>{" "}
+          NOT AUTHORIZED BY ANY CANDIDATE OR CANDIDATE’S COMMITTEE.
         </div>
       </div>
     </div>

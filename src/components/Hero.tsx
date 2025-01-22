@@ -15,7 +15,7 @@ export function Hero() {
       >
         <h1 className="text-4xl font-bold text-white">
           Welcome to{" "}
-          <span className="whitespace-nowrap bg-white text-blue-600 p-px">
+          <span className="whitespace-nowrap text-prussian">
             Progressive Victory
           </span>{" "}
           the Online Community for Political Action.

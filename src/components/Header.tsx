@@ -21,7 +21,7 @@ const navitems = [
   },
   {
     name: "Merch",
-    href: "/merch",
+    href: "https://progressivevictory.myshopify.com/",
   },
   {
     name: "Contact",
@@ -46,7 +46,7 @@ export function Header() {
         ))}
       </div>
       <Link
-        href="#"
+        href="https://secure.actblue.com/donate/pvwebsite"
         className="text-xl bg-jasper px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out hidden lg:block"
       >
         Donate
