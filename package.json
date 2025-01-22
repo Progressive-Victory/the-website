@@ -13,7 +13,8 @@
     "motion": "^12.0.0-alpha.2",
     "next": "15.0.3",
     "react": "19.0.0-rc-66855b96-20241106",
-    "react-dom": "19.0.0-rc-66855b96-20241106"
+    "react-dom": "19.0.0-rc-66855b96-20241106",
+    "react-social-icons": "^6.18.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",

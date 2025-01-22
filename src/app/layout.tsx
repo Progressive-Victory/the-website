@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -8,7 +7,11 @@ export const metadata: Metadata = {
   description: "Get involved!",
 };
 
-const geist = Geist({ subsets: ["latin"] });
+const geist = Geist({
+  subsets: ["latin"],
+  weight: ["400", "700", "900"],
+  display: "swap",
+});
 export default function RootLayout({
   children,
 }: Readonly<{
