@@ -1,12 +1,21 @@
+import BlogCard from "@/components/BlogCard";
 import { Header } from "@/components/Header";
+import BlogHeader from "./BlogHeader";
 
 export default function Home() {
   return (
     <div className="bg-steel-blue w-full">
       <Header />
-      <div className="flex flex-col items-center z-1">
-        <div>
-            TODO: BLOG MAIN PAGE GOES HERE https://trello.com/c/IZM1Gqq2/28-look-into-markdown-blogs
+      <div>
+        <BlogHeader />
+        <div className="bg-[#D4E6F5] p-10">
+          <h2 className="text-4xl font-bold text-center p-10">Posts</h2>
+          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+            <BlogCard />
+            <BlogCard />
+            <BlogCard />
+            <BlogCard />
+          </div>
         </div>
       </div>
     </div>
