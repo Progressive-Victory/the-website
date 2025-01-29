@@ -22,8 +22,8 @@ export default function BlogCard() {
       </div>
       <div className="absolute inset-x-0 bottom-0 z-[1]">
         <div className="flex h-full flex-col rounded-b-xl bg-white bg-opacity-90 p-4 sm:p-6 ">
-          <h3 className="text-xl ">Is Modern Virginia Too Small?</h3>
-          <p className="text-gray-500">
+          <h3 className="text-lg">Is Modern Virginia Too Small?</h3>
+          <p className="text-gray-500 line-clamp-2">
             Of the many issues hardworking Americans face, this one is often
             ignored
           </p>

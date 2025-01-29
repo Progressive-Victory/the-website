@@ -9,7 +9,7 @@ export default function Home() {
       <div>
         <BlogHeader />
         <div className="bg-[#D4E6F5] p-10">
-          <h2 className="text-2xl font-bold text-center p-10">Posts</h2>
+          <h2 className="text-4xl font-bold text-center p-10">Posts</h2>
           <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
             <BlogCard />
             <BlogCard />

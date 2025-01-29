@@ -9,7 +9,7 @@ export default function BlogHeader() {
   ) {
     const words = text.split(" ");
     return (
-      <p aria-label={text}>
+      <div aria-label={text}>
         {words.map((word, index) => (
           <div key={index} className="inline-block relative">
             <span
@@ -23,7 +23,7 @@ export default function BlogHeader() {
             </span>
           </div>
         ))}
-      </p>
+      </div>
     );
   }
 
