@@ -16,26 +16,14 @@ type Post = {
 };
 
 async function getPosts(): Promise<Post[]> {
-  const query = `{
-    posts {
-      edges {
-        node {
-              title
-              excerpt
-              slug
-              content
-              date
-              id
-            }
-          }
-        }
-      }`;
   const res = await fetch(`http://progressive-victory-blog.local/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({
+      query: `{posts{edges{node{title, excerpt, slug, content, date, id}}}}`,
+    }),
   });
   const data = await res.json();
   const posts = data.data.posts.edges;
@@ -71,13 +59,15 @@ export default function Home() {
                 image="/images/protestors-ukraine.jpg"
               />
             ))}
-            {/* <BlogCard
-              title="Is Modern Virginia Too Small?"
-              description="Of the many issues hardworking Americans face, this one is often ignored"
-              date="2024-09-11"
-              image="/images/protestors-ukraine.jpg"
-            /> */}
           </div>
+          <br />
+          {posts[0] && (
+            <div
+              dangerouslySetInnerHTML={{
+                __html: posts[0].node.content,
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
