@@ -3,6 +3,7 @@ import BlogCard from "@/components/BlogCard";
 import { Header } from "@/components/Header";
 import BlogHeader from "./BlogHeader";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 type Post = {
   node: {
@@ -51,23 +52,16 @@ export default function Home() {
           <h2 className="text-4xl font-bold text-center p-10">Posts</h2>
           <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post: any) => (
-              <BlogCard
-                key={post.node.id}
-                title={post.node.title}
-                description={post.node.excerpt}
-                date={post.node.date}
-                image="/images/protestors-ukraine.jpg"
-              />
+                  <BlogCard
+                    key={post.node.id}
+                    slug={post.node.slug}
+                    title={post.node.title}
+                    description={post.node.excerpt}
+                    date={post.node.date}
+                    image="/images/protestors-ukraine.jpg"
+                  />
             ))}
           </div>
-          <br />
-          {posts[0] && (
-            <div
-              dangerouslySetInnerHTML={{
-                __html: posts[0].node.content,
-              }}
-            />
-          )}
         </div>
       </div>
     </div>
