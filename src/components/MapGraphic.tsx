@@ -12,7 +12,7 @@ export function MapGraphic() {
       />
       <div className="flex flex-col items-center justify-center gap-y-4 px-4 sm:w-1/2 w-full">
         <h1 className="text-4xl font-bold text-white text-center">
-          Thousands of <span className="text-jasper">Volunteers</span>
+          Thousands of <span className="text-valencia">Volunteers</span>
           <br /> Across the US
         </h1>
         <p className="text-lg text-white text-center w-full lg:w-1/2">
@@ -23,7 +23,7 @@ export function MapGraphic() {
         </p>
         <Link
           href="/volunteer"
-          className="text-xl bg-jasper px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out"
+          className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out"
         >
           Get Involved
         </Link>

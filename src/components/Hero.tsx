@@ -5,8 +5,23 @@ import Link from "next/link";
 
 export function Hero() {
   return (
-    <div className="relative h-fit bg-steel-blue w-full flex flex-col items-center justify-start overflow-hidden py-20">
+    <div
+      className="relative h-fit bg-steel-blue w-full flex flex-col items-center justify-start py-20"
+      style={{
+        backgroundImage: "url('images/halftone.svg')",
+        backgroundSize: "cover",
+      }}
+    >
       {/* Animated Main Text */}
+      <div
+        className="absolute top-10 left-0 lg:-translate-x-1/2 w-full lg:w-1/2 h-full"
+        style={{
+          backgroundImage: "url('/images/blend_test.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "right",
+          mixBlendMode: "lighten",
+        }}
+      ></div>
       <motion.div
         className="text-center w-full lg:w-1/2 px-4"
         initial={{ y: 50, opacity: 0 }}
@@ -26,7 +41,7 @@ export function Hero() {
         </p>
         <Link
           href="/volunteer"
-          className="text-xl bg-jasper px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out"
+          className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out"
         >
           Get Involved
         </Link>

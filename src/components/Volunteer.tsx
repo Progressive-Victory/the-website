@@ -59,7 +59,7 @@ const actions = [
 
 export function Volunteer() {
   return (
-    <div className="flex flex-col items-center justify-center bg-jasper py-20 w-full gap-y-24">
+    <div className="flex flex-col items-center justify-center bg-valencia py-20 w-full gap-y-24">
       <h1 className="text-4xl font-bold text-white">
         What Can <span className="text-black">You</span> Do?
       </h1>
