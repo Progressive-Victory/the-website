@@ -24,7 +24,7 @@ export function Footer() {
         </div>
         <div className="p-1 border-2 border-white w-[400px] text-center text-steel-blue font-bold mx-12 md:mx-0">
           PAID FOR BY PROGRESSIVE VICTORY{" "}
-          <Link href="https://progressivevictory.win" className="text-jasper">
+          <Link href="https://progressivevictory.win" className="text-valencia">
             WWW.PROGRESSIVEVICTORY.WIN
           </Link>{" "}
           NOT AUTHORIZED BY ANY CANDIDATE OR CANDIDATE’S COMMITTEE.

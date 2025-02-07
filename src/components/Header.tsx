@@ -39,7 +39,7 @@ export function Header() {
           <Link
             key={item.name}
             href={item.href}
-            className="text-xl text-white font-bold hover:text-jasper hover:bg-white rounded-full px-2 py-1 transition duration-200 ease-in-out"
+            className="text-xl text-white font-bold hover:text-valencia hover:bg-white rounded-full px-2 py-1 transition duration-200 ease-in-out"
           >
             {item.name}
           </Link>
@@ -47,12 +47,12 @@ export function Header() {
       </div>
       <Link
         href="https://secure.actblue.com/donate/pvwebsite"
-        className="text-xl bg-jasper px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out hidden lg:block"
+        className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out hidden lg:block"
       >
         Donate
       </Link>
       <button className="group lg:hidden">
-        <Bars3Icon className="w-8 h-8 text-white group-hover:text-jasper transition duration-300 ease-in-out" />
+        <Bars3Icon className="w-8 h-8 text-white group-hover:text-valencia transition duration-300 ease-in-out" />
       </button>
     </div>
   );
