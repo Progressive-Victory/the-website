@@ -1,8 +1,8 @@
 "use client";
 import BlogCard from "@/components/BlogCard";
-import { Header } from "@/components/Header";
 import { BlogHeader } from "@/components/BlogHeader";
 import { useEffect, useState } from "react";
+import { MainLayout } from "@/components/MainLayout";
 
 type Post = {
   node: {
@@ -42,26 +42,23 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-steel-blue w-full">
-      <Header />
-      <div>
-        <BlogHeader />
-        <div className="bg-[#D4E6F5] p-10">
-          <h2 className="text-4xl font-bold text-center p-10">Posts</h2>
-          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post: any) => (
-              <BlogCard
-                key={post.node.id}
-                id={post.node.id}
-                title={post.node.title}
-                description={post.node.excerpt}
-                date={post.node.date}
-                image="/images/protestors-ukraine.jpg"
-              />
-            ))}
-          </div>
+    <MainLayout>
+      <BlogHeader />
+      <div className="bg-[#D4E6F5] p-10">
+        <h2 className="text-4xl font-bold text-center p-10">Posts</h2>
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post: any) => (
+            <BlogCard
+              key={post.node.id}
+              id={post.node.id}
+              title={post.node.title}
+              description={post.node.excerpt}
+              date={post.node.date}
+              image="/images/protestors-ukraine.jpg"
+            />
+          ))}
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 }
