@@ -1,7 +1,7 @@
 import React from "react";
 import { Logo } from "@/components/Logo";
 
-export default function BlogHeader() {
+export function BlogHeader() {
   function DoubleTextEffect(
     text: string = "Test",
     upperColor: string = "#09223a",

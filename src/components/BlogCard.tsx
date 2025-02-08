@@ -4,7 +4,7 @@ import Link from "next/link";
 
 type BlogCardProps = {
   title: string;
-  slug: string;
+  id: string;
   description: string;
   date: string;
   image: string;
@@ -12,7 +12,7 @@ type BlogCardProps = {
 
 export default function BlogCard({
   title,
-  slug,
+  id,
   description,
   date,
   image,
@@ -25,7 +25,10 @@ export default function BlogCard({
     });
   }
   return (
-    <Link className="relative rounded-xl shadow-md" href={`/blog/${encodeURIComponent(slug)}`}>
+    <Link
+      className="relative rounded-xl shadow-md"
+      href={`/blog/${encodeURIComponent(id)}`}
+    >
       <div className="relative w-full overflow-hidden rounded-xl before:absolute before:inset-x-0 before:z-[1] before:size-full before:bg-gradient-to-t before:from-neutral-900/[.9] ">
         <Image src={image} alt="test" width={650} height={650} />
       </div>
