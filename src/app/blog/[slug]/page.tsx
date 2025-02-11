@@ -1,7 +1,5 @@
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { BlogHeader } from "@/components/BlogHeader";
 import { MainLayout } from "@/components/MainLayout";
+import { getPost, Post } from "../util";
 
 export default async function Page({
   params,
@@ -9,16 +7,7 @@ export default async function Page({
   params: Promise<{ slug: string }>;
 }) {
   const slug = (await params).slug;
-  const res = await fetch(`http://progressive-victory-blog.local/graphql`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: `{post(id:"${slug}"){title, content, date}}`,
-    }),
-  });
-  const data = await res.json();
+  const data = await getPost(slug);
   const post = data.data.post;
 
   return (
