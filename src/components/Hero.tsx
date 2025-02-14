@@ -22,8 +22,9 @@ export function Hero() {
                     mixBlendMode: 'lighten',
                 }}
             ></div>
+
             <motion.div
-                className="text-center w-full lg:w-1/2 px-4"
+                className="text-center w-full md:w-2/3 px-4"
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -35,7 +36,7 @@ export function Hero() {
                     </span>{' '}
                     the Online Community for Political Action.
                 </h1>
-                <p className="text-lg text-white my-8">
+                <p className="text-xl text-white my-8">
                     Find like minded people, share ideas, and engage in
                     meaningful political action. Get involved today!
                 </p>
@@ -48,42 +49,47 @@ export function Hero() {
             </motion.div>
 
             {/* Message Blocks */}
-            <div className="mt-20 flex flex-wrap justify-center gap-6 px-2">
+            <div className="mt-20 flex flex-wrap justify-center gap-6 px-4">
                 <motion.div
                     initial={{ rotate: -4, y: 50, opacity: 0 }}
                     animate={{ rotate: -5, y: 0, opacity: 1 }}
                     transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+                    className="order-last xl:order-first"
                 >
                     <Message
-                        avatar="https://picsum.photos/200"
-                        username="John Doe"
+                        avatar="/images/pv_twitter_photo.jpg"
+                        username="Progressive Victory"
                         nameColor="red"
-                        text="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+                        text="Progressive Victory is proud to support @benwikler for @DNC chair! 💙
+                        We need more bold Democrats with track records of proven results leading the charge 💪"
+                        image="/images/ben.jpg"
                     />
                 </motion.div>
                 <motion.div
                     initial={{ rotate: 7, y: 50, opacity: 0 }}
                     animate={{ rotate: 1, y: 0, opacity: 1 }}
+                    className="lg:mt-24"
                     transition={{ duration: 0.8, ease: 'easeOut', delay: 0.4 }}
                 >
                     <Message
-                        avatar="https://picsum.photos/201"
-                        username="Jane Smith"
-                        nameColor="blue"
-                        image="/images/protestors-ukraine.jpg"
-                        text="Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                        avatar="/images/pv_twitter_photo.jpg"
+                        username="Progressive Victory"
+                        nameColor="red"
+                        text="Built by the internet, for the internet! — Progressive Victory is a new kind of political community turning the tides of elections across the country."
                     />
                 </motion.div>
                 <motion.div
                     initial={{ rotate: -15, y: 50, opacity: 0 }}
                     animate={{ rotate: 6, y: 0, opacity: 1 }}
                     transition={{ duration: 0.8, ease: 'easeOut', delay: 0.6 }}
+                    className="order-first xl:order-last"
                 >
                     <Message
-                        avatar="https://picsum.photos/202"
-                        username="Alice Johnson"
-                        nameColor="green"
-                        text="Ut enim ad minim veniam, quis nostrud exercitation ullamco."
+                        avatar="/images/sam_twitter_photo.jpeg"
+                        image="/images/sam.jpg"
+                        username="Sam Dryzmala"
+                        nameColor="purple"
+                        text="I founded Progressive Victory with the dream of creating a political action community that comes together to get progressive policies & candidates the attention they deserve!"
                     />
                 </motion.div>
             </div>

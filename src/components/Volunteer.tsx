@@ -21,19 +21,17 @@ function Card({
                 delay,
                 ease: 'easeOut',
             }}
-            className="flex flex-col items-center justify-start w-full sm:w-2/3 h-full lg:w-[330px] lg:h-[500px] p-4 bg-white rounded-md shadow-xl gap-y-4 my-4"
+            className="relative flex flex-row items-center justify-start w-full bg-white rounded-md p-4 h-[275px]"
         >
-            <Image
-                src={image}
-                alt={title}
-                className="w-32 h-32 rounded-full"
-                width={64}
-                height={64}
-            />
-            <h1 className="text-2xl font-bold text-black text-center">
-                {title}
-            </h1>
-            <p className="text-lg text-black text-center">{description}</p>
+            <Image src={image} alt={title} width={128} height={128} />
+            <div className="flex flex-col items-center justify-center gap-x-4">
+                <h1 className="text-xl font-bold text-black text-center">
+                    {title}
+                </h1>
+                <p className="text-md text-black text-center px-4">
+                    {description}
+                </p>
+            </div>
         </motion.div>
     )
 }
@@ -53,7 +51,7 @@ const actions = [
     },
     {
         image: '/images/Halftone-Clipboard.webp',
-        title: 'Active Learning',
+        title: 'Learn Political Action',
         description:
             'What goes into creating a progressive victory and how to achieve them yourself! We’re teaching volunteers the skills needed to effectively organize and achieve a political project goal.',
     },
@@ -65,7 +63,7 @@ export function Volunteer() {
             <h1 className="text-4xl font-bold text-white">
                 What Can <span className="text-black">You</span> Do?
             </h1>
-            <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-x-10 px-4">
+            <div className="w-full flex flex-col xl:flex-row items-center justify-center gap-x-10 gap-y-10 px-4">
                 {actions.map((action, index) => (
                     <Card
                         key={action.title}

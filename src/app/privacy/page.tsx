@@ -1,9 +1,7 @@
-import { Header } from '@/components/Header'
-import { Footer } from '@/components/Footer'
+import { MainLayout } from '@/components/MainLayout'
 export default function Privacy() {
     return (
-        <>
-            <Header />
+        <MainLayout>
             <div className="min-w-screen mx-auto my-10 mt-10 flex h-full min-h-screen w-full flex-col tracking-wide lg:max-w-[80%]">
                 <div className="mx-auto px-5">
                     <p className="text-prussian pb-5 text-center text-3xl font-black">
@@ -351,7 +349,6 @@ export default function Privacy() {
                     </p>
                 </div>
             </div>
-            <Footer />
-        </>
+        </MainLayout>
     )
 }

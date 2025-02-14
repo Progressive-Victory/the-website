@@ -1,8 +1,8 @@
 import { MainLayout } from '@/components/MainLayout'
-export default function Volunteer() {
+export default function About() {
     return (
         <MainLayout>
-            <h1>Volunteer</h1>
+            <h1>About</h1>
         </MainLayout>
     )
 }
