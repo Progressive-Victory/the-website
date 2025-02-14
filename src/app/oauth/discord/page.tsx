@@ -47,6 +47,7 @@ export default function Home() {
   );
 }
 
+
 // function getData(code:string) {
 //   let data = getauth(code)
 
