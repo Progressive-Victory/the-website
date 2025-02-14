@@ -27,6 +27,21 @@ const navitems = [
         href: '/contact',
     },
 ]
+
+/**
+ * A navigation header for the Progressive Victory website.
+ *
+ * This component renders a sticky header bar with the Progressive Victory
+ * logo on the left and a navigation menu on the right. The navigation menu
+ * includes links to the main pages of the website, as well as a "Donate" button.
+ * On large screens, the menu is shown as a horizontal list of links. On small
+ * screens, the menu is hidden and replaced with a hamburger menu icon that
+ * toggles the display of the menu when clicked. When the menu is displayed on
+ * small screens, it is rendered as a vertical list of links that covers the
+ * entire screen.
+ *
+ * @return {JSX.Element} The rendered header component.
+ */
 export function Header() {
     const [isOpen, setIsOpen] = useState(false)
 
@@ -54,12 +69,21 @@ export function Header() {
                         </Link>
                     ))}
                 </div>
-                <Link
-                    href="https://secure.actblue.com/donate/pvwebsite"
-                    className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out hidden xl:block"
-                >
-                    Donate
-                </Link>
+                <div className="flex flex-row items-center justify-center gap-x-4 w-[300px]">
+                    <Link
+                        href="https://secure.actblue.com/donate/pvwebsite"
+                        className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out hidden xl:block"
+                    >
+                        Donate
+                    </Link>
+                    <Link
+                        href="/login"
+                        className="text-xl bg-steel-blue px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out hidden xl:block"
+                    >
+                        Log In
+                    </Link>
+                </div>
+
                 <button
                     className="group xl:hidden"
                     onClick={() => setIsOpen(!isOpen)}
@@ -79,36 +103,57 @@ export function Header() {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                 >
-                    <div className="absolute top-24 left-0 right-0 flex flex-col items-center justify-center w-full px-4 py-4 z-10 bg-prussian overflow-hidden">
+                    <div className="absolute top-24 left-0 right-0 flex flex-col items-center justify-center w-full px-4 py-4 gap-y-4 z-10 bg-prussian overflow-hidden">
                         {navitems.map((item, index) => (
-                            <motion.div
+                            <Link
+                                href={item.href}
                                 key={item.name}
-                                layoutId={item.name}
+                                className="w-full"
+                            >
+                                <motion.div
+                                    layoutId={item.name}
+                                    initial={{ x: '-100vw', opacity: 0 }}
+                                    animate={{ x: 0, opacity: 1 }}
+                                    transition={{
+                                        duration: 0.2,
+                                        ease: 'easeIn',
+                                        delay: index * 0.1,
+                                    }}
+                                    className="cursor-pointer text-center text-xl text-white font-bold hover:text-valencia hover:bg-white w-full px-2 py-4 transition duration-200 ease-in-out"
+                                >
+                                    {item.name}
+                                </motion.div>
+                            </Link>
+                        ))}
+                        <Link
+                            href="https://secure.actblue.com/donate/pvwebsite"
+                            className="w-full"
+                        >
+                            <motion.div
                                 initial={{ x: '-100vw', opacity: 0 }}
                                 animate={{ x: 0, opacity: 1 }}
                                 transition={{
                                     duration: 0.2,
                                     ease: 'easeIn',
-                                    delay: index * 0.1,
                                 }}
-                                className="cursor-pointer text-center text-xl text-white font-bold hover:text-valencia hover:bg-white w-full px-2 py-4 transition duration-200 ease-in-out"
+                                className="cursor-pointer text-center text-xl text-white bg-valencia hover:bg-white hover:text-black font-bold w-full px-2 py-4"
                             >
-                                <Link href={item.href}>{item.name}</Link>
-                            </motion.div>
-                        ))}
-                        <motion.div
-                            initial={{ x: '-100vw', opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{
-                                duration: 0.2,
-                                ease: 'easeIn',
-                            }}
-                            className="cursor-pointer text-center text-xl text-white bg-valencia font-bold w-full px-2 py-4"
-                        >
-                            <Link href="https://secure.actblue.com/donate/pvwebsite">
                                 Donate
-                            </Link>
-                        </motion.div>
+                            </motion.div>
+                        </Link>
+                        <Link href="/login" className="w-full">
+                            <motion.div
+                                initial={{ x: '-100vw', opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{
+                                    duration: 0.2,
+                                    ease: 'easeIn',
+                                }}
+                                className="cursor-pointer text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black font-bold w-full px-2 py-4"
+                            >
+                                Log In
+                            </motion.div>
+                        </Link>
                     </div>
                 </Transition>
             </div>
