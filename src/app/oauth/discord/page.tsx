@@ -5,8 +5,6 @@ import { useRouter } from "next/router";
 import { getauth } from '../../../api/oauth/discord';
 
 import dotenv from 'dotenv'; 
-
-import App from 'next/app';
 dotenv.config();  // Load environment variables from .env file 
 const apiKey = process.env.OAUTH_DISCORD_APPID;  
 const AppId = process.env.OAUTH_DISCORD_APPID;
@@ -18,12 +16,6 @@ export default function Home() {
         const endpointData = await getauth(property1)
         console.log(endpointData);
     }
-
-
-  
-
-    // const parameter1 = query.postName;
-    // const parameter2 = query.postId;
   return (
     <div className="bg-steel-blue w-full">
 
@@ -36,19 +28,8 @@ export default function Home() {
       
         <button onClick={()=>handleClick()}>"{property1}"</button>
           
-          
-
-
-
-        
       </div>
       
     </div>
   );
 }
-
-
-// function getData(code:string) {
-//   let data = getauth(code)
-
-// }

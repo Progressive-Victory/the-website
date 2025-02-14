@@ -38,7 +38,7 @@ export default function Home() {
 export function DiscordButton() {
   const ID = process.env.OAUTH_DISCORD_APPID!;  
     const secret = process.env.OAUTH_DISCORD_CLIENT_SECRET!
-    const ip = process.env.IP_ADDRESS!
+    const host = process.env.HOST!
     // const discordauthpath:string  = `https://discord.com/oauth2/authorize?client_id=${ ID }&response_type=code&redirect_uri=http%3A%2F%2F${ ip }%3A3000%2Foauth%2Fdiscord%2F&scope=identify+email`
     // const redirect_uri
   return (
@@ -47,7 +47,7 @@ export function DiscordButton() {
         pathname: 'https://discord.com/oauth2/authorize',
         query: { client_id: ID , 
           response_type : "code", 
-          redirect_uri: `http://${ip}:3000/oauth/discord/`, 
+          redirect_uri: `http://${host}/oauth/discord/`, 
           scope: "identify"
 
 

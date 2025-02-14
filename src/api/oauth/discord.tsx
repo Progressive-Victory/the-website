@@ -12,7 +12,7 @@ export async function getauth(codestr:string) {
     dotenv.config();  // Load environment variables from .env file 
     const app_id = process.env.OAUTH_DISCORD_APPID!;  
     const secret = process.env.OAUTH_DISCORD_CLIENT_SECRET!
-    const ip = process.env.IP_ADDRESS!
+    const host = process.env.HOST!
     var RETURN_VARS = {}
      // params.append("client_id", apiKey)
     // params.append("client_secret",secret)
@@ -28,7 +28,7 @@ export async function getauth(codestr:string) {
       client_id: app_id,
       client_secret: secret,
       grant_type: "authorization_code",
-      redirect_uri: `http://${ip}:3000/oauth/discord/`,
+      redirect_uri: `http://${host}/oauth/discord/`,
       code:codestr,
       scope: "identify"
     }).toString();
