@@ -2,9 +2,7 @@
 'use client'
 import { redirect, useSearchParams } from 'next/navigation'
 import { useRouter } from "next/router";
-import { getauth } from './getauth';
-
-import Button from "@/components/button/Button";
+import { getauth } from '../../../api/oauth/discord';
 
 import dotenv from 'dotenv'; 
 
