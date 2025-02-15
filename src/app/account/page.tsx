@@ -1,19 +1,32 @@
-import BlogCard from "@/components/BlogCard";
-import { Header } from "@/components/Header";
+'use client'
+import { MainLayout } from '@/components/MainLayout'
+import { useSession, signOut } from 'next-auth/react'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+export default function Account() {
+    const { data: session } = useSession()
+    const router = useRouter()
 
-export default function Home() {
-  return (
-    <div className="bg-steel-blue w-full">
-      <Header />
-      <div>
-        <div className="bg-[#D4E6F5] p-10">
-          <h2 className="text-4xl font-bold text-center p-10">Account</h2>
-          
-        </div>
+    useEffect(() => {
+        if (!session) {
+            router.push('/login')
+        }
+    }, [session])
 
-        
-      </div>
-    </div>
-  );
+    if (!session) {
+        return null
+    } else {
+        return (
+            <MainLayout>
+                <div className="bg-steel-blue w-full h-screen">
+                    <button
+                        onClick={() => signOut()}
+                        className="bg-valencia text-white font-bold py-2 px-4 rounded-full hover:bg-white hover:text-black transition duration-300 ease-in-out"
+                    >
+                        Sign Out
+                    </button>
+                </div>
+            </MainLayout>
+        )
+    }
 }
-
