@@ -21,7 +21,7 @@ function Card({
                 delay,
                 ease: 'easeOut',
             }}
-            className="relative flex flex-row items-center justify-start w-full bg-white rounded-md p-4 h-[275px]"
+            className="relative flex flex-row items-center justify-start w-full bg-white rounded-lg p-4 h-[275px]"
         >
             <Image src={image} alt={title} width={128} height={128} />
             <div className="flex flex-col items-center justify-center gap-x-4">

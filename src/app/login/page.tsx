@@ -1,11 +1,21 @@
+'use client'
 import Link from 'next/link'
 import { MainLayout } from '@/components/MainLayout'
 import { LoginCard } from '@/components/LoginCard'
+
+import { useSession, signIn, signOut } from 'next-auth/react'
 export default function Home() {
+    const { data: session } = useSession()
+
     return (
         <MainLayout>
             <div className="flex flex-col items-center justify-center bg-steel-blue w-full h-screen">
-                <LoginCard />
+                <LoginCard signIn={signIn} signOut={signOut} />
+                {session ? (
+                    <div>Logged in as {session.user?.email}</div>
+                ) : (
+                    <div>Not logged in</div>
+                )}
             </div>
         </MainLayout>
     )
