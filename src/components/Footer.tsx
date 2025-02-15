@@ -9,7 +9,7 @@ const socials = [
 ]
 export function Footer() {
     return (
-        <div className="bg-prussian w-full">
+        <div className="bg-black-pearl-dark w-full">
             <div className="flex flex-col items-center justify-start gap-y-4 py-6">
                 <Image
                     src="/images/LogoFull.webp"

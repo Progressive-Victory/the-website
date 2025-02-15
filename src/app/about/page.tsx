@@ -3,21 +3,28 @@ import { FAQ } from '@/components/FAQ'
 function AboutCard({
     title,
     description,
+    emphasis,
 }: {
     title: string
+    emphasis: string
     description: string
 }) {
     return (
-        <div className="bg-white rounded-lg lg:w-2/3 p-4 px-12 text-center">
-            <h1 className="text-4xl font-bold text-valencia mb-4">{title}</h1>
-            <p className="text-xl text-black">{description}</p>
+        <div className="bg-black-pearl rounded-lg lg:w-2/3 p-6 px-12 text-center">
+            <h1 className="text-4xl font-bold text-white py-2">
+                {title} <span className="text-valencia">{emphasis}</span>
+            </h1>
+            <p className="text-xl text-white text-left font-[500] py-4">
+                {description}
+            </p>
         </div>
     )
 }
 
 const content = [
     {
-        title: 'Our Community',
+        title: 'Our',
+        emphasis: 'Community',
         description: `Progressive Victory is a new kind of political community — built by the internet, for the internet. Our community is turning the tides in elections across the country. Progressive Victory seeks to challenge the traditional methods of political organizing by engaging people through online media, with a focus on building solidarity with streamers and social influencers.
 
                     The PV community is based online, hosted in a dedicated Discord server. PV works closely with online content creators on Twitch and YouTube to get their engaged, dedicated audiences into the PV community Discord. There, we’re bringing new people into the political process by giving them the tactics, resources, and support to make their voices heard.
@@ -25,7 +32,8 @@ const content = [
                     Progressive Victory is constantly growing, with new members joining the community every day. The community is built upon the values of equity and inclusion, with a zero tolerance policy for hate. All members are asked to sign on to the PV rules before gaining access to the community and are upheld to the highest standards.`,
     },
     {
-        title: 'Our Mission',
+        title: 'Our',
+        emphasis: 'Mission',
         description: `Progressive Victory is committed to building our community of new-to-activism volunteers by empowering members to develop the skills and gain the knowledge needed to become lifelong activists. Progressive Victory’s unifying mission is to ensure progressive candidates are elected to positions of power and progressive policy is implemented. Over the long term, Progressive Victory aims to create a progressive power block within the Democratic Party that is too big to ignore.
 
                     Progressive Victory values unity above all, and seeks to connect progressives across the ideological spectrum with the common goal of creating a more just world. Regardless of our differences, we unite over the need to take pro-democracy action in these unprecedented times.`,
@@ -47,11 +55,18 @@ const content = [
 export default function About() {
     return (
         <MainLayout>
-            <div className="flex flex-col py-10 h-full gap-y-10 items-center justify-start bg-steel-blue px-12">
+            <div
+                className="flex flex-col py-10 h-full gap-y-10 items-center justify-start bg-steel-blue px-12"
+                style={{
+                    backgroundImage: "url('images/halftone.svg')",
+                    backgroundSize: 'cover',
+                }}
+            >
                 {content.map((section) => (
                     <AboutCard
-                        key={section.title}
+                        key={section.emphasis}
                         title={section.title}
+                        emphasis={section.emphasis}
                         description={section.description}
                     />
                 ))}

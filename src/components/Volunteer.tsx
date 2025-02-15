@@ -59,9 +59,9 @@ const actions = [
 
 export function Volunteer() {
     return (
-        <div className="flex flex-col items-center justify-center bg-valencia py-20 w-full gap-y-24">
+        <div className="flex flex-col items-center justify-center bg-black-pearl-light py-20 w-full gap-y-24">
             <h1 className="text-4xl font-bold text-white">
-                What Can <span className="text-black">You</span> Do?
+                What Can <span className="text-valencia">You </span> Do?
             </h1>
             <div className="w-full flex flex-col xl:flex-row items-center justify-center gap-x-10 gap-y-10 px-4">
                 {actions.map((action, index) => (

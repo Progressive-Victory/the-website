@@ -32,7 +32,7 @@ const questions = [
 
 export function FAQ() {
     return (
-        <div className="flex flex-col items-center justify-center bg-black py-20 w-full lg:w-2/3 rounded-lg gap-y-10">
+        <div className="flex flex-col items-center justify-center bg-black-pearl-light py-12 w-full lg:w-2/3 rounded-lg gap-y-10">
             <h1 className="text-4xl font-bold text-white">
                 Frequently <span className="text-valencia">Asked</span>{' '}
                 Questions?
