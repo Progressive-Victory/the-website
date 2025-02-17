@@ -28,23 +28,21 @@ if (!cached) {
  * @returns The MongoDB connection.
  */
 async function dbConnect() {
-    if (cached.conn) {
-        return cached.conn
-    }
+  if (cached.conn) {
+    return cached.conn;
+  }
 
-    if (!cached.promise) {
-        const opts = {
-            bufferCommands: false,
-        }
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    };
 
-        cached.promise = mongoose
-            .connect(MONGODB_URI!, opts)
-            .then((mongoose) => {
-                return mongoose
-            })
-    }
-    cached.conn = await cached.promise
-    return cached.conn
+    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+      return mongoose;
+    });
+  }
+  cached.conn = await cached.promise;
+  return cached.conn;
 }
 
-export default dbConnect
+export default dbConnect;

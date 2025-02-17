@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useSession, signIn } from 'next-auth/react'
 export function LoginCard({ signIn }: { signIn: (provider: string) => void }) {
     return (
         <div className="flex flex-col items-center justify-center bg-white p-4 rounded-md shadow-lg">
@@ -19,6 +20,7 @@ export function LoginCard({ signIn }: { signIn: (provider: string) => void }) {
                 />
                 Sign In with Discord
             </button>
+
         </div>
     )
 }
