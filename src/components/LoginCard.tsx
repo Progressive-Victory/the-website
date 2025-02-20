@@ -1,13 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-export function LoginCard({
-    signIn,
-    signOut,
-}: {
-    signIn: (provider: string) => void
-    signOut: () => void
-}) {
+export function LoginCard({ signIn }: { signIn: (provider: string) => void }) {
     return (
         <div className="flex flex-col items-center justify-center bg-white p-4 rounded-md shadow-lg">
             <h1 className="text-2xl font-bold text-black text-center">

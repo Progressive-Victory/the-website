@@ -10,7 +10,7 @@ function AboutCard({
     description: string
 }) {
     return (
-        <div className="bg-black-pearl rounded-lg lg:w-2/3 p-6 px-12 text-center">
+        <div className="bg-black-pearl-dark rounded-lg lg:w-2/3 p-6 px-12 text-center">
             <h1 className="text-4xl font-bold text-white py-2">
                 {title} <span className="text-valencia">{emphasis}</span>
             </h1>
