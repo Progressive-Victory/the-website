@@ -19,7 +19,7 @@ import dbConnect from '@/util/libmongo'
  *   -H 'Content-Type: application/json' \
  *   -d '{"user":{"name":"John Doe","email":"john@example.com","image":"https://example.com/john.jpg"}}'
  */
-export default async function POST(req: NextRequest) {
+export async function POST(req: NextRequest) {
     const session = await getServerSession()
     await dbConnect()
 
