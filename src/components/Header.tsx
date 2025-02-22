@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { Transition } from '@headlessui/react'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 
 const navitems = [
     {
@@ -133,9 +133,9 @@ export function Header() {
                                     initial={{ x: '-100vw', opacity: 0 }}
                                     animate={{ x: 0, opacity: 1 }}
                                     transition={{
-                                        duration: 0.2,
+                                        duration: 0.1,
                                         ease: 'easeIn',
-                                        delay: index * 0.1,
+                                        delay: index * 0.05,
                                     }}
                                     className="cursor-pointer text-center text-xl text-white font-bold hover:text-valencia hover:bg-white w-full px-2 py-4 transition duration-200 ease-in-out"
                                 >
