@@ -24,7 +24,7 @@ export function Message({
 }) {
     return (
         <motion.div
-            className="flex flex-col items-center justify-start w-fit p-4 bg-white rounded-md shadow-xl my-2"
+            className="flex flex-col items-center justify-start w-fit xl:w-[30vw] p-4 bg-white rounded-md shadow-xl my-2"
             initial={{ x: 100, opacity: 0 }} // Start position: off-screen to the right
             animate={{ x: 0, opacity: 1 }} // End position: visible and on-screen
             transition={{
@@ -52,7 +52,7 @@ export function Message({
                         src={image}
                         alt={username}
                         className="rounded-lg object-cover mt-4"
-                        style={{ objectPosition: '0 10%' }}
+                        style={{ objectPosition: '0 20%' }}
                         fill={true}
                     />
                 </div>

@@ -31,7 +31,7 @@ export function Hero() {
             >
                 <h1 className="text-4xl font-bold text-white">
                     Welcome to{' '}
-                    <span className="whitespace-nowrap text-black-pearl-dark">
+                    <span className="text-black-pearl-dark">
                         Progressive Victory
                     </span>{' '}
                     the Online Community for Political Action.

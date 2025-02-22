@@ -21,14 +21,14 @@ function Card({
                 delay,
                 ease: 'easeOut',
             }}
-            className="relative flex flex-row items-center justify-start w-full bg-white rounded-lg p-4 h-[275px]"
+            className="relative flex flex-row items-center justify-start w-full bg-white rounded-lg p-4 h-fit md:h-[275px]"
         >
             <Image src={image} alt={title} width={128} height={128} />
             <div className="flex flex-col items-center justify-center gap-x-4">
-                <h1 className="text-xl font-bold text-black text-center">
+                <h1 className="text-lg md:text-xl font-bold text-black text-center">
                     {title}
                 </h1>
-                <p className="text-md text-black text-center px-4">
+                <p className="text-sm md:text-md text-black text-center px-4">
                     {description}
                 </p>
             </div>
