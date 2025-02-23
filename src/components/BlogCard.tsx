@@ -37,9 +37,7 @@ export default function BlogCard({
                     <h3 className="text-lg">{title}</h3>
                     <div
                         className="text-gray-500 line-clamp-2"
-                        dangerouslySetInnerHTML={{
-                            __html: description,
-                        }}
+                        dangerouslySetInnerHTML={{ __html: description }}
                     />
                     <p className="text-sm">{formatDate(date)}</p>
                 </div>

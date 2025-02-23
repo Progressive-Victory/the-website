@@ -44,7 +44,7 @@ const navitems = [
  *
  * @return {JSX.Element} The rendered header component.
  */
-export function Header() {
+export function Header(): JSX.Element {
     const [isOpen, setIsOpen] = useState(false)
     const { data: session } = useSession()
 
