@@ -1,7 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test'
 
 test('has title', async ({ page }) => {
-  await page.goto('/');
-  await expect(page).toHaveTitle(/Progressive Victory/);
-});
-
+    await page.goto('/')
+    await expect(page).toHaveTitle(/Progressive Victory/)
+})
