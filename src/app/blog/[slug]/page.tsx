@@ -12,7 +12,6 @@ export default async function Page({
     const data = await getPost(slug)
     const post = data.data.post
     const comments = post.comments.nodes
-    const allowAddComment = false
 
     return (
         <MainLayout>
@@ -26,10 +25,7 @@ export default async function Page({
                     </div>
                     <HTML html={post.content} />
                 </section>
-                <CommentsList
-                    comments={comments}
-                    allowAddComment={allowAddComment}
-                />
+                <CommentsList comments={comments} />
             </div>
         </MainLayout>
     )

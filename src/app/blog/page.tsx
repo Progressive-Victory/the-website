@@ -21,7 +21,7 @@ export default async function Home() {
         <MainLayout>
             <BlogHeader />
             <div className="bg-[#D4E6F5] p-10">
-                <h1 className="text-center p-10">Posts</h1>
+                <h1 className="text-center text-4xl font-bold p-10">Posts</h1>
                 <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
                     {posts.map((post: Post) => (
                         <BlogCard

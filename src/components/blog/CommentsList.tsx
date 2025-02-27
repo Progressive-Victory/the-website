@@ -1,7 +1,7 @@
 import { Comment } from './Comment'
 
 type CommentsListProps = {
-    comments: Array<{
+    comments?: Array<{
         id: string
         content: string
         date: string
@@ -14,28 +14,27 @@ type CommentsListProps = {
 
 export function CommentsList({
     comments,
-    allowAddComment = false,
+    allowAddComment = true,
 }: CommentsListProps) {
-    if (comments.length === 0) {
-        return null
-    }
-
     return (
         <>
             <hr />
             <section id="comments h-full">
-                <h3 className="mb-1">Comments</h3>
+                <h3 className="mb-1 font-semibold text-2xl">Comments</h3>
                 {allowAddComment && (
                     <div className="flex items-end flex-col">
-                        <textarea className="w-full border border-black rounded-sm" />
-                        <button>Submit</button>
+                        <textarea className="w-full border border-black rounded-sm mb-1" />
+                        <button className="border rounded-full px-3 py-1 bg-valencia hover:bg-valencia/70 text-white font-semibold">
+                            Submit
+                        </button>
                     </div>
                 )}
-
                 <div className="flex flex-col gap-3">
-                    {comments.map((comment) => (
-                        <Comment key={comment.id} {...comment} />
-                    ))}
+                    {comments
+                        ? comments.map((comment) => (
+                              <Comment key={comment.id} {...comment} />
+                          ))
+                        : undefined}
                 </div>
             </section>
         </>
