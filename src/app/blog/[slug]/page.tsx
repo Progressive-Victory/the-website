@@ -1,6 +1,7 @@
 import { MainLayout } from '@/components/MainLayout'
 import { formatDate, getPost } from '../util'
 import { HTML } from '@/components/HTML'
+import { CommentsList } from '@/components/blog/CommentsList'
 
 export default async function Page({
     params,
@@ -25,38 +26,10 @@ export default async function Page({
                     </div>
                     <HTML html={post.content} />
                 </section>
-                {comments.length > 0 ? (
-                    <>
-                        <hr />
-                        <section id="comments h-full">
-                            <h3 className="mb-1">Comments</h3>
-                            {allowAddComment && (
-                                <div className="flex items-end flex-col">
-                                    <textarea className="w-full border border-black rounded-sm" />
-                                    <button>Submit</button>
-                                </div>
-                            )}
-
-                            <div className="flex flex-col gap-3">
-                                {comments.map(
-                                    ({ id, content, date, author }) => {
-                                        return (
-                                            <div key={id}>
-                                                <p className="font-bold">
-                                                    {author.name}
-                                                </p>
-                                                <span className="italic text-zinc-500">
-                                                    {formatDate(date)}
-                                                </span>
-                                                <HTML html={content} />
-                                            </div>
-                                        )
-                                    }
-                                )}
-                            </div>
-                        </section>
-                    </>
-                ) : undefined}
+                <CommentsList
+                    comments={comments}
+                    allowAddComment={allowAddComment}
+                />
             </div>
         </MainLayout>
     )
