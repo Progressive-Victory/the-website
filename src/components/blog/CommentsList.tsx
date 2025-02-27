@@ -14,8 +14,10 @@ type CommentsListProps = {
 
 export function CommentsList({
     comments,
-    allowAddComment = true,
+    allowAddComment = false,
 }: CommentsListProps) {
+    if (!allowAddComment && !comments?.length) return
+
     return (
         <>
             <hr />
