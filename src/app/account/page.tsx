@@ -11,7 +11,7 @@ export default function Account() {
         if (!session) {
             router.push('/login')
         }
-    }, [session])
+    }, [router, session])
 
     if (!session) {
         return null

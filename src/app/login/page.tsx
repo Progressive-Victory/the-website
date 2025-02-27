@@ -11,7 +11,7 @@ export default function Home() {
         if (session) {
             router.push('/account')
         }
-    }, [session])
+    }, [router, session])
     return (
         <MainLayout>
             <div className="flex flex-col items-center justify-center bg-steel-blue w-full h-screen">
