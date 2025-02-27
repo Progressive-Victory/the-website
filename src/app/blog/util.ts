@@ -1,5 +1,4 @@
-const HEADLESS_WORDPRESS_SANDBOX_URL =
-    'https://bpheadlessb110.wpenginepowered.com/graphql'
+const HEADLESS_WORDPRESS_SANDBOX_URL = process.env.WORDPRESS_URI!
 
 export interface Comment {
     id: string

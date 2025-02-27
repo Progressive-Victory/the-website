@@ -11,6 +11,7 @@ export default async function Page({
     const data = await getPost(slug)
     const post = data.data.post
     const comments = post.comments.nodes
+    const allowAddComment = false
 
     return (
         <MainLayout>
@@ -29,6 +30,13 @@ export default async function Page({
                         <hr />
                         <section id="comments h-full">
                             <h3 className="mb-1">Comments</h3>
+                            {allowAddComment && (
+                                <div className="flex items-end flex-col">
+                                    <textarea className="w-full border border-black rounded-sm" />
+                                    <button>Submit</button>
+                                </div>
+                            )}
+
                             <div className="flex flex-col gap-3">
                                 {comments.map(
                                     ({ id, content, date, author }) => {
