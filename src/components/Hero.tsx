@@ -42,7 +42,7 @@ export function Hero() {
                 </p>
                 <Link
                     href="/volunteer"
-                    className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out"
+                    className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out"
                 >
                     Get Involved
                 </Link>

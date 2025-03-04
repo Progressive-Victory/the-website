@@ -55,13 +55,7 @@ const content = [
 export default function About() {
     return (
         <MainLayout>
-            <div
-                className="flex flex-col py-10 h-full gap-y-10 items-center justify-start bg-steel-blue px-12"
-                style={{
-                    backgroundImage: "url('images/halftone.svg')",
-                    backgroundSize: 'cover',
-                }}
-            >
+            <div className="flex flex-col py-10 h-full gap-y-10 items-center justify-start bg-steel-blue px-12">
                 {content.map((section) => (
                     <AboutCard
                         key={section.emphasis}

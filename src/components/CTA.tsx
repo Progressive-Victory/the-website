@@ -12,7 +12,7 @@ const CTA = ({
                     <h1 className="text-4xl font-bold text-white text-center">
                         {askText}
                     </h1>
-                    <button className="py-2 px-4 text-white bg-black hover:bg-white hover:text-black font-bold">
+                    <button className="py-2 px-4 text-white bg-black hover:bg-white hover:text-black-pearl-dark font-bold">
                         {buttonText}
                     </button>
                 </div>

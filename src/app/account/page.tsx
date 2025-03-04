@@ -21,7 +21,7 @@ export default function Account() {
                 <div className="bg-steel-blue w-full h-screen">
                     <button
                         onClick={() => signOut()}
-                        className="bg-valencia text-white font-bold py-2 px-4 rounded-full hover:bg-white hover:text-black transition duration-300 ease-in-out"
+                        className="bg-valencia text-white font-bold py-2 px-4 rounded-full hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out"
                     >
                         Sign Out
                     </button>
