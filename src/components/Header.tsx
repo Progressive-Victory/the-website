@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Transition } from '@headlessui/react'
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useSession } from 'next-auth/react'
 
 const navitems = [
@@ -144,7 +144,7 @@ export function Header() {
                                         ease: 'easeIn',
                                         delay: index * 0.05,
                                     }}
-                                    className="cursor-pointer text-center text-xl text-white font-bold hover:text-valencia hover:bg-white w-full px-2 py-4 transition duration-200 ease-in-out"
+                                    className="cursor-pointer text-center text-xl text-white font-bold hover:text-valencia hover:bg-white rounded-full w-full px-2 py-4 transition duration-200 ease-in-out"
                                 >
                                     {item.name}
                                 </motion.div>
@@ -162,7 +162,7 @@ export function Header() {
                                     duration: 0.2,
                                     ease: 'easeIn',
                                 }}
-                                className="cursor-pointer text-center text-xl text-white bg-valencia hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-4"
+                                className="cursor-pointer rounded-full text-center text-xl text-white bg-valencia hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-4"
                             >
                                 Donate
                             </motion.div>
@@ -176,7 +176,7 @@ export function Header() {
                                         duration: 0.2,
                                         ease: 'easeIn',
                                     }}
-                                    className="cursor-pointer text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-4"
+                                    className="cursor-pointer rounded-full text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-4"
                                 >
                                     Log In
                                 </motion.div>

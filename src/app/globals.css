@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.halftone {
+    --mask: linear-gradient(
+        45deg,
+        transparent 2%,
+        rgb(255 255 255) 4%,
+        rgb(255 255 255 / 0.5) 96%,
+        transparent 98%
+    );
+    --stop1: 3%;
+    --stop2: 88%;
+    background-color: black;
+    aspect-ratio: 1;
+    filter: contrast(55);
+}
+
+.halftone::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+        circle at center,
+        white var(--stop1),
+        transparent var(--stop2)
+    );
+    background-size: 0.7rem 0.7rem;
+    background-repeat: round;
+    background-position: center;
+    mask-image: var(--mask);
+}

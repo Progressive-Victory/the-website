@@ -5,6 +5,7 @@ const socials = [
     'https://www.twitch.tv/progressivevictory',
     'https://www.youtube.com/channel/UCRn-TsfTCP68oee03_F2eIg',
     'https://www.instagram.com/progressivevictory/',
+    'https://bsky.app/profile/progressivevictory.win',
     'https://x.com/ProgressiveVic?mx=2',
 ]
 export function Footer() {
@@ -22,7 +23,7 @@ export function Footer() {
                         <SocialIcon key={social} url={social} fgColor="white" />
                     ))}
                 </div>
-                <div className="p-1 border-2 border-white w-[400px] text-center text-steel-blue font-bold mx-12 md:mx-0">
+                <div className="p-1 border-2 border-white md:w-[400px] text-center text-steel-blue font-bold mx-12 md:mx-0">
                     PAID FOR BY PROGRESSIVE VICTORY{' '}
                     <Link
                         href="https://progressivevictory.win"

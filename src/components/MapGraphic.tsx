@@ -4,7 +4,7 @@ export function MapGraphic() {
     return (
         <div className="flex flex-col lg:flex-row items-center justify-center bg-white w-full gap-y-24 px-4 py-12">
             <Image
-                src="/images/chalk-map.jpg"
+                src="/images/map.png"
                 alt="progressive-victory-map"
                 className="rounded-md order-last lg:order-first"
                 width={500}

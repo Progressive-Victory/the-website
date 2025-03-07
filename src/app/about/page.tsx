@@ -10,7 +10,7 @@ function AboutCard({
     description: string
 }) {
     return (
-        <div className="bg-black-pearl-dark rounded-lg lg:w-2/3 p-6 px-12 text-center">
+        <div className="bg-black-pearl-dark rounded-lg lg:w-2/3 p-6 px-12 text-center z-2">
             <h1 className="text-4xl font-bold text-white py-2">
                 {title} <span className="text-valencia">{emphasis}</span>
             </h1>
@@ -55,17 +55,27 @@ const content = [
 export default function About() {
     return (
         <MainLayout>
-            <div className="flex flex-col py-10 h-full gap-y-10 items-center justify-start bg-steel-blue px-12">
-                {content.map((section) => (
-                    <AboutCard
-                        key={section.emphasis}
-                        title={section.title}
-                        emphasis={section.emphasis}
-                        description={section.description}
-                    />
-                ))}
+            <div className="relative py-10 h-fit bg-steel-blue px-12">
+                {/* Halftone background */}
+                <div className="absolute inset-0 w-full h-full halftone opacity-10 z-1" />
+                <div className="relative flex flex-col justify-start mt-10 items-center min-h-screen w-full m-auto gap-y-10 z-2">
+                    <p className="text-4xl font-bold text-white w-full text-center">
+                        About{' '}
+                        <span className="text-black-pearl-dark">
+                            Progressive Victory
+                        </span>
+                    </p>
+                    {content.map((section) => (
+                        <AboutCard
+                            key={section.emphasis}
+                            title={section.title}
+                            emphasis={section.emphasis}
+                            description={section.description}
+                        />
+                    ))}
 
-                <FAQ />
+                    <FAQ />
+                </div>
             </div>
         </MainLayout>
     )
