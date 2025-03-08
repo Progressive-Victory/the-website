@@ -3,8 +3,8 @@
 import Image from 'next/image'
 export function LoginCard({ signIn }: { signIn: (provider: string) => void }) {
     return (
-        <div className="flex flex-col items-center justify-center bg-white p-4 rounded-md shadow-lg">
-            <h1 className="text-2xl font-bold text-black text-center">
+        <div className="flex flex-col items-center justify-center bg-black-pearl-dark p-4 rounded-md shadow-lg">
+            <h1 className="text-2xl font-bold text-white text-center">
                 Log In to Continue
             </h1>
             <button
