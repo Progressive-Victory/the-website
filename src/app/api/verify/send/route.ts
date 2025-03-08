@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/route'
+import { getToken } from 'next-auth/jwt'
 
 export async function POST(req: NextRequest, res: NextResponse) {
     // Parse incoming JSON body
@@ -11,9 +12,11 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
     // Retrieve the session using the incoming request and auth options
     const session = await getServerSession(authOptions)
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
+    console.log('Session', session)
+    console.log('Token', token)
     const neutrinoEndpoint = 'https://neutrinoapi.net/sms-verify'
-
     // Prepare the headers (note the inclusion of Content-Type for URL encoded data)
     const headers = {
         'User-ID': process.env.NEUTRINO_USERID!,
@@ -38,8 +41,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
     const data = await response.json()
     if (!data || !data.sent) {
-        return new Response('Invalid phone number', { status: 400 })
+        return new Response('bad request', { status: 400 })
     }
 
-    return new Response('Success', { status: 200 })
+    return new Response('success', { status: 200 })
 }

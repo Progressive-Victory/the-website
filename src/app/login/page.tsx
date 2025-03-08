@@ -1,31 +1,25 @@
 'use client'
 import { MainLayout } from '@/components/MainLayout'
 import { LoginCard } from '@/components/LoginCard'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
-export default function Home() {
+export default function Login() {
     const { data: session } = useSession()
-    const router = useRouter()
+    const [redirect, setRedirect] = useState<string>('')
     const params = useSearchParams()
     useEffect(() => {
-        if (session) {
-            if (params.get('redirect')) {
-                if (
-                    params.get('redirect')?.startsWith('/') &&
-                    !params.get('redirect')?.includes('?')
-                ) {
-                    router.push(params.get('redirect')!)
-                } else {
-                    router.push('/account')
-                }
-            } else {
-                router.push('/account')
-            }
+        if (
+            session &&
+            params.get('redirect') &&
+            params.get('redirect')?.startsWith('/') &&
+            !params.get('redirect')?.includes('?')
+        ) {
+            setRedirect(params.get('redirect') || '/')
         }
-    }, [session, router, params])
+    }, [session, params])
     return (
         <MainLayout>
             <div className="relative bg-steel-blue">
@@ -41,7 +35,7 @@ export default function Home() {
                 <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-1" />
 
                 <div className="relative flex flex-col items-center justify-center w-full z-2 h-screen">
-                    <LoginCard signIn={signIn} />
+                    <LoginCard signIn={signIn} redirect={redirect} />
                     <div className="bg-black-pearl-dark rounded-lg text-white flex flex-row shadow-lg mt-4 p-4">
                         <InformationCircleIcon className="text-steel-blue bg-white rounded-full w-6 h-6 mr-1" />
                         By signing in you agree to our{' '}

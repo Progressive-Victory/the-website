@@ -129,7 +129,7 @@ export default function Volunteer() {
     const [validationFlags, setValidationFlags] = useState<
         Map<string, boolean>
     >(new Map())
-
+    const [codeTimer, setCodeTimer] = useState<number>(0)
     const { data: session, status } = useSession()
 
     useEffect(() => {
@@ -141,9 +141,15 @@ export default function Volunteer() {
                 }),
             })
 
-            if (resp.status !== 200) {
-                setStartJoin(false)
-                setPhoneNumber('')
+            if (resp.status === 200) {
+                setCodeTimer(60) // Start a one minute clock
+                let countdown = setInterval(() => {
+                    if (codeTimer === 0) {
+                        clearInterval(countdown)
+                    } else {
+                        setCodeTimer((prev) => prev - 1)
+                    }
+                }, 1000)
             }
         }
 
@@ -300,7 +306,6 @@ export default function Volunteer() {
                             </>
                         ) : status !== 'authenticated' ? (
                             <>
-                                {' '}
                                 <p className="text-white text-center text-3xl font-bold my-2 mx-auto">
                                     Volunteer with PV
                                 </p>
@@ -312,7 +317,7 @@ export default function Volunteer() {
                                 </p>
                                 <Link
                                     href="/login?redirect=/volunteer"
-                                    className="bg-steel-blue py-2 px-1 w-full rounded-lg text-center text-white text-bold text-lg font-bold"
+                                    className="bg-steel-blue rounded-md text-center w-full mt-4 py-2 text-lg font-bold hover:bg-blue-900 hover:scale-[101%] text-white transition-all duration-100"
                                 >
                                     Goto Log In
                                 </Link>
@@ -342,6 +347,16 @@ export default function Volunteer() {
                                     }}
                                     disabled={false}
                                 />
+                                <button
+                                    className={`${
+                                        codeTimer > 0
+                                            ? 'text-steel-blue'
+                                            : 'text-gray-500'
+                                    } underline w-fit p-2 text-left`}
+                                >
+                                    Resend{' '}
+                                    {codeTimer > 0 ? `(${codeTimer})` : ''}
+                                </button>
                             </>
                         ) : null}
                     </div>

@@ -1,17 +1,9 @@
 'use client'
 import { MainLayout } from '@/components/MainLayout'
 import { useSession, signOut } from 'next-auth/react'
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+
 export default function Account() {
     const { data: session } = useSession()
-    const router = useRouter()
-
-    useEffect(() => {
-        if (!session) {
-            router.push('/login')
-        }
-    }, [session])
 
     if (!session) {
         return null

@@ -1,5 +1,6 @@
 import mongoose, { Document, Model, Schema } from 'mongoose'
 
+// State management enum for join flow
 enum OnboardingStage {
     NOT_STARTED = 'not_started',
     AWAIT_VERIFICATION = 'awaiting_verify',
@@ -12,6 +13,7 @@ export interface IUser extends Document {
     name: string
     email: string
     image: string
+    discordId: string
     zipCode?: string
     preferredName?: string
     phoneNumber?: string
@@ -25,6 +27,7 @@ const userSchema = new Schema<IUser>({
     name: { type: String, required: true },
     email: { type: String, required: true },
     image: { type: String, required: true },
+    discordId: { type: String, required: true },
     zipCode: { type: String, required: false },
     preferredName: { type: String, required: false },
     phoneNumber: { type: String, required: false },

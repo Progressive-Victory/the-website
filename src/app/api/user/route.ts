@@ -25,31 +25,34 @@ export async function POST(req: NextRequest) {
 
     // Check if the user is authenticated
     if (!session) {
-        return new NextResponse('Unauthorized', { status: 401 })
+        return new NextResponse('unauthorized', { status: 401 })
     }
 
-    // Load
     const data = await req.json()
     const user = data.user as IUser
 
     if (!user || user.name !== session.user?.name) {
-        return new NextResponse('Unauthorized', { status: 401 })
+        return new NextResponse('unauthorized', { status: 401 })
     }
 
     try {
         // Exists?
-        const existingUser = await User.findOne({ email: user.email })
+        const existingUser = await User.findOne({ discordId: user.discordId })
         if (existingUser) {
-            return new NextResponse('User already exists', { status: 400 })
+            return new NextResponse('bad request', { status: 400 })
         }
 
         // Create
         const newUser = new User(user)
         await newUser.save()
-        return new NextResponse('User created', { status: 201 })
+        return new NextResponse('user created', { status: 201 })
     } catch (error) {
         // Bad request
         console.error(error)
-        return new NextResponse('Internal Server Error', { status: 500 })
+        return new NextResponse('server error', { status: 500 })
     }
 }
+
+export async function GET(req: NextRequest) {}
+
+export async function PATCH(req: NextRequest) {}
