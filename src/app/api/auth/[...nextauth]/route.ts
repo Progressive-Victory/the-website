@@ -17,6 +17,7 @@ export const authOptions: NextAuthOptions = {
                     id: profile.id,
                     name: profile.username,
                     email: profile.email,
+                    // Using long form here to adjust size of image
                     image: `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}?size=512`,
                 }
             },
@@ -49,6 +50,7 @@ export const authOptions: NextAuthOptions = {
                     const newUser = new User({
                         name: profile.username,
                         email: profile.email,
+                        // Using long form here to adjust size of image
                         image: `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}?size=512`,
                         discordId: profile.id,
                     })

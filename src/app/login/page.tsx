@@ -8,18 +8,20 @@ import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 export default function Login() {
     const { data: session } = useSession()
-    const [redirect, setRedirect] = useState<string>('')
+    const [redirect, setRedirect] = useState<string>('/account')
     const params = useSearchParams()
+
+    // If we had some redirect, e.g. to volunteer form we should handle it with next-auth
     useEffect(() => {
         if (
-            session &&
             params.get('redirect') &&
             params.get('redirect')?.startsWith('/') &&
             !params.get('redirect')?.includes('?')
         ) {
             setRedirect(params.get('redirect') || '/')
         }
-    }, [session, params])
+    }, [params])
+
     return (
         <MainLayout>
             <div className="relative bg-steel-blue">

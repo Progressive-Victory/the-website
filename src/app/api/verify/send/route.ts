@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/route'
 import { getToken } from 'next-auth/jwt'
+import { User } from '@/models/User'
+import { OnboardingStage } from '@/util/stage'
+import dbConnect from '@/util/libmongo'
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest) {
     // Parse incoming JSON body
     const reqJson = await req.json()
     if (!reqJson.number) {
@@ -14,8 +17,33 @@ export async function POST(req: NextRequest, res: NextResponse) {
     const session = await getServerSession(authOptions)
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
-    console.log('Session', session)
-    console.log('Token', token)
+    if (!session || !token) {
+        return new Response('Unauthorized', { status: 401 })
+    }
+
+    // Get the user
+    try {
+        await dbConnect()
+
+        const user = await User.findOne({ discordId: token?.discordId })
+
+        switch (user?.onboardingStage) {
+            case OnboardingStage.NOT_STARTED:
+                // Update user to await state
+                user.onboardingStage = OnboardingStage.AWAIT_VERIFICATION
+                await user.save()
+                break
+            case OnboardingStage.AWAIT_VERIFICATION:
+                // Do nothing we can send another code if they need it
+                break
+            default:
+                // They cannot request a code after being verified
+                return new Response('Unauthorized', { status: 401 })
+        }
+    } catch {
+        return new Response('Unauthorized', { status: 401 })
+    }
+
     const neutrinoEndpoint = 'https://neutrinoapi.net/sms-verify'
     // Prepare the headers (note the inclusion of Content-Type for URL encoded data)
     const headers = {
@@ -28,9 +56,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
     const formData = new URLSearchParams({
         number: '+1' + reqJson.number,
         'code-length': '6',
+        'brand-name': 'PV',
     })
-
-    console.log(formData)
 
     // Make the POST request with URL encoded data in the body
     const response = await fetch(neutrinoEndpoint, {
@@ -41,8 +68,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
     const data = await response.json()
     if (!data || !data.sent) {
-        return new Response('bad request', { status: 400 })
+        return new Response('Bad request', { status: 400 })
     }
 
-    return new Response('success', { status: 200 })
+    return new Response('Success', { status: 200 })
 }

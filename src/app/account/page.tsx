@@ -19,7 +19,7 @@ export default function Account() {
                         </p>
                         <div className="flex flex-row items-center justify-between">
                             <button
-                                onClick={() => signOut()}
+                                onClick={() => signOut({ callbackUrl: '/' })}
                                 className="bg-valencia text-white font-bold py-2 px-4 rounded-full hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out"
                             >
                                 Sign Out

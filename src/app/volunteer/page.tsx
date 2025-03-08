@@ -1,8 +1,17 @@
 'use client'
 import { MainLayout } from '@/components/MainLayout'
-import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
-import { InformationCircleIcon } from '@heroicons/react/24/solid'
+import {
+    ChangeEvent,
+    ReactElement,
+    useEffect,
+    useState,
+    Dispatch,
+    SetStateAction,
+} from 'react'
+import { ArrowPathIcon, InformationCircleIcon } from '@heroicons/react/24/solid'
 import { useSession } from 'next-auth/react'
+import { IUser } from '@/models/User'
+import { OnboardingStage } from '@/util/stage'
 import Link from 'next/link'
 function Field({
     value, // Value
@@ -25,7 +34,7 @@ function Field({
 }) {
     return (
         <div
-            className={`flex flex-col items-start justify-center my-2 transition-all duration-200 ${
+            className={`flex flex-col items-start justify-center my-2 transition-all duration-200 w-full ${
                 disabled !== null && disabled
                     ? 'h-0 opacity-0 -mb-2'
                     : 'h-[48px]'
@@ -126,33 +135,74 @@ export default function Volunteer() {
     const [startJoin, setStartJoin] = useState<boolean>(false)
     const [securityCode, setSecurityCode] = useState<string>('')
     const [showVerify, setShowVerify] = useState<boolean>(false)
+    const [codeError, setCodeError] = useState<boolean>(false)
     const [validationFlags, setValidationFlags] = useState<
         Map<string, boolean>
     >(new Map())
     const [codeTimer, setCodeTimer] = useState<number>(0)
+    const [user, setUser] = useState<Partial<IUser> | undefined>()
     const { data: session, status } = useSession()
 
-    useEffect(() => {
-        const requestCode = async (phone: string) => {
-            const resp = await fetch('/api/verify/send', {
-                method: 'POST',
-                body: JSON.stringify({
-                    number: phone,
-                }),
-            })
+    const requestCode = async (
+        phone: string,
+        setter: Dispatch<SetStateAction<number>>,
+        timer: number
+    ) => {
+        const resp = await fetch('/api/verify/send', {
+            method: 'POST',
+            body: JSON.stringify({
+                number: phone,
+            }),
+        })
 
-            if (resp.status === 200) {
-                setCodeTimer(60) // Start a one minute clock
-                let countdown = setInterval(() => {
-                    if (codeTimer === 0) {
-                        clearInterval(countdown)
-                    } else {
-                        setCodeTimer((prev) => prev - 1)
-                    }
-                }, 1000)
-            }
+        console.log(resp)
+        if (resp.status === 200) {
+            setter(60) // Start a one minute clock
+            let countdown = setInterval(() => {
+                if (timer === -1) {
+                    setter(0)
+                    clearInterval(countdown)
+                } else {
+                    setter((prev) => prev - 1)
+                }
+            }, 1000)
+            return true
+        } else {
+            return false
         }
+    }
 
+    const updateUser = async (data: Partial<IUser>) => {
+        const resp = await fetch('/api/user', {
+            method: 'PATCH',
+            body: JSON.stringify(data),
+        })
+
+        if (resp.status === 200) {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    // Gets the current user object, useful for manipulation as we proceed in flow
+    useEffect(() => {
+        const getUser = async () => {
+            const response = await fetch('/api/user')
+            const data = await response.json()
+            setUser(data as Partial<IUser>)
+        }
+        getUser()
+    }, [])
+
+    useEffect(() => {
+        if (user?.onboardingStage === OnboardingStage.AWAIT_VERIFICATION) {
+            setShowVerify(true)
+        }
+    }, [user])
+
+    // Handles OTP logic and presentation, with form data validation
+    useEffect(() => {
         if (startJoin) {
             const validationKeys = ['name', 'phone', 'zip'] // Add if form ever grows
             if (
@@ -163,8 +213,28 @@ export default function Volunteer() {
             ) {
                 setStartJoin(false)
             } else {
-                setShowVerify(true) // Start OTP verification via SMS
-                requestCode(phoneNumber)
+                // Set data on user and upate onboarding stage
+                updateUser({
+                    preferredName: preferredName,
+                    zipCode: fromUS ? '00000' : zipCode, // give them a dummy zip if international
+                    phoneNumber: phoneNumber,
+                }).then((result) => {
+                    if (result) {
+                        requestCode(phoneNumber, setCodeTimer, codeTimer).then(
+                            (result) => {
+                                if (result) {
+                                    setShowVerify(true) // Start OTP verification via SMS
+                                } else {
+                                    //TODO: An error occured do something
+                                    console.error('Could not send OTP!')
+                                }
+                            }
+                        )
+                    } else {
+                        // TODO: an error occured in setting user data
+                        console.error('Could not update user profile!')
+                    }
+                })
             }
         }
     }, [startJoin, validationFlags, phoneNumber, privacyPolicy])
@@ -185,6 +255,7 @@ export default function Volunteer() {
                 />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col w-full max-w-[600px] mx-auto z-2">
                     <div className="relative flex flex-col rounded-lg bg-black-pearl-dark p-4 shadow-md gap-y-4">
+                        {/* Chunky stuff for form filling */}
                         {!showVerify && status === 'authenticated' ? (
                             <>
                                 <p className="text-white text-center text-3xl font-bold my-2 mx-auto">
@@ -304,7 +375,7 @@ export default function Volunteer() {
                                     Join Now
                                 </button>
                             </>
-                        ) : status !== 'authenticated' ? (
+                        ) : status === 'unauthenticated' ? (
                             <>
                                 <p className="text-white text-center text-3xl font-bold my-2 mx-auto">
                                     Volunteer with PV
@@ -323,8 +394,18 @@ export default function Volunteer() {
                                 </Link>
                             </>
                         ) : null}
+                        {/* Loading indicator for between auth state */}
+                        {status === 'loading' && (
+                            <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
+                                <ArrowPathIcon className="h-8 w-8 text-white animate-spin" />
+                                <p className="text-lg font-bold text-center text-white mt-6">
+                                    Loading...
+                                </p>
+                            </div>
+                        )}
+                        {/* Phone verification state */}
                         {showVerify && status === 'authenticated' ? (
-                            <>
+                            <div className="flex flex-col items-center w-full">
                                 <p className="text-lg text-white font-white text-center font-bold">
                                     Enter your Verification Code
                                 </p>
@@ -334,7 +415,8 @@ export default function Volunteer() {
                                 <Field
                                     value={securityCode}
                                     placeholder="Security Code"
-                                    error={true}
+                                    error={!codeError}
+                                    errorText="Invalid or expired code, try a new one"
                                     maxLength={6}
                                     onChange={(e) => {
                                         const re = /^[0-9\b]+$/
@@ -348,16 +430,28 @@ export default function Volunteer() {
                                     disabled={false}
                                 />
                                 <button
+                                    disabled={codeTimer > 0}
                                     className={`${
-                                        codeTimer > 0
+                                        codeTimer <= 0
                                             ? 'text-steel-blue'
                                             : 'text-gray-500'
-                                    } underline w-fit p-2 text-left`}
+                                    } underline w-fit mr-auto p-2 text-left`}
+                                    onClick={() => {
+                                        // Get a new OTP
+                                        requestCode(
+                                            phoneNumber,
+                                            setCodeTimer,
+                                            codeTimer
+                                        )
+                                    }}
                                 >
                                     Resend{' '}
                                     {codeTimer > 0 ? `(${codeTimer})` : ''}
                                 </button>
-                            </>
+                                <button className="bg-steel-blue rounded-md text-center w-full mt-4 py-2 text-lg font-bold hover:bg-blue-900 hover:scale-[101%] text-white transition-all duration-100">
+                                    Verify
+                                </button>
+                            </div>
                         ) : null}
                     </div>
                 </div>

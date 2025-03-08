@@ -1,12 +1,5 @@
 import mongoose, { Document, Model, Schema } from 'mongoose'
-
-// State management enum for join flow
-enum OnboardingStage {
-    NOT_STARTED = 'not_started',
-    AWAIT_VERIFICATION = 'awaiting_verify',
-    VERIFIED = 'verified',
-    JOINED = 'joined',
-}
+import { OnboardingStage } from '@/util/stage'
 // Here is a user document
 // It defines the structure of the user and provides a POJO for interacting with user data
 export interface IUser extends Document {
