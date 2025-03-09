@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth'
+import NextAuth, { Account, Profile } from 'next-auth'
 import Discord from 'next-auth/providers/discord'
 import dbConnect from '@/util/libmongo'
 import { User } from '@/models/User'
@@ -30,33 +30,42 @@ export const authOptions: NextAuthOptions = {
             profile,
         }: {
             token: JWT
-            account: any
-            profile?: any
+            account: Account | null
+            profile?: Profile
         }) {
+            interface EProfile extends Profile {
+                id: string
+                username: string
+                avatar: string
+            }
+
+            const eprofile = profile as EProfile
+
             if (account && profile) {
                 // First time OAuth sign-in: Store OAuth data in the token
                 token.access_token = account.access_token
-                token.discordId = profile.id
+                token.discordId = eprofile.id
 
                 // Database connection
                 await dbConnect()
 
                 const existingUser = await User.findOne({
-                    discordId: profile.id,
+                    discordId: eprofile.id,
                 })
 
                 if (!existingUser) {
                     // Create new user
                     const newUser = new User({
-                        name: profile.username,
+                        name: eprofile.username,
                         email: profile.email,
                         // Using long form here to adjust size of image
-                        image: `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}?size=512`,
-                        discordId: profile.id,
+                        image: `https://cdn.discordapp.com/avatars/${eprofile.id}/${eprofile.avatar}?size=512`,
+                        discordId: eprofile.id,
                     })
                     await newUser.save()
                 }
             }
+
             return token
         },
     },
