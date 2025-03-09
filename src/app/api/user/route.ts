@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { getToken } from 'next-auth/jwt'
 import { User, IUser } from '@/models/User'
 import dbConnect from '@/util/libmongo'
-import { authOptions } from '../auth/[...nextauth]/route'
+import { authOptions } from '@/util/auth'
 import { OnboardingStage } from '@/util/stage'
 /**
  * Create a new user.
