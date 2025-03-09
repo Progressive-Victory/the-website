@@ -3,8 +3,8 @@ import { Frame } from '@/components/Frame'
 export default function Events() {
     return (
         <MainLayout>
-            <div className="bg-steel-blue w-full h-full flex flex-col items-center my-10 gap-y-10">
-                <div className="bg-[#f0f4f9] rounded-lg my-4 py-4 mx-6">
+            <div className="bg-steel-blue w-full h-full flex flex-col items-center p-10 gap-y-10">
+                <div className="w-full bg-[#f0f4f9] rounded-lg my-4 py-4 mx-6">
                     <p className="text-center text-3xl font-black lg:text-5xl">
                         Upcoming Events Calendar
                     </p>
@@ -17,7 +17,7 @@ export default function Events() {
                         Loading…
                     </Frame>
                 </div>
-                <div className="bg-[#f0f4f9] rounded-lg my-4 py-4 mx-6">
+                <div className="w-full bg-[#f0f4f9] rounded-lg my-4 py-4 mx-6">
                     <p className="text-center text-3xl font-black lg:text-5xl">
                         Primary Calendar
                     </p>
