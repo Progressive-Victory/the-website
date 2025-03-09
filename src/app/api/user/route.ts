@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { getToken } from 'next-auth/jwt'
 import { User, IUser } from '@/models/User'
 import dbConnect from '@/util/libmongo'
-
+import { authOptions } from '@/util/auth'
+import { OnboardingStage } from '@/util/stage'
+export const dynamic = 'force-dynamic'
 /**
  * Create a new user.
  *
@@ -19,37 +22,73 @@ import dbConnect from '@/util/libmongo'
  *   -H 'Content-Type: application/json' \
  *   -d '{"user":{"name":"John Doe","email":"john@example.com","image":"https://example.com/john.jpg"}}'
  */
-export async function POST(req: NextRequest) {
-    const session = await getServerSession()
+
+export async function GET(req: NextRequest) {
+    const session = await getServerSession(authOptions)
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+
     await dbConnect()
 
-    // Check if the user is authenticated
-    if (!session) {
-        return new NextResponse('Unauthorized', { status: 401 })
+    if (!session || !token) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Load
-    const data = await req.json()
-    const user = data.user as IUser
-
-    if (!user || user.name !== session.user?.name) {
-        return new NextResponse('Unauthorized', { status: 401 })
+    const user = await User.findOne({ discordId: token?.discordId || '' })
+    if (!user) {
+        return NextResponse.json({ error: 'Bad request' }, { status: 400 })
     }
 
-    try {
-        // Exists?
-        const existingUser = await User.findOne({ email: user.email })
-        if (existingUser) {
-            return new NextResponse('User already exists', { status: 400 })
-        }
+    return NextResponse.json(user)
+}
 
-        // Create
-        const newUser = new User(user)
-        await newUser.save()
-        return new NextResponse('User created', { status: 201 })
-    } catch (error) {
-        // Bad request
-        console.error(error)
-        return new NextResponse('Internal Server Error', { status: 500 })
+export async function PATCH(req: NextRequest) {
+    const session = await getServerSession(authOptions)
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+
+    await dbConnect()
+
+    if (!session || !token) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const user = (await User.findOne({
+        discordId: token?.discordId || '',
+    })) as IUser
+
+    if (!user) {
+        return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+    }
+
+    // Make sure we're at onboarding stage
+    if (
+        user.onboardingStage === OnboardingStage.NOT_STARTED ||
+        user.onboardingStage === OnboardingStage.AWAIT_VERIFICATION
+    ) {
+        const data = (await req.json()) as Partial<IUser>
+        Object.keys(data).forEach((k) => {
+            const key = k as keyof IUser
+            // Sets what keys we can set on the new objects
+            const allowed = [
+                'zipCode',
+                'preferredNamed',
+                'phoneNumber',
+                'acceptedAlerts',
+                // A user may go back one stage in case they enter a bad number
+                user.onboardingStage === OnboardingStage.AWAIT_VERIFICATION
+                    ? 'onboardingStage'
+                    : '',
+            ]
+            if (user[key] !== data[key] || !allowed.includes(key)) {
+                // @ts-expect-error potential bad key
+                user[key] = data[key] as IUser[keyof IUser]
+            }
+        })
+    } else {
+        // we only want to allow updating the stage and verified after this point
+        return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+    }
+
+    await user.save()
+
+    return NextResponse.json(user)
 }

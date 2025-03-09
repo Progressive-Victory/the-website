@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Transition } from '@headlessui/react'
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useSession } from 'next-auth/react'
 
 const navitems = [
@@ -26,7 +26,7 @@ const navitems = [
     },
     {
         name: 'Contact',
-        href: '/contact',
+        href: 'https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform',
     },
 ]
 
@@ -50,7 +50,7 @@ export function Header() {
 
     return (
         <>
-            <div className="sticky top-0 left-0 right-0 flex flex-row items-center justify-between w-full gap-x-4 px-6 md:px-12 py-4 z-10 bg-black-pearl-dark">
+            <div className="sticky top-0 left-0 right-0 flex flex-row items-center justify-between w-full gap-x-4 px-6 md:px-12 py-4 z-10 bg-black-pearl-dark h-[100px]">
                 <Link href="/">
                     <div className="flex-none">
                         <Image
@@ -66,6 +66,8 @@ export function Header() {
                         <Link
                             key={item.name}
                             href={item.href}
+                            target={item.href.includes('https') ? '_blank' : ''}
+                            referrerPolicy={'no-referrer'}
                             className="text-xl text-white font-bold hover:text-valencia hover:bg-white rounded-full px-3 py-1 transition duration-200 ease-in-out"
                         >
                             {item.name}
@@ -75,21 +77,22 @@ export function Header() {
                 <div className="flex flex-row items-center justify-center gap-x-4 w-[300px]">
                     <Link
                         href="https://secure.actblue.com/donate/pvwebsite"
-                        className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out hidden xl:block"
+                        target="_blank"
+                        className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out hidden xl:block"
                     >
                         Donate
                     </Link>
                     {!session ? (
                         <Link
                             href="/login"
-                            className="text-xl whitespace-nowrap bg-steel-blue px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black transition duration-300 ease-in-out hidden xl:block"
+                            className="text-xl whitespace-nowrap bg-steel-blue px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out hidden xl:block"
                         >
                             Log In
                         </Link>
                     ) : (
                         <Link
                             href="/account"
-                            className="bg-white p-1 rounded-full text-white group hover:scale-105 hover:bg-valencia hover:text-black transition duration-300 ease-in-out hidden xl:block"
+                            className="bg-white p-1 rounded-full text-white group hover:scale-105 hover:bg-valencia hover:text-black-pearl-dark transition duration-300 ease-in-out hidden xl:block"
                         >
                             <Image
                                 src={session.user!.image || ''}
@@ -126,6 +129,10 @@ export function Header() {
                             <Link
                                 href={item.href}
                                 key={item.name}
+                                target={
+                                    item.href.includes('https') ? '_blank' : ''
+                                }
+                                referrerPolicy={'no-referrer'}
                                 className="w-full"
                             >
                                 <motion.div
@@ -137,7 +144,7 @@ export function Header() {
                                         ease: 'easeIn',
                                         delay: index * 0.05,
                                     }}
-                                    className="cursor-pointer text-center text-xl text-white font-bold hover:text-valencia hover:bg-white w-full px-2 py-4 transition duration-200 ease-in-out"
+                                    className="cursor-pointer text-center text-xl text-white font-bold hover:text-valencia hover:bg-white rounded-full w-full px-2 py-4 transition duration-200 ease-in-out"
                                 >
                                     {item.name}
                                 </motion.div>
@@ -145,6 +152,7 @@ export function Header() {
                         ))}
                         <Link
                             href="https://secure.actblue.com/donate/pvwebsite"
+                            target="_blank"
                             className="w-full"
                         >
                             <motion.div
@@ -154,7 +162,7 @@ export function Header() {
                                     duration: 0.2,
                                     ease: 'easeIn',
                                 }}
-                                className="cursor-pointer text-center text-xl text-white bg-valencia hover:bg-white hover:text-black font-bold w-full px-2 py-4"
+                                className="cursor-pointer rounded-full text-center text-xl text-white bg-valencia hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-4"
                             >
                                 Donate
                             </motion.div>
@@ -168,14 +176,14 @@ export function Header() {
                                         duration: 0.2,
                                         ease: 'easeIn',
                                     }}
-                                    className="cursor-pointer text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black font-bold w-full px-2 py-4"
+                                    className="cursor-pointer rounded-full text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-4"
                                 >
                                     Log In
                                 </motion.div>
                             </Link>
                         ) : (
                             <Link href="/account" className="w-full">
-                                <div className="flex flex-row items-center justify-center gap-x-4 cursor-pointer text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black font-bold w-full px-2 py-2">
+                                <div className="flex flex-row items-center justify-center gap-x-4 cursor-pointer text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-2">
                                     <Image
                                         src={session.user!.image || ''}
                                         width={44}

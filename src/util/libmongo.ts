@@ -1,50 +1,29 @@
 import mongoose from 'mongoose'
 
-interface MongooseCache {
-    conn: typeof mongoose | null
-    promise: Promise<typeof mongoose> | null
-}
-
-// dirty hack at module scope
-declare global {
-    // eslint-disable-next-line no-var
-    var mongoose: MongooseCache
-}
-
 const MONGODB_URI = process.env.MONGODB_URI
 
 if (!MONGODB_URI) {
     throw new Error('Please define the MONGODB_URI environment variable')
 }
 
-let cached = global.mongoose
-
-if (!cached) {
-    cached = global.mongoose = { conn: null, promise: null }
-}
-
-/**
- * Connects to the MongoDB database.
- * @returns The MongoDB connection.
- */
 async function dbConnect() {
-    if (cached.conn) {
-        return cached.conn
+    // If the connection is already established (readyState 1 means connected),
+    // return the mongoose instance right away.
+    if (mongoose.connection.readyState >= 1) {
+        return mongoose
     }
 
-    if (!cached.promise) {
-        const opts = {
-            bufferCommands: false,
-        }
-
-        cached.promise = mongoose
-            .connect(MONGODB_URI!, opts)
-            .then((mongoose) => {
-                return mongoose
-            })
+    try {
+        // Connect to MongoDB; note that in a serverless environment it is
+        // acceptable to connect on every invocation since cold starts are expected.
+        await mongoose.connect(MONGODB_URI!, {
+            bufferCommands: false, // Disable mongoose buffering, recommended for serverless.
+        })
+        return mongoose
+    } catch (error) {
+        console.error('MongoDB connection error:', error)
+        throw error
     }
-    cached.conn = await cached.promise
-    return cached.conn
 }
 
 export default dbConnect

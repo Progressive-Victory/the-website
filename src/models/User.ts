@@ -1,11 +1,18 @@
 import mongoose, { Document, Model, Schema } from 'mongoose'
-
-// Here is a sample user document
-// It defines the structure of the user document
+import { OnboardingStage } from '@/util/stage'
+// Here is a user document
+// It defines the structure of the user and provides a POJO for interacting with user data
 export interface IUser extends Document {
     name: string
     email: string
     image: string
+    discordId: string
+    zipCode?: string
+    preferredName?: string
+    phoneNumber?: string
+    acceptedAlerts?: boolean
+    verified: boolean
+    onboardingStage: OnboardingStage
 }
 
 // We then create a schema for the user document, tells Mongoose how the document should be structured
@@ -13,6 +20,17 @@ const userSchema = new Schema<IUser>({
     name: { type: String, required: true },
     email: { type: String, required: true },
     image: { type: String, required: true },
+    discordId: { type: String, required: true },
+    zipCode: { type: String, required: false },
+    preferredName: { type: String, required: false },
+    phoneNumber: { type: String, required: false },
+    acceptedAlerts: { type: Boolean, required: false, default: false },
+    verified: { type: Boolean, required: false, default: false },
+    onboardingStage: {
+        type: String,
+        enum: OnboardingStage,
+        default: OnboardingStage.NOT_STARTED,
+    },
 })
 
 // A name
