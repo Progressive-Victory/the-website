@@ -1,6 +1,5 @@
 'use client'
 import { useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
 
 export const Frame: React.FC<{
     type?: string
@@ -21,27 +20,6 @@ export const Frame: React.FC<{
     width,
     height,
 }) => {
-    const searchParams = useSearchParams()
-    const campaign = searchParams?.get('campaign')
-    const source = searchParams?.get('source')
-
-    if (!src) {
-        const root = process.env.NEXT_PUBLIC_FORM
-
-        if (type === 'map') {
-            src = `${root}/map?dotColor=CE3728&backGroundColor=FFFFFF&mapFill=2986CC`
-        } else {
-            src = `${root}/`
-
-            if (campaign) {
-                src += `?campaign=${campaign}`
-            }
-            if (source || campaign) {
-                src += `${src.includes('?') ? '&' : '?'}source=${source}`
-            }
-        }
-    }
-
     useEffect(() => {
         if (!window.onblur) {
             window.focus()

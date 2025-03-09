@@ -2,11 +2,14 @@
 import { MainLayout } from '@/components/MainLayout'
 import { LoginCard } from '@/components/LoginCard'
 import { useEffect, useState } from 'react'
+import { Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
-export default function Login() {
+
+// We have to do this to comply with Next.js
+function LoginPage() {
     const { data: session } = useSession()
     const [redirect, setRedirect] = useState<string>('/account')
     const params = useSearchParams()
@@ -57,5 +60,13 @@ export default function Login() {
                 </div>
             </div>
         </MainLayout>
+    )
+}
+
+export default function Login() {
+    return (
+        <Suspense>
+            <LoginPage />
+        </Suspense>
     )
 }
