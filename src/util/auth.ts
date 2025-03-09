@@ -52,7 +52,6 @@ export const authOptions: NextAuthOptions = {
                 const existingUser = await User.findOne({
                     discordId: eprofile.id,
                 })
-
                 if (!existingUser) {
                     // Create new user
                     const newUser = new User({
