@@ -32,8 +32,8 @@ export default function Account() {
                             </button>
                         </div>
                     </div>
-                    <div className="relative z-2 bg-black-pearl-dark rounded-lg text-white flex flex-row shadow-lg mt-4 p-4">
-                        <InformationCircleIcon className="text-steel-blue bg-white rounded-full w-6 h-6 mr-1" />
+                    <div className="relative z-2 text-xs bg-black-pearl-dark rounded-lg text-white flex flex-row shadow-lg mt-4 p-4">
+                        <InformationCircleIcon className="text-steel-blue bg-white rounded-full w-4 h-4 mr-1" />
                         Pardon our dust while we work on this page
                     </div>
                 </div>

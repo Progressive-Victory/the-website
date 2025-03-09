@@ -45,8 +45,8 @@ function LoginPage() {
 
                 <div className="relative flex flex-col items-center justify-center w-full z-2 h-screen">
                     <LoginCard signIn={signIn} redirect={redirect} />
-                    <div className="bg-black-pearl-dark rounded-lg text-white flex flex-row shadow-lg mt-4 p-4">
-                        <InformationCircleIcon className="text-steel-blue bg-white rounded-full w-6 h-6 mr-1" />
+                    <div className="bg-black-pearl-dark text-xs rounded-lg text-white flex flex-row items-center shadow-lg mt-4 p-4">
+                        <InformationCircleIcon className="text-steel-blue bg-white rounded-full w-4 h-4 mr-1" />
                         By signing in you agree to our{' '}
                         <Link
                             href="/privacy"

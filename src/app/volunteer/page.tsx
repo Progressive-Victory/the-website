@@ -84,7 +84,7 @@ function Toggle({
                     tabIndex={0}
                     className="group relative touch-pan-zoom cursor-pointer"
                 >
-                    <InformationCircleIcon className="w-4 h-4 mr-2 text-steel-blue bg-white rounded-full" />
+                    <InformationCircleIcon className="w-4 h-4 mr-1 text-steel-blue bg-white rounded-full" />
                     <div className="absolute z-10 top-0 opacity-0 group-hover:opacity-75 group-focus:opacity-75 group-hover:translate-y-[25px] group-focus:translate-y-[25px] transition-all duration-100 flex pointer-events-none flex-col items-center bg-black rounded-md py-2 px-px text-center text-gray-700 text-sm">
                         <span className="min-w-[300px] text-xs text-white text-center">
                             {tooltip}
@@ -92,13 +92,13 @@ function Toggle({
                     </div>
                 </div>
 
-                <label className="text-white text-xs lg:text-sm">
+                <label className="text-white text-[10px] lg:text-sm">
                     {placeholder}
                 </label>
             </div>
 
             <div
-                className="relative inline-block w-12 ml-auto lg:ml-0 lg:mr-2 align-middle select-none"
+                className="relative inline-block w-10 ml-auto lg:ml-0 lg:mr-2 align-middle select-none"
                 onClick={() => {
                     onChange()
                 }}
@@ -112,7 +112,7 @@ function Toggle({
                     <span
                         className={`${
                             value
-                                ? 'translate-x-6 bg-white shadow-lg'
+                                ? 'translate-x-4 bg-white shadow-lg'
                                 : 'translate-x-0 bg-white'
                         } absolute block w-6 h-6 rounded-full transition-all duration-300`}
                     />
@@ -280,8 +280,8 @@ export default function Volunteer() {
                         transform: 'scaleX(-1)',
                     }}
                 />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col w-full max-w-[600px] mx-auto z-2">
-                    <div className="relative flex flex-col rounded-lg bg-black-pearl-dark p-4 shadow-md gap-y-4">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col w-full max-w-[600px] z-2">
+                    <div className="relative flex flex-col rounded-lg bg-black-pearl-dark p-4 shadow-md gap-y-4 mx-2">
                         {/* Chunky stuff for form filling */}
                         {!showVerify &&
                         status === 'authenticated' &&

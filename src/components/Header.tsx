@@ -183,7 +183,7 @@ export function Header() {
                             </Link>
                         ) : (
                             <Link href="/account" className="w-full">
-                                <div className="flex flex-row items-center justify-center gap-x-4 cursor-pointer text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-2">
+                                <div className="flex flex-row rounded-full items-center justify-center gap-x-4 cursor-pointer text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-2">
                                     <Image
                                         src={session.user!.image || ''}
                                         width={44}
