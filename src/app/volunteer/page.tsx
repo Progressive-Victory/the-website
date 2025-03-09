@@ -249,7 +249,11 @@ export default function Volunteer() {
                             if (result) {
                                 setShowVerify(true) // Start OTP verification via SMS
                             } else {
-                                //TODO: An error occured do something
+                                setShowVerify(false)
+                                setStartJoin(false)
+                                setValidationFlags((prev) =>
+                                    new Map(prev).set('phone', false)
+                                )
                                 console.error('Could not send OTP!')
                             }
                         })
@@ -326,9 +330,9 @@ export default function Volunteer() {
                                         )
                                     }}
                                 />
-                                <p className={`"text-xs text-white -mt-2`}>
+                                <p className={`text-[12px] text-white -mt-2`}>
                                     US numbers only. Message and data rates may
-                                    apply.
+                                    apply. Must be SMS reachable.
                                 </p>
                                 <Field
                                     value={zipCode}
@@ -409,14 +413,14 @@ export default function Volunteer() {
                                 <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2">
                                     Join us on Discord and make a difference ✨
                                 </p>
-                                <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2">
+                                <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2 italic">
                                     But first you{"'"}ve got to log in...
                                 </p>
                                 <Link
                                     href="/login?redirect=/volunteer"
                                     className="bg-steel-blue rounded-md text-center w-full mt-4 py-2 text-lg font-bold hover:bg-blue-900 hover:scale-[101%] text-white transition-all duration-100"
                                 >
-                                    Goto Log In
+                                    Go to Log In
                                 </Link>
                             </>
                         ) : null}
@@ -443,6 +447,7 @@ export default function Volunteer() {
                                 <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2">
                                     We just sent it to your phone 📱
                                 </p>
+
                                 <div className="flex flex-row items-center justify-center w-full">
                                     <Field
                                         value={securityCode}
@@ -461,6 +466,7 @@ export default function Volunteer() {
                                         }}
                                         disabled={false}
                                     />
+
                                     <button
                                         disabled={codeTimer > 0}
                                         className={`${
@@ -481,6 +487,23 @@ export default function Volunteer() {
                                         {codeTimer > 0 ? `(${codeTimer})` : ''}
                                     </button>
                                 </div>
+                                <button
+                                    onClick={() => {
+                                        updateUser({
+                                            onboardingStage:
+                                                OnboardingStage.NOT_STARTED,
+                                        })
+
+                                        setTimeout(() => {
+                                            getUser()
+                                            setShowVerify(false)
+                                            setStartJoin(false)
+                                        }, 1000)
+                                    }}
+                                    className="text-steel-blue underline hover:text-white text-xs text-center mr-auto mt-2"
+                                >
+                                    I made a mistake!
+                                </button>
                                 <button
                                     onClick={() => {
                                         if (securityCode.length === 6) {

@@ -5,13 +5,12 @@
 .halftone {
     --mask: linear-gradient(
         45deg,
-        transparent 2%,
-        rgb(255 255 255) 4%,
-        rgb(255 255 255 / 0.5) 96%,
-        transparent 98%
+        transparent 5%,
+        rgb(255 255 255) 10%,
+        rgb(255 255 255 / 0.5) 96%
     );
-    --stop1: 3%;
-    --stop2: 88%;
+    --stop1: 10%;
+    --stop2: 96%;
     background-color: black;
     aspect-ratio: 1;
     filter: contrast(55);
@@ -26,8 +25,24 @@
         white var(--stop1),
         transparent var(--stop2)
     );
-    background-size: 0.7rem 0.7rem;
+    background-size: 0.55rem 0.55rem;
     background-repeat: round;
     background-position: center;
     mask-image: var(--mask);
+}
+
+@keyframes grow {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.grow {
+    animation: grow 0.3s ease-in-out;
 }

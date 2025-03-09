@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
         number: '+1' + reqJson.number,
         'code-length': '6',
         'brand-name': 'PV',
+        limit: '20',
     })
 
     // Make the POST request with URL encoded data in the body
@@ -65,8 +66,9 @@ export async function POST(req: NextRequest) {
         headers,
         body: formData.toString(),
     })
-
     const data = await response.json()
+    console.log(data)
+
     if (!data || !data.sent) {
         return new Response('Bad request', { status: 400 })
     }

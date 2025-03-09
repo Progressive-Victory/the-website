@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export function Hero() {
     return (
-        <div className="relative h-fit w-full flex flex-col items-center bg-steel-blue justify-start py-20">
+        <div className="relative h-full w-full flex flex-col items-center bg-steel-blue justify-start py-20">
             {/* Halftone background */}
             <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-1" />
             {/* Animated Main Text */}
@@ -31,7 +31,7 @@ export function Hero() {
                     </span>{' '}
                     the Online Community for Political Action.
                 </h1>
-                <p className="text-xl text-white my-8">
+                <p className="text-xl text-white my-8 font-[500]">
                     Find like minded people, share ideas, and engage in
                     meaningful political action. Get involved today!
                 </p>

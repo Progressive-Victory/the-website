@@ -60,7 +60,10 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Make sure we're at onboarding stage
-    if (user.onboardingStage === OnboardingStage.NOT_STARTED) {
+    if (
+        user.onboardingStage === OnboardingStage.NOT_STARTED ||
+        user.onboardingStage === OnboardingStage.AWAIT_VERIFICATION
+    ) {
         const data = (await req.json()) as Partial<IUser>
         Object.keys(data).forEach((k) => {
             const key = k as keyof IUser
@@ -70,6 +73,10 @@ export async function PATCH(req: NextRequest) {
                 'preferredNamed',
                 'phoneNumber',
                 'acceptedAlerts',
+                // A user may go back one stage in case they enter a bad number
+                user.onboardingStage === OnboardingStage.AWAIT_VERIFICATION
+                    ? 'onboardingStage'
+                    : '',
             ]
             if (user[key] !== data[key] || !allowed.includes(key)) {
                 // @ts-expect-error potential bad key
