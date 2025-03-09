@@ -423,7 +423,7 @@ export default function Volunteer() {
                         {/* Loading indicator for between auth state */}
                         {status === 'loading' ||
                         (startJoin && !showVerify) ||
-                        !user ? (
+                        (!user && status === 'authenticated') ? (
                             <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
                                 <ArrowPathIcon className="h-8 w-8 text-white animate-spin" />
                                 <p className="text-lg font-bold text-center text-white mt-6">
