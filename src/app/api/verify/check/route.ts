@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
                 // Do nothing we can send another code if they need it
                 break
             default:
-                // They cannot request a code after being verified
+                // They cannot ask for a verification before or after they need it
                 return new Response('Unauthorized', { status: 401 })
         }
 

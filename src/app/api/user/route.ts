@@ -26,6 +26,8 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
+    await dbConnect()
+
     if (!session || !token) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -43,6 +45,8 @@ export async function PATCH(req: NextRequest) {
     const session = await getServerSession(authOptions)
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
+    await dbConnect()
+
     if (!session || !token) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -50,6 +54,7 @@ export async function PATCH(req: NextRequest) {
     const user = (await User.findOne({
         discordId: token?.discordId || '',
     })) as IUser
+
     if (!user) {
         return NextResponse.json({ error: 'Bad request' }, { status: 400 })
     }
@@ -59,13 +64,15 @@ export async function PATCH(req: NextRequest) {
         const data = (await req.json()) as Partial<IUser>
         Object.keys(data).forEach((k) => {
             const key = k as keyof IUser
-
-            if (
-                user[key] !== data[key] ||
-                key === 'verified' ||
-                key === 'onboardingStage'
-            ) {
-                // @ts-ignore
+            // Sets what keys we can set on the new objects
+            const allowed = [
+                'zipCode',
+                'preferredNamed',
+                'phoneNumber',
+                'acceptedAlerts',
+            ]
+            if (user[key] !== data[key] || !allowed.includes(key)) {
+                // @ts-expect-error potential bad key
                 user[key] = data[key] as IUser[keyof IUser]
             }
         })

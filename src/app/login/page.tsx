@@ -2,7 +2,7 @@
 import { MainLayout } from '@/components/MainLayout'
 import { LoginCard } from '@/components/LoginCard'
 import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
@@ -10,7 +10,7 @@ export default function Login() {
     const { data: session } = useSession()
     const [redirect, setRedirect] = useState<string>('/account')
     const params = useSearchParams()
-
+    const router = useRouter()
     // If we had some redirect, e.g. to volunteer form we should handle it with next-auth
     useEffect(() => {
         if (
@@ -20,7 +20,11 @@ export default function Login() {
         ) {
             setRedirect(params.get('redirect') || '/')
         }
-    }, [params])
+
+        if (session) {
+            router.push('/account')
+        }
+    }, [params, router, session])
 
     return (
         <MainLayout>

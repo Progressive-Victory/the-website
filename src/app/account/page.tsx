@@ -1,10 +1,16 @@
 'use client'
 import { MainLayout } from '@/components/MainLayout'
 import { useSession, signOut } from 'next-auth/react'
+import { InformationCircleIcon } from '@heroicons/react/24/solid'
+import { useEffect } from 'react'
 
 export default function Account() {
     const { data: session } = useSession()
 
+    useEffect(() => {
+        // Check if the user is already on the server
+        fetch('/api/discord/join')
+    }, [])
     if (!session) {
         return null
     } else {
@@ -25,6 +31,10 @@ export default function Account() {
                                 Sign Out
                             </button>
                         </div>
+                    </div>
+                    <div className="relative z-2 bg-black-pearl-dark rounded-lg text-white flex flex-row shadow-lg mt-4 p-4">
+                        <InformationCircleIcon className="text-steel-blue bg-white rounded-full w-6 h-6 mr-1" />
+                        Pardon our dust while we work on this page
                     </div>
                 </div>
             </MainLayout>

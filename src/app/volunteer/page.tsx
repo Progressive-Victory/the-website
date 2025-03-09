@@ -1,17 +1,14 @@
 'use client'
 import { MainLayout } from '@/components/MainLayout'
+import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
 import {
-    ChangeEvent,
-    ReactElement,
-    useEffect,
-    useState,
-    Dispatch,
-    SetStateAction,
-} from 'react'
-import { ArrowPathIcon, InformationCircleIcon } from '@heroicons/react/24/solid'
-import { useSession } from 'next-auth/react'
+    ArrowPathIcon,
+    CakeIcon,
+    InformationCircleIcon,
+} from '@heroicons/react/24/solid'
 import { IUser } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 function Field({
     value, // Value
@@ -140,34 +137,54 @@ export default function Volunteer() {
         Map<string, boolean>
     >(new Map())
     const [codeTimer, setCodeTimer] = useState<number>(0)
+    const [checkingCode, setCheckingCode] = useState<boolean>(false)
+    const { status } = useSession()
     const [user, setUser] = useState<Partial<IUser> | undefined>()
-    const { data: session, status } = useSession()
 
-    const requestCode = async (
-        phone: string,
-        setter: Dispatch<SetStateAction<number>>,
-        timer: number
-    ) => {
+    const requestCode = async (phone: string) => {
         const resp = await fetch('/api/verify/send', {
             method: 'POST',
             body: JSON.stringify({
                 number: phone,
             }),
         })
+        setCodeTimer(60) // Start a one minute clock
 
-        console.log(resp)
         if (resp.status === 200) {
-            setter(60) // Start a one minute clock
-            let countdown = setInterval(() => {
-                if (timer === -1) {
-                    setter(0)
+            getUser()
+            const countdown = setInterval(() => {
+                if (codeTimer === -1) {
+                    setCodeTimer(0)
                     clearInterval(countdown)
                 } else {
-                    setter((prev) => prev - 1)
+                    setCodeTimer((prev) => prev - 1)
                 }
             }, 1000)
             return true
         } else {
+            return false
+        }
+    }
+    const getUser = async () => {
+        const response = await fetch('/api/user')
+        const data = await response.json()
+        setUser(data as Partial<IUser>)
+    }
+
+    const checkCode = async (code: string) => {
+        setCheckingCode(true)
+        const resp = await fetch('/api/verify/check', {
+            method: 'POST',
+            body: JSON.stringify({
+                code: code,
+            }),
+        })
+        setCheckingCode(false)
+        if (resp.status === 200) {
+            getUser() // get the latest user state
+            return true
+        } else {
+            setCodeError(true)
             return false
         }
     }
@@ -187,13 +204,21 @@ export default function Volunteer() {
 
     // Gets the current user object, useful for manipulation as we proceed in flow
     useEffect(() => {
-        const getUser = async () => {
-            const response = await fetch('/api/user')
-            const data = await response.json()
-            setUser(data as Partial<IUser>)
-        }
         getUser()
     }, [])
+
+    // Try and join user to server
+    useEffect(() => {
+        if (
+            user?.verified &&
+            user.onboardingStage === OnboardingStage.VERIFIED
+        ) {
+            fetch('/api/discord/join', { method: 'PUT' }).then(getUser)
+        } else {
+            // check if they are already in the server
+            fetch('/api/discord/join')
+        }
+    }, [user])
 
     useEffect(() => {
         if (user?.onboardingStage === OnboardingStage.AWAIT_VERIFICATION) {
@@ -220,16 +245,14 @@ export default function Volunteer() {
                     phoneNumber: phoneNumber,
                 }).then((result) => {
                     if (result) {
-                        requestCode(phoneNumber, setCodeTimer, codeTimer).then(
-                            (result) => {
-                                if (result) {
-                                    setShowVerify(true) // Start OTP verification via SMS
-                                } else {
-                                    //TODO: An error occured do something
-                                    console.error('Could not send OTP!')
-                                }
+                        requestCode(phoneNumber).then((result) => {
+                            if (result) {
+                                setShowVerify(true) // Start OTP verification via SMS
+                            } else {
+                                //TODO: An error occured do something
+                                console.error('Could not send OTP!')
                             }
-                        )
+                        })
                     } else {
                         // TODO: an error occured in setting user data
                         console.error('Could not update user profile!')
@@ -256,7 +279,10 @@ export default function Volunteer() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col w-full max-w-[600px] mx-auto z-2">
                     <div className="relative flex flex-col rounded-lg bg-black-pearl-dark p-4 shadow-md gap-y-4">
                         {/* Chunky stuff for form filling */}
-                        {!showVerify && status === 'authenticated' ? (
+                        {!showVerify &&
+                        status === 'authenticated' &&
+                        user?.onboardingStage === OnboardingStage.NOT_STARTED &&
+                        !startJoin ? (
                             <>
                                 <p className="text-white text-center text-3xl font-bold my-2 mx-auto">
                                     Volunteer with PV
@@ -395,16 +421,21 @@ export default function Volunteer() {
                             </>
                         ) : null}
                         {/* Loading indicator for between auth state */}
-                        {status === 'loading' && (
+                        {status === 'loading' ||
+                        (startJoin && !showVerify) ||
+                        !user ? (
                             <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
                                 <ArrowPathIcon className="h-8 w-8 text-white animate-spin" />
                                 <p className="text-lg font-bold text-center text-white mt-6">
                                     Loading...
                                 </p>
                             </div>
-                        )}
+                        ) : null}
                         {/* Phone verification state */}
-                        {showVerify && status === 'authenticated' ? (
+                        {showVerify &&
+                        status === 'authenticated' &&
+                        user?.onboardingStage ===
+                            OnboardingStage.AWAIT_VERIFICATION ? (
                             <div className="flex flex-col items-center w-full">
                                 <p className="text-lg text-white font-white text-center font-bold">
                                     Enter your Verification Code
@@ -412,47 +443,76 @@ export default function Volunteer() {
                                 <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2">
                                     We just sent it to your phone 📱
                                 </p>
-                                <Field
-                                    value={securityCode}
-                                    placeholder="Security Code"
-                                    error={!codeError}
-                                    errorText="Invalid or expired code, try a new one"
-                                    maxLength={6}
-                                    onChange={(e) => {
-                                        const re = /^[0-9\b]+$/
-                                        if (
-                                            e.target.value === '' ||
-                                            re.test(e.target.value)
-                                        ) {
-                                            setSecurityCode(e.target.value)
+                                <div className="flex flex-row items-center justify-center w-full">
+                                    <Field
+                                        value={securityCode}
+                                        placeholder="Security Code"
+                                        error={!codeError}
+                                        errorText="Invalid or expired code, try a new one"
+                                        maxLength={6}
+                                        onChange={(e) => {
+                                            const re = /^[0-9\b]+$/
+                                            if (
+                                                e.target.value === '' ||
+                                                re.test(e.target.value)
+                                            ) {
+                                                setSecurityCode(e.target.value)
+                                            }
+                                        }}
+                                        disabled={false}
+                                    />
+                                    <button
+                                        disabled={codeTimer > 0}
+                                        className={`${
+                                            codeTimer <= 0
+                                                ? 'bg-steel-blue'
+                                                : 'bg-gray-500'
+                                        } w-fit py-3 px-2 text-center text-white text-sm whitespace-nowrap rounded-lg ml-2 mt-auto`}
+                                        onClick={() => {
+                                            // Get a new OTP
+                                            requestCode(
+                                                phoneNumber !== ''
+                                                    ? phoneNumber
+                                                    : user?.phoneNumber || ''
+                                            )
+                                        }}
+                                    >
+                                        Resend{' '}
+                                        {codeTimer > 0 ? `(${codeTimer})` : ''}
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        if (securityCode.length === 6) {
+                                            checkCode(securityCode)
                                         }
                                     }}
-                                    disabled={false}
-                                />
-                                <button
-                                    disabled={codeTimer > 0}
-                                    className={`${
-                                        codeTimer <= 0
-                                            ? 'text-steel-blue'
-                                            : 'text-gray-500'
-                                    } underline w-fit mr-auto p-2 text-left`}
-                                    onClick={() => {
-                                        // Get a new OTP
-                                        requestCode(
-                                            phoneNumber,
-                                            setCodeTimer,
-                                            codeTimer
-                                        )
-                                    }}
+                                    disabled={
+                                        securityCode.length < 6 || checkingCode
+                                    }
+                                    className="disabled:bg-gray-500 bg-steel-blue rounded-md text-center w-full mt-4 py-2 text-lg font-bold hover:bg-blue-900 hover:scale-[101%] text-white transition-all duration-100"
                                 >
-                                    Resend{' '}
-                                    {codeTimer > 0 ? `(${codeTimer})` : ''}
-                                </button>
-                                <button className="bg-steel-blue rounded-md text-center w-full mt-4 py-2 text-lg font-bold hover:bg-blue-900 hover:scale-[101%] text-white transition-all duration-100">
                                     Verify
                                 </button>
                             </div>
                         ) : null}
+                        {/* Onboarding done need to join them to server now*/}
+                        {user?.onboardingStage === OnboardingStage.VERIFIED && (
+                            <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
+                                <ArrowPathIcon className="h-8 w-8 text-white animate-spin" />
+                                <p className="text-lg font-bold text-center text-white mt-6">
+                                    Joining you to the server...
+                                </p>
+                            </div>
+                        )}
+                        {user?.onboardingStage === OnboardingStage.JOINED && (
+                            <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
+                                <CakeIcon className="h-12 w-12 text-steel-blue" />
+                                <p className="text-lg font-bold text-center text-white mt-6">
+                                    Congrats you are in the server!
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
