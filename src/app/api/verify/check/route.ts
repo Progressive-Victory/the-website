@@ -5,7 +5,7 @@ import { getToken } from 'next-auth/jwt'
 import { User } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
 import dbConnect from '@/util/libmongo'
-
+export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
     // Parse incoming JSON body
     const reqJson = await req.json()

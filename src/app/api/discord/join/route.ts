@@ -5,7 +5,7 @@ import { getToken } from 'next-auth/jwt'
 import { User } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
 import dbConnect from '@/util/libmongo'
-
+export const dynamic = 'force-dynamic'
 // Joins user to the server with our grant
 export async function PUT(req: NextRequest) {
     // Retrieve the session using the incoming request and auth options

@@ -5,6 +5,7 @@ import { User, IUser } from '@/models/User'
 import dbConnect from '@/util/libmongo'
 import { authOptions } from '@/util/auth'
 import { OnboardingStage } from '@/util/stage'
+export const dynamic = 'force-dynamic'
 /**
  * Create a new user.
  *
@@ -32,7 +33,6 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    await dbConnect()
     const user = await User.findOne({ discordId: token?.discordId || '' })
     if (!user) {
         return NextResponse.json({ error: 'Bad request' }, { status: 400 })
@@ -78,6 +78,7 @@ export async function PATCH(req: NextRequest) {
         })
     } else {
         // we only want to allow updating the stage and verified after this point
+        return NextResponse.json({ error: 'Bad request' }, { status: 400 })
     }
 
     await user.save()
