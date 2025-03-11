@@ -8,11 +8,9 @@ export const metadata: Metadata = {
     openGraph: {
         title: 'PV - Login',
         description: 'Log in and join the community',
-        url: `https://${process.env.VERCEL_URL}/`,
+        url: `https://${process.env.SITE_URL}/`,
         siteName: 'Progressive Victory',
-        images: [
-            { url: `https://${process.env.VERCEL_URL}/images/banner.png` },
-        ],
+        images: [{ url: `https://${process.env.SITE_URL}/images/banner.png` }],
     },
 }
 
