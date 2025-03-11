@@ -8,7 +8,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - name: Install pnpm
-              run: npm install pnpm@latest-10
+              run: npm install -g pnpm@latest-10
             - name: Install dependencies
               run: pnpm install
             - name: Lint Codebase
