@@ -1,5 +1,5 @@
 module.exports = {
-    siteUrl: 'https://progressivevictory.win',
+    siteUrl: 'https://www.progressivevictory.win',
     generateRobotsTxt: true, // (optional)
     // ...other options
 }
