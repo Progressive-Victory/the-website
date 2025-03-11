@@ -1,5 +1,19 @@
 import { MainLayout } from '@/components/MainLayout'
 import { Frame } from '@/components/Frame'
+import { Metadata } from 'next'
+export const metadata: Metadata = {
+    title: 'PV - Events',
+    description: 'See what we are up to!',
+    openGraph: {
+        title: 'PV - Events',
+        description: 'See what we are up to!',
+        url: `https://${process.env.VERCEL_URL}/`,
+        siteName: 'Progressive Victory',
+        images: [
+            { url: `https://${process.env.VERCEL_URL}/images/banner.png` },
+        ],
+    },
+}
 export default function Events() {
     return (
         <MainLayout>

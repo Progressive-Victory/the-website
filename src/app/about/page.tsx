@@ -1,5 +1,19 @@
 import { MainLayout } from '@/components/MainLayout'
 import { FAQ } from '@/components/FAQ'
+import { Metadata } from 'next'
+export const metadata: Metadata = {
+    title: 'PV - About',
+    description: 'Learn about Progressive Victory!',
+    openGraph: {
+        title: 'PV - About',
+        description: 'Learn about Progressive Victory!',
+        url: `https://${process.env.VERCEL_URL}/`,
+        siteName: 'Progressive Victory',
+        images: [
+            { url: `https://${process.env.VERCEL_URL}/images/banner.png` },
+        ],
+    },
+}
 function AboutCard({
     title,
     description,
