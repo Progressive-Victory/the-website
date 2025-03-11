@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://progressivevictory.win
+
+# Sitemaps
+Sitemap: https://progressivevictory.win/sitemap.xml

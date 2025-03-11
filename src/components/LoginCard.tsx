@@ -1,11 +1,15 @@
 'use client'
 import Image from 'next/image'
-import { SignInOptions } from 'next-auth/react'
+import { SignInAuthorizationParams, SignInOptions } from 'next-auth/react'
 export function LoginCard({
     signIn,
     redirect,
 }: {
-    signIn: (provider: string, options?: SignInOptions) => void
+    signIn: (
+        provider: string,
+        options?: SignInOptions,
+        params?: SignInAuthorizationParams
+    ) => void
     redirect: string
 }) {
     return (
@@ -14,7 +18,13 @@ export function LoginCard({
                 Log In to Continue
             </h1>
             <button
-                onClick={() => signIn('discord', { callbackUrl: redirect })}
+                onClick={() =>
+                    signIn(
+                        'discord',
+                        { callbackUrl: redirect },
+                        { prompt: 'none' }
+                    )
+                }
                 className="flex flex-row items-center justify-center gap-x-4 mt-6 bg-[#5865F2] text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
             >
                 <Image
