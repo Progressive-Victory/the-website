@@ -7,11 +7,9 @@ export const metadata: Metadata = {
     openGraph: {
         title: 'PV - About',
         description: 'Learn about Progressive Victory!',
-        url: `https://${process.env.VERCEL_URL}/`,
+        url: `https://${process.env.SITE_URL}/`,
         siteName: 'Progressive Victory',
-        images: [
-            { url: `https://${process.env.VERCEL_URL}/images/banner.png` },
-        ],
+        images: [{ url: `https://${process.env.SITE_URL}/images/banner.png` }],
     },
 }
 function AboutCard({
