@@ -21,6 +21,7 @@ const montserrat = Montserrat({
     weight: ['400', '500', '700', '900'],
     display: 'swap',
 })
+
 export default async function RootLayout({
     children,
 }: Readonly<{
@@ -28,6 +29,13 @@ export default async function RootLayout({
 }>) {
     return (
         <html lang="en" suppressHydrationWarning>
+            <head>
+                <script
+                    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+                    crossOrigin=""
+                />
+            </head>
             <body className={montserrat.className}>
                 <Analytics />
                 <AuthProvider>{children}</AuthProvider>

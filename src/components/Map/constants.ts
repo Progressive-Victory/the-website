@@ -1,0 +1,1 @@
+export const US_CENTER = { lat: 39.848779897406224, lng: -97.89004707736677 }

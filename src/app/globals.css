@@ -46,3 +46,8 @@
 .grow {
     animation: grow 0.3s ease-in-out;
 }
+
+.custom-marker-cluster > div {
+    @apply size-full flex items-center justify-center text-white text-[1rem] font-bold rounded-full border-2 border-dashed border-white;
+    background: #10233a;
+}
