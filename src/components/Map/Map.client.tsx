@@ -24,10 +24,13 @@ const createClusterCustomIcon = function (cluster: MarkerCluster) {
 }
 
 export interface MapProps {
+    disableInteraction?: boolean
+    hideOpenStreetMap?: boolean
     zipCodes?: number[]
     variant?: 'heatmap' | 'marker'
 }
 
+// Map Layers
 const USMapLayer = ({ isHeatmap }: { isHeatmap?: boolean }) => {
     return (
         <GeoJSON
@@ -53,6 +56,10 @@ const USMapLayer = ({ isHeatmap }: { isHeatmap?: boolean }) => {
     )
 }
 
+const OpenStreetMapLayer = () => {
+    return <TileLayer attribution={OPEN_ATTR} url={OPEN_MAP_URI} />
+}
+
 const MarkerLayer = ({ markerList }: { markerList: LatLon[] }) => {
     return (
         <MarkerClusterGroup
@@ -68,7 +75,13 @@ const MarkerLayer = ({ markerList }: { markerList: LatLon[] }) => {
     )
 }
 
-export default function ClientMap({ zipCodes, variant }: MapProps) {
+// Map
+export default function ClientMap({
+    disableInteraction,
+    hideOpenStreetMap,
+    zipCodes,
+    variant,
+}: MapProps) {
     const isHeatmap = !variant || variant === 'heatmap'
     const isMarker = variant === 'marker'
 
@@ -93,14 +106,17 @@ export default function ClientMap({ zipCodes, variant }: MapProps) {
 
     return (
         <MapContainer
-            center={US_CENTER}
-            zoom={4}
-            maxZoom={9}
+            zoom={3}
             minZoom={3}
-            scrollWheelZoom
-            style={{ height: '100%', width: '100%' }}
+            maxZoom={9}
+            center={US_CENTER}
+            zoomControl={false}
+            attributionControl={false}
+            scrollWheelZoom={!disableInteraction}
+            dragging={!disableInteraction}
+            className="z-0 size-full"
         >
-            <TileLayer attribution={OPEN_ATTR} url={OPEN_MAP_URI} />
+            {!hideOpenStreetMap && <OpenStreetMapLayer />}
             <USMapLayer isHeatmap={isHeatmap} />
             {isMarker && <MarkerLayer markerList={markerList} />}
         </MapContainer>

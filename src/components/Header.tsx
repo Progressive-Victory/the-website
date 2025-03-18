@@ -50,7 +50,7 @@ export function Header() {
 
     return (
         <>
-            <div className="sticky top-0 left-0 right-0 flex flex-row items-center justify-between w-full gap-x-4 px-6 md:px-12 py-4 z-10 bg-black-pearl-dark h-[100px]">
+            <div className="sticky top-0 left-0 right-0 flex flex-row items-center justify-between w-full gap-x-4 px-6 md:px-12 py-4 z-50 bg-black-pearl-dark h-[100px]">
                 <Link href="/">
                     <div className="flex-none">
                         <Image

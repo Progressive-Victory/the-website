@@ -51,3 +51,7 @@
     @apply size-full flex items-center justify-center text-white text-[1rem] font-bold rounded-full border-2 border-dashed border-white;
     background: #10233a;
 }
+
+.leaflet-container img.leaflet-tile {
+    mix-blend-mode: unset;
+}

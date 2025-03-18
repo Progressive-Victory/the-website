@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Montserrat } from 'next/font/google'
 import { AuthProvider } from '@/components/AuthProvider'
 import { Analytics } from '@vercel/analytics/react'
+import 'leaflet/dist/leaflet.css'
 import './globals.css'
 
 export const metadata: Metadata = {
