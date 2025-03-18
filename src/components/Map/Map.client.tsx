@@ -1,6 +1,6 @@
 'use client'
 import L from 'leaflet'
-import { useEffect, useState } from 'react'
+import { ReactElement, useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, GeoJSON } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import { zipToLatLong } from './util'
@@ -25,13 +25,13 @@ const createClusterCustomIcon = function (cluster: MarkerCluster) {
 
 export interface MapProps {
     disableInteraction?: boolean
-    hideOpenStreetMap?: boolean
+    children?: ReactElement
     zipCodes?: number[]
     variant?: 'heatmap' | 'marker'
 }
 
 // Map Layers
-const USMapLayer = ({ isHeatmap }: { isHeatmap?: boolean }) => {
+export const USMapLayer = ({ isHeatmap }: { isHeatmap?: boolean }) => {
     return (
         <GeoJSON
             data={statesData}
@@ -56,11 +56,11 @@ const USMapLayer = ({ isHeatmap }: { isHeatmap?: boolean }) => {
     )
 }
 
-const OpenStreetMapLayer = () => {
+export const OpenStreetMapLayer = () => {
     return <TileLayer attribution={OPEN_ATTR} url={OPEN_MAP_URI} />
 }
 
-const MarkerLayer = ({ markerList }: { markerList: LatLon[] }) => {
+export const MarkerLayer = ({ markerList }: { markerList: LatLon[] }) => {
     return (
         <MarkerClusterGroup
             iconCreateFunction={createClusterCustomIcon}
@@ -76,12 +76,12 @@ const MarkerLayer = ({ markerList }: { markerList: LatLon[] }) => {
 }
 
 // Map
-export default function ClientMap({
+export const ClientMap = ({
     disableInteraction,
-    hideOpenStreetMap,
+    children,
     zipCodes,
     variant,
-}: MapProps) {
+}: MapProps) => {
     const isHeatmap = !variant || variant === 'heatmap'
     const isMarker = variant === 'marker'
 
@@ -116,9 +116,15 @@ export default function ClientMap({
             dragging={!disableInteraction}
             className="z-0 size-full"
         >
-            {!hideOpenStreetMap && <OpenStreetMapLayer />}
-            <USMapLayer isHeatmap={isHeatmap} />
-            {isMarker && <MarkerLayer markerList={markerList} />}
+            {children ? (
+                children
+            ) : (
+                <>
+                    <OpenStreetMapLayer />
+                    <USMapLayer isHeatmap={isHeatmap} />
+                    {isMarker && <MarkerLayer markerList={markerList} />}
+                </>
+            )}
         </MapContainer>
     )
 }
