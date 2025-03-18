@@ -5,12 +5,15 @@ import { MapContainer, TileLayer, Marker, GeoJSON } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import { zipToLatLong } from './util'
 import { statesData } from './stateData'
+import { OPEN_ATTR, OPEN_MAP_URI, US_CENTER } from './constants'
 import { getBrandColor, ShadeIndex } from '@/util/theme'
-import { US_CENTER } from '@/components/Map/constants'
 
+// Types
 type MarkerCluster = {
     getChildCount: () => number
 }
+
+type LatLon = { lat: string | number; lon: string | number }
 
 const createClusterCustomIcon = function (cluster: MarkerCluster) {
     return L.divIcon({
@@ -30,6 +33,7 @@ const USMapLayer = ({ isHeatmap }: { isHeatmap?: boolean }) => {
         <GeoJSON
             data={statesData}
             style={() => {
+                // TODO: pull in data from api instead of using random shades
                 const shade = getBrandColor(
                     'blue',
                     [500, 400, 300, 200, 100][
@@ -49,11 +53,7 @@ const USMapLayer = ({ isHeatmap }: { isHeatmap?: boolean }) => {
     )
 }
 
-const MarkerLayer = ({
-    markerList,
-}: {
-    markerList: { lat: string | number; lon: string | number }[]
-}) => {
+const MarkerLayer = ({ markerList }: { markerList: LatLon[] }) => {
     return (
         <MarkerClusterGroup
             iconCreateFunction={createClusterCustomIcon}
@@ -72,33 +72,24 @@ export default function ClientMap({ zipCodes, variant }: MapProps) {
     const isHeatmap = !variant || variant === 'heatmap'
     const isMarker = variant === 'marker'
 
-    const [markerList, setMarkerList] = useState<
-        { lat: string; lon: string; name: string }[]
-    >([])
+    const [markerList, setMarkerList] = useState<LatLon[]>([])
 
     useEffect(() => {
         const fetcher = async () => {
-            const zipcodes = [28390, 90210, 28201, 10001, 60601, 98101]
-            for (const zipcode of zipcodes) {
-                const response = await zipToLatLong(zipcode)
-                if (response.length) {
-                    const { lat, lon, name } = response[0]
-                    setMarkerList((prevData) => [
-                        ...prevData,
-                        ...Array(10)
-                            .fill(null)
-                            .map(() => ({
-                                lat: (Number(lat) + Math.random()).toString(),
-                                lon: (Number(lon) + Math.random()).toString(),
-                                name,
-                            })),
-                    ])
-                }
-                await new Promise((resolve) => setTimeout(resolve, 10))
+            if (!zipCodes) return
+            const newList = []
+            for (const zipcode of zipCodes) {
+                const data = await zipToLatLong(zipcode)
+                if (data) newList.push(data)
             }
+            setMarkerList(newList)
         }
         if (isMarker) fetcher()
-    }, [])
+
+        return () => {
+            setMarkerList([])
+        }
+    }, [zipCodes, isMarker])
 
     return (
         <MapContainer
@@ -109,10 +100,7 @@ export default function ClientMap({ zipCodes, variant }: MapProps) {
             scrollWheelZoom
             style={{ height: '100%', width: '100%' }}
         >
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+            <TileLayer attribution={OPEN_ATTR} url={OPEN_MAP_URI} />
             <USMapLayer isHeatmap={isHeatmap} />
             {isMarker && <MarkerLayer markerList={markerList} />}
         </MapContainer>

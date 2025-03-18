@@ -13,16 +13,15 @@ interface NominatimResponse {
     boundingbox: string[]
 }
 
-export const zipToLatLong = async (
-    zipcode: number
-): Promise<NominatimResponse[]> => {
+export const zipToLatLong = async (zipcode: number) => {
     try {
         const url = `https://nominatim.openstreetmap.org/search?postalcode=${zipcode}&country=us&format=json`
         const response = await fetch(url)
-        const data = await response.json()
-        return data
+        const data = (await response.json()) as NominatimResponse[]
+        const { lat, lon } = data[0]
+        return { lat, lon }
     } catch (error) {
         console.error('Error fetching location data:', error)
-        return []
+        return null
     }
 }

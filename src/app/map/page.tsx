@@ -7,7 +7,7 @@ export default function About() {
     return (
         <MainLayout>
             <div className="h-96">
-                <Map variant="heatmap" />
+                <Map variant="marker" zipCodes={[27610]} />
             </div>
         </MainLayout>
     )
