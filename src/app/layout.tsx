@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Montserrat } from 'next/font/google'
 import { AuthProvider } from '@/components/AuthProvider'
 import { Analytics } from '@vercel/analytics/react'
+import Script from 'next/script'
 import 'leaflet/dist/leaflet.css'
 import './globals.css'
 
@@ -31,7 +32,7 @@ export default async function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
-                <script
+                <Script
                     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
                     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
                     crossOrigin=""
