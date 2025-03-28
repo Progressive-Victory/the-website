@@ -23,36 +23,49 @@ const createClusterCustomIcon = function (cluster: MarkerCluster) {
     })
 }
 
-export interface MapProps {
-    disableInteraction?: boolean
-    children?: ReactElement
-    zipCodes?: number[]
-    variant?: 'heatmap' | 'marker'
-}
-
 // Map Layers
 export const USMapLayer = ({ isHeatmap }: { isHeatmap?: boolean }) => {
     return (
-        <GeoJSON
-            data={statesData}
-            style={() => {
-                // TODO: pull in data from api instead of using random shades
-                const shade = getBrandColor(
-                    'blue',
-                    [500, 400, 300, 200, 100][
-                        Math.floor(Math.random() * 5)
-                    ] as ShadeIndex
-                )
-                return {
-                    fillColor: isHeatmap ? shade : getBrandColor('blue', 300),
-                    weight: 2,
-                    opacity: 1,
-                    color: '#fff',
-                    dashArray: '3',
-                    fillOpacity: 0.9,
-                }
-            }}
-        />
+        <>
+            <GeoJSON
+                data={statesData}
+                style={() => {
+                    const strokeColor = getBrandColor('blue', 200)
+                    return {
+                        weight: 8,
+                        opacity: 1,
+                        fillOpacity: 1,
+                        color: strokeColor,
+                        fillColor: strokeColor,
+                    }
+                }}
+            />
+            <GeoJSON
+                data={statesData}
+                style={() => {
+                    // TODO: pull in data from api instead of using random shades
+                    const shade = getBrandColor(
+                        'blue',
+                        [500, 400, 300, 200, 100][
+                            Math.floor(Math.random() * 5)
+                        ] as ShadeIndex
+                    )
+
+                    const fillColor = isHeatmap
+                        ? shade
+                        : getBrandColor('blue', 300)
+
+                    return {
+                        fillColor,
+                        weight: 2,
+                        opacity: 1,
+                        color: '#fff',
+                        dashArray: '3',
+                        fillOpacity: 0.9,
+                    }
+                }}
+            />
+        </>
     )
 }
 
@@ -75,8 +88,17 @@ export const MarkerLayer = ({ markerList }: { markerList: LatLon[] }) => {
     )
 }
 
+export interface MapProps {
+    hideOpenStreetMap?: boolean
+    disableInteraction?: boolean
+    children?: ReactElement
+    zipCodes?: number[]
+    variant?: 'heatmap' | 'marker'
+}
+
 // Map
 export const ClientMap = ({
+    hideOpenStreetMap,
     disableInteraction,
     children,
     zipCodes,
@@ -106,7 +128,7 @@ export const ClientMap = ({
 
     return (
         <MapContainer
-            zoom={3}
+            zoom={4}
             minZoom={3}
             maxZoom={9}
             center={US_CENTER}
@@ -114,13 +136,14 @@ export const ClientMap = ({
             attributionControl={false}
             scrollWheelZoom={!disableInteraction}
             dragging={!disableInteraction}
+            doubleClickZoom={!disableInteraction}
             className="z-0 size-full"
         >
             {children ? (
                 children
             ) : (
                 <>
-                    <OpenStreetMapLayer />
+                    {!hideOpenStreetMap && <OpenStreetMapLayer />}
                     <USMapLayer isHeatmap={isHeatmap} />
                     {isMarker && <MarkerLayer markerList={markerList} />}
                 </>
@@ -128,3 +151,5 @@ export const ClientMap = ({
         </MapContainer>
     )
 }
+
+export default ClientMap

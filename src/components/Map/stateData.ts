@@ -1,6 +1,6 @@
 import { GeoJSON } from 'geojson'
 
-export const statesData: GeoJSON = {
+const statesData: GeoJSON = {
     type: 'FeatureCollection',
     features: [
         {
@@ -4486,3 +4486,5 @@ export const statesData: GeoJSON = {
         },
     ],
 }
+
+export { statesData }
