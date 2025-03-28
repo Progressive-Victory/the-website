@@ -13,6 +13,12 @@ export const metadata: Metadata = {
     },
 }
 export default function Events() {
+    // Get timezone and encode it to use in the URL
+    console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    let timezoneParameter: string = "&ctz=" + encodeURI(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    let eventsCalendarURL: string = "https://calendar.google.com/calendar/embed?src=c_c92baa7ee2cd5e3a35a54b8a558a7bfec3cb0067c2eeaf63db81331340801b8e%40group.calendar.google.com&mode=agenda" + timezoneParameter; 
+    let primaryCalendarURL: string = "https://calendar.google.com/calendar/embed?height=600&wkst=2&bgcolor=%23ffffff&title=Progressive%20Victory%20&src=Y185NDhjMzI5OWU3OTQ2N2M3MjBkNWQzMTY0YjEzOGU4OGRiM2FjNTFiNmUxMmM0ZTc2ZjAzZjY0NThjMTA2OGYzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23F6BF26&mode=agenda" + timezoneParameter;
+
     return (
         <MainLayout>
             <div className="bg-steel-blue w-full h-full flex flex-col items-center p-4 gap-y-10">
@@ -21,7 +27,7 @@ export default function Events() {
                         Upcoming Events Calendar
                     </p>
                     <Frame
-                        src="https://calendar.google.com/calendar/embed?src=c_c92baa7ee2cd5e3a35a54b8a558a7bfec3cb0067c2eeaf63db81331340801b8e%40group.calendar.google.com&ctz=America%2FDetroit&mode=agenda"
+                        src={eventsCalendarURL}
                         className="mx-auto h-[600px] mt-4 w-[95%] bg-[#f0f4f9]"
                         type="calendar"
                         title="Calendar"
@@ -34,7 +40,7 @@ export default function Events() {
                         Primary Calendar
                     </p>
                     <Frame
-                        src="https://calendar.google.com/calendar/embed?height=600&wkst=2&bgcolor=%23ffffff&ctz=America%2FChicago&title=Progressive%20Victory%20&src=Y185NDhjMzI5OWU3OTQ2N2M3MjBkNWQzMTY0YjEzOGU4OGRiM2FjNTFiNmUxMmM0ZTc2ZjAzZjY0NThjMTA2OGYzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23F6BF26&mode=agenda"
+                        src={primaryCalendarURL}
                         className="mx-auto h-[600px] mt-4 w-[95%] bg-[#f0f4f9]"
                         type="calendar"
                         title="Calendar"
@@ -46,3 +52,14 @@ export default function Events() {
         </MainLayout>
     )
 }
+
+// Display events color coded according to event type.
+// Display events in week view by default.
+// Merge all calendars into one calendar:
+// Add functionality for filtering calendar events based on type or tag
+// This will also be used to filter by user roles for logged in users
+// E.g.. State  or Skill Team specific meeting.
+// Add functionality for changing calendar time zone from system time.
+// Add separate section to events page for upcoming major events
+//Wishlist:
+   // Style google calendar widgets more in line with PV theme
