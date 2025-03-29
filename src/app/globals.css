@@ -52,6 +52,10 @@
     background: #10233a;
 }
 
+.leaflet-container {
+    background: transparent;
+}
+
 .leaflet-container img.leaflet-tile {
     mix-blend-mode: unset;
 }
