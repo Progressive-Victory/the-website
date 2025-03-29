@@ -2,7 +2,7 @@
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Transition } from '@headlessui/react'
+import { Transition, TransitionChild } from '@headlessui/react'
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { useSession } from 'next-auth/react'
@@ -34,17 +34,19 @@ const containerVariants = {
     hidden: {},
     visible: {
         transition: {
-            staggerChildren: 0.05, // delay between children animations
+            staggerChildren: 0.075, // delay between children animations
         },
     },
 }
+
 const springTransition = {
-    ease: 'easeOut',
+    ease: 'easeInOut',
     type: 'spring',
-    duration: 0.15,
-    stiffness: 300,
-    damping: 22, // Lower damping value for more bounce
+    duration: 0.075,
+    stiffness: 250,
+    damping: 25,
 }
+
 const itemVariants = {
     hidden: { y: '-100vh' },
     visible: { y: 0 },
@@ -80,7 +82,7 @@ export function Header() {
                         />
                     </div>
                 </Link>
-                <div className="flex flex-row items-center justify-center gap-x-12 cursor-pointer w-full hidden xl:flex shadow-md mb-2">
+                <div className="flex flex-row items-center justify-center gap-x-12 cursor-pointer w-full hidden xl:flex mb-2">
                     {navitems.map((item) => (
                         <Link
                             key={item.name}
@@ -137,83 +139,87 @@ export function Header() {
             </div>
             <Transition
                 show={isOpen}
-                enter="transition-all ease-in duration-300"
-                enterFrom="-translate-y-full mt-2 opacity-0"
+                enter="transition-all ease-in duration-200"
+                enterFrom="-translate-y-full mt-2 "
                 enterTo="translate-y-0 mt-0 opacity-100"
-                leave="ease-in duration-100"
+                leave="ease-in duration-200"
                 leaveFrom="opacity-100"
-                leaveTo="opacity-0 -translate-y-full"
+                leaveTo=" -translate-y-full"
             >
-                <div className="absolute rounded-b-lg border-black-pearl-light border-b-4 top-24 left-0 right-0 w-full px-10 pt-4 pb-8 z-10 bg-black-pearl-dark overflow-hidden xl:hidden">
-                    <motion.div
-                        className="w-full flex flex-col items-center justify-center gap-y-4"
-                        initial="hidden"
-                        animate="visible"
-                        variants={containerVariants}
-                    >
-                        {navitems.map((item) => (
+                <TransitionChild>
+                    <div className="fixed rounded-b-lg drop-shadow-xl top-24 pb-12 left-0 right-0 w-full px-10 pt-4 z-10 bg-black-pearl-dark xl:hidden">
+                        <motion.div
+                            className="w-full flex flex-col items-center justify-start mt-2 gap-y-4 pb-16"
+                            initial="hidden"
+                            animate="visible"
+                            variants={containerVariants}
+                        >
+                            {navitems.map((item) => (
+                                <Link
+                                    href={item.href}
+                                    key={item.name}
+                                    target={
+                                        item.href.includes('https')
+                                            ? '_blank'
+                                            : ''
+                                    }
+                                    referrerPolicy="no-referrer"
+                                    className="w-full"
+                                >
+                                    <motion.div
+                                        layoutId={item.name}
+                                        variants={itemVariants}
+                                        transition={springTransition}
+                                        className="cursor-pointer text-center text-xl font-bold text-white hover:text-valencia hover:bg-white rounded-full w-full px-2 py-4"
+                                    >
+                                        {item.name}
+                                    </motion.div>
+                                </Link>
+                            ))}
                             <Link
-                                href={item.href}
-                                key={item.name}
-                                target={
-                                    item.href.includes('https') ? '_blank' : ''
-                                }
-                                referrerPolicy="no-referrer"
+                                href="https://secure.actblue.com/donate/pvwebsite"
+                                target="_blank"
                                 className="w-full"
                             >
                                 <motion.div
-                                    layoutId={item.name}
                                     variants={itemVariants}
                                     transition={springTransition}
-                                    className="cursor-pointer text-center text-xl text-white font-bold hover:text-valencia hover:bg-white rounded-full w-full px-2 py-4"
+                                    className="cursor-pointer rounded-full text-center text-xl text-white bg-valencia hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-4"
                                 >
-                                    {item.name}
+                                    Donate
                                 </motion.div>
                             </Link>
-                        ))}
-                        <Link
-                            href="https://secure.actblue.com/donate/pvwebsite"
-                            target="_blank"
-                            className="w-full"
-                        >
-                            <motion.div
-                                variants={itemVariants}
-                                transition={springTransition}
-                                className="cursor-pointer rounded-full text-center text-xl text-white bg-valencia hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-4"
-                            >
-                                Donate
-                            </motion.div>
-                        </Link>
-                        {!session ? (
-                            <Link href="/login" className="w-full">
-                                <motion.div
-                                    variants={itemVariants}
-                                    transition={springTransition}
-                                    className="cursor-pointer rounded-full text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-4"
-                                >
-                                    Log In
-                                </motion.div>
-                            </Link>
-                        ) : (
-                            <Link href="/account" className="w-full">
-                                <motion.div
-                                    variants={itemVariants}
-                                    transition={springTransition}
-                                    className="flex flex-row rounded-full items-center justify-center gap-x-4 cursor-pointer text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-2"
-                                >
-                                    <Image
-                                        src={session.user?.image || ''}
-                                        width={44}
-                                        height={44}
-                                        className="rounded-full border-2 border-white"
-                                        alt="User Image"
-                                    />
-                                    Account
-                                </motion.div>
-                            </Link>
-                        )}
-                    </motion.div>
-                </div>
+                            {!session ? (
+                                <Link href="/login" className="w-full">
+                                    <motion.div
+                                        variants={itemVariants}
+                                        transition={springTransition}
+                                        className="cursor-pointer rounded-full text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-4"
+                                    >
+                                        Log In
+                                    </motion.div>
+                                </Link>
+                            ) : (
+                                <Link href="/account" className="w-full">
+                                    <motion.div
+                                        variants={itemVariants}
+                                        transition={springTransition}
+                                        className="flex flex-row rounded-full items-center justify-center gap-x-4 cursor-pointer text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-2"
+                                    >
+                                        <Image
+                                            src={session.user?.image || ''}
+                                            width={44}
+                                            height={44}
+                                            className="rounded-full border-2 border-white"
+                                            alt="User Image"
+                                        />
+                                        Account
+                                    </motion.div>
+                                </Link>
+                            )}
+                        </motion.div>
+                    </div>
+                </TransitionChild>
             </Transition>
         </>
     )
