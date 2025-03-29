@@ -149,7 +149,7 @@ export function Header() {
                 <TransitionChild>
                     <div className="fixed rounded-b-lg drop-shadow-xl top-24 pb-12 left-0 right-0 w-full px-10 pt-4 z-10 bg-black-pearl-dark xl:hidden">
                         <motion.div
-                            className="w-full flex flex-col items-center justify-start mt-6 gap-y-6 pb-16"
+                            className="w-full flex flex-col items-center justify-start mt-2 gap-y-4 pb-16"
                             initial="hidden"
                             animate="visible"
                             variants={containerVariants}
