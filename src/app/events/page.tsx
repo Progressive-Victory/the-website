@@ -12,8 +12,8 @@ export const metadata: Metadata = {
         images: [{ url: `https://${process.env.SITE_URL}/images/banner.png` }],
     },
 }
-const eventsCalendarSrc: string = "&src=c_c92baa7ee2cd5e3a35a54b8a558a7bfec3cb0067c2eeaf63db81331340801b8e%40group.calendar.google.com&color=%23d6a80f";
-const otherEventsSrc: string = "&src=Y185NDhjMzI5OWU3OTQ2N2M3MjBkNWQzMTY0YjEzOGU4OGRiM2FjNTFiNmUxMmM0ZTc2ZjAzZjY0NThjMTA2OGYzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23070ee3"
+const eventsCalendarSrc: string = "&src=c_c92baa7ee2cd5e3a35a54b8a558a7bfec3cb0067c2eeaf63db81331340801b8e%40group.calendar.google.com&color=%23009949";
+const otherEventsSrc: string = "&src=Y185NDhjMzI5OWU3OTQ2N2M3MjBkNWQzMTY0YjEzOGU4OGRiM2FjNTFiNmUxMmM0ZTc2ZjAzZjY0NThjMTA2OGYzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%230099e1"
 // Embed options
 const standardParams = "&mode=week&showPrint=0&showTz=0&height=100&showNav=0&showTabs=0"
 export default function Events() {
