@@ -6,7 +6,6 @@ import { Transition, TransitionChild } from '@headlessui/react'
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { useSession } from 'next-auth/react'
-import { delay } from 'motion'
 
 const navitems = [
     {
