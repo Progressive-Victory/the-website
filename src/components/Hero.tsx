@@ -42,7 +42,6 @@ export function Hero() {
                     Get Involved
                 </Link>
             </motion.div>
-
             {/* Message Blocks */}
             <div className="mt-20 flex flex-wrap justify-center gap-6 px-4">
                 <motion.div
@@ -66,7 +65,7 @@ export function Hero() {
                     />
                 </motion.div>
                 <motion.div
-                    initial={{ rotate: 7, y: 50, opacity: 0 }}
+                    initial={{ rotate: 4, y: 50, opacity: 0 }}
                     animate={{ rotate: 1, y: 0, opacity: 1 }}
                     className="lg:mt-24"
                     transition={{
@@ -84,7 +83,7 @@ export function Hero() {
                     />
                 </motion.div>
                 <motion.div
-                    initial={{ rotate: -15, y: 50, opacity: 0 }}
+                    initial={{ rotate: -9, y: 50, opacity: 0 }}
                     animate={{ rotate: 6, y: 0, opacity: 1 }}
                     transition={{
                         duration: 0.8,
