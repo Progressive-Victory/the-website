@@ -36,7 +36,7 @@ export function Message({
     return (
         <div className="hover:rotate-1 hover:scale-[102%] transition-transform ease-in-out">
             <motion.div
-                className="flex flex-col items-center justify-start w-fit xl:w-[30vw] p-4 bg-white rounded-md shadow-xl my-2 max-w-xl"
+                className="flex flex-col items-center drop-shadow-lg justify-start w-fit xl:w-[30vw] p-4 bg-white rounded-md shadow-xl my-2 max-w-xl"
                 initial={{ x: 100, opacity: 0 }} // Start position: off-screen to the right
                 animate={{ x: 0, opacity: 1 }} // End position: visible and on-screen
                 transition={{
