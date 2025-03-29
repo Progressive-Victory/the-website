@@ -39,6 +39,7 @@ const containerVariants = {
         },
     },
 }
+
 const springTransition = {
     ease: 'easeInOut',
     type: 'spring',
@@ -46,6 +47,7 @@ const springTransition = {
     stiffness: 250,
     damping: 25,
 }
+
 const itemVariants = {
     hidden: { y: '-100vh' },
     visible: { y: 0 },
