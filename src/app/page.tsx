@@ -7,7 +7,7 @@ export default function Home() {
     return (
         <div className="w-full">
             <Header />
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center overflow-x-hidden">
                 <Hero />
                 <Volunteer />
                 <MapGraphic />
