@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Transition } from '@headlessui/react'
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion } from 'motion/react'
 import { useSession } from 'next-auth/react'
 
 const navitems = [
