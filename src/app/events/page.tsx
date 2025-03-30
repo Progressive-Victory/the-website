@@ -1,6 +1,5 @@
-import { MainLayout } from '@/components/MainLayout'
-import { Frame } from '@/components/Frame'
 import { Metadata } from 'next'
+import { ClientCalendar } from '@/components/Calendar'
 export const metadata: Metadata = {
     title: 'PV - Events',
     description: 'See what we are up to!',
@@ -12,36 +11,16 @@ export const metadata: Metadata = {
         images: [{ url: `https://${process.env.SITE_URL}/images/banner.png` }],
     },
 }
+const baseString = "https://calendar.google.com/calendar/embed?title=Progressive%20Victory%20"
 const eventsCalendarSrc: string = "&src=c_c92baa7ee2cd5e3a35a54b8a558a7bfec3cb0067c2eeaf63db81331340801b8e%40group.calendar.google.com&color=%23009949";
 const otherEventsSrc: string = "&src=Y185NDhjMzI5OWU3OTQ2N2M3MjBkNWQzMTY0YjEzOGU4OGRiM2FjNTFiNmUxMmM0ZTc2ZjAzZjY0NThjMTA2OGYzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23b09e00";
 const organzingMeetingsSrc: string = "&src=27d041938d95e549e529dcfa46f1989c1fde36c9acd31d07829872ef08e4961d%40group.calendar.google.com&color=%23ba7525";
 const skillTeamMeetingsSrc: string = "&src=0151b1ae27c001d91226349720dd486eb6c37a8c649807ad68d0aae28817d7c1%40group.calendar.google.com&color=%230099e1";
 // Embed options
 const standardParams = "&mode=week&wkst=2"
-export default function Events() {
-    // Get timezone and encode it to use in the URL
-    // const timezoneParameter: string = "&ctz=" + encodeURI(Intl.DateTimeFormat().resolvedOptions().timeZone);
-    const calendarEmbedURL: string = "https://calendar.google.com/calendar/embed?title=Progressive%20Victory%20" + otherEventsSrc + eventsCalendarSrc + organzingMeetingsSrc + skillTeamMeetingsSrc + standardParams + "&ctz=America%2FNew_York"; // temporarily hardcode timezone
 
-    return (
-        <MainLayout>
-            <div className="bg-steel-blue w-full h-full flex flex-col items-center p-4 gap-y-10">
-                <div className="w-full bg-[#f0f4f9] rounded-lg py-4 mx-6">
-                    <p className="text-center text-3xl font-black lg:text-5xl">
-                        Progressive Victory Calendar
-                    </p>
-                    <Frame
-                        src={calendarEmbedURL}
-                        className="mx-auto h-[800px] mt-4 w-[95%] bg-[#f0f4f9]"
-                        type="calendar"
-                        title="Calendar"
-                    >
-                        Loading…
-                    </Frame>
-                </div>
-            </div>
-        </MainLayout>
-    )
+export default function Events() {
+    return <ClientCalendar>{baseString + eventsCalendarSrc + otherEventsSrc + organzingMeetingsSrc + skillTeamMeetingsSrc + standardParams}</ClientCalendar>
 }
 
 // Add functionality for filtering calendar events based on type or tag - Needs API access as far as I can tell
