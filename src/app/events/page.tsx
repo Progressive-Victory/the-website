@@ -20,9 +20,9 @@ const calendarMap = new Map<string, string>([
     ["0151b1ae27c001d91226349720dd486eb6c37a8c649807ad68d0aae28817d7c1@group.calendar.google.com", "0099e1"]
 ]);
 export default function Events() {
-    let calendarUri = new URL("https://calendar.google.com/calendar/embed");
+    const calendarUri = new URL("https://calendar.google.com/calendar/embed");
     // build calendar string out of the base embed string plus their colors
-    for (let [key, value] of calendarMap) {
+    for (const [key, value] of calendarMap) {
         // src - calendar id, color - color that the events from that calendar show up as
         // the %23 magic value is # encoded into the URL
         calendarUri.searchParams.append("src", key);
