@@ -45,16 +45,18 @@ export function Hero() {
             {/* Message Blocks */}
             <div className="mt-20 flex flex-wrap justify-center gap-6 px-4">
                 <motion.div
-                    initial={{ rotate: -4, y: 50, opacity: 0 }}
-                    animate={{ rotate: -5, y: 0, opacity: 1 }}
-                    transition={{
-                        duration: 0.8,
-                        ease: 'easeOut',
-                        delay: 0.2,
+                    whileHover={{
+                        rotate: -2,
+                        scale: 1.02,
+                        transition: {
+                            duration: 0.2
+                        }
                     }}
                     className="order-last xl:order-first"
                 >
                     <Message
+                        initial={{ rotate: -4, y: 50, opacity: 0 }}
+                        animate={{ rotate: -5, y: 0, opacity: 1 }}
                         avatar="/images/Logo_DB_Transparent.svg"
                         avatarRounded={false}
                         username="Progressive Victory"
@@ -65,16 +67,18 @@ export function Hero() {
                     />
                 </motion.div>
                 <motion.div
-                    initial={{ rotate: 4, y: 50, opacity: 0 }}
-                    animate={{ rotate: 1, y: 0, opacity: 1 }}
-                    className="lg:mt-24"
-                    transition={{
-                        duration: 0.8,
-                        ease: 'easeOut',
-                        delay: 0.4,
+                    className="lg:mt-24 h-fit"
+                    whileHover={{
+                        rotate: -2,
+                        scale: 1.02,
+                        transition: {
+                            duration: 0.2
+                        }
                     }}
                 >
                     <Message
+                        initial={{ rotate: 4, y: 50, opacity: 0 }}
+                        animate={{ rotate: 1, y: 0, opacity: 1 }}
                         avatar="/images/Logo_DB_Transparent.svg"
                         avatarRounded={false}
                         username="Progressive Victory"
@@ -83,16 +87,18 @@ export function Hero() {
                     />
                 </motion.div>
                 <motion.div
-                    initial={{ rotate: -9, y: 50, opacity: 0 }}
-                    animate={{ rotate: 6, y: 0, opacity: 1 }}
-                    transition={{
-                        duration: 0.8,
-                        ease: 'easeOut',
-                        delay: 0.6,
+                    whileHover={{
+                        rotate: -2,
+                        scale: 1.02,
+                        transition: {
+                            duration: 0.2
+                        }
                     }}
                     className="order-first xl:order-last"
                 >
                     <Message
+                        initial={{ rotate: -9, y: 50, opacity: 0 }}
+                        animate={{ rotate: 6, y: 0, opacity: 1 }}
                         avatar="/images/sam_twitter_photo.jpeg"
                         image="/images/sam.jpg"
                         username="Sam Dryzmala"
