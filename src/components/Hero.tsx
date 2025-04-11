@@ -30,7 +30,7 @@ export function Hero() {
                 <motion.div
                     initial={{ y: 100, opacity: 0, scale: 0 }}
                     animate={{ y: 0, opacity: 1, scale: 1 }}
-                    transition={{ type: "spring", duration: 1.5, delay: 0.8 }}
+                    transition={{ ease: "backInOut", duration: 1, delay: 0.45 }}
                 >
                     <h1 className="text-4xl font-bold text-white">
                         Welcome to{' '}
@@ -43,7 +43,7 @@ export function Hero() {
                 <motion.div
                     initial={{ y: 50, opacity: 0, scale: 0 }}
                     animate={{ y: 0, opacity: 1, scale: 1 }}
-                    transition={{ type: "spring", duration: 1.5, delay: 0.5 }}
+                    transition={{ ease: "backInOut", duration: 1, delay: 0.25 }}
                 >
                     <p className="text-xl text-white my-8 font-[500]">
                         Find like minded people, share ideas, and engage in
@@ -53,7 +53,7 @@ export function Hero() {
                 <motion.div
                     initial={{ y: 50, opacity: 0, scale: 0 }}
                     animate={{ y: 0, opacity: 1, scale: 1 }}
-                    transition={{ type: "spring", duration: 1.5, delay: 0.3 }}
+                    transition={{ ease: "backInOut", duration: .8, delay: 0.15 }}
                 >
                     <Link
                         href="/volunteer"
