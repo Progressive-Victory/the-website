@@ -13,27 +13,25 @@ import {
 } from '@heroicons/react/24/solid'
 import { useState } from 'react'
 export function Message({
-    initial,
-    animate,
-    transition,
+    motionProps,
     avatar,
     avatarRounded = true,
     username,
     nameColor,
     image,
     text,
-    delay = 0, // Delay for staggering
 }: {
-    initial?: TargetAndTransition
-    animate?: TargetAndTransition
-    transition?: Transition
+    motionProps?: {
+        initial?: TargetAndTransition
+        animate?: TargetAndTransition
+        transition?: Transition
+    }
     avatar: string
     avatarRounded?: boolean
     username: string
     nameColor?: string
     text: string
     image?: string
-    delay?: number
 }) {
     const [clickedHeart, setClickedHeart] = useState<boolean>(false)
     const [clickedBubble, setClickedBubble] = useState<boolean>(false)
@@ -42,14 +40,9 @@ export function Message({
     return (
         <motion.div
             className="bg-white drop-shadow-lg shadow-xl rounded-md my-2 p-4 h-fit w-fit xl:w-[30vw] max-w-xl"
-            initial={{ x: 100, opacity: 0, ...initial }} // Start position: off-screen to the right
-            animate={{ x: 0, opacity: 1, ...animate }} // End position: visible and on-screen
-            transition={{
-                duration: 0.8,
-                delay,
-                ease: 'easeOut',
-                ...transition
-            }}
+            initial={{ opacity: 0, scale: 0, ...motionProps?.initial }} // Start position: off-screen to the right
+            animate={{ opacity: 1, scale: 1, ...motionProps?.animate }} // End position: visible and on-screen
+            transition={{ ease: "backInOut", ...motionProps?.transition }}
         >
             <div className="flex flex-row items-center justify-start gap-x-4 mr-auto">
                 <Image
@@ -72,6 +65,7 @@ export function Message({
                         className="rounded-lg object-cover mt-4"
                         style={{ objectPosition: '0 20%' }}
                         fill={true}
+                        sizes='100%'
                     />
                 </div>
             )}
