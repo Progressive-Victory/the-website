@@ -4,6 +4,14 @@ import { Message } from './Message'
 import Link from 'next/link'
 
 export function Hero() {
+    const messageHover = {
+        rotate: -2,
+        scale: 1.02,
+        transition: {
+            duration: 0.2
+        }
+    }
+
     return (
         <div className="relative h-full w-full flex flex-col items-center bg-steel-blue justify-start py-20">
             {/* Halftone background */}
@@ -18,43 +26,56 @@ export function Hero() {
                     mixBlendMode: 'lighten',
                 }}
             />
-            <motion.div
-                className="relative top-0 left-0 text-center w-full md:w-2/3 px-4 z-2 flex flex-col items-center"
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-            >
-                <h1 className="text-4xl font-bold text-white">
-                    Welcome to{' '}
-                    <span className="text-black-pearl-dark">
-                        Progressive Victory
-                    </span>{' '}
-                    the Online Community for Political Action.
-                </h1>
-                <p className="text-xl text-white my-8 font-[500]">
-                    Find like minded people, share ideas, and engage in
-                    meaningful political action. Get involved today!
-                </p>
-                <Link
-                    href="/volunteer"
-                    className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out"
+            <div className="relative top-0 left-0 text-center w-full md:w-2/3 px-4 z-2 flex flex-col items-center">
+                <motion.div
+                    initial={{ y: 100, opacity: 0, scale: 0 }}
+                    animate={{ y: 0, opacity: 1, scale: 1 }}
+                    transition={{ ease: "backInOut", duration: 1, delay: 0.45 }}
                 >
-                    Get Involved
-                </Link>
-            </motion.div>
+                    <h1 className="text-4xl font-bold text-white">
+                        Welcome to{' '}
+                        <span className="text-black-pearl-dark">
+                            Progressive Victory
+                        </span>{' '}
+                        the Online Community for Political Action.
+                    </h1>
+                </motion.div>
+                <motion.div
+                    initial={{ y: 50, opacity: 0, scale: 0 }}
+                    animate={{ y: 0, opacity: 1, scale: 1 }}
+                    transition={{ ease: "backInOut", duration: 1, delay: 0.25 }}
+                >
+                    <p className="text-xl text-white my-8 font-[500]">
+                        Find like minded people, share ideas, and engage in
+                        meaningful political action. Get involved today!
+                    </p>
+                </motion.div>
+                <motion.div
+                    initial={{ y: 50, opacity: 0, scale: 0 }}
+                    animate={{ y: 0, opacity: 1, scale: 1 }}
+                    transition={{ ease: "backInOut", duration: .8, delay: 0.15 }}
+                >
+                    <Link
+                        href="/volunteer"
+                        className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out"
+                    >
+                        Get Involved
+                    </Link>
+                </motion.div>
+            </div>
+
             {/* Message Blocks */}
             <div className="mt-20 flex flex-wrap justify-center gap-6 px-4">
                 <motion.div
-                    initial={{ rotate: -4, y: 50, opacity: 0 }}
-                    animate={{ rotate: -5, y: 0, opacity: 1 }}
-                    transition={{
-                        duration: 0.8,
-                        ease: 'easeOut',
-                        delay: 0.2,
-                    }}
+                    whileHover={messageHover}
                     className="order-last xl:order-first"
                 >
                     <Message
+                        motionProps={{
+                            initial: { rotate: 20, y: 50 },
+                            animate: { rotate: -5, y: 0 },
+                            transition: { delay: 0.15, duration: 0.65 }
+                        }}
                         avatar="/images/Logo_DB_Transparent.svg"
                         avatarRounded={false}
                         username="Progressive Victory"
@@ -65,16 +86,15 @@ export function Hero() {
                     />
                 </motion.div>
                 <motion.div
-                    initial={{ rotate: 4, y: 50, opacity: 0 }}
-                    animate={{ rotate: 1, y: 0, opacity: 1 }}
-                    className="lg:mt-24"
-                    transition={{
-                        duration: 0.8,
-                        ease: 'easeOut',
-                        delay: 0.4,
-                    }}
+                    whileHover={messageHover}
+                    className="lg:mt-24 h-fit"
                 >
                     <Message
+                        motionProps={{
+                            initial: { rotate: 15, y: 50 },
+                            animate: { rotate: 1, y: 0 },
+                            transition: { delay: .65, duration: 0.65 }
+                        }}
                         avatar="/images/Logo_DB_Transparent.svg"
                         avatarRounded={false}
                         username="Progressive Victory"
@@ -83,16 +103,15 @@ export function Hero() {
                     />
                 </motion.div>
                 <motion.div
-                    initial={{ rotate: -9, y: 50, opacity: 0 }}
-                    animate={{ rotate: 6, y: 0, opacity: 1 }}
-                    transition={{
-                        duration: 0.8,
-                        ease: 'easeOut',
-                        delay: 0.6,
-                    }}
+                    whileHover={messageHover}
                     className="order-first xl:order-last"
                 >
                     <Message
+                        motionProps={{
+                            initial: { rotate: 30, y: 50 },
+                            animate: { rotate: 6, y: 0 },
+                            transition: { delay: 0.3, duration: 0.9 }
+                        }}
                         avatar="/images/sam_twitter_photo.jpeg"
                         image="/images/sam.jpg"
                         username="Sam Dryzmala"

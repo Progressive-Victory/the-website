@@ -1,6 +1,8 @@
 'use client'
 import Image from 'next/image'
 import { motion } from 'motion/react'
+import { useState, useEffect, useRef } from 'react';
+
 function Card({
     image,
     title,
@@ -19,7 +21,7 @@ function Card({
             transition={{
                 duration: 1.0,
                 delay,
-                ease: 'easeOut',
+                ease: 'backInOut',
             }}
             className="relative flex flex-col md:flex-row items-center justify-start w-full bg-white rounded-lg p-4 h-fit md:h-[275px]"
         >
@@ -64,22 +66,54 @@ const actions = [
 ]
 
 export function Volunteer() {
+    const { inView, observe } = useInView();
+    const divRef = useRef<HTMLDivElement>(null);
+    const [visible, setVisible] = useState(false);
+
+    useEffect(() => {
+        if (divRef.current) observe(divRef.current)
+    }, [observe]);
+
+    useEffect(() => {
+        if (inView) setVisible(true)
+    }, [inView])
+
     return (
         <div className="flex flex-col items-center justify-center bg-black-pearl-light py-20 w-full gap-y-24">
             <h1 className="text-4xl font-bold text-white">
                 What Can <span className="text-valencia">You </span> Do?
             </h1>
             <div className="w-full flex flex-col xl:flex-row items-center justify-center gap-x-10 gap-y-10 px-4">
-                {actions.map((action, index) => (
+                {visible && actions.map((action, index) => (
                     <Card
                         key={action.title}
                         image={action.image}
                         title={action.title}
-                        delay={index * 0.5}
+                        delay={index * 0.2}
                         description={action.description}
                     />
                 ))}
             </div>
+            <div ref={divRef} />
         </div>
     )
 }
+
+const useInView = () => {
+    const [inView, setInView] = useState(false);
+    const observerRef = useRef<IntersectionObserver | null>(null);
+
+    useEffect(() => {
+        observerRef.current = new IntersectionObserver(([entry]) => {
+            setInView(entry.isIntersecting);
+        });
+
+        return () => observerRef.current?.disconnect();
+    }, []);
+
+    const observe = (element: HTMLElement | null) => {
+        if (element) observerRef.current?.observe(element)
+    };
+
+    return { inView, observe };
+};
