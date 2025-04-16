@@ -62,7 +62,7 @@ const itemVariants = {
  * screens, the menu is hidden and replaced with a hamburger menu icon that
  * toggles the display of the menu when clicked. When the menu is displayed on
  * small screens, it is rendered as a vertical list of links that covers the
- * entire screen.
+ * entire screen. 
  *
  */
 export function Header() {
