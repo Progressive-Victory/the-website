@@ -78,7 +78,7 @@ export function Header() {
                             src="/images/LogoFull.webp"
                             alt="progressive-victory-logo"
                             width={256}
-                            height={256}
+                            height={78}
                         />
                     </div>
                 </Link>
