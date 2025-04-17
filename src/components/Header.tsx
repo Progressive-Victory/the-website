@@ -62,7 +62,7 @@ const itemVariants = {
  * screens, the menu is hidden and replaced with a hamburger menu icon that
  * toggles the display of the menu when clicked. When the menu is displayed on
  * small screens, it is rendered as a vertical list of links that covers the
- * entire screen.
+ * entire screen. 
  *
  */
 export function Header() {
@@ -78,7 +78,7 @@ export function Header() {
                             src="/images/LogoFull.webp"
                             alt="progressive-victory-logo"
                             width={256}
-                            height={256}
+                            height={78}
                         />
                     </div>
                 </Link>

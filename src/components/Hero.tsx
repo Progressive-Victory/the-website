@@ -28,6 +28,7 @@ export function Hero() {
             />
             <div className="relative top-0 left-0 text-center w-full md:w-2/3 px-4 z-2 flex flex-col items-center">
                 <motion.div
+                    style={{ willChange: "opacity, transform", transform: "translateZ(0)" }}
                     initial={{ y: 100, opacity: 0, scale: 0 }}
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     transition={{ ease: "backInOut", duration: 1, delay: 0.45 }}
@@ -41,6 +42,7 @@ export function Hero() {
                     </h1>
                 </motion.div>
                 <motion.div
+                    style={{ willChange: "opacity, transform", transform: "translateZ(0)" }}
                     initial={{ y: 50, opacity: 0, scale: 0 }}
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     transition={{ ease: "backInOut", duration: 1, delay: 0.25 }}
@@ -51,6 +53,7 @@ export function Hero() {
                     </p>
                 </motion.div>
                 <motion.div
+                    style={{ willChange: "opacity, transform", transform: "translateZ(0)" }}
                     initial={{ y: 50, opacity: 0, scale: 0 }}
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     transition={{ ease: "backInOut", duration: .8, delay: 0.15 }}
@@ -67,6 +70,7 @@ export function Hero() {
             {/* Message Blocks */}
             <div className="mt-20 flex flex-wrap justify-center gap-6 px-4">
                 <motion.div
+                    style={{ willChange: "transform", transform: "translateZ(0)" }}
                     whileHover={messageHover}
                     className="order-last xl:order-first"
                 >
@@ -86,6 +90,7 @@ export function Hero() {
                     />
                 </motion.div>
                 <motion.div
+                    style={{ willChange: "opacity, transform", transform: "translateZ(0)" }}
                     whileHover={messageHover}
                     className="lg:mt-24 h-fit"
                 >
@@ -103,6 +108,7 @@ export function Hero() {
                     />
                 </motion.div>
                 <motion.div
+                    style={{ willChange: "opacity, transform", transform: "translateZ(0)" }}
                     whileHover={messageHover}
                     className="order-first xl:order-last"
                 >

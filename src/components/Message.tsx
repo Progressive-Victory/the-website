@@ -39,7 +39,8 @@ export function Message({
 
     return (
         <motion.div
-            className="bg-white drop-shadow-lg shadow-xl rounded-md my-2 p-4 h-fit w-fit xl:w-[30vw] max-w-xl"
+            className="bg-white shadow-xl rounded-md my-2 p-4 h-fit w-fit xl:w-[30vw] max-w-xl"
+            style={{ willChange: "opacity, transform", transform: "translateZ(0)" }}
             initial={{ opacity: 0, scale: 0, ...motionProps?.initial }} // Start position: off-screen to the right
             animate={{ opacity: 1, scale: 1, ...motionProps?.animate }} // End position: visible and on-screen
             transition={{ ease: "backInOut", ...motionProps?.transition }}
@@ -69,7 +70,7 @@ export function Message({
                     />
                 </div>
             )}
-            <div className="flex flex-row items-center justify-end gap-x-4 mt-8 ml-auto">
+            <div className="flex flex-row items-center justify-end gap-x-4 mt-8 ml-auto select-none">
                 <div
                     className="w-6 h-6 group"
                     onClick={() => setClickedBubble(!clickedBubble)}
