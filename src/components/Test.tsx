@@ -1,25 +1,31 @@
-import { ITest } from "@/models/Test"
+'use client'
+import { ITest } from '@/models/Test'
+import { useState } from 'react'
+import { useEffect } from 'react'
 
-const getEntries = async () => {
-    const response = await fetch(process.env.URL + '/api/test')
-    console.log(response)
-    const data = await response.json()
-    return data
-}
+export function TestComp() {
+    const [data, setData] = useState<ITest[]>()
 
-export async function TestComp() {
-    
-    const data: ITest[] = await getEntries()
+    useEffect(() => {
+        const getEntries = async () => {
+            const response = await fetch('/api/test')
+            console.log(response)
+            const data = await response.json()
+            setData(data)
+        }
+        getEntries()
+    }, [])
 
     return (
         <div>
-            {data.map(entry => (
-                <div key={entry.a}>
-                    <a>{entry.a}</a>
-                    <a>{entry.b}</a>
-                    <a>{entry.c}</a>
-                </div>
-            ))}
+            {data &&
+                data.map((entry) => (
+                    <div key={entry.a}>
+                        <a>{entry.a}</a>
+                        <a>{entry.b}</a>
+                        <a>{entry.c}</a>
+                    </div>
+                ))}
         </div>
     )
 }
