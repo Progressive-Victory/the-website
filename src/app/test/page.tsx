@@ -1,9 +1,11 @@
-import { Suspense } from "react";
 import { TestComp } from "@/components/Test"
+import ProtectedPage from "@/components/ProtectedPage"
 
 export default function Test(){
 
     return (
-        <TestComp/>
+        <ProtectedPage requiredRoles={ ["Superadmin"] }>
+            <TestComp/>
+        </ProtectedPage>
     )
 }

@@ -2,17 +2,18 @@
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/util/auth' // your NextAuth options
 import { IUser } from '@/models/User'
+import { IRole } from '@/models/Role'
 
 // Role checking utility function
 const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
+    console.log(user)
+    console.log(user.roles)
+    const userRoles = user.roles as IRole[]
+    const roleStrs = userRoles.map((role: IRole) => role.name)
+    console.log("Required Roles: " + requiredRoles)
+    console.log("User Roles: " + roleStrs)
     if (!user || !user.roles || !Array.isArray(user.roles)) return false
-    return requiredRoles.every((role) => user.roles.includes(role))
-}
-
-const getUser = async () => {
-    const response = await fetch('/api/user')
-    const data = await response.json()
-    return data
+    return requiredRoles.every((role) => roleStrs.includes(role))
 }
 
 interface ProtectedPageProps {
@@ -28,9 +29,14 @@ export default async function ProtectedPage({
     children,
     requiredRoles = [],
 }: ProtectedPageProps) {
-    // Get the server session
     const session = await getServerSession(authOptions)
-    const user = await getUser()
+    console.log("Component Session: " + session)
+    const response = await fetch(process.env.URL + '/api/user')
+    const user = await response.json()
+    if(!session) throw Error("Failed to retrieve session from server.")
+
+    // Get the server session
+    //const session = await getServerSession(authOptions)
     // No session found
     if (!session || !session.user) {
         return (
@@ -41,19 +47,20 @@ export default async function ProtectedPage({
         )
     }
 
+    console.log("UwU")
     // If required roles are specified, verify them
-    if (requiredRoles.length > 0 && !hasRequiredRoles(user, requiredRoles)) {
-        return (
-            // TODO: Make this pretty
-            <div>
-                <h1>Access Denied</h1>
-                <p>
-                    You do not have the necessary permissions to view this page.
-                </p>
-            </div>
-        )
+    if (user && requiredRoles.length > 0 && hasRequiredRoles(user, requiredRoles)) {
+        // Render the provided client component if all checks pass
+        return <>{children}</>
     }
 
-    // Render the provided client component if all checks pass
-    return <>{children}</>
+    return (
+        // TODO: Make this pretty
+        <div>
+            <h1>Access Denied</h1>
+            <p>
+                You do not have the necessary permissions to view this page.
+            </p>
+        </div>
+    )
 }

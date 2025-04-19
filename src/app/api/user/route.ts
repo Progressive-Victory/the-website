@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
     }
 
     const user = await User.findOne({ discordId: token?.discordId || '' })
+        .populate('roles')
     if (!user) {
         return NextResponse.json({ error: 'Bad request' }, { status: 400 })
     }
