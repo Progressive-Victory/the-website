@@ -1,9 +1,9 @@
-import mongoose, { Document, Model, Schema } from 'mongoose'
+import mongoose, { Document, Model, Schema, PopulatedDoc, Types } from 'mongoose'
 import { IPermission } from './Permission'
 
 export interface IRole extends Document{
     name: string
-    permissions: IPermission["_id"]
+    permissions: [PopulatedDoc<Document<Types.ObjectId> & IPermission>]
 }
 
 const roleSchema = new Schema<IRole>({
@@ -12,5 +12,7 @@ const roleSchema = new Schema<IRole>({
 })
 
 export const Role: Model<IRole> =
-    (mongoose.models as Record<string, Model<IRole>>).Role ||
+    (mongoose.models as Record<string, Model<IRole>>)['Role'] || 
     mongoose.model<IRole>('Role', roleSchema)
+
+export default Role

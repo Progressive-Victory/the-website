@@ -1,6 +1,6 @@
-import mongoose, { Document, Model, Schema } from 'mongoose'
-import { OnboardingStage } from '@/util/stage'
+import mongoose, { Document, Model, Schema, Types, PopulatedDoc } from 'mongoose'
 import { IRole } from './Role'
+import { OnboardingStage } from '@/util/stage'
 
 // Here is a user document
 // It defines the structure of the user and provides a POJO for interacting with user data
@@ -15,7 +15,7 @@ export interface IUser extends Document {
     acceptedAlerts?: boolean
     verified: boolean
     onboardingStage: OnboardingStage
-    roles?: IRole["_id"]
+    roles?: [PopulatedDoc<Document<Types.ObjectId> & IRole>]
 }
 
 // We then create a schema for the user document, tells Mongoose how the document should be structured

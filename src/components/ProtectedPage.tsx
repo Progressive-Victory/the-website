@@ -1,8 +1,10 @@
 // app/ProtectedPage.jsx
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/util/auth' // your NextAuth options
-import { IUser } from '@/models/User'
-import { IRole } from '@/models/Role'
+import { IUser, User } from '@/models/User'
+import { IRole, Role } from '@/models/Role'
+import dbConnect from '@/util/libmongo'
+import { getToken } from 'next-auth/jwt'
 
 // Role checking utility function
 const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
@@ -14,6 +16,11 @@ const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
     console.log("User Roles: " + roleStrs)
     if (!user || !user.roles || !Array.isArray(user.roles)) return false
     return requiredRoles.every((role) => roleStrs.includes(role))
+}
+
+const getUser = async (token: string) => {
+    await dbConnect()
+    const usr = User.findOne()
 }
 
 interface ProtectedPageProps {
@@ -30,10 +37,6 @@ export default async function ProtectedPage({
     requiredRoles = [],
 }: ProtectedPageProps) {
     const session = await getServerSession(authOptions)
-    console.log("Component Session: " + session)
-    const response = await fetch(process.env.URL + '/api/user')
-    const user = await response.json()
-    if(!session) throw Error("Failed to retrieve session from server.")
 
     // Get the server session
     //const session = await getServerSession(authOptions)
@@ -47,7 +50,13 @@ export default async function ProtectedPage({
         )
     }
 
-    console.log("UwU")
+    await dbConnect()
+
+    const user = await User.findOne({discordId: session.discordId})
+        .populate('roles')
+        .exec()
+
+    console.log("User Object:" + user)
     // If required roles are specified, verify them
     if (user && requiredRoles.length > 0 && hasRequiredRoles(user, requiredRoles)) {
         // Render the provided client component if all checks pass

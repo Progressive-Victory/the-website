@@ -1,4 +1,4 @@
-import { Account, Profile } from 'next-auth'
+import { Account, DefaultSession, Profile, Session } from 'next-auth'
 import Discord from 'next-auth/providers/discord'
 import dbConnect from '@/util/libmongo'
 import { User } from '@/models/User'
@@ -24,6 +24,16 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
+        async session({
+            session,
+            token
+        }: {
+            session: Session
+            token: JWT
+        }) {
+            if(token.discordId) session.discordId = token.discordId as string
+            return session
+        },
         async jwt({
             token,
             account,
