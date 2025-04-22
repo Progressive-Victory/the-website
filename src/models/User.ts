@@ -1,5 +1,5 @@
 import mongoose, { Document, Model, Schema, Types, PopulatedDoc } from 'mongoose'
-import { IRole } from './Role'
+import { IRole, Role } from './Role'
 import { OnboardingStage } from '@/util/stage'
 
 // Here is a user document
@@ -15,7 +15,7 @@ export interface IUser extends Document {
     acceptedAlerts?: boolean
     verified: boolean
     onboardingStage: OnboardingStage
-    roles?: [PopulatedDoc<Document<Types.ObjectId> & IRole>]
+    roles: [PopulatedDoc<Document<Types.ObjectId> & IRole>]
 }
 
 // We then create a schema for the user document, tells Mongoose how the document should be structured
@@ -34,7 +34,7 @@ const userSchema = new Schema<IUser>({
         enum: OnboardingStage,
         default: OnboardingStage.NOT_STARTED,
     },
-    roles: [{ type: Schema.Types.ObjectId, ref: 'Role', required: false }],
+    roles: [{ type: Schema.Types.ObjectId, ref: Role }],
 })
 
 // A name
@@ -42,7 +42,7 @@ const modelName = 'User'
 
 // Finally the model itself is exported, we use the cache if it exists
 export const User: Model<IUser> =
-    (mongoose.models as Record<string, Model<IUser>>)[modelName] ||
+    (mongoose.models as Record<string, Model<IUser>>).User ||
     mongoose.model<IUser>(modelName, userSchema)
 
 // Default export
