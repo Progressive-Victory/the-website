@@ -2,25 +2,15 @@
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/util/auth' // your NextAuth options
 import { IUser, User } from '@/models/User'
-import { IRole, Role } from '@/models/Role'
+import { IRole } from '@/models/Role'
 import dbConnect from '@/util/libmongo'
-import { getToken } from 'next-auth/jwt'
 
 // Role checking utility function
 const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
-    console.log(user)
-    console.log(user.roles)
     const userRoles = user.roles as IRole[]
     const roleStrs = userRoles.map((role: IRole) => role.name)
-    console.log("Required Roles: " + requiredRoles)
-    console.log("User Roles: " + roleStrs)
     if (!user || !user.roles || !Array.isArray(user.roles)) return false
     return requiredRoles.every((role) => roleStrs.includes(role))
-}
-
-const getUser = async (token: string) => {
-    await dbConnect()
-    const usr = User.findOne()
 }
 
 interface ProtectedPageProps {
@@ -36,6 +26,7 @@ export default async function ProtectedPage({
     children,
     requiredRoles = [],
 }: ProtectedPageProps) {
+    // get session object from server
     const session = await getServerSession(authOptions)
 
     // Get the server session
@@ -50,13 +41,20 @@ export default async function ProtectedPage({
         )
     }
 
+    // connect to database
     await dbConnect()
 
+    // query database for the user object with a discordId corresponding to
+    // the one stored in the session object
     const user = await User.findOne({discordId: session.discordId})
-        .populate('roles')
+        .populate({
+            path: 'roles',
+            populate: {
+                path: 'permissions'
+            }
+        })
         .exec()
 
-    console.log("User Object:" + user)
     // If required roles are specified, verify them
     if (user && requiredRoles.length > 0 && hasRequiredRoles(user, requiredRoles)) {
         // Render the provided client component if all checks pass
