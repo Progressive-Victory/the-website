@@ -1,4 +1,7 @@
+import ProtectedPage from "@/components/ProtectedPage";
 import { Metadata } from "next";
+import { AdminDash } from "@/components/AdminDash";
+
 export const metadata: Metadata = {
     title: 'PV - Admin',
     description: 'Portal for Administration of the Website and Database',
@@ -9,4 +12,12 @@ export const metadata: Metadata = {
         siteName: 'Progressive Victory',
         images: [{ url: `https://${process.env.SITE_URL}/images/banner.png` }],
     },
+}
+
+export default function AdminPage() {
+    return (
+        <ProtectedPage requiredRoles={["Superadmin"]}>
+            <AdminDash/>
+        </ProtectedPage>
+    )
 }

@@ -1,4 +1,4 @@
-import { Account, DefaultSession, Profile, Session } from 'next-auth'
+import { Account, Profile, Session } from 'next-auth'
 import Discord from 'next-auth/providers/discord'
 import dbConnect from '@/util/libmongo'
 import { User } from '@/models/User'
@@ -24,6 +24,7 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
+        // session call back assigns the discordId from the token to the session object
         async session({
             session,
             token

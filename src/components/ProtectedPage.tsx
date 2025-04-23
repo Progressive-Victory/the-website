@@ -55,8 +55,10 @@ export default async function ProtectedPage({
         })
         .exec()
 
+    console.log("checking roles")
     // If required roles are specified, verify them
     if (user && requiredRoles.length > 0 && hasRequiredRoles(user, requiredRoles)) {
+        console.log("returning children")
         // Render the provided client component if all checks pass
         return <>{children}</>
     }
