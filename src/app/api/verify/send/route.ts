@@ -67,7 +67,6 @@ export async function POST(req: NextRequest) {
         body: formData.toString(),
     })
     const data = await response.json()
-    console.log(data)
 
     if (!data || !data.sent) {
         return new Response('Bad request', { status: 400 })
