@@ -5,6 +5,7 @@ import {
     ArrowPathIcon,
     CakeIcon,
     InformationCircleIcon,
+    TrophyIcon,
 } from '@heroicons/react/24/solid'
 import { IUser } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
@@ -132,6 +133,7 @@ export default function Volunteer() {
     const [startJoin, setStartJoin] = useState<boolean>(false)
     const [securityCode, setSecurityCode] = useState<string>('')
     const [showVerify, setShowVerify] = useState<boolean>(false)
+    const [showRejoin, setShowRejoin] = useState<boolean>(false)
     const [codeError, setCodeError] = useState<boolean>(false)
     const [validationFlags, setValidationFlags] = useState<
         Map<string, boolean>
@@ -209,15 +211,21 @@ export default function Volunteer() {
 
     // Try and join user to server
     useEffect(() => {
-        if (
-            user?.verified &&
-            user.onboardingStage === OnboardingStage.VERIFIED
-        ) {
-            fetch('/api/discord/join', { method: 'PUT' }).then(getUser)
-        } else {
-            // check if they are already in the server
-            fetch('/api/discord/join')
-        }
+        const joinStatus = fetch('/api/discord/join')
+        joinStatus.then(async (result) => {
+            if (result.status === 404) {
+                if (
+                    user?.verified &&
+                    user.onboardingStage === OnboardingStage.VERIFIED
+                ) {
+                    fetch('/api/discord/join', { method: 'PUT' }).then(getUser)
+                } else {
+                    setShowRejoin(true)
+                }
+            } else {
+                setShowRejoin(false)
+            }
+        })
     }, [user])
 
     useEffect(() => {
@@ -530,10 +538,32 @@ export default function Volunteer() {
                         )}
                         {user?.onboardingStage === OnboardingStage.JOINED && (
                             <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
-                                <CakeIcon className="h-12 w-12 text-steel-blue" />
-                                <p className="text-lg font-bold text-center text-white mt-6">
-                                    Congrats you are in the server!
-                                </p>
+                                {showRejoin ? (
+                                    <>
+                                        <TrophyIcon className="h-12 w-12 text-steel-blue" />
+                                        <p className="text-lg font-bold text-center text-white mt-6">
+                                            Would you like to rejoin?
+                                        </p>
+                                        <button
+                                            onClick={() => {
+                                                setShowRejoin(false)
+                                                fetch('/api/discord/join', {
+                                                    method: 'PUT',
+                                                }).then(getUser)
+                                            }}
+                                            className="px-4 py-2 bg-valencia hover:bg-red-900 font-bold rounded-full mt-2 text-white"
+                                        >
+                                            Rejoin
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <CakeIcon className="h-12 w-12 text-steel-blue" />
+                                        <p className="text-lg font-bold text-center text-white mt-6">
+                                            Congrats you are in the server!
+                                        </p>
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>

@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/util/auth'
 import { getToken } from 'next-auth/jwt'
@@ -20,9 +20,16 @@ export async function PUT(req: NextRequest) {
 
     const user = await User.findOne({ discordId: token?.discordId })
 
-    if (user?.onboardingStage !== OnboardingStage.VERIFIED) {
-        // They cannot request a join without verification
-        return new Response('Unauthorized', { status: 401 })
+    // Escape if the user is null
+    if (!user) return new Response('Not Logged In', { status: 200 })
+
+    switch (user.onboardingStage) {
+        case OnboardingStage.VERIFIED:
+            break
+        case OnboardingStage.JOINED:
+            break
+        default:
+            return new Response('Unauthorized', { status: 401 })
     }
 
     const endpoint = `https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${token?.discordId}`
@@ -65,10 +72,18 @@ export async function GET(req: NextRequest) {
 
     const user = await User.findOne({ discordId: token?.discordId })
 
-    if (user?.onboardingStage !== OnboardingStage.VERIFIED) {
-        // They cannot request a join without verification
-        return new Response('Unauthorized', { status: 401 })
+    if (!user) return new Response('Internal Error', { status: 500 })
+    console.log(user.onboardingStage)
+    switch (user.onboardingStage) {
+        case OnboardingStage.VERIFIED:
+            break
+        case OnboardingStage.JOINED:
+            break
+        default:
+            // They cannot request a join without verification
+            return new Response('Unauthorized', { status: 401 })
     }
+
     const endpoint = `https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${token?.discordId}`
 
     const response = await fetch(endpoint, {
@@ -78,12 +93,16 @@ export async function GET(req: NextRequest) {
         },
     })
 
-    if (response.ok) {
+    if (response.status === 200) {
         if (user && user!.onboardingStage === OnboardingStage.VERIFIED) {
             user!.onboardingStage = OnboardingStage.JOINED
             await user?.save()
         }
-        return new Response('Already Joined!', { status: 200 })
+
+        return NextResponse.json(
+            { message: 'Already Joined!' },
+            { status: 200 }
+        )
     } else {
         return new Response('Not Joined.', { status: 404 })
     }
