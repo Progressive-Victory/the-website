@@ -43,7 +43,7 @@ export function AdminDash() {
                         <br/>
                         <ul>
                             {sectionArray.map((value, index) => (
-                                <li className={"p-2 " + (value == Section[section] ? "bg-sky-700" : "hover:bg-sky-500")}
+                                <li key={value} className={"p-2 " + (value == Section[section] ? "bg-sky-700" : "hover:bg-sky-500")}
                                  onClick={() => (
                                     setSection(index)
                                 )} >

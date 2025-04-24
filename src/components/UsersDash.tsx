@@ -20,10 +20,16 @@ export function UsersDash() {
     function serveUserReadout() {
         console.log(selectedEntry)
         if(!selectedEntry) return
+        type userkey = keyof IUser
+        const props = Object.keys(selectedEntry)
         return (
             <>
-                <a>Name: {selectedEntry.name}</a>
-                <a>Discord Id: {selectedEntry.discordId}</a>
+                {props.map((key) => (
+                    <>
+                        <a>{key + ": " + selectedEntry[key as userkey]}</a>
+                        <br/>
+                    </>
+                ))}
             </>
         )
     }
@@ -31,12 +37,12 @@ export function UsersDash() {
     return (
         <>
             <div className="grid gap-x-4 grid-cols-10 h-full">
-                <div className="col-span-6 h-full bg-white p-4">
+                <div className="col-span-4 h-full bg-white p-4">
                     <h1>Users</h1>
                     <br/>
                     <ul>
                         {sectionData?.map((entry) => (
-                            <li className={"p-2 " + (entry == selectedEntry ? "bg-sky-700" : "hover:bg-sky-500")} 
+                            <li key={entry.name} className={"p-2 " + (entry == selectedEntry ? "bg-sky-700" : "hover:bg-sky-500")} 
                             onClick={ () => (
                                 setSelectedEntry(entry)
                             )}>
@@ -45,9 +51,8 @@ export function UsersDash() {
                         ))}
                     </ul>
                 </div>
-                <div className="col-span-4 h-full bg-white p-4">
-                    <p>Name: {selectedEntry?.name}</p>
-                    <a>Discord Id: {selectedEntry?.discordId}</a>
+                <div className="col-span-6 h-full bg-white p-4">
+                    {serveUserReadout()}
                 </div>
             </div>
         </>
