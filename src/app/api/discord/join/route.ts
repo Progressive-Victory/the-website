@@ -73,7 +73,6 @@ export async function GET(req: NextRequest) {
     const user = await User.findOne({ discordId: token?.discordId })
 
     if (!user) return new Response('Internal Error', { status: 500 })
-    console.log(user.onboardingStage)
     switch (user.onboardingStage) {
         case OnboardingStage.VERIFIED:
             break
