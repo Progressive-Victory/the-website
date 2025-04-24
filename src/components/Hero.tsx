@@ -1,5 +1,5 @@
 'use client'
-import { motion, useTransform, useSpring } from 'framer-motion'
+import { motion, useTransform, useSpring } from 'motion/react'
 import { Message } from './Message'
 import Link from 'next/link'
 import { useState } from 'react'
