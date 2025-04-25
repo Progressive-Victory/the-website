@@ -1,9 +1,11 @@
-import { Account, Profile, Session } from 'next-auth'
+import { Account, getServerSession, Profile, Session } from 'next-auth'
 import Discord from 'next-auth/providers/discord'
 import dbConnect from '@/util/libmongo'
 import { User } from '@/models/User'
 import { JWT } from 'next-auth/jwt'
 import { NextAuthOptions } from 'next-auth'
+import { IUser } from '@/models/User'
+import { IRole } from '@/models/Role'
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -79,4 +81,49 @@ export const authOptions: NextAuthOptions = {
             return token
         },
     },
+}
+
+export const enum ResponseCode {
+    Successful,
+    Exception,
+    NoSession,
+    InsufficientAccess
+}
+
+// Role checking utility function
+const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
+    const userRoles = user.roles as IRole[]
+    const roleStrs = userRoles.map((role: IRole) => role.name)
+    if (!user || !user.roles || !Array.isArray(user.roles)) return false
+    return requiredRoles.every((role) => roleStrs.includes(role))   
+}
+
+export async function checkAuth(roles?: string[]): Promise<ResponseCode> {
+    //Get server session
+    const session = await getServerSession(authOptions)
+
+    // No session found
+    if (!session || !session.user) return ResponseCode.NoSession
+
+    if(!roles) return ResponseCode.Successful
+
+    // Connect to database
+    await dbConnect()
+
+    // query database for the user object with a discordId corresponding to
+    // the one stored in the session object
+    const user = await User.findOne({discordId: session.discordId})
+        .populate({
+            path: 'roles',
+            populate: {
+                path: 'permissions'
+            }
+        })
+        .exec()
+
+    if (!user || !(roles.length > 0)) return ResponseCode.Exception
+
+    if (hasRequiredRoles(user, roles)) return ResponseCode.Successful
+
+    return ResponseCode.InsufficientAccess
 }

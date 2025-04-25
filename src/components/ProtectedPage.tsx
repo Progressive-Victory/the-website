@@ -1,17 +1,6 @@
 // app/ProtectedPage.jsx
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/util/auth' // your NextAuth options
-import { IUser, User } from '@/models/User'
-import { IRole } from '@/models/Role'
-import dbConnect from '@/util/libmongo'
-
-// Role checking utility function
-const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
-    const userRoles = user.roles as IRole[]
-    const roleStrs = userRoles.map((role: IRole) => role.name)
-    if (!user || !user.roles || !Array.isArray(user.roles)) return false
-    return requiredRoles.every((role) => roleStrs.includes(role))
-}
+import { checkAuth, ResponseCode } from '@/util/auth' // your NextAuth options
+import { error } from 'console'
 
 interface ProtectedPageProps {
     children: React.ReactNode
@@ -26,50 +15,39 @@ export default async function ProtectedPage({
     children,
     requiredRoles = [],
 }: ProtectedPageProps) {
-    // get session object from server
-    const session = await getServerSession(authOptions)
+    const response = await checkAuth(requiredRoles)
 
-    // Get the server session
-    //const session = await getServerSession(authOptions)
-    // No session found
-    if (!session || !session.user) {
-        return (
-            <div>
-                <h1>Access Denied</h1>
-                <p>You must be signed in to view this page.</p>
-            </div>
-        )
+    switch(response) {
+        case ResponseCode.Successful:
+            return <>{children}</>
+        case ResponseCode.Exception:
+            return (
+                <div>
+                    <h1>Access Denied</h1>
+                    <p>
+                        There was an error while checking your authentication.
+                    </p>
+                </div>
+            )
+        case ResponseCode.InsufficientAccess:
+            return (
+                <div>
+                    <h1>Access Denied</h1>
+                    <p>
+                        You lack sufficient permissions to view this page.
+                    </p>
+                </div>
+            )
+        case ResponseCode.NoSession:
+            return (
+                <div>
+                    <h1>Access Denied</h1>
+                    <p>
+                        You need to be logged in to view this page.
+                    </p>
+                </div>
+            )
+        default:
+            throw error("Unidentifed response code")
     }
-
-    // connect to database
-    await dbConnect()
-
-    // query database for the user object with a discordId corresponding to
-    // the one stored in the session object
-    const user = await User.findOne({discordId: session.discordId})
-        .populate({
-            path: 'roles',
-            populate: {
-                path: 'permissions'
-            }
-        })
-        .exec()
-
-    console.log("checking roles")
-    // If required roles are specified, verify them
-    if (user && requiredRoles.length > 0 && hasRequiredRoles(user, requiredRoles)) {
-        console.log("returning children")
-        // Render the provided client component if all checks pass
-        return <>{children}</>
-    }
-
-    return (
-        // TODO: Make this pretty
-        <div>
-            <h1>Access Denied</h1>
-            <p>
-                You do not have the necessary permissions to view this page.
-            </p>
-        </div>
-    )
 }
