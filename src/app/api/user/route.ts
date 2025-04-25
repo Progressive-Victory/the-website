@@ -3,8 +3,9 @@ import { getServerSession } from 'next-auth'
 import { getToken } from 'next-auth/jwt'
 import { User, IUser } from '@/models/User'
 import dbConnect from '@/util/libmongo'
-import { authOptions } from '@/util/auth'
+import { authOptions, checkAuth, ResponseCode } from '@/util/auth'
 import { OnboardingStage } from '@/util/stage'
+import { error } from 'console'
 export const dynamic = 'force-dynamic'
 /**
  * Create a new user.
@@ -23,41 +24,58 @@ export const dynamic = 'force-dynamic'
  *   -d '{"user":{"name":"John Doe","email":"john@example.com","image":"https://example.com/john.jpg"}}'
  */
 
-export async function GET(req: NextRequest) {
+//retrieves the currently logged in user
+async function retrieveUser(){
     const session = await getServerSession(authOptions)
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
-
     await dbConnect()
+    const user = await User.findOne({discordId: session?.discordId})
+    .populate({
+        path: 'roles',
+        populate: {
+            path: 'permissions'
+        }
+    })
+    .exec()
+    return user
+}
 
-    if (!session || !token) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET(req: NextRequest) {
+    //check to make sure user is logged in
+    const response = await checkAuth()
+
+    //serve response based on the outcome of the auth check
+    switch (response){
+        case ResponseCode.Successful:
+            return NextResponse.json(await retrieveUser())
+        case ResponseCode.Exception:
+            return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+        case ResponseCode.NoSession:
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        case ResponseCode.InsufficientAccess: 
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        default:
+            throw error("Unidentified response code.")
     }
-
-    const user = await User.findOne({ discordId: token?.discordId || '' })
-        .populate('roles')
-    if (!user) {
-        return NextResponse.json({ error: 'Bad request' }, { status: 400 })
-    }
-
-    return NextResponse.json(user)
 }
 
 export async function PATCH(req: NextRequest) {
-    const session = await getServerSession(authOptions)
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+    //check to make sure user is logged in
+    const response = await checkAuth()
+    let user: IUser
 
-    await dbConnect()
-
-    if (!session || !token) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const user = (await User.findOne({
-        discordId: token?.discordId || '',
-    })) as IUser
-
-    if (!user) {
-        return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+    //serve response based on the outcome of the auth check
+    switch (response){
+        case ResponseCode.Successful:
+            user = await retrieveUser() as IUser
+            break
+        case ResponseCode.Exception:
+            return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+        case ResponseCode.NoSession:
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        case ResponseCode.InsufficientAccess: 
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        default:
+            throw error("Unidentified response code.")
     }
 
     // Make sure we're at onboarding stage

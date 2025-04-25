@@ -1,36 +1,30 @@
 import dbConnect from "@/util/libmongo";
-import { IUser, User } from "@/models/User"
-import { IRole } from "@/models/Role";
-import { authOptions } from "@/util/auth";
+import { Role } from "@/models/Role";
+import { checkAuth, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { getToken } from "next-auth/jwt";
-
-const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
-    const userRoles = user.roles as IRole[]
-    const roleStrs = userRoles.map((role: IRole) => role.name)
-    if (!user || !user.roles || !Array.isArray(user.roles)) return false
-    return requiredRoles.every((role) => roleStrs.includes(role))
-}
+import { error } from "console";
 
 export async function GET(req: NextRequest) {
-    const session = await getServerSession(authOptions)
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET })
+    const response = await checkAuth(["Superadmin"])
 
-    if(!session || !token) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    switch (response){
+        case ResponseCode.Successful:
+            break
+        case ResponseCode.Exception:
+            return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+        case ResponseCode.NoSession:
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        case ResponseCode.InsufficientAccess:
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        default:
+            throw error("Unidentified response code.")
     }
 
     await dbConnect()
 
-    const user: IUser = await User.findOne({discordId: session.discordId})
-        .populate({
-            path: 'roles',
-            populate: {
-                path: 'permissions'
-            }
-        })
-        .exec() as IUser
+    const data = await Role.find()
+        .populate('permissions')
+        .exec()
 
-    if(!hasRequiredRoles)
+    return NextResponse.json(data)
 }
