@@ -10,11 +10,11 @@ The language used in this project is [Typescript](https://www.typescriptlang.org
 
 By continuing with development you are agreeing that you understand these frameworks and will attempt to work within the best practices and conventions.
 
-## Create a New Branch
+### 1. Create a New Branch
 
 Check out a new branch from `main` before you begin working on any new feature. If you do not understand the previous sentence see [git - the simple guide](https://rogerdudler.github.io/git-guide/) for a primer.
 
-## Installing
+### 2. Installing
 
 **BEFORE** running the server you must have [Node.js](https://nodejs.org/en/download) installed on your machine. We officialy use the 20.19.1 LTS version of Node but backward compatability means you should be able to use any LTS >= 20.19.1 to run the server.
 
@@ -31,6 +31,8 @@ First, install the dependencies,
 ```
 pnpm install
 ```
+
+### 3. Configure
 
 Next, check the .env.example file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to Brioche on Discord.
 
@@ -59,6 +61,8 @@ MONGODB_URI="mongodb://localhost:27017"
 SITE_URL="https://example.com"
 ```
 
+### 4. Run
+
 Finally, run the development server
 
 ```
@@ -78,4 +82,4 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy on Vercel
 
-Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @asoronow or attend coding team meeting Mondays at 5PM PST / 8PM EST.
+Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @asoronow or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.
