@@ -3,6 +3,7 @@ import { Role } from "@/models/Role";
 import { checkAuth, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { error } from "console";
+import url from "url"
 
 export async function GET(req: NextRequest) {
     const response = await checkAuth(["Superadmin"])
@@ -19,6 +20,9 @@ export async function GET(req: NextRequest) {
         default:
             throw error("Unidentified response code.")
     }
+
+    const queryParams = url.parse(req.url, true).query
+    console.log(queryParams)
 
     await dbConnect()
 

@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect } from "react"
 import { IUser } from "@/models/User"
-import { IRole } from "@/models/Role"
+import { IRole} from "@/models/Role"
+import { HydratedDocument } from "mongoose"
 
 export function UsersDash() {
 
@@ -16,16 +17,15 @@ export function UsersDash() {
             setSectionData(data)
         }
         const getRoleList = async () => {
-            const response = await fetch()
+            const response = await fetch("/api/admin/role")
             const data = await response.json()
-            setRoleList(roleList)
+            setRoleList(data)
         }
         getRoleList()
         getSectionData()
     }, [])
 
     function isIterable(obj:any): boolean {
-        console.log("isIterable?: " + !!obj[Symbol.iterator])
         return Array.isArray(obj)
     }
 
@@ -37,11 +37,18 @@ export function UsersDash() {
 
     const addRole = (roleStr: string) => {
         console.log("Adding Role")
-        //I guess cry?
+        const tgtRole = roleList?.filter(x => x.name == roleStr)[0]
+        if(!tgtRole) throw Error("Cannot add role. Tgt role is undefined.")
+        if(!selectedEntry?.roles.includes(tgtRole)) selectedEntry?.roles.push(tgtRole)
+        console.log(selectedEntry)
     }
 
     const removeRole = (roleStr: string) => {
         console.log("Removing Role")
+        if(!selectedEntry) return
+        const index = selectedEntry.roles.findIndex(x => x.name == roleStr)
+        selectedEntry.roles.splice(index, 1)
+        console.log(selectedEntry)
     }
 
     const saveChanges = () => {
@@ -54,22 +61,15 @@ export function UsersDash() {
         type userkey = keyof IUser
         const props = Object.keys(selectedEntry)
         return (
-            <div className="flex h-full grid">
-                <div className="overflow-scroll">
-                    <table className="w-auto">
-                        {props.map((key) => (
-                            <tr key={key}>
-                                <th className="p-1 border border-black">{key}</th>
-                                <td className="break-all p-1 border border-black">{isIterable(selectedEntry[key as userkey]) ? iterableToString(selectedEntry[key as userkey]) : selectedEntry[key as userkey].toString()}</td>
-                            </tr>
-                        ))}
-                    </table>
-                </div>
-                <div className="block self-end h-20 w-full">
-                    <button className="w-1/3 h-full hover:bg-sky-500" onClick={addRole}>Add Role</button>
-                    <button className="w-1/3 h-full hover:bg-sky-500" onClick={removeRole}>Remove Role</button>
-                    <button className="w-1/3 h-full hover:bg-sky-500" onClick={saveChanges}>Save Changes</button>
-                </div>
+            <div className="overflow-scroll">
+                <table className="w-auto">
+                    {props.map((key) => (
+                        <tr key={key}>
+                            <th className="p-1 border border-black">{key}</th>
+                            <td className="break-all p-1 border border-black">{isIterable(selectedEntry[key as userkey]) ? iterableToString(selectedEntry[key as userkey]) : selectedEntry[key as userkey].toString()}</td>
+                        </tr>
+                    ))}
+                </table>
             </div>
         )
     }
@@ -92,7 +92,14 @@ export function UsersDash() {
                     </ul>
                 </div>
                 <div className="col-span-6 h-full bg-white p-4">
-                    {serveUserReadout()}
+                    <div className="flex h-full grid">
+                        {serveUserReadout()}
+                        <div className="block self-end h-20 w-full">
+                            <button className="w-1/3 h-full hover:bg-sky-500" onClick={() => (addRole("Superadmin"))}>Add Role</button>
+                            <button className="w-1/3 h-full hover:bg-sky-500" onClick={() => (removeRole("Superadmin"))}>Remove Role</button>
+                            <button className="w-1/3 h-full hover:bg-sky-500" onClick={saveChanges}>Save Changes</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </>

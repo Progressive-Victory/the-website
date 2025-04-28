@@ -106,6 +106,8 @@ export async function PATCH(req: NextRequest) {
         // we only want to allow updating the stage and verified after this point
         return NextResponse.json({ error: 'Bad request' }, { status: 400 })
     }
+    
+    await dbConnect()
 
     await user.save()
 

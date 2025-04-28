@@ -3,7 +3,7 @@ import { IPermission, Permission } from './Permission'
 
 export interface IRole extends Document{
     name: string
-    permissions?: [PopulatedDoc<Document<Types.ObjectId> & IPermission>]
+    permissions?: [IPermission]
 }
 
 const roleSchema = new Schema<IRole>({

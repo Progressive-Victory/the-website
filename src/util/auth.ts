@@ -112,14 +112,13 @@ export async function checkAuth(roles?: string[]): Promise<ResponseCode> {
 
     // query database for the user object with a discordId corresponding to
     // the one stored in the session object
-    const user = await User.findOne({discordId: session.discordId})
+    const user: IUser | null = await User.findOne({discordId: session.discordId})
         .populate({
             path: 'roles',
             populate: {
                 path: 'permissions'
             }
-        })
-        .exec()
+        }).exec()
 
     if (!user || !(roles.length > 0)) return ResponseCode.Exception
 

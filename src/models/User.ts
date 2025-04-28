@@ -15,7 +15,7 @@ export interface IUser extends Document {
     acceptedAlerts?: boolean
     verified: boolean
     onboardingStage: OnboardingStage
-    roles: [PopulatedDoc<Document<Types.ObjectId> & IRole>]
+    roles: [IRole]
 }
 
 // We then create a schema for the user document, tells Mongoose how the document should be structured
