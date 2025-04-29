@@ -51,7 +51,7 @@ function TiltMessage({ children, className }: { children: React.ReactNode, class
       const x = (mousePosition.x - elementPosition.left) / elementPosition.width
       const y = (mousePosition.y - elementPosition.top) / elementPosition.height
       
-      tiltX.set((x - 0.5) * -.5)
+      tiltX.set((x - 0.5) * .5)
       tiltY.set((y - 0.5) * -.5)
     }
   
