@@ -85,9 +85,7 @@ export function Hero() {
     <div className="relative h-full w-full flex flex-col items-center bg-steel-blue justify-start py-20">
       
       {/* Halftone background */}
-      <div className="perspective-container">
-        <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-0" />
-      </div>
+      <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-1" />
       {/* Animated Main Text */}
       <div
         className="absolute top-0 left-0 lg:-translate-x-1/2 w-full lg:w-1/2 h-full z-1"

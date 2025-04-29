@@ -8,24 +8,17 @@
   
 }
 .halftone {
-    --mask: radial-gradient(
-        circle at center,
-        rgba(255,255,255,1) 0%,
-        rgba(255,255,255,0.8) 50%,
-        rgba(255,255,255,0.2) 100%
+    --mask: linear-gradient(
+        45deg,
+        transparent 5%,
+        rgb(255 255 255) 10%,
+        rgb(255 255 255 / 0.5) 96%
     );
-    --stop1: 5%;
-    --stop2: 15%;
+    --stop1: 10%;
+    --stop2: 96%;
     background-color: black;
     aspect-ratio: 1;
-    filter: contrast(150) brightness(1.2); /* Increased contrast */
-    transform: 
-        perspective(1000px) 
-        rotateY(10deg) /* Reduced rotation */
-        translateZ(-20px);
-    transform-origin: center center;
-    opacity: 0.15; /* Adjusted opacity */
-    z-index: 1; /* Ensure it stays above container */
+    filter: contrast(55);
 }
 
 .halftone::after {
@@ -37,13 +30,12 @@
         white var(--stop1),
         transparent var(--stop2)
     );
-    background-size: 0.5rem 0.5rem; /* Slightly smaller dots */
+    background-size: 0.55rem 0.55rem;
     background-repeat: round;
     background-position: center;
     mask-image: var(--mask);
-    mask-mode: luminance;
-    mask-size: 100% 100%; /* Full size mask */
 }
+
 
 @keyframes grow {
     0% {
