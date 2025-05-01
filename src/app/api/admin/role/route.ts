@@ -3,11 +3,12 @@ import { Role } from "@/models/Role";
 import { checkAuth, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { error } from "console";
-import url from "url"
 
-export async function GET(req: NextRequest) {
+export async function GET() {
+    // check session auth
     const response = await checkAuth(["Superadmin"])
 
+    // handle checkAuth response
     switch (response){
         case ResponseCode.Successful:
             break
@@ -21,14 +22,13 @@ export async function GET(req: NextRequest) {
             throw error("Unidentified response code.")
     }
 
-    const queryParams = url.parse(req.url, true).query
-    console.log(queryParams)
-
     await dbConnect()
 
+    //query all permissions
     const data = await Role.find()
         .populate('permissions')
         .exec()
 
+    //return list
     return NextResponse.json(data)
 }
