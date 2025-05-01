@@ -4,7 +4,7 @@ import { checkAuth, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { error } from "console";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     const response = await checkAuth(["Superadmin"])
 
     switch (response){

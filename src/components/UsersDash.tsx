@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from "react"
 import { IUser } from "@/models/User"
-import { IRole} from "@/models/Role"
+import { IRole } from "@/models/Role"
 
 export function UsersDash() {
     // Contains a list of users to be displayed in the middle panel
@@ -29,19 +29,16 @@ export function UsersDash() {
 
     // This is a helper function that checks if an object is an array.
     // It's honestly just here to make the line its on more readable.
-    function isIterable(obj:any): boolean {
+    function isIterable(obj: object): boolean {
         return Array.isArray(obj)
     }
 
-    // This is a temp function that returns the name field of roles. 
-    // If I were using an oop approach in a language I knew better this wouldn't exist and 
-    // the object I wanted to list a name would have an overridden toString() function but I 
-    // have no idea how to do that with typescript interfaces. As it stands, this function will 
-    // cause errors in the future under certain conditions listed below and needs to be replaced 
-    // by a better solution.
-    function iterableToString(obj:Array<any>): string[] {
-        // This will cause crashes if the user interface gets other arrays that contain docs without a name property in the future!!!
-        return obj.map((value: any) => (value["name"]))
+    // Helper function that takes in a generic type, an array of said generic type,
+    // and a string representing the key for the desired field to return as a string
+    // in the stead of this object
+    function iterableToString<T>(arr: Array<T>, printField: string): string[] {
+        const printKey = printField as keyof T
+        return arr.map((value) => ((value[printKey] as object).toString()))
     }
 
     // This function is a callback for the "Add Role" button.
@@ -85,7 +82,7 @@ export function UsersDash() {
                     {props.map((key) => (
                         <tr key={key}>
                             <th className="p-1 border border-black">{key}</th>
-                            <td className="break-all p-1 border border-black">{isIterable(selectedEntry[key as userkey]) ? iterableToString(selectedEntry[key as userkey]) : selectedEntry[key as userkey].toString()}</td>
+                            <td className="break-all p-1 border border-black">{isIterable(selectedEntry[key as userkey]) ? iterableToString<IRole>(selectedEntry[key as userkey], 'name') : selectedEntry[key as userkey].toString()}</td>
                         </tr>
                     ))}
                 </table>

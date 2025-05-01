@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { getToken } from 'next-auth/jwt'
 import { User, IUser } from '@/models/User'
 import dbConnect from '@/util/libmongo'
 import { authOptions, checkAuth, ResponseCode } from '@/util/auth'
@@ -39,7 +38,7 @@ async function retrieveUser(){
     return user
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     //check to make sure user is logged in
     const response = await checkAuth()
 
