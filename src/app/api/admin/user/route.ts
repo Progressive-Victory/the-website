@@ -61,8 +61,8 @@ export async function PATCH(req: NextRequest) {
         }
     })
     .exec()) as IUser[]
-    data.forEach(async (usr) => {
-        const dbUsr: IUser = dbUsrList.find(x => x.id = usr.id) as IUser
+    data.forEach(async(usr) => { 
+        const dbUsr: IUser = dbUsrList.find(x => x.id == usr.id) as IUser
          Object.keys(usr).forEach((k) => {
             const key = k as keyof IUser
             
