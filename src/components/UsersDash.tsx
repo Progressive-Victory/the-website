@@ -51,8 +51,9 @@ export function UsersDash() {
         console.log(selectedEntry)
     }
 
-    const saveChanges = () => {
+    const saveChanges = async () => {
         console.log("Saving Changes")
+        await 
     }
 
     function serveUserReadout() {

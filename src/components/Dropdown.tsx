@@ -1,13 +1,13 @@
 import { useState } from 'react';
- 
+
 interface DropdownProps {
   onSelect: (option: string) => void;
 }
- 
+
 const Dropdown = ({ onSelect }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const options = ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5'];
- 
+
   return (
     <div className="relative flex justify-center items-center h-screen">
       <div className="flex flex-col items-center">
@@ -17,7 +17,7 @@ const Dropdown = ({ onSelect }: DropdownProps) => {
         >
           Open Dropdown
         </button>
- 
+        
         {isOpen && (
           <div className="mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
             <div className="py-1" role="menu">
@@ -41,5 +41,5 @@ const Dropdown = ({ onSelect }: DropdownProps) => {
     </div>
   );
 };
- 
+
 export default Dropdown;

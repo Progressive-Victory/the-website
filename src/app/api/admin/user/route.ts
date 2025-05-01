@@ -33,6 +33,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(data)
 }
 
+function updateUserObj<Key extends keyof IUser>(key: Key, obj: IUser, value: IUser[Key])  {
+    obj[key] = value
+}
+
 export async function PATCH(req: NextRequest) {
     const response = await checkAuth()
 
@@ -71,10 +75,8 @@ export async function PATCH(req: NextRequest) {
             ]
 
             if(dbUsr[key] !== usr[key] || !allowed.includes(key)) {
-                dbUsr[key] = usr[key] as IUser[keyof IUser]
+                updateUserObj(key, dbUsr, usr[key])
             }
-
-            
          })
          await dbUsr.save()
     })
