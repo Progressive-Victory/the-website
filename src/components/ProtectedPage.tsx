@@ -15,9 +15,13 @@ export default async function ProtectedPage({
     children,
     requiredRoles = [],
 }: ProtectedPageProps) {
+    // Run util function that handles the logic for checking whether
+    // there is a current session and whether it has sufficient permissions
     const response = await checkAuth(requiredRoles)
 
+    // switch statement handling the various responses checkAuth() will return
     switch(response) {
+        // if all auth checks passed then render the page
         case ResponseCode.Successful:
             return <>{children}</>
         case ResponseCode.Exception:

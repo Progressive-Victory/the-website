@@ -7,6 +7,7 @@ import { PermissionsDash } from "./PermissionsDash"
 import { PagesDash } from "./PagesDash"
 
 export function AdminDash() {
+    // Enum that lists the various sections accessible from the admin dashboard.
     enum Section {
         Users,
         Roles,
@@ -14,12 +15,15 @@ export function AdminDash() {
         Pages
     }
 
+    // Grab the array version of the enum and filter out all the index values
     const sectionArray = Object.values(Section).filter((value) => (
         isNaN(Number(value))
     ))
     
+    // State hook managing which section is selected.
     const [section, setSection] = useState<number>(Section.Users)
 
+    // function that interprets which component to serve based on the section enum selected.
     function serveSectionComp() {
         switch(section) {
             case Section.Users:

@@ -67,17 +67,18 @@ export function UsersDash() {
         if(index > -1) selectedEntry.roles.splice(index, 1) //if the index search found something, remove it
     }
 
-    
+    // callback for submitting changes made to all user objects to the database to save.
     const saveChanges = async () => {
-        if (sectionData) console.log(JSON.stringify(sectionData))
         await fetch('/api/admin/user', {method: "PATCH", body: JSON.stringify(sectionData)})
     }
 
+    // this function renders the right hand panel with the information of the selectedEntry (user)
+    // it should trigger everytime the selectedEntry is changed. For some reason I can't get it 
+    // to update when the roles within the selectedEntry are changed though.
     function serveUserReadout() {
-        console.log(selectedEntry)
-        if(!selectedEntry) return
-        type userkey = keyof IUser
-        const props = Object.keys(selectedEntry)
+        if(!selectedEntry) return // if there is no selectedEntry then abort function
+        type userkey = keyof IUser // this is for some reason required if I'm going to reference an object's fields by string. For some reason I think the declaration only works on a separate line.
+        const props = Object.keys(selectedEntry) // get list of selectedEntry Fields
         return (
             <div className="overflow-scroll">
                 <table className="w-auto">
@@ -92,6 +93,7 @@ export function UsersDash() {
         )
     }
 
+    // serve overall layout
     return (
         <>
             <div className="grid gap-x-4 grid-cols-10 h-full">
