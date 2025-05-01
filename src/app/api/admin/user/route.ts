@@ -1,5 +1,6 @@
 import dbConnect from "@/util/libmongo";
 import { User, IUser } from "@/models/User"
+import { Role, IRole } from "@/models/Role"
 import { checkAuth, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { error } from "console";
@@ -55,8 +56,9 @@ export async function PATCH(req: NextRequest) {
 
     await dbConnect()
 
+    const json = await req.json() as Partial<IUser>[]
 
-    const data = (await req.json()) as Partial<IUser>[]
+    const data = json as IUser[]
     const dbUsrList = (await User.find({})
     .populate({
         path: 'roles',
@@ -65,8 +67,8 @@ export async function PATCH(req: NextRequest) {
         }
     })
     .exec()) as IUser[]
-    data.forEach(async(usr) => { 
-        const dbUsr: IUser = dbUsrList.find(x => x.id == usr.id) as IUser
+    data.forEach(async(usr) => {
+        const dbUsr: IUser = dbUsrList.find(x => x.discordId == usr.discordId) as IUser
          Object.keys(usr).forEach((k) => {
             const key = k as keyof IUser
             
@@ -78,6 +80,8 @@ export async function PATCH(req: NextRequest) {
                 updateUserObj(key, dbUsr, usr[key])
             }
          })
+         await dbConnect()
          await dbUsr.save()
     })
+   return NextResponse.json({status: 200})
 }

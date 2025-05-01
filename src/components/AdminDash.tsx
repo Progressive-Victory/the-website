@@ -37,8 +37,8 @@ export function AdminDash() {
         <MainLayout>
             <div className="relative items-center bg-steel-blue w-full h-screen">
                 <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-2"/>
-                <div className="relative h-full z-1 grid grid-cols-12 gap-x-4 opacity-90">
-                    <div className="col-span-2 h-full bg-white p-4">
+                <div className="items-stretch z-1 grid grid-cols-12 gap-x-4 opacity-90">
+                    <div className="col-span-2 bg-white p-4">
                         <h1>Admin Portal</h1>
                         <br/>
                         <ul>
@@ -52,7 +52,7 @@ export function AdminDash() {
                             ))}
                         </ul>
                     </div>
-                    <div className="col-span-10 h-full p-4">
+                    <div className="col-span-10 p-4">
                         {serveSectionComp()}
                     </div>
                 </div>
