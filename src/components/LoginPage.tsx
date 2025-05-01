@@ -15,6 +15,7 @@ export function LoginPage() {
     const router = useRouter()
     // If we had some redirect, e.g. to volunteer form we should handle it with next-auth
     useEffect(() => {
+        console.log(session)
         if (
             params.get('redirect') &&
             params.get('redirect')?.startsWith('/') &&

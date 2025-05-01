@@ -7,8 +7,9 @@ import { Field } from '@/components/Field'
 import { Toggle } from '@/components/Toggle'
 import { IUser } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
+import { join } from 'path'
 
 export default function Volunteer() {
     const [currentStage, setCurrentStage] = useState<string>('loading')
@@ -55,6 +56,23 @@ export default function Volunteer() {
             return false
         }
     }
+
+    const joinToServer = async () => {
+        fetch('/api/discord/join', {
+            method: 'PUT',
+        }).then(async (response) => {
+            if (response.ok) {
+                getUser()
+            } else {
+                const data = await response.json()
+                if (data && data.code === 50025) {
+                    signOut({
+                        callbackUrl: '/login',
+                    })
+                }
+            }
+        })
+    }
     const getUser = async () => {
         const response = await fetch('/api/user')
         const data = await response.json()
@@ -72,8 +90,7 @@ export default function Volunteer() {
         setCheckingCode(false)
         if (resp.status === 200) {
             // Join the user
-            fetch('api')
-            getUser() // get the latest user state
+            joinToServer()
             return true
         } else {
             setCodeError(true)
@@ -119,15 +136,15 @@ export default function Volunteer() {
                             setCurrentStage('verification')
                             break
                         case OnboardingStage.VERIFIED:
+                            // Check if the user has joined or needs to rejoin the server
+
                             setCurrentStage('joining')
                             // Join the user
                             fetch('/api/discord/join').then(async (result) => {
                                 if (result.status === 404) {
-                                    fetch('/api/discord/join', {
-                                        method: 'PUT',
-                                    }).then(getUser)
+                                    joinToServer()
                                 } else {
-                                    fetch('/api/discord/join')
+                                    getUser()
                                     setShowRejoin(false)
                                 }
                             })
@@ -145,7 +162,6 @@ export default function Volunteer() {
                         default:
                             setCurrentStage('not_started')
                     }
-                    // Check if the user has joined or needs to rejoin the server
                 }
                 break
             default:
@@ -396,13 +412,14 @@ export default function Volunteer() {
                                         }}
                                         disabled={false}
                                     />
-
                                     <button
                                         disabled={codeTimer > 0}
                                         className={`${
                                             codeTimer <= 0
                                                 ? 'bg-steel-blue'
                                                 : 'bg-gray-500'
+                                        } ${
+                                            !codeError ? '' : 'mb-[12px]'
                                         } w-fit py-3 px-2 text-center text-white text-sm whitespace-nowrap rounded-lg ml-2 mt-auto`}
                                         onClick={() => {
                                             // Get a new OTP
@@ -469,9 +486,7 @@ export default function Volunteer() {
                                         <button
                                             onClick={() => {
                                                 setShowRejoin(false)
-                                                fetch('/api/discord/join', {
-                                                    method: 'PUT',
-                                                }).then(getUser)
+                                                setCurrentStage('joining')
                                             }}
                                             className="px-4 py-2 bg-valencia hover:bg-red-900 font-bold rounded-full mt-2 text-white"
                                         >

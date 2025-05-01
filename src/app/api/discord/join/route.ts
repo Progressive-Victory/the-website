@@ -54,7 +54,21 @@ export async function PUT(req: NextRequest) {
         }
         return new Response('Added Member!', { status: 200 })
     } else {
-        return new Response('Bad Request', { status: 400 })
+        const data = await response.json()
+
+        if (data.code === 50025) {
+            // User needs to be reauthed we should sign them out
+            return NextResponse.json(
+                {
+                    message: 'Credentials Expired',
+                    code: 50025,
+                },
+                {
+                    status: 400,
+                }
+            )
+        }
+        return new Response('Internal Error', { status: 500 })
     }
 }
 
