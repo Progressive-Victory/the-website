@@ -1,7 +1,7 @@
 import dbConnect from "@/util/libmongo";
 import { Role } from "@/models/Role";
 import { checkAuth, ResponseCode } from "@/util/auth";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { error } from "console";
 
 export async function GET() {
