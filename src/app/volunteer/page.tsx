@@ -1,6 +1,6 @@
 'use client'
 import { MainLayout } from '@/components/MainLayout'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { ArrowPathIcon, CakeIcon, TrophyIcon } from '@heroicons/react/24/solid'
 import { Stage } from '@/components/Stage'
 import { Field } from '@/components/Field'
@@ -9,7 +9,6 @@ import { IUser } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { join } from 'path'
 
 export default function Volunteer() {
     const [currentStage, setCurrentStage] = useState<string>('loading')
@@ -21,7 +20,6 @@ export default function Volunteer() {
     const [privacyPolicy, setPrivacyPolicy] = useState<boolean>(false)
     const [startJoin, setStartJoin] = useState<boolean>(false)
     const [securityCode, setSecurityCode] = useState<string>('')
-    const [showVerify, setShowVerify] = useState<boolean>(false)
     const [showRejoin, setShowRejoin] = useState<boolean>(false)
     const [codeError, setCodeError] = useState<boolean>(false)
     const [validationFlags, setValidationFlags] = useState<
@@ -29,42 +27,68 @@ export default function Volunteer() {
     >(new Map())
     const [codeTimer, setCodeTimer] = useState<number>(0)
     const [checkingCode, setCheckingCode] = useState<boolean>(false)
+    const codeTimerRef = useRef<number>(codeTimer)
+    const intervalRef = useRef<NodeJS.Timeout>(null)
+    const updateTimer = (newVal: number | ((prev: number) => number)) => {
+        setCodeTimer((prev) => {
+            const next = typeof newVal === 'function' ? newVal(prev) : newVal
+            codeTimerRef.current = next
+            return next
+        })
+    }
+
     const { status } = useSession()
     const [user, setUser] = useState<Partial<IUser> | undefined>()
 
-    const requestCode = async (phone: string) => {
+    const requestCode = useCallback(async (phone: string) => {
+        // guard against spamming if the ref says we're still counting down
+        if (codeTimerRef.current > 0) {
+            return false
+        }
+
         const resp = await fetch('/api/verify/send', {
             method: 'POST',
-            body: JSON.stringify({
-                number: phone,
-            }),
+            body: JSON.stringify({ number: phone }),
         })
-        setCodeTimer(60) // Start a one minute clock
 
         if (resp.status === 200) {
             getUser()
-            const countdown = setInterval(() => {
-                if (codeTimer === -1) {
-                    setCodeTimer(0)
-                    clearInterval(countdown)
-                } else {
-                    setCodeTimer((prev) => prev - 1)
-                }
-            }, 1000)
-            return true
-        } else {
-            return false
-        }
-    }
 
-    const joinToServer = async () => {
+            // kick off the clock
+            updateTimer(60)
+
+            // clear any old interval (just in case)
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current)
+            }
+
+            intervalRef.current = setInterval(() => {
+                updateTimer((prev) => {
+                    if (prev <= 1) {
+                        // reached zero: stop
+                        clearInterval(intervalRef.current!)
+                        return 0
+                    }
+                    return prev - 1
+                })
+            }, 1000)
+
+            return true
+        }
+
+        return false
+    }, [])
+
+    const joinToServer = useCallback(async () => {
         fetch('/api/discord/join', {
             method: 'PUT',
         }).then(async (response) => {
             if (response.ok) {
                 getUser()
             } else {
+                // Not every response will have JSON but errors should
                 const data = await response.json()
+                // The discord code for bad oauth2 we pass back
                 if (data && data.code === 50025) {
                     signOut({
                         callbackUrl: '/login',
@@ -72,7 +96,8 @@ export default function Volunteer() {
                 }
             }
         })
-    }
+    }, [])
+
     const getUser = async () => {
         const response = await fetch('/api/user')
         const data = await response.json()
@@ -87,6 +112,7 @@ export default function Volunteer() {
                 code: code,
             }),
         })
+
         setCheckingCode(false)
         if (resp.status === 200) {
             // Join the user
@@ -132,7 +158,6 @@ export default function Volunteer() {
                             setCurrentStage('not_started')
                             break
                         case OnboardingStage.AWAIT_VERIFICATION:
-                            setShowVerify(true)
                             setCurrentStage('verification')
                             break
                         case OnboardingStage.VERIFIED:
@@ -167,13 +192,7 @@ export default function Volunteer() {
             default:
                 setCurrentStage('unauthenticated')
         }
-    }, [user, status])
-
-    useEffect(() => {
-        if (user?.onboardingStage === OnboardingStage.AWAIT_VERIFICATION) {
-            setShowVerify(true)
-        }
-    }, [user])
+    }, [user, status, joinToServer])
 
     // Handles OTP logic and presentation, with form data validation
     useEffect(() => {
@@ -196,9 +215,8 @@ export default function Volunteer() {
                     if (result) {
                         requestCode(phoneNumber).then((result) => {
                             if (result) {
-                                setShowVerify(true) // Start OTP verification via SMS
+                                getUser()
                             } else {
-                                setShowVerify(false)
                                 setStartJoin(false)
                                 setValidationFlags((prev) =>
                                     new Map(prev).set('phone', false)
@@ -213,7 +231,16 @@ export default function Volunteer() {
                 })
             }
         }
-    }, [startJoin, validationFlags, phoneNumber, privacyPolicy])
+    }, [
+        startJoin,
+        validationFlags,
+        phoneNumber,
+        privacyPolicy,
+        fromUS,
+        preferredName,
+        zipCode,
+        requestCode,
+    ])
 
     return (
         <MainLayout>
@@ -399,6 +426,12 @@ export default function Volunteer() {
                                         value={securityCode}
                                         placeholder="Security Code"
                                         error={!codeError}
+                                        // Let users input with enter key
+                                        onEnter={() => {
+                                            if (securityCode.length === 6) {
+                                                checkCode(securityCode)
+                                            }
+                                        }}
                                         errorText="Invalid or expired code, try a new one"
                                         maxLength={6}
                                         onChange={(e) => {
@@ -443,7 +476,6 @@ export default function Volunteer() {
 
                                         setTimeout(() => {
                                             getUser()
-                                            setShowVerify(false)
                                             setStartJoin(false)
                                         }, 1000)
                                     }}

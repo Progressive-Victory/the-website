@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react'
+import { ChangeEvent, KeyboardEvent } from 'react'
 export function Field({
     value, // Value
     onChange, // Value setter
@@ -6,6 +6,7 @@ export function Field({
     disabled,
     error,
     errorText,
+    onEnter,
     required = true,
     maxLength,
 }: {
@@ -15,6 +16,7 @@ export function Field({
     disabled?: boolean
     error?: boolean
     errorText?: string
+    onEnter?: (e: KeyboardEvent<HTMLInputElement>) => void
     required?: boolean
     maxLength?: number
 }) {
@@ -32,7 +34,12 @@ export function Field({
             </label>
             <input
                 value={value}
-                maxLength={maxLength !== null ? maxLength : 25}
+                maxLength={maxLength != null ? maxLength : 25}
+                onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+                    if (onEnter != null && e.key === 'Enter') {
+                        onEnter(e)
+                    }
+                }}
                 disabled={disabled !== null && disabled}
                 placeholder={placeholder ? placeholder : ''}
                 onChange={(e) => {
