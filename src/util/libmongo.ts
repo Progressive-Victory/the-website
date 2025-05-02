@@ -19,6 +19,7 @@ async function dbConnect() {
         await mongoose.connect(MONGODB_URI!, {
             bufferCommands: false, // Disable mongoose buffering, recommended for serverless.
         })
+
         return mongoose
     } catch (error) {
         console.error('MongoDB connection error:', error)
