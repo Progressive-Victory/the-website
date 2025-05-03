@@ -7,12 +7,13 @@ export function UsersDash() {
     const [sectionData, setSectionData] = useState<IUser[]>([])
     const [selectedEntry, setSelectedEntry] = useState<IUser | null>(null)
     const [roleList, setRoleList] = useState<IRole[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [, setLoading] = useState(true)
+    const [, setError] = useState<string | null>(null)
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                
                 setLoading(true)
                 const [usersRes, rolesRes] = await Promise.all([
                     fetch("/api/admin/user"),
