@@ -7,7 +7,6 @@ import { PermissionsDash } from "./PermissionsDash"
 import { PagesDash } from "./PagesDash"
 
 export function AdminDash() {
-    // Enum that lists the various sections accessible from the admin dashboard.
     enum Section {
         Users,
         Roles,
@@ -15,15 +14,12 @@ export function AdminDash() {
         Pages
     }
 
-    // Grab the array version of the enum and filter out all the index values
     const sectionArray = Object.values(Section).filter((value) => (
         isNaN(Number(value))
     ))
     
-    // State hook managing which section is selected.
     const [section, setSection] = useState<number>(Section.Users)
 
-    // function that interprets which component to serve based on the section enum selected.
     function serveSectionComp() {
         switch(section) {
             case Section.Users:
@@ -39,10 +35,11 @@ export function AdminDash() {
 
     return (
         <MainLayout>
-            <div className="relative items-center bg-steel-blue w-full h-screen">
-                <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-2"/>
-                <div className="items-stretch z-1 grid grid-cols-12 gap-x-4 opacity-90">
-                    <div className="col-span-2 bg-white p-4">
+            <div className="relative flex flex-col bg-steel-blue w-full h-full">
+                <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-2 py-20"/>
+    
+                <div className="items-stretch z-1 grid grid-cols-12 gap-x-4 opacity-90 flex-1 overflow-hidden">
+                    <div className="col-span-2 bg-white p-4 overflow-y-auto">
                         <h1>Admin Portal</h1>
                         <br/>
                         <ul>
@@ -51,12 +48,13 @@ export function AdminDash() {
                                  onClick={() => (
                                     setSection(index)
                                 )} >
-                                    <a>{value}</a>
+                                    <a className="cursor-pointer">{value}</a>
                                 </li>
                             ))}
                         </ul>
                     </div>
-                    <div className="col-span-10 p-4">
+                    
+                    <div className="col-span-10 p-4 overflow-y-auto">
                         {serveSectionComp()}
                     </div>
                 </div>
