@@ -16,20 +16,24 @@ export const metadata: Metadata = {
 const calendarMap = new Map<string, string>([
     [
         '27d041938d95e549e529dcfa46f1989c1fde36c9acd31d07829872ef08e4961d@group.calendar.google.com',
-        'ba7525',
-    ],
+        'b09e00',
+    ], // Organizing Meetings
     [
         'c_c92baa7ee2cd5e3a35a54b8a558a7bfec3cb0067c2eeaf63db81331340801b8e@group.calendar.google.com',
         '009949',
-    ],
+    ], // Event Planning
     [
         'Y185NDhjMzI5OWU3OTQ2N2M3MjBkNWQzMTY0YjEzOGU4OGRiM2FjNTFiNmUxMmM0ZTc2ZjAzZjY0NThjMTA2OGYzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20',
-        'b09e00',
-    ],
+        'ba7525',
+    ], // Primary Calendar
     [
         '0151b1ae27c001d91226349720dd486eb6c37a8c649807ad68d0aae28817d7c1@group.calendar.google.com',
         '0099e1',
-    ],
+    ], // Skill team meetings
+    [
+        'cd79f48ade35423e0a232cfcf146e619d06ae8143c04fae93278788bcdc19b1d@group.calendar.google.com',
+        '9802b3'
+    ], // PV Special Events
 ])
 export default function Events() {
     const calendarUri = new URL('https://calendar.google.com/calendar/embed')
