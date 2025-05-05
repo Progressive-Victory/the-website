@@ -12,6 +12,5 @@ export const metadata: Metadata = {
     },
 }
 export default function AccountPage() {
-    // We move the client code to a separate component
     return <Account />
 }
