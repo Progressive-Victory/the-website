@@ -3,7 +3,7 @@ import { IPermission, Permission } from './Permission'
 
 export interface IRole extends Document{
     name: string
-    permissions?: [IPermission]
+    permissions?: IPermission[]
 }
 
 const roleSchema = new Schema<IRole>({

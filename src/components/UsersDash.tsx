@@ -40,32 +40,28 @@ export function UsersDash() {
 
     const updateSelectedUser = (updatedUser: IUser) => {
         setSectionData(prev => 
-            prev.map(user => user._id === updatedUser._id ? updatedUser : user)
+            prev.map(user => user.discordId === updatedUser.discordId ? updatedUser : user)
         )
         setSelectedEntry(updatedUser)
     }
 
-    const handleAddRole = (roleId: string) => {
+    const handleAddRole = (roleName: string) => {
         if (!selectedEntry) return
         
-        const roleToAdd = roleList.find(role => role._id === roleId)
+        const roleToAdd = roleList.find(role => role.name === roleName)
         if (!roleToAdd) return
 
-        const updatedUser = {
-            ...selectedEntry,
-            roles: [...selectedEntry.roles, roleToAdd]
-        }
+        const updatedUser: IUser = { ...selectedEntry } as IUser
+        updatedUser.roles = [ ...selectedEntry.roles, roleToAdd ]
         updateSelectedUser(updatedUser)
     }
 
-    const handleRemoveRole = (roleId: string) => {
+    const handleRemoveRole = (roleName: string) => {
         if (!selectedEntry) return
         
-        const updatedUser = {
-            ...selectedEntry,
-            roles: selectedEntry.roles.filter(role => role._id !== roleId)
-        }
-        
+
+        const updatedUser: IUser = { ...selectedEntry } as IUser
+        updatedUser.roles = selectedEntry.roles.filter(role => role.name !== roleName)
         updateSelectedUser(updatedUser)
     }
 
@@ -103,9 +99,9 @@ export function UsersDash() {
                 <ul className="space-y-1 md:space-y-2">
                     {sectionData.map(user => (
                         <li
-                            key={user._id}
+                            key={user.discordId}
                             className={`p-2 md:p-3 rounded-lg cursor-pointer transition-colors text-sm md:text-base ${
-                                selectedEntry?._id === user._id 
+                                selectedEntry?.discordId === user.discordId
                                 ? 'bg-blue-100 border-blue-500'
                                 : 'hover:bg-gray-100'
                             }`}
@@ -136,7 +132,7 @@ export function UsersDash() {
                                 <div className="flex flex-wrap gap-1 md:gap-2">
                                     {selectedEntry.roles.map(role => (
                                         <span 
-                                            key={role._id}
+                                            key={role.name}
                                             className="px-2 py-1 bg-gray-200 rounded-full text-xs md:text-sm"
                                         >
                                             {role.name}
@@ -155,7 +151,7 @@ export function UsersDash() {
                                 >
                                     <option value="">Add Role</option>
                                     {roleList.map(role => (
-                                        <option key={role._id} value={role._id}>
+                                        <option key={role.name} value={role.name}>
                                             {role.name}
                                         </option>
                                     ))}
@@ -168,7 +164,7 @@ export function UsersDash() {
                                 >
                                     <option value="">Remove Role</option>
                                     {selectedEntry.roles.map(role => (
-                                        <option key={role._id} value={role._id}>
+                                        <option key={role.name} value={role.name}>
                                             {role.name}
                                         </option>
                                     ))}
