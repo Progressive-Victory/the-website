@@ -1,9 +1,11 @@
-import { Account, Profile } from 'next-auth'
+import { Account, getServerSession, Profile, Session } from 'next-auth'
 import Discord from 'next-auth/providers/discord'
 import dbConnect from '@/util/libmongo'
 import { User } from '@/models/User'
 import { JWT } from 'next-auth/jwt'
 import { NextAuthOptions } from 'next-auth'
+import { IUser } from '@/models/User'
+import { IRole } from '@/models/Role'
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -24,6 +26,17 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
+        // session call back assigns the discordId from the token to the session object
+        async session({
+            session,
+            token
+        }: {
+            session: Session
+            token: JWT
+        }) {
+            if(token.discordId) session.discordId = token.discordId as string
+            return session
+        },
         async jwt({
             token,
             account,
@@ -68,4 +81,59 @@ export const authOptions: NextAuthOptions = {
             return token
         },
     },
+}
+
+export const enum ResponseCode {
+    Successful,
+    Exception,
+    NoSession,
+    InsufficientAccess
+}
+
+// Role checking utility function
+// takes an array of strings, each matching the name field of a given roles
+const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
+    const userRoles = user.roles as IRole[]
+    const roleStrs = userRoles.map((role: IRole) => role.name)
+    if (!user || !user.roles || !Array.isArray(user.roles)) return false
+    return requiredRoles.every((role) => roleStrs.includes(role))   
+}
+
+// utility function for checking the current session against an array of roles
+// provided in the form of strings that correspond to role names.
+// If this function is called, it's implied that you need to be logged in to pass.
+// If you want to check if a user is logged in but don't want to require any roles
+// you can call this with no parameters and it will do that for you.
+export async function checkAuth(roles?: string[]): Promise<ResponseCode> {
+    //Get server session
+    const session = await getServerSession(authOptions)
+
+    // No session found
+    if (!session || !session.user) return ResponseCode.NoSession
+
+    //if there are no required roles, then all auth requirements have been met.
+    if(!roles) return ResponseCode.Successful
+
+    // Connect to database
+    await dbConnect()
+
+    // query database for the user object with a discordId corresponding to
+    // the one stored in the session object
+    const user: IUser | null = await User.findOne({discordId: session.discordId})
+        .populate({
+            path: 'roles',
+            populate: {
+                path: 'permissions'
+            }
+        }).exec()
+
+    //  if either the currently logged in user cant be found in the databse
+    // for some reason or the user has no roles at all return an exception code.
+    if (!user || !(roles.length > 0)) return ResponseCode.Exception
+
+    //if the user has any of the required roles, return a successful response code.
+    if (hasRequiredRoles(user, roles)) return ResponseCode.Successful
+
+    // otherwise return an insufficient access response.
+    return ResponseCode.InsufficientAccess
 }

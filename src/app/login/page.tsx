@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { LoginPage } from '@/components/LoginPage'
-
 import { Metadata } from 'next'
+
 export const metadata: Metadata = {
     title: 'PV - Login',
     description: 'Log in and join the community',
