@@ -1,128 +1,17 @@
 'use client'
 import { MainLayout } from '@/components/MainLayout'
-import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
-import {
-    ArrowPathIcon,
-    CakeIcon,
-    InformationCircleIcon,
-} from '@heroicons/react/24/solid'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { ArrowPathIcon, CakeIcon, TrophyIcon } from '@heroicons/react/24/solid'
+import { Stage } from '@/components/Stage'
+import { Field } from '@/components/Field'
+import { Toggle } from '@/components/Toggle'
 import { IUser } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
-function Field({
-    value, // Value
-    onChange, // Value setter
-    placeholder, // Label and placeholder text
-    disabled,
-    error,
-    errorText,
-    required = true,
-    maxLength,
-}: {
-    value: string
-    onChange: (e: ChangeEvent<HTMLInputElement>) => void
-    placeholder?: string
-    disabled?: boolean
-    error?: boolean
-    errorText?: string
-    required?: boolean
-    maxLength?: number
-}) {
-    return (
-        <div
-            className={`flex flex-col items-start justify-center my-2 transition-all duration-200 w-full ${
-                disabled !== null && disabled
-                    ? 'h-0 opacity-0 -mb-2'
-                    : 'h-[48px]'
-            }`}
-        >
-            <label className="inline-block text-gray-300 text-sm">
-                {placeholder}
-                {required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <input
-                value={value}
-                maxLength={maxLength !== null ? maxLength : 25}
-                disabled={disabled !== null && disabled}
-                placeholder={placeholder ? placeholder : ''}
-                onChange={(e) => {
-                    if (disabled !== null && !disabled) {
-                        onChange(e)
-                    }
-                }}
-                className={`bg-white rounded-md w-full px-4 py-2 ring-steel-blue ${
-                    error !== null && value !== '' && !error
-                        ? 'border-red-500 border-2'
-                        : ''
-                }`}
-            />
-            {!error && value !== '' && (
-                <div className="text-left h-4 text-red-500 text-xs my-1">
-                    {errorText}
-                </div>
-            )}
-        </div>
-    )
-}
-
-function Toggle({
-    value, // Value
-    onChange, // Value setter
-    placeholder, // Label and placeholder text
-    tooltip,
-}: {
-    value: boolean
-    onChange: () => void
-    placeholder?: string | ReactElement
-    tooltip?: string
-}) {
-    return (
-        <div className="flex flex-row items-center justify-between bg-gray-700 p-2 rounded-md">
-            <div className="flex flex-row items-center">
-                <div
-                    tabIndex={0}
-                    className="group relative touch-pan-zoom cursor-pointer"
-                >
-                    <InformationCircleIcon className="w-4 h-4 mr-1 text-steel-blue bg-white rounded-full" />
-                    <div className="absolute z-10 top-0 opacity-0 group-hover:opacity-75 group-focus:opacity-75 group-hover:translate-y-[25px] group-focus:translate-y-[25px] transition-all duration-100 flex pointer-events-none flex-col items-center bg-black rounded-md py-2 px-px text-center text-gray-700 text-sm">
-                        <span className="min-w-[300px] text-xs text-white text-center">
-                            {tooltip}
-                        </span>
-                    </div>
-                </div>
-
-                <label className="text-white text-[10px] lg:text-sm">
-                    {placeholder}
-                </label>
-            </div>
-
-            <div
-                className="relative inline-block w-10 ml-auto lg:ml-0 lg:mr-2 align-middle select-none"
-                onClick={() => {
-                    onChange()
-                }}
-            >
-                <label
-                    className={`${
-                        value ? 'bg-steel-blue' : 'bg-gray-500'
-                    } block overflow-hidden h-6 rounded-full cursor-pointer transition-all duration-300`}
-                    htmlFor="toggle"
-                >
-                    <span
-                        className={`${
-                            value
-                                ? 'translate-x-4 bg-white shadow-lg'
-                                : 'translate-x-0 bg-white'
-                        } absolute block w-6 h-6 rounded-full transition-all duration-300`}
-                    />
-                </label>
-            </div>
-        </div>
-    )
-}
 
 export default function Volunteer() {
+    const [currentStage, setCurrentStage] = useState<string>('loading')
     const [preferredName, setPreferredName] = useState<string>('')
     const [phoneNumber, setPhoneNumber] = useState<string>('')
     const [zipCode, setZipCode] = useState<string>('')
@@ -131,40 +20,84 @@ export default function Volunteer() {
     const [privacyPolicy, setPrivacyPolicy] = useState<boolean>(false)
     const [startJoin, setStartJoin] = useState<boolean>(false)
     const [securityCode, setSecurityCode] = useState<string>('')
-    const [showVerify, setShowVerify] = useState<boolean>(false)
+    const [showRejoin, setShowRejoin] = useState<boolean>(false)
     const [codeError, setCodeError] = useState<boolean>(false)
     const [validationFlags, setValidationFlags] = useState<
         Map<string, boolean>
     >(new Map())
     const [codeTimer, setCodeTimer] = useState<number>(0)
     const [checkingCode, setCheckingCode] = useState<boolean>(false)
+    const codeTimerRef = useRef<number>(codeTimer)
+    const intervalRef = useRef<NodeJS.Timeout>(null)
+    const updateTimer = (newVal: number | ((prev: number) => number)) => {
+        setCodeTimer((prev) => {
+            const next = typeof newVal === 'function' ? newVal(prev) : newVal
+            codeTimerRef.current = next
+            return next
+        })
+    }
+
     const { status } = useSession()
     const [user, setUser] = useState<Partial<IUser> | undefined>()
 
-    const requestCode = async (phone: string) => {
+    const requestCode = useCallback(async (phone: string) => {
+        // guard against spamming if the ref says we're still counting down
+        if (codeTimerRef.current > 0) {
+            return false
+        }
+
         const resp = await fetch('/api/verify/send', {
             method: 'POST',
-            body: JSON.stringify({
-                number: phone,
-            }),
+            body: JSON.stringify({ number: phone }),
         })
-        setCodeTimer(60) // Start a one minute clock
 
         if (resp.status === 200) {
             getUser()
-            const countdown = setInterval(() => {
-                if (codeTimer === -1) {
-                    setCodeTimer(0)
-                    clearInterval(countdown)
-                } else {
-                    setCodeTimer((prev) => prev - 1)
-                }
+
+            // kick off the clock
+            updateTimer(60)
+
+            // clear any old interval (just in case)
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current)
+            }
+
+            intervalRef.current = setInterval(() => {
+                updateTimer((prev) => {
+                    if (prev <= 1) {
+                        // reached zero: stop
+                        clearInterval(intervalRef.current!)
+                        return 0
+                    }
+                    return prev - 1
+                })
             }, 1000)
+
             return true
-        } else {
-            return false
         }
-    }
+
+        return false
+    }, [])
+
+    const joinToServer = useCallback(async () => {
+        fetch('/api/discord/join', {
+            method: 'PUT',
+        }).then(async (response) => {
+            if (response.ok) {
+                getUser()
+            } else {
+                // Not every response will have JSON but errors should
+                const data = await response.json()
+                // The discord code for bad oauth2 we pass back
+                if (data && data.code === 50025) {
+                    signOut({
+                        callbackUrl: '/login',
+                    })
+                }
+            }
+        })
+    }, [])
+
     const getUser = async () => {
         const response = await fetch('/api/user')
         const data = await response.json()
@@ -179,9 +112,11 @@ export default function Volunteer() {
                 code: code,
             }),
         })
+
         setCheckingCode(false)
         if (resp.status === 200) {
-            getUser() // get the latest user state
+            // Join the user
+            joinToServer()
             return true
         } else {
             setCodeError(true)
@@ -209,22 +144,55 @@ export default function Volunteer() {
 
     // Try and join user to server
     useEffect(() => {
-        if (
-            user?.verified &&
-            user.onboardingStage === OnboardingStage.VERIFIED
-        ) {
-            fetch('/api/discord/join', { method: 'PUT' }).then(getUser)
-        } else {
-            // check if they are already in the server
-            fetch('/api/discord/join')
-        }
-    }, [user])
+        switch (status) {
+            case 'loading':
+                setCurrentStage('loading')
+                break
+            case 'unauthenticated':
+                setCurrentStage('unauthenticated')
+                break
+            case 'authenticated':
+                if (user) {
+                    switch (user.onboardingStage) {
+                        case OnboardingStage.NOT_STARTED:
+                            setCurrentStage('not_started')
+                            break
+                        case OnboardingStage.AWAIT_VERIFICATION:
+                            setCurrentStage('verification')
+                            break
+                        case OnboardingStage.VERIFIED:
+                            // Check if the user has joined or needs to rejoin the server
 
-    useEffect(() => {
-        if (user?.onboardingStage === OnboardingStage.AWAIT_VERIFICATION) {
-            setShowVerify(true)
+                            setCurrentStage('joining')
+                            // Join the user
+                            fetch('/api/discord/join').then(async (result) => {
+                                if (result.status === 404) {
+                                    joinToServer()
+                                } else {
+                                    getUser()
+                                    setShowRejoin(false)
+                                }
+                            })
+                            break
+                        case OnboardingStage.JOINED:
+                            setCurrentStage('joined')
+                            fetch('/api/discord/join').then(async (result) => {
+                                if (result.status === 404) {
+                                    setShowRejoin(true)
+                                } else {
+                                    setShowRejoin(false)
+                                }
+                            })
+                            break
+                        default:
+                            setCurrentStage('not_started')
+                    }
+                }
+                break
+            default:
+                setCurrentStage('unauthenticated')
         }
-    }, [user])
+    }, [user, status, joinToServer])
 
     // Handles OTP logic and presentation, with form data validation
     useEffect(() => {
@@ -247,9 +215,8 @@ export default function Volunteer() {
                     if (result) {
                         requestCode(phoneNumber).then((result) => {
                             if (result) {
-                                setShowVerify(true) // Start OTP verification via SMS
+                                getUser()
                             } else {
-                                setShowVerify(false)
                                 setStartJoin(false)
                                 setValidationFlags((prev) =>
                                     new Map(prev).set('phone', false)
@@ -264,7 +231,16 @@ export default function Volunteer() {
                 })
             }
         }
-    }, [startJoin, validationFlags, phoneNumber, privacyPolicy])
+    }, [
+        startJoin,
+        validationFlags,
+        phoneNumber,
+        privacyPolicy,
+        fromUS,
+        preferredName,
+        zipCode,
+        requestCode,
+    ])
 
     return (
         <MainLayout>
@@ -282,164 +258,161 @@ export default function Volunteer() {
                 />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col w-full max-w-[600px] z-2">
                     <div className="relative flex flex-col rounded-lg bg-black-pearl-dark p-4 shadow-md gap-y-4 mx-2">
-                        {/* Chunky stuff for form filling */}
-                        {!showVerify &&
-                        status === 'authenticated' &&
-                        user?.onboardingStage === OnboardingStage.NOT_STARTED &&
-                        !startJoin ? (
-                            <>
-                                <p className="text-white text-center text-3xl font-bold my-2 mx-auto">
-                                    Volunteer with PV
-                                </p>
-                                <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2">
-                                    Join us on Discord and make a difference ✨
-                                </p>
-                                <Field
-                                    value={preferredName}
-                                    placeholder="Preferred Name"
-                                    error={validationFlags.get('name')}
-                                    errorText="Enter a valid name with no special characters"
-                                    maxLength={40} // sensible default, may be too premissive
-                                    onChange={(e) => {
-                                        const text = e.target.value
-                                        setPreferredName(text)
-                                        const isValid =
-                                            /^[A-Za-z. \s_-]*$/g.test(text) &&
-                                            text.trim() !== ''
-                                        setValidationFlags((prev) =>
-                                            new Map(prev).set('name', isValid)
-                                        )
-                                    }}
-                                />
-                                <Field
-                                    value={phoneNumber}
-                                    placeholder="Phone Number"
-                                    error={validationFlags.get('phone')}
-                                    errorText="Enter a valid 10 digit phone, e.g., 1234567890"
-                                    maxLength={10}
-                                    onChange={(e) => {
-                                        const text = e.target.value
-                                        setPhoneNumber(text)
-                                        const isValid =
-                                            /^\d{10}$/g.test(text) &&
-                                            text[0] !== '0' &&
-                                            text[0] !== '1'
+                        {/* User is not authenticated and needs to login */}
+                        <Stage
+                            stageName="unauthenticated"
+                            currentStage={currentStage}
+                        >
+                            <p className="text-white text-center text-3xl font-bold my-2 mx-auto">
+                                Volunteer with PV
+                            </p>
+                            <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2">
+                                Join us on Discord and make a difference ✨
+                            </p>
+                            <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2 italic">
+                                But first you{"'"}ve got to log in...
+                            </p>
+                            <Link
+                                href="/login?redirect=/volunteer"
+                                className="bg-steel-blue rounded-md text-center w-full mt-4 py-2 text-lg font-bold hover:bg-blue-900 hover:scale-[101%] text-white transition-all duration-100"
+                            >
+                                Go to Log In
+                            </Link>
+                        </Stage>
+                        {/* User is authenticated and needs to do onboarding */}
+                        <Stage
+                            stageName="not_started"
+                            currentStage={currentStage}
+                        >
+                            <p className="text-white text-center text-3xl font-bold my-2 mx-auto">
+                                Volunteer with PV
+                            </p>
+                            <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2">
+                                Join us on Discord and make a difference ✨
+                            </p>
+                            <Field
+                                value={preferredName}
+                                placeholder="Preferred Name"
+                                error={validationFlags.get('name')}
+                                errorText="Enter a valid name with no special characters"
+                                maxLength={40} // sensible default, may be too premissive
+                                onChange={(e) => {
+                                    const text = e.target.value
+                                    setPreferredName(text)
+                                    const isValid =
+                                        /^[A-Za-z. \s_-]*$/g.test(text) &&
+                                        text.trim() !== ''
+                                    setValidationFlags((prev) =>
+                                        new Map(prev).set('name', isValid)
+                                    )
+                                }}
+                            />
+                            <Field
+                                value={phoneNumber}
+                                placeholder="Phone Number"
+                                error={validationFlags.get('phone')}
+                                errorText="Enter a valid 10 digit phone, e.g., 1234567890"
+                                maxLength={10}
+                                onChange={(e) => {
+                                    const text = e.target.value
+                                    setPhoneNumber(text)
+                                    const isValid =
+                                        /^\d{10}$/g.test(text) &&
+                                        text[0] !== '0' &&
+                                        text[0] !== '1'
 
-                                        setValidationFlags((prev) =>
-                                            new Map(prev).set('phone', isValid)
-                                        )
-                                    }}
-                                />
-                                <p className={`text-[12px] text-white -mt-2`}>
-                                    US numbers only. Message and data rates may
-                                    apply. Must be SMS reachable.
-                                </p>
-                                <Field
-                                    value={zipCode}
-                                    placeholder="Zip Code"
-                                    error={validationFlags.get('zip')}
-                                    errorText="Enter a valid zip code"
-                                    maxLength={10}
-                                    onChange={(e) => {
-                                        const text = e.target.value
-                                        setZipCode(text)
-                                        const isValid =
-                                            /^\d{5}(-\d{4})?$/g.test(text) &&
-                                            text[0] !== '0'
-                                        setValidationFlags((prev) =>
-                                            new Map(prev).set('zip', isValid)
-                                        )
-                                    }}
-                                    disabled={fromUS}
-                                />
-                                <Toggle
-                                    value={fromUS}
-                                    placeholder="I'm not from the US"
-                                    tooltip="We'd love to have you, just not your Zipcode"
-                                    onChange={() => {
-                                        setFromUS(!fromUS)
-                                    }}
-                                />
-                                <Toggle
-                                    value={getAlerts}
-                                    placeholder="I want to recieve community updates"
-                                    tooltip="Alerts may be delivered to your phone and/or email periodically. Text STOP to opt-out."
-                                    onChange={() => {
-                                        setGetAlerts(!getAlerts)
-                                    }}
-                                />
-                                <Toggle
-                                    value={privacyPolicy}
-                                    placeholder={
-                                        <span>
-                                            <span className="text-red-500">
-                                                *
-                                            </span>{' '}
-                                            I agree to the{' '}
-                                            <Link
-                                                href="/privacy"
-                                                target="_blank"
-                                                referrerPolicy="no-referrer"
-                                                className="text-steel-blue underline"
-                                            >
-                                                Privacy Policy
-                                            </Link>
-                                        </span>
-                                    }
-                                    tooltip="You are agreeing to the usage of your data as described by the policy"
-                                    onChange={() => {
-                                        setPrivacyPolicy(!privacyPolicy)
-                                    }}
-                                />
-                                <div className="text-left text-xs w-full text-white px-1">
-                                    <span className="text-red-500">*</span> =
-                                    required field
-                                </div>
-                                <button
-                                    onClick={() => {
-                                        setStartJoin(true)
-                                    }}
-                                    disabled={startJoin}
-                                    className="bg-steel-blue rounded-md w-full mt-4 py-2 text-lg font-bold hover:bg-blue-900 hover:scale-[101%] text-white transition-all duration-100"
-                                >
-                                    Join Now
-                                </button>
-                            </>
-                        ) : status === 'unauthenticated' ? (
-                            <>
-                                <p className="text-white text-center text-3xl font-bold my-2 mx-auto">
-                                    Volunteer with PV
-                                </p>
-                                <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2">
-                                    Join us on Discord and make a difference ✨
-                                </p>
-                                <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2 italic">
-                                    But first you{"'"}ve got to log in...
-                                </p>
-                                <Link
-                                    href="/login?redirect=/volunteer"
-                                    className="bg-steel-blue rounded-md text-center w-full mt-4 py-2 text-lg font-bold hover:bg-blue-900 hover:scale-[101%] text-white transition-all duration-100"
-                                >
-                                    Go to Log In
-                                </Link>
-                            </>
-                        ) : null}
+                                    setValidationFlags((prev) =>
+                                        new Map(prev).set('phone', isValid)
+                                    )
+                                }}
+                            />
+                            <p className={`text-[12px] text-white -mt-2`}>
+                                US numbers only. Message and data rates may
+                                apply. Must be SMS reachable.
+                            </p>
+                            <Field
+                                value={zipCode}
+                                placeholder="Zip Code"
+                                error={validationFlags.get('zip')}
+                                errorText="Enter a valid zip code"
+                                maxLength={10}
+                                onChange={(e) => {
+                                    const text = e.target.value
+                                    setZipCode(text)
+                                    const isValid =
+                                        /^\d{5}(-\d{4})?$/g.test(text) &&
+                                        text[0] !== '0'
+                                    setValidationFlags((prev) =>
+                                        new Map(prev).set('zip', isValid)
+                                    )
+                                }}
+                                disabled={fromUS}
+                            />
+                            <Toggle
+                                value={fromUS}
+                                placeholder="I'm not from the US"
+                                tooltip="We'd love to have you, just not your Zipcode"
+                                onChange={() => {
+                                    setFromUS(!fromUS)
+                                }}
+                            />
+                            <Toggle
+                                value={getAlerts}
+                                placeholder="I want to recieve community updates"
+                                tooltip="Alerts may be delivered to your phone and/or email periodically. Text STOP to opt-out."
+                                onChange={() => {
+                                    setGetAlerts(!getAlerts)
+                                }}
+                            />
+                            <Toggle
+                                value={privacyPolicy}
+                                placeholder={
+                                    <span>
+                                        <span className="text-red-500">*</span>{' '}
+                                        I agree to the{' '}
+                                        <Link
+                                            href="/privacy"
+                                            target="_blank"
+                                            referrerPolicy="no-referrer"
+                                            className="text-steel-blue underline"
+                                        >
+                                            Privacy Policy
+                                        </Link>
+                                    </span>
+                                }
+                                tooltip="You are agreeing to the usage of your data as described by the policy"
+                                onChange={() => {
+                                    setPrivacyPolicy(!privacyPolicy)
+                                }}
+                            />
+                            <div className="text-left text-xs w-full text-white px-1">
+                                <span className="text-red-500">*</span> =
+                                required field
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setStartJoin(true)
+                                }}
+                                disabled={startJoin}
+                                className="bg-steel-blue disabled:bg-gray-500 rounded-md w-full mt-4 py-2 text-lg font-bold hover:bg-blue-900 hover:scale-[101%] text-white transition-all duration-100"
+                            >
+                                Join Now
+                            </button>
+                        </Stage>
                         {/* Loading indicator for between auth state */}
-                        {status === 'loading' ||
-                        (startJoin && !showVerify) ||
-                        (!user && status === 'authenticated') ? (
+                        <Stage stageName="loading" currentStage={currentStage}>
                             <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
                                 <ArrowPathIcon className="h-8 w-8 text-white animate-spin" />
                                 <p className="text-lg font-bold text-center text-white mt-6">
                                     Loading...
                                 </p>
                             </div>
-                        ) : null}
-                        {/* Phone verification state */}
-                        {showVerify &&
-                        status === 'authenticated' &&
-                        user?.onboardingStage ===
-                            OnboardingStage.AWAIT_VERIFICATION ? (
+                        </Stage>
+                        {/* Phone verification state presentation */}
+                        <Stage
+                            stageName="verification"
+                            currentStage={currentStage}
+                        >
                             <div className="flex flex-col items-center w-full">
                                 <p className="text-lg text-white font-white text-center font-bold">
                                     Enter your Verification Code
@@ -453,6 +426,12 @@ export default function Volunteer() {
                                         value={securityCode}
                                         placeholder="Security Code"
                                         error={!codeError}
+                                        // Let users input with enter key
+                                        onEnter={() => {
+                                            if (securityCode.length === 6) {
+                                                checkCode(securityCode)
+                                            }
+                                        }}
                                         errorText="Invalid or expired code, try a new one"
                                         maxLength={6}
                                         onChange={(e) => {
@@ -466,13 +445,14 @@ export default function Volunteer() {
                                         }}
                                         disabled={false}
                                     />
-
                                     <button
                                         disabled={codeTimer > 0}
                                         className={`${
                                             codeTimer <= 0
                                                 ? 'bg-steel-blue'
                                                 : 'bg-gray-500'
+                                        } ${
+                                            !codeError ? '' : 'mb-[12px]'
                                         } w-fit py-3 px-2 text-center text-white text-sm whitespace-nowrap rounded-lg ml-2 mt-auto`}
                                         onClick={() => {
                                             // Get a new OTP
@@ -496,7 +476,6 @@ export default function Volunteer() {
 
                                         setTimeout(() => {
                                             getUser()
-                                            setShowVerify(false)
                                             setStartJoin(false)
                                         }, 1000)
                                     }}
@@ -518,24 +497,44 @@ export default function Volunteer() {
                                     Verify
                                 </button>
                             </div>
-                        ) : null}
+                        </Stage>
                         {/* Onboarding done need to join them to server now*/}
-                        {user?.onboardingStage === OnboardingStage.VERIFIED && (
+                        <Stage stageName="joining" currentStage={currentStage}>
                             <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
                                 <ArrowPathIcon className="h-8 w-8 text-white animate-spin" />
                                 <p className="text-lg font-bold text-center text-white mt-6">
                                     Joining you to the server...
                                 </p>
                             </div>
-                        )}
-                        {user?.onboardingStage === OnboardingStage.JOINED && (
+                        </Stage>
+                        <Stage stageName="joined" currentStage={currentStage}>
                             <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
-                                <CakeIcon className="h-12 w-12 text-steel-blue" />
-                                <p className="text-lg font-bold text-center text-white mt-6">
-                                    Congrats you are in the server!
-                                </p>
+                                {showRejoin ? (
+                                    <>
+                                        <TrophyIcon className="h-12 w-12 text-steel-blue" />
+                                        <p className="text-lg font-bold text-center text-white mt-6">
+                                            Would you like to rejoin?
+                                        </p>
+                                        <button
+                                            onClick={() => {
+                                                setShowRejoin(false)
+                                                setCurrentStage('joining')
+                                            }}
+                                            className="px-4 py-2 bg-valencia hover:bg-red-900 font-bold rounded-full mt-2 text-white"
+                                        >
+                                            Rejoin
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <CakeIcon className="h-12 w-12 text-steel-blue" />
+                                        <p className="text-lg font-bold text-center text-white mt-6">
+                                            Congrats you are in the server!
+                                        </p>
+                                    </>
+                                )}
                             </div>
-                        )}
+                        </Stage>
                     </div>
                 </div>
             </div>
