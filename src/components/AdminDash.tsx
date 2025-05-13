@@ -8,7 +8,7 @@ import { PagesDash } from "./PagesDash"
 
 export function AdminDash() {
     enum Section {
-        Users,
+        Members,
         Roles,
         Permissions,
         Pages
@@ -18,11 +18,11 @@ export function AdminDash() {
         isNaN(Number(value))
     ))
     
-    const [section, setSection] = useState<number>(Section.Users)
+    const [section, setSection] = useState<number>(Section.Members)
 
     function serveSectionComp() {
         switch(section) {
-            case Section.Users:
+            case Section.Members:
                 return <UsersDash/>
             case Section.Roles:
                 return <RolesDash/>

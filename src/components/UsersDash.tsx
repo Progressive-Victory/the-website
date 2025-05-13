@@ -47,6 +47,8 @@ export function UsersDash() {
 
     const handleAddRole = (roleName: string) => {
         if (!selectedEntry) return
+
+        if(selectedEntry.roles.find(role => roleName === roleName)) return
         
         const roleToAdd = roleList.find(role => role.name === roleName)
         if (!roleToAdd) return
@@ -59,7 +61,6 @@ export function UsersDash() {
     const handleRemoveRole = (roleName: string) => {
         if (!selectedEntry) return
         
-
         const updatedUser: IUser = { ...selectedEntry } as IUser
         updatedUser.roles = selectedEntry.roles.filter(role => role.name !== roleName)
         updateSelectedUser(updatedUser)
@@ -95,7 +96,7 @@ export function UsersDash() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full bg-gray-50 min-h-screen lg:min-h-0 lg:h-full bg-gray-50 pb-16 lg:pb-4">
             {/* User List */}
             <div className="lg:col-span-1 bg-white rounded-lg shadow-sm p-3 md:p-4">
-                <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">Users</h2>
+                <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">Members</h2>
                 <ul className="space-y-1 md:space-y-2">
                     {sectionData.map(user => (
                         <li
@@ -118,7 +119,7 @@ export function UsersDash() {
             {selectedEntry ? (
                 <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6">
                     <div className="space-y-2 md:space-y-4">
-                        <h2 className="text-lg md:text-xl font-semibold">User Details</h2>
+                        <h2 className="text-lg md:text-xl font-semibold">Member Details</h2>
                         
                         <UserDetailRow label="Name" value={selectedEntry.name} />
                         <UserDetailRow label="Preferred Name" value={selectedEntry.preferredName} />
@@ -182,7 +183,7 @@ export function UsersDash() {
                 </div>
             ) : (
                 <div className="lg:col-span-2 flex items-center justify-center text-gray-500 text-sm md:text-base p-4">
-                    Select a user to view details
+                    Select a member to view details
                 </div>
             )}
         </div>
