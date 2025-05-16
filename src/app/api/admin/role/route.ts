@@ -111,7 +111,7 @@ export async function DELETE(req: NextRequest) {
 
         const data = await req.json() as IRole
 
-        const entry = await Role.deleteOne({name: data.name}).exec()
+        await Role.deleteOne({name: data.name}).exec()
 
         return NextResponse.json({status: 200})
 }

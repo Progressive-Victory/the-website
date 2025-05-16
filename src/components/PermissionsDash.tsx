@@ -8,7 +8,7 @@ import { Popup } from "./Popup"
 export function PermissionsDash() {
     const [sectionData, setSectionData] = useState<IPermission[]>([])
     const [selectedPerm, setSelectedPerm] = useState<IPermission | null>(null)
-    const [refresh, setRefresh] = useState<Boolean>(false)
+    const [refresh, setRefresh] = useState<boolean>(false)
     const [, setLoading] = useState(true)
     const [, setError] = useState<string | null>(null)
 
@@ -37,7 +37,7 @@ export function PermissionsDash() {
         if(selectedPerm && !sectionData.find(x => x.name === selectedPerm.name)) {
             setSelectedPerm(null)
         }
-    }, [sectionData])
+    }, [sectionData, selectedPerm])
 
     const handleCreatePerm = async (permName: string) => {
         console.log("creating: " + permName)

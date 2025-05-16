@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, RefObject } from "react"
+import { useState, useEffect, useRef} from "react"
 
 function getWindowDimensions(){
     const { innerWidth: width, innerHeight: height } = window;
@@ -22,17 +22,6 @@ export function Popup({
     const [open, setOpen] = useState<boolean>(false)
     const [closerList, setCloserList] = useState<Element[]>([])
     const wrapperRef = useRef<HTMLDivElement>(null)
-    const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions())
-    const [popupMarginWidth, setPopupMarginWidth] = useState(0) 
-
-    useEffect(() => {
-        function handleResize() {
-            setWindowDimensions(getWindowDimensions())
-        }
-
-        window.addEventListener('resize', handleResize)
-        return () => window.removeEventListener('resize', handleResize)
-    }, [])
 
     useEffect(() => {
         if(!wrapperRef.current) return
@@ -40,7 +29,6 @@ export function Popup({
             wrapperRef.current.getElementsByClassName("closer")
         )
 
-        setPopupMarginWidth(Math.round((windowDimensions.width - wrapperRef.current.clientWidth)/2))
         setCloserList(closers)
     }, [open, wrapperRef])
 
