@@ -48,7 +48,7 @@ export function RolesDash() {
         if(selectedRole && !sectionData.find(x => x.name === selectedRole.name)) {
             setSelectedRole(null)
         }
-    }, [sectionData])
+    }, [sectionData, selectedRole])
 
     //this will be used to update values of existing roles when I implement that
     const updateSelectedRole = (updatedRole: IRole) => {

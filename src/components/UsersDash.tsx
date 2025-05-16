@@ -48,7 +48,7 @@ export function UsersDash() {
     const handleAddRole = (roleName: string) => {
         if (!selectedEntry) return
 
-        if(selectedEntry.roles.find(role => roleName === roleName)) return
+        if(selectedEntry.roles.find(role => role.name === roleName)) return
         
         const roleToAdd = roleList.find(role => role.name === roleName)
         if (!roleToAdd) return
