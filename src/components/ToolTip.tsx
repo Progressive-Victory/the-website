@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, RefObject, ReactHTMLElement } from "react";
+import { useState, useEffect, useRef, RefObject} from "react";
 
 /*
 preliminary notes: component that generates a button which upon being clicked displays an 
