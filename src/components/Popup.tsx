@@ -1,13 +1,5 @@
 import { useState, useEffect, useRef} from "react"
 
-function getWindowDimensions(){
-    const { innerWidth: width, innerHeight: height } = window;
-    return {
-        width,
-        height
-    }
-}
-
 export function Popup({
     children,
     label,
