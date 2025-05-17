@@ -1,7 +1,7 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import js from "@eslint/js";
+import js from "@eslint/js/src/index.js";
 import { FlatCompat } from "@eslint/eslintrc";
 
 const __filename = fileURLToPath(import.meta.url);
