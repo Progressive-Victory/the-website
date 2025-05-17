@@ -78,6 +78,9 @@ importers:
         specifier: ^0.176.0
         version: 0.176.0
     devDependencies:
+      '@eslint/js':
+        specifier: ^9.27.0
+        version: 9.27.0
       '@next/eslint-plugin-next':
         specifier: ^15.3.2
         version: 15.3.2
