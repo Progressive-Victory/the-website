@@ -1,12 +1,13 @@
 import dbConnect from "@/util/libmongo";
 import { User, IUser } from "@/models/User"
-import { checkAuth, ResponseCode } from "@/util/auth";
+import { checkAuth, checkAuthPermissions, PermissionName, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { error } from "console";
-
+ 
 export async function GET() {
     // check session auth
-    const response = await checkAuth(["Superadmin"])
+    const response = await checkAuthPermissions([PermissionName.VIEW_MEMBER_DATA])
+    console.log({response})
 
     // handle session auth response
     switch (response){
@@ -76,14 +77,14 @@ export async function PATCH(req: NextRequest) {
     .exec()) as IUser[]
 
     // iterate through every item in data to apply changes to it.
-    data.forEach(async(usr) => {
+    data.forEach(async(usr: Partial<IUser>) => {
         // grab the user object in the databaseUser list that corresponds to the current submitted list
         const dbUsr: IUser = dbUsrList.find(x => x.discordId == usr.discordId) as IUser
         // iterate through each key of the submitted user object
         Object.keys(usr).forEach((k) => {
             // set the str key value to a Key type
             const key = k as keyof IUser
-            
+
             // list of fields allowed to be changed
             const allowed = [
                 'roles'
