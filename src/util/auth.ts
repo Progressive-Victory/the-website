@@ -16,23 +16,27 @@ export const authOptions: NextAuthOptions = {
             authorization:
                 'https://discord.com/oauth2/authorize?scope=identify+guilds+guilds.join+guilds.members.read+email',
             async profile(profile) {
-                // FIXME(hhammon) There may be a better way to do this, but if this is the way,
-                // an index needs to be created on the discordId key. Likely, we want this lookup
-                // anyway going forward so that data we store can be exposed through the session,
-                // though there's an argument that the current method of calling GET /api/user is
-                // always preferable, there may be a better solution even for the image going
-                // that route.
+                // FIXME(hhammon) @NoDiscordIdIndex As far as I can tell, there's no index on the `discordId` key.
+                // At least there isn't one in the dev database, and one isn't created in the model. This probably
+                // needs to be addressed.
 
-                const user = await User.findOne({ discordId: profile.id })
-                    .select({
-                        discordUserAvatar: 1,
-                    })
-                    .lean()
+                // Executed async. No reason to wait on this update before sending a response down.
+                User.findOneAndUpdate(
+                    {
+                        discordId: profile.id,
+                    },
+                    {
+                        $set: {
+                            discordUserAvatar: profile.avatar,
+                        },
+                    }
+                )
                     .exec()
+                    .then()
 
                 const image = await getDisplayAvatarURL(
                     profile.id,
-                    user?.discordUserAvatar
+                    profile.avatar
                 )
 
                 return {
