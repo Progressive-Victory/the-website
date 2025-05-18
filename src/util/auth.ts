@@ -21,10 +21,6 @@ export const authOptions: NextAuthOptions = {
             authorization:
                 'https://discord.com/oauth2/authorize?scope=identify+guilds+guilds.join+guilds.members.read+email',
             async profile(profile) {
-                // FIXME(hhammon): @NoDiscordIdIndex As far as I can tell, there's no index on the `discordId` key.
-                // At least there isn't one in the dev database, and one isn't created in the model. This probably
-                // needs to be addressed.
-
                 // Executed async. No reason to wait on this update before sending a response down.
                 User.findOneAndUpdate(
                     {

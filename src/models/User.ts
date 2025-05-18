@@ -42,10 +42,6 @@ const userSchema = new Schema<IUser>({
 // A name
 const modelName = 'User'
 
-// FIXME(hhammon) @NoDiscordIdIndex As far as I can tell, there's no index on the `discordId` key.
-// At least there isn't one in the dev database, and one isn't created here. This probably needs
-// to be addressed as it is used to lookup the user using a session after auth with discord.
-
 // Finally the model itself is exported, we use the cache if it exists
 export const User: Model<IUser> =
     (mongoose.models as Record<string, Model<IUser>>).User ||
