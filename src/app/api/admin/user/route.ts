@@ -76,7 +76,7 @@ export async function PATCH(req: NextRequest) {
     .exec()) as IUser[]
 
     // iterate through every item in data to apply changes to it.
-    data.forEach(async(usr) => {
+    data.forEach(async(usr: Partial<IUser>) => {
         // grab the user object in the databaseUser list that corresponds to the current submitted list
         const dbUsr: IUser = dbUsrList.find(x => x.discordId == usr.discordId) as IUser
         // iterate through each key of the submitted user object

@@ -24,7 +24,6 @@ export const Frame: React.FC<{
         if (!window.onblur) {
             window.focus()
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return (
