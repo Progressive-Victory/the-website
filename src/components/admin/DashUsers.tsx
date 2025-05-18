@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { IUser } from "@/models/User"
 import { IRole } from "@/models/Role"
 
-export function UsersDash() {
+export default function DashUsers() {
     const [sectionData, setSectionData] = useState<IUser[]>([])
     const [selectedEntry, setSelectedEntry] = useState<IUser | null>(null)
     const [roleList, setRoleList] = useState<IRole[]>([])
@@ -13,20 +13,20 @@ export function UsersDash() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                
+
                 setLoading(true)
                 const [usersRes, rolesRes] = await Promise.all([
                     fetch("/api/admin/user"),
                     fetch("/api/admin/role")
                 ])
-                
+
                 if (!usersRes.ok || !rolesRes.ok) throw new Error('Failed to fetch data')
-                
+
                 const [users, roles] = await Promise.all([
                     usersRes.json(),
                     rolesRes.json()
                 ])
-                
+
                 setSectionData(users)
                 setRoleList(roles)
             } catch (err) {
@@ -39,7 +39,7 @@ export function UsersDash() {
     }, [])
 
     const updateSelectedUser = (updatedUser: IUser) => {
-        setSectionData(prev => 
+        setSectionData(prev =>
             prev.map(user => user.discordId === updatedUser.discordId ? updatedUser : user)
         )
         setSelectedEntry(updatedUser)
@@ -48,19 +48,19 @@ export function UsersDash() {
     const handleAddRole = (roleName: string) => {
         if (!selectedEntry) return
 
-        if(selectedEntry.roles.find(role => role.name === roleName)) return
-        
+        if (selectedEntry.roles.find(role => role.name === roleName)) return
+
         const roleToAdd = roleList.find(role => role.name === roleName)
         if (!roleToAdd) return
 
         const updatedUser: IUser = { ...selectedEntry } as IUser
-        updatedUser.roles = [ ...selectedEntry.roles, roleToAdd ]
+        updatedUser.roles = [...selectedEntry.roles, roleToAdd]
         updateSelectedUser(updatedUser)
     }
 
     const handleRemoveRole = (roleName: string) => {
         if (!selectedEntry) return
-        
+
         const updatedUser: IUser = { ...selectedEntry } as IUser
         updatedUser.roles = selectedEntry.roles.filter(role => role.name !== roleName)
         updateSelectedUser(updatedUser)
@@ -75,7 +75,7 @@ export function UsersDash() {
                 },
                 body: JSON.stringify(sectionData)
             })
-            
+
             if (!response.ok) throw new Error('Failed to save changes')
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save changes')
@@ -93,7 +93,7 @@ export function UsersDash() {
     );
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full bg-gray-50 min-h-screen lg:min-h-0 lg:h-full bg-gray-50 pb-16 lg:pb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full bg-gray-50 min-h-screen lg:min-h-0 lg:h-full pb-16 lg:pb-4">
             {/* User List */}
             <div className="lg:col-span-1 bg-white rounded-lg shadow-sm p-3 md:p-4">
                 <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">Members</h2>
@@ -101,11 +101,10 @@ export function UsersDash() {
                     {sectionData.map(user => (
                         <li
                             key={user.discordId}
-                            className={`p-2 md:p-3 rounded-lg cursor-pointer transition-colors text-sm md:text-base ${
-                                selectedEntry?.discordId === user.discordId
-                                ? 'bg-blue-100 border-blue-500'
-                                : 'hover:bg-gray-100'
-                            }`}
+                            className={`p-2 md:p-3 rounded-lg cursor-pointer transition-colors text-sm md:text-base ${selectedEntry?.discordId === user.discordId
+                                    ? 'bg-blue-100 border-blue-500'
+                                    : 'hover:bg-gray-100'
+                                }`}
                             onClick={() => setSelectedEntry(user)}
                         >
                             <div className="font-medium truncate">{user.name}</div>
@@ -120,19 +119,19 @@ export function UsersDash() {
                 <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6">
                     <div className="space-y-2 md:space-y-4">
                         <h2 className="text-lg md:text-xl font-semibold">Member Details</h2>
-                        
+
                         <UserDetailRow label="Name" value={selectedEntry.name} />
                         <UserDetailRow label="Preferred Name" value={selectedEntry.preferredName} />
                         <UserDetailRow label="Email" value={selectedEntry.email} />
                         <UserDetailRow label="Discord ID" value={selectedEntry.discordId} />
                         <UserDetailRow label="Zip Code" value={selectedEntry.zipCode} />
-                        
-                        <UserDetailRow 
-                            label="Roles" 
+
+                        <UserDetailRow
+                            label="Roles"
                             value={
                                 <div className="flex flex-wrap gap-1 md:gap-2">
                                     {selectedEntry.roles.map(role => (
-                                        <span 
+                                        <span
                                             key={role.name}
                                             className="px-2 py-1 bg-gray-200 rounded-full text-xs md:text-sm"
                                         >
@@ -140,7 +139,7 @@ export function UsersDash() {
                                         </span>
                                     ))}
                                 </div>
-                            } 
+                            }
                         />
 
                         <div className="mt-4 md:mt-6 space-y-2 md:space-y-4">
@@ -157,7 +156,7 @@ export function UsersDash() {
                                         </option>
                                     ))}
                                 </select>
-                                
+
                                 <select
                                     className="w-full p-1 md:p-2 border rounded text-sm md:text-base"
                                     onChange={(e) => handleRemoveRole(e.target.value)}
@@ -171,7 +170,7 @@ export function UsersDash() {
                                     ))}
                                 </select>
                             </div>
-                            
+
                             <button
                                 onClick={handleSaveChanges}
                                 className="w-full py-1 md:py-2 px-3 md:px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm md:text-base"

@@ -3,10 +3,10 @@
 import { useState, useEffect, FormEvent } from "react"
 import { IRole } from "@/models/Role"
 import { IPermission } from "@/models/Permission"
-import { ToolTip } from "./ToolTip"
-import { Popup } from "./Popup"
+import { ToolTip } from "../ToolTip"
+import { Popup } from "../Popup"
 
-export function RolesDash() {
+export default function DashRoles() {
     const [sectionData, setSectionData] = useState<IRole[]>([])
     const [selectedRole, setSelectedRole] = useState<IRole | null>(null)
     const [permissionList, setPermissionList] = useState<IPermission[]>([])
