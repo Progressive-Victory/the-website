@@ -1,6 +1,6 @@
 import ProtectedPage from "@/components/ProtectedPage";
 import { Metadata } from "next";
-import { AdminDash } from "@/components/AdminDash";
+import AdminDash from "@/components/admin/AdminDash";
 
 export const metadata: Metadata = {
     title: 'PV - Admin',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function AdminPage() {
     return (
         <ProtectedPage requiredRoles={["Superadmin"]}>
-            <AdminDash/>
+            <AdminDash />
         </ProtectedPage>
     )
 }

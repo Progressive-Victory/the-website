@@ -4,7 +4,6 @@ import { useSession, signOut } from 'next-auth/react'
 import { useEffect, useMemo } from 'react'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import { hasPermission, useUser } from '@/util/hooks'
-import { PermissionName } from '@/util/auth'
 import Link from 'next/link'
 
 export function Account() {
@@ -13,7 +12,7 @@ export function Account() {
 
     const AdminPanelButton = useMemo(() => {
         if (user.data && !user.error && !user.loading) {
-            if (hasPermission(user.data, PermissionName.ADMIN_PANEL_ACCESS)) {
+            if (hasPermission(user.data, 'Admin Panel Access')) {
                 return () => (
                     <Link href="/admin">
                         <button
@@ -27,7 +26,7 @@ export function Account() {
         }
 
         return undefined
-    }, [session])
+    }, [session, user])
 
     useEffect(() => {
         // Check if the user is already on the server
