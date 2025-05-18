@@ -9,6 +9,7 @@ export interface IUser extends Document {
     email: string
     image: string
     discordId: string
+    discordUserAvatar?: string
     zipCode?: string
     preferredName?: string
     phoneNumber?: string
@@ -24,6 +25,7 @@ const userSchema = new Schema<IUser>({
     email: { type: String, required: true },
     image: { type: String, required: true },
     discordId: { type: String, required: true },
+    discordUserAvatar: { type: String, required: false },
     zipCode: { type: String, required: false },
     preferredName: { type: String, required: false },
     phoneNumber: { type: String, required: false },
@@ -39,6 +41,10 @@ const userSchema = new Schema<IUser>({
 
 // A name
 const modelName = 'User'
+
+// FIXME(hhammon) @NoDiscordIdIndex As far as I can tell, there's no index on the `discordId` key.
+// At least there isn't one in the dev database, and one isn't created here. This probably needs
+// to be addressed as it is used to lookup the user using a session after auth with discord.
 
 // Finally the model itself is exported, we use the cache if it exists
 export const User: Model<IUser> =

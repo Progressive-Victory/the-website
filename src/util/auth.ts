@@ -6,6 +6,7 @@ import { JWT } from 'next-auth/jwt'
 import { NextAuthOptions } from 'next-auth'
 import { IUser } from '@/models/User'
 import { IRole } from '@/models/Role'
+import { getDisplayAvatarURL } from './discord-rest'
 
 export enum PermissionName {
     ADMIN_PANEL_ACCESS = 'Admin Panel Access',
@@ -18,28 +19,45 @@ export const authOptions: NextAuthOptions = {
             clientId: process.env.DISCORD_CLIENT_ID!,
             clientSecret: process.env.DISCORD_CLIENT_SECRET!,
             authorization:
-                'https://discord.com/oauth2/authorize?scope=identify+guilds+guilds.join+email',
+                'https://discord.com/oauth2/authorize?scope=identify+guilds+guilds.join+guilds.members.read+email',
             async profile(profile) {
+                // FIXME(hhammon): @NoDiscordIdIndex As far as I can tell, there's no index on the `discordId` key.
+                // At least there isn't one in the dev database, and one isn't created in the model. This probably
+                // needs to be addressed.
+
+                // Executed async. No reason to wait on this update before sending a response down.
+                User.findOneAndUpdate(
+                    {
+                        discordId: profile.id,
+                    },
+                    {
+                        $set: {
+                            discordUserAvatar: profile.avatar,
+                        },
+                    }
+                )
+                    .exec()
+                    .then()
+
+                const image = await getDisplayAvatarURL(
+                    profile.id,
+                    profile.avatar
+                )
+
                 return {
                     id: profile.id,
                     name: profile.username,
                     email: profile.email,
                     // Using long form here to adjust size of image
-                    image: `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}?size=512`,
+                    image,
                 }
             },
         }),
     ],
     callbacks: {
         // session call back assigns the discordId from the token to the session object
-        async session({
-            session,
-            token
-        }: {
-            session: Session
-            token: JWT
-        }) {
-            if(token.discordId) session.discordId = token.discordId as string
+        async session({ session, token }: { session: Session; token: JWT }) {
+            if (token.discordId) session.discordId = token.discordId as string
             return session
         },
         async jwt({
@@ -78,6 +96,7 @@ export const authOptions: NextAuthOptions = {
                         // Using long form here to adjust size of image
                         image: `https://cdn.discordapp.com/avatars/${eprofile.id}/${eprofile.avatar}?size=512`,
                         discordId: eprofile.id,
+                        discordUserAvatar: eprofile.avatar,
                     })
                     await newUser.save()
                 }
@@ -117,22 +136,25 @@ export async function checkAuth(roles?: string[]): Promise<ResponseCode> {
     if (!session || !session.user) return ResponseCode.NoSession
 
     //if there are no required roles, then all auth requirements have been met.
-    if(!roles) return ResponseCode.Successful
+    if (!roles) return ResponseCode.Successful
 
     // Connect to database
     await dbConnect()
 
     // query database for the user object with a discordId corresponding to
     // the one stored in the session object
-    const user: IUser | null = await User.findOne({discordId: session.discordId})
+    const user: IUser | null = await User.findOne({
+        discordId: session.discordId,
+    })
         .populate({
             path: 'roles',
             populate: {
-                path: 'permissions'
-            }
-        }).exec()
+                path: 'permissions',
+            },
+        })
+        .exec()
 
-    //  if either the currently logged in user cant be found in the databse
+    //  if either the currently logged in user cant be found in the database
     // for some reason or the user has no roles at all return an exception code.
     if (!user || !(roles.length > 0)) return ResponseCode.Exception
 
