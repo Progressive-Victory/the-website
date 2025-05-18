@@ -28,10 +28,6 @@ async function retrieveUser() {
     const session = await getServerSession(authOptions)
     await dbConnect()
 
-    // FIXME(hhammon) @NoDiscordIdIndex As far as I can tell, there's no index on the `discordId` key.
-    // At least there isn't one in the dev database, and one isn't created in the model. This probably
-    // needs to be addressed.
-
     const user = await User.findOne({ discordId: session?.discordId })
         .populate({
             path: 'roles',
