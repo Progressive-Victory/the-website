@@ -2,10 +2,10 @@
 
 import { useState, useEffect, FormEvent } from "react"
 import { IPermission } from "@/models/Permission"
-import { ToolTip } from "./ToolTip"
-import { Popup } from "./Popup"
+import { ToolTip } from "../ToolTip"
+import { Popup } from "../Popup"
 
-export function PermissionsDash() {
+export default function DashPermissions() {
     const [sectionData, setSectionData] = useState<IPermission[]>([])
     const [selectedPerm, setSelectedPerm] = useState<IPermission | null>(null)
     const [refresh, setRefresh] = useState<boolean>(false)
@@ -19,12 +19,12 @@ export function PermissionsDash() {
                 setLoading(true)
                 const permsRes = await fetch('/api/admin/permission')
 
-                if(!permsRes.ok) throw new Error("Failed to fetch data")
-                
+                if (!permsRes.ok) throw new Error("Failed to fetch data")
+
                 const perms = await permsRes.json()
 
                 setSectionData(perms)
-            } catch(err) {
+            } catch (err) {
                 setError(err instanceof Error ? err.message : "Failed to fetch data")
             } finally {
                 setLoading(false)
@@ -34,7 +34,7 @@ export function PermissionsDash() {
     }, [refresh])
 
     useEffect(() => {
-        if(selectedPerm && !sectionData.find(x => x.name === selectedPerm.name)) {
+        if (selectedPerm && !sectionData.find(x => x.name === selectedPerm.name)) {
             setSelectedPerm(null)
         }
     }, [sectionData, selectedPerm])
@@ -70,7 +70,7 @@ export function PermissionsDash() {
         setRefresh(!refresh)
     }
 
-    const PermDetailRow = ({label, value}: {label: string, value: React.ReactNode}) => (
+    const PermDetailRow = ({ label, value }: { label: string, value: React.ReactNode }) => (
         <div className="flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-4 py-2 border-b">
             <span className="font-medium text-gray-700 text-sm md:text-base">{label}</span>
             <span className="col-span-2 text-gray-600 text-sm md:text-base break-words">
@@ -89,13 +89,12 @@ export function PermissionsDash() {
                         {sectionData.map(perm => (
                             <li
                                 key={perm.name}
-                                className={`p-2 md:p-3 rounded-lg cursor-pointer transition-colors text-sm md:text-base ${
-                                    selectedPerm?.name === perm.name
-                                    ? 'bg-blue-100 border-blue-500'
-                                    : 'hover:bg-gray-100'
-                                }`}
+                                className={`p-2 md:p-3 rounded-lg cursor-pointer transition-colors text-sm md:text-base ${selectedPerm?.name === perm.name
+                                        ? 'bg-blue-100 border-blue-500'
+                                        : 'hover:bg-gray-100'
+                                    }`}
                                 onClick={() => setSelectedPerm(perm)}
-                                >
+                            >
                                 <div className="font-medium relative">
                                     {perm.name}
                                     <ToolTip
@@ -104,7 +103,7 @@ export function PermissionsDash() {
                                         containerClasses="bg-white p-1 rounded"
                                     >
                                         <>
-                                            <button 
+                                            <button
                                                 onClick={(ev) => {
                                                     handleDeletePerm(perm.name)
                                                     ev.target.dispatchEvent(new Event('closettm'))
@@ -129,13 +128,13 @@ export function PermissionsDash() {
                         <div>
                             <h2 className="text-lg">Add Permission</h2>
                             <form className="closer" action="javascript:void(0);" onSubmit={(ev: FormEvent<HTMLFormElement>) => {
-                                    const item: HTMLInputElement = ev.currentTarget.elements.namedItem("pName") as HTMLInputElement
-                                    if (!item) return false
-                                    handleCreatePerm(item.value)
-                                    ev.target.dispatchEvent(new Event('closepm'))
-                                }}>
+                                const item: HTMLInputElement = ev.currentTarget.elements.namedItem("pName") as HTMLInputElement
+                                if (!item) return false
+                                handleCreatePerm(item.value)
+                                ev.target.dispatchEvent(new Event('closepm'))
+                            }}>
                                 <label htmlFor="rName">Permission Name:</label>
-                                <input className="float-right border border-blue-500 rounded" type="text" id="pName" name="pName"/><br/>
+                                <input className="float-right border border-blue-500 rounded" type="text" id="pName" name="pName" /><br />
                                 <div className="mt-6">
                                     <button
                                         className="text-white closer rounded px-2 py-1 bg-blue-600 hover:bg-blue-700"
@@ -145,7 +144,7 @@ export function PermissionsDash() {
                                     >
                                         Cancel
                                     </button>
-                                    <input className="text-white cursor-pointer float-right bg-blue-600 hover:bg-blue-700 rounded px-2 py-1" type="submit" value="Submit"/>
+                                    <input className="text-white cursor-pointer float-right bg-blue-600 hover:bg-blue-700 rounded px-2 py-1" type="submit" value="Submit" />
                                 </div>
                             </form>
                         </div>
@@ -161,11 +160,11 @@ export function PermissionsDash() {
                         <PermDetailRow label="Name" value={selectedPerm.name} />
                     </div>
                 </div>
-            ): (
+            ) : (
                 <div className="lg:col-span-2 flex items-center justify-center text-gray-500 text-sm md:text-base p-4">
                     Select a permission to view details
                 </div>
             )}
-        </div>      
+        </div>
     )
 }
