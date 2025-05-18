@@ -55,5 +55,11 @@
         "tailwindcss": "^3.4.1",
         "typescript": "^5.7.3",
         "typescript-eslint": "^8.32.1"
+    },
+    "pnpm": {
+        "overrides": {
+            "@babel/runtime@<7.26.10": ">=7.26.10",
+            "undici@>=6.0.0 <6.21.2": ">=6.21.2"
+        }
     }
 }
