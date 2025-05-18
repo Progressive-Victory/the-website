@@ -30,12 +30,6 @@ export const authOptions: NextAuthOptions = {
                     .lean()
                     .exec()
 
-                console.log({
-                    user,
-                    keys: Object.keys(user || {}),
-                    values: Object.values(user || {}),
-                })
-
                 const image = await getDisplayAvatarURL(
                     profile.id,
                     user?.discordUserAvatar
