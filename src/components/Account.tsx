@@ -1,11 +1,33 @@
 'use client'
 import { MainLayout } from '@/components/MainLayout'
 import { useSession, signOut } from 'next-auth/react'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
+import { hasPermission, useUser } from '@/util/hooks'
+import { PermissionName } from '@/util/auth'
+import Link from 'next/link'
 
 export function Account() {
     const { data: session } = useSession()
+    const user = useUser()
+
+    const AdminPanelButton = useMemo(() => {
+        if (user.data && !user.error && !user.loading) {
+            if (hasPermission(user.data, PermissionName.ADMIN_PANEL_ACCESS)) {
+                return () => (
+                    <Link href="/admin">
+                        <button
+                            className="bg-valencia text-white font-bold py-2 px-4 rounded-full hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out"
+                        >
+                            Admin Panel
+                        </button>
+                    </Link>
+                )
+            }
+        }
+
+        return undefined
+    }, [session])
 
     useEffect(() => {
         // Check if the user is already on the server
@@ -31,6 +53,8 @@ export function Account() {
                             >
                                 Sign Out
                             </button>
+
+                            {AdminPanelButton && <AdminPanelButton />}
                         </div>
                     </div>
                     <div className="relative z-2 text-xs bg-black-pearl-dark rounded-lg text-white flex flex-row shadow-lg mt-4 p-4">
