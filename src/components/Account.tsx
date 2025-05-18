@@ -13,7 +13,7 @@ export function Account() {
     const AdminPanelButton = useMemo(() => {
         if (user.data && !user.error && !user.loading) {
             if (hasPermission(user.data, 'Admin Panel Access')) {
-                return () => (
+                return (
                     <Link href="/admin">
                         <button
                             className="bg-valencia text-white font-bold py-2 px-4 rounded-full hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out"
@@ -26,7 +26,7 @@ export function Account() {
         }
 
         return undefined
-    }, [session, user])
+    }, [user])
 
     useEffect(() => {
         // Check if the user is already on the server
@@ -53,7 +53,7 @@ export function Account() {
                                 Sign Out
                             </button>
 
-                            {AdminPanelButton && <AdminPanelButton />}
+                            {AdminPanelButton && AdminPanelButton}
                         </div>
                     </div>
                     <div className="relative z-2 text-xs bg-black-pearl-dark rounded-lg text-white flex flex-row shadow-lg mt-4 p-4">

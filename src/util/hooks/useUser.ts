@@ -1,13 +1,13 @@
 import { IUser } from "@/models/User";
-import { useEffect, useState } from "react";
+import { DependencyList, useEffect, useState } from "react";
 
 /**
  * Optional props
- * @param {any[]} dependencies - An array of dependencies passed into the useEffect.  If any of the given values change, "useUser" will reload.
+ * @param {DependencyList[]} dependencies - An array of dependencies passed into the useEffect.  If any of the given values change, "useUser" will reload.
  * @param {boolean} autoLoad - Default to `true`.  If true, loads on first render.
  */
 type DataProps = {
-  dependencies?: any[];
+  dependencies?: DependencyList[];
   autoLoad?: boolean;
 }
 
