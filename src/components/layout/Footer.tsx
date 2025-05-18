@@ -12,7 +12,7 @@ const socials = [
 
 export function Footer() {
     return (
-        <div className="w-full bg-black-pearl-dark">
+        <div className="w-full bg-black-pearl-dark grid grid-cols-3">
             <div className="flex flex-col items-center justify-start gap-y-4 py-6">
                 <Image
                     src="/images/LogoFull.webp"
@@ -35,12 +35,64 @@ export function Footer() {
                     </Link>{' '}
                     NOT AUTHORIZED BY ANY CANDIDATE OR CANDIDATE’S COMMITTEE.
                 </div>
+            </div>
 
-                <Link href="/privacy">
-                    <p className="font-bold text-steel-blue underline">
-                        Privacy Policy
-                    </p>
-                </Link>
+            <div className="flex flex-col items-center justify-center gap-y-4 py-6">
+            </div>
+
+            <div className="flex flex-col items-end justify-center gap-y-4 py-6 pr-8">
+                <div className="flex flex-row items-end justify-end gap-x-8 py-6">
+                    <Link href="/about">
+                        <p className="text-white text-lg font-bold hover:underline">
+                            About
+                        </p>
+                    </Link>
+                    <Link href="/volunteer">
+                        <p className="text-white text-lg font-bold hover:underline">
+                            Volunteer
+                        </p>
+                    </Link>
+                    <Link href="/events">
+                        <p className="text-white text-lg font-bold hover:underline">
+                            Events
+                        </p>
+                    </Link>
+                    <Link href="https://progressivevictory.myshopify.com/">
+                        <p className="text-white text-lg font-bold hover:underline">
+                            Merch
+                        </p>
+                    </Link>
+                </div>
+                <div className="flex flex-row items-start justify-stretch gap-x-4 py-6">
+                    {socials.map((social) => (
+                        <SocialIcon key={social} url={social} fgColor="white" />
+                    ))}
+                    <a target="_blank" className="text-base bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out hidden xl:block" 
+                        href="https://secure.actblue.com/donate/pvwebsite">
+                            Donate
+                    </a>
+                    <a target="_blank" className="text-base bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out hidden xl:block" 
+                        href="/volunteer">
+                            Get Involved
+                    </a>
+                </div>
+                <div className="flex flex-row items-end justify-end gap-x-8 py-6">
+                    <Link href="https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform">
+                        <p className="text-white text-lg font-bold hover:underline">
+                            Contact
+                        </p>
+                    </Link>
+                    <Link href="/privacy">
+                        <p className="text-white text-lg font-bold hover:underline">
+                            Privacy Policy
+                        </p>
+                    </Link>
+                    <Link href="/account">
+                        <p className="text-white text-lg font-bold hover:underline">
+                            Account
+                        </p>
+                    </Link>
+                </div>
             </div>
         </div>
     )
