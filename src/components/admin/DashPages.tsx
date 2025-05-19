@@ -1,6 +1,6 @@
 'use client'
 
-export function PagesDash() {
+export default function DashPages() {
     return (
         <div>
             <p>pages</p>

@@ -6,6 +6,12 @@ import { JWT } from 'next-auth/jwt'
 import { NextAuthOptions } from 'next-auth'
 import { IUser } from '@/models/User'
 import { IRole } from '@/models/Role'
+import { getDisplayAvatarURL } from './discord-rest'
+
+export enum PermissionName {
+    ADMIN_PANEL_ACCESS = 'Admin Panel Access',
+    VIEW_MEMBER_DATA = 'View Member Data',
+}
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -13,28 +19,41 @@ export const authOptions: NextAuthOptions = {
             clientId: process.env.DISCORD_CLIENT_ID!,
             clientSecret: process.env.DISCORD_CLIENT_SECRET!,
             authorization:
-                'https://discord.com/oauth2/authorize?scope=identify+guilds+guilds.join+email',
+                'https://discord.com/oauth2/authorize?scope=identify+guilds+guilds.join+guilds.members.read+email',
             async profile(profile) {
+                // Executed async. No reason to wait on this update before sending a response down.
+                User.findOneAndUpdate(
+                    {
+                        discordId: profile.id,
+                    },
+                    {
+                        $set: {
+                            discordUserAvatar: profile.avatar,
+                        },
+                    }
+                )
+                    .exec()
+                    .then()
+
+                const image = await getDisplayAvatarURL(
+                    profile.id,
+                    profile.avatar
+                )
+
                 return {
                     id: profile.id,
                     name: profile.username,
                     email: profile.email,
                     // Using long form here to adjust size of image
-                    image: `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}?size=512`,
+                    image,
                 }
             },
         }),
     ],
     callbacks: {
         // session call back assigns the discordId from the token to the session object
-        async session({
-            session,
-            token
-        }: {
-            session: Session
-            token: JWT
-        }) {
-            if(token.discordId) session.discordId = token.discordId as string
+        async session({ session, token }: { session: Session; token: JWT }) {
+            if (token.discordId) session.discordId = token.discordId as string
             return session
         },
         async jwt({
@@ -73,6 +92,7 @@ export const authOptions: NextAuthOptions = {
                         // Using long form here to adjust size of image
                         image: `https://cdn.discordapp.com/avatars/${eprofile.id}/${eprofile.avatar}?size=512`,
                         discordId: eprofile.id,
+                        discordUserAvatar: eprofile.avatar,
                     })
                     await newUser.save()
                 }
@@ -87,7 +107,7 @@ export const enum ResponseCode {
     Successful,
     Exception,
     NoSession,
-    InsufficientAccess
+    InsufficientAccess,
 }
 
 // Role checking utility function
@@ -96,7 +116,7 @@ const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
     const userRoles = user.roles as IRole[]
     const roleStrs = userRoles.map((role: IRole) => role.name)
     if (!user || !user.roles || !Array.isArray(user.roles)) return false
-    return requiredRoles.every((role) => roleStrs.includes(role))   
+    return requiredRoles.every((role) => roleStrs.includes(role))
 }
 
 // utility function for checking the current session against an array of roles
@@ -112,22 +132,25 @@ export async function checkAuth(roles?: string[]): Promise<ResponseCode> {
     if (!session || !session.user) return ResponseCode.NoSession
 
     //if there are no required roles, then all auth requirements have been met.
-    if(!roles) return ResponseCode.Successful
+    if (!roles) return ResponseCode.Successful
 
     // Connect to database
     await dbConnect()
 
     // query database for the user object with a discordId corresponding to
     // the one stored in the session object
-    const user: IUser | null = await User.findOne({discordId: session.discordId})
+    const user: IUser | null = await User.findOne({
+        discordId: session.discordId,
+    })
         .populate({
             path: 'roles',
             populate: {
-                path: 'permissions'
-            }
-        }).exec()
+                path: 'permissions',
+            },
+        })
+        .exec()
 
-    //  if either the currently logged in user cant be found in the databse
+    //  if either the currently logged in user cant be found in the database
     // for some reason or the user has no roles at all return an exception code.
     if (!user || !(roles.length > 0)) return ResponseCode.Exception
 
@@ -136,4 +159,59 @@ export async function checkAuth(roles?: string[]): Promise<ResponseCode> {
 
     // otherwise return an insufficient access response.
     return ResponseCode.InsufficientAccess
+}
+
+/*
+ * Checks the currently logged-in user against a list of permissions according to some mode.
+ * The 'all' mode is default and requires the user to have all permission listed, otherwise,
+ * it will pass if any match. Like `checkAuth` for roles, it will fail with no session if no
+ * user is logged in.
+ */
+export async function checkAuthPermissions(
+    permissions?: string[],
+    mode: 'all' | 'any' = 'all'
+): Promise<ResponseCode> {
+    const session = await getServerSession(authOptions)
+    if (!session || !session.user) {
+        return ResponseCode.NoSession
+    }
+
+    if (!permissions || permissions.length == 0) {
+        return ResponseCode.Successful
+    }
+
+    const user = await User.findOne({
+        discordId: session.discordId,
+    }).select({
+        roles: 1
+    }).populate({
+        path: 'roles',
+        populate: {
+            path: 'permissions',
+        },
+    }).exec()
+
+    if (!user) {
+        // This shouldn't happen except in the case of a database error.
+        return ResponseCode.Exception
+    }
+
+    // Organize permissions from all user roles into a set for easy lookup
+    const userPerms: Set<string> = new Set()
+    user.roles.forEach(((role) => {
+        role.permissions.forEach(((perm) => {
+            userPerms.add(perm.name)
+        }))
+    }))
+
+    // Predicate to check if user has a perm is passed into some array iterating function based on mode
+    const predicate = (perm: string) => userPerms.has(perm)
+    let success = false;
+    if (mode === 'all') {
+        success = permissions.every(predicate)
+    } else {
+        success = permissions.some(predicate)
+    }
+
+    return success ? ResponseCode.Successful : ResponseCode.InsufficientAccess
 }
