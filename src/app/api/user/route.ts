@@ -45,7 +45,7 @@ export async function GET() {
     //serve response based on the outcome of the auth check
     switch (response){
         case ResponseCode.Successful:
-            return NextResponse.json(await retrieveUser())
+            break
         case ResponseCode.Exception:
             return NextResponse.json({ error: 'Bad request' }, { status: 400 })
         case ResponseCode.NoSession:
@@ -55,6 +55,9 @@ export async function GET() {
         default:
             throw error("Unidentified response code.")
     }
+
+    const usr: IUser = await retrieveUser() as IUser
+    return NextResponse.json(usr)
 }
 
 export async function PATCH(req: NextRequest) {
