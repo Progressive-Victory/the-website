@@ -7,6 +7,7 @@ export default function DashUsers() {
     const [sectionData, setSectionData] = useState<IUser[]>([])
     const [selectedEntry, setSelectedEntry] = useState<IUser | null>(null)
     const [roleList, setRoleList] = useState<IRole[]>([])
+    const [refreshData, setRefreshData] = useState<boolean>(false)
     const [, setLoading] = useState(true)
     const [, setError] = useState<string | null>(null)
 
@@ -36,7 +37,7 @@ export default function DashUsers() {
             }
         }
         fetchData()
-    }, [])
+    }, [refreshData])
 
     const updateSelectedUser = (updatedUser: IUser) => {
         setSectionData(prev =>
@@ -77,14 +78,22 @@ export default function DashUsers() {
             })
 
             if (!response.ok) throw new Error('Failed to save changes')
+            setRefreshData(!refreshData)
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save changes')
         }
     }
 
 
-    const UserDetailRow = ({ label, value }: { label: string; value: React.ReactNode }) => (
-        <div className="flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-4 py-2 border-b">
+    interface IUserDetailProps {
+        label: string,
+        value: React.ReactNode,
+        doDiv?: boolean
+    }
+    
+
+    const UserDetailRow = ({ label, value, doDiv=true }: IUserDetailProps) => (
+        <div className={`flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-4 py-2 ${doDiv ? "border-b" : ""}`}>
             <span className="font-medium text-gray-700 text-sm md:text-base">{label}</span>
             <span className="col-span-2 text-gray-600 text-sm md:text-base break-words">
                 {value || 'N/A'}
@@ -96,7 +105,7 @@ export default function DashUsers() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full bg-gray-50 min-h-screen lg:min-h-0 lg:h-full pb-16 lg:pb-4">
             {/* User List */}
             <div className="lg:col-span-1 bg-white rounded-lg shadow-sm p-3 md:p-4">
-                <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">Members</h2>
+                <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4 text-black-pearl-dark">Members</h2>
                 <ul className="space-y-1 md:space-y-2">
                     {sectionData.map(user => (
                         <li
@@ -118,12 +127,17 @@ export default function DashUsers() {
             {selectedEntry ? (
                 <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6">
                     <div className="space-y-2 md:space-y-4">
-                        <h2 className="text-lg md:text-xl font-semibold">Member Details</h2>
-
-                        <UserDetailRow label="Name" value={selectedEntry.name} />
-                        <UserDetailRow label="Preferred Name" value={selectedEntry.preferredName} />
+                        <h2 className="text-lg md:text-xl font-semibold text-black-pearl-dark">Member Details</h2>
+                        
+                        <UserDetailRow label="Discord Username" value={selectedEntry.name} />
+                        <UserDetailRow label="Nickname" value={selectedEntry.preferredName} />
                         <UserDetailRow label="Email" value={selectedEntry.email} />
                         <UserDetailRow label="Discord ID" value={selectedEntry.discordId} />
+                        <UserDetailRow label="Address Line 1" value="N/A" doDiv={false} />
+                        <UserDetailRow label="Address Line 2" value="N/A" doDiv={false} />
+                        <UserDetailRow label="City" value={selectedEntry.city} doDiv={false} />
+                        <UserDetailRow label="County" value={selectedEntry.county} doDiv={false} />
+                        <UserDetailRow label="State" value={selectedEntry.state} doDiv={false} />
                         <UserDetailRow label="Zip Code" value={selectedEntry.zipCode} />
 
                         <UserDetailRow

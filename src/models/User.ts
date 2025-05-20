@@ -1,6 +1,7 @@
 import mongoose, { Document, Model, Schema } from 'mongoose'
 import { IRole, Role } from './Role'
 import { OnboardingStage } from '@/util/stage'
+import { getLoc } from '@/util/loc'
 
 // Here is a user document
 // It defines the structure of the user and provides a POJO for interacting with user data
@@ -11,6 +12,9 @@ export interface IUser extends Document {
     discordId: string
     discordUserAvatar?: string
     zipCode?: string
+    state?: string
+    county?: string
+    city?: string
     preferredName?: string
     phoneNumber?: string
     acceptedAlerts?: boolean
@@ -27,6 +31,9 @@ const userSchema = new Schema<IUser>({
     discordId: { type: String, required: true },
     discordUserAvatar: { type: String, required: false },
     zipCode: { type: String, required: false },
+    state: { type: String, required: false },
+    county: { type: String, required: false },
+    city: { type: String, required: false },
     preferredName: { type: String, required: false },
     phoneNumber: { type: String, required: false },
     acceptedAlerts: { type: Boolean, required: false, default: false },
@@ -37,6 +44,20 @@ const userSchema = new Schema<IUser>({
         default: OnboardingStage.NOT_STARTED,
     },
     roles: [{ type: Schema.Types.ObjectId, ref: Role }],
+})
+
+userSchema.post('save', (doc: Document<IUser>, next) => {
+    setTimeout(async () => {
+        const usr: IUser = doc as IUser
+        if(usr.zipCode && !(usr.state && usr.county && usr.city)) {
+            const [city, county, state] = await getLoc(usr.zipCode)
+            usr.city = city
+            usr.county = county
+            usr.state = state
+            usr.save()
+        }
+        next()
+    }, 200)
 })
 
 // A name

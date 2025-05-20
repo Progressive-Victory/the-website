@@ -37,8 +37,8 @@ export default function AdminDash() {
 
                 <div className="items-stretch z-1 grid grid-cols-12 gap-x-4 opacity-90 flex-1 overflow-hidden">
                     <div className="col-span-2 bg-white p-4 overflow-y-auto">
-                        <h1>Admin Portal</h1>
-                        <br />
+                        <h1 className="text-black-pearl-dark text-lg font-semibold">Admin Portal</h1>
+                        <br/>
                         <ul>
                             {sectionArray.map((value, index) => (
                                 <li key={value} className={"p-2 " + (value == Section[section] ? "bg-sky-700" : "hover:bg-sky-500")}
