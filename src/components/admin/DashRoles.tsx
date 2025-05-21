@@ -288,7 +288,7 @@ export default function DashRoles() {
 
                             <button
                                 onClick={handleSaveChanges}
-                                className="w-full py-1 md:py-2 px-3 md:px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                                className="w-full py-1 md:py-2 px-3 md:px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm md:text-base active:outline active:outline-offset-2 active:outline-blue-500"
                             >
                                 Save Changes
                             </button>
