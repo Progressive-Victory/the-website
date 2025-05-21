@@ -57,7 +57,7 @@ userSchema.post('save', (doc: Document<IUser>, next) => {
             usr.save()
         }
         next()
-    }, 200)
+    }, 10)
 })
 
 // A name

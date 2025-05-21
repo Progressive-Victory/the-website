@@ -10,6 +10,7 @@ export default function DashUsers() {
     const [refreshData, setRefreshData] = useState<boolean>(false)
     const [, setLoading] = useState(true)
     const [, setError] = useState<string | null>(null)
+    const [unsaved, setUnsaved] = useState<boolean>(false)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -40,6 +41,7 @@ export default function DashUsers() {
     }, [refreshData])
 
     const updateSelectedUser = (updatedUser: IUser) => {
+        setUnsaved(true)
         setSectionData(prev =>
             prev.map(user => user.discordId === updatedUser.discordId ? updatedUser : user)
         )
@@ -59,6 +61,14 @@ export default function DashUsers() {
         updateSelectedUser(updatedUser)
     }
 
+    const handleChangeSelection = (usr: IUser) => {
+        if (!unsaved) {
+            setSelectedEntry(usr)
+        } else {
+            alert("Please save your changes before moving on.")
+        }
+    }
+
     const handleRemoveRole = (roleName: string) => {
         if (!selectedEntry) return
 
@@ -74,16 +84,18 @@ export default function DashUsers() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(sectionData)
+                body: JSON.stringify([selectedEntry])
             })
 
             if (!response.ok) throw new Error('Failed to save changes')
             setRefreshData(!refreshData)
+            setUnsaved(false)
+            alert("Save Successful")
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save changes')
+            alert("Saving Failed")
         }
     }
-
 
     interface IUserDetailProps {
         label: string,
@@ -91,7 +103,6 @@ export default function DashUsers() {
         doDiv?: boolean
     }
     
-
     const UserDetailRow = ({ label, value, doDiv=true }: IUserDetailProps) => (
         <div className={`flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-4 py-2 ${doDiv ? "border-b" : ""}`}>
             <span className="font-medium text-gray-700 text-sm md:text-base">{label}</span>
@@ -114,7 +125,7 @@ export default function DashUsers() {
                                     ? 'bg-blue-100 border-blue-500'
                                     : 'hover:bg-gray-100'
                                 }`}
-                            onClick={() => setSelectedEntry(user)}
+                            onClick={() => handleChangeSelection(user)}
                         >
                             <div className="font-medium truncate">{user.name}</div>
                             <div className="text-xs md:text-sm text-gray-500 truncate">{user.email}</div>
@@ -187,7 +198,7 @@ export default function DashUsers() {
 
                             <button
                                 onClick={handleSaveChanges}
-                                className="w-full py-1 md:py-2 px-3 md:px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm md:text-base"
+                                className="w-full py-1 md:py-2 px-3 md:px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm md:text-base active:outline active:outline-offset-2 active:outline-blue-500"
                             >
                                 Save Changes
                             </button>

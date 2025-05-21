@@ -11,6 +11,7 @@ export default function DashRoles() {
     const [selectedRole, setSelectedRole] = useState<IRole | null>(null)
     const [permissionList, setPermissionList] = useState<IPermission[]>([])
     const [refresh, setRefresh] = useState<boolean>(false) //this is cursed but it seems like the best way to trigger refresh on callback
+    const [unsaved, setUnsaved] = useState<boolean>(false)
     const [, setLoading] = useState(true)
     const [, setError] = useState<string | null>(null)
 
@@ -52,10 +53,19 @@ export default function DashRoles() {
 
     //this will be used to update values of existing roles when I implement that
     const updateSelectedRole = (updatedRole: IRole) => {
+        setUnsaved(true)
         setSectionData(prev => (
             prev.map(role => role.name === updatedRole.name ? updatedRole : role)
         ))
         setSelectedRole(updatedRole)
+    }
+
+    const handleChangeSelection = (role: IRole) => {
+        if (!unsaved) {
+            setSelectedRole(role)
+        } else {
+            alert("Please save your changes before moving on.")
+        }
     }
 
     //this will be used to add perms to existing roles when its implemented
@@ -127,12 +137,16 @@ export default function DashRoles() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(sectionData)
+                body: JSON.stringify([selectedRole])
             })
 
             if (!response.ok) throw new Error('Failed to save changes')
+            setRefresh(!refresh)
+            setUnsaved(false)
+            alert("Save Successful")
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save changes')
+            alert("Saving Failed")
         }
     }
 
@@ -160,7 +174,7 @@ export default function DashRoles() {
                                     ? 'bg-blue-100 border-blue-500'
                                     : 'hover:bg-gray-100'
                                 }`}
-                                onClick={() => setSelectedRole(role)}
+                                onClick={() => handleChangeSelection(role)}
                                 >
                                 <div className="font-medium relative">
                                     {role.name}
@@ -274,7 +288,7 @@ export default function DashRoles() {
 
                             <button
                                 onClick={handleSaveChanges}
-                                className="w-full py-1 md:py-2 px-3 md:px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                                className="w-full py-1 md:py-2 px-3 md:px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm md:text-base active:outline active:outline-offset-2 active:outline-blue-500"
                             >
                                 Save Changes
                             </button>
