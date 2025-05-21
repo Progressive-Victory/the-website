@@ -65,7 +65,7 @@ export default function DashUsers() {
         if (!unsaved) {
             setSelectedEntry(usr)
         } else {
-            alert("PLEASE SAVE YO SHIT")
+            alert("Please save your changes before moving on.")
         }
     }
 
@@ -90,10 +90,10 @@ export default function DashUsers() {
             if (!response.ok) throw new Error('Failed to save changes')
             setRefreshData(!refreshData)
             setUnsaved(false)
-            alert("save successful")
+            alert("Save Successful")
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save changes')
-            alert("Saving failed.")
+            alert("Saving Failed")
         }
     }
 
