@@ -116,7 +116,7 @@ export function Header() {
                             className="group hidden rounded-full bg-white p-1 text-white transition duration-300 ease-in-out hover:scale-105 hover:bg-valencia hover:text-black-pearl-dark xl:block"
                         >
                             <Image
-                                src={session.user!.image || ''}
+                                src={session.user?.image ?? ''}
                                 className="rounded-full transition duration-300 ease-in-out"
                                 alt="User Image"
                                 width={44}

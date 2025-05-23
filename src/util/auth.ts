@@ -12,12 +12,17 @@ export enum PermissionName {
     ADMIN_PANEL_ACCESS = 'Admin Panel Access',
     VIEW_MEMBER_DATA = 'View Member Data',
 }
+const clientId = process.env.DISCORD_CLIENT_ID
+const clientSecret = process.env.DISCORD_CLIENT_SECRET
+
+if (!clientId) throw Error('Please define the DISCORD_CLIENT_ID environment variable')
+if (!clientSecret) throw Error('Please define the DISCORD_CLIENT_SECRET environment variable')
 
 export const authOptions: NextAuthOptions = {
     providers: [
         Discord({
-            clientId: process.env.DISCORD_CLIENT_ID!,
-            clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+            clientId,
+            clientSecret,
             authorization:
                 'https://discord.com/oauth2/authorize?scope=identify+guilds+guilds.join+guilds.members.read+email',
             async profile(profile) {
@@ -197,7 +202,7 @@ export async function checkAuthPermissions(
     }
 
     // Organize permissions from all user roles into a set for easy lookup
-    const userPerms: Set<string> = new Set()
+    const userPerms = new Set<string>()
     user.roles.forEach(((role) => {
         role.permissions.forEach(((perm) => {
             userPerms.add(perm.name)

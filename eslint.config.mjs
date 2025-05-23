@@ -2,7 +2,6 @@ import { FlatCompat } from '@eslint/eslintrc'
 import js from "@eslint/js";
 import globals from "globals";
 import ts from "typescript-eslint";
-import { defineConfig } from "eslint/config";
 import tailwind from "eslint-plugin-tailwindcss";
 
 const compat = new FlatCompat({
@@ -10,9 +9,10 @@ const compat = new FlatCompat({
   baseDirectory: import.meta.dirname,
 })
 
-export default defineConfig([
+export default ts.config([
     js.configs.recommended,
-    ts.configs.recommended,
+    ts.configs.strict,
+    ts.configs.stylistic,
     compat.extends('next/core-web-vitals', 'next/typescript'),
     tailwind.configs['flat/recommended'],
     { files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"], languageOptions: { globals: {...globals.browser, ...globals.node} } },

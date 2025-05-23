@@ -19,7 +19,7 @@ const Dropdown = ({ onSelect }: DropdownProps) => {
         </button>
         
         {isOpen && (
-          <div className="mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+          <div className="mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black/5">
             <div className="py-1" role="menu">
               {options.map((option) => (
                 <button

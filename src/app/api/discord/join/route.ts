@@ -47,9 +47,9 @@ export async function PUT(req: NextRequest) {
     if (response.ok) {
         if (
             user.verified &&
-            user!.onboardingStage === OnboardingStage.VERIFIED
+            user?.onboardingStage === OnboardingStage.VERIFIED
         ) {
-            user!.onboardingStage = OnboardingStage.JOINED
+            user.onboardingStage = OnboardingStage.JOINED
             await user?.save()
         }
         return new Response('Added Member!', { status: 200 })
@@ -107,8 +107,8 @@ export async function GET(req: NextRequest) {
     })
 
     if (response.status === 200) {
-        if (user && user!.onboardingStage === OnboardingStage.VERIFIED) {
-            user!.onboardingStage = OnboardingStage.JOINED
+        if (user && user?.onboardingStage === OnboardingStage.VERIFIED) {
+            user.onboardingStage = OnboardingStage.JOINED
             await user?.save()
         }
 

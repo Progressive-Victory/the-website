@@ -3,7 +3,7 @@ import { BlogHeader } from '@/components/BlogHeader'
 import { MainLayout } from '@/components/MainLayout'
 import { getPosts } from './util'
 
-type Post = {
+interface Post {
     node: {
         id: string
         date: string

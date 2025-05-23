@@ -15,7 +15,7 @@ export async function getLoc(zip: string): Promise<string[]> {
         }
     })
     
-    const out: Promise<string[]> = new Promise((resolve, reject) => {
+    const out = new Promise<string[]>((resolve, reject) => {
         fd.on('end', () => resolve(results))
         fd.on('error', reject)
     })
