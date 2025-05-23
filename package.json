@@ -10,7 +10,7 @@
         "lint": "next lint"
     },
     "engines": {
-        "node": ">=20.2"
+        "node": ">=20.11"
     },
     "dependencies": {
         "@discordjs/rest": "^2.5.0",
