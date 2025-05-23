@@ -5,6 +5,10 @@ import { getToken } from 'next-auth/jwt'
 import { User } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
 import dbConnect from '@/util/libmongo'
+import { Neutrino } from '@/util/neutrino'
+
+const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET
+
 export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
     // Parse incoming JSON body
@@ -15,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     // Retrieve the session using the incoming request and auth options
     const session = await getServerSession(authOptions)
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+    const token = await getToken({ req, secret: NEXTAUTH_SECRET })
 
     if (!session || !token) {
         return new Response('Unauthorized', { status: 401 })
@@ -36,36 +40,15 @@ export async function POST(req: NextRequest) {
                 return new Response('Unauthorized', { status: 401 })
         }
 
-        const neutrinoEndpoint = 'https://neutrinoapi.net/verify-security-code'
-        // Prepare the headers (note the inclusion of Content-Type for URL encoded data)
-        const headers = {
-            'User-ID': process.env.NEUTRINO_USERID!,
-            'API-Key': process.env.NEUTRINO_SECRET!,
-            'Content-Type': 'application/x-www-form-urlencoded',
-        }
-
-        // Build the URL encoded form data
-        const formData = new URLSearchParams({
-            'security-code': reqJson.code,
-        })
-
-        // Make the POST request with URL encoded data in the body
-        const response = await fetch(neutrinoEndpoint, {
-            method: 'POST',
-            headers,
-            body: formData.toString(),
-        })
-
-        const data = await response.json()
-        if (!data || !data.verified) {
+        const response = await Neutrino.verifySecurityCode(reqJson.code)
+    
+        if (!response) {
             return new Response('Bad request or bad code', { status: 400 })
         }
-
-        if (data.verified) {
-            user.onboardingStage = OnboardingStage.VERIFIED
-            user.verified = true
-            await user.save()
-        }
+       
+        user.onboardingStage = OnboardingStage.VERIFIED
+        user.verified = true
+        await user.save()
 
         return new Response('Success', { status: 200 })
     } catch {
