@@ -151,32 +151,32 @@ export default function DashRoles() {
     }
 
     const RoleDetailRow = ({label, value}: {label: string, value: React.ReactNode}) => (
-        <div className="flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-4 py-2 border-b">
-            <span className="font-medium text-gray-700 text-sm md:text-base">{label}</span>
-            <span className="col-span-2 text-gray-600 text-sm md:text-base break-words">
+        <div className="flex flex-col gap-2 border-b py-2 md:grid md:grid-cols-3 md:gap-4">
+            <span className="text-sm font-medium text-gray-700 md:text-base">{label}</span>
+            <span className="col-span-2 break-words text-sm text-gray-600 md:text-base">
                 {value || 'N/A'}
             </span>
         </div>
     )
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 lg:min-h-0 lg:h-full lg:pb-4 gap-4 h-full bg-gray-50 min-h-screen b-gray-50 pb-16">
+        <div className="b-gray-50 grid h-full min-h-screen grid-cols-1 gap-4 bg-gray-50 pb-16 lg:h-full lg:min-h-0 lg:grid-cols-3 lg:pb-4">
             {/* Role List */}
-            <div className="flex flex-col lg:col-span-1 bg-white rounded-lg shadow-sm p-3 md:p-4">
+            <div className="flex flex-col rounded-lg bg-white p-3 shadow-sm md:p-4 lg:col-span-1">
                 <div className="grow">
-                    <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">Roles</h2>
+                    <h2 className="mb-2 text-lg font-semibold md:mb-4 md:text-xl">Roles</h2>
                     <ul className="space-y-1 md:space-y-2">
                         {sectionData.map(role => (
                             <li
                                 key={role.name}
-                                className={`p-2 md:p-3 rounded-lg cursor-pointer transition-colors text-sm md:text-base ${
+                                className={`cursor-pointer rounded-lg p-2 text-sm transition-colors md:p-3 md:text-base ${
                                     selectedRole?.name === role.name
-                                    ? 'bg-blue-100 border-blue-500'
+                                    ? 'border-blue-500 bg-blue-100'
                                     : 'hover:bg-gray-100'
                                 }`}
                                 onClick={() => handleChangeSelection(role)}
                                 >
-                                <div className="font-medium relative">
+                                <div className="relative font-medium">
                                     {role.name}
                                     <ToolTip
                                         label="..."
@@ -189,7 +189,7 @@ export default function DashRoles() {
                                                     handleDeleteRole(role.name)
                                                     ev.target.dispatchEvent(new Event('closettm'))
                                                 }}
-                                                className="hover:bg-blue-500 px-2 rounded closer"
+                                                className="closer rounded px-2 hover:bg-blue-500"
                                             >
                                                 Delete
                                             </button>
@@ -215,17 +215,17 @@ export default function DashRoles() {
                                     ev.target.dispatchEvent(new Event('closepm'))
                                 }}>
                                 <label htmlFor="rName">Role Name:</label>
-                                <input className="float-right border border-blue-500 rounded" type="text" id="rName" name="rName"/><br/>
+                                <input className="float-right rounded border border-blue-500" type="text" id="rName" name="rName"/><br/>
                                 <div className="mt-6">
                                     <button
-                                        className="text-white closer rounded px-2 py-1 bg-blue-600 hover:bg-blue-700"
+                                        className="closer rounded bg-blue-600 px-2 py-1 text-white hover:bg-blue-700"
                                         onClick={(ev) => {
                                             ev.target.dispatchEvent(new Event('closepm'))
                                         }}
                                     >
                                         Cancel
                                     </button>
-                                    <input className="text-white cursor-pointer float-right bg-blue-600 hover:bg-blue-700 rounded px-2 py-1" type="submit" value="Submit"/>
+                                    <input className="float-right cursor-pointer rounded bg-blue-600 px-2 py-1 text-white hover:bg-blue-700" type="submit" value="Submit"/>
                                 </div>
                             </form>
                         </div>
@@ -234,9 +234,9 @@ export default function DashRoles() {
             </div>
             {/* Role Details */}
             {selectedRole ? (
-                <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6">
+                <div className="rounded-lg bg-white p-4 shadow-sm md:p-6 lg:col-span-2">
                     <div className="space-y-2 md:space-y-4">
-                        <h2 className="text-lg md:text-xl font-semibold">Role Details</h2>
+                        <h2 className="text-lg font-semibold md:text-xl">Role Details</h2>
 
                         <RoleDetailRow label="Name" value={selectedRole.name} />
                         <RoleDetailRow 
@@ -246,21 +246,21 @@ export default function DashRoles() {
                                     {selectedRole.permissions.length > 0 ? (selectedRole.permissions.map(perm => (
                                         <span
                                             key={perm.name}
-                                            className="px-2 py-1 bg-gray-200 rounded-full text-xs md:text-sm"
+                                            className="rounded-full bg-gray-200 px-2 py-1 text-xs md:text-sm"
                                         >
                                             {perm.name}
                                         </span>
                                     ))) : 
-                                        <div className="text-gray-500 text-sm md:text-base">None</div>
+                                        <div className="text-sm text-gray-500 md:text-base">None</div>
                                     }
                                 </div>
                             }
                         />
 
-                        <div className="mt-4 md:mt-6 space-y-2 md:space-y-4">
-                            <div className="flex flex-col md:flex-row gap-2 md:gap-4">
+                        <div className="mt-4 space-y-2 md:mt-6 md:space-y-4">
+                            <div className="flex flex-col gap-2 md:flex-row md:gap-4">
                                 <select
-                                    className="w-full p-1 md:p-2 border rounded text-sm md:text-base"
+                                    className="w-full rounded border p-1 text-sm md:p-2 md:text-base"
                                     onChange={(e) => handleAddPerm(e.target.value)}
                                     value=""
                                 >
@@ -273,7 +273,7 @@ export default function DashRoles() {
                                 </select>
 
                                 <select
-                                    className="w-full p-1 md:p-2 border rounded text-sm md:text-base"
+                                    className="w-full rounded border p-1 text-sm md:p-2 md:text-base"
                                     onChange={(e) => handleRemovePerm(e.target.value)}
                                     value=""
                                 >
@@ -288,7 +288,7 @@ export default function DashRoles() {
 
                             <button
                                 onClick={handleSaveChanges}
-                                className="w-full py-1 md:py-2 px-3 md:px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm md:text-base active:outline active:outline-offset-2 active:outline-blue-500"
+                                className="w-full rounded bg-blue-600 px-3 py-1 text-sm text-white transition-colors hover:bg-blue-700 active:outline active:outline-offset-2 active:outline-blue-500 md:px-4 md:py-2 md:text-base"
                             >
                                 Save Changes
                             </button>
@@ -296,7 +296,7 @@ export default function DashRoles() {
                     </div>
                 </div>
             ) : (
-                <div className="lg:col-span-2 flex items-center justify-center text-gray-500 text-sm md:text-base p-4">
+                <div className="flex items-center justify-center p-4 text-sm text-gray-500 md:text-base lg:col-span-2">
                     Select a role to view details
                 </div>
             )}

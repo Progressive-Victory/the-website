@@ -71,7 +71,7 @@ export function Header() {
 
     return (
         <>
-            <div className="sticky top-0 left-0 right-0 flex flex-row items-center justify-between w-full gap-x-4 px-6 md:px-12 py-4 z-[20] bg-black-pearl-dark h-[100px]">
+            <div className="sticky inset-x-0 top-0 z-20 flex h-[100px] w-full flex-row items-center justify-between gap-x-4 bg-black-pearl-dark px-6 py-4 md:px-12">
                 <Link href="/">
                     <div className="flex-none">
                         <Image
@@ -82,38 +82,38 @@ export function Header() {
                         />
                     </div>
                 </Link>
-                <div className="flex flex-row items-center justify-center gap-x-12 cursor-pointer w-full hidden xl:flex mb-2">
+                <div className="mb-2 flex hidden w-full cursor-pointer flex-row items-center justify-center gap-x-12 xl:flex">
                     {navitems.map((item) => (
                         <Link
                             key={item.name}
                             href={item.href}
                             target={item.href.includes('https') ? '_blank' : ''}
                             referrerPolicy={'no-referrer'}
-                            className="text-xl text-white font-bold hover:text-valencia hover:bg-white rounded-full px-3 py-1 transition duration-200 ease-in-out"
+                            className="rounded-full px-3 py-1 text-xl font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia"
                         >
                             {item.name}
                         </Link>
                     ))}
                 </div>
-                <div className="flex flex-row items-center justify-center gap-x-4 w-[300px]">
+                <div className="flex w-[300px] flex-row items-center justify-center gap-x-4">
                     <Link
                         href="https://secure.actblue.com/donate/pvwebsite"
                         target="_blank"
-                        className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out hidden xl:block"
+                        className="hidden rounded-full bg-valencia px-4 py-2 text-xl font-bold text-white transition duration-300 ease-in-out hover:bg-white hover:text-black-pearl-dark xl:block"
                     >
                         Donate
                     </Link>
                     {!session ? (
                         <Link
                             href="/login"
-                            className="text-xl whitespace-nowrap bg-steel-blue px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out hidden xl:block"
+                            className="hidden whitespace-nowrap rounded-full bg-steel-blue px-4 py-2 text-xl font-bold text-white transition duration-300 ease-in-out hover:bg-white hover:text-black-pearl-dark xl:block"
                         >
                             Log In
                         </Link>
                     ) : (
                         <Link
                             href="/account"
-                            className="bg-white p-1 rounded-full text-white group hover:scale-105 hover:bg-valencia hover:text-black-pearl-dark transition duration-300 ease-in-out hidden xl:block"
+                            className="group hidden rounded-full bg-white p-1 text-white transition duration-300 ease-in-out hover:scale-105 hover:bg-valencia hover:text-black-pearl-dark xl:block"
                         >
                             <Image
                                 src={session.user!.image || ''}
@@ -131,9 +131,9 @@ export function Header() {
                     onClick={() => setIsOpen(!isOpen)}
                 >
                     {isOpen ? (
-                        <XMarkIcon className="w-8 h-8 text-white group-hover:text-valencia transition duration-300 ease-in-out" />
+                        <XMarkIcon className="size-8 text-white transition duration-300 ease-in-out group-hover:text-valencia" />
                     ) : (
-                        <Bars3Icon className="w-8 h-8 text-white group-hover:text-valencia transition duration-300 ease-in-out" />
+                        <Bars3Icon className="size-8 text-white transition duration-300 ease-in-out group-hover:text-valencia" />
                     )}
                 </button>
             </div>
@@ -147,9 +147,9 @@ export function Header() {
                 leaveTo=" -translate-y-full"
             >
                 <TransitionChild>
-                    <div className="fixed rounded-b-lg drop-shadow-xl top-24 pb-12 left-0 right-0 w-full px-10 pt-4 z-10 bg-black-pearl-dark xl:hidden">
+                    <div className="fixed inset-x-0 top-24 z-10 w-full rounded-b-lg bg-black-pearl-dark px-10 pb-12 pt-4 drop-shadow-xl xl:hidden">
                         <motion.div
-                            className="w-full flex flex-col items-center justify-start mt-2 gap-y-4 pb-16"
+                            className="mt-2 flex w-full flex-col items-center justify-start gap-y-4 pb-16"
                             initial="hidden"
                             animate="visible"
                             variants={containerVariants}
@@ -170,7 +170,7 @@ export function Header() {
                                         layoutId={item.name}
                                         variants={itemVariants}
                                         transition={springTransition}
-                                        className="cursor-pointer text-center text-xl font-bold text-white hover:text-valencia hover:bg-white rounded-full w-full px-2 py-4"
+                                        className="w-full cursor-pointer rounded-full px-2 py-4 text-center text-xl font-bold text-white hover:bg-white hover:text-valencia"
                                     >
                                         {item.name}
                                     </motion.div>
@@ -184,7 +184,7 @@ export function Header() {
                                 <motion.div
                                     variants={itemVariants}
                                     transition={springTransition}
-                                    className="cursor-pointer rounded-full text-center text-xl text-white bg-valencia hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-4"
+                                    className="w-full cursor-pointer rounded-full bg-valencia px-2 py-4 text-center text-xl font-bold text-white hover:bg-white hover:text-black-pearl-dark"
                                 >
                                     Donate
                                 </motion.div>
@@ -194,7 +194,7 @@ export function Header() {
                                     <motion.div
                                         variants={itemVariants}
                                         transition={springTransition}
-                                        className="cursor-pointer rounded-full text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-4"
+                                        className="w-full cursor-pointer rounded-full bg-steel-blue px-2 py-4 text-center text-xl font-bold text-white hover:bg-white hover:text-black-pearl-dark"
                                     >
                                         Log In
                                     </motion.div>
@@ -204,7 +204,7 @@ export function Header() {
                                     <motion.div
                                         variants={itemVariants}
                                         transition={springTransition}
-                                        className="flex flex-row rounded-full items-center justify-center gap-x-4 cursor-pointer text-center text-xl text-white bg-steel-blue hover:bg-white hover:text-black-pearl-dark font-bold w-full px-2 py-2"
+                                        className="flex w-full cursor-pointer flex-row items-center justify-center gap-x-4 rounded-full bg-steel-blue p-2 text-center text-xl font-bold text-white hover:bg-white hover:text-black-pearl-dark"
                                     >
                                         <Image
                                             src={session.user?.image || ''}

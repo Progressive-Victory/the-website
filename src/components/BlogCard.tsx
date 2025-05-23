@@ -36,7 +36,7 @@ export default function BlogCard({
                 <div className="flex h-full flex-col rounded-b-xl bg-white bg-opacity-90 p-4 sm:p-6 ">
                     <h3 className="text-lg">{title}</h3>
                     <div
-                        className="text-gray-500 line-clamp-2"
+                        className="line-clamp-2 text-gray-500"
                         dangerouslySetInnerHTML={{
                             __html: description,
                         }}

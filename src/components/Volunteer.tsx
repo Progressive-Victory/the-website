@@ -23,7 +23,7 @@ function Card({
                 delay,
                 ease: 'backInOut',
             }}
-            className="relative flex flex-col md:flex-row items-center justify-start w-full bg-white rounded-lg p-4 h-fit md:h-[275px]"
+            className="relative flex h-fit w-full flex-col items-center justify-start rounded-lg bg-white p-4 md:h-[275px] md:flex-row"
         >
             <Image
                 src={image}
@@ -33,10 +33,10 @@ function Card({
                 className="my-4"
             />
             <div className="flex flex-col items-center justify-center gap-x-4">
-                <h1 className="text-lg md:text-xl font-bold text-black-pearl-dark text-center">
+                <h1 className="text-center text-lg font-bold text-black-pearl-dark md:text-xl">
                     {title}
                 </h1>
-                <p className="text-sm md:text-md text-black text-center px-4">
+                <p className="md:text-md px-4 text-center text-sm text-black">
                     {description}
                 </p>
             </div>
@@ -79,11 +79,11 @@ export function Volunteer() {
     }, [inView])
 
     return (
-        <div className="flex flex-col items-center justify-center bg-black-pearl-light py-20 w-full gap-y-24">
+        <div className="flex w-full flex-col items-center justify-center gap-y-24 bg-black-pearl-light py-20">
             <h1 className="text-4xl font-bold text-white">
                 What Can <span className="text-valencia">You </span> Do?
             </h1>
-            <div className="w-full flex flex-col xl:flex-row items-center justify-center gap-x-10 gap-y-10 px-4">
+            <div className="flex w-full flex-col items-center justify-center gap-10 px-4 xl:flex-row">
                 {visible && actions.map((action, index) => (
                     <Card
                         key={action.title}
