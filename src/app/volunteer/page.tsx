@@ -66,7 +66,7 @@ export default function Volunteer() {
                 updateTimer((prev) => {
                     if (prev <= 1) {
                         // reached zero: stop
-                        clearInterval(intervalRef.current!)
+                        clearInterval(intervalRef.current ?? undefined)
                         return 0
                     }
                     return prev - 1
