@@ -82,7 +82,7 @@ export function Header() {
                         />
                     </div>
                 </Link>
-                <div className="mb-2 flex hidden w-full cursor-pointer flex-row items-center justify-center gap-x-12 xl:flex">
+                <div className="mb-2 flex w-full cursor-pointer flex-row items-center justify-center gap-x-12 xl:flex">
                     {navitems.map((item) => (
                         <Link
                             key={item.name}

@@ -266,10 +266,10 @@ export default function Volunteer() {
                             <p className="mx-auto my-2 text-center text-3xl font-bold text-white">
                                 Volunteer with PV
                             </p>
-                            <p className="mx-2 mx-auto mb-2 text-center text-lg font-medium text-white">
+                            <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
                                 Join us on Discord and make a difference ✨
                             </p>
-                            <p className="mx-2 mx-auto mb-2 text-center text-lg font-medium italic text-white">
+                            <p className="mx-2 mb-2 text-center text-lg font-medium italic text-white">
                                 But first you{"'"}ve got to log in...
                             </p>
                             <Link
@@ -287,7 +287,7 @@ export default function Volunteer() {
                             <p className="mx-auto my-2 text-center text-3xl font-bold text-white">
                                 Volunteer with PV
                             </p>
-                            <p className="mx-2 mx-auto mb-2 text-center text-lg font-medium text-white">
+                            <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
                                 Join us on Discord and make a difference ✨
                             </p>
                             <Field
@@ -295,7 +295,7 @@ export default function Volunteer() {
                                 placeholder="Preferred Name"
                                 error={validationFlags.get('name')}
                                 errorText="Enter a valid name with no special characters"
-                                maxLength={40} // sensible default, may be too premissive
+                                maxLength={40} // sensible default, may be too permissive
                                 onChange={(e) => {
                                     const text = e.target.value
                                     setPreferredName(text)
@@ -417,7 +417,7 @@ export default function Volunteer() {
                                 <p className="font-white text-center text-lg font-bold text-white">
                                     Enter your Verification Code
                                 </p>
-                                <p className="mx-2 mx-auto mb-2 text-center text-lg font-medium text-white">
+                                <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
                                     We just sent it to your phone 📱
                                 </p>
 
