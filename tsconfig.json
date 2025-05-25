@@ -22,6 +22,6 @@
             "@/*": ["./src/*"]
         }
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "types/next-auth.d.ts", "eslint.config.mjs"],
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "types/next-auth.d.ts", "**/*.mjs","**/*.js"],
     "exclude": ["node_modules"]
 }

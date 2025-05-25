@@ -34,15 +34,11 @@ export default defineConfig([
     },
     compat.extends('next/core-web-vitals', 'next/typescript'),
     {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       extends:[tailwind.configs['flat/recommended']],
       rules:{
         "tailwindcss/no-custom-classname": "off",
       }
-    }
-    ,
-    { files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"], languageOptions: { globals: {...globals.browser, ...globals.node} } },
-    {
-      files:["**/*.{js,mjs}"],
-      extends:[ts.configs.disableTypeChecked]
     },
+    { files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"], languageOptions: { globals: {...globals.browser, ...globals.node} } },
 ]);

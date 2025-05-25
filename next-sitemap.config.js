@@ -1,5 +1,2 @@
-module.exports = {
-    siteUrl: 'https://www.progressivevictory.win',
-    generateRobotsTxt: true, // (optional)
-    // ...other options
-}
+export const siteUrl = 'https://www.progressivevictory.win';
+export const generateRobotsTxt = true;
