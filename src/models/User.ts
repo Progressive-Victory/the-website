@@ -51,10 +51,12 @@ userSchema.post('save', (doc: Document<IUser>, next) => {
         const usr: IUser = doc as IUser
         if(usr.zipCode && !(usr.state && usr.county && usr.city)) {
             const usrLoc: ILocation = (await Location.findOne({"zip": usr.zipCode}).exec()) as ILocation
-            usr.city = usrLoc.primary_city
-            usr.county = usrLoc.county
-            usr.state = usrLoc.state
-            usr.save()
+            if(usrLoc) {
+                usr.city = usrLoc.primary_city
+                usr.county = usrLoc.county
+                usr.state = usrLoc.state
+                usr.save()
+            }
         }
         next()
     }, 10)
