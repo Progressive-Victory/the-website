@@ -1,4 +1,4 @@
-import mongoose, { Document, Model, Schema } from 'mongoose'
+import mongoose, { Document, Schema } from 'mongoose'
 
 export interface ILocation extends Document {
     zip: number
@@ -38,8 +38,6 @@ const locationSchema = new Schema<ILocation>({
 
 const modelName = 'Location'
 
-export const Location: Model<ILocation> = 
-    (mongoose.models as Record<string, Model<ILocation>>).Location ||
-    mongoose.model<ILocation>(modelName, locationSchema)
+export const Location = mongoose.model<ILocation>(modelName, locationSchema)
 
 export default Location

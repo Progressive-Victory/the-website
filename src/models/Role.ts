@@ -1,4 +1,4 @@
-import mongoose, { Document, Model, Schema } from 'mongoose'
+import mongoose, { Document, Schema } from 'mongoose'
 import { IPermission, Permission } from './Permission'
 
 export interface IRole extends Document{
@@ -11,6 +11,6 @@ const roleSchema = new Schema<IRole>({
     permissions: [{ type: Schema.Types.ObjectId, ref: Permission, required: true }],
 })
 
-export const Role: Model<IRole> = mongoose.model<IRole>('Role', roleSchema)
+export const Role = mongoose.model<IRole>('Role', roleSchema)
 
 export default Role
