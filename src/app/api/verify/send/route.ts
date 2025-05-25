@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (!response.sent) {
-        return new Response('Bad request', { status: HTTPStatus.UnAuthorized })
+        return new Response('Bad request', { status: HTTPStatus.BadRequest })
     }
 
     return new Response('Success', { status: HTTPStatus.Ok })
