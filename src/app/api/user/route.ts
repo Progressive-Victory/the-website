@@ -4,7 +4,6 @@ import { User, IUser } from '@/models/User'
 import dbConnect from '@/util/libmongo'
 import { authOptions, checkAuth, ResponseCode } from '@/util/auth'
 import { OnboardingStage } from '@/util/stage'
-import { error } from 'console'
 export const dynamic = 'force-dynamic'
 /**
  * Create a new user.
@@ -54,7 +53,7 @@ export async function GET() {
         case ResponseCode.InsufficientAccess:
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         default:
-            throw error('Unidentified response code.')
+            throw Error('Unidentified response code.')
     }
 
     const usr: IUser = await retrieveUser() as IUser
@@ -78,7 +77,7 @@ export async function PATCH(req: NextRequest) {
         case ResponseCode.InsufficientAccess:
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         default:
-            throw error('Unidentified response code.')
+            throw Error('Unidentified response code.')
     }
 
     // Make sure we're at onboarding stage
@@ -102,7 +101,8 @@ export async function PATCH(req: NextRequest) {
             ]
             if (user[key] !== data[key] || !allowed.includes(key)) {
                 // @ts-expect-error potential bad key
-                user[key] = data[key] as IUser[keyof IUser]
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                user[key] = data[key]
             }
         })
     } else {

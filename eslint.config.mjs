@@ -11,9 +11,32 @@ const compat = new FlatCompat({
 
 export default ts.config([
     js.configs.recommended,
-    ts.configs.strict,
-    ts.configs.stylistic,
+    ts.configs.strictTypeChecked,
+    ts.configs.stylisticTypeChecked,
+    {
+      languageOptions: {
+        parserOptions: {
+          projectService: true,
+          tsconfigRootDir: import.meta.dirname,
+        },
+      },
+    },
     compat.extends('next/core-web-vitals', 'next/typescript'),
     tailwind.configs['flat/recommended'],
     { files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"], languageOptions: { globals: {...globals.browser, ...globals.node} } },
+    {
+      plugins: {tailwind},
+      rules: {
+        "tailwindcss/no-custom-classname": "off",
+        "@typescript-eslint/no-unsafe-assignment": "warn",
+        "@typescript-eslint/no-unsafe-member-access": "warn",
+        "@typescript-eslint/no-unsafe-argument": "warn"
+      }
+    },
+    {
+      files:["**/*.tsx"],
+      rules: {
+        "@typescript-eslint/no-misused-promises": 'off'
+      }
+    }
 ]);

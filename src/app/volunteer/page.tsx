@@ -318,8 +318,8 @@ export default function Volunteer() {
                                     setPhoneNumber(text)
                                     const isValid =
                                         /^\d{10}$/g.test(text) &&
-                                        text[0] !== '0' &&
-                                        text[0] !== '1'
+                                        !text.startsWith('0') &&
+                                        !text.startsWith('1')
 
                                     setValidationFlags((prev) =>
                                         new Map(prev).set('phone', isValid)
@@ -341,7 +341,7 @@ export default function Volunteer() {
                                     setZipCode(text)
                                     const isValid =
                                         /^\d{5}(-\d{4})?$/g.test(text) &&
-                                        text[0] !== '0'
+                                        !text.startsWith('0')
                                     setValidationFlags((prev) =>
                                         new Map(prev).set('zip', isValid)
                                     )

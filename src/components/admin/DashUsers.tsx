@@ -125,7 +125,7 @@ export default function DashUsers() {
                                     ? 'border-blue-500 bg-blue-100'
                                     : 'hover:bg-gray-100'
                                 }`}
-                            onClick={() => handleChangeSelection(user)}
+                            onClick={() => { handleChangeSelection(user); }}
                         >
                             <div className="truncate font-medium">{user.name}</div>
                             <div className="truncate text-xs text-gray-500 md:text-sm">{user.email}</div>
@@ -171,7 +171,7 @@ export default function DashUsers() {
                             <div className="flex flex-col gap-2 md:flex-row md:gap-4">
                                 <select
                                     className="w-full rounded border p-1 text-sm md:p-2 md:text-base"
-                                    onChange={(e) => handleAddRole(e.target.value)}
+                                    onChange={(e) => { handleAddRole(e.target.value); }}
                                     value=""
                                 >
                                     <option value="">Add Role</option>
@@ -184,7 +184,7 @@ export default function DashUsers() {
 
                                 <select
                                     className="w-full rounded border p-1 text-sm md:p-2 md:text-base"
-                                    onChange={(e) => handleRemoveRole(e.target.value)}
+                                    onChange={(e) => { handleRemoveRole(e.target.value); }}
                                     value=""
                                 >
                                     <option value="">Remove Role</option>

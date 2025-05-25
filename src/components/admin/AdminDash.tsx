@@ -42,9 +42,7 @@ export default function AdminDash() {
                         <ul>
                             {sectionArray.map((value, index) => (
                                 <li key={value} className={"p-2 " + (value == Section[section] ? "bg-sky-700" : "hover:bg-sky-500")}
-                                    onClick={() => (
-                                        setSection(index)
-                                    )} >
+                                    onClick={() => { setSection(index); }} >
                                     <a className="cursor-pointer">{value}</a>
                                 </li>
                             ))}

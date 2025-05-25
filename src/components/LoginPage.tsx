@@ -21,7 +21,7 @@ export function LoginPage() {
             params.get('redirect')?.startsWith('/') &&
             !params.get('redirect')?.includes('?')
         ) {
-            setRedirect(params.get('redirect') || '/')
+            setRedirect(params.get('redirect') ?? '/')
         }
 
         if (session) {

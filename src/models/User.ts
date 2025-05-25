@@ -49,14 +49,16 @@ const userSchema = new Schema<IUser>({
 })
 
 userSchema.post('save', (doc: Document<IUser>, next) => {
-    setTimeout(async () => {
+    setTimeout(() => {
         const usr: IUser = doc as IUser
         if(usr.zipCode && !(usr.state && usr.county && usr.city)) {
-            const [city, county, state] = await getLoc(usr.zipCode)
-            usr.city = city
-            usr.county = county
-            usr.state = state
-            usr.save()
+            void getLoc(usr.zipCode).then(([city, county, state]) => {
+                usr.city = city
+                usr.county = county
+                usr.state = state
+                void usr.save()
+            })
+            
         }
         next()
     }, 10)
@@ -66,9 +68,7 @@ userSchema.post('save', (doc: Document<IUser>, next) => {
 const modelName = 'User'
 
 // Finally the model itself is exported, we use the cache if it exists
-export const User: Model<IUser> =
-    (mongoose.models as Record<string, Model<IUser>>).User ||
-    mongoose.model<IUser>(modelName, userSchema)
+export const User: Model<IUser> = mongoose.model<IUser>(modelName, userSchema)
 
 // Default export
 export default User

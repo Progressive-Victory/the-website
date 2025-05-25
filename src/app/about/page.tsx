@@ -1,15 +1,20 @@
 import { MainLayout } from '@/components/MainLayout'
 import { FAQ } from '@/components/FAQ'
 import { Metadata } from 'next'
+
+const SITE_URL = process.env.SITE_URL
+
+if (!SITE_URL) throw Error('SITE_URL undefined in environment variable')
+
 export const metadata: Metadata = {
     title: 'PV - About',
     description: 'Learn about Progressive Victory!',
     openGraph: {
         title: 'PV - About',
         description: 'Learn about Progressive Victory!',
-        url: `https://${process.env.SITE_URL}/`,
+        url: `https://${SITE_URL}/`,
         siteName: 'Progressive Victory',
-        images: [{ url: `https://${process.env.SITE_URL}/images/banner.png` }],
+        images: [{ url: `https://${SITE_URL}/images/banner.png` }],
     },
 }
 function AboutCard({

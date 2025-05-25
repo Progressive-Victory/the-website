@@ -1,5 +1,5 @@
 import { IUser } from "@/models/User";
-import { DependencyList, useEffect, useState } from "react";
+import { DependencyList, SetStateAction, useEffect, useState } from "react";
 
 /**
  * Optional props
@@ -25,15 +25,15 @@ export default function useUser(props?: DataProps): DataState {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
-  async function reload() {
+  function reload() {
     setLoading(true)
 
-    await fetch('api/user')
+    fetch('api/user')
       .then(async response => {
         const body = await response.json()
         setData(body)
       })
-      .catch(err => setError(err))
+      .catch(( err: unknown) => { setError(err as SetStateAction<string>); })
 
     setLoading(false)
   }
@@ -59,7 +59,7 @@ export function hasPermission(user: IUser, permission: string): boolean {
   let res = false
 
   for (const r of user.roles) {
-    if (r.permissions?.map(p => p.name).includes(permission)) {
+    if (r.permissions.map(p => p.name).includes(permission)) {
       res = true
     }
   }

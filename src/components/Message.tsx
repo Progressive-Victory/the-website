@@ -49,7 +49,7 @@ export function Message({
                 <Image
                     src={avatar}
                     alt={username}
-                    className={`${avatarRounded ? 'rounded-full' : ''}`}
+                    className={avatarRounded ? 'rounded-full' : ''}
                     width={38}
                     height={38}
                 />
@@ -73,7 +73,7 @@ export function Message({
             <div className="ml-auto mt-8 flex select-none flex-row items-center justify-end gap-x-4">
                 <div
                     className="group size-6"
-                    onClick={() => setClickedBubble(!clickedBubble)}
+                    onClick={() => { setClickedBubble(!clickedBubble); }}
                 >
                     {clickedBubble ? (
                         <SolidChatBubbleLeftRightIcon className="grow text-blue-500" />
@@ -83,7 +83,7 @@ export function Message({
                 </div>
                 <div
                     className="group size-6"
-                    onClick={() => setClickedShare(!clickedShare)}
+                    onClick={() => { setClickedShare(!clickedShare); }}
                 >
                     {clickedShare ? (
                         <SolidArrowUpOnSquareIcon className="grow text-green-500" />
@@ -93,7 +93,7 @@ export function Message({
                 </div>
                 <div
                     className="group size-6"
-                    onClick={() => setClickedHeart(!clickedHeart)}
+                    onClick={() => { setClickedHeart(!clickedHeart); }}
                 >
                     {clickedHeart ? (
                         <SolidHeartIcon className="grow text-red-500" />

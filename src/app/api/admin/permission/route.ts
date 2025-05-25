@@ -51,21 +51,18 @@ export async function PATCH(req: NextRequest) {
     const dbPermList = (await Permission.find({})
         .exec()) as IPermission[]
 
-    data.forEach(async(perm: Partial<IPermission>) => {
-        const dbPerm: IPermission = dbPermList.find(x => x.name === perm.name) as IPermission
+    for (const perm of data) {
+        const dbPerm = dbPermList.find(x => x.name === perm.name)
         if(dbPerm){
             //update existing role
             //throw a not implemented for now
             return NextResponse.json({ error: 'Not Implemented '}, { status: 501 })
         } else {
             //logic route for creating new role
-            const doc = await Permission.create(perm)
-
-            doc.save()
-            
+            void Permission.create(perm)
             return NextResponse.json({status: 200})
         }
-    })
+    }
 }
 
 export async function DELETE(req: NextRequest) {

@@ -174,7 +174,7 @@ export default function DashRoles() {
                                     ? 'border-blue-500 bg-blue-100'
                                     : 'hover:bg-gray-100'
                                 }`}
-                                onClick={() => handleChangeSelection(role)}
+                                onClick={() => { handleChangeSelection(role); }}
                                 >
                                 <div className="relative font-medium">
                                     {role.name}
@@ -261,7 +261,7 @@ export default function DashRoles() {
                             <div className="flex flex-col gap-2 md:flex-row md:gap-4">
                                 <select
                                     className="w-full rounded border p-1 text-sm md:p-2 md:text-base"
-                                    onChange={(e) => handleAddPerm(e.target.value)}
+                                    onChange={(e) => { handleAddPerm(e.target.value); }}
                                     value=""
                                 >
                                     <option value="">Add Permission</option>
@@ -274,7 +274,7 @@ export default function DashRoles() {
 
                                 <select
                                     className="w-full rounded border p-1 text-sm md:p-2 md:text-base"
-                                    onChange={(e) => handleRemovePerm(e.target.value)}
+                                    onChange={(e) => { handleRemovePerm(e.target.value); }}
                                     value=""
                                 >
                                     <option value="">Remove Permission</option>

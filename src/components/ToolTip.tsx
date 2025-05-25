@@ -51,9 +51,9 @@ export function ToolTip({
 
     useOutsideDetector(wrapperRef)
 
-    closerList?.map((element : Element) => {
+    closerList.map((element : Element) => {
         if (element instanceof HTMLButtonElement) {
-            const btn = element as HTMLButtonElement
+            const btn = element
             btn.addEventListener('closettm', () => {setOpen(false)})
         }
     })

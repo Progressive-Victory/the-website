@@ -24,21 +24,21 @@ export function Popup({
         setCloserList(closers)
     }, [open, wrapperRef])
 
-    closerList?.map((element : Element) => {
+    closerList.map((element : Element) => {
         if(element instanceof HTMLButtonElement) {
-            const btn = element as HTMLButtonElement
-            btn.addEventListener('closepm', () => (setOpen(false)))
+            const btn = element
+            btn.addEventListener('closepm', () => { setOpen(false); })
         }
         if(element instanceof HTMLFormElement) {
-            const form = element as HTMLFormElement
-            form.addEventListener('closepm', () => (setOpen(false)))
+            const form = element
+            form.addEventListener('closepm', () => { setOpen(false); })
         }
     })
 
     return (
         <>
             <button
-                onClick={() => (setOpen(!open))}
+                onClick={() => { setOpen(!open); }}
                 className={triggerClasses}
             >
                 {label}

@@ -2,7 +2,6 @@ import dbConnect from "@/util/libmongo";
 import { Role, IRole } from "@/models/Role";
 import { checkAuth, ResponseCode } from "@/util/auth";
 import { NextResponse, NextRequest } from "next/server";
-import { error } from "console";
 
 export async function GET() {
     // check session auth
@@ -19,7 +18,7 @@ export async function GET() {
         case ResponseCode.InsufficientAccess:
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         default:
-            throw error("Unidentified response code.")
+            throw Error("Unidentified response code.")
     }
 
     await dbConnect()
@@ -52,7 +51,7 @@ export async function PATCH(req: NextRequest) {
         case ResponseCode.InsufficientAccess:
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         default:
-            throw error("Unidentified response code.")
+            throw Error("Unidentified response code.")
     }
 
     await dbConnect()
@@ -62,8 +61,8 @@ export async function PATCH(req: NextRequest) {
         .populate('permissions')
         .exec()) as IRole[]
 
-    data.forEach(async(role: Partial<IRole>) => {
-        const dbRole: IRole = dbRoleList.find(x => x.name == role.name) as IRole
+    for (const role of data) {
+        const dbRole = dbRoleList.find(x => x.name == role.name)
         if(dbRole){
             //update existing role
             Object.keys(role).forEach((k) => {
@@ -78,14 +77,13 @@ export async function PATCH(req: NextRequest) {
                 }
             })
             await dbConnect()
-            await dbRole.save()
+            void dbRole.save()
         } else {
             //logic route for creating new role
-            const doc = await Role.create(role)
-
-            doc.save()
+            void Role.create(role)
         }
-    })
+    }
+
     return NextResponse.json({status: 200})
 }
 
@@ -104,7 +102,7 @@ export async function DELETE(req: NextRequest) {
             case ResponseCode.InsufficientAccess:
                 return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
             default:
-                throw error("Unidentified response code.")
+                throw Error("Unidentified response code.")
         }
     
         await dbConnect()

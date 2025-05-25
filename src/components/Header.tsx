@@ -128,7 +128,7 @@ export function Header() {
 
                 <button
                     className="group xl:hidden"
-                    onClick={() => setIsOpen(!isOpen)}
+                    onClick={() => { setIsOpen(!isOpen); }}
                 >
                     {isOpen ? (
                         <XMarkIcon className="size-8 text-white transition duration-300 ease-in-out group-hover:text-valencia" />
@@ -207,7 +207,7 @@ export function Header() {
                                         className="flex w-full cursor-pointer flex-row items-center justify-center gap-x-4 rounded-full bg-steel-blue p-2 text-center text-xl font-bold text-white hover:bg-white hover:text-black-pearl-dark"
                                     >
                                         <Image
-                                            src={session.user?.image || ''}
+                                            src={session.user?.image ?? ''}
                                             width={44}
                                             height={44}
                                             className="rounded-full border-2 border-white"

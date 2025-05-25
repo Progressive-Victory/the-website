@@ -5,7 +5,7 @@ const MONGODB_URI = process.env.MONGODB_URI
 async function dbConnect() {
     // If the connection is already established (readyState 1 means connected),
     // return the mongoose instance right away.
-    if (mongoose.connection.readyState >= 1) {
+    if (mongoose.connection.readyState === mongoose.ConnectionStates.connected) {
         return mongoose
     }
 

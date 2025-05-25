@@ -6,7 +6,7 @@ function Questions({ question, answer }: { question: string; answer: string }) {
     return (
         <button
             className="relative m-4 flex flex-col items-center justify-center gap-y-4 overflow-y-scroll rounded-md bg-white p-4"
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => { setIsOpen(!isOpen); }}
         >
             <div className="mt-4 flex w-full flex-row items-center justify-between gap-x-4">
                 <h1 className="text-left text-2xl font-bold text-black">

@@ -23,7 +23,7 @@ export function Field({
     return (
         <div
             className={`my-2 flex w-full flex-col items-start justify-center transition-all duration-200 ${
-                disabled !== null && disabled
+                disabled
                     ? '-mb-2 h-0 opacity-0'
                     : 'h-[48px]'
             }`}
@@ -34,21 +34,21 @@ export function Field({
             </label>
             <input
                 value={value}
-                maxLength={maxLength != null ? maxLength : 25}
+                maxLength={maxLength ?? 25}
                 onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                     if (onEnter != null && e.key === 'Enter') {
                         onEnter(e)
                     }
                 }}
-                disabled={disabled !== null && disabled}
-                placeholder={placeholder ? placeholder : ''}
+                disabled={disabled}
+                placeholder={placeholder ?? ''}
                 onChange={(e) => {
-                    if (disabled !== null && !disabled) {
+                    if (!disabled) {
                         onChange(e)
                     }
                 }}
                 className={`w-full rounded-md bg-white px-4 py-2 ring-steel-blue ${
-                    error !== null && value !== '' && !error
+                    value !== '' && !error
                         ? 'border-2 border-red-500'
                         : ''
                 }`}

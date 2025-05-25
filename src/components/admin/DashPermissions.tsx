@@ -93,7 +93,7 @@ export default function DashPermissions() {
                                         ? 'border-blue-500 bg-blue-100'
                                         : 'hover:bg-gray-100'
                                     }`}
-                                onClick={() => setSelectedPerm(perm)}
+                                onClick={() => { setSelectedPerm(perm); }}
                             >
                                 <div className="relative font-medium">
                                     {perm.name}

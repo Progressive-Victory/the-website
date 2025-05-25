@@ -11,8 +11,6 @@ const roleSchema = new Schema<IRole>({
     permissions: [{ type: Schema.Types.ObjectId, ref: Permission, required: true }],
 })
 
-export const Role: Model<IRole> =
-    (mongoose.models as Record<string, Model<IRole>>).Role || 
-    mongoose.model<IRole>('Role', roleSchema)
+export const Role: Model<IRole> = mongoose.model<IRole>('Role', roleSchema)
 
 export default Role
