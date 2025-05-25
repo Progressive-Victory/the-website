@@ -15,7 +15,7 @@ interface NominatimResponse {
 
 export const zipToLatLong = async (zipcode: number) => {
     try {
-        const url = `https://nominatim.openstreetmap.org/search?postalcode=${zipcode}&country=us&format=json`
+        const url = `https://nominatim.openstreetmap.org/search?postalcode=${zipcode.toString()}&country=us&format=json`
         const response = await fetch(url)
         const data = (await response.json()) as NominatimResponse[]
         const { lat, lon } = data[0]

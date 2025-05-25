@@ -17,7 +17,7 @@ interface LatLon { lat: string | number; lon: string | number }
 
 const createClusterCustomIcon = function (cluster: MarkerCluster) {
     return L.divIcon({
-        html: `<div><p>${cluster.getChildCount()}</p></div>`,
+        html: `<div><p>${cluster.getChildCount().toString()}</p></div>`,
         className: 'custom-marker-cluster',
         iconSize: L.point(33, 33, true),
     })
@@ -119,7 +119,7 @@ export const ClientMap = ({
             }
             setMarkerList(newList)
         }
-        if (isMarker) fetcher()
+        if (isMarker) void fetcher()
 
         return () => {
             setMarkerList([])
@@ -139,9 +139,7 @@ export const ClientMap = ({
             doubleClickZoom={!disableInteraction}
             className="z-0 size-full"
         >
-            {children ? (
-                children
-            ) : (
+            {children ?? (
                 <>
                     {!hideOpenStreetMap && <OpenStreetMapLayer />}
                     <USMapLayer isHeatmap={isHeatmap} />

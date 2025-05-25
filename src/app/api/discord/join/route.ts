@@ -8,6 +8,7 @@ import dbConnect from '@/util/libmongo'
 import { RESTJSONErrorCodes, Routes } from 'discord-api-types/v10'
 import { RequestMethod } from '@discordjs/rest'
 import { rest, isGuildMember } from '@/util/discord'
+import { HTTPStatus } from '@/util/types'
 
 const GUILD_ID = process.env.GUILD_ID
 
@@ -19,7 +20,7 @@ export async function PUT(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
     if (!session || !token) {
-        return new Response('Unauthorized', { status: 401 })
+        return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
     }
 
     await dbConnect()
@@ -27,7 +28,7 @@ export async function PUT(req: NextRequest) {
     const user = await User.findOne({ discordId: token.discordId })
 
     // Escape if the user is null
-    if (!user) return new Response('Not Logged In', { status: 200 })
+    if (!user) return new Response('Not Logged In', { status: HTTPStatus.UnAuthorized })
 
     switch (user.onboardingStage) {
         case OnboardingStage.VERIFIED:
@@ -35,12 +36,13 @@ export async function PUT(req: NextRequest) {
         case OnboardingStage.JOINED:
             break
         default:
-            return new Response('Unauthorized', { status: 401 })
+            return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
     }
 
     if (!GUILD_ID) throw Error('Please define the GUILD_ID environment variable')
 
     /**
+     * Adds a user to the guild, provided you have a valid oauth2 access token for the user with the guilds.join scope. Returns a 201 Created with the guild member as the body, or 204 No Content if the user is already a member of the guild. Fires a Guild Member Add Gateway event.
      * @see https://discord.com/developers/docs/resources/guild#add-guild-member
      */
     const response = await rest.queueRequest({
@@ -53,7 +55,7 @@ export async function PUT(req: NextRequest) {
 
     const data = await response.json()
 
-    if (response.status === 201 && isGuildMember(data)) {
+    if (response.status === HTTPStatus.Created && isGuildMember(data)) {
         user.discordUserAvatar = data.user.avatar ?? undefined
         user.discordGuildAvatar = data.avatar ?? undefined
     }
@@ -66,7 +68,7 @@ export async function PUT(req: NextRequest) {
             user.onboardingStage = OnboardingStage.JOINED
         }
         await user.save()
-        return new Response('Added Member!', { status: 200 })
+        return new Response('Added Member!', { status: HTTPStatus.Ok })
     } else {
         const data = await response.json()
 
@@ -78,11 +80,11 @@ export async function PUT(req: NextRequest) {
                     code: RESTJSONErrorCodes.InvalidOAuth2AccessToken,
                 },
                 {
-                    status: 400,
+                    status: HTTPStatus.BadRequest,
                 }
             )
         }
-        return new Response('Internal Error', { status: 500 })
+        return new Response('Internal Error', { status: HTTPStatus.InternalServerError })
     }
 }
 
@@ -93,14 +95,14 @@ export async function GET(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
     if (!session || !token) {
-        return new Response('Unauthorized', { status: 401 })
+        return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
     }
 
     await dbConnect()
 
     const user = await User.findOne({ discordId: token.discordId })
 
-    if (!user) return new Response('Internal Error', { status: 500 })
+    if (!user) return new Response('Internal Error', { status: HTTPStatus.InternalServerError })
     switch (user.onboardingStage) {
         case OnboardingStage.VERIFIED:
             break
@@ -108,7 +110,7 @@ export async function GET(req: NextRequest) {
             break
         default:
             // They cannot request a join without verification
-            return new Response('Unauthorized', { status: 401 })
+            return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
     }
 
     if (!GUILD_ID) throw Error('Please define the GUILD_ID environment variable')
@@ -137,9 +139,9 @@ export async function GET(req: NextRequest) {
     await user.save()
         return NextResponse.json(
             { message: 'Already Joined!' },
-            { status: 200 }
+            { status: HTTPStatus.Ok }
         )
     } else {
-        return new Response('Not Joined.', { status: 404 })
+        return new Response('Not Joined.', { status: HTTPStatus.NotFound })
     }
 }

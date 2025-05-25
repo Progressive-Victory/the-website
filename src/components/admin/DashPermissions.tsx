@@ -30,7 +30,7 @@ export default function DashPermissions() {
                 setLoading(false)
             }
         }
-        fetchData()
+        void fetchData()
     }, [refresh])
 
     useEffect(() => {
@@ -74,7 +74,7 @@ export default function DashPermissions() {
         <div className="flex flex-col gap-2 border-b py-2 md:grid md:grid-cols-3 md:gap-4">
             <span className="text-sm font-medium text-gray-700 md:text-base">{label}</span>
             <span className="col-span-2 break-words text-sm text-gray-600 md:text-base">
-                {value || 'N/A'}
+                {value ?? 'N/A'}
             </span>
         </div>
     )
@@ -105,7 +105,7 @@ export default function DashPermissions() {
                                         <>
                                             <button
                                                 onClick={(ev) => {
-                                                    handleDeletePerm(perm.name)
+                                                    void handleDeletePerm(perm.name)
                                                     ev.target.dispatchEvent(new Event('closettm'))
                                                 }}
                                                 className="closer rounded px-2 hover:bg-blue-500"
@@ -128,9 +128,9 @@ export default function DashPermissions() {
                         <div>
                             <h2 className="text-lg">Add Permission</h2>
                             <form className="closer" action="javascript:void(0);" onSubmit={(ev: FormEvent<HTMLFormElement>) => {
-                                const item: HTMLInputElement = ev.currentTarget.elements.namedItem("pName") as HTMLInputElement
-                                if (!item) return false
-                                handleCreatePerm(item.value)
+                                const item = ev.currentTarget.elements.namedItem("pName")
+                                if (!(item instanceof HTMLInputElement)) return false
+                                void handleCreatePerm(item.value)
                                 ev.target.dispatchEvent(new Event('closepm'))
                             }}>
                                 <label htmlFor="rName">Permission Name:</label>

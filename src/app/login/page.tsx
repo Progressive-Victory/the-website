@@ -2,15 +2,19 @@ import { Suspense } from 'react'
 import { LoginPage } from '@/components/LoginPage'
 import { Metadata } from 'next'
 
+const SITE_URL = process.env.SITE_URL
+
+if (!SITE_URL) throw Error('Please define the SITE_URL environment variable')
+
 export const metadata: Metadata = {
     title: 'PV - Login',
     description: 'Log in and join the community',
     openGraph: {
         title: 'PV - Login',
         description: 'Log in and join the community',
-        url: `https://${process.env.SITE_URL}/`,
+        url: `https://${SITE_URL}/`,
         siteName: 'Progressive Victory',
-        images: [{ url: `https://${process.env.SITE_URL}/images/banner.png` }],
+        images: [{ url: `https://${SITE_URL}/images/banner.png` }],
     },
 }
 

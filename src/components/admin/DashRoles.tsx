@@ -41,7 +41,7 @@ export default function DashRoles() {
                 setLoading(false)
             }
         }
-        fetchData()
+        void fetchData()
     }, [refresh])
 
     //if sectionData has been changed then check to see if the currently displayed role still exists. If not set selectedRole to null
@@ -154,7 +154,7 @@ export default function DashRoles() {
         <div className="flex flex-col gap-2 border-b py-2 md:grid md:grid-cols-3 md:gap-4">
             <span className="text-sm font-medium text-gray-700 md:text-base">{label}</span>
             <span className="col-span-2 break-words text-sm text-gray-600 md:text-base">
-                {value || 'N/A'}
+                {value ?? 'N/A'}
             </span>
         </div>
     )
@@ -186,7 +186,7 @@ export default function DashRoles() {
                                         <>
                                             <button 
                                                 onClick={(ev) => {
-                                                    handleDeleteRole(role.name)
+                                                    void handleDeleteRole(role.name)
                                                     ev.target.dispatchEvent(new Event('closettm'))
                                                 }}
                                                 className="closer rounded px-2 hover:bg-blue-500"
@@ -209,9 +209,9 @@ export default function DashRoles() {
                         <div>
                             <h2 className="text-lg">Add Role</h2>
                             <form className="closer" action="javascript:void(0);" onSubmit={(ev: FormEvent<HTMLFormElement>) => {
-                                    const item: HTMLInputElement = ev.currentTarget.elements.namedItem("rName") as HTMLInputElement
-                                    if (!item) return false
-                                    handleCreateRole(item.value)
+                                    const item = ev.currentTarget.elements.namedItem("rName")
+                                    if (!(item instanceof HTMLInputElement)) return false
+                                    void handleCreateRole(item.value)
                                     ev.target.dispatchEvent(new Event('closepm'))
                                 }}>
                                 <label htmlFor="rName">Role Name:</label>
@@ -287,7 +287,7 @@ export default function DashRoles() {
                             </div>
 
                             <button
-                                onClick={handleSaveChanges}
+                                onClick={void handleSaveChanges}
                                 className="w-full rounded bg-blue-600 px-3 py-1 text-sm text-white transition-colors hover:bg-blue-700 active:outline active:outline-offset-2 active:outline-blue-500 md:px-4 md:py-2 md:text-base"
                             >
                                 Save Changes

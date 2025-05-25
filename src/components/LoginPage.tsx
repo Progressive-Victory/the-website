@@ -3,7 +3,7 @@ import { MainLayout } from '@/components/MainLayout'
 import { LoginCard } from '@/components/LoginCard'
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useSession, signIn } from 'next-auth/react'
+import { useSession, signIn, SignInOptions, SignInAuthorizationParams } from 'next-auth/react'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 
@@ -44,7 +44,7 @@ export function LoginPage() {
                 <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
 
                 <div className="z-2 relative flex h-screen w-full flex-col items-center justify-center">
-                    <LoginCard signIn={signIn} redirect={redirect} />
+                    <LoginCard signIn={(provider: string, options?: SignInOptions, params?: SignInAuthorizationParams) => void signIn(provider, options, params)} redirect={redirect} />
                     <div className="mt-4 flex flex-row items-center rounded-lg bg-black-pearl-dark p-4 text-xs text-white shadow-lg">
                         <InformationCircleIcon className="mr-1 size-4 rounded-full bg-white text-steel-blue" />
                         By signing in you agree to our{' '}

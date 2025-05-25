@@ -2,6 +2,7 @@ import dbConnect from "@/util/libmongo";
 import { Permission, IPermission } from "@/models/Permission";
 import { checkAuth, ResponseCode } from "@/util/auth";
 import { NextResponse, NextRequest } from "next/server";
+import { HTTPStatus } from "@/util/types";
 
 export async function GET() {
     const response = await checkAuth(["Superadmin"])
@@ -10,11 +11,11 @@ export async function GET() {
         case ResponseCode.Successful:
             break
         case ResponseCode.Exception:
-            return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+            return NextResponse.json({ error: 'Bad request' }, { status: HTTPStatus.BadRequest })
         case ResponseCode.NoSession:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ error: 'Unauthorized' }, { status: HTTPStatus.UnAuthorized })
         case ResponseCode.InsufficientAccess:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ error: 'Forbidden' }, { status: HTTPStatus.Forbidden })
         default:
             throw new Error("Unidentified response code.")
     }
@@ -36,11 +37,11 @@ export async function PATCH(req: NextRequest) {
         case ResponseCode.Successful:
             break
         case ResponseCode.Exception:
-            return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+            return NextResponse.json({ error: 'Bad request' }, { status: HTTPStatus.BadRequest })
         case ResponseCode.NoSession:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ error: 'Unauthorized' }, { status: HTTPStatus.UnAuthorized })
         case ResponseCode.InsufficientAccess:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ error: 'Forbidden' }, { status: HTTPStatus.Forbidden })
         default:
             throw new Error("Unidentified response code.")
     }
@@ -56,11 +57,11 @@ export async function PATCH(req: NextRequest) {
         if(dbPerm){
             //update existing role
             //throw a not implemented for now
-            return NextResponse.json({ error: 'Not Implemented '}, { status: 501 })
+            return NextResponse.json({ error: 'Not Implemented '}, { status: HTTPStatus.NotImplemented })
         } else {
             //logic route for creating new role
             void Permission.create(perm)
-            return NextResponse.json({status: 200})
+            return NextResponse.json({status: HTTPStatus.Ok})
         }
     }
 }
@@ -74,11 +75,11 @@ export async function DELETE(req: NextRequest) {
             case ResponseCode.Successful:
                 break
             case ResponseCode.Exception:
-                return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+                return NextResponse.json({ error: 'Bad request' }, { status: HTTPStatus.BadRequest })
             case ResponseCode.NoSession:
-                return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+                return NextResponse.json({ error: 'Unauthorized' }, { status: HTTPStatus.UnAuthorized })
             case ResponseCode.InsufficientAccess:
-                return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+                return NextResponse.json({ error: 'Forbidden' }, { status: HTTPStatus.Forbidden })
             default:
                 throw new Error("Unidentified response code.")
         }
@@ -90,5 +91,5 @@ export async function DELETE(req: NextRequest) {
 
         console.log(perm)
 
-        return NextResponse.json({status: 200})
+        return NextResponse.json({status: HTTPStatus.Ok})
 }

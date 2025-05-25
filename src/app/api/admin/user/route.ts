@@ -2,6 +2,7 @@ import dbConnect from "@/util/libmongo";
 import { User, IUser } from "@/models/User"
 import { checkAuth, checkAuthPermissions, PermissionName, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
+import { HTTPStatus } from "@/util/types";
 
 export async function GET() {
     // check session auth
@@ -12,11 +13,11 @@ export async function GET() {
         case ResponseCode.Successful:
             break
         case ResponseCode.Exception:
-            return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+            return NextResponse.json({ error: 'Bad request' }, { status: HTTPStatus.BadRequest })
         case ResponseCode.NoSession:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ error: 'Unauthorized' }, { status: HTTPStatus.UnAuthorized })
         case ResponseCode.InsufficientAccess:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ error: 'Forbidden' }, { status: HTTPStatus.Forbidden })
         default:
             throw Error("Unidentified response code.")
     }
@@ -51,11 +52,11 @@ export async function PATCH(req: NextRequest) {
         case ResponseCode.Successful:
             break
         case ResponseCode.Exception:
-            return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+            return NextResponse.json({ error: 'Bad request' }, { status: HTTPStatus.BadRequest })
         case ResponseCode.NoSession:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ error: 'Unauthorized' }, { status: HTTPStatus.UnAuthorized })
         case ResponseCode.InsufficientAccess:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ error: 'Forbidden' }, { status:  HTTPStatus.Forbidden })
         default:
             throw Error("Unidentified response code.")
     }
@@ -102,5 +103,5 @@ export async function PATCH(req: NextRequest) {
          void dbUsr.save() // save the user object to commit changes.
     }
 
-   return NextResponse.json({status: 200})
+    return NextResponse.json({status: HTTPStatus.Ok})
 }

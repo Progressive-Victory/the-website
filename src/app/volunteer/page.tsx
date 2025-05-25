@@ -9,6 +9,8 @@ import { IUser } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
+import { HTTPStatus } from '@/util/types'
+import { RESTJSONErrorCodes } from 'discord-api-types/v10'
 
 export default function Volunteer() {
     const [currentStage, setCurrentStage] = useState<string>('loading')
@@ -51,8 +53,8 @@ export default function Volunteer() {
             body: JSON.stringify({ number: phone }),
         })
 
-        if (resp.status === 200) {
-            getUser()
+        if (resp.status === HTTPStatus.Ok) {
+            void getUser()
 
             // kick off the clock
             updateTimer(60)
@@ -79,18 +81,18 @@ export default function Volunteer() {
         return false
     }, [])
 
-    const joinToServer = useCallback(async () => {
-        fetch('/api/discord/join', {
+    const joinToServer = useCallback(() => {
+        void fetch('/api/discord/join', {
             method: 'PUT',
         }).then(async (response) => {
             if (response.ok) {
-                getUser()
+                void getUser()
             } else {
                 // Not every response will have JSON but errors should
                 const data = await response.json()
                 // The discord code for bad oauth2 we pass back
-                if (data && data.code === 50025) {
-                    signOut({
+                if (data && 'code' in data && typeof data.code === 'number' && data.code === RESTJSONErrorCodes.InvalidOAuth2AccessToken) {
+                    void signOut({
                         callbackUrl: '/login',
                     })
                 }
@@ -114,7 +116,7 @@ export default function Volunteer() {
         })
 
         setCheckingCode(false)
-        if (resp.status === 200) {
+        if (resp.status === HTTPStatus.Ok) {
             // Join the user
             joinToServer()
             return true
@@ -139,7 +141,7 @@ export default function Volunteer() {
 
     // Gets the current user object, useful for manipulation as we proceed in flow
     useEffect(() => {
-        getUser()
+        void getUser()
     }, [])
 
     // Try and join user to server
@@ -165,19 +167,19 @@ export default function Volunteer() {
 
                             setCurrentStage('joining')
                             // Join the user
-                            fetch('/api/discord/join').then(async (result) => {
-                                if (result.status === 404) {
+                            void fetch('/api/discord/join').then((result) => {
+                                if (result.status === HTTPStatus.NotFound) {
                                     joinToServer()
                                 } else {
-                                    getUser()
+                                    void getUser()
                                     setShowRejoin(false)
                                 }
                             })
                             break
                         case OnboardingStage.JOINED:
                             setCurrentStage('joined')
-                            fetch('/api/discord/join').then(async (result) => {
-                                if (result.status === 404) {
+                            void fetch('/api/discord/join').then((result) => {
+                                if (result.status === HTTPStatus.NotFound) {
                                     setShowRejoin(true)
                                 } else {
                                     setShowRejoin(false)
@@ -207,15 +209,15 @@ export default function Volunteer() {
                 setStartJoin(false)
             } else {
                 // Set data on user and upate onboarding stage
-                updateUser({
+                void updateUser({
                     preferredName: preferredName,
                     zipCode: fromUS ? '00000' : zipCode, // give them a dummy zip if international
                     phoneNumber: phoneNumber,
                 }).then((result) => {
                     if (result) {
-                        requestCode(phoneNumber).then((result) => {
+                        void requestCode(phoneNumber).then((result) => {
                             if (result) {
-                                getUser()
+                                void getUser()
                             } else {
                                 setStartJoin(false)
                                 setValidationFlags((prev) =>
@@ -225,7 +227,7 @@ export default function Volunteer() {
                             }
                         })
                     } else {
-                        // TODO: an error occured in setting user data
+                        // TODO: an error occurred in setting user data
                         console.error('Could not update user profile!')
                     }
                 })
@@ -429,7 +431,7 @@ export default function Volunteer() {
                                         // Let users input with enter key
                                         onEnter={() => {
                                             if (securityCode.length === 6) {
-                                                checkCode(securityCode)
+                                                void checkCode(securityCode)
                                             }
                                         }}
                                         errorText="Invalid or expired code, try a new one"
@@ -456,26 +458,26 @@ export default function Volunteer() {
                                         } ml-2 mt-auto w-fit whitespace-nowrap rounded-lg px-2 py-3 text-center text-sm text-white`}
                                         onClick={() => {
                                             // Get a new OTP
-                                            requestCode(
+                                            void requestCode(
                                                 phoneNumber !== ''
                                                     ? phoneNumber
-                                                    : user?.phoneNumber || ''
+                                                    : user?.phoneNumber ?? ''
                                             )
                                         }}
                                     >
                                         Resend{' '}
-                                        {codeTimer > 0 ? `(${codeTimer})` : ''}
+                                        {codeTimer > 0 ? `(${codeTimer.toString()})` : ''}
                                     </button>
                                 </div>
                                 <button
                                     onClick={() => {
-                                        updateUser({
+                                        void updateUser({
                                             onboardingStage:
                                                 OnboardingStage.NOT_STARTED,
                                         })
 
                                         setTimeout(() => {
-                                            getUser()
+                                            void getUser()
                                             setStartJoin(false)
                                         }, 1000)
                                     }}
@@ -486,7 +488,7 @@ export default function Volunteer() {
                                 <button
                                     onClick={() => {
                                         if (securityCode.length === 6) {
-                                            checkCode(securityCode)
+                                            void checkCode(securityCode)
                                         }
                                     }}
                                     disabled={

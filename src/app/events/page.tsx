@@ -1,15 +1,20 @@
 import { Metadata } from 'next'
 import { MainLayout } from '@/components/MainLayout'
 import { ClientCalendar } from '@/components/Calendar'
+
+const SITE_URL = process.env.SITE_URL
+
+if (!SITE_URL) throw Error('Please define the SITE_URL environment variable')
+
 export const metadata: Metadata = {
     title: 'PV - Events',
     description: 'See what we are up to!',
     openGraph: {
         title: 'PV - Events',
         description: 'See what we are up to!',
-        url: `https://${process.env.SITE_URL}/`,
+        url: `https://${SITE_URL}/`,
         siteName: 'Progressive Victory',
-        images: [{ url: `https://${process.env.SITE_URL}/images/banner.png` }],
+        images: [{ url: `https://${SITE_URL}/images/banner.png` }],
     },
 }
 // Map calendar src embed to their RGB color

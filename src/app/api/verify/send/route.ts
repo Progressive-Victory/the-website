@@ -6,6 +6,7 @@ import { User } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
 import dbConnect from '@/util/libmongo'
 import { Neutrino } from '@/util/neutrino'
+import { HTTPStatus } from '@/util/types'
 export const dynamic = 'force-dynamic'
 
 interface POSTRequestBody {
@@ -16,12 +17,23 @@ function isPOSTRequestBody(b:unknown): b is POSTRequestBody {
     return typeof b === 'object' && b !== null && 'number' in b
 }
 
+async function processPOSTRequest(body:unknown) {
+    if(body instanceof Promise) {
+        return body.then((v) => {
+            if(isPOSTRequestBody(v)){
+                return v
+            }
+            return null
+        })
+    } else if(isPOSTRequestBody(body)) return body
+    return null
+}
+
 export async function POST(req: NextRequest) {
     // Parse incoming JSON body
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const reqJson = await req.json()
-    if (!isPOSTRequestBody(reqJson)) {
-        return new Response('Phone number is required', { status: 400 })
+    const reqJson = await processPOSTRequest(req.json())
+    if (!reqJson || !isPOSTRequestBody(reqJson)) {
+        return new Response('Phone number is required', { status: HTTPStatus.BadRequest })
     }
 
     // Retrieve the session using the incoming request and auth options
@@ -29,7 +41,7 @@ export async function POST(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
     if (!session || !token) {
-        return new Response('Unauthorized', { status: 401 })
+        return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
     }
 
     // Get the user
@@ -49,10 +61,10 @@ export async function POST(req: NextRequest) {
                 break
             default:
                 // They cannot request a code after being verified
-                return new Response('Unauthorized', { status: 401 })
+                return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
         }
     } catch {
-        return new Response('Unauthorized', { status: 401 })
+        return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
     }
 
     const response = await Neutrino.smsVerify(reqJson.number,{
@@ -63,8 +75,8 @@ export async function POST(req: NextRequest) {
     })
 
     if (!response.sent) {
-        return new Response('Bad request', { status: 400 })
+        return new Response('Bad request', { status: HTTPStatus.UnAuthorized })
     }
 
-    return new Response('Success', { status: 200 })
+    return new Response('Success', { status: HTTPStatus.Ok })
 }

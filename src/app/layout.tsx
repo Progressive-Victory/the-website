@@ -6,15 +6,19 @@ import Script from 'next/script'
 import 'leaflet/dist/leaflet.css'
 import './globals.css'
 
+const SITE_URL = process.env.SITE_URL
+
+if (!SITE_URL) throw Error('Please define the SITE_URL environment variable')
+
 export const metadata: Metadata = {
     title: 'Progressive Victory',
     description: 'A new kind of online community for political action!',
     openGraph: {
         title: 'Progressive Victory',
         description: 'A new kind of online community for political action!',
-        url: `https://${process.env.SITE_URL}/`,
+        url: `https://${SITE_URL}/`,
         siteName: 'Progressive Victory',
-        images: [{ url: `https://${process.env.SITE_URL}/images/banner.png` }],
+        images: [{ url: `https://${SITE_URL}/images/banner.png` }],
     },
 }
 
@@ -24,7 +28,7 @@ const montserrat = Montserrat({
     display: 'swap',
 })
 
-export default async function RootLayout({
+export default function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode

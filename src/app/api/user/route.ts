@@ -4,15 +4,16 @@ import { User, IUser } from '@/models/User'
 import dbConnect from '@/util/libmongo'
 import { authOptions, checkAuth, ResponseCode } from '@/util/auth'
 import { OnboardingStage } from '@/util/stage'
+import { HTTPStatus } from '@/util/types'
 export const dynamic = 'force-dynamic'
 /**
  * Create a new user.
  *
- * @param {NextRequest} req - The request object.
+ * @param req - The request object.
  *
- * @returns {NextResponse} The response object.
+ * @returns The response object.
  *
- * @throws {Error} If the server encounters an error while creating the user.
+ * @throws If the server encounters an error while creating the user.
  *
  * @example
  * Note: Before running the test make sure you auth with the Discord provider as the user you want to create
@@ -47,11 +48,11 @@ export async function GET() {
         case ResponseCode.Successful:
             break
         case ResponseCode.Exception:
-            return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+            return NextResponse.json({ error: 'Bad request' }, { status: HTTPStatus.BadRequest })
         case ResponseCode.NoSession:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ error: 'Unauthorized' }, { status: HTTPStatus.UnAuthorized })
         case ResponseCode.InsufficientAccess:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ error: 'Forbidden' }, { status: HTTPStatus.Forbidden })
         default:
             throw Error('Unidentified response code.')
     }
@@ -71,11 +72,11 @@ export async function PATCH(req: NextRequest) {
             user = (await retrieveUser()) as IUser
             break
         case ResponseCode.Exception:
-            return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+            return NextResponse.json({ error: 'Bad request' }, { status: HTTPStatus.BadRequest })
         case ResponseCode.NoSession:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ error: 'Unauthorized' }, { status: HTTPStatus.UnAuthorized })
         case ResponseCode.InsufficientAccess:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ error: 'Forbidden' }, { status: HTTPStatus.Forbidden })
         default:
             throw Error('Unidentified response code.')
     }
@@ -101,13 +102,12 @@ export async function PATCH(req: NextRequest) {
             ]
             if (user[key] !== data[key] || !allowed.includes(key)) {
                 // @ts-expect-error potential bad key
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 user[key] = data[key]
             }
         })
     } else {
         // we only want to allow updating the stage and verified after this point
-        return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+        return NextResponse.json({ error: 'Bad request' }, { status: HTTPStatus.BadRequest })
     }
 
     await dbConnect()

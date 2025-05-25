@@ -37,7 +37,7 @@ export default function DashUsers() {
                 setLoading(false)
             }
         }
-        fetchData()
+        void fetchData()
     }, [refreshData])
 
     const updateSelectedUser = (updatedUser: IUser) => {
@@ -107,7 +107,7 @@ export default function DashUsers() {
         <div className={`flex flex-col gap-2 py-2 md:grid md:grid-cols-3 md:gap-4 ${doDiv ? "border-b" : ""}`}>
             <span className="text-sm font-medium text-gray-700 md:text-base">{label}</span>
             <span className="col-span-2 break-words text-sm text-gray-600 md:text-base">
-                {value || 'N/A'}
+                {value ?? 'N/A'}
             </span>
         </div>
     );
@@ -197,7 +197,7 @@ export default function DashUsers() {
                             </div>
 
                             <button
-                                onClick={handleSaveChanges}
+                                onClick={void handleSaveChanges}
                                 className="w-full rounded bg-blue-600 px-3 py-1 text-sm text-white transition-colors hover:bg-blue-700 active:outline active:outline-offset-2 active:outline-blue-500 md:px-4 md:py-2 md:text-base"
                             >
                                 Save Changes

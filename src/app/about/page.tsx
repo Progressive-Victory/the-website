@@ -4,7 +4,7 @@ import { Metadata } from 'next'
 
 const SITE_URL = process.env.SITE_URL
 
-if (!SITE_URL) throw Error('SITE_URL undefined in environment variable')
+if (!SITE_URL) throw Error('Please define the SITE_URL environment variable')
 
 export const metadata: Metadata = {
     title: 'PV - About',
