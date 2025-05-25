@@ -1,11 +1,10 @@
 'use client'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid'
+import { useState } from 'react'
 import NextLink from 'next/link'
 import Image from 'next/image'
-import { Transition, TransitionChild } from '@headlessui/react'
-import { useState } from 'react'
-import { motion } from 'motion/react'
 import { useSession } from 'next-auth/react'
+import { AnimatePresence, motion } from 'motion/react'
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid'
 import { NavItem } from './types'
 import { Link } from '../common/Buttons'
 
@@ -36,28 +35,6 @@ const navitems: NavItem[] = [
     href: 'https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform',
   },
 ]
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.075, // delay between children animations
-    },
-  },
-}
-
-const springTransition = {
-  ease: 'easeInOut',
-  type: 'spring',
-  duration: 0.075,
-  stiffness: 250,
-  damping: 25,
-}
-
-const itemVariants = {
-  hidden: { y: '-100vh' },
-  visible: { y: 0 },
-}
 
 /**
  * A navigation header for the Progressive Victory website.
@@ -128,89 +105,106 @@ export function Header() {
         </button>
       </div>
 
+
       <NavDrawer isOpen={isOpen}>
-        {navitems.map((item) => (
-          <Link
-            href={item.href}
-            key={item.name}
-            className="w-full text-center py-4"
-          >
-            <motion.div
-              layoutId={item.name}
-              variants={itemVariants}
-              transition={springTransition}
-            >
-              {item.name}
-            </motion.div>
-          </Link>
-        ))}
-        <Link
-          href="https://secure.actblue.com/donate/pvwebsite"
-          className="w-full text-center py-4 bg-valencia"
-        >
-          <motion.div
-            variants={itemVariants}
-            transition={springTransition}
+        {navitems
+          .map(({ href, name }) => (
+            <Link href={href} key={name} className="w-full py-4">
+              {name}
+            </Link>
+          ))
+          .concat(<Link
+            href="https://secure.actblue.com/donate/pvwebsite"
+            className="w-full text-center py-4 bg-valencia"
           >
             Donate
-          </motion.div>
-        </Link>
-        {!session ? (
-          <Link href="/login" className="w-full text-center py-4 bg-steel-blue">
-            <motion.div
-              variants={itemVariants}
-              transition={springTransition}
-            >
+          </Link>)
+          .concat(!session ? (
+            <Link href="/login" className="w-full py-4 bg-steel-blue">
               Log In
-            </motion.div>
-          </Link>
-        ) : (
-          <Link href="/account" className="w-full text-center bg-steel-blue">
-            <motion.div
-              variants={itemVariants}
-              transition={springTransition}
-              className="flex flex-row items-center justify-center gap-x-4"
-            >
+            </Link>
+          ) : (
+            <Link href="/account" className="w-full bg-steel-blue">
               <Image
                 src={session.user?.image || ''}
                 width={44}
                 height={44}
-                className="rounded-full border-2 border-white"
+                className="rounded-full border-2 border-white mr-4"
                 alt="User Image"
               />
               Account
-            </motion.div>
-          </Link>
-        )}
-      </NavDrawer>
+            </Link>
+          ))
+        }
+      </NavDrawer >
     </>
   )
 }
 
-function NavDrawer(props: { isOpen: boolean, children: React.ReactNode }) {
+const containerVariants = {
+  hidden: {
+    y: "-100%",
+    transition: {
+      type: "tween",
+      ease: "easeInOut",
+      duration: 0.2
+    }
+  },
+  visible: {
+    y: "-2%",
+    transition: {
+      ease: "easeInOut",
+      type: "spring",
+      stiffness: 250,
+      damping: 25,
+      staggerChildren: 0.05
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { y: "-200%", opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      ease: "easeInOut",
+      type: "spring",
+      stiffness: 300,
+      damping: 20
+    }
+  }
+}
+
+function NavDrawer(props: { isOpen: boolean, children: React.ReactNode[] }) {
 
   return (
-    <Transition
-      show={props.isOpen}
-      enter="transition-all ease-in duration-200"
-      enterFrom="-translate-y-full mt-2 "
-      enterTo="translate-y-0 mt-0 opacity-100"
-      leave="ease-in duration-200"
-      leaveFrom="opacity-100"
-      leaveTo=" -translate-y-full"
-    >
-      <TransitionChild>
-        <div className="fixed rounded-b-lg drop-shadow-xl top-24 pb-12 left-0 right-0 w-full px-10 pt-4 z-10 bg-black-pearl-dark xl:hidden">
-          <motion.div
-            className="w-full flex flex-col items-center justify-start mt-2 gap-y-4 pb-16"
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-          >
-            {props.children}
-          </motion.div>
-        </div>
-      </TransitionChild>
-    </Transition>
+    <AnimatePresence>
+      {props.isOpen && (
+        <motion.div
+          key="nav-drawer"
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+          variants={containerVariants}
+          className={`
+            fixed inset-x-0 top-24 z-10 w-full rounded-b-lg
+            bg-black-pearl-dark drop-shadow-xl
+            px-10 pt-4 pb-16 xl:hidden
+            flex flex-col gap-y-4
+          `}
+        >
+          {props.children.map((child, i) => (
+            <motion.div
+              key={i}
+              className="w-full"
+              variants={itemVariants}
+            >
+              {child}
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

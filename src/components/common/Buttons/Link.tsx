@@ -16,7 +16,7 @@ export default function Link({
       href={href}
       target={href.includes('https') ? '_blank' : ''}
       referrerPolicy={'no-referrer'}
-      className={`text-xl font-bold px-4 py-2 text-white hover:text-valencia hover:bg-white rounded-full transition duration-200 ease-in-out ${className ? className : ""}`}
+      className={`flex justify-center items-center text-xl font-bold px-4 py-2 text-white text-center hover:text-valencia hover:bg-white rounded-full transition duration-200 ease-in-out ${className ? className : ""}`}
       {...linkProps}
     >
       {children}
