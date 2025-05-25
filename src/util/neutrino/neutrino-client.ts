@@ -44,7 +44,7 @@ export class NeutrinoClient {
         if ('verified' in data && typeof data.verified === 'boolean' ) {
             return data.verified
         }
-        throw Error('Unexpected response from neutrinoAPI', {cause: response})
+        throw Error('Unexpected response from neutrinoAPI', {cause: response.json()})
     }
 
     async smsVerify( number: string, options?:{

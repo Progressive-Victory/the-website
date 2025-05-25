@@ -1,19 +1,9 @@
 import {
     calculateUserDefaultAvatarIndex,
-    REST,
     ImageURLOptions,
 } from '@discordjs/rest'
 import { Snowflake } from 'discord-api-types/v10'
-
-const discordToken = process.env.DISCORD_BOT_TOKEN
-
-if (!discordToken) {
-    throw new Error(
-        "Please specify 'DISCORD_BOT_TOKEN' in the environment file."
-    )
-}
-
-export const rest = new REST({ version: '10' }).setToken(discordToken)
+import { rest } from '.'
 
 /**
  * Get Icon for user based on discord Profile
@@ -39,11 +29,7 @@ export async function getDisplayAvatarURL(
         avatarURL = await getAvatarURL(userId, avatarHash, imageOptions)
     }
 
-    if (!avatarURL) {
-        avatarURL = getDefaultAvatarURL(userId)
-    }
-
-    return avatarURL
+   return avatarURL ?? getDefaultAvatarURL(userId);
 }
 
 async function getGuildAvatarURL(
@@ -54,7 +40,7 @@ async function getGuildAvatarURL(
 ) {
     if (!avatarHash) return null
 
-    const avatarURL = rest.cdn.avatar(userId, avatarHash, imageOptions)
+    const avatarURL = rest.cdn.guildMemberAvatar(guildId, userId, avatarHash, imageOptions)
 
     if (await isFourOFour(avatarURL)) return null
 

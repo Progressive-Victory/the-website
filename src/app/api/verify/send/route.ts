@@ -7,10 +7,20 @@ import { OnboardingStage } from '@/util/stage'
 import dbConnect from '@/util/libmongo'
 import { Neutrino } from '@/util/neutrino'
 export const dynamic = 'force-dynamic'
+
+interface POSTRequestBody {
+    number: string
+}
+
+function isPOSTRequestBody(b:unknown): b is POSTRequestBody {
+    return typeof b === 'object' && b !== null && 'number' in b
+}
+
 export async function POST(req: NextRequest) {
     // Parse incoming JSON body
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const reqJson = await req.json()
-    if (!reqJson.number) {
+    if (!isPOSTRequestBody(reqJson)) {
         return new Response('Phone number is required', { status: 400 })
     }
 
@@ -26,7 +36,7 @@ export async function POST(req: NextRequest) {
     try {
         await dbConnect()
 
-        const user = await User.findOne({ discordId: token?.discordId })
+        const user = await User.findOne({ discordId: token.discordId })
 
         switch (user?.onboardingStage) {
             case OnboardingStage.NOT_STARTED:

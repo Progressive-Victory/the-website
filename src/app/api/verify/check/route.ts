@@ -7,19 +7,27 @@ import { OnboardingStage } from '@/util/stage'
 import dbConnect from '@/util/libmongo'
 import { Neutrino } from '@/util/neutrino'
 
-const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET
+interface POSTRequestBody {
+    code: string
+}
+
+function isPOSTRequestBody(b:unknown): b is POSTRequestBody {
+    return typeof b === 'object' && b !== null && 'code' in b
+}
 
 export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
     // Parse incoming JSON body
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const reqJson = await req.json()
-    if (!reqJson.code) {
+    if (!isPOSTRequestBody(reqJson)) {
         return new Response('Code is required', { status: 400 })
     }
+    
 
     // Retrieve the session using the incoming request and auth options
     const session = await getServerSession(authOptions)
-    const token = await getToken({ req, secret: NEXTAUTH_SECRET })
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
     if (!session || !token) {
         return new Response('Unauthorized', { status: 401 })
@@ -29,7 +37,7 @@ export async function POST(req: NextRequest) {
     try {
         await dbConnect()
 
-        const user = await User.findOne({ discordId: token?.discordId })
+        const user = await User.findOne({ discordId: token.discordId })
 
         switch (user?.onboardingStage) {
             case OnboardingStage.AWAIT_VERIFICATION:

@@ -11,6 +11,7 @@ export interface IUser extends Document {
     image: string
     discordId: string
     discordUserAvatar?: string
+    discordGuildAvatar?: string
     zipCode?: string
     state?: string
     county?: string
@@ -30,6 +31,7 @@ const userSchema = new Schema<IUser>({
     image: { type: String, required: true },
     discordId: { type: String, required: true },
     discordUserAvatar: { type: String, required: false },
+    discordGuildAvatar: { type: String, required: false},
     zipCode: { type: String, required: false },
     state: { type: String, required: false },
     county: { type: String, required: false },
