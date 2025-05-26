@@ -5,9 +5,9 @@ import { getToken } from 'next-auth/jwt'
 import { User } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
 import dbConnect from '@/util/libmongo'
-import { RESTJSONErrorCodes, Routes } from 'discord-api-types/v10'
-import { RequestMethod } from '@discordjs/rest'
-import { rest, isGuildMember } from '@/util/discord'
+import { RESTJSONErrorCodes as DiscordJSONErrorCodes, Routes } from 'discord-api-types/v10'
+import { DiscordAPIError } from '@discordjs/rest'
+import { rest, isAPIGuildMember } from '@/util/discord'
 import { HTTPStatus } from '@/util/types'
 
 const GUILD_ID = process.env.GUILD_ID
@@ -36,55 +36,35 @@ export async function PUT(req: NextRequest) {
         case OnboardingStage.JOINED:
             break
         default:
-            return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
+            return new Response('OnboardingStage error not VERIFIED or JOINED', { status: HTTPStatus.InternalServerError })
     }
 
     if (!GUILD_ID) throw Error('Please define the GUILD_ID environment variable')
-
-    /**
-     * Adds a user to the guild, provided you have a valid oauth2 access token for the user with the guilds.join scope. Returns a 201 Created with the guild member as the body, or 204 No Content if the user is already a member of the guild. Fires a Guild Member Add Gateway event.
-     * @see https://discord.com/developers/docs/resources/guild#add-guild-member
-     */
-    const response = await rest.queueRequest({
-        fullRoute: Routes.guildMember(GUILD_ID, user.discordId),
-        body: JSON.stringify({
-            access_token: token.access_token,
-        }),
-        method: RequestMethod.Put
-    })
-
-    const data = await response.json()
-
-    if (response.status === HTTPStatus.Created && isGuildMember(data)) {
-        user.discordUserAvatar = data.user.avatar ?? undefined
-        user.discordGuildAvatar = data.avatar ?? undefined
-    }
-    if (response.ok) {
-        
-        if (
-            user.verified &&
-            user.onboardingStage === OnboardingStage.VERIFIED
-        ) {
+    
+    try {
+        /**
+         * Adds a user to the guild, provided you have a valid oauth2 access token for the user with the guilds.join scope. Returns a 201 Created with the guild member as the body, or 204 No Content if the user is already a member of the guild. Fires a Guild Member Add Gateway event.
+         * @see https://discord.com/developers/docs/resources/guild#add-guild-member
+         */
+        const data = await rest.put(
+            Routes.guildMember(GUILD_ID, user.discordId),
+            { body: JSON.stringify({ access_token: token.access_token }) })
+        if(isAPIGuildMember(data)) {
+            user.discordUserAvatar = data.user.avatar ?? undefined
+            user.discordGuildAvatar = data.avatar ?? undefined
+        }
+        else {/* Member is all ready in Guild*/}
+        if ( user.verified && user.onboardingStage === OnboardingStage.VERIFIED) {
             user.onboardingStage = OnboardingStage.JOINED
         }
-        await user.save()
+        void user.save()
         return new Response('Added Member!', { status: HTTPStatus.Ok })
-    } else {
-        const data = await response.json()
+    } catch (error) {
+        if (!(error instanceof DiscordAPIError)) return NextResponse.json('Internal Error', { status: HTTPStatus.InternalServerError })
+            const {code} = error
+        if(code == DiscordJSONErrorCodes.InvalidOAuth2AccessToken) return NextResponse.json(error, { status: HTTPStatus.UnAuthorized })
 
-        if (typeof data === 'object' && data && 'code' in data && data.code === RESTJSONErrorCodes.InvalidOAuth2AccessToken) {
-            // User needs to be reauthed we should sign them out
-            return NextResponse.json(
-                {
-                    message: 'Invalid OAuth2 Access Token',
-                    code: RESTJSONErrorCodes.InvalidOAuth2AccessToken,
-                },
-                {
-                    status: HTTPStatus.BadRequest,
-                }
-            )
-        }
-        return new Response('Internal Error', { status: HTTPStatus.InternalServerError })
+        return NextResponse.json('Internal Error', { status: HTTPStatus.InternalServerError })
     }
 }
 
@@ -110,38 +90,35 @@ export async function GET(req: NextRequest) {
             break
         default:
             // They cannot request a join without verification
-            return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
+            return new Response('OnboardingStage error not VERIFIED or JOINED', { status: HTTPStatus.InternalServerError })
+
     }
 
     if (!GUILD_ID) throw Error('Please define the GUILD_ID environment variable')
 
-    /**
-     * @see https://discord.com/developers/docs/resources/guild#get-guild-member
-     */
-    const response = await rest.queueRequest({
-        fullRoute: Routes.guildMember(GUILD_ID, user.discordId),
-        body: JSON.stringify({
-            access_token: token.access_token,
-        }),
-        method: RequestMethod.Get
-    })
+    try {
+        /**
+         * @see https://discord.com/developers/docs/resources/guild#get-guild-member
+         */
+        const data = await rest.get(Routes.guildMember(GUILD_ID, user.discordId))
 
-    if (response.status === 200) {
-        const data = await response.json()
-        if(isGuildMember(data)) {
-            user.discordUserAvatar = data.user.avatar ?? undefined
-            user.discordGuildAvatar = data.avatar ?? undefined
-        }
+        if (!isAPIGuildMember(data)) return new Response('Internal Error', { status: HTTPStatus.InternalServerError })
+
+        user.discordUserAvatar = data.user.avatar ?? undefined
+        user.discordGuildAvatar = data.avatar ?? undefined
+
         if (user.onboardingStage === OnboardingStage.VERIFIED) {
             user.onboardingStage = OnboardingStage.JOINED
-            
         }
-    await user.save()
-        return NextResponse.json(
-            { message: 'Already Joined!' },
-            { status: HTTPStatus.Ok }
-        )
-    } else {
-        return new Response('Not Joined.', { status: HTTPStatus.NotFound })
+        void user.save()
+
+        return new Response('Member in Guild', {status: HTTPStatus.Ok})
+
+    } catch (error) {
+        if (!(error instanceof DiscordAPIError)) throw error
+        const {code} = error
+        if ( code === DiscordJSONErrorCodes.UnknownMember) {
+            return new Response('Member not in guild', { status: HTTPStatus.NotFound })
+        } 
     }
 }

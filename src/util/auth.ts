@@ -9,6 +9,12 @@ import { IRole } from '@/models/Role'
 import { getDisplayAvatarURL } from './discord/AvatarURL'
 import { OAuth2Routes, OAuth2Scopes } from 'discord-api-types/v10'
 
+interface EProfile extends Profile {
+    id: string
+    username: string
+    avatar: string
+}
+
 export enum PermissionName {
     ADMIN_PANEL_ACCESS = 'Admin Panel Access',
     VIEW_MEMBER_DATA = 'View Member Data',
@@ -20,12 +26,13 @@ if (!clientId) throw Error('Please define the DISCORD_CLIENT_ID environment vari
 if (!clientSecret) throw Error('Please define the DISCORD_CLIENT_SECRET environment variable')
 
 
-/**
- * Ouuth2 Discord documentation
- * @see https://discord.com/developers/docs/topics/oauth2
- */
+
 export const authOptions: NextAuthOptions = {
     providers: [
+        /**
+         * OAuth2 Discord documentation
+         * @see https://discord.com/developers/docs/topics/oauth2
+         */
         Discord({
             clientId,
             clientSecret,
@@ -75,7 +82,8 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         // session call back assigns the discordId from the token to the session object
         session({ session, token }: { session: Session; token: JWT }) {
-            if (token.discordId) session.discordId = token.discordId as string
+            if(!(typeof token.discordId === 'string')) throw Error('token.discordId is not a string')
+            if (token.discordId) session.discordId = token.discordId
             return session
         },
         async jwt({
@@ -87,36 +95,31 @@ export const authOptions: NextAuthOptions = {
             account: Account | null
             profile?: Profile
         }) {
-            interface EProfile extends Profile {
-                id: string
-                username: string
-                avatar: string
-            }
 
-            const eprofile = profile as EProfile
+            if (account && profile && isEProfile(profile)) {
+                
+                const {id, username, avatar} = profile
 
-            if (account && profile) {
                 // First time OAuth sign-in: Store OAuth data in the token
                 token.access_token = account.access_token
-                token.discordId = eprofile.id
+                token.discordId = id
 
                 // Database connection
                 await dbConnect()
 
-                const existingUser = await User.findOne({
-                    discordId: eprofile.id,
-                })
+                const existingUser = await User.findOne({ discordId: id })
+
                 if (!existingUser) {
                     // Create new user
                     const newUser = new User({
-                        name: eprofile.username,
+                        name: username,
                         email: profile.email,
                         // Using long form here to adjust size of image
-                        image: getDisplayAvatarURL(eprofile.id, eprofile.avatar),
-                        discordId: eprofile.id,
-                        discordUserAvatar: eprofile.avatar,
+                        image: getDisplayAvatarURL(id, avatar),
+                        discordId: id,
+                        discordUserAvatar: avatar,
                     })
-                    await newUser.save()
+                    void newUser.save()
                 }
             }
 
@@ -236,4 +239,10 @@ export async function checkAuthPermissions(
     }
 
     return success ? ResponseCode.Successful : ResponseCode.InsufficientAccess
+}
+
+function isEProfile(profile:Profile): profile is EProfile {
+    return 'id' in profile &&
+        'username' in profile &&
+        'avatar' in profile
 }
