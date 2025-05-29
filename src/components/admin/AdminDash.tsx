@@ -1,7 +1,10 @@
 'use client'
+
 import { useState } from "react"
-import { MainLayout } from "@/components/layout"
-import { DashPages, DashPermissions, DashRoles, DashUsers } from "../admin"
+import { MainLayout } from "../MainLayout"
+import { DashPages, DashPermissions, DashRoles} from "../admin"
+import DetailRow from "./DetailRow"
+import DashBrowser from "./DashBrowser"
 
 export default function AdminDash() {
     enum Section {
@@ -26,7 +29,21 @@ export default function AdminDash() {
             case Section.Roles:
                 return <DashRoles />
             case Section.Members:
-                return <DashUsers />
+                return (
+                    <DashBrowser apiStr="/api/admin/user" title="User" displayKey="name">
+                        <DetailRow label="Discord Username" tgtKey="name" />
+                        <DetailRow label="Nickname" tgtKey="preferredName" />
+                        <DetailRow label="Email" tgtKey="email" />
+                        <DetailRow label="Discord ID" tgtKey="discordId" />
+                        <DetailRow label="Address Line 1" tgtKey="addr" doDiv={false} />
+                        <DetailRow label="Address Line 2" tgtKey="addr" doDiv={false} />
+                        <DetailRow label="City" tgtKey="city" doDiv={false} />
+                        <DetailRow label="County" tgtKey="county" doDiv={false} />
+                        <DetailRow label="State" tgtKey="state" doDiv={false} />
+                        <DetailRow label="Zip Code" tgtKey="zipCode" />
+                        {/* still need to figure out how tf to do roles */}
+                    </DashBrowser>
+                )
         }
     }
 
