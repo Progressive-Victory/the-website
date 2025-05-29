@@ -12,7 +12,7 @@ export default function DashUsers() {
     const [, setLoading] = useState(true)
     const [, setError] = useState<string | null>(null)
     const [unsaved, setUnsaved] = useState<boolean>(false)
-    const [search, setSearch] = useState<string | null>("");
+    const [search, setSearch] = useState<string | null>("")
 
     useEffect(() => {
         const fetchData = async () => {
