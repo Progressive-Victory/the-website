@@ -48,8 +48,9 @@ export default function DashRoles() {
 
     useEffect(() => {
         const filteredRoles: IRole[] = []
+        const lowerCaseSearch = search ? search.toLowerCase() : ""
         for (const role of sectionData) {
-            if (search === null || role.name.includes(search)) {
+            if (search === null || role.name.toLowerCase().includes(lowerCaseSearch)) {
                 filteredRoles.push(role)
             }
         }

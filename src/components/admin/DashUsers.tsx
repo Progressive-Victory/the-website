@@ -44,8 +44,9 @@ export default function DashUsers() {
 
     useEffect(() => {
         const filteredUsers: IUser[] = []
+        const lowerCaseSearch = search ? search.toLowerCase() : ""
         for (const user of sectionData) {
-            if (search === null || user.name.includes(search) || user.email.includes(search)) {
+            if (search === null || user.name.toLowerCase().includes(lowerCaseSearch) || user.email.toLowerCase().includes(lowerCaseSearch)) {
                 filteredUsers.push(user)
             }
         }
