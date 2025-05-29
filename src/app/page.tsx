@@ -1,8 +1,6 @@
-import { Footer } from '@/components/layout/Footer'
-import { Header } from '@/components/layout/Header'
-import { Hero } from '@/components/HomePage/Hero'
-import { MapGraphic } from '@/components/HomePage/MapGraphic'
-import { Volunteer } from '@/components/HomePage/Volunteer'
+import { Footer, Header } from '@/components/layout'
+import { Hero, MapGraphic, Volunteer } from '@/components/HomePage'
+
 export default function Home() {
     return (
         <div className="w-full">
