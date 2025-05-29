@@ -1,16 +1,18 @@
 'use client'
-import { useState, useEffect } from "react"
+import { useState, useEffect, ChangeEvent } from "react"
 import { IUser } from "@/models/User"
 import { IRole } from "@/models/Role"
 
 export default function DashUsers() {
     const [sectionData, setSectionData] = useState<IUser[]>([])
+    const [filteredData, setFilteredData] = useState<IUser[]>([])
     const [selectedEntry, setSelectedEntry] = useState<IUser | null>(null)
     const [roleList, setRoleList] = useState<IRole[]>([])
     const [refreshData, setRefreshData] = useState<boolean>(false)
     const [, setLoading] = useState(true)
     const [, setError] = useState<string | null>(null)
     const [unsaved, setUnsaved] = useState<boolean>(false)
+    const [search, setSearch] = useState<string | null>("")
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,6 +41,17 @@ export default function DashUsers() {
         }
         fetchData()
     }, [refreshData])
+
+    useEffect(() => {
+        const filteredUsers: IUser[] = []
+        const lowerCaseSearch = search ? search.toLowerCase() : ""
+        for (const user of sectionData) {
+            if (search === null || user.name.toLowerCase().includes(lowerCaseSearch) || user.email.toLowerCase().includes(lowerCaseSearch)) {
+                filteredUsers.push(user)
+            }
+        }
+        setFilteredData(filteredUsers)
+    }, [sectionData, search])
 
     const updateSelectedUser = (updatedUser: IUser) => {
         setUnsaved(true)
@@ -97,6 +110,11 @@ export default function DashUsers() {
         }
     }
 
+    const updateSearch = (event: ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.currentTarget.value
+        setSearch(newValue)
+    }
+
     interface IUserDetailProps {
         label: string,
         value: React.ReactNode,
@@ -117,8 +135,9 @@ export default function DashUsers() {
             {/* User List */}
             <div className="lg:col-span-1 bg-white rounded-lg shadow-sm p-3 md:p-4">
                 <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4 text-black-pearl-dark">Members</h2>
+                <input className="bg-white rounded-md w-full px-4 py-2 ring-steel-blue border border-steel-blue" value={search ? search : ""} onChange={(e) => updateSearch(e)} />
                 <ul className="space-y-1 md:space-y-2">
-                    {sectionData.map(user => (
+                    {filteredData.map(user => (
                         <li
                             key={user.discordId}
                             className={`p-2 md:p-3 rounded-lg cursor-pointer transition-colors text-sm md:text-base ${selectedEntry?.discordId === user.discordId
