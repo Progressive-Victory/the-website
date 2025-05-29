@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, FormEvent } from "react"
+import { useState, useEffect, FormEvent, ChangeEvent } from "react"
 import { IRole } from "@/models/Role"
 import { IPermission } from "@/models/Permission"
 import { ToolTip } from "../ToolTip"
@@ -8,12 +8,14 @@ import { Popup } from "../Popup"
 
 export default function DashRoles() {
     const [sectionData, setSectionData] = useState<IRole[]>([])
+    const [filteredData, setFilteredData] = useState<IRole[]>([])
     const [selectedRole, setSelectedRole] = useState<IRole | null>(null)
     const [permissionList, setPermissionList] = useState<IPermission[]>([])
     const [refresh, setRefresh] = useState<boolean>(false) //this is cursed but it seems like the best way to trigger refresh on callback
     const [unsaved, setUnsaved] = useState<boolean>(false)
     const [, setLoading] = useState(true)
     const [, setError] = useState<string | null>(null)
+    const [search, setSearch] = useState<string | null>("")
 
     //pull page data from database. Triggers on both component initialization and the trigger of the refresh state
     useEffect(() => {
@@ -44,6 +46,16 @@ export default function DashRoles() {
         fetchData()
     }, [refresh])
 
+    useEffect(() => {
+        const filteredRoles: IRole[] = []
+        for (const role of sectionData) {
+            if (search === null || role.name.includes(search)) {
+                filteredRoles.push(role)
+            }
+        }
+        setFilteredData(filteredRoles)
+    }, [sectionData, search])
+
     //if sectionData has been changed then check to see if the currently displayed role still exists. If not set selectedRole to null
     useEffect(() => {
         if(selectedRole && !sectionData.find(x => x.name === selectedRole.name)) {
@@ -58,6 +70,11 @@ export default function DashRoles() {
             prev.map(role => role.name === updatedRole.name ? updatedRole : role)
         ))
         setSelectedRole(updatedRole)
+    }
+
+    const updateSearch = (event: ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.currentTarget.value
+        setSearch(newValue)
     }
 
     const handleChangeSelection = (role: IRole) => {
@@ -165,8 +182,9 @@ export default function DashRoles() {
             <div className="flex flex-col lg:col-span-1 bg-white rounded-lg shadow-sm p-3 md:p-4">
                 <div className="grow">
                     <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">Roles</h2>
+                    <input className="bg-white rounded-md w-full px-4 py-2 ring-steel-blue border border-steel-blue" value={search ? search : ""} onChange={(e) => updateSearch(e)} />
                     <ul className="space-y-1 md:space-y-2">
-                        {sectionData.map(role => (
+                        {filteredData.map(role => (
                             <li
                                 key={role.name}
                                 className={`p-2 md:p-3 rounded-lg cursor-pointer transition-colors text-sm md:text-base ${
