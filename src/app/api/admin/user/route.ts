@@ -2,8 +2,10 @@ import dbConnect from "@/util/libmongo";
 import { User, IUser } from "@/models/User"
 import { checkAuth, checkAuthPermissions, PermissionName, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
+import { Aggregate } from "mongoose";
+import { URLWrapper } from "@/util/url-wrapper";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     // check session auth
     const response = await checkAuthPermissions([PermissionName.VIEW_MEMBER_DATA])
 
@@ -21,17 +23,60 @@ export async function GET() {
             throw Error("Unidentified response code.")
     }
 
+    //parse out query params
+    const url = new URLWrapper(req.url)
+    const query: string | undefined = url.getParam("query")
+    const pageNumberStr = url.getParam("pageNumber")
+    const entriesPerPageStr = url.getParam("entriesPerPage")
+    const keyVals: Map<string, string> = new Map<string, string>()
+    if(query){
+      try {
+        const queryArgs: string[] = query.split(' ')
+        queryArgs.map((str) => {
+          const pair: string[] = str.split(':')
+          keyVals.set(pair[0], pair[1])
+        })
+      } catch(err) {
+        console.error(err)
+      }
+    }
+    console.log(query)
+    if(!pageNumberStr || !entriesPerPageStr) throw new Error("pageNumber or entriesPerPage are undefiend")
+    const pageNumber = Number.parseInt(pageNumberStr)
+    const entriesPerPage = Number.parseInt(entriesPerPageStr)
+    const skip = pageNumber * entriesPerPage
+
     await dbConnect()
 
-    //grab list of all users
-    const data = await User.find()
-            .populate({
-                path: 'roles',
-                populate: {
-                    path: 'permissions'
-                }
-            }).exec()
-
+    //grab list of requested users
+    let mongoAggregate: Aggregate<any> = User.aggregate([
+      {
+        $lookup: { from: 'roles', localField: 'roles', foreignField: '_id', as: 'roles' },
+      },
+    ])
+    if(query && query != ""){
+      keyVals.forEach(async (value: string, key: string) => {
+        mongoAggregate.match({ [key] : value })
+        /*const _type: FieldCase = await getFieldCase(key)
+        console.log(_type)
+        switch (_type) {
+          case FieldCase.PrimitiveSinglet:
+            mongoAggregate.match({})
+            break
+          case FieldCase.PrimitiveArray:
+            break
+          case FieldCase.ComplexSinglet:
+            break
+          case FieldCase.ComplexArray:
+            break
+          default:
+            throw new Error("unrecognized field case!")
+        }*/
+      })
+    }
+    const data = await mongoAggregate.skip(skip)
+            .limit(entriesPerPage)
+            .exec()
     //return list
     return NextResponse.json(data)
 }
@@ -83,6 +128,7 @@ export async function PATCH(req: NextRequest) {
             const key = k as keyof IUser
 
             // list of fields allowed to be changed
+            // needs to be fixed, lets everything through
             const allowed = [
                 'roles'
             ]

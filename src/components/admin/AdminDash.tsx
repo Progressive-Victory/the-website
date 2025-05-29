@@ -1,7 +1,10 @@
 'use client'
+
 import { useState } from "react"
-import { MainLayout } from "@/components/layout"
-import { DashPages, DashPermissions, DashRoles, DashUsers } from "../admin"
+import { MainLayout } from "../layout/MainLayout"
+import { DashPages, DashPermissions, DashRoles} from "../admin"
+import DashBrowser, { IDashBrowserPerms } from "./DashBrowser"
+import { IUser } from "@/models/User"
 
 export default function AdminDash() {
     enum Section {
@@ -26,7 +29,23 @@ export default function AdminDash() {
             case Section.Roles:
                 return <DashRoles />
             case Section.Members:
-                return <DashUsers />
+                const perms: IDashBrowserPerms = {
+                  add: false,
+                  delete: true,
+                  editWhiteList: {
+                    roles: true,
+                    name: true
+                  }
+                }
+                return (
+                    <DashBrowser<IUser> apiStr="/api/admin/user" title="User" displayKey="name" perms={perms} deps={
+                        {roles: {
+                            apiUri: "/api/admin/role",
+                            dKey: "name"
+                          },
+                        }
+                    } />
+                )
         }
     }
 
