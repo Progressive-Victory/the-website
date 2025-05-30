@@ -1,15 +1,15 @@
-import { HTMLAttributes } from "react";
+import { HTMLAttributes } from 'react'
 
 export default function Button({
-  children,
-  ...props
+    children,
+    ...props
 }: React.PropsWithChildren<HTMLAttributes<HTMLButtonElement>>) {
-  return (
-    <button
-      className="text-xl text-white font-bold hover:text-valencia hover:bg-white rounded-full px-3 py-1 transition duration-200 ease-in-out"
-      {...props}
-    >
-      {children}
-    </button>
-  )
+    return (
+        <button
+            className="rounded-full px-3 py-1 text-xl font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia"
+            {...props}
+        >
+            {children}
+        </button>
+    )
 }

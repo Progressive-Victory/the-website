@@ -12,7 +12,7 @@ const socials = [
 
 export function Footer() {
     return (
-        <div className="bg-black-pearl-dark w-full">
+        <div className="w-full bg-black-pearl-dark">
             <div className="flex flex-col items-center justify-start gap-y-4 py-6">
                 <Image
                     src="/images/LogoFull.webp"
@@ -25,7 +25,7 @@ export function Footer() {
                         <SocialIcon key={social} url={social} fgColor="white" />
                     ))}
                 </div>
-                <div className="p-1 border-2 border-white md:w-[400px] text-center text-steel-blue font-bold mx-12 md:mx-0">
+                <div className="mx-12 border-2 border-white p-1 text-center font-bold text-steel-blue md:mx-0 md:w-[400px]">
                     PAID FOR BY PROGRESSIVE VICTORY{' '}
                     <Link
                         href="https://progressivevictory.win"
@@ -37,7 +37,7 @@ export function Footer() {
                 </div>
 
                 <Link href="/privacy">
-                    <p className="text-steel-blue font-bold underline">
+                    <p className="font-bold text-steel-blue underline">
                         Privacy Policy
                     </p>
                 </Link>

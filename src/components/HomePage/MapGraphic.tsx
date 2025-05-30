@@ -4,17 +4,17 @@ import { Link } from '../common/Buttons'
 
 export function MapGraphic() {
     return (
-        <div className="flex flex-col lg:flex-row items-center justify-center bg-white gap-y-24 px-4 py-12">
-            <div className="lg:w-[750px] w-[100%] h-[450px]">
+        <div className="flex flex-col items-center justify-center gap-y-24 bg-white px-4 py-12 lg:flex-row">
+            <div className="h-[450px] w-[100%] lg:w-[750px]">
                 <Map hideOpenStreetMap disableInteraction />
             </div>
             <div className="flex flex-col items-center justify-center gap-y-4 px-4 sm:w-1/2">
-                <h1 className="text-4xl font-bold text-black-pearl-dark text-center">
+                <h1 className="text-center text-4xl font-bold text-black-pearl-dark">
                     Thousands of{' '}
                     <span className="text-valencia">Volunteers</span>
                     <br /> Across the US
                 </h1>
-                <p className="text-lg text-black text-center lg:w-1/2">
+                <p className="text-center text-lg text-black lg:w-1/2">
                     The PV community is constantly growing! Our members are
                     organizing in their local communities, identifying campaigns
                     in their area, and using the shared resources, tactics, and
