@@ -4,7 +4,7 @@ import { Link } from '../common/Buttons'
 
 export function MapGraphic() {
     return (
-        <div className="flex flex-col items-center justify-center gap-y-24 bg-white px-4 py-12 lg:flex-row">
+        <div className="flex w-full flex-col items-center justify-center gap-y-24 bg-white px-4 py-12 lg:flex-row">
             <div className="h-[450px] w-[100%] lg:w-[750px]">
                 <Map hideOpenStreetMap disableInteraction />
             </div>

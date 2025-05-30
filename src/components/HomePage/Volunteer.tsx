@@ -38,7 +38,7 @@ export function Volunteer() {
     }, [inView])
 
     return (
-        <div className="flex flex-col items-center justify-center gap-y-24 bg-black-pearl-light py-20">
+        <div className="flex w-full flex-col items-center justify-center gap-y-24 bg-black-pearl-light py-20">
             <h1 className="text-4xl font-bold text-white">
                 What Can <span className="text-valencia">You </span> Do?
             </h1>
