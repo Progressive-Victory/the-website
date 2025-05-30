@@ -6,7 +6,7 @@ import { Link } from '../common/Buttons'
 
 export function Hero() {
   return (
-    <div className="relative h-full w-full flex flex-col items-center justify-start py-20">
+    <div className="relative w-full flex flex-col items-center justify-start py-20">
       {/* Background */}
       <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-1" />
       <div
@@ -20,7 +20,7 @@ export function Hero() {
       />
 
       {/* Content */}
-      <div className="relative top-0 left-0 text-center w-full md:w-2/3 px-4 z-2 flex flex-col items-center">
+      <div className="relative top-0 left-0 text-center md:w-2/3 px-4 z-2 flex flex-col items-center">
         <motion.div
           style={{ willChange: "opacity, transform", transform: "translateZ(0)" }}
           initial={{ y: 100, opacity: 0, scale: 0 }}

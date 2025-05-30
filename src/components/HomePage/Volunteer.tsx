@@ -1,48 +1,7 @@
 'use client'
-import Image from 'next/image'
-import { motion } from 'motion/react'
 import { useState, useEffect, useRef } from 'react';
-
-function Card({
-    image,
-    title,
-    description,
-    delay = 0,
-}: {
-    image: string
-    title: string
-    description: string
-    delay?: number
-}) {
-    return (
-        <motion.div
-            initial={{ x: 100, opacity: 0 }} // Start position: off-screen to the right
-            animate={{ x: 0, opacity: 1 }} // End position: visible and on-screen
-            transition={{
-                duration: 1.0,
-                delay,
-                ease: 'backInOut',
-            }}
-            className="relative flex flex-col md:flex-row items-center justify-start w-full bg-white rounded-lg p-4 h-fit md:h-[275px]"
-        >
-            <Image
-                src={image}
-                alt={title}
-                width={128}
-                height={128}
-                className="my-4"
-            />
-            <div className="flex flex-col items-center justify-center gap-x-4">
-                <h1 className="text-lg md:text-xl font-bold text-black-pearl-dark text-center">
-                    {title}
-                </h1>
-                <p className="text-sm md:text-md text-black text-center px-4">
-                    {description}
-                </p>
-            </div>
-        </motion.div>
-    )
-}
+import { motion } from 'motion/react'
+import Image from 'next/image'
 
 const actions = [
     {
@@ -79,11 +38,11 @@ export function Volunteer() {
     }, [inView])
 
     return (
-        <div className="flex flex-col items-center justify-center bg-black-pearl-light py-20 w-full gap-y-24">
+        <div className="flex flex-col items-center justify-center bg-black-pearl-light py-20 gap-y-24">
             <h1 className="text-4xl font-bold text-white">
                 What Can <span className="text-valencia">You </span> Do?
             </h1>
-            <div className="w-full flex flex-col xl:flex-row items-center justify-center gap-x-10 gap-y-10 px-4">
+            <div className="flex flex-col xl:flex-row items-center justify-center gap-10 px-10">
                 {visible && actions.map((action, index) => (
                     <Card
                         key={action.title}
@@ -96,6 +55,41 @@ export function Volunteer() {
             </div>
             <div ref={divRef} />
         </div>
+    )
+}
+
+function Card({ image, title, description, delay = 0 }: {
+    image: string;
+    title: string;
+    description: string;
+    delay?: number;
+}) {
+    return (
+        <motion.div
+            initial={{ x: 100, opacity: 0 }} // Start position: off-screen to the right
+            animate={{ x: 0, opacity: 1 }} // End position: visible and on-screen
+            transition={{
+                duration: 1.0,
+                delay,
+                ease: 'backInOut',
+            }}
+            className="relative flex flex-col md:flex-row items-center justify-start w-full bg-white rounded-lg p-4 h-fit md:h-[275px]"
+        >
+            <Image
+                src={image}
+                alt={title}
+                width={128}
+                height={128}
+            />
+            <div className="flex flex-col items-center justify-center gap-x-4">
+                <h1 className="text-lg md:text-xl font-bold text-black-pearl-dark text-center">
+                    {title}
+                </h1>
+                <p className="text-sm md:text-md text-black text-center px-4">
+                    {description}
+                </p>
+            </div>
+        </motion.div>
     )
 }
 
