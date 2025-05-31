@@ -1,5 +1,5 @@
 'use client'
-import { MainLayout } from '@/components/MainLayout'
+import { MainLayout } from '@/components/layout/MainLayout'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { ArrowPathIcon, CakeIcon, TrophyIcon } from '@heroicons/react/24/solid'
 import { Stage } from '@/components/Stage'

@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { MainLayout } from '@/components/MainLayout'
+import { MainLayout } from '@/components/layout/MainLayout'
 import { ClientCalendar } from '@/components/Calendar'
 export const metadata: Metadata = {
     title: 'PV - Events',

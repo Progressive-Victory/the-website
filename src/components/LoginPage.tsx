@@ -1,5 +1,5 @@
 'use client'
-import { MainLayout } from '@/components/MainLayout'
+import { MainLayout } from '@/components/layout/MainLayout'
 import { LoginCard } from '@/components/LoginCard'
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'

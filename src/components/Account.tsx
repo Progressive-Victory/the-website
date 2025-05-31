@@ -1,5 +1,5 @@
 'use client'
-import { MainLayout } from '@/components/MainLayout'
+import { MainLayout } from '@/components/layout/MainLayout'
 import { useSession, signOut } from 'next-auth/react'
 import { useEffect, useMemo } from 'react'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'

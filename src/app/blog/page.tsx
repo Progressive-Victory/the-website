@@ -1,6 +1,6 @@
 import BlogCard from '@/components/BlogCard'
 import { BlogHeader } from '@/components/BlogHeader'
-import { MainLayout } from '@/components/MainLayout'
+import { MainLayout } from '@/components/layout/MainLayout'
 import { getPosts } from './util'
 
 type Post = {

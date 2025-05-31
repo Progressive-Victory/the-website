@@ -1,4 +1,4 @@
-import { MainLayout } from '@/components/MainLayout'
+import { MainLayout } from '@/components/layout/MainLayout'
 import { getPost } from '../util'
 
 export default async function Page({

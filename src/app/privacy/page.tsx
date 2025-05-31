@@ -1,4 +1,4 @@
-import { MainLayout } from '@/components/MainLayout'
+import { MainLayout } from '@/components/layout/MainLayout'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
