@@ -10,7 +10,7 @@ type BlogCardProps = {
     image: string
 }
 
-export default function BlogCard({
+export function BlogCard({
     title,
     id,
     description,
@@ -29,14 +29,14 @@ export default function BlogCard({
             className="relative rounded-xl shadow-md"
             href={`/blog/${encodeURIComponent(id)}`}
         >
-            <div className="relative w-full overflow-hidden rounded-xl before:absolute before:inset-x-0 before:z-[1] before:size-full before:bg-gradient-to-t before:from-neutral-900/[.9] ">
+            <div className="relative w-full overflow-hidden rounded-xl before:absolute before:inset-x-0 before:z-[1] before:size-full before:bg-gradient-to-t before:from-neutral-900/[.9]">
                 <Image src={image} alt="test" width={650} height={650} />
             </div>
             <div className="absolute inset-x-0 bottom-0 z-[1]">
-                <div className="flex h-full flex-col rounded-b-xl bg-white bg-opacity-90 p-4 sm:p-6 ">
+                <div className="flex h-full flex-col rounded-b-xl bg-white bg-opacity-90 p-4 sm:p-6">
                     <h3 className="text-lg">{title}</h3>
                     <div
-                        className="text-gray-500 line-clamp-2"
+                        className="line-clamp-2 text-gray-500"
                         dangerouslySetInnerHTML={{
                             __html: description,
                         }}
