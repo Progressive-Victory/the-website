@@ -41,8 +41,6 @@ export function Account() {
 
                     <div className="z-2 relative mt-20 flex w-[300px] flex-col rounded-lg bg-black-pearl-dark p-4">
                         <p className="mb-4 text-lg font-bold text-white">
-                    <div className="z-2 relative mt-20 flex w-[300px] flex-col rounded-lg bg-black-pearl-dark p-4">
-                        <p className="mb-4 text-lg font-bold text-white">
                             Account Controls
                         </p>
                         <div className="flex flex-row items-center justify-between">
