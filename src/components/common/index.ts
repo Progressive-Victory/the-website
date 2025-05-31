@@ -1,4 +1,5 @@
-import { Button, Link } from "./Buttons";
+import { Button } from "./Button";
+import { Link } from "./Link";
 import { Logo } from "./Logo";
 import { Message } from "./Message";
 

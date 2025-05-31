@@ -5,7 +5,7 @@ interface ButtonLinkProps extends LinkProps {
     className?: string
 }
 
-export default function Link({
+export function Link({
     href,
     className,
     children,
