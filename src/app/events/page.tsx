@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { MainLayout } from '@/components/layout/MainLayout'
-import { ClientCalendar } from '@/components/Calendar'
+import { ClientCalendar } from './Calendar'
+
 export const metadata: Metadata = {
     title: 'PV - Events',
     description: 'See what we are up to!',
@@ -32,7 +33,7 @@ const calendarMap = new Map<string, string>([
     ], // Skill team meetings
     [
         'cd79f48ade35423e0a232cfcf146e619d06ae8143c04fae93278788bcdc19b1d@group.calendar.google.com',
-        '9802b3'
+        '9802b3',
     ], // PV Special Events
 ])
 export default function Events() {
