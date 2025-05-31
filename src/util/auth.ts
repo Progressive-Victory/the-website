@@ -89,7 +89,7 @@ export const authOptions: NextAuthOptions = {
             name: eprofile.username,
             email: profile.email,
             // Using long form here to adjust size of image
-            image: `https://cdn.discordapp.com/avatars/${eprofile.id}/${eprofile.avatar}?size=512`,
+            image: await getUserAvatarURL(eprofile.id, eprofile.avatar, { forceStatic: true, size: 512 }),
             discordId: eprofile.id,
             discordUserAvatar: eprofile.avatar,
           })
