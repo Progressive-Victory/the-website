@@ -1,5 +1,5 @@
 import { BlogCard, BlogHeader, getPosts } from '@/app/blog'
-import { MainLayout } from '@/components/layout/MainLayout'
+import { MainLayout } from '@/components/layout'
 
 type Post = {
     node: {

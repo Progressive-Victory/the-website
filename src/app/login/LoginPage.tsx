@@ -4,7 +4,7 @@ import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import Link from 'next/link'
-import { MainLayout } from '@/components/layout/MainLayout'
+import { MainLayout } from '@/components/layout'
 import { LoginCard } from '@/app/login/LoginCard'
 
 // We have to do this to comply with Next.js

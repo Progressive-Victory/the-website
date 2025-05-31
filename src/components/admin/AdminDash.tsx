@@ -1,6 +1,6 @@
 'use client'
 import { useState } from "react"
-import { MainLayout } from "../MainLayout"
+import { MainLayout } from "@/components/layout"
 import { DashPages, DashPermissions, DashRoles, DashUsers } from "../admin"
 
 export default function AdminDash() {

@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { MainLayout } from '@/components/layout/MainLayout'
+import { MainLayout } from '@/components/layout'
 import FAQ from './FAQ'
 import AboutCards from './AboutCards'
 

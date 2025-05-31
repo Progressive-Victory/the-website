@@ -4,7 +4,7 @@ import { ArrowPathIcon, CakeIcon, TrophyIcon } from '@heroicons/react/24/solid'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { Field, Stage, Toggle } from '@/app/volunteer'
-import { MainLayout } from '@/components/layout/MainLayout'
+import { MainLayout } from '@/components/layout'
 import { IUser } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
 

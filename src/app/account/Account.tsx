@@ -3,7 +3,7 @@ import { useEffect, useMemo } from 'react'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { MainLayout } from '@/components/layout/MainLayout'
+import { MainLayout } from '@/components/layout'
 import { hasPermission, useUser } from '@/util/hooks'
 
 export function Account() {

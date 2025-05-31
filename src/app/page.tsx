@@ -1,5 +1,5 @@
 import { Hero, MapGraphic, Volunteer } from '@/app/home'
-import { MainLayout } from '@/components/layout/MainLayout'
+import { MainLayout } from '@/components/layout'
 
 export default function Home() {
     return (
