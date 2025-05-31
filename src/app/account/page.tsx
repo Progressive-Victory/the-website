@@ -1,5 +1,6 @@
-import { Account } from '@/components/Account'
 import { Metadata } from 'next'
+import { Account } from './Account'
+
 export const metadata: Metadata = {
     title: 'PV - Account',
     description: 'Manage your PV Account',
