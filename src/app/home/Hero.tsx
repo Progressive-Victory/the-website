@@ -1,8 +1,8 @@
 'use client'
 import { useState } from 'react'
 import { motion, useTransform, useSpring } from 'motion/react'
-import { Message } from '../Message'
-import { Link } from '../common/Buttons'
+import { Message } from '../../components/Message'
+import { Link } from '../../components/common/Buttons'
 
 export function Hero() {
     return (
