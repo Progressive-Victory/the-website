@@ -1,6 +1,7 @@
 import { Hero, MapGraphic, Volunteer } from '@/app/home'
 import { MainLayout } from '@/components/layout'
 
+// HomePage
 export default function Home() {
     return (
         <MainLayout>
