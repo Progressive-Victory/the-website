@@ -30,7 +30,7 @@ export default function DashPermissions() {
                 setLoading(false)
             }
         }
-        fetchData()
+        void fetchData()
     }, [refresh])
 
     useEffect(() => {
@@ -71,31 +71,31 @@ export default function DashPermissions() {
     }
 
     const PermDetailRow = ({ label, value }: { label: string, value: React.ReactNode }) => (
-        <div className="flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-4 py-2 border-b">
-            <span className="font-medium text-gray-700 text-sm md:text-base">{label}</span>
-            <span className="col-span-2 text-gray-600 text-sm md:text-base break-words">
-                {value || 'N/A'}
+        <div className="flex flex-col gap-2 border-b py-2 md:grid md:grid-cols-3 md:gap-4">
+            <span className="text-sm font-medium text-gray-700 md:text-base">{label}</span>
+            <span className="col-span-2 break-words text-sm text-gray-600 md:text-base">
+                {value ?? 'N/A'}
             </span>
         </div>
     )
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 lg:min-h-0 lg:h-full lg:pb-4 gap-4 h-full bg-gray-50 min-h-screen b-gray-50 pb-16">
+        <div className="b-gray-50 grid h-full min-h-screen grid-cols-1 gap-4 bg-gray-50 pb-16 lg:h-full lg:min-h-0 lg:grid-cols-3 lg:pb-4">
             {/* Perm List */}
-            <div className="flex flex-col lg:col-span-1 bg-white rounded-lg shadow-sm p-3 md:p-4">
+            <div className="flex flex-col rounded-lg bg-white p-3 shadow-sm md:p-4 lg:col-span-1">
                 <div className="grow">
-                    <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">Permissions</h2>
+                    <h2 className="mb-2 text-lg font-semibold md:mb-4 md:text-xl">Permissions</h2>
                     <ul className="space-y-1 md:space-y-2">
                         {sectionData.map(perm => (
                             <li
                                 key={perm.name}
-                                className={`p-2 md:p-3 rounded-lg cursor-pointer transition-colors text-sm md:text-base ${selectedPerm?.name === perm.name
-                                        ? 'bg-blue-100 border-blue-500'
+                                className={`cursor-pointer rounded-lg p-2 text-sm transition-colors md:p-3 md:text-base ${selectedPerm?.name === perm.name
+                                        ? 'border-blue-500 bg-blue-100'
                                         : 'hover:bg-gray-100'
                                     }`}
                                 onClick={() => setSelectedPerm(perm)}
                             >
-                                <div className="font-medium relative">
+                                <div className="relative font-medium">
                                     {perm.name}
                                     <ToolTip
                                         label="..."
@@ -105,10 +105,10 @@ export default function DashPermissions() {
                                         <>
                                             <button
                                                 onClick={(ev) => {
-                                                    handleDeletePerm(perm.name)
+                                                    void handleDeletePerm(perm.name)
                                                     ev.target.dispatchEvent(new Event('closettm'))
                                                 }}
-                                                className="hover:bg-blue-500 px-2 rounded closer"
+                                                className="closer rounded px-2 hover:bg-blue-500"
                                             >
                                                 Delete
                                             </button>
@@ -130,21 +130,21 @@ export default function DashPermissions() {
                             <form className="closer" action="javascript:void(0);" onSubmit={(ev: FormEvent<HTMLFormElement>) => {
                                 const item: HTMLInputElement = ev.currentTarget.elements.namedItem("pName") as HTMLInputElement
                                 if (!item) return false
-                                handleCreatePerm(item.value)
+                                void handleCreatePerm(item.value)
                                 ev.target.dispatchEvent(new Event('closepm'))
                             }}>
                                 <label htmlFor="rName">Permission Name:</label>
-                                <input className="float-right border border-blue-500 rounded" type="text" id="pName" name="pName" /><br />
+                                <input className="float-right rounded border border-blue-500" type="text" id="pName" name="pName" /><br />
                                 <div className="mt-6">
                                     <button
-                                        className="text-white closer rounded px-2 py-1 bg-blue-600 hover:bg-blue-700"
+                                        className="closer rounded bg-blue-600 px-2 py-1 text-white hover:bg-blue-700"
                                         onClick={(ev) => {
                                             ev.target.dispatchEvent(new Event('closepm'))
                                         }}
                                     >
                                         Cancel
                                     </button>
-                                    <input className="text-white cursor-pointer float-right bg-blue-600 hover:bg-blue-700 rounded px-2 py-1" type="submit" value="Submit" />
+                                    <input className="float-right cursor-pointer rounded bg-blue-600 px-2 py-1 text-white hover:bg-blue-700" type="submit" value="Submit" />
                                 </div>
                             </form>
                         </div>
@@ -153,15 +153,15 @@ export default function DashPermissions() {
             </div>
             {/* Perm Details */}
             {selectedPerm ? (
-                <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6">
+                <div className="rounded-lg bg-white p-4 shadow-sm md:p-6 lg:col-span-2">
                     <div className="space-y-2 md:space-y-4">
-                        <h2 className="text-lg md:text-xl font-semibold">Permission Details</h2>
+                        <h2 className="text-lg font-semibold md:text-xl">Permission Details</h2>
 
                         <PermDetailRow label="Name" value={selectedPerm.name} />
                     </div>
                 </div>
             ) : (
-                <div className="lg:col-span-2 flex items-center justify-center text-gray-500 text-sm md:text-base p-4">
+                <div className="flex items-center justify-center p-4 text-sm text-gray-500 md:text-base lg:col-span-2">
                     Select a permission to view details
                 </div>
             )}

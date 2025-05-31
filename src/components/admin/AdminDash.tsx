@@ -32,12 +32,12 @@ export default function AdminDash() {
 
     return (
         <MainLayout>
-            <div className="relative flex flex-col bg-steel-blue w-full h-full">
-                <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-2 py-20" />
+            <div className="relative flex size-full flex-col bg-steel-blue">
+                <div className="halftone z-2 absolute left-0 top-0 size-full py-20 opacity-10" />
 
-                <div className="items-stretch z-1 grid grid-cols-12 gap-x-4 opacity-90 flex-1 overflow-hidden">
-                    <div className="col-span-2 bg-white p-4 overflow-y-auto">
-                        <h1 className="text-black-pearl-dark text-lg font-semibold">Admin Portal</h1>
+                <div className="z-1 grid flex-1 grid-cols-12 items-stretch gap-x-4 overflow-hidden opacity-90">
+                    <div className="col-span-2 overflow-y-auto bg-white p-4">
+                        <h1 className="text-lg font-semibold text-black-pearl-dark">Admin Portal</h1>
                         <br/>
                         <ul>
                             {sectionArray.map((value, index) => (
@@ -51,7 +51,7 @@ export default function AdminDash() {
                         </ul>
                     </div>
 
-                    <div className="col-span-10 p-4 overflow-y-auto">
+                    <div className="col-span-10 overflow-y-auto p-4">
                         {serveSectionComp()}
                     </div>
                 </div>

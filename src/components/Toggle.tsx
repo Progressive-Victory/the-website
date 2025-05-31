@@ -12,27 +12,27 @@ export function Toggle({
     tooltip?: string
 }) {
     return (
-        <div className="flex flex-row items-center justify-between bg-gray-700 p-2 rounded-md">
+        <div className="flex flex-row items-center justify-between rounded-md bg-gray-700 p-2">
             <div className="flex flex-row items-center">
                 <div
                     tabIndex={0}
-                    className="group relative touch-pan-zoom cursor-pointer"
+                    className="touch-pan-zoom group relative cursor-pointer"
                 >
-                    <InformationCircleIcon className="w-4 h-4 mr-1 text-steel-blue bg-white rounded-full" />
-                    <div className="absolute z-10 top-0 opacity-0 group-hover:opacity-75 group-focus:opacity-75 group-hover:translate-y-[25px] group-focus:translate-y-[25px] transition-all duration-100 flex pointer-events-none flex-col items-center bg-black rounded-md py-2 px-px text-center text-gray-700 text-sm">
-                        <span className="min-w-[300px] text-xs text-white text-center">
+                    <InformationCircleIcon className="mr-1 size-4 rounded-full bg-white text-steel-blue" />
+                    <div className="pointer-events-none absolute top-0 z-10 flex flex-col items-center rounded-md bg-black px-px py-2 text-center text-sm text-gray-700 opacity-0 transition-all duration-100 group-hover:translate-y-[25px] group-hover:opacity-75 group-focus:translate-y-[25px] group-focus:opacity-75">
+                        <span className="min-w-[300px] text-center text-xs text-white">
                             {tooltip}
                         </span>
                     </div>
                 </div>
 
-                <label className="text-white text-[10px] lg:text-sm">
+                <label className="text-[10px] text-white lg:text-sm">
                     {placeholder}
                 </label>
             </div>
 
             <div
-                className="relative inline-block w-10 ml-auto lg:ml-0 lg:mr-2 align-middle select-none"
+                className="relative ml-auto inline-block w-10 select-none align-middle lg:ml-0 lg:mr-2"
                 onClick={() => {
                     onChange()
                 }}
@@ -40,7 +40,7 @@ export function Toggle({
                 <label
                     className={`${
                         value ? 'bg-steel-blue' : 'bg-gray-500'
-                    } block overflow-hidden h-6 rounded-full cursor-pointer transition-all duration-300`}
+                    } block h-6 cursor-pointer overflow-hidden rounded-full transition-all duration-300`}
                     htmlFor="toggle"
                 >
                     <span
@@ -48,7 +48,7 @@ export function Toggle({
                             value
                                 ? 'translate-x-4 bg-white shadow-lg'
                                 : 'translate-x-0 bg-white'
-                        } absolute block w-6 h-6 rounded-full transition-all duration-300`}
+                        } absolute block size-6 rounded-full transition-all duration-300`}
                     />
                 </label>
             </div>

@@ -22,11 +22,11 @@ function AboutCard({
     description: string
 }) {
     return (
-        <div className="bg-black-pearl-dark rounded-lg lg:w-2/3 p-4 px-6 text-center z-2">
-            <h1 className="text-4xl font-bold text-white py-2">
+        <div className="z-2 rounded-lg bg-black-pearl-dark p-4 px-6 text-center lg:w-2/3">
+            <h1 className="py-2 text-4xl font-bold text-white">
                 {title} <span className="text-valencia">{emphasis}</span>
             </h1>
-            <p className="text-md lg:text-lg text-white text-left font-[500] py-4">
+            <p className="text-md py-4 text-left font-[500] text-white lg:text-lg">
                 {description}
             </p>
         </div>
@@ -67,11 +67,11 @@ const content = [
 export default function About() {
     return (
         <MainLayout>
-            <div className="relative py-10 h-fit bg-steel-blue px-4">
+            <div className="relative h-fit bg-steel-blue px-4 py-10">
                 {/* Halftone background */}
-                <div className="absolute inset-0 w-full h-full halftone opacity-10 z-1" />
-                <div className="relative flex flex-col justify-start mt-10 items-center min-h-screen w-full m-auto gap-y-10 z-2">
-                    <p className="text-4xl font-bold text-white w-full text-center">
+                <div className="halftone z-1 absolute inset-0 size-full opacity-10" />
+                <div className="z-2 relative m-auto mt-10 flex min-h-screen w-full flex-col items-center justify-start gap-y-10">
+                    <p className="w-full text-center text-4xl font-bold text-white">
                         About{' '}
                         <span className="text-black-pearl-dark">
                             Progressive Victory

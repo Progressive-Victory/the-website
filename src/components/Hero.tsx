@@ -82,13 +82,13 @@ function TiltMessage({ children, className }: { children: React.ReactNode, class
 
 export function Hero() {
   return (
-    <div className="relative h-full w-full flex flex-col items-center bg-steel-blue justify-start py-20">
+    <div className="relative flex size-full flex-col items-center justify-start bg-steel-blue py-20">
       
       {/* Halftone background */}
-      <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-1" />
+      <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
       {/* Animated Main Text */}
       <div
-        className="absolute top-0 left-0 lg:-translate-x-1/2 w-full lg:w-1/2 h-full z-1"
+        className="z-1 absolute left-0 top-0 size-full lg:w-1/2 lg:-translate-x-1/2"
         style={{
           backgroundImage: "url('/images/blend_test.png')",
           backgroundSize: 'cover',
@@ -97,7 +97,7 @@ export function Hero() {
         }}
       />
       
-      <div className="relative top-0 left-0 text-center w-full md:w-2/3 px-4 z-2 flex flex-col items-center">
+      <div className="z-2 relative left-0 top-0 flex w-full flex-col items-center px-4 text-center md:w-2/3">
         <motion.div
           style={{ willChange: "opacity, transform", transform: "translateZ(0)" }}
           initial={{ y: 100, opacity: 0, scale: 0 }}
@@ -119,7 +119,7 @@ export function Hero() {
           animate={{ y: 0, opacity: 1, scale: 1 }}
           transition={{ ease: "backInOut", duration: 1, delay: 0.25 }}
         >
-          <p className="text-xl text-white my-8 font-[500]">
+          <p className="my-8 text-xl font-[500] text-white">
             Find like minded people, share ideas, and engage in
             meaningful political action. Get involved today!
           </p>
@@ -133,7 +133,7 @@ export function Hero() {
         >
           <Link
             href="/volunteer"
-            className="text-xl bg-valencia px-4 py-2 rounded-full text-white font-bold hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out"
+            className="rounded-full bg-valencia px-4 py-2 text-xl font-bold text-white transition duration-300 ease-in-out hover:bg-white hover:text-black-pearl-dark"
           >
             Get Involved
           </Link>
@@ -159,7 +159,7 @@ export function Hero() {
           />
         </TiltMessage>
 
-        <TiltMessage className="lg:mt-24 h-fit">
+        <TiltMessage className="h-fit lg:mt-24">
           <Message
             motionProps={{
               initial: { rotate: 15, y: 50 },

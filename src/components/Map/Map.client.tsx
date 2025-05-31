@@ -9,11 +9,11 @@ import { OPEN_ATTR, OPEN_MAP_URI, US_CENTER } from './constants'
 import { getBrandColor, ShadeIndex } from '@/util/theme'
 
 // Types
-type MarkerCluster = {
+interface MarkerCluster {
     getChildCount: () => number
 }
 
-type LatLon = { lat: string | number; lon: string | number }
+interface LatLon { lat: string | number; lon: string | number }
 
 const createClusterCustomIcon = function (cluster: MarkerCluster) {
     return L.divIcon({
@@ -119,7 +119,7 @@ export const ClientMap = ({
             }
             setMarkerList(newList)
         }
-        if (isMarker) fetcher()
+        if (isMarker) void fetcher()
 
         return () => {
             setMarkerList([])
@@ -139,9 +139,7 @@ export const ClientMap = ({
             doubleClickZoom={!disableInteraction}
             className="z-0 size-full"
         >
-            {children ? (
-                children
-            ) : (
+            {children ?? (
                 <>
                     {!hideOpenStreetMap && <OpenStreetMapLayer />}
                     <USMapLayer isHeatmap={isHeatmap} />

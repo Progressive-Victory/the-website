@@ -13,8 +13,8 @@ export function LoginCard({
     redirect: string
 }) {
     return (
-        <div className="flex flex-col items-center justify-center bg-black-pearl-dark p-4 rounded-md shadow-lg">
-            <h1 className="text-2xl font-bold text-white text-center">
+        <div className="flex flex-col items-center justify-center rounded-md bg-black-pearl-dark p-4 shadow-lg">
+            <h1 className="text-center text-2xl font-bold text-white">
                 Log In to Continue
             </h1>
             <button
@@ -25,7 +25,7 @@ export function LoginCard({
                         { prompt: 'none' }
                     )
                 }
-                className="flex flex-row items-center justify-center gap-x-4 mt-6 bg-[#5865F2] text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
+                className="mt-6 flex flex-row items-center justify-center gap-x-4 rounded-lg bg-[#5865F2] px-4 py-2 font-bold text-white transition duration-300 ease-in-out"
             >
                 <Image
                     src="/images/discord-white-icon.png"

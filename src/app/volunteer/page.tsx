@@ -9,6 +9,7 @@ import { IUser } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
+import { RESTJSONErrorCodes } from 'discord-api-types/v10'
 
 export default function Volunteer() {
     const [currentStage, setCurrentStage] = useState<string>('loading')
@@ -52,7 +53,7 @@ export default function Volunteer() {
         })
 
         if (resp.status === 200) {
-            getUser()
+            void getUser()
 
             // kick off the clock
             updateTimer(60)
@@ -79,18 +80,18 @@ export default function Volunteer() {
         return false
     }, [])
 
-    const joinToServer = useCallback(async () => {
-        fetch('/api/discord/join', {
+    const joinToServer = useCallback(() => {
+        void fetch('/api/discord/join', {
             method: 'PUT',
         }).then(async (response) => {
             if (response.ok) {
-                getUser()
+                void getUser()
             } else {
                 // Not every response will have JSON but errors should
                 const data = await response.json()
                 // The discord code for bad oauth2 we pass back
-                if (data && data.code === 50025) {
-                    signOut({
+                if (data?.code && data.code === RESTJSONErrorCodes.InvalidOAuth2AccessToken) {
+                    void signOut({
                         callbackUrl: '/login',
                     })
                 }
@@ -100,8 +101,8 @@ export default function Volunteer() {
 
     const getUser = async () => {
         const response = await fetch('/api/user')
-        const data = await response.json()
-        setUser(data as Partial<IUser>)
+        const data = await response.json() as Partial<IUser>
+        setUser(data)
     }
 
     const checkCode = async (code: string) => {
@@ -116,7 +117,7 @@ export default function Volunteer() {
         setCheckingCode(false)
         if (resp.status === 200) {
             // Join the user
-            joinToServer()
+            void joinToServer()
             return true
         } else {
             setCodeError(true)
@@ -139,7 +140,7 @@ export default function Volunteer() {
 
     // Gets the current user object, useful for manipulation as we proceed in flow
     useEffect(() => {
-        getUser()
+        void getUser()
     }, [])
 
     // Try and join user to server
@@ -165,18 +166,18 @@ export default function Volunteer() {
 
                             setCurrentStage('joining')
                             // Join the user
-                            fetch('/api/discord/join').then(async (result) => {
+                            void fetch('/api/discord/join').then((result) => {
                                 if (result.status === 404) {
-                                    joinToServer()
+                                    void joinToServer()
                                 } else {
-                                    getUser()
+                                    void getUser()
                                     setShowRejoin(false)
                                 }
                             })
                             break
                         case OnboardingStage.JOINED:
                             setCurrentStage('joined')
-                            fetch('/api/discord/join').then(async (result) => {
+                            void fetch('/api/discord/join').then((result) => {
                                 if (result.status === 404) {
                                     setShowRejoin(true)
                                 } else {
@@ -206,16 +207,16 @@ export default function Volunteer() {
             ) {
                 setStartJoin(false)
             } else {
-                // Set data on user and upate onboarding stage
-                updateUser({
+                // Set data on user and update onboarding stage
+                void updateUser({
                     preferredName: preferredName,
                     zipCode: fromUS ? '00000' : zipCode, // give them a dummy zip if international
                     phoneNumber: phoneNumber,
                 }).then((result) => {
                     if (result) {
-                        requestCode(phoneNumber).then((result) => {
+                        void requestCode(phoneNumber).then((result) => {
                             if (result) {
-                                getUser()
+                                void getUser()
                             } else {
                                 setStartJoin(false)
                                 setValidationFlags((prev) =>
@@ -225,7 +226,7 @@ export default function Volunteer() {
                             }
                         })
                     } else {
-                        // TODO: an error occured in setting user data
+                        // TODO: an error occurred in setting user data
                         console.error('Could not update user profile!')
                     }
                 })
@@ -244,10 +245,10 @@ export default function Volunteer() {
 
     return (
         <MainLayout>
-            <div className="relative flex flex-col items-center h-screen justify-center bg-steel-blue">
-                <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-1" />
+            <div className="relative flex h-screen flex-col items-center justify-center bg-steel-blue">
+                <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
                 <div
-                    className="absolute top-0 right-0 lg:translate-x-1/2 w-full lg:w-1/2 h-full"
+                    className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
                     style={{
                         backgroundImage: "url('/images/blend_test.png')",
                         backgroundSize: 'cover',
@@ -256,25 +257,25 @@ export default function Volunteer() {
                         transform: 'scaleX(-1)',
                     }}
                 />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col w-full max-w-[600px] z-2">
-                    <div className="relative flex flex-col rounded-lg bg-black-pearl-dark p-4 shadow-md gap-y-4 mx-2">
+                <div className="z-2 absolute left-1/2 top-1/2 flex w-full max-w-[600px] -translate-x-1/2 -translate-y-1/2 flex-col">
+                    <div className="relative mx-2 flex flex-col gap-y-4 rounded-lg bg-black-pearl-dark p-4 shadow-md">
                         {/* User is not authenticated and needs to login */}
                         <Stage
                             stageName="unauthenticated"
                             currentStage={currentStage}
                         >
-                            <p className="text-white text-center text-3xl font-bold my-2 mx-auto">
+                            <p className="mx-auto my-2 text-center text-3xl font-bold text-white">
                                 Volunteer with PV
                             </p>
-                            <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2">
+                            <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
                                 Join us on Discord and make a difference ✨
                             </p>
-                            <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2 italic">
+                            <p className="mx-2 mb-2 text-center text-lg font-medium italic text-white">
                                 But first you{"'"}ve got to log in...
                             </p>
                             <Link
                                 href="/login?redirect=/volunteer"
-                                className="bg-steel-blue rounded-md text-center w-full mt-4 py-2 text-lg font-bold hover:bg-blue-900 hover:scale-[101%] text-white transition-all duration-100"
+                                className="mt-4 w-full rounded-md bg-steel-blue py-2 text-center text-lg font-bold text-white transition-all duration-100 hover:scale-[101%] hover:bg-blue-900"
                             >
                                 Go to Log In
                             </Link>
@@ -284,10 +285,10 @@ export default function Volunteer() {
                             stageName="not_started"
                             currentStage={currentStage}
                         >
-                            <p className="text-white text-center text-3xl font-bold my-2 mx-auto">
+                            <p className="mx-auto my-2 text-center text-3xl font-bold text-white">
                                 Volunteer with PV
                             </p>
-                            <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2">
+                            <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
                                 Join us on Discord and make a difference ✨
                             </p>
                             <Field
@@ -318,15 +319,15 @@ export default function Volunteer() {
                                     setPhoneNumber(text)
                                     const isValid =
                                         /^\d{10}$/g.test(text) &&
-                                        text[0] !== '0' &&
-                                        text[0] !== '1'
+                                        !text.startsWith('0') &&
+                                        !text.startsWith('1')
 
                                     setValidationFlags((prev) =>
                                         new Map(prev).set('phone', isValid)
                                     )
                                 }}
                             />
-                            <p className={`text-[12px] text-white -mt-2`}>
+                            <p className={`-mt-2 text-[12px] text-white`}>
                                 US numbers only. Message and data rates may
                                 apply. Must be SMS reachable.
                             </p>
@@ -341,7 +342,7 @@ export default function Volunteer() {
                                     setZipCode(text)
                                     const isValid =
                                         /^\d{5}(-\d{4})?$/g.test(text) &&
-                                        text[0] !== '0'
+                                        !text.startsWith('0')
                                     setValidationFlags((prev) =>
                                         new Map(prev).set('zip', isValid)
                                     )
@@ -385,7 +386,7 @@ export default function Volunteer() {
                                     setPrivacyPolicy(!privacyPolicy)
                                 }}
                             />
-                            <div className="text-left text-xs w-full text-white px-1">
+                            <div className="w-full px-1 text-left text-xs text-white">
                                 <span className="text-red-500">*</span> =
                                 required field
                             </div>
@@ -394,16 +395,16 @@ export default function Volunteer() {
                                     setStartJoin(true)
                                 }}
                                 disabled={startJoin}
-                                className="bg-steel-blue disabled:bg-gray-500 rounded-md w-full mt-4 py-2 text-lg font-bold hover:bg-blue-900 hover:scale-[101%] text-white transition-all duration-100"
+                                className="mt-4 w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:scale-[101%] hover:bg-blue-900 disabled:bg-gray-500"
                             >
                                 Join Now
                             </button>
                         </Stage>
                         {/* Loading indicator for between auth state */}
                         <Stage stageName="loading" currentStage={currentStage}>
-                            <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
-                                <ArrowPathIcon className="h-8 w-8 text-white animate-spin" />
-                                <p className="text-lg font-bold text-center text-white mt-6">
+                            <div className="flex min-h-[200px] flex-col items-center justify-center p-4">
+                                <ArrowPathIcon className="size-8 animate-spin text-white" />
+                                <p className="mt-6 text-center text-lg font-bold text-white">
                                     Loading...
                                 </p>
                             </div>
@@ -413,15 +414,15 @@ export default function Volunteer() {
                             stageName="verification"
                             currentStage={currentStage}
                         >
-                            <div className="flex flex-col items-center w-full">
-                                <p className="text-lg text-white font-white text-center font-bold">
+                            <div className="flex w-full flex-col items-center">
+                                <p className="font-white text-center text-lg font-bold text-white">
                                     Enter your Verification Code
                                 </p>
-                                <p className="text-white text-center text-lg mx-2 font-medium mx-auto mb-2">
+                                <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
                                     We just sent it to your phone 📱
                                 </p>
 
-                                <div className="flex flex-row items-center justify-center w-full">
+                                <div className="flex w-full flex-row items-center justify-center">
                                     <Field
                                         value={securityCode}
                                         placeholder="Security Code"
@@ -429,7 +430,7 @@ export default function Volunteer() {
                                         // Let users input with enter key
                                         onEnter={() => {
                                             if (securityCode.length === 6) {
-                                                checkCode(securityCode)
+                                                void checkCode(securityCode)
                                             }
                                         }}
                                         errorText="Invalid or expired code, try a new one"
@@ -453,13 +454,13 @@ export default function Volunteer() {
                                                 : 'bg-gray-500'
                                         } ${
                                             !codeError ? '' : 'mb-[12px]'
-                                        } w-fit py-3 px-2 text-center text-white text-sm whitespace-nowrap rounded-lg ml-2 mt-auto`}
+                                        } ml-2 mt-auto w-fit whitespace-nowrap rounded-lg px-2 py-3 text-center text-sm text-white`}
                                         onClick={() => {
                                             // Get a new OTP
-                                            requestCode(
+                                            void requestCode(
                                                 phoneNumber !== ''
                                                     ? phoneNumber
-                                                    : user?.phoneNumber || ''
+                                                    : user?.phoneNumber ?? ''
                                             )
                                         }}
                                     >
@@ -469,30 +470,30 @@ export default function Volunteer() {
                                 </div>
                                 <button
                                     onClick={() => {
-                                        updateUser({
+                                        void updateUser({
                                             onboardingStage:
                                                 OnboardingStage.NOT_STARTED,
                                         })
 
                                         setTimeout(() => {
-                                            getUser()
+                                            void getUser()
                                             setStartJoin(false)
                                         }, 1000)
                                     }}
-                                    className="text-steel-blue underline hover:text-white text-xs text-center mr-auto mt-2"
+                                    className="mr-auto mt-2 text-center text-xs text-steel-blue underline hover:text-white"
                                 >
                                     I made a mistake!
                                 </button>
                                 <button
                                     onClick={() => {
                                         if (securityCode.length === 6) {
-                                            checkCode(securityCode)
+                                            void checkCode(securityCode)
                                         }
                                     }}
                                     disabled={
                                         securityCode.length < 6 || checkingCode
                                     }
-                                    className="disabled:bg-gray-500 bg-steel-blue rounded-md text-center w-full mt-4 py-2 text-lg font-bold hover:bg-blue-900 hover:scale-[101%] text-white transition-all duration-100"
+                                    className="mt-4 w-full rounded-md bg-steel-blue py-2 text-center text-lg font-bold text-white transition-all duration-100 hover:scale-[101%] hover:bg-blue-900 disabled:bg-gray-500"
                                 >
                                     Verify
                                 </button>
@@ -500,19 +501,19 @@ export default function Volunteer() {
                         </Stage>
                         {/* Onboarding done need to join them to server now*/}
                         <Stage stageName="joining" currentStage={currentStage}>
-                            <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
-                                <ArrowPathIcon className="h-8 w-8 text-white animate-spin" />
-                                <p className="text-lg font-bold text-center text-white mt-6">
+                            <div className="flex min-h-[200px] flex-col items-center justify-center p-4">
+                                <ArrowPathIcon className="size-8 animate-spin text-white" />
+                                <p className="mt-6 text-center text-lg font-bold text-white">
                                     Joining you to the server...
                                 </p>
                             </div>
                         </Stage>
                         <Stage stageName="joined" currentStage={currentStage}>
-                            <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
+                            <div className="flex min-h-[200px] flex-col items-center justify-center p-4">
                                 {showRejoin ? (
                                     <>
-                                        <TrophyIcon className="h-12 w-12 text-steel-blue" />
-                                        <p className="text-lg font-bold text-center text-white mt-6">
+                                        <TrophyIcon className="size-12 text-steel-blue" />
+                                        <p className="mt-6 text-center text-lg font-bold text-white">
                                             Would you like to rejoin?
                                         </p>
                                         <button
@@ -520,15 +521,15 @@ export default function Volunteer() {
                                                 setShowRejoin(false)
                                                 setCurrentStage('joining')
                                             }}
-                                            className="px-4 py-2 bg-valencia hover:bg-red-900 font-bold rounded-full mt-2 text-white"
+                                            className="mt-2 rounded-full bg-valencia px-4 py-2 font-bold text-white hover:bg-red-900"
                                         >
                                             Rejoin
                                         </button>
                                     </>
                                 ) : (
                                     <>
-                                        <CakeIcon className="h-12 w-12 text-steel-blue" />
-                                        <p className="text-lg font-bold text-center text-white mt-6">
+                                        <CakeIcon className="size-12 text-steel-blue" />
+                                        <p className="mt-6 text-center text-lg font-bold text-white">
                                             Congrats you are in the server!
                                         </p>
                                     </>

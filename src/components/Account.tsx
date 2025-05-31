@@ -16,7 +16,7 @@ export function Account() {
                 return (
                     <Link href="/admin">
                         <button
-                            className="bg-valencia text-white font-bold py-2 px-4 rounded-full hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out"
+                            className="rounded-full bg-valencia px-4 py-2 font-bold text-white transition duration-300 ease-in-out hover:bg-white hover:text-black-pearl-dark"
                         >
                             Admin Panel
                         </button>
@@ -30,7 +30,7 @@ export function Account() {
 
     useEffect(() => {
         // Check if the user is already on the server
-        fetch('/api/discord/join')
+        void fetch('/api/discord/join')
     }, [])
 
     if (!session) {
@@ -38,17 +38,17 @@ export function Account() {
     } else {
         return (
             <MainLayout>
-                <div className="relative flex flex-col items-center bg-steel-blue w-full h-screen">
-                    <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-1" />
+                <div className="relative flex h-screen w-full flex-col items-center bg-steel-blue">
+                    <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
 
-                    <div className="relative flex flex-col bg-black-pearl-dark rounded-lg w-[300px] p-4 z-2 mt-20">
-                        <p className="text-white text-lg font-bold mb-4">
+                    <div className="z-2 relative mt-20 flex w-[300px] flex-col rounded-lg bg-black-pearl-dark p-4">
+                        <p className="mb-4 text-lg font-bold text-white">
                             Account Controls
                         </p>
                         <div className="flex flex-row items-center justify-between">
                             <button
-                                onClick={() => signOut({ callbackUrl: '/' })}
-                                className="bg-valencia text-white font-bold py-2 px-4 rounded-full hover:bg-white hover:text-black-pearl-dark transition duration-300 ease-in-out"
+                                onClick={() => void signOut({ callbackUrl: '/' })}
+                                className="rounded-full bg-valencia px-4 py-2 font-bold text-white transition duration-300 ease-in-out hover:bg-white hover:text-black-pearl-dark"
                             >
                                 Sign Out
                             </button>
@@ -56,8 +56,8 @@ export function Account() {
                             {AdminPanelButton && AdminPanelButton}
                         </div>
                     </div>
-                    <div className="relative z-2 text-xs bg-black-pearl-dark rounded-lg text-white flex flex-row shadow-lg mt-4 p-4">
-                        <InformationCircleIcon className="text-steel-blue bg-white rounded-full w-4 h-4 mr-1" />
+                    <div className="z-2 relative mt-4 flex flex-row rounded-lg bg-black-pearl-dark p-4 text-xs text-white shadow-lg">
+                        <InformationCircleIcon className="mr-1 size-4 rounded-full bg-white text-steel-blue" />
                         Pardon our dust while we work on this page
                     </div>
                 </div>

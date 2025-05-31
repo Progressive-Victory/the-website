@@ -21,7 +21,7 @@ export function LoginPage() {
             params.get('redirect')?.startsWith('/') &&
             !params.get('redirect')?.includes('?')
         ) {
-            setRedirect(params.get('redirect') || '/')
+            setRedirect(params.get('redirect') ?? '/')
         }
 
         if (session) {
@@ -33,7 +33,7 @@ export function LoginPage() {
         <MainLayout>
             <div className="relative bg-steel-blue">
                 <div
-                    className="absolute top-0 right-0 w-full lg:w-1/2 h-full"
+                    className="absolute right-0 top-0 size-full lg:w-1/2"
                     style={{
                         backgroundImage: "url('/images/memorial.png')",
                         backgroundSize: 'cover',
@@ -41,18 +41,23 @@ export function LoginPage() {
                         mixBlendMode: 'lighten',
                     }}
                 />
-                <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-1" />
+                <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
 
-                <div className="relative flex flex-col items-center justify-center w-full z-2 h-screen">
-                    <LoginCard signIn={signIn} redirect={redirect} />
-                    <div className="bg-black-pearl-dark text-xs rounded-lg text-white flex flex-row items-center shadow-lg mt-4 p-4">
-                        <InformationCircleIcon className="text-steel-blue bg-white rounded-full w-4 h-4 mr-1" />
+                <div className="z-2 relative flex h-screen w-full flex-col items-center justify-center">
+                    <LoginCard
+                        signIn={(provider, options, params) =>
+                            void signIn(provider, options, params)
+                        }
+                        redirect={redirect}
+                    />
+                    <div className="mt-4 flex flex-row items-center rounded-lg bg-black-pearl-dark p-4 text-xs text-white shadow-lg">
+                        <InformationCircleIcon className="mr-1 size-4 rounded-full bg-white text-steel-blue" />
                         By signing in you agree to our{' '}
                         <Link
                             href="/privacy"
                             target="_blank"
                             referrerPolicy="no-referrer"
-                            className="text-steel-blue underline ml-1"
+                            className="ml-1 text-steel-blue underline"
                         >
                             Privacy Policy
                         </Link>

@@ -2,7 +2,6 @@ import dbConnect from "@/util/libmongo";
 import { User, IUser } from "@/models/User"
 import { checkAuth, checkAuthPermissions, PermissionName, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { error } from "console";
 
 export async function GET() {
     // check session auth
@@ -19,7 +18,7 @@ export async function GET() {
         case ResponseCode.InsufficientAccess:
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         default:
-            throw error("Unidentified response code.")
+            throw Error("Unidentified response code.")
     }
 
     await dbConnect()
@@ -58,7 +57,7 @@ export async function PATCH(req: NextRequest) {
         case ResponseCode.InsufficientAccess:
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         default:
-            throw error("Unidentified response code.")
+            throw Error("Unidentified response code.")
     }
 
     await dbConnect()
@@ -72,13 +71,12 @@ export async function PATCH(req: NextRequest) {
         populate: {
             path: 'permissions'
         }
-    })
-    .exec()) as IUser[]
+    }))
 
     // iterate through every item in data to apply changes to it.
-    data.forEach(async(usr: Partial<IUser>) => {
+    data.forEach((usr) => {
         // grab the user object in the databaseUser list that corresponds to the current submitted list
-        const dbUsr: IUser = dbUsrList.find(x => x.discordId == usr.discordId) as IUser
+        const dbUsr: IUser = dbUsrList.find(x => x.discordId == usr.discordId)!
         // iterate through each key of the submitted user object
         Object.keys(usr).forEach((k) => {
             // set the str key value to a Key type
@@ -94,8 +92,9 @@ export async function PATCH(req: NextRequest) {
                 updateUserObj(key, dbUsr, usr[key])
             }
          })
-         await dbConnect() // for some reason without this  second dbConnect() the whole thing breaks. ;w; help
-         await dbUsr.save() // save the user object to commit changes.
+
+        // save the user object to commit changes.
+        void dbConnect().then(()=> void dbUsr.save()) // for some reason without this  second dbConnect() the whole thing breaks. ;w; help
     })
    return NextResponse.json({status: 200})
 }

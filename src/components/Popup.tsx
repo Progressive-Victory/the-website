@@ -26,11 +26,11 @@ export function Popup({
 
     closerList?.map((element : Element) => {
         if(element instanceof HTMLButtonElement) {
-            const btn = element as HTMLButtonElement
+            const btn = element
             btn.addEventListener('closepm', () => (setOpen(false)))
         }
         if(element instanceof HTMLFormElement) {
-            const form = element as HTMLFormElement
+            const form = element
             form.addEventListener('closepm', () => (setOpen(false)))
         }
     })
@@ -44,7 +44,7 @@ export function Popup({
                 {label}
             </button>
             {open ? 
-                <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center">
+                <div className="fixed left-0 top-0 flex size-full items-center justify-center">
                     <div 
                         ref={wrapperRef} 
                         className={containerClasses}
