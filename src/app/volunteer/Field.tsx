@@ -22,39 +22,39 @@ export function Field({
 }) {
     return (
         <div
-            className={`flex flex-col items-start justify-center my-2 transition-all duration-200 w-full ${
+            className={`my-2 flex w-full flex-col items-start justify-center transition-all duration-200 ${
                 disabled !== null && disabled
-                    ? 'h-0 opacity-0 -mb-2'
+                    ? '-mb-2 h-0 opacity-0'
                     : 'h-[48px]'
             }`}
         >
-            <label className="inline-block text-gray-300 text-sm">
+            <label className="inline-block text-sm text-gray-300">
                 {placeholder}
-                {required && <span className="text-red-500 ml-1">*</span>}
+                {required && <span className="ml-1 text-red-500">*</span>}
             </label>
             <input
                 value={value}
-                maxLength={maxLength != null ? maxLength : 25}
+                maxLength={maxLength ?? 25}
                 onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                     if (onEnter != null && e.key === 'Enter') {
                         onEnter(e)
                     }
                 }}
                 disabled={disabled !== null && disabled}
-                placeholder={placeholder ? placeholder : ''}
+                placeholder={placeholder ?? ''}
                 onChange={(e) => {
                     if (disabled !== null && !disabled) {
                         onChange(e)
                     }
                 }}
-                className={`bg-white rounded-md w-full px-4 py-2 ring-steel-blue ${
+                className={`w-full rounded-md bg-white px-4 py-2 ring-steel-blue ${
                     error !== null && value !== '' && !error
-                        ? 'border-red-500 border-2'
+                        ? 'border-2 border-red-500'
                         : ''
                 }`}
             />
             {!error && value !== '' && (
-                <div className="text-left h-4 text-red-500 text-xs my-1">
+                <div className="my-1 h-4 text-left text-xs text-red-500">
                     {errorText}
                 </div>
             )}

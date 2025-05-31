@@ -17,9 +17,9 @@ export const metadata: Metadata = {
 export default function Privacy() {
     return (
         <MainLayout>
-            <div className="min-w-screen mx-auto my-10 mt-10 flex h-full min-h-screen w-full flex-col tracking-wide lg:max-w-[80%]">
+            <div className="min-w-screen mx-auto my-10 flex size-full min-h-screen flex-col tracking-wide lg:max-w-[80%]">
                 <div className="mx-auto px-5">
-                    <p className="text-black-pearl-dark pb-5 text-center text-3xl font-black">
+                    <p className="pb-5 text-center text-3xl font-black text-black-pearl-dark">
                         PRIVACY POLICY
                     </p>
                     <p className="text-black">
@@ -47,7 +47,7 @@ export default function Privacy() {
                     </p>
                 </div>
                 <div className="mx-auto px-5">
-                    <p className="text-black-pearl-dark py-5 text-center text-3xl font-black">
+                    <p className="py-5 text-center text-3xl font-black text-black-pearl-dark">
                         WHAT IS PERSONAL INFORMATION?
                     </p>
                     <p className="text-black">
@@ -63,7 +63,7 @@ export default function Privacy() {
                     </p>
                 </div>
                 <div className="mx-auto px-5">
-                    <p className="text-black-pearl-dark py-5 text-center text-3xl font-black">
+                    <p className="py-5 text-center text-3xl font-black text-black-pearl-dark">
                         COLLECTION OF PERSONAL INFORMATION
                     </p>
                     <p className="text-black">
@@ -138,7 +138,7 @@ export default function Privacy() {
                     </p>
                 </div>
                 <div className="mx-auto px-5">
-                    <p className="text-black-pearl-dark py-5 text-center text-3xl font-black">
+                    <p className="py-5 text-center text-3xl font-black text-black-pearl-dark">
                         COLLECTION FROM OTHER SOURCES
                     </p>
                     <p className="text-black">
@@ -152,14 +152,14 @@ export default function Privacy() {
                     </p>
                 </div>
                 <div className="mx-auto px-5">
-                    <p className="text-black-pearl-dark py-5 text-center text-3xl font-black">
+                    <p className="py-5 text-center text-3xl font-black text-black-pearl-dark">
                         HOW WE USE YOUR PERSONAL INFORMATION
                     </p>
                     <p className="text-black">
                         We may use your Personal Information for various
                         purposes including to:
                     </p>
-                    <ul className="text-black list-disc px-5 pt-5">
+                    <ul className="list-disc px-5 pt-5 text-black">
                         <li>
                             Connect you to Progressive Victory PAC programs,
                             events and activities, and obtain and confirm RSVP’s
@@ -208,14 +208,14 @@ export default function Privacy() {
                     </ul>
                 </div>
                 <div className="mx-auto px-5">
-                    <p className="text-black-pearl-dark py-5 text-center text-3xl font-black">
+                    <p className="py-5 text-center text-3xl font-black text-black-pearl-dark">
                         HOW WE SHARE YOUR PERSONAL INFORMATION
                     </p>
                     <p className="text-black">
                         Though we make every effort to preserve your privacy, we
                         may share Personal information as follows:
                     </p>
-                    <ul className="text-black list-disc px-5 pt-5">
+                    <ul className="list-disc px-5 pt-5 text-black">
                         <li>
                             When we have a good-faith belief that release is
                             appropriate to comply with the law (for example, a
@@ -247,7 +247,7 @@ export default function Privacy() {
                     </ul>
                 </div>
                 <div className="mx-auto px-5">
-                    <p className="text-black-pearl-dark py-5 text-center text-3xl font-black">
+                    <p className="py-5 text-center text-3xl font-black text-black-pearl-dark">
                         HOW WE PROTECT THE INFORMATION YOU PROVIDE
                     </p>
                     <p className="text-black">
@@ -271,7 +271,7 @@ export default function Privacy() {
                     </p>
                 </div>
                 <div className="mx-auto px-5">
-                    <p className="text-black-pearl-dark py-5 text-center text-3xl font-black">
+                    <p className="py-5 text-center text-3xl font-black text-black-pearl-dark">
                         PETITIONS
                     </p>
                     <p className="text-black">
@@ -282,7 +282,7 @@ export default function Privacy() {
                     </p>
                 </div>
                 <div className="mx-auto px-5">
-                    <p className="text-black-pearl-dark py-5 text-center text-3xl font-black">
+                    <p className="py-5 text-center text-3xl font-black text-black-pearl-dark">
                         ADVERTISING AND ANALYTICS SERVICES
                     </p>
                     <p className="text-black">
@@ -314,7 +314,7 @@ export default function Privacy() {
                     </p>
                 </div>
                 <div className="mx-auto px-5">
-                    <p className="text-black-pearl-dark py-5 text-center text-3xl font-black">
+                    <p className="py-5 text-center text-3xl font-black text-black-pearl-dark">
                         CALIFORNIA RESIDENTS
                     </p>
                     <p className="text-black">
@@ -337,7 +337,7 @@ export default function Privacy() {
                     </p>
                 </div>
                 <div className="mx-auto px-5">
-                    <p className="text-black-pearl-dark py-5 text-center text-3xl font-black">
+                    <p className="py-5 text-center text-3xl font-black text-black-pearl-dark">
                         HOW TO UNSUBSCRIBE OR OPT OUT
                     </p>
                     <p className="text-black">
@@ -348,7 +348,7 @@ export default function Privacy() {
                     </p>
                 </div>
                 <div className="mx-auto px-5">
-                    <p className="text-black-pearl-dark py-5 text-center text-3xl font-black">
+                    <p className="py-5 text-center text-3xl font-black text-black-pearl-dark">
                         HOW TO CONTACT US
                     </p>
                     <p className="text-black">

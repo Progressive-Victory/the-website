@@ -6,13 +6,13 @@ const CTA = ({
     buttonText: string
 }) => {
     return (
-        <div className={`relative bg-black-pearl-light-dark shadow-2xl w-full`}>
-            <div className="-translate-y-[5px] -translate-x-1 bg-valencia p-4">
-                <div className="flex flex-col items-center justify-center w-full gap-y-4">
-                    <h1 className="text-4xl font-bold text-white text-center">
+        <div className={`bg-black-pearl-light-dark relative w-full shadow-2xl`}>
+            <div className="-translate-x-1 translate-y-[-5px] bg-valencia p-4">
+                <div className="flex w-full flex-col items-center justify-center gap-y-4">
+                    <h1 className="text-center text-4xl font-bold text-white">
                         {askText}
                     </h1>
-                    <button className="py-2 px-4 text-white bg-black hover:bg-white hover:text-black-pearl-dark font-bold">
+                    <button className="bg-black px-4 py-2 font-bold text-white hover:bg-white hover:text-black-pearl-dark">
                         {buttonText}
                     </button>
                 </div>

@@ -7,6 +7,9 @@ import { Field, Stage, Toggle } from '@/app/volunteer'
 import { MainLayout } from '@/components/layout'
 import { IUser } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
+import { useSession, signOut } from 'next-auth/react'
+import Link from 'next/link'
+import { RESTJSONErrorCodes } from 'discord-api-types/v10'
 
 export default function Volunteer() {
     const [currentStage, setCurrentStage] = useState<string>('loading')
@@ -50,7 +53,7 @@ export default function Volunteer() {
         })
 
         if (resp.status === 200) {
-            getUser()
+            void getUser()
 
             // kick off the clock
             updateTimer(60)
@@ -77,18 +80,18 @@ export default function Volunteer() {
         return false
     }, [])
 
-    const joinToServer = useCallback(async () => {
-        fetch('/api/discord/join', {
+    const joinToServer = useCallback(() => {
+        void fetch('/api/discord/join', {
             method: 'PUT',
         }).then(async (response) => {
             if (response.ok) {
-                getUser()
+                void getUser()
             } else {
                 // Not every response will have JSON but errors should
                 const data = await response.json()
                 // The discord code for bad oauth2 we pass back
-                if (data && data.code === 50025) {
-                    signOut({
+                if (data?.code && data.code === RESTJSONErrorCodes.InvalidOAuth2AccessToken) {
+                    void signOut({
                         callbackUrl: '/login',
                     })
                 }
@@ -98,8 +101,8 @@ export default function Volunteer() {
 
     const getUser = async () => {
         const response = await fetch('/api/user')
-        const data = await response.json()
-        setUser(data as Partial<IUser>)
+        const data = await response.json() as Partial<IUser>
+        setUser(data)
     }
 
     const checkCode = async (code: string) => {
@@ -114,7 +117,7 @@ export default function Volunteer() {
         setCheckingCode(false)
         if (resp.status === 200) {
             // Join the user
-            joinToServer()
+            void joinToServer()
             return true
         } else {
             setCodeError(true)
@@ -137,7 +140,7 @@ export default function Volunteer() {
 
     // Gets the current user object, useful for manipulation as we proceed in flow
     useEffect(() => {
-        getUser()
+        void getUser()
     }, [])
 
     // Try and join user to server
@@ -163,18 +166,18 @@ export default function Volunteer() {
 
                             setCurrentStage('joining')
                             // Join the user
-                            fetch('/api/discord/join').then(async (result) => {
+                            void fetch('/api/discord/join').then((result) => {
                                 if (result.status === 404) {
-                                    joinToServer()
+                                    void joinToServer()
                                 } else {
-                                    getUser()
+                                    void getUser()
                                     setShowRejoin(false)
                                 }
                             })
                             break
                         case OnboardingStage.JOINED:
                             setCurrentStage('joined')
-                            fetch('/api/discord/join').then(async (result) => {
+                            void fetch('/api/discord/join').then((result) => {
                                 if (result.status === 404) {
                                     setShowRejoin(true)
                                 } else {
@@ -204,16 +207,16 @@ export default function Volunteer() {
             ) {
                 setStartJoin(false)
             } else {
-                // Set data on user and upate onboarding stage
-                updateUser({
+                // Set data on user and update onboarding stage
+                void updateUser({
                     preferredName: preferredName,
                     zipCode: fromUS ? '00000' : zipCode, // give them a dummy zip if international
                     phoneNumber: phoneNumber,
                 }).then((result) => {
                     if (result) {
-                        requestCode(phoneNumber).then((result) => {
+                        void requestCode(phoneNumber).then((result) => {
                             if (result) {
-                                getUser()
+                                void getUser()
                             } else {
                                 setStartJoin(false)
                                 setValidationFlags((prev) =>
@@ -223,7 +226,7 @@ export default function Volunteer() {
                             }
                         })
                     } else {
-                        // TODO: an error occured in setting user data
+                        // TODO: an error occurred in setting user data
                         console.error('Could not update user profile!')
                     }
                 })
@@ -243,9 +246,9 @@ export default function Volunteer() {
     return (
         <MainLayout>
             <div className="relative flex h-screen flex-col items-center justify-center bg-steel-blue">
-                <div className="halftone z-1 absolute left-0 top-0 h-full w-full opacity-10" />
+                <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
                 <div
-                    className="absolute right-0 top-0 h-full w-full lg:w-1/2 lg:translate-x-1/2"
+                    className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
                     style={{
                         backgroundImage: "url('/images/blend_test.png')",
                         backgroundSize: 'cover',
@@ -264,10 +267,10 @@ export default function Volunteer() {
                             <p className="mx-auto my-2 text-center text-3xl font-bold text-white">
                                 Volunteer with PV
                             </p>
-                            <p className="mx-2 mx-auto mb-2 text-center text-lg font-medium text-white">
+                            <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
                                 Join us on Discord and make a difference ✨
                             </p>
-                            <p className="mx-2 mx-auto mb-2 text-center text-lg font-medium italic text-white">
+                            <p className="mx-2 mb-2 text-center text-lg font-medium italic text-white">
                                 But first you{"'"}ve got to log in...
                             </p>
                             <Link
@@ -285,7 +288,7 @@ export default function Volunteer() {
                             <p className="mx-auto my-2 text-center text-3xl font-bold text-white">
                                 Volunteer with PV
                             </p>
-                            <p className="mx-2 mx-auto mb-2 text-center text-lg font-medium text-white">
+                            <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
                                 Join us on Discord and make a difference ✨
                             </p>
                             <Field
@@ -316,8 +319,8 @@ export default function Volunteer() {
                                     setPhoneNumber(text)
                                     const isValid =
                                         /^\d{10}$/g.test(text) &&
-                                        text[0] !== '0' &&
-                                        text[0] !== '1'
+                                        !text.startsWith('0') &&
+                                        !text.startsWith('1')
 
                                     setValidationFlags((prev) =>
                                         new Map(prev).set('phone', isValid)
@@ -339,7 +342,7 @@ export default function Volunteer() {
                                     setZipCode(text)
                                     const isValid =
                                         /^\d{5}(-\d{4})?$/g.test(text) &&
-                                        text[0] !== '0'
+                                        !text.startsWith('0')
                                     setValidationFlags((prev) =>
                                         new Map(prev).set('zip', isValid)
                                     )
@@ -400,7 +403,7 @@ export default function Volunteer() {
                         {/* Loading indicator for between auth state */}
                         <Stage stageName="loading" currentStage={currentStage}>
                             <div className="flex min-h-[200px] flex-col items-center justify-center p-4">
-                                <ArrowPathIcon className="h-8 w-8 animate-spin text-white" />
+                                <ArrowPathIcon className="size-8 animate-spin text-white" />
                                 <p className="mt-6 text-center text-lg font-bold text-white">
                                     Loading...
                                 </p>
@@ -415,7 +418,7 @@ export default function Volunteer() {
                                 <p className="font-white text-center text-lg font-bold text-white">
                                     Enter your Verification Code
                                 </p>
-                                <p className="mx-2 mx-auto mb-2 text-center text-lg font-medium text-white">
+                                <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
                                     We just sent it to your phone 📱
                                 </p>
 
@@ -427,7 +430,7 @@ export default function Volunteer() {
                                         // Let users input with enter key
                                         onEnter={() => {
                                             if (securityCode.length === 6) {
-                                                checkCode(securityCode)
+                                                void checkCode(securityCode)
                                             }
                                         }}
                                         errorText="Invalid or expired code, try a new one"
@@ -454,10 +457,10 @@ export default function Volunteer() {
                                         } ml-2 mt-auto w-fit whitespace-nowrap rounded-lg px-2 py-3 text-center text-sm text-white`}
                                         onClick={() => {
                                             // Get a new OTP
-                                            requestCode(
+                                            void requestCode(
                                                 phoneNumber !== ''
                                                     ? phoneNumber
-                                                    : user?.phoneNumber || ''
+                                                    : user?.phoneNumber ?? ''
                                             )
                                         }}
                                     >
@@ -467,13 +470,13 @@ export default function Volunteer() {
                                 </div>
                                 <button
                                     onClick={() => {
-                                        updateUser({
+                                        void updateUser({
                                             onboardingStage:
                                                 OnboardingStage.NOT_STARTED,
                                         })
 
                                         setTimeout(() => {
-                                            getUser()
+                                            void getUser()
                                             setStartJoin(false)
                                         }, 1000)
                                     }}
@@ -484,7 +487,7 @@ export default function Volunteer() {
                                 <button
                                     onClick={() => {
                                         if (securityCode.length === 6) {
-                                            checkCode(securityCode)
+                                            void checkCode(securityCode)
                                         }
                                     }}
                                     disabled={
@@ -499,7 +502,7 @@ export default function Volunteer() {
                         {/* Onboarding done need to join them to server now*/}
                         <Stage stageName="joining" currentStage={currentStage}>
                             <div className="flex min-h-[200px] flex-col items-center justify-center p-4">
-                                <ArrowPathIcon className="h-8 w-8 animate-spin text-white" />
+                                <ArrowPathIcon className="size-8 animate-spin text-white" />
                                 <p className="mt-6 text-center text-lg font-bold text-white">
                                     Joining you to the server...
                                 </p>
@@ -509,7 +512,7 @@ export default function Volunteer() {
                             <div className="flex min-h-[200px] flex-col items-center justify-center p-4">
                                 {showRejoin ? (
                                     <>
-                                        <TrophyIcon className="h-12 w-12 text-steel-blue" />
+                                        <TrophyIcon className="size-12 text-steel-blue" />
                                         <p className="mt-6 text-center text-lg font-bold text-white">
                                             Would you like to rejoin?
                                         </p>
@@ -525,7 +528,7 @@ export default function Volunteer() {
                                     </>
                                 ) : (
                                     <>
-                                        <CakeIcon className="h-12 w-12 text-steel-blue" />
+                                        <CakeIcon className="size-12 text-steel-blue" />
                                         <p className="mt-6 text-center text-lg font-bold text-white">
                                             Congrats you are in the server!
                                         </p>

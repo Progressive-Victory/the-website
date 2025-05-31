@@ -28,7 +28,7 @@ export function Account() {
 
     useEffect(() => {
         // Check if the user is already on the server
-        fetch('/api/discord/join')
+        void fetch('/api/discord/join')
     }, [])
 
     if (!session) {
@@ -39,6 +39,8 @@ export function Account() {
                 <div className="relative flex h-screen w-full flex-col items-center bg-steel-blue">
                     <div className="halftone z-1 absolute left-0 top-0 h-full w-full opacity-10" />
 
+                    <div className="z-2 relative mt-20 flex w-[300px] flex-col rounded-lg bg-black-pearl-dark p-4">
+                        <p className="mb-4 text-lg font-bold text-white">
                     <div className="z-2 relative mt-20 flex w-[300px] flex-col rounded-lg bg-black-pearl-dark p-4">
                         <p className="mb-4 text-lg font-bold text-white">
                             Account Controls

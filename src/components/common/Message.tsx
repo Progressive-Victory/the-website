@@ -49,6 +49,7 @@ export function Message({
             transition={{ ease: 'backInOut', ...motionProps?.transition }}
         >
             <div className="mr-auto flex flex-row items-center justify-start gap-x-4">
+            <div className="mr-auto flex flex-row items-center justify-start gap-x-4">
                 <Image
                     src={avatar}
                     alt={username}
@@ -61,11 +62,14 @@ export function Message({
                 </p>
             </div>
             <p className="mr-auto mt-2 text-left">{text}</p>
+            <p className="mr-auto mt-2 text-left">{text}</p>
             {image && (
+                <div className="relative h-[300px] w-full">
                 <div className="relative h-[300px] w-full">
                     <Image
                         src={image}
                         alt={username}
+                        className="mt-4 rounded-lg object-cover"
                         className="mt-4 rounded-lg object-cover"
                         style={{ objectPosition: '0 20%' }}
                         fill={true}
@@ -74,8 +78,9 @@ export function Message({
                 </div>
             )}
             <div className="ml-auto mt-8 flex select-none flex-row items-center justify-end gap-x-4">
+            <div className="ml-auto mt-8 flex select-none flex-row items-center justify-end gap-x-4">
                 <div
-                    className="group h-6 w-6"
+                    className="group size-6"
                     onClick={() => setClickedBubble(!clickedBubble)}
                 >
                     {clickedBubble ? (
@@ -85,7 +90,7 @@ export function Message({
                     )}
                 </div>
                 <div
-                    className="group h-6 w-6"
+                    className="group size-6"
                     onClick={() => setClickedShare(!clickedShare)}
                 >
                     {clickedShare ? (
@@ -95,7 +100,7 @@ export function Message({
                     )}
                 </div>
                 <div
-                    className="group h-6 w-6"
+                    className="group size-6"
                     onClick={() => setClickedHeart(!clickedHeart)}
                 >
                     {clickedHeart ? (

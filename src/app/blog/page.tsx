@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { BlogCard, BlogHeader, getPosts } from '@/app/blog'
 import { MainLayout } from '@/components/layout'
 
-type Post = {
+interface Post {
     node: {
         id: string
         date: string
@@ -19,6 +20,7 @@ export default async function Home() {
         <MainLayout>
             <BlogHeader />
             <div className="bg-[#D4E6F5] p-10">
+                <h2 className="p-10 text-center text-4xl font-bold">Posts</h2>
                 <h2 className="p-10 text-center text-4xl font-bold">Posts</h2>
                 <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
                     {posts.map((post: Post) => (

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, RefObject } from 'react'
 
 /*
 preliminary notes: component that generates a button which upon being clicked displays an 
-interactable tool tip menu beneath it
+intractable tool tip menu beneath it
 
 If the user clicks outside the menu while it is open it will close.
 If you want a button in the menu to close it when pressed:
@@ -56,10 +56,8 @@ export function ToolTip({
 
     closerList?.map((element: Element) => {
         if (element instanceof HTMLButtonElement) {
-            const btn = element as HTMLButtonElement
-            btn.addEventListener('closettm', () => {
-                setOpen(false)
-            })
+            const btn = element
+            btn.addEventListener('closettm', () => {setOpen(false)})
         }
     })
 

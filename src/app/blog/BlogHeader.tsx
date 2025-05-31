@@ -3,9 +3,9 @@ import { Logo } from '@/components/common'
 
 export function BlogHeader() {
     function DoubleTextEffect(
-        text: string = 'Test',
-        upperColor: string = '#09223a',
-        lowerColor: string = '#4483C7'
+        text = 'Test',
+        upperColor = '#09223a',
+        lowerColor = '#4483C7'
     ) {
         const words = text.split(' ')
         return (

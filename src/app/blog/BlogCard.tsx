@@ -2,7 +2,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-type BlogCardProps = {
+interface BlogCardProps {
     title: string
     id: string
     description: string
@@ -33,7 +33,7 @@ export function BlogCard({
                 <Image src={image} alt="test" width={650} height={650} />
             </div>
             <div className="absolute inset-x-0 bottom-0 z-[1]">
-                <div className="flex h-full flex-col rounded-b-xl bg-white bg-opacity-90 p-4 sm:p-6">
+                <div className="flex h-full flex-col rounded-b-xl bg-white/90 p-4 sm:p-6">
                     <h3 className="text-lg">{title}</h3>
                     <div
                         className="line-clamp-2 text-gray-500"

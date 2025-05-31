@@ -1,6 +1,5 @@
 // app/ProtectedPage.jsx
 import { checkAuth, ResponseCode } from '@/util/auth' // your NextAuth options
-import { error } from 'console'
 
 interface ProtectedPageProps {
     children: React.ReactNode
@@ -52,6 +51,6 @@ export default async function ProtectedPage({
                 </div>
             )
         default:
-            throw error("Unidentifed response code")
+            throw Error("Unidentified response code")
     }
 }

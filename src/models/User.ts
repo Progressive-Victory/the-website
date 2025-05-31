@@ -1,7 +1,7 @@
 import mongoose, { Document, Model, Schema } from 'mongoose'
 import { IRole, Role } from './Role'
 import { OnboardingStage } from '@/util/stage'
-import { getLoc } from '@/util/loc'
+import { Location } from '@/models/Location'
 
 // Here is a user document
 // It defines the structure of the user and provides a POJO for interacting with user data
@@ -47,14 +47,16 @@ const userSchema = new Schema<IUser>({
 })
 
 userSchema.post('save', (doc: Document<IUser>, next) => {
-    setTimeout(async () => {
+    setTimeout(() => {
         const usr: IUser = doc as IUser
         if(usr.zipCode && !(usr.state && usr.county && usr.city)) {
-            const [city, county, state] = await getLoc(usr.zipCode)
-            usr.city = city
-            usr.county = county
-            usr.state = state
-            usr.save()
+            void Location.findOne({"zip": usr.zipCode}).then((usrLoc) => {
+                if(!usrLoc) return
+                usr.city = usrLoc.primary_city
+                usr.county = usrLoc.county
+                usr.state = usrLoc.state
+                void usr.save()
+            })
         }
         next()
     }, 10)
