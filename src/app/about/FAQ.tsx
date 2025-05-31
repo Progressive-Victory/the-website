@@ -42,9 +42,9 @@ function Questions({ question, answer }: { question: string; answer: string }) {
                     {question}
                 </h1>
                 {isOpen ? (
-                    <MinusIcon className="h-8 w-8 text-black-pearl-dark" />
+                    <MinusIcon className="size-8 text-black-pearl-dark" />
                 ) : (
-                    <PlusIcon className="h-8 w-8 text-black-pearl-dark" />
+                    <PlusIcon className="size-8 text-black-pearl-dark" />
                 )}
             </div>
             <div

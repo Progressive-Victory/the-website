@@ -39,7 +39,7 @@ export function Message({
 
     return (
         <motion.div
-            className="my-2 h-fit w-fit max-w-xl rounded-md bg-white p-4 shadow-xl xl:w-[30vw]"
+            className="my-2 size-fit max-w-xl rounded-md bg-white p-4 shadow-xl xl:w-[30vw]"
             style={{
                 willChange: 'opacity, transform',
                 transform: 'translateZ(0)',

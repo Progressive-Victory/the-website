@@ -41,7 +41,7 @@ export function Popup({
                 {label}
             </button>
             {open ? (
-                <div className="fixed left-0 top-0 flex h-full w-full items-center justify-center">
+                <div className="fixed left-0 top-0 flex size-full items-center justify-center">
                     <div ref={wrapperRef} className={containerClasses}>
                         {children}
                     </div>

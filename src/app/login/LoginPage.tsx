@@ -32,7 +32,7 @@ export function LoginPage() {
     return (
         <MainLayout>
             <div
-                className="absolute right-0 top-0 h-full w-full lg:w-1/2"
+                className="absolute right-0 top-0 size-full lg:w-1/2"
                 style={{
                     backgroundImage: "url('/images/memorial.png')",
                     backgroundSize: 'cover',
@@ -40,7 +40,7 @@ export function LoginPage() {
                     mixBlendMode: 'lighten',
                 }}
             />
-            <div className="halftone z-1 absolute left-0 top-0 h-full w-full opacity-10" />
+            <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
 
             <div className="z-2 relative flex h-screen w-full flex-col items-center justify-center">
                 <LoginCard
@@ -50,7 +50,7 @@ export function LoginPage() {
                     redirect={redirect}
                 />                
                 <div className="mt-4 flex flex-row items-center rounded-lg bg-black-pearl-dark p-4 text-xs text-white shadow-lg">
-                    <InformationCircleIcon className="mr-1 h-4 w-4 rounded-full bg-white text-steel-blue" />
+                    <InformationCircleIcon className="mr-1 size-4 rounded-full bg-white text-steel-blue" />
                     By signing in you agree to our{' '}
                     <Link
                         href="/privacy"

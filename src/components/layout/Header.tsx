@@ -55,7 +55,7 @@ export function Header() {
 
     return (
         <>
-            <div className="sticky top-0 z-[20] flex h-[100px] w-full flex-row items-center justify-between bg-black-pearl-dark px-6">
+            <div className="sticky top-0 z-20 flex h-[100px] w-full flex-row items-center justify-between bg-black-pearl-dark px-6">
                 <NextLink href="/">
                     <Image
                         src="/images/LogoFull.webp"

@@ -3,7 +3,7 @@ import { Footer } from './Footer'
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="relative h-full w-full">
+        <div className="relative size-full">
             <Header />
             <div className="relative bg-steel-blue">{children}</div>
             <Footer />
