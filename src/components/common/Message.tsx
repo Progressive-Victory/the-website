@@ -40,10 +40,13 @@ export function Message({
     return (
         <motion.div
             className="my-2 size-fit max-w-xl rounded-md bg-white p-4 shadow-xl xl:w-[30vw]"
-            style={{ willChange: "opacity, transform", transform: "translateZ(0)" }}
+            style={{
+                willChange: 'opacity, transform',
+                transform: 'translateZ(0)',
+            }}
             initial={{ opacity: 0, scale: 0, ...motionProps?.initial }} // Start position: off-screen to the right
             animate={{ opacity: 1, scale: 1, ...motionProps?.animate }} // End position: visible and on-screen
-            transition={{ ease: "backInOut", ...motionProps?.transition }}
+            transition={{ ease: 'backInOut', ...motionProps?.transition }}
         >
             <div className="mr-auto flex flex-row items-center justify-start gap-x-4">
                 <Image
@@ -66,7 +69,7 @@ export function Message({
                         className="mt-4 rounded-lg object-cover"
                         style={{ objectPosition: '0 20%' }}
                         fill={true}
-                        sizes='100%'
+                        sizes="100%"
                     />
                 </div>
             )}

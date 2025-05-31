@@ -1,6 +1,7 @@
 'use client'
-import Image from 'next/image'
 import { SignInAuthorizationParams, SignInOptions } from 'next-auth/react'
+import Image from 'next/image'
+
 export function LoginCard({
     signIn,
     redirect,

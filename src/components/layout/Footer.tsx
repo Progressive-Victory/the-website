@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { SocialIcon } from 'react-social-icons'
 import Image from 'next/image'
+import { SocialIcon } from 'react-social-icons'
+
 const socials = [
     'https://www.twitch.tv/progressivevictory',
     'https://www.youtube.com/channel/UCRn-TsfTCP68oee03_F2eIg',
@@ -8,6 +9,7 @@ const socials = [
     'https://bsky.app/profile/progressivevictory.win',
     'https://x.com/ProgressiveVic?mx=2',
 ]
+
 export function Footer() {
     return (
         <div className="w-full bg-black-pearl-dark">

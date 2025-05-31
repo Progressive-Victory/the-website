@@ -1,6 +1,6 @@
 'use client'
 
-import { Frame } from '@/components/Frame'
+import { Frame } from '@/app/events/Frame'
 
 export function ClientCalendar({ src }: Readonly<{ src: string }>) {
     // Get client timezone and encode it to use in the URL

@@ -1,14 +1,12 @@
 'use client'
-import { MainLayout } from '@/components/MainLayout'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { ArrowPathIcon, CakeIcon, TrophyIcon } from '@heroicons/react/24/solid'
-import { Stage } from '@/components/Stage'
-import { Field } from '@/components/Field'
-import { Toggle } from '@/components/Toggle'
-import { IUser } from '@/models/User'
-import { OnboardingStage } from '@/util/stage'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
+import { Field, Stage, Toggle } from '@/app/volunteer'
+import { MainLayout } from '@/components/layout'
+import { IUser } from '@/models/User'
+import { OnboardingStage } from '@/util/stage'
 import { RESTJSONErrorCodes } from 'discord-api-types/v10'
 
 export default function Volunteer() {

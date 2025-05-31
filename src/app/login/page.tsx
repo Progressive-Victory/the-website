@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { LoginPage } from '@/components/LoginPage'
+import { LoginPage } from '@/app/login/LoginPage'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
