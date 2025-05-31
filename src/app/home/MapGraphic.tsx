@@ -1,6 +1,6 @@
 'use client'
 import { Map } from '@/components/Map'
-import { Link } from '../../components/common/Buttons'
+import { Link } from '@/components/common'
 
 export function MapGraphic() {
     return (

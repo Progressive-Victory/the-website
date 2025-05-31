@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, RefObject} from "react";
+import { useState, useEffect, useRef, RefObject } from 'react'
 
 /*
 preliminary notes: component that generates a button which upon being clicked displays an 
@@ -14,7 +14,7 @@ export function ToolTip({
     children,
     label,
     triggerClasses,
-    containerClasses
+    containerClasses,
 }: {
     children: React.ReactNode
     label: string
@@ -28,14 +28,17 @@ export function ToolTip({
     function useOutsideDetector(ref: RefObject<HTMLDivElement | null>) {
         useEffect(() => {
             function handleClickOutside(event: MouseEvent) {
-                if (ref.current && !ref.current.contains(event.target as HTMLElement)) {
+                if (
+                    ref.current &&
+                    !ref.current.contains(event.target as HTMLElement)
+                ) {
                     setOpen(false)
                 }
             }
 
-            document.addEventListener("mousedown", handleClickOutside)
+            document.addEventListener('mousedown', handleClickOutside)
             return () => {
-                document.removeEventListener("mousedown", handleClickOutside)
+                document.removeEventListener('mousedown', handleClickOutside)
             }
         }, [ref])
     }
@@ -51,26 +54,35 @@ export function ToolTip({
 
     useOutsideDetector(wrapperRef)
 
-    closerList?.map((element : Element) => {
+    closerList?.map((element: Element) => {
         if (element instanceof HTMLButtonElement) {
             const btn = element as HTMLButtonElement
-            btn.addEventListener('closettm', () => {setOpen(false)})
+            btn.addEventListener('closettm', () => {
+                setOpen(false)
+            })
         }
     })
 
     return (
         <>
-            <button 
-                onClick={() => {setOpen(!open)}}
+            <button
+                onClick={() => {
+                    setOpen(!open)
+                }}
                 className={triggerClasses}
             >
                 {label}
             </button>
-            {open ? <div ref={wrapperRef} className={"absolute right-0 " + containerClasses}>
-                {children}
-            </div>
-            : <></>
-            }
+            {open ? (
+                <div
+                    ref={wrapperRef}
+                    className={'absolute right-0 ' + containerClasses}
+                >
+                    {children}
+                </div>
+            ) : (
+                <></>
+            )}
         </>
     )
 }

@@ -2,8 +2,8 @@
 
 import { useState, useEffect, FormEvent } from "react"
 import { IPermission } from "@/models/Permission"
-import { ToolTip } from "../ToolTip"
-import { Popup } from "../Popup"
+import { ToolTip } from "../common/ToolTip"
+import { Popup } from "../common/Popup"
 
 export default function DashPermissions() {
     const [sectionData, setSectionData] = useState<IPermission[]>([])

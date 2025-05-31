@@ -3,8 +3,8 @@
 import { useState, useEffect, FormEvent } from "react"
 import { IRole } from "@/models/Role"
 import { IPermission } from "@/models/Permission"
-import { ToolTip } from "../ToolTip"
-import { Popup } from "../Popup"
+import { ToolTip } from "../common/ToolTip"
+import { Popup } from "../common/Popup"
 
 export default function DashRoles() {
     const [sectionData, setSectionData] = useState<IRole[]>([])
