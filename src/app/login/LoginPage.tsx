@@ -21,7 +21,7 @@ export function LoginPage() {
             params.get('redirect')?.startsWith('/') &&
             !params.get('redirect')?.includes('?')
         ) {
-            setRedirect(params.get('redirect') || '/')
+            setRedirect(params.get('redirect') ?? '/')
         }
 
         if (session) {
@@ -43,7 +43,12 @@ export function LoginPage() {
             <div className="halftone z-1 absolute left-0 top-0 h-full w-full opacity-10" />
 
             <div className="z-2 relative flex h-screen w-full flex-col items-center justify-center">
-                <LoginCard signIn={signIn} redirect={redirect} />
+                <LoginCard
+                    signIn={(provider, options, params) =>
+                        void signIn(provider, options, params)
+                    }
+                    redirect={redirect}
+                />                
                 <div className="mt-4 flex flex-row items-center rounded-lg bg-black-pearl-dark p-4 text-xs text-white shadow-lg">
                     <InformationCircleIcon className="mr-1 h-4 w-4 rounded-full bg-white text-steel-blue" />
                     By signing in you agree to our{' '}

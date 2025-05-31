@@ -26,11 +26,11 @@ export function Popup({
 
     closerList?.map((element: Element) => {
         if (element instanceof HTMLButtonElement) {
-            const btn = element as HTMLButtonElement
+            const btn = element
             btn.addEventListener('closepm', () => setOpen(false))
         }
         if (element instanceof HTMLFormElement) {
-            const form = element as HTMLFormElement
+            const form = element
             form.addEventListener('closepm', () => setOpen(false))
         }
     })

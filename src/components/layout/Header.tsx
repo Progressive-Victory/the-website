@@ -91,7 +91,7 @@ export function Header() {
                             className={`hidden rounded-full bg-white p-1 hover:scale-105 xl:block ${button_hover}`}
                         >
                             <Image
-                                src={session.user!.image || ''}
+                                src={session.user!.image ?? ''}
                                 className="rounded-full"
                                 alt="User Image"
                                 width={44}
@@ -142,7 +142,7 @@ export function Header() {
                                 className="w-full bg-steel-blue"
                             >
                                 <Image
-                                    src={session.user?.image || ''}
+                                    src={session.user?.image ?? ''}
                                     width={44}
                                     height={44}
                                     className="mr-4 rounded-full border-2 border-white"
