@@ -56,6 +56,7 @@ export default function useUser(props?: DataProps): DataState {
  * @param {string} permission - Name of the permission
  */
 export function hasPermission(user: IUser, permission: string): boolean {
+    console.log(user)
   let res = false
 
   for (const r of user.roles) {
