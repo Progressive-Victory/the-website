@@ -5,23 +5,23 @@ function Questions({ question, answer }: { question: string; answer: string }) {
     const [isOpen, setIsOpen] = useState(false)
     return (
         <button
-            className="relative overflow-y-scroll flex flex-col items-center justify-center mx-4 gap-y-4 bg-white p-4 rounded-md my-4"
+            className="relative m-4 flex flex-col items-center justify-center gap-y-4 overflow-y-scroll rounded-md bg-white p-4"
             onClick={() => setIsOpen(!isOpen)}
         >
-            <div className="flex flex-row items-center justify-between gap-x-4 w-full mt-4">
-                <h1 className="text-2xl font-bold text-black text-left">
+            <div className="mt-4 flex w-full flex-row items-center justify-between gap-x-4">
+                <h1 className="text-left text-2xl font-bold text-black">
                     {question}
                 </h1>
                 {isOpen ? (
-                    <MinusIcon className="w-8 h-8 text-black-pearl-dark" />
+                    <MinusIcon className="size-8 text-black-pearl-dark" />
                 ) : (
-                    <PlusIcon className="w-8 h-8 text-black-pearl-dark" />
+                    <PlusIcon className="size-8 text-black-pearl-dark" />
                 )}
             </div>
             <div
-                className={`select-text transition-all duration-100 pointer-events-auto text-lg text-black-pearl-dark text-left ${
+                className={`pointer-events-auto select-text text-left text-lg text-black-pearl-dark transition-all duration-100 ${
                     isOpen
-                        ? 'max-h-40 pb-4 overflow-auto'
+                        ? 'max-h-40 overflow-auto pb-4'
                         : 'max-h-0 overflow-hidden'
                 }`}
             >
@@ -40,13 +40,13 @@ const questions = [
 
 export function FAQ() {
     return (
-        <div className="flex flex-col items-center justify-center bg-black-pearl-dark py-12 w-full lg:w-2/3 rounded-lg gap-y-10">
-            <h1 className="text-4xl font-bold text-white w-full text-center px-2">
+        <div className="flex w-full flex-col items-center justify-center gap-y-10 rounded-lg bg-black-pearl-dark py-12 lg:w-2/3">
+            <h1 className="w-full px-2 text-center text-4xl font-bold text-white">
                 Frequently <span className="text-valencia">Asked</span>{' '}
                 Questions?
             </h1>
 
-            <div className="w-full flex flex-col items-center justify-center gap-x-4">
+            <div className="flex w-full flex-col items-center justify-center gap-x-4">
                 {questions.map((question) => (
                     <Questions
                         key={question.question}

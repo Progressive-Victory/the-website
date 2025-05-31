@@ -1,12 +1,12 @@
-import { Account, getServerSession, Profile, Session } from 'next-auth'
+import { getServerSession, Profile } from 'next-auth'
 import Discord from 'next-auth/providers/discord'
 import dbConnect from '@/util/libmongo'
 import { User } from '@/models/User'
-import { JWT } from 'next-auth/jwt'
 import { NextAuthOptions } from 'next-auth'
 import { IUser } from '@/models/User'
 import { IRole } from '@/models/Role'
-import { getDisplayAvatarURL } from './discord-rest'
+import { OAuth2Routes, OAuth2Scopes } from 'discord-api-types/v10'
+import { getUserAvatarURL } from './discord'
 
 export enum PermissionName {
     ADMIN_PANEL_ACCESS = 'Admin Panel Access',
@@ -18,27 +18,30 @@ export const authOptions: NextAuthOptions = {
         Discord({
             clientId: process.env.DISCORD_CLIENT_ID!,
             clientSecret: process.env.DISCORD_CLIENT_SECRET!,
-            authorization:
-                'https://discord.com/oauth2/authorize?scope=identify+guilds+guilds.join+guilds.members.read+email',
+            authorization: {
+                url:OAuth2Routes.authorizationURL,
+                params:{
+                    scope: [
+                        OAuth2Scopes.Identify,
+                        OAuth2Scopes.Email,
+                        OAuth2Scopes.Guilds,
+                        OAuth2Scopes.GuildsJoin,
+                        OAuth2Scopes.GuildsMembersRead
+                    ].join('+')
+                }
+            },
             async profile(profile) {
                 // Executed async. No reason to wait on this update before sending a response down.
-                User.findOneAndUpdate(
+                void User.findOneAndUpdate(
                     {
                         discordId: profile.id,
                     },
                     {
-                        $set: {
-                            discordUserAvatar: profile.avatar,
-                        },
+                        discordUserAvatar: profile.avatar,
                     }
                 )
-                    .exec()
-                    .then()
 
-                const image = await getDisplayAvatarURL(
-                    profile.id,
-                    profile.avatar
-                )
+                const image = await getUserAvatarURL(profile.id, profile.avatar)
 
                 return {
                     id: profile.id,
@@ -52,7 +55,7 @@ export const authOptions: NextAuthOptions = {
     ],
     callbacks: {
         // session call back assigns the discordId from the token to the session object
-        async session({ session, token }: { session: Session; token: JWT }) {
+        session({ session, token }) {
             if (token.discordId) session.discordId = token.discordId as string
             return session
         },
@@ -60,10 +63,6 @@ export const authOptions: NextAuthOptions = {
             token,
             account,
             profile,
-        }: {
-            token: JWT
-            account: Account | null
-            profile?: Profile
         }) {
             interface EProfile extends Profile {
                 id: string
@@ -113,9 +112,9 @@ export const enum ResponseCode {
 // Role checking utility function
 // takes an array of strings, each matching the name field of a given roles
 const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
-    const userRoles = user.roles as IRole[]
+    const userRoles = user.roles
     const roleStrs = userRoles.map((role: IRole) => role.name)
-    if (!user || !user.roles || !Array.isArray(user.roles)) return false
+    if (!user?.roles || !Array.isArray(user.roles)) return false
     return requiredRoles.every((role) => roleStrs.includes(role))
 }
 
@@ -129,7 +128,7 @@ export async function checkAuth(roles?: string[]): Promise<ResponseCode> {
     const session = await getServerSession(authOptions)
 
     // No session found
-    if (!session || !session.user) return ResponseCode.NoSession
+    if (!session?.user) return ResponseCode.NoSession
 
     //if there are no required roles, then all auth requirements have been met.
     if (!roles) return ResponseCode.Successful
@@ -172,7 +171,7 @@ export async function checkAuthPermissions(
     mode: 'all' | 'any' = 'all'
 ): Promise<ResponseCode> {
     const session = await getServerSession(authOptions)
-    if (!session || !session.user) {
+    if (!session?.user) {
         return ResponseCode.NoSession
     }
 
@@ -197,7 +196,7 @@ export async function checkAuthPermissions(
     }
 
     // Organize permissions from all user roles into a set for easy lookup
-    const userPerms: Set<string> = new Set()
+    const userPerms = new Set<string>()
     user.roles.forEach(((role) => {
         role.permissions.forEach(((perm) => {
             userPerms.add(perm.name)

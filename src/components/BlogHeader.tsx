@@ -3,17 +3,17 @@ import { Logo } from '@/components/Logo'
 
 export function BlogHeader() {
     function DoubleTextEffect(
-        text: string = 'Test',
-        upperColor: string = '#09223a',
-        lowerColor: string = '#4483C7'
+        text = 'Test',
+        upperColor = '#09223a',
+        lowerColor = '#4483C7'
     ) {
         const words = text.split(' ')
         return (
             <div aria-label={text}>
                 {words.map((word, index) => (
-                    <div key={index} className="inline-block relative">
+                    <div key={index} className="relative inline-block">
                         <span
-                            className="tracking-wide absolute bottom-0.5 right-0.5"
+                            className="absolute bottom-0.5 right-0.5 tracking-wide"
                             style={{ color: upperColor }}
                         >
                             {word}
@@ -31,13 +31,13 @@ export function BlogHeader() {
     }
 
     return (
-        <div className="bg-white grid grid-cols-2 py-5">
-            <div className="grid text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-right content-center font-extrabold text-[#09223a]">
+        <div className="grid grid-cols-2 bg-white py-5">
+            <div className="grid content-center text-right text-2xl font-extrabold text-[#09223a] sm:text-4xl md:text-5xl lg:text-6xl">
                 {DoubleTextEffect('Progressive'.toUpperCase())}
                 {DoubleTextEffect('Victory'.toUpperCase())}
                 {DoubleTextEffect('Blog'.toUpperCase(), '#4483C7', '#09223a')}
             </div>
-            <div className="inline-block relative w-40 sm:w-50 md:w-60 lg:w-70">
+            <div className="sm:w-50 lg:w-70 relative inline-block w-40 md:w-60">
                 <Logo className="absolute bottom-1 left-1" />
                 <Logo pColor="#4483C7" />
             </div>

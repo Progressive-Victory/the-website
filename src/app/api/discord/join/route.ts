@@ -5,6 +5,10 @@ import { getToken } from 'next-auth/jwt'
 import { User } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
 import dbConnect from '@/util/libmongo'
+import { getMember, joinMember } from '@/util/discord'
+import { RESTJSONErrorCodes } from 'discord-api-types/v10'
+import { DiscordAPIError } from '@discordjs/rest'
+import { HTTPStatus } from '@/util/https-status'
 export const dynamic = 'force-dynamic'
 // Joins user to the server with our grant
 export async function PUT(req: NextRequest) {
@@ -32,43 +36,31 @@ export async function PUT(req: NextRequest) {
             return new Response('Unauthorized', { status: 401 })
     }
 
-    const endpoint = `https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${token?.discordId}`
-    const response = await fetch(endpoint, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-        },
-        body: JSON.stringify({
-            access_token: token.access_token,
-        }),
-    })
-
-    if (response.ok) {
+    try {
+        // TODO: remove casting
+        const data = await joinMember(session.discordId, token.access_token as string)
         if (
             user.verified &&
-            user!.onboardingStage === OnboardingStage.VERIFIED
+            user.onboardingStage === OnboardingStage.VERIFIED
         ) {
-            user!.onboardingStage = OnboardingStage.JOINED
+            user.onboardingStage = OnboardingStage.JOINED
             await user?.save()
         }
-        return new Response('Added Member!', { status: 200 })
-    } else {
-        const data = await response.json()
-
-        if (data.code === 50025) {
-            // User needs to be reauthed we should sign them out
+        if('flags' in data) return new Response('Added Member!', { status: HTTPStatus.Ok })
+         return new Response('Member in Guild', { status: HTTPStatus.Ok })
+    } catch (error) {
+        if ((error instanceof DiscordAPIError) && error.code === RESTJSONErrorCodes.InvalidOAuth2AccessToken) {
+            
+            // User needs to be reauthorized we should sign them out
             return NextResponse.json(
                 {
-                    message: 'Credentials Expired',
-                    code: 50025,
+                    message: 'Invalid OAuth2 access token provided',
+                    code: error.code,
                 },
-                {
-                    status: 400,
-                }
+                { status: HTTPStatus.UnAuthorized }
             )
-        }
-        return new Response('Internal Error', { status: 500 })
+        }  
+        return new Response('Internal Error', { status: HTTPStatus.InternalServerError })  
     }
 }
 
@@ -86,7 +78,7 @@ export async function GET(req: NextRequest) {
 
     const user = await User.findOne({ discordId: token?.discordId })
 
-    if (!user) return new Response('Internal Error', { status: 500 })
+    if (!user) return new Response('Internal Error', { status: HTTPStatus.InternalServerError })
     switch (user.onboardingStage) {
         case OnboardingStage.VERIFIED:
             break
@@ -94,29 +86,23 @@ export async function GET(req: NextRequest) {
             break
         default:
             // They cannot request a join without verification
-            return new Response('Unauthorized', { status: 401 })
+            return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
     }
 
-    const endpoint = `https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${token?.discordId}`
-
-    const response = await fetch(endpoint, {
-        method: 'GET',
-        headers: {
-            Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-        },
-    })
-
-    if (response.status === 200) {
-        if (user && user!.onboardingStage === OnboardingStage.VERIFIED) {
-            user!.onboardingStage = OnboardingStage.JOINED
-            await user?.save()
+    try {
+        void getMember(token?.discordId as string)
+        if (user && user.onboardingStage === OnboardingStage.VERIFIED) {
+            user.onboardingStage = OnboardingStage.JOINED
+            void user?.save()
         }
-
         return NextResponse.json(
             { message: 'Already Joined!' },
-            { status: 200 }
+            { status: HTTPStatus.Ok }
         )
-    } else {
-        return new Response('Not Joined.', { status: 404 })
+    } catch (error) {
+        if((error instanceof DiscordAPIError) && error.code === RESTJSONErrorCodes.UnknownMember) 
+            return new Response('Not Joined.', { status: HTTPStatus.NotFound })
+        console.error(error)
+        return new Response('Internal Error', { status: HTTPStatus.InternalServerError })
     }
 }

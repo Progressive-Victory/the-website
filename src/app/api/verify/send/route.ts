@@ -5,12 +5,16 @@ import { getToken } from 'next-auth/jwt'
 import { User } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
 import dbConnect from '@/util/libmongo'
+import { HTTPStatus } from '@/util/https-status'
+import { neutrino } from '@/util/neutrino'
 export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
     // Parse incoming JSON body
     const reqJson = await req.json()
     if (!reqJson.number) {
-        return new Response('Phone number is required', { status: 400 })
+        return new Response('Phone number is required', {
+            status: HTTPStatus.BadRequest,
+        })
     }
 
     // Retrieve the session using the incoming request and auth options
@@ -18,7 +22,7 @@ export async function POST(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
     if (!session || !token) {
-        return new Response('Unauthorized', { status: 401 })
+        return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
     }
 
     // Get the user
@@ -38,39 +42,24 @@ export async function POST(req: NextRequest) {
                 break
             default:
                 // They cannot request a code after being verified
-                return new Response('Unauthorized', { status: 401 })
+                return new Response('Unauthorized', {
+                    status: HTTPStatus.UnAuthorized,
+                })
         }
     } catch {
-        return new Response('Unauthorized', { status: 401 })
+        return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
     }
 
-    const neutrinoEndpoint = 'https://neutrinoapi.net/sms-verify'
-    // Prepare the headers (note the inclusion of Content-Type for URL encoded data)
-    const headers = {
-        'User-ID': process.env.NEUTRINO_USERID!,
-        'API-Key': process.env.NEUTRINO_SECRET!,
-        'Content-Type': 'application/x-www-form-urlencoded',
-    }
-
-    // Build the URL encoded form data
-    const formData = new URLSearchParams({
-        number: '+1' + reqJson.number,
-        'code-length': '6',
-        'brand-name': 'PV',
-        limit: '20',
+    const data = await neutrino.smsVerify(reqJson.number, {
+        codeLength: 6,
+        brandName: 'PV',
+        limit: 20,
+        countryCode: 'US',
     })
 
-    // Make the POST request with URL encoded data in the body
-    const response = await fetch(neutrinoEndpoint, {
-        method: 'POST',
-        headers,
-        body: formData.toString(),
-    })
-    const data = await response.json()
-
-    if (!data || !data.sent) {
-        return new Response('Bad request', { status: 400 })
+    if (!data.sent) {
+        return new Response('Bad request', { status: HTTPStatus.BadRequest })
     }
 
-    return new Response('Success', { status: 200 })
+    return new Response('Success', { status: HTTPStatus.Ok })
 }

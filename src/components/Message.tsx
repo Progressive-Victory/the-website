@@ -39,13 +39,13 @@ export function Message({
 
     return (
         <motion.div
-            className="bg-white shadow-xl rounded-md my-2 p-4 h-fit w-fit xl:w-[30vw] max-w-xl"
+            className="my-2 size-fit max-w-xl rounded-md bg-white p-4 shadow-xl xl:w-[30vw]"
             style={{ willChange: "opacity, transform", transform: "translateZ(0)" }}
             initial={{ opacity: 0, scale: 0, ...motionProps?.initial }} // Start position: off-screen to the right
             animate={{ opacity: 1, scale: 1, ...motionProps?.animate }} // End position: visible and on-screen
             transition={{ ease: "backInOut", ...motionProps?.transition }}
         >
-            <div className="flex flex-row items-center justify-start gap-x-4 mr-auto">
+            <div className="mr-auto flex flex-row items-center justify-start gap-x-4">
                 <Image
                     src={avatar}
                     alt={username}
@@ -57,48 +57,48 @@ export function Message({
                     {username}
                 </p>
             </div>
-            <p className="mt-2 text-left mr-auto">{text}</p>
+            <p className="mr-auto mt-2 text-left">{text}</p>
             {image && (
-                <div className="relative w-full h-[300px]">
+                <div className="relative h-[300px] w-full">
                     <Image
                         src={image}
                         alt={username}
-                        className="rounded-lg object-cover mt-4"
+                        className="mt-4 rounded-lg object-cover"
                         style={{ objectPosition: '0 20%' }}
                         fill={true}
                         sizes='100%'
                     />
                 </div>
             )}
-            <div className="flex flex-row items-center justify-end gap-x-4 mt-8 ml-auto select-none">
+            <div className="ml-auto mt-8 flex select-none flex-row items-center justify-end gap-x-4">
                 <div
-                    className="w-6 h-6 group"
+                    className="group size-6"
                     onClick={() => setClickedBubble(!clickedBubble)}
                 >
                     {clickedBubble ? (
-                        <SolidChatBubbleLeftRightIcon className="text-blue-500 grow" />
+                        <SolidChatBubbleLeftRightIcon className="grow text-blue-500" />
                     ) : (
-                        <ChatBubbleLeftRightIcon className="text-black group-hover:scale-110 transition-all duration-100" />
+                        <ChatBubbleLeftRightIcon className="text-black transition-all duration-100 group-hover:scale-110" />
                     )}
                 </div>
                 <div
-                    className="w-6 h-6 group"
+                    className="group size-6"
                     onClick={() => setClickedShare(!clickedShare)}
                 >
                     {clickedShare ? (
-                        <SolidArrowUpOnSquareIcon className="text-green-500 grow" />
+                        <SolidArrowUpOnSquareIcon className="grow text-green-500" />
                     ) : (
-                        <ArrowUpOnSquareIcon className="text-black group-hover:scale-110 transition-all duration-100" />
+                        <ArrowUpOnSquareIcon className="text-black transition-all duration-100 group-hover:scale-110" />
                     )}
                 </div>
                 <div
-                    className="w-6 h-6 group"
+                    className="group size-6"
                     onClick={() => setClickedHeart(!clickedHeart)}
                 >
                     {clickedHeart ? (
-                        <SolidHeartIcon className="text-red-500 grow" />
+                        <SolidHeartIcon className="grow text-red-500" />
                     ) : (
-                        <HeartIcon className="text-black group-hover:scale-110 transition-all duration-100" />
+                        <HeartIcon className="text-black transition-all duration-100 group-hover:scale-110" />
                     )}
                 </div>
             </div>
