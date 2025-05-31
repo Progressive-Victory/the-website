@@ -9,57 +9,60 @@ import { HTTPStatus } from '@/util/https-status'
 import { neutrino } from '@/util/neutrino'
 export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
-    // Parse incoming JSON body
-    const reqJson = await req.json()
-    if (!reqJson.number) {
-        return new Response('Phone number is required', {
-            status: HTTPStatus.BadRequest,
+  // Parse incoming JSON body
+  const reqJson = await req.json()
+  if (!reqJson.number) {
+    return new Response('Phone number is required', {
+      status: HTTPStatus.BadRequest,
+    })
+  }
+
+  // Retrieve the session using the incoming request and auth options
+  const session = await getServerSession(authOptions)
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+
+  if (!session || !token) {
+    return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
+  }
+
+  // Get the user
+  try {
+    await dbConnect()
+
+    const user = await User.findOne({ discordId: token?.discordId })
+
+    switch (user?.onboardingStage) {
+      case OnboardingStage.NOT_STARTED:
+        // Update user to await state
+        user.onboardingStage = OnboardingStage.AWAIT_VERIFICATION
+        await user.save()
+        break
+      case OnboardingStage.AWAIT_VERIFICATION:
+        // Do nothing we can send another code if they need it
+        break
+      default:
+        // They cannot request a code after being verified
+        return new Response('Unauthorized', {
+          status: HTTPStatus.UnAuthorized,
         })
     }
+  } catch {
+    return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
+  }
 
-    // Retrieve the session using the incoming request and auth options
-    const session = await getServerSession(authOptions)
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+  const data = await neutrino.smsVerify(reqJson.number, {
+    codeLength: 6,
+    brandName: 'PV',
+    limit: 20,
+    countryCode: 'US',
+  })
 
-    if (!session || !token) {
-        return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
-    }
+  if ('api-error-msg' in data)
+    throw Error(data['api-error-msg'])
 
-    // Get the user
-    try {
-        await dbConnect()
+  if (!data.sent) {
+    return new Response('Bad request', { status: HTTPStatus.BadRequest })
+  }
 
-        const user = await User.findOne({ discordId: token?.discordId })
-
-        switch (user?.onboardingStage) {
-            case OnboardingStage.NOT_STARTED:
-                // Update user to await state
-                user.onboardingStage = OnboardingStage.AWAIT_VERIFICATION
-                await user.save()
-                break
-            case OnboardingStage.AWAIT_VERIFICATION:
-                // Do nothing we can send another code if they need it
-                break
-            default:
-                // They cannot request a code after being verified
-                return new Response('Unauthorized', {
-                    status: HTTPStatus.UnAuthorized,
-                })
-        }
-    } catch {
-        return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
-    }
-
-    const data = await neutrino.smsVerify(reqJson.number, {
-        codeLength: 6,
-        brandName: 'PV',
-        limit: 20,
-        countryCode: 'US',
-    })
-
-    if (!data.sent) {
-        return new Response('Bad request', { status: HTTPStatus.BadRequest })
-    }
-
-    return new Response('Success', { status: HTTPStatus.Ok })
+  return new Response('Success', { status: HTTPStatus.Ok })
 }
