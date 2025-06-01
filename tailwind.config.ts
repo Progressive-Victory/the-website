@@ -29,6 +29,9 @@ export default {
                 'selective-yellow-50': '#FED67C',
                 'selective-yellow-15': '#F5F0E0',
             },
+            screens: {
+              '3xl': '2290px',
+            },
         },
     },
     plugins: [],
