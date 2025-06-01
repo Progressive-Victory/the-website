@@ -318,7 +318,6 @@ export default function Volunteer() {
                                 onChange={(e) => {
                                     const text = e.target.value
                                     setLastName(text)
-                                    setLastName(text)
                                     const isValid =
                                         /^[A-Za-z. \s_-]*$/g.test(text) &&
                                         text.trim() !== ''
