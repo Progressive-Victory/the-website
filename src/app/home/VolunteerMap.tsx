@@ -1,7 +1,6 @@
 'use client'
 import { Link, Message, TiltMessage } from '@/components/common'
 import { Map } from '@/components/Map'
-import { useState, useEffect, useRef } from 'react'
 
 const mapText = `The PV community is constantly growing! Our members are
                     organizing in their local communities, identifying campaigns
@@ -10,7 +9,7 @@ const mapText = `The PV community is constantly growing! Our members are
 
 export function VolunteerMap() {
     return (
-        <div className="flex w-full flex-col items-center gap-5 bg-black-pearl-light py-10">
+        <div className="flex w-full flex-col items-center gap-6 bg-black-pearl-light py-10">
             <h1 className="text-center text-4xl font-bold text-white">
                 Thousands of <span className="text-valencia">Volunteers</span>
                 <br /> Across the US
@@ -31,7 +30,8 @@ export function VolunteerMap() {
                             Get Involved
                         </Link>
                     }
-                    botLeftContent={<p>Members: xx</p>}
+                    botDivider={true}
+                    botLeftContent={<p className="font-medium">Members: xx</p>}
                 >
                     <div className="h-[450px] w-[750px] rounded-md">
                         <Map disableInteraction />
