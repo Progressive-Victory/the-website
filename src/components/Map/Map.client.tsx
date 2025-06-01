@@ -13,7 +13,10 @@ interface MarkerCluster {
     getChildCount: () => number
 }
 
-interface LatLon { lat: string | number; lon: string | number }
+interface LatLon {
+    lat: string | number
+    lon: string | number
+}
 
 const createClusterCustomIcon = function (cluster: MarkerCluster) {
     return L.divIcon({
@@ -128,16 +131,17 @@ export const ClientMap = ({
 
     return (
         <MapContainer
-            zoom={4}
+            zoom={4.1}
             minZoom={3}
             maxZoom={9}
             center={US_CENTER}
+            zoomSnap={0.1}
             zoomControl={false}
             attributionControl={false}
             scrollWheelZoom={!disableInteraction}
             dragging={!disableInteraction}
             doubleClickZoom={!disableInteraction}
-            className="z-0 size-full"
+            className="z-0 size-full rounded-md"
         >
             {children ?? (
                 <>
