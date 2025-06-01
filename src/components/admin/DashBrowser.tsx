@@ -11,13 +11,11 @@ export default function DashBrowser<T extends Document>(
     {
         apiStr,
         title,
-        displayKey,
-        children
+        displayKey
     } : {
         apiStr: string,
         title: string,
         displayKey: string,
-        children: React.ReactElement<typeof DetailRow>[]
     }
 ){
     const [sectionData, setSectionData] = useState<T[]>([])
@@ -53,6 +51,10 @@ export default function DashBrowser<T extends Document>(
             setSelectedEntry(null)
         }
     }, [sectionData, selectedEntry])
+
+    const serveField = (key: string) => {
+        
+    }
 
     const handleCreateT = async (pk: string) => {
         console.log(`creating: ${pk}`)
@@ -139,11 +141,14 @@ export default function DashBrowser<T extends Document>(
                 <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6">
                     <div className="space-y-2 md:space-y-4">
                         <h2 className="text-lg md:text-xl font-semibold text-black-pearl-dark">{`${title} Details`}</h2>
-
-                        {children.map((child) => {
-                            const props = { tgt: selectedEntry } as Partial<IDetailProps>
-                            return cloneElement(child, props)
-                        })}
+                        <form>
+                            {Object.keys(selectedEntry).map(key => (
+                                <div key={key}>
+                                    <p>{key as string}</p>
+                                    <p>{selectedEntry[key as keyof T] as string}</p>
+                                </div>
+                            ))} 
+                        </form>
                     </div>
                 </div>
             ) : (
