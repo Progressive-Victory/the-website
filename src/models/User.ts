@@ -21,6 +21,8 @@ export interface IUser extends Document {
     verified: boolean
     onboardingStage: OnboardingStage
     roles: IRole[]
+    firstName?: string
+    lastName?: string
 }
 
 // We then create a schema for the user document, tells Mongoose how the document should be structured
@@ -44,6 +46,8 @@ const userSchema = new Schema<IUser>({
         default: OnboardingStage.NOT_STARTED,
     },
     roles: [{ type: Schema.Types.ObjectId, ref: Role }],
+    firstName: { type: String, required: false },
+    lastName: { type: String, required: false }
 })
 
 userSchema.post('save', (doc: Document<IUser>, next) => {

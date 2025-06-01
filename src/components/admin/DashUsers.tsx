@@ -161,6 +161,8 @@ export default function DashUsers() {
                         
                         <UserDetailRow label="Discord Username" value={selectedEntry.name} />
                         <UserDetailRow label="Nickname" value={selectedEntry.preferredName} />
+                        <UserDetailRow label="First Name" value={selectedEntry.firstName} />
+                        <UserDetailRow label="Last Name" value={selectedEntry.lastName} />
                         <UserDetailRow label="Email" value={selectedEntry.email} />
                         <UserDetailRow label="Discord ID" value={selectedEntry.discordId} />
                         <UserDetailRow label="Address Line 1" value="N/A" doDiv={false} />
