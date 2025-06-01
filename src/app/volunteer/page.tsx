@@ -11,7 +11,8 @@ import { RESTJSONErrorCodes } from 'discord-api-types/v10'
 
 export default function Volunteer() {
     const [currentStage, setCurrentStage] = useState<string>('loading')
-    const [preferredName, setPreferredName] = useState<string>('')
+    const [firstName, setFirstName] = useState<string>('')
+    const [lastName, setLastName] = useState<string>('')
     const [phoneNumber, setPhoneNumber] = useState<string>('')
     const [zipCode, setZipCode] = useState<string>('')
     const [fromUS, setFromUS] = useState<boolean>(false)
@@ -207,7 +208,8 @@ export default function Volunteer() {
             } else {
                 // Set data on user and update onboarding stage
                 void updateUser({
-                    preferredName: preferredName,
+                    firstName: firstName,
+                    lastName: lastName,
                     zipCode: fromUS ? '00000' : zipCode, // give them a dummy zip if international
                     phoneNumber: phoneNumber,
                 }).then((result) => {
@@ -236,7 +238,8 @@ export default function Volunteer() {
         phoneNumber,
         privacyPolicy,
         fromUS,
-        preferredName,
+        firstName,
+        lastName,
         zipCode,
         requestCode,
     ])
@@ -290,14 +293,31 @@ export default function Volunteer() {
                                 Join us on Discord and make a difference ✨
                             </p>
                             <Field
-                                value={preferredName}
-                                placeholder="Preferred Name"
+                                value={firstName}
+                                placeholder="First Name"
                                 error={validationFlags.get('name')}
                                 errorText="Enter a valid name with no special characters"
                                 maxLength={40} // sensible default, may be too premissive
                                 onChange={(e) => {
                                     const text = e.target.value
-                                    setPreferredName(text)
+                                    setFirstName(text)
+                                    const isValid =
+                                        /^[A-Za-z. \s_-]*$/g.test(text) &&
+                                        text.trim() !== ''
+                                    setValidationFlags((prev) =>
+                                        new Map(prev).set('name', isValid)
+                                    )
+                                }}
+                            />                            
+                            <Field
+                                value={lastName}
+                                placeholder="Last Name"
+                                error={validationFlags.get('name')}
+                                errorText="Enter a valid name with no special characters"
+                                maxLength={40} // sensible default, may be too premissive
+                                onChange={(e) => {
+                                    const text = e.target.value
+                                    setLastName(text)
                                     const isValid =
                                         /^[A-Za-z. \s_-]*$/g.test(text) &&
                                         text.trim() !== ''
