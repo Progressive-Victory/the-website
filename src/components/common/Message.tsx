@@ -26,11 +26,13 @@ export function Message({
     username,
     motionProps,
     avatarRounded = true,
+    className,
     nameColor,
     image,
     children,
     topRightContent,
     botLeftContent,
+    botDivider = false,
 }: {
     avatar: string
     text: string
@@ -41,11 +43,13 @@ export function Message({
         transition?: Transition
     }
     avatarRounded?: boolean
+    className?: string
     nameColor?: string
     image?: string
     children?: JSX.Element
     topRightContent?: JSX.Element
     botLeftContent?: JSX.Element
+    botDivider?: boolean
 }) {
     const [clickedHeart, setClickedHeart] = useState<boolean>(false)
     const [clickedBubble, setClickedBubble] = useState<boolean>(false)
@@ -53,7 +57,7 @@ export function Message({
 
     return (
         <motion.div
-            className="my-2 flex size-fit max-w-[800px] flex-col gap-4 rounded-md bg-white p-4 shadow-xl xl:w-[30vw]"
+            className={`my-2 flex size-fit max-w-[800px] flex-col gap-4 rounded-md bg-white p-4 shadow-xl xl:w-[30vw] ${className ?? className}`}
             style={{
                 willChange: 'opacity, transform',
                 transform: 'translateZ(0)',
@@ -63,29 +67,30 @@ export function Message({
             transition={{ ease: 'backInOut', ...motionProps?.transition }}
         >
             {/* Header */}
-            <div className="mr-auto flex w-full flex-row items-center justify-between">
-                <div className="flex items-center gap-x-4">
-                    <Image
-                        src={avatar}
-                        alt={username}
-                        className={`${avatarRounded ? 'rounded-full' : ''}`}
-                        width={38}
-                        height={38}
-                        unoptimized
-                    />
-                    <p className="font-bold" style={{ color: nameColor }}>
-                        {username}
-                    </p>
+            <div className="flex flex-col gap-2">
+                <div className="mr-auto flex w-full flex-row items-center justify-between">
+                    <div className="flex items-center gap-x-4">
+                        <Image
+                            src={avatar}
+                            alt={username}
+                            className={`${avatarRounded ? 'rounded-full' : ''}`}
+                            width={38}
+                            height={38}
+                            unoptimized
+                        />
+                        <p className="font-bold" style={{ color: nameColor }}>
+                            {username}
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-x-4">
+                        {topRightContent && topRightContent}
+                        <EllipsisHorizontalIcon className="size-7 cursor-pointer" />
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-x-4">
-                    {topRightContent && topRightContent}
-                    <EllipsisHorizontalIcon className="size-7 cursor-pointer" />
-                </div>
+                <p className="mr-auto text-left">{text}</p>
             </div>
-
-            {/* Text */}
-            <p className="mr-auto text-left">{text}</p>
 
             {/* Middle - Image */}
             {image && (
@@ -105,6 +110,8 @@ export function Message({
             {children && <div className="flex justify-center">{children}</div>}
 
             {/* Bottom Row */}
+            {botDivider && <hr className="h-[1px] w-full border-gray-200" />}
+
             <div className="flex flex-row items-center justify-between">
                 <div className="flex gap-x-4">
                     {botLeftContent && botLeftContent}
