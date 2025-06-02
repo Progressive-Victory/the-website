@@ -206,9 +206,10 @@ export default function Volunteer() {
             ) {
                 setStartJoin(false)
             } else {
-                // Set data on user and upate onboarding stage
-                updateUser({
-                    preferredName: preferredName,
+                // Set data on user and update onboarding stage
+                void updateUser({
+                    firstName: firstName,
+                    lastName: lastName,
                     zipCode: fromUS ? '00000' : zipCode, // give them a dummy zip if international
                     phoneNumber: phoneNumber,
                 }).then((result) => {
@@ -245,7 +246,7 @@ export default function Volunteer() {
 
     return (
         <MainLayout>
-            <div className="relative flex flex-col items-center h-screen justify-center bg-steel-blue">
+            <div className="relative flex flex-col items-center h-full justify-center bg-steel-blue">
                 <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-1" />
                 <div
                     className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
@@ -257,8 +258,8 @@ export default function Volunteer() {
                         transform: 'scaleX(-1)',
                     }}
                 />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col w-full max-w-[600px] z-2">
-                    <div className="relative flex flex-col rounded-lg bg-black-pearl-dark p-4 shadow-md gap-y-4 mx-2">
+                <div className="w-full flex justify-center">
+                    <div className="flex flex-col h-auto rounded-lg bg-black-pearl-dark p-4 my-2 shadow-md gap-y-4 mx-2 z-0">
                         {/* User is not authenticated and needs to login */}
                         <Stage
                             stageName="unauthenticated"
@@ -316,6 +317,7 @@ export default function Volunteer() {
                                 maxLength={40} // sensible default, may be too premissive
                                 onChange={(e) => {
                                     const text = e.target.value
+                                    setLastName(text)
                                     setLastName(text)
                                     const isValid =
                                         /^[A-Za-z. \s_-]*$/g.test(text) &&
