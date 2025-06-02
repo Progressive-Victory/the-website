@@ -31,7 +31,7 @@ export class NeutrinoClient {
 
   }
 
-  async verifySecurityCode(code: number | string, limitBy?: string) {
+  async verifySecurityCode(code: number | string, limitBy?: string): Promise<boolean> {
     const formData = new URLSearchParams({
       'security-code': code.toString(),
     })
@@ -42,7 +42,7 @@ export class NeutrinoClient {
     const data = await response.json()
 
     if ('verified' in data && typeof data.verified === 'boolean') {
-      return data.verified
+      return data.verified as boolean
     }
     throw Error('Unexpected response from neutrinoAPI', { cause: data })
   }
