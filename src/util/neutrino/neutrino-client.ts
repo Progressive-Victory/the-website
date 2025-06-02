@@ -76,5 +76,4 @@ export class NeutrinoClient {
     const response = await this.fetch('POST', NeutrinoRoutes.SmsVerify, formData)
     return (await response.json()) as { sent: boolean, 'number-valid': boolean, 'security-code': string } | NeutrinoAPIError
   }
-
 }
