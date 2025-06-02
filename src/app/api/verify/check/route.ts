@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
                 })
         }
 
-        const data = await neutrino.verifySecurityCode(reqJson.code)
+        const data = await neutrino.verifySecurityCode(reqJson.code as number)
 
         if (!data) {
             return new Response('Bad request or bad code', {
