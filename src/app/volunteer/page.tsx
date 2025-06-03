@@ -11,7 +11,8 @@ import { RESTJSONErrorCodes } from 'discord-api-types/v10'
 
 export default function Volunteer() {
     const [currentStage, setCurrentStage] = useState<string>('loading')
-    const [preferredName, setPreferredName] = useState<string>('')
+    const [firstName, setFirstName] = useState<string>('')
+    const [lastName, setLastName] = useState<string>('')
     const [phoneNumber, setPhoneNumber] = useState<string>('')
     const [zipCode, setZipCode] = useState<string>('')
     const [fromUS, setFromUS] = useState<boolean>(false)
@@ -205,9 +206,10 @@ export default function Volunteer() {
             ) {
                 setStartJoin(false)
             } else {
-                // Set data on user and update onboarding stage
+                // Set data on user and upate onboarding stage
                 void updateUser({
-                    preferredName: preferredName,
+                    firstName: firstName,
+                    lastName: lastName,
                     zipCode: fromUS ? '00000' : zipCode, // give them a dummy zip if international
                     phoneNumber: phoneNumber,
                 }).then((result) => {
@@ -236,15 +238,16 @@ export default function Volunteer() {
         phoneNumber,
         privacyPolicy,
         fromUS,
-        preferredName,
+        firstName,
+        lastName,
         zipCode,
         requestCode,
     ])
 
     return (
         <MainLayout>
-            <div className="relative flex h-screen flex-col items-center justify-center bg-steel-blue">
-                <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
+            <div className="relative flex flex-col items-center h-full justify-center bg-steel-blue">
+                <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-1" />
                 <div
                     className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
                     style={{
@@ -255,8 +258,8 @@ export default function Volunteer() {
                         transform: 'scaleX(-1)',
                     }}
                 />
-                <div className="z-2 absolute left-1/2 top-1/2 flex w-full max-w-[600px] -translate-x-1/2 -translate-y-1/2 flex-col">
-                    <div className="relative mx-2 flex flex-col gap-y-4 rounded-lg bg-black-pearl-dark p-4 shadow-md">
+                <div className="w-full flex justify-center">
+                    <div className="flex flex-col h-auto rounded-lg bg-black-pearl-dark p-4 my-2 shadow-md gap-y-4 mx-2 z-0">
                         {/* User is not authenticated and needs to login */}
                         <Stage
                             stageName="unauthenticated"
@@ -290,14 +293,32 @@ export default function Volunteer() {
                                 Join us on Discord and make a difference ✨
                             </p>
                             <Field
-                                value={preferredName}
-                                placeholder="Preferred Name"
+                                value={firstName}
+                                placeholder="First Name"
                                 error={validationFlags.get('name')}
                                 errorText="Enter a valid name with no special characters"
                                 maxLength={40} // sensible default, may be too premissive
                                 onChange={(e) => {
                                     const text = e.target.value
-                                    setPreferredName(text)
+                                    setFirstName(text)
+                                    const isValid =
+                                        /^[A-Za-z. \s_-]*$/g.test(text) &&
+                                        text.trim() !== ''
+                                    setValidationFlags((prev) =>
+                                        new Map(prev).set('name', isValid)
+                                    )
+                                }}
+                            />                            
+                            <Field
+                                value={lastName}
+                                placeholder="Last Name"
+                                error={validationFlags.get('name')}
+                                errorText="Enter a valid name with no special characters"
+                                maxLength={40} // sensible default, may be too premissive
+                                onChange={(e) => {
+                                    const text = e.target.value
+                                    setLastName(text)
+                                    setLastName(text)
                                     const isValid =
                                         /^[A-Za-z. \s_-]*$/g.test(text) &&
                                         text.trim() !== ''
