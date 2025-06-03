@@ -27,12 +27,10 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
 
   // tilt + flip
   const rotateX = useTransform(tiltY, [-1, 1], [-15, 15]);
-  const rotateY = useTransform(
+  const rotateY = useTransform<number, number>(
     [tiltX, flipSpring],
-    (values: number[]) => (values[0] * 15) + values[1]  
-  );
-
-
+    ([x, flip]) => (x * 15) + flip
+  )
 
   const handleMouseEnter = (e: React.MouseEvent) => {
     setIsHovered(true)
@@ -68,9 +66,9 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
 
   // flip 
   const handleClick = () => {
-  const isCurrentlyFlipped = flipSpring.get() === 180
-  flipSpring.set(isCurrentlyFlipped ? 0 : 180)
-}
+    const isCurrentlyFlipped = flipSpring.get() === 180
+    flipSpring.set(isCurrentlyFlipped ? 0 : 180)
+  }
 
   return (
     <motion.div
