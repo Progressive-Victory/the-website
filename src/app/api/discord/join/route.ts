@@ -11,7 +11,7 @@ import { DiscordAPIError } from '@discordjs/rest'
 import { HTTPStatus } from '@/util/https-status'
 export const dynamic = 'force-dynamic'
 // Joins user to the server with our grant
-export async function PUT(_req: NextRequest) {
+export async function PUT() {
   // Retrieve the session using the incoming request and auth options
   const session = await getServerSession(authOptions)
   // const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
