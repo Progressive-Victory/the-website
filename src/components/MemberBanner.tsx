@@ -1,6 +1,6 @@
 'use client'
 import Image, { StaticImageData } from 'next/image'
-import { motion, useSpring, useTransform } from 'motion/react'
+import { motion, useSpring, useTransform, } from 'motion/react'
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 
@@ -26,10 +26,10 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
   const flipSpring = useSpring(0, { stiffness: 300, damping: 30 })
 
   // tilt + flip
-  const rotateX = useTransform(tiltY, [-1, 1], [-15, 15])
-  const rotateY = useTransform<[number, number], number>(
+  const rotateX = useTransform(tiltY, [-1, 1], [-15, 15]);
+  const rotateY = useTransform<number, number>(
     [tiltX, flipSpring],
-    ([x, flip]: [number, number]) => (x * 15) + flip
+    ([x, flip]) => (x * 15) + flip
   )
 
   const handleMouseEnter = (e: React.MouseEvent) => {
@@ -66,9 +66,9 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
 
   // flip 
   const handleClick = () => {
-  const isCurrentlyFlipped = flipSpring.get() === 180
-  flipSpring.set(isCurrentlyFlipped ? 0 : 180)
-}
+    const isCurrentlyFlipped = flipSpring.get() === 180
+    flipSpring.set(isCurrentlyFlipped ? 0 : 180)
+  }
 
   return (
     <motion.div
