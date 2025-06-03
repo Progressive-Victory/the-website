@@ -13,8 +13,6 @@ export default function Volunteer() {
     const [currentStage, setCurrentStage] = useState<string>('loading')
     const [firstName, setFirstName] = useState<string>('')
     const [lastName, setLastName] = useState<string>('')
-    const [firstName, setFirstName] = useState<string>('')
-    const [lastName, setLastName] = useState<string>('')
     const [phoneNumber, setPhoneNumber] = useState<string>('')
     const [zipCode, setZipCode] = useState<string>('')
     const [fromUS, setFromUS] = useState<boolean>(false)
