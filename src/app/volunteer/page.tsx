@@ -207,7 +207,7 @@ export default function Volunteer() {
                 setStartJoin(false)
             } else {
                 // Set data on user and upate onboarding stage
-                updateUser({
+                void updateUser({
                     firstName: firstName,
                     lastName: lastName,
                     zipCode: fromUS ? '00000' : zipCode, // give them a dummy zip if international
