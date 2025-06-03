@@ -6,7 +6,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 If you're new to Next.js development please start by [reading the docs](https://nextjs.org/docs/app/getting-started/project-structure) to get a understanding of how a Next.js site works. The underlying reactive web development framework is [React](https://react.dev/learn), the linked page has a great tutorial for getting you aquainted quickly.
 
-The language used in this project is [Typescript](https://www.typescriptlang.org/docs/) which is a typed version of Javascript. Please take a moment to review Typescript basiscs and best practices before getting started.
+The language used in this project is [Typescript](https://www.typescriptlang.org/docs/) which is a typed version of Javascript. Please take a moment to review Typescript basics and best practices before getting started.
 
 By continuing with development you are agreeing that you understand these frameworks and will attempt to work within the best practices and conventions.
 
@@ -75,8 +75,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 To learn more about Next.js, take a look at the following resources:
 
--   [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
--   [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
