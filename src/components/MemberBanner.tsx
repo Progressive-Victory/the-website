@@ -1,8 +1,8 @@
 'use client'
 import Image, { StaticImageData } from 'next/image'
-import { motion, useSpring, useTransform, } from 'motion/react'
+import { motion, useSpring, useTransform } from 'motion/react'
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-
+import NextLink from 'next/link';
 
 interface CardProps {
   frontImage: string | StaticImageData
@@ -18,14 +18,11 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
     height: 0,
   })
 
-  // tilt spring
   const tiltX = useSpring(0, { stiffness: 500, damping: 300 })
   const tiltY = useSpring(0, { stiffness: 500, damping: 300 })
 
-  // flip spring
   const flipSpring = useSpring(0, { stiffness: 300, damping: 30 })
 
-  // tilt + flip
   const rotateX = useTransform(tiltY, [-1, 1], [-15, 15]);
   const rotateY = useTransform<number, number>(
     [tiltX, flipSpring],
@@ -56,93 +53,91 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
     const centerX = elementPosition.width / 2
     const centerY = elementPosition.height / 2
 
-    // norm it 
     const normX = (x - centerX) / centerX
     const normY = (y - centerY) / centerY
 
     tiltX.set(normX)
-    tiltY.set(normY * -1) // invert Y 
+    tiltY.set(normY * -1)
   }
 
-  // flip 
   const handleClick = () => {
     const isCurrentlyFlipped = flipSpring.get() === 180
     flipSpring.set(isCurrentlyFlipped ? 0 : 180)
   }
 
   return (
-    <motion.div
-      className="relative h-[300px] w-full max-w-[500px] cursor-pointer"
-      style={{
-        perspective: 1000,
-        transformStyle: 'preserve-3d',
-      }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
-      onClick={handleClick}
-      whileTap={{ scale: 0.95 }}
-      animate={{ scale: isHovered ? 1.03 : 1 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-    >
+    <div className="flex flex-col items-center gap-6">
       <motion.div
-        className="size-full"
+        className="relative h-[300px] w-full max-w-[500px] cursor-pointer"
         style={{
-          rotateX,
-          rotateY,
+          perspective: 1000,
           transformStyle: 'preserve-3d',
         }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onMouseMove={handleMouseMove}
+        onClick={handleClick}
+        whileTap={{ scale: 0.95 }}
+        animate={{ scale: isHovered ? 1.03 : 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        {/* Front side */}
         <motion.div
-          className="absolute inset-0 overflow-hidden rounded-xl bg-white shadow-2xl"
+          className="size-full"
           style={{
-            backfaceVisibility: 'hidden',
-            transform: 'translateZ(1px)',
+            rotateX,
+            rotateY,
+            transformStyle: 'preserve-3d',
           }}
         >
-          <Image
-            src={frontImage}
-            alt="Front content"
-            fill
-            className="object-cover"
-            priority
-            sizes="500px"
-            quality={100}
-            unoptimized
-          />
-        </motion.div>
+          <motion.div
+            className="absolute inset-0 overflow-hidden rounded-xl bg-white shadow-2xl"
+            style={{
+              backfaceVisibility: 'hidden',
+              transform: 'translateZ(1px)',
+            }}
+          >
+            <Image
+              src={frontImage}
+              alt="Front content"
+              fill
+              className="object-cover"
+              priority
+              sizes="500px"
+              quality={100}
+              unoptimized
+            />
+          </motion.div>
 
-        {/* Back side */}
-        <motion.div
-          className="absolute inset-0 overflow-hidden rounded-xl bg-white shadow-2xl"
-          style={{
-            backfaceVisibility: 'hidden',
-            transform: 'rotateY(180deg) translateZ(1px)',
-          }}
-        >
-          <Image
-            src={backImage}
-            alt="Back content"
-            fill
-            className="object-cover"
-            priority
-            sizes="500px"
-            quality={100}
-            unoptimized
-          />
-        </motion.div>
+          <motion.div
+            className="absolute inset-0 overflow-hidden rounded-xl bg-white shadow-2xl"
+            style={{
+              backfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg) translateZ(1px)',
+            }}
+          >
+            <Image
+              src={backImage}
+              alt="Back content"
+              fill
+              className="object-cover"
+              priority
+              sizes="500px"
+              quality={100}
+              unoptimized
+            />
+          </motion.div>
 
-        {/* Border */}
-        <div className="absolute inset-0 rounded-xl">
-          <div className="absolute inset-0 rounded-xl border-8 border-gray-200/50" />
-        </div>
+          <div className="absolute inset-0 rounded-xl">
+            <div className="absolute inset-0 rounded-xl border-8 border-gray-200/50" />
+          </div>
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   )
 }
 
 export default InteractiveThreeCard
+
 
 
 interface BulletPointProps {
@@ -187,7 +182,7 @@ const bulletPoints: BulletPointItem[] = [
     description: 'Exclusive text chat in the PV Discord with the Strategic Advisors and a really sick PV Baseball cap!',
   },
   {
-    title: '$100/month - @Inner Circle™',
+    title: '$100/month - Inner Circle™',
     description: 'The Complete Progressive Victory Merch Bundle Including A Progressive Victory Signature Mug, A Progressive Victory Waves Water Bottle, A Progressive Victory Waves Tee navy blue shirt.',
   },
 ]
@@ -272,11 +267,46 @@ export function MemberBanner() {
                 frontImage="/images/membercard_front.png"
                 backImage="/images/membercard_back.png"
               />
+              
+              {/* Button under the card (large screens only) */}
+              <div className="mt-6 hidden min-[1020px]:flex justify-center">
+                <NextLink
+                  href="https://secure.actblue.com/donate/pvmember"
+                  passHref
+                  legacyBehavior
+                >
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block rounded-xl bg-valencia px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:bg-white hover:text-valencia border border-valencia"
+                  >
+                    Become a Member
+                  </a>
+                </NextLink>
+              </div>
             </div>
           </motion.div>
+          
+
+            <div className="mt-8 flex justify-center min-[1020px]:hidden">
+              <NextLink
+                href="https://secure.actblue.com/donate/pvmember"
+                passHref
+                legacyBehavior
+              >
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block rounded-xl bg-valencia px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:bg-white hover:text-valencia border border-valencia"
+                >
+                  Become a Member
+                </a>
+              </NextLink>
+            </div>
+
 
           <motion.div
-            className="w-full min-[1020px]:w-[45%]"
+            className="w-full pb-12 min-[1020px]:w-[45%] min-[1020px]:pb-0"
             initial="hidden"
             animate={visible ? "visible" : "hidden"}
           >
@@ -290,6 +320,8 @@ export function MemberBanner() {
                 />
               ))}
             </div>
+            
+            
           </motion.div>
         </div>
       </div>
