@@ -31,7 +31,7 @@ export class NeutrinoClient {
 
   }
 
-  async verifySecurityCode(code: number | string, limitBy?: string) {
+  async verifySecurityCode(code: number | string, limitBy?: string): Promise<boolean> {
     const formData = new URLSearchParams({
       'security-code': code.toString(),
     })
@@ -39,12 +39,12 @@ export class NeutrinoClient {
     if (limitBy) formData.set('limit-by', limitBy)
 
     const response = await this.fetch('POST', NeutrinoRoutes.VerifySecurityCode, formData)
-    const data = response.json()
+    const data = await response.json()
 
     if ('verified' in data && typeof data.verified === 'boolean') {
-      return data.verified
+      return data.verified as boolean
     }
-    throw Error('Unexpected response from neutrinoAPI', { cause: response.json() })
+    throw Error('Unexpected response from neutrinoAPI', { cause: data })
   }
 
   async smsVerify(number: string, options?: {
@@ -76,5 +76,4 @@ export class NeutrinoClient {
     const response = await this.fetch('POST', NeutrinoRoutes.SmsVerify, formData)
     return (await response.json()) as { sent: boolean, 'number-valid': boolean, 'security-code': string } | NeutrinoAPIError
   }
-
 }

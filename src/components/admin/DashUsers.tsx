@@ -188,55 +188,20 @@ export default function DashUsers() {
             {selectedEntry ? (
                 <div className="rounded-lg bg-white p-4 shadow-sm md:p-6 lg:col-span-2">
                     <div className="space-y-2 md:space-y-4">
-                        <h2 className="text-lg font-semibold text-black-pearl-dark md:text-xl">
-                            Member Details
-                        </h2>
-
-                        <UserDetailRow
-                            label="Discord Username"
-                            value={selectedEntry.name}
-                        />
-                        <UserDetailRow
-                            label="Nickname"
-                            value={selectedEntry.preferredName}
-                        />
-                        <UserDetailRow
-                            label="Email"
-                            value={selectedEntry.email}
-                        />
-                        <UserDetailRow
-                            label="Discord ID"
-                            value={selectedEntry.discordId}
-                        />
-                        <UserDetailRow
-                            label="Address Line 1"
-                            value="N/A"
-                            doDiv={false}
-                        />
-                        <UserDetailRow
-                            label="Address Line 2"
-                            value="N/A"
-                            doDiv={false}
-                        />
-                        <UserDetailRow
-                            label="City"
-                            value={selectedEntry.city}
-                            doDiv={false}
-                        />
-                        <UserDetailRow
-                            label="County"
-                            value={selectedEntry.county}
-                            doDiv={false}
-                        />
-                        <UserDetailRow
-                            label="State"
-                            value={selectedEntry.state}
-                            doDiv={false}
-                        />
-                        <UserDetailRow
-                            label="Zip Code"
-                            value={selectedEntry.zipCode}
-                        />
+                        <h2 className="text-lg md:text-xl font-semibold text-black-pearl-dark">Member Details</h2>
+                        
+                        <UserDetailRow label="Discord Username" value={selectedEntry.name} />
+                        <UserDetailRow label="Nickname" value={selectedEntry.preferredName} />
+                        <UserDetailRow label="First Name" value={selectedEntry.firstName} />
+                        <UserDetailRow label="Last Name" value={selectedEntry.lastName} />
+                        <UserDetailRow label="Email" value={selectedEntry.email} />
+                        <UserDetailRow label="Discord ID" value={selectedEntry.discordId} />
+                        <UserDetailRow label="Address Line 1" value="N/A" doDiv={false} />
+                        <UserDetailRow label="Address Line 2" value="N/A" doDiv={false} />
+                        <UserDetailRow label="City" value={selectedEntry.city} doDiv={false} />
+                        <UserDetailRow label="County" value={selectedEntry.county} doDiv={false} />
+                        <UserDetailRow label="State" value={selectedEntry.state} doDiv={false} />
+                        <UserDetailRow label="Zip Code" value={selectedEntry.zipCode} />
 
                         <UserDetailRow
                             label="Roles"
