@@ -39,12 +39,12 @@ export class NeutrinoClient {
     if (limitBy) formData.set('limit-by', limitBy)
 
     const response = await this.fetch('POST', NeutrinoRoutes.VerifySecurityCode, formData)
-    const data = response.json()
+    const data = await response.json()
 
     if ('verified' in data && typeof data.verified === 'boolean') {
       return data.verified
     }
-    throw Error('Unexpected response from neutrinoAPI', { cause: response.json() })
+    throw Error('Unexpected response from neutrinoAPI', { cause: data })
   }
 
   async smsVerify(number: string, options?: {
