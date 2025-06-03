@@ -55,7 +55,8 @@ export async function POST(req: NextRequest) {
         }
 
         return new Response('Success', { status: HTTPStatus.Ok })
-    } catch {
+    } catch(err) {
+        console.log(err instanceof Error ? err.message : 'couldn\'t read error message')
         return new Response('Unauthorized', { status: HTTPStatus.UnAuthorized })
     }
 }
