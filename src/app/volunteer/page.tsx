@@ -339,8 +339,7 @@ export default function Volunteer() {
                                     const text = e.target.value
                                     setZipCode(text)
                                     const isValid =
-                                        /^\d{5}(-\d{4})?$/g.test(text) &&
-                                        !text.startsWith('0')
+                                        /^\d{5}(-\d{4})?$/g.test(text)
                                     setValidationFlags((prev) =>
                                         new Map(prev).set('zip', isValid)
                                     )
