@@ -56,7 +56,8 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     // session call back assigns the discordId from the token to the session object
     session({ session, token }) {
-      if (token.discordId) session.discordId = token.discordId as string
+      session.discordId = token.discordId as string
+      session.accessToken = token.accessToken as string
       return session
     },
     async jwt({
@@ -74,7 +75,8 @@ export const authOptions: NextAuthOptions = {
 
       if (account && profile) {
         // First time OAuth sign-in: Store OAuth data in the token
-        token.access_token = account.access_token
+        console.log(account.access_token)
+        token.accessToken = account.access_token
         token.discordId = eprofile.id
 
         // Database connection

@@ -11,18 +11,18 @@ import { DiscordAPIError } from '@discordjs/rest'
 import { HTTPStatus } from '@/util/https-status'
 export const dynamic = 'force-dynamic'
 // Joins user to the server with our grant
-export async function PUT(req: NextRequest) {
+export async function PUT(_req: NextRequest) {
   // Retrieve the session using the incoming request and auth options
   const session = await getServerSession(authOptions)
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+  // const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
-  if (!session || !token) {
+  if (!session) {
     return new Response('Unauthorized', { status: 401 })
   }
 
   await dbConnect()
 
-  const user = await User.findOne({ discordId: token?.discordId })
+  const user = await User.findOne({ discordId: session.discordId })
 
   // Escape if the user is null
   if (!user) return new Response('Not Logged In', { status: 200 })
@@ -37,8 +37,8 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    // TODO: remove casting
-    const data = await joinMember(session.discordId, token.access_token as string)
+    console.log(session.accessToken)
+    const data = await joinMember(session.discordId, session.accessToken)
     if (
       user.verified &&
       user.onboardingStage === OnboardingStage.VERIFIED
@@ -49,8 +49,9 @@ export async function PUT(req: NextRequest) {
     if ('flags' in data) return new Response('Added Member!', { status: HTTPStatus.Ok })
     return new Response('Member in Guild', { status: HTTPStatus.Ok })
   } catch (error) {
+    console.error(error)
     if ((error instanceof DiscordAPIError) && error.code === RESTJSONErrorCodes.InvalidOAuth2AccessToken) {
-
+      console.log(error.requestBody)
       // User needs to be reauthorized we should sign them out
       return NextResponse.json(
         {

@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
   const data = await neutrino.smsVerify(reqJson.number, {
     codeLength: 6,
-    brandName: 'PV',
+    brandName: 'Progressive Victory',
     limit: 20,
     countryCode: 'US',
   })

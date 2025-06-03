@@ -6,7 +6,7 @@ export function joinMember(userId: Snowflake, accessToken: string) {
   if (!process.env.GUILD_ID) throw Error("Please specify 'GUILD_ID' in the environment file.")
 
   return rest.put(Routes.guildMember(process.env.GUILD_ID, userId), {
-    body: JSON.stringify({ access_token: accessToken })
+    body: {"access_token": accessToken}
   }) as Promise<APIGuildMember | object>
 }
 
