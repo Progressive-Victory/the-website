@@ -4,7 +4,7 @@ import { ReactElement, useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, GeoJSON } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import { zipToLatLong } from './util'
-import { statesData } from './stateData'
+import { StateDataFeatureCollection, statesData } from './stateData'
 import { OPEN_ATTR, OPEN_MAP_URI, US_CENTER } from './constants'
 import { getBrandColor, ShadeIndex } from '@/util/theme'
 
@@ -27,11 +27,15 @@ const createClusterCustomIcon = function (cluster: MarkerCluster) {
 }
 
 // Map Layers
-export const USMapLayer = ({ isHeatmap }: { isHeatmap?: boolean }) => {
+export const USMapLayer = ({ isHeatmap, data }: {
+    isHeatmap?: boolean,
+    data: StateDataFeatureCollection
+}) => {
+
     return (
         <>
             <GeoJSON
-                data={statesData}
+                data={data}
                 style={() => {
                     const strokeColor = getBrandColor('blue', 200)
                     return {
@@ -44,13 +48,13 @@ export const USMapLayer = ({ isHeatmap }: { isHeatmap?: boolean }) => {
                 }}
             />
             <GeoJSON
-                data={statesData}
+                data={data}
                 style={() => {
                     // TODO: pull in data from api instead of using random shades
                     const shade = getBrandColor(
                         'blue',
                         [500, 400, 300, 200, 100][
-                            Math.floor(Math.random() * 5)
+                        Math.floor(Math.random() * 5)
                         ] as ShadeIndex
                     )
 
@@ -120,6 +124,7 @@ export const ClientMap = ({
                 const data = await zipToLatLong(zipcode)
                 if (data) newList.push(data)
             }
+            console.log(newList)
             setMarkerList(newList)
         }
         if (isMarker) void fetcher()
@@ -128,6 +133,38 @@ export const ClientMap = ({
             setMarkerList([])
         }
     }, [zipCodes, isMarker])
+
+    // US State GeoJSON for "USMapLayer"
+    const [stateGeoJSON, setStateGeoJSON] = useState(statesData)
+
+    useEffect(() => {
+        (async () => {
+            if (statesData.type !== "FeatureCollection") return;
+
+            // api call goes here
+            const apiData = [{ state: "Alabama", count: 1 }]
+            let max = 0
+
+            let res: StateDataFeatureCollection = {
+                type: "FeatureCollection",
+                features: statesData.features.map(f => {
+                    // Redefine feature
+                    let feature = { ...f }
+
+                    // Handle api call data
+                    const stateCount = apiData.find(s => s.state === f.properties?.name)
+                    if (stateCount) {
+                        if (stateCount.count > max) max = stateCount.count;
+                        feature.properties.count = stateCount.count;
+                    }
+
+                    return feature
+                })
+            }
+
+            setStateGeoJSON(res)
+        })()
+    }, [])
 
     return (
         <MapContainer
@@ -146,7 +183,7 @@ export const ClientMap = ({
             {children ?? (
                 <>
                     {!hideOpenStreetMap && <OpenStreetMapLayer />}
-                    <USMapLayer isHeatmap={isHeatmap} />
+                    <USMapLayer isHeatmap={isHeatmap} data={stateGeoJSON} />
                     {isMarker && <MarkerLayer markerList={markerList} />}
                 </>
             )}
