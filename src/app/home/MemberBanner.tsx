@@ -3,6 +3,7 @@ import Image, { StaticImageData } from 'next/image'
 import { motion, useSpring, useTransform } from 'motion/react'
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import NextLink from 'next/link';
+import { Link } from '@/components/common';
 
 interface CardProps {
   frontImage: string | StaticImageData
@@ -262,48 +263,22 @@ export function MemberBanner() {
             animate={visible ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, ease: 'easeOut' }}
           >
-            <div className="h-[300px] w-full max-w-[500px]">
+            <div className="w-full max-w-[500px]">
               <InteractiveThreeCard
                 frontImage="/images/membercard_front.png"
                 backImage="/images/membercard_back.png"
               />
-              
-              {/* Button under the card (large screens only) */}
-              <div className="mt-6 hidden min-[1020px]:flex justify-center">
-                <NextLink
+
+              <div className="mt-6 flex justify-center">
+                <Link
                   href="https://secure.actblue.com/donate/pvmember"
-                  passHref
-                  legacyBehavior
+                  className="bg-valencia"
                 >
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block rounded-xl bg-valencia px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:bg-white hover:text-valencia border border-valencia"
-                  >
-                    Become a Member
-                  </a>
-                </NextLink>
+                  Become a Member
+                </Link>
               </div>
             </div>
           </motion.div>
-          
-
-            <div className="mt-8 flex justify-center min-[1020px]:hidden">
-              <NextLink
-                href="https://secure.actblue.com/donate/pvmember"
-                passHref
-                legacyBehavior
-              >
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block rounded-xl bg-valencia px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:bg-white hover:text-valencia border border-valencia"
-                >
-                  Become a Member
-                </a>
-              </NextLink>
-            </div>
-
 
           <motion.div
             className="w-full pb-12 min-[1020px]:w-[45%] min-[1020px]:pb-0"
@@ -320,8 +295,8 @@ export function MemberBanner() {
                 />
               ))}
             </div>
-            
-            
+
+
           </motion.div>
         </div>
       </div>

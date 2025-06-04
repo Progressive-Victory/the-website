@@ -1,6 +1,5 @@
-import { Hero, MapGraphic, Volunteer } from '@/app/home'
+import { Hero, MapGraphic, MemberBanner, Volunteer } from '@/app/home'
 import { MainLayout } from '@/components/layout'
-import { MemberBanner } from '@/components/MemberBanner'
 // HomePage
 export default function Home() {
     return (
@@ -9,7 +8,7 @@ export default function Home() {
                 <Hero />
                 <Volunteer />
                 <MapGraphic />
-                <MemberBanner/>
+                <MemberBanner />
             </div>
         </MainLayout>
     )
