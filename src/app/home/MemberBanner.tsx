@@ -2,7 +2,7 @@
 import Image, { StaticImageData } from 'next/image'
 import { motion, useSpring, useTransform } from 'motion/react'
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import NextLink from 'next/link';
+import { Link } from '@/components/common';
 
 interface CardProps {
   frontImage: string | StaticImageData
@@ -138,51 +138,62 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
 
 export default InteractiveThreeCard
 
-
-
-interface BulletPointProps {
-  title: string
-  description: string
-  delay?: number
+interface BulletPointItem {
+  title: string;
+  sub: number;
+  description: string;
+  bullet: string;
 }
+type BulletPointProps = BulletPointItem & { delay?: number }
 
-function BulletPoint({ title, description, delay = 0 }: BulletPointProps) {
+function BulletPoint({ title, description, sub, bullet, delay = 0 }: BulletPointProps) {
   return (
     <motion.div
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.8, delay, ease: 'backInOut' }}
-      className="mb-6 flex w-full items-start gap-4"
+      className="mb-6 flex w-full items-start gap-5"
     >
-      <div className="mt-2 size-3 shrink-0 rounded-full bg-valencia" />
+      <Image
+        className="mt-[3.5px]"
+        src={`/images/${bullet}`}
+        alt={bullet}
+        width={48}
+        height={48}
+        unoptimized
+      />
       <div>
-        <h3 className="mb-1 text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="mb-0.5 text-lg font-semibold text-black-pearl-dark">{title}</h3>
+        <h4 className="mb-3 font-semibold text-valencia">${sub}/month</h4>
         <p className="text-base text-gray-600">{description}</p>
       </div>
     </motion.div>
   )
 }
 
-interface BulletPointItem {
-  title: string
-  description: string
-}
-
 const bulletPoints: BulletPointItem[] = [
   {
-    title: '$5/month - Dues Paying Member',
+    title: 'Dues Paying Member',
+    sub: 5,
+    bullet: 'PV_DPM_Logo.png',
     description: 'Gain your very own PV membership card, recognition at the end of our long-form content, and your very own sticker!',
   },
   {
-    title: '$10/month - Premium Member',
+    title: 'Premium Member',
+    sub: 10,
+    bullet: 'PV_DPM_Logo.png',
     description: 'Early Access to the Progressive Victory Monthly Newsletter and priority questions during Q&As with PV staff. ',
   },
   {
-    title: '$20/month - Signature Member',
+    title: 'Signature Member',
+    sub: 20,
+    bullet: 'PV_DPM_Signature_Logo.png',
     description: 'Exclusive text chat in the PV Discord with the Strategic Advisors and a really sick PV Baseball cap!',
   },
   {
-    title: '$100/month - Inner Circle™',
+    title: 'Inner Circle Member',
+    sub: 100,
+    bullet: 'PV_DPM_Inner_Circle_Logo.png',
     description: 'The Complete Progressive Victory Merch Bundle Including A Progressive Victory Signature Mug, A Progressive Victory Waves Water Bottle, A Progressive Victory Waves Tee navy blue shirt.',
   },
 ]
@@ -251,7 +262,10 @@ export function MemberBanner() {
 
   return (
     <div className="w-full bg-white px-4 py-16 md:px-8 md:py-24">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto flex max-w-6xl flex-col gap-14">
+        <h1 className="text-center text-4xl/[2.75rem] font-bold text-black-pearl-dark">
+          Get Your Own Progressive Victory <br /><span className="text-valencia">Membership Card</span>
+        </h1>
         <div
           ref={containerRef}
           className="flex flex-col gap-8 md:gap-12 min-[1020px]:flex-row-reverse"
@@ -262,48 +276,22 @@ export function MemberBanner() {
             animate={visible ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, ease: 'easeOut' }}
           >
-            <div className="h-[300px] w-full max-w-[500px]">
+            <div className="mb-8 w-full max-w-[500px] min-[1020px]:mt-14">
               <InteractiveThreeCard
                 frontImage="/images/membercard_front.png"
                 backImage="/images/membercard_back.png"
               />
-              
-              {/* Button under the card (large screens only) */}
-              <div className="mt-6 hidden min-[1020px]:flex justify-center">
-                <NextLink
+
+              <div className="mt-10 flex justify-center">
+                <Link
                   href="https://secure.actblue.com/donate/pvmember"
-                  passHref
-                  legacyBehavior
+                  className="bg-valencia"
                 >
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block rounded-xl bg-valencia px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:bg-white hover:text-valencia border border-valencia"
-                  >
-                    Become a Member
-                  </a>
-                </NextLink>
+                  Become a Member
+                </Link>
               </div>
             </div>
           </motion.div>
-          
-
-            <div className="mt-8 flex justify-center min-[1020px]:hidden">
-              <NextLink
-                href="https://secure.actblue.com/donate/pvmember"
-                passHref
-                legacyBehavior
-              >
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block rounded-xl bg-valencia px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:bg-white hover:text-valencia border border-valencia"
-                >
-                  Become a Member
-                </a>
-              </NextLink>
-            </div>
-
 
           <motion.div
             className="w-full pb-12 min-[1020px]:w-[45%] min-[1020px]:pb-0"
@@ -316,12 +304,12 @@ export function MemberBanner() {
                   key={point.title}
                   title={point.title}
                   description={point.description}
+                  sub={point.sub}
+                  bullet={point.bullet}
                   delay={index * 0.15 + 0.2}
                 />
               ))}
             </div>
-            
-            
           </motion.div>
         </div>
       </div>
