@@ -246,8 +246,8 @@ export default function Volunteer() {
 
     return (
         <MainLayout>
-            <div className="relative flex flex-col items-center h-full justify-center bg-steel-blue">
-                <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-1" />
+            <div className="relative flex h-full flex-col items-center justify-center bg-steel-blue">
+                <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
                 <div
                     className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
                     style={{
@@ -258,8 +258,8 @@ export default function Volunteer() {
                         transform: 'scaleX(-1)',
                     }}
                 />
-                <div className="w-full flex justify-center">
-                    <div className="flex flex-col h-auto rounded-lg bg-black-pearl-dark p-4 my-2 shadow-md gap-y-4 mx-2 z-0">
+                <div className="flex w-full justify-center">
+                    <div className="z-0 m-2 flex h-auto flex-col gap-y-4 rounded-lg bg-black-pearl-dark p-4 shadow-md">
                         {/* User is not authenticated and needs to login */}
                         <Stage
                             stageName="unauthenticated"

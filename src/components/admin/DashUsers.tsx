@@ -188,7 +188,7 @@ export default function DashUsers() {
             {selectedEntry ? (
                 <div className="rounded-lg bg-white p-4 shadow-sm md:p-6 lg:col-span-2">
                     <div className="space-y-2 md:space-y-4">
-                        <h2 className="text-lg md:text-xl font-semibold text-black-pearl-dark">Member Details</h2>
+                        <h2 className="text-lg font-semibold text-black-pearl-dark md:text-xl">Member Details</h2>
                         
                         <UserDetailRow label="Discord Username" value={selectedEntry.name} />
                         <UserDetailRow label="Nickname" value={selectedEntry.preferredName} />

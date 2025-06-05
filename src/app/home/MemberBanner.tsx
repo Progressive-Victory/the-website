@@ -262,7 +262,7 @@ export function MemberBanner() {
 
   return (
     <div className="w-full bg-white px-4 py-16 md:px-8 md:py-24">
-      <div className="mx-auto max-w-6xl flex flex-col gap-14">
+      <div className="mx-auto flex max-w-6xl flex-col gap-14">
         <h1 className="text-center text-4xl/[2.75rem] font-bold text-black-pearl-dark">
           Get Your Own Progressive Victory <br /><span className="text-valencia">Membership Card</span>
         </h1>
@@ -276,7 +276,7 @@ export function MemberBanner() {
             animate={visible ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, ease: 'easeOut' }}
           >
-            <div className="w-full max-w-[500px] min-[1020px]:mt-14 mb-8">
+            <div className="mb-8 w-full max-w-[500px] min-[1020px]:mt-14">
               <InteractiveThreeCard
                 frontImage="/images/membercard_front.png"
                 backImage="/images/membercard_back.png"
