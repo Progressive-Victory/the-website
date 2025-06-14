@@ -310,3 +310,4 @@ export default function Privacy() {
     </MainLayout>
   );
 }
+ 
