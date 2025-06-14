@@ -152,7 +152,7 @@ function BulletPoint({ title, description, sub, bullet, delay = 0 }: BulletPoint
       initial={{ y: 50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, delay, ease: 'backInOut' }}
-      className="flex w-full items-start gap-5 bg-white rounded-xl shadow-lg p-5"
+      className="flex w-full items-start gap-5 rounded-xl bg-white p-5 shadow-lg"
     >
       <Image
         className="mt-[3.5px]"
@@ -300,7 +300,7 @@ export function MemberBanner() {
               >
                 <Link
                   href="https://secure.actblue.com/donate/pvmember"
-                  className="bg-valencia hover:bg-valencia-dark transition-colors"
+                  className="hover:bg-valencia-dark bg-valencia transition-colors"
                 >
                   Become a Member
                 </Link>

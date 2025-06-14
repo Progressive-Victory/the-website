@@ -81,7 +81,7 @@ export function Header() {
                     {!session ? (
                         <Link
                             href="/login"
-                            className="hidden bg-steel-blue xl:block"
+                            className="hidden text-nowrap bg-steel-blue xl:block"
                         >
                             Log In
                         </Link>
