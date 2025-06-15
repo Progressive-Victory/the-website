@@ -149,8 +149,8 @@ type BulletPointProps = BulletPointItem & { delay?: number }
 function BulletPoint({ title, description, sub, bullet, delay = 0 }: BulletPointProps) {
   return (
     <motion.div
-      initial={{ y: 50, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
+      initial={{ x: -100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.8, delay, ease: 'backInOut' }}
       className="flex w-full items-start gap-5 rounded-xl bg-white p-5 shadow-lg"
     >
@@ -211,7 +211,7 @@ const useInView = (): UseInViewReturn => {
     if (typeof window !== 'undefined') {
       observerRef.current = new IntersectionObserver(([entry]) => {
         setInView(!!entry?.isIntersecting);
-      }, { threshold: 0.1 });
+      });
     }
 
     return () => observerRef.current?.disconnect();
@@ -261,21 +261,11 @@ export function MemberBanner() {
   }, [inView]);
 
   return (
-    <div className="relative w-full bg-black-pearl-light px-4 py-16 md:px-8 md:py-24">
-      {/* Halftone background pattern */}
-      <div className="halftone absolute left-0 top-0 size-full opacity-10" />
-      
-      <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-14">
-        <motion.h1 
-          className="text-center text-4xl/[2.75rem] font-bold text-white"
-          initial={{ opacity: 0, y: 20 }}
-          animate={visible ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-        >
-          Get Your Own Progressive Victory <br />
-          <span className="text-valencia">Membership Card</span>
-        </motion.h1>
-        
+    <div className="w-full bg-white px-4 py-16 md:px-8 md:py-24">
+      <div className="mx-auto flex max-w-6xl flex-col gap-14">
+        <h1 className="text-center text-4xl/[2.75rem] font-bold text-black-pearl-dark">
+          Get Your Own Progressive Victory <br /><span className="text-valencia">Membership Card</span>
+        </h1>
         <div
           ref={containerRef}
           className="flex flex-col gap-8 md:gap-12 min-[1020px]:flex-row-reverse"
@@ -284,7 +274,7 @@ export function MemberBanner() {
             className="mx-auto flex w-full max-w-[500px] justify-center min-[1020px]:w-[55%] min-[1020px]:max-w-none"
             initial={{ opacity: 0, y: 50 }}
             animate={visible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
           >
             <div className="mb-8 w-full max-w-[500px] min-[1020px]:mt-14">
               <InteractiveThreeCard
@@ -292,19 +282,14 @@ export function MemberBanner() {
                 backImage="/images/membercard_back.png"
               />
 
-              <motion.div 
-                className="mt-10 flex justify-center"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={visible ? { opacity: 1, scale: 1 } : {}}
-                transition={{ delay: 0.6, type: 'spring' }}
-              >
+              <div className="mt-10 flex justify-center">
                 <Link
                   href="https://secure.actblue.com/donate/pvmember"
                   className="hover:bg-valencia-dark bg-valencia transition-colors"
                 >
                   Become a Member
                 </Link>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
 
@@ -313,7 +298,7 @@ export function MemberBanner() {
             initial="hidden"
             animate={visible ? "visible" : "hidden"}
           >
-            <div className="flex flex-col gap-6 overflow-hidden">
+            <div className="overflow-hidden">
               {visible && bulletPoints.map((point, index) => (
                 <BulletPoint
                   key={point.title}
