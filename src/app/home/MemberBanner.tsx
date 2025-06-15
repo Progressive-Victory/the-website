@@ -17,7 +17,7 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
     width: 0,
     height: 0,
   })
-
+ 
   const tiltX = useSpring(0, { stiffness: 500, damping: 300 })
   const tiltY = useSpring(0, { stiffness: 500, damping: 300 })
 
