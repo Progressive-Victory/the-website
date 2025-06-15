@@ -17,7 +17,7 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
     width: 0,
     height: 0,
   })
-
+ 
   const tiltX = useSpring(0, { stiffness: 500, damping: 300 })
   const tiltY = useSpring(0, { stiffness: 500, damping: 300 })
 
@@ -152,7 +152,7 @@ function BulletPoint({ title, description, sub, bullet, delay = 0 }: BulletPoint
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.8, delay, ease: 'backInOut' }}
-      className="mb-6 flex w-full items-start gap-5"
+      className="flex w-full items-start gap-5 rounded-xl bg-white p-5 shadow-lg"
     >
       <Image
         className="mt-[3.5px]"
@@ -285,7 +285,7 @@ export function MemberBanner() {
               <div className="mt-10 flex justify-center">
                 <Link
                   href="https://secure.actblue.com/donate/pvmember"
-                  className="bg-valencia"
+                  className="hover:bg-valencia-dark bg-valencia transition-colors"
                 >
                   Become a Member
                 </Link>
