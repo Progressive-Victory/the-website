@@ -17,7 +17,7 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
     width: 0,
     height: 0,
   })
- 
+
   const tiltX = useSpring(0, { stiffness: 500, damping: 300 })
   const tiltY = useSpring(0, { stiffness: 500, damping: 300 })
 
@@ -152,7 +152,8 @@ function BulletPoint({ title, description, sub, bullet, delay = 0 }: BulletPoint
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.8, delay, ease: 'backInOut' }}
-      className="flex w-full items-start gap-5 rounded-xl bg-white p-5 shadow-lg"
+      className="mb-6 flex w-full items-start gap-5"
+    // className="flex w-full items-start gap-5 rounded-xl bg-white p-5 shadow-lg"
     >
       <Image
         className="mt-[3.5px]"
