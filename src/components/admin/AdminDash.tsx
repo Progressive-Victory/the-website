@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from "react"
-import { MainLayout } from "../MainLayout"
+import { MainLayout } from "../layout/MainLayout"
 import { DashPages, DashPermissions, DashRoles} from "../admin"
-import DetailRow from "./DetailRow"
 import DashBrowser from "./DashBrowser"
+import { IUser } from "@/models/User"
 
 export default function AdminDash() {
     enum Section {
@@ -30,7 +30,13 @@ export default function AdminDash() {
                 return <DashRoles />
             case Section.Members:
                 return (
-                    <DashBrowser apiStr="/api/admin/user" title="User" displayKey="name" />
+                    <DashBrowser<IUser> apiStr="/api/admin/user" title="User" displayKey="name" deps={
+                        {roles: {
+                            apiUri: "/api/admin/role",
+                            dKey: "name"
+                          },
+                        }
+                    } />
                 )
         }
     }

@@ -1,21 +1,33 @@
 'use client'
 
-import { useState, useEffect, cloneElement } from "react"
-import { Document } from "mongoose"
-import { ToolTip } from "../ToolTip"
-import { Popup } from "../Popup"
+import { useState, useEffect, ChangeEvent} from "react"
+import { Document} from "mongoose"
+import { ToolTip } from "../common/ToolTip"
+import { Popup } from "../common/Popup"
 import { FormEvent } from "react"
-import DetailRow, { IDetailProps } from "./DetailRow"
 
+/*
+// This is the polymorphic form of the admin panel. 
+// T - generic type for whatever type of data it is displaying
+// apiStr - string giving the relative uri of the api route required to fetch and save data
+// title - the string that should be displayed at the top of the panel
+// displayKey - the string that will return the field you want the data to use as an identifier
+// deps - a record listing all fields holding child mongo entries by key and providing their api route uris
+*/
 export default function DashBrowser<T extends Document>(
     {
         apiStr,
         title,
-        displayKey
+        displayKey,
+        deps
     } : {
         apiStr: string,
         title: string,
         displayKey: string,
+        deps: Record<string, {
+          apiUri: string,
+          dKey: string
+        }> //dependency type, apiUri, display key
     }
 ){
     const [sectionData, setSectionData] = useState<T[]>([])
@@ -26,6 +38,7 @@ export default function DashBrowser<T extends Document>(
     const [, setLoading] = useState(true)
     const [, setError] = useState<string | null>(null)
 
+    //retrieve data for the browser section
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -35,8 +48,10 @@ export default function DashBrowser<T extends Document>(
                 if (!res.ok) throw new Error("Failed to fetch data.")
 
                 const data = await res.json()
+                console.log(data)
 
                 setSectionData(data)
+
             } catch(err) {
                 setError(err instanceof Error ? err.message : "Failed to fetch data.")
             } finally {
@@ -46,22 +61,150 @@ export default function DashBrowser<T extends Document>(
         fetchData()
     }, [refresh])
 
+    //set the detail viewer to blank if its selected entry no longer exists in section data
     useEffect(() => {
         if (selectedEntry && !sectionData.find(x => x._id === selectedEntry._id)) {
             setSelectedEntry(null)
         }
     }, [sectionData, selectedEntry])
 
-    const serveField = (key: string) => {
-        
-    }
-
+    //handle the creation of a new entry
     const handleCreateT = async (pk: string) => {
         console.log(`creating: ${pk}`)
     }
 
+    // handle the deletion of an entry
     const handleDeleteT = async (pk: string) => {
+        const tgt = sectionData.find(x => x[displayKey as keyof T] == pk)
         console.log(`deleting: ${pk}`)
+        try {
+          const res = await fetch(apiStr, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(tgt)
+          })
+          if(!res.ok) throw new Error("Data failed to delete!")
+          setRefresh(!refresh)
+        } catch(err) {
+          console.error(err)
+        }
+    }
+
+    //handle modifying a field on selectedEntry
+    const handleModifyT = (ev: ChangeEvent<HTMLInputElement>) => {
+      console.log(ev.target.value)
+      if(!selectedEntry) return
+      selectedEntry[ev.target.name as keyof T] = ev.target.value as any
+    }
+
+    //handle modifying an array field on selectedEntry
+    const handleModifyTArr = (key: string, arr: object[]) => {
+      if(!selectedEntry) return
+      selectedEntry[key as keyof T] = arr as any
+    }
+
+    //handle saving changes to selectedEntry
+    const handleSaveT = async () => {
+      console.log("Saving")
+      try {
+        const res = await fetch(apiStr, {
+          method: "PATCH",
+          body: JSON.stringify([selectedEntry]),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+        if(!res.ok) throw new Error("Data failed to save!")
+        setRefresh(!refresh)
+      } catch(err) {
+        console.error(err)
+      }
+    }
+
+    //component for each field
+    const Field = ({fKey} : {fKey : string}) => {
+      if(!selectedEntry) return
+      const rawData = selectedEntry[fKey as keyof T]
+      if(Array.isArray(rawData)){
+          const [data, setData] = useState<object[]>(rawData)
+          const rec = deps[fKey]
+          const uri = rec.apiUri
+          const _key = rec.dKey
+
+          const [fDeps, setFDeps] = useState<object[]>([])
+
+          const addItem = (name: string) => {
+            console.log("adding")
+            const tgt = fDeps.find(x => x[_key as keyof object] == name)
+            if(tgt && !data.find(x => x[_key as keyof object] == name)){
+              setData([...data, tgt])
+              handleModifyTArr(fKey, data)
+            } 
+          }
+
+          const removeItem = (name: string) => {
+            console.log("Removing")
+            const index = data.findIndex(x => x[_key as keyof object] == name)
+            if(index >= 0) {
+              data.splice(index, 1)
+              setData([...data])
+            }
+          }
+
+          useEffect(() => {
+            const getDeps = async () => {
+              const res = await fetch(uri)
+              setFDeps(await res.json())
+            }
+            getDeps()
+          }, [])
+
+        return(
+          <div className={`grid grid-cols-3 py-1 border-b`}>
+            <label htmlFor={`${fKey}`}>{fKey}</label>
+            <div className="group col-span-2 flex flex-row relative">
+              {data.length > 0 ? data.map(item => (
+                <div key={item[_key as keyof object]} className="bg-gray-200 rounded px-1 flex gap-1">
+                  <span>{item[_key as keyof object] as string}</span>
+                  <button className="rounded hover:bg-gray-300 hover:text-white px-1" onClick={() => {removeItem(item[_key as keyof object])}}>x</button>
+                </div>
+              )) : <span>None</span>}
+              <select
+                className="group-hover:block hidden absolute right-0 top-0 px-1 rounded bg-gray-200 w-[30px] hover:bg-gray-300"
+                value=""
+                onChange={(ev) => {
+                  console.log("press")
+                  addItem(ev.target.value)}}
+              >
+                <option value="">+</option>
+                {fDeps.map((dep) => (
+                  <option key={dep[_key as keyof object]} value={dep[_key as keyof object]}>{dep[_key as keyof object]}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )
+      } else {
+        const [val, setVal] = useState<string>(rawData as string)
+        return (
+          <div key={fKey} className="grid grid-cols-3 py-1 border-b">
+            <label htmlFor={fKey}>{fKey}</label>
+            <input 
+              name={fKey}
+              id={fKey}
+              value={val}
+              className="col-span-2"
+              onChange={(ev) => {
+                ev.preventDefault()
+                handleModifyT(ev)
+                setVal(ev.target.value)
+              }}
+            />
+          </div>
+        )
+      }
     }
 
     return (
@@ -141,13 +284,11 @@ export default function DashBrowser<T extends Document>(
                 <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6">
                     <div className="space-y-2 md:space-y-4">
                         <h2 className="text-lg md:text-xl font-semibold text-black-pearl-dark">{`${title} Details`}</h2>
-                        <form>
+                        <form action={handleSaveT}>
                             {Object.keys(selectedEntry).map(key => (
-                                <div key={key}>
-                                    <p>{key as string}</p>
-                                    <p>{selectedEntry[key as keyof T] as string}</p>
-                                </div>
+                                <Field key={key} fKey={key}/>
                             ))} 
+                            <input type="submit" value="Save"/>
                         </form>
                     </div>
                 </div>

@@ -31,7 +31,6 @@ export async function GET() {
                     path: 'permissions'
                 }
             }).exec()
-
     //return list
     return NextResponse.json(data)
 }
