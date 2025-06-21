@@ -1,20 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+ 
 import { BlogCard, BlogHeader, getPosts } from '@/app/blog'
+import { Post, PostData} from './util'
 import { MainLayout } from '@/components/layout'
 
-interface Post {
-    node: {
-        id: string
-        date: string
-        title: string
-        excerpt: string
-        content: string
-    }
-}
+
 
 export default async function Home() {
-    const data = await getPosts()
-    const posts = data.data.posts.edges
+    const data: PostData = await getPosts()
+    const posts: Post[] = data.data.posts.edges
 
     return (
         <MainLayout>
