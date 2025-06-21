@@ -6,6 +6,12 @@ import { ToolTip } from "../common/ToolTip"
 import { Popup } from "../common/Popup"
 import { FormEvent } from "react"
 
+export interface IDashBrowserPerms {
+  add: boolean
+  delete: boolean
+  editWhiteList: Record<string, boolean>
+}
+
 /*
 // This is the polymorphic form of the admin panel. 
 // T - generic type for whatever type of data it is displaying
@@ -19,7 +25,8 @@ export default function DashBrowser<T extends Document>(
         apiStr,
         title,
         displayKey,
-        deps
+        deps,
+        perms
     } : {
         apiStr: string,
         title: string,
@@ -27,7 +34,8 @@ export default function DashBrowser<T extends Document>(
         deps: Record<string, {
           apiUri: string,
           dKey: string
-        }> //dependency type, apiUri, display key
+        }>, //dependency type, apiUri, display key
+        perms: IDashBrowserPerms
     }
 ){
     const [sectionData, setSectionData] = useState<T[]>([])
@@ -191,17 +199,21 @@ export default function DashBrowser<T extends Document>(
         return (
           <div key={fKey} className="grid grid-cols-3 py-1 border-b">
             <label htmlFor={fKey}>{fKey}</label>
-            <input 
-              name={fKey}
-              id={fKey}
-              value={val}
-              className="col-span-2"
-              onChange={(ev) => {
-                ev.preventDefault()
-                handleModifyT(ev)
-                setVal(ev.target.value)
-              }}
-            />
+            {perms.editWhiteList[fKey] ? (
+              <input 
+                name={fKey}
+                id={fKey}
+                value={val}
+                className="col-span-2"
+                onChange={(ev) => {
+                  ev.preventDefault()
+                  handleModifyT(ev)
+                  setVal(ev.target.value)
+                }}
+              />) : (
+                <span>{val}</span>
+              )
+            }
           </div>
         )
       }
