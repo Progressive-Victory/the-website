@@ -3,7 +3,7 @@ import { User, IUser } from "@/models/User"
 import { checkAuth, checkAuthPermissions, PermissionName, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     // check session auth
     const response = await checkAuthPermissions([PermissionName.VIEW_MEMBER_DATA])
 
@@ -21,10 +21,16 @@ export async function GET() {
             throw Error("Unidentified response code.")
     }
 
+    //parse out query params
+    const [pageNumber, entriesPerPage] = req.url.split('?')[1].split('&').map((val) => {return Number.parseInt(val.split('=')[1])})
+    const skip = pageNumber * entriesPerPage
+
     await dbConnect()
 
-    //grab list of all users
+    //grab list of requested users
     const data = await User.find()
+            .skip(skip)
+            .limit(entriesPerPage)
             .populate({
                 path: 'roles',
                 populate: {

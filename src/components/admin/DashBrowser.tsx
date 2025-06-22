@@ -5,7 +5,9 @@ import { Document} from "mongoose"
 import { ToolTip } from "../common/ToolTip"
 import { Popup } from "../common/Popup"
 import { FormEvent } from "react"
+import { useSearchParams } from "next/navigation"
 
+//interface to define a dashbrowsers permissions statically
 export interface IDashBrowserPerms {
   add: boolean
   delete: boolean
@@ -41,33 +43,40 @@ export default function DashBrowser<T extends Document>(
     const [sectionData, setSectionData] = useState<T[]>([])
     const [selectedEntry, setSelectedEntry] = useState<T | null>(null)
     const [pageNumber, setPageNumber] = useState<number>(1)
-    const [entriesPerPage, setEntriesPerPage] = useState<number>(15)
+    const [entriesPerPage, setEntriesPerPage] = useState<number>(5)
     const [refresh, setRefresh] = useState<boolean>(false)
     const [, setLoading] = useState(true)
     const [, setError] = useState<string | null>(null)
+    const [numPages, setNumPages] = useState<number>(0)
 
     //retrieve data for the browser section
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true)
-                const res = await fetch(apiStr)
+                const res = await fetch(`${apiStr}/?pageNumber=${pageNumber}&entriesPerPage=${entriesPerPage}`)
+                const count = await fetch(`${apiStr}/count`)
 
-                if (!res.ok) throw new Error("Failed to fetch data.")
+
+                if (!res.ok || !count.ok) throw new Error("Failed to fetch data.")
 
                 const data = await res.json()
+                const countNum: number = await count.json()
                 console.log(data)
 
                 setSectionData(data)
+                setNumPages(Math.ceil(countNum/entriesPerPage))
 
             } catch(err) {
                 setError(err instanceof Error ? err.message : "Failed to fetch data.")
+                console.error(err)
             } finally {
                 setLoading(false)
+                console.log("Done loading")
             }
         }
         fetchData()
-    }, [refresh])
+    }, [refresh, entriesPerPage, pageNumber])
 
     //set the detail viewer to blank if its selected entry no longer exists in section data
     useEffect(() => {
@@ -134,15 +143,19 @@ export default function DashBrowser<T extends Document>(
     //component for each field
     const Field = ({fKey} : {fKey : string}) => {
       if(!selectedEntry) return
+      //get the field data from selected entry
       const rawData = selectedEntry[fKey as keyof T]
+      //test if field is an array; if yes: return array field component; if no: return normal field component
       if(Array.isArray(rawData)){
+          //list of array field entries
           const [data, setData] = useState<object[]>(rawData)
           const rec = deps[fKey]
           const uri = rec.apiUri
           const _key = rec.dKey
-
+          //list of field dependencies
           const [fDeps, setFDeps] = useState<object[]>([])
 
+          //handle adding item to array field
           const addItem = (name: string) => {
             console.log("adding")
             const tgt = fDeps.find(x => x[_key as keyof object] == name)
@@ -152,6 +165,7 @@ export default function DashBrowser<T extends Document>(
             } 
           }
 
+          //handle removing item from array field
           const removeItem = (name: string) => {
             console.log("Removing")
             const index = data.findIndex(x => x[_key as keyof object] == name)
@@ -161,6 +175,7 @@ export default function DashBrowser<T extends Document>(
             }
           }
 
+          //retrieve dependency objects from api
           useEffect(() => {
             const getDeps = async () => {
               const res = await fetch(uri)
@@ -211,7 +226,9 @@ export default function DashBrowser<T extends Document>(
                   setVal(ev.target.value)
                 }}
               />) : (
-                <span>{val}</span>
+                <div className="col-span-2 break-all">
+                  <span>{val}</span>
+                </div>
               )
             }
           </div>
@@ -289,6 +306,15 @@ export default function DashBrowser<T extends Document>(
                             </form>
                         </div>
                     </Popup>
+                    <div>
+                      {[...Array(numPages).keys()].map((item: number) => (
+                        <a 
+                          key={item}
+                          className={`${pageNumber == item ? "text-blue-800 bg-gray-300" : "text-blue-700 hover:bg-gray-200"} px-1 cursor-pointer`}
+                          onClick={() => {setPageNumber(item)}}
+                        >{item + 1}</a>
+                      ))}
+                    </div>
                 </div>
             </div>
             {/* Detail Viewer */}
