@@ -1,33 +1,32 @@
- 
+
 import { BlogCard, BlogHeader, getPosts } from '@/app/blog'
-import { Post, PostData} from './util'
+import { Post, PostData } from './util'
 import { MainLayout } from '@/components/layout'
 
 
 
 export default async function Home() {
-    const data: PostData = await getPosts()
-    const posts: Post[] = data.data.posts.edges
+  const data: PostData = await getPosts()
+  const posts: Post[] = data.data.posts.edges
 
-    return (
-        <MainLayout>
-            <BlogHeader />
-            <div className="bg-[#D4E6F5] p-10">
-                <h2 className="p-10 text-center text-4xl font-bold">Posts</h2>
-                <h2 className="p-10 text-center text-4xl font-bold">Posts</h2>
-                <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-                    {posts.map((post: Post) => (
-                        <BlogCard
-                            key={post.node.id}
-                            id={post.node.id}
-                            title={post.node.title}
-                            description={post.node.excerpt}
-                            date={post.node.date}
-                            image="/images/protestors-ukraine.jpg"
-                        />
-                    ))}
-                </div>
-            </div>
-        </MainLayout>
-    )
+  return (
+    <MainLayout>
+      <BlogHeader />
+      <div className="bg-[#D4E6F5] p-10">
+        <h2 className="p-10 text-center text-4xl font-bold">Posts</h2>
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post: Post) => (
+            <BlogCard
+              key={post.node.id}
+              id={post.node.id}
+              title={post.node.title}
+              description={post.node.excerpt}
+              date={post.node.date}
+              image="/images/protestors-ukraine.jpg"
+            />
+          ))}
+        </div>
+      </div>
+    </MainLayout>
+  )
 }
