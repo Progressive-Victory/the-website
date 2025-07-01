@@ -21,6 +21,9 @@ export interface IDashBrowserPerms {
 // title - the string that should be displayed at the top of the panel
 // displayKey - the string that will return the field you want the data to use as an identifier
 // deps - a record listing all fields holding child mongo entries by key and providing their api route uris
+// all api routes that load into sectionData need a count subroute that returns the number of documents in the collection
+// theres a bug with the delete function
+// theres a bug with searching for results that dont exist and non primitive fields (fuck me side ways)
 */
 export default function DashBrowser<T extends Document>(
     {
@@ -42,20 +45,21 @@ export default function DashBrowser<T extends Document>(
 ){
     const [sectionData, setSectionData] = useState<T[]>([])
     const [selectedEntry, setSelectedEntry] = useState<T | null>(null)
-    const [pageNumber, setPageNumber] = useState<number>(1)
-    const [entriesPerPage, setEntriesPerPage] = useState<number>(5)
+    const [pageNumber, setPageNumber] = useState<number>(0)
+    const [entriesPerPage, setEntriesPerPage] = useState<number>(10)
     const [refresh, setRefresh] = useState<boolean>(false)
     const [, setLoading] = useState(true)
     const [, setError] = useState<string | null>(null)
     const [numPages, setNumPages] = useState<number>(0)
+    const [query, setQuery] = useState<string>("")
 
     //retrieve data for the browser section
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true)
-                const res = await fetch(`${apiStr}/?pageNumber=${pageNumber}&entriesPerPage=${entriesPerPage}`)
-                const count = await fetch(`${apiStr}/count`)
+                const res = await fetch(`${apiStr}/?pageNumber=${pageNumber}&entriesPerPage=${entriesPerPage}&query=${query}`)
+                const count = await fetch(`${apiStr}/count/?query=${query}`)
 
 
                 if (!res.ok || !count.ok) throw new Error("Failed to fetch data.")
@@ -76,7 +80,7 @@ export default function DashBrowser<T extends Document>(
             }
         }
         fetchData()
-    }, [refresh, entriesPerPage, pageNumber])
+    }, [refresh, entriesPerPage, pageNumber, query])
 
     //set the detail viewer to blank if its selected entry no longer exists in section data
     useEffect(() => {
@@ -140,7 +144,16 @@ export default function DashBrowser<T extends Document>(
       }
     }
 
+    //search handling function
+    const handleSearchT = (fd: FormData) => {
+      const search = fd.get("search")?.toString()
+      const filter = fd.get("filter")?.toString()
+      if(!search) setQuery("")
+      else setQuery(`${search}`)
+    }
+
     //component for each field
+    //I think this is lacking handling for cases where dependency fields arent arrays or arrays have primitives
     const Field = ({fKey} : {fKey : string}) => {
       if(!selectedEntry) return
       //get the field data from selected entry
@@ -241,8 +254,27 @@ export default function DashBrowser<T extends Document>(
             {/* Browser Section */}
             <div className="flex flex-col lg:col-span-1 bg-white rounded-lg shadow-sm p-3 md:p-4">
                 <div className="grow">
+                    {/*Title*/}
                     <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">{`${title}s`}</h2>
+                    {/*Search Bar*/}
+                    <form action={(fd: FormData) => {handleSearchT(fd)}}>
+                      <label htmlFor="search">Search</label>
+                      <input name="search" id="search"></input>
+                      <select
+                        name="filter"
+                        id="filter"
+                      >
+                        <option value="">filter</option>
+                        {sectionData[0] ?
+                        Object.keys(sectionData[0]).map((key) => (
+                          <option value={key}>{key}</option>
+                        )) : 
+                          <></>
+                        }
+                      </select>
+                    </form>
                     <ul className="space-y-1 md:space-y-2">
+                        {/*Item Selection*/}
                         {sectionData.map((entry: T) => (
                             <li
                                 key={entry._id as string}
@@ -254,6 +286,7 @@ export default function DashBrowser<T extends Document>(
                             >
                                 <div className="font-medium relative">
                                     {(entry[displayKey as keyof T]) as string}
+                                    {/*Delete Item Button*/}
                                     <ToolTip
                                         label="..."
                                         triggerClasses="float-right hover:bg-blue-500 px-2 rounded"
@@ -277,6 +310,7 @@ export default function DashBrowser<T extends Document>(
                     </ul>
                 </div>
                 <div>
+                    {/*Add Item Button*/}
                     <Popup
                         label={`Add ${title}`}
                         triggerClasses="w-full rounded bg-blue-600 hover:bg-blue-700 text-white transition-colors text-sm py-2"
@@ -306,6 +340,7 @@ export default function DashBrowser<T extends Document>(
                             </form>
                         </div>
                     </Popup>
+                    {/*Pagination*/}
                     <div>
                       {[...Array(numPages).keys()].map((item: number) => (
                         <a 

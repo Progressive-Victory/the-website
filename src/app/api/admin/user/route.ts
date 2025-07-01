@@ -2,6 +2,8 @@ import dbConnect from "@/util/libmongo";
 import { User, IUser } from "@/models/User"
 import { checkAuth, checkAuthPermissions, PermissionName, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
+import { Query } from "mongoose";
+import { URLWrapper } from "@/util/url-wrapper";
 
 export async function GET(req: NextRequest) {
     // check session auth
@@ -22,21 +24,53 @@ export async function GET(req: NextRequest) {
     }
 
     //parse out query params
-    const [pageNumber, entriesPerPage] = req.url.split('?')[1].split('&').map((val) => {return Number.parseInt(val.split('=')[1])})
+    const url = new URLWrapper(req.url)
+    const query: string | undefined = url.getParam("query")
+    const pageNumberStr = url.getParam("pageNumber")
+    const entriesPerPageStr = url.getParam("entriesPerPage")
+    const keyVals: Map<string, string> = new Map<string, string>()
+    if(query){
+      try {
+        const queryArgs: string[] = query.split(' ')
+        queryArgs.map((str) => {
+          const pair: string[] = str.split(':')
+          keyVals.set(pair[0], pair[1])
+          console.log(keyVals.get('name'))
+        })
+      } catch(err) {
+        console.error(err)
+      }
+    }
+    console.log(query)
+    if(!pageNumberStr || !entriesPerPageStr) throw new Error("pageNumber or entriesPerPage are undefiend")
+    const pageNumber = Number.parseInt(pageNumberStr)
+    const entriesPerPage = Number.parseInt(entriesPerPageStr)
     const skip = pageNumber * entriesPerPage
 
+    const specialFields = [
+      "roles"
+    ]
     await dbConnect()
 
     //grab list of requested users
-    const data = await User.find()
-            .skip(skip)
-            .limit(entriesPerPage)
-            .populate({
+    let mongoQuery: Query<any, any> = User.find().populate({
                 path: 'roles',
                 populate: {
                     path: 'permissions'
                 }
-            }).exec()
+            })
+    if(query && query != ""){
+      keyVals.forEach((value: string, key: string) => {
+        if(specialFields.find(x => key === x)) {
+          //mongoQuery = mongoQuery.where(value).in(`${key}.name`)
+        } else {
+          mongoQuery = mongoQuery.where(key).equals(value)
+        }
+      })
+    }
+    const data = await mongoQuery.skip(skip)
+            .limit(entriesPerPage)
+            .exec()
     //return list
     return NextResponse.json(data)
 }
@@ -88,6 +122,7 @@ export async function PATCH(req: NextRequest) {
             const key = k as keyof IUser
 
             // list of fields allowed to be changed
+            // needs to be fixed, lets everything through
             const allowed = [
                 'roles'
             ]

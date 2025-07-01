@@ -1,7 +1,9 @@
 import dbConnect from "@/util/libmongo";
-import { User, IUser } from "@/models/User"
-import { checkAuth, checkAuthPermissions, PermissionName, ResponseCode } from "@/util/auth";
+import { User} from "@/models/User"
+import { checkAuthPermissions, PermissionName, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
+import { URLWrapper } from "@/util/url-wrapper";
+import { Query } from "mongoose";
 
 export async function GET(req: NextRequest) {
       // check session auth
@@ -21,9 +23,36 @@ export async function GET(req: NextRequest) {
             throw Error("Unidentified response code.")
     }
 
-    await dbConnect()
+    //parse out query params
+    const url = new URLWrapper(req.url)
+    const query: string | undefined = url.getParam("query")
+    console.log(query)
+    const keyVals: Map<string, string> = new Map<string, string>()
+    let count: number
+    if(query){
+      try {
+        const queryArgs: string[] = query.split(',')
+        queryArgs.map((str) => {
+          const pair: string[] = str.split('%3A')
+          keyVals.set(pair[0], pair[1])
+          console.log(keyVals.get('name'))
+        })
+      } catch(err) {
+        console.error(err)
+      }
 
-    const data = await User.countDocuments({}).exec()
+      await dbConnect()
+      
+      let data: Query<any, any> = User.find()
+      keyVals.forEach((value: string, key: string) => {
+        data = data.where(key).equals(value)
+      })
 
-    return NextResponse.json(data)
+      count = await data.countDocuments()
+    } else {
+      await dbConnect()
+      count = await User.countDocuments()
+    }
+
+    return NextResponse.json(count)
 }
