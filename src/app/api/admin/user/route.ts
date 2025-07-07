@@ -2,8 +2,51 @@ import dbConnect from "@/util/libmongo";
 import { User, IUser } from "@/models/User"
 import { checkAuth, checkAuthPermissions, PermissionName, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { Query } from "mongoose";
+import { Aggregate, Query } from "mongoose";
 import { URLWrapper } from "@/util/url-wrapper";
+import { FieldCase } from "@/util/field-case"
+
+async function getFieldCase(name: string): Promise<FieldCase> {
+  await dbConnect()
+
+  //instantiate output
+  let out: FieldCase = FieldCase.PrimitiveSinglet
+
+  //test if type is an array or a singlet
+  const myType = (await User.aggregate(
+  [
+    { "$project": { "fieldType": { "$type": `$${name}`} } }
+  ]
+  ).sample(1).exec())[0]
+
+  console.log(myType)
+
+  if (myType.fieldType == "array") {
+    //the field must atleast be a primitive array
+    out = FieldCase.PrimitiveArray
+
+    //test if field is a complex array
+    const _type = (await User.aggregate([
+      { $unwind: { path: `$${name}` } },
+      { $project: { 
+        "fieldType": { $type: `$${name}` }
+      } }
+    ]).sample(1).exec())[0]
+    console.log(_type)
+
+    //set output based on test
+    if (_type == 'objectId') {
+      out = FieldCase.ComplexArray
+    }
+  } else {
+    //test if field is a complex singlet
+    if(myType == 'objectId') {
+      out = FieldCase.ComplexSinglet
+    }
+  }
+
+  return out
+}
 
 export async function GET(req: NextRequest) {
     // check session auth
@@ -35,7 +78,6 @@ export async function GET(req: NextRequest) {
         queryArgs.map((str) => {
           const pair: string[] = str.split(':')
           keyVals.set(pair[0], pair[1])
-          console.log(keyVals.get('name'))
         })
       } catch(err) {
         console.error(err)
@@ -47,28 +89,47 @@ export async function GET(req: NextRequest) {
     const entriesPerPage = Number.parseInt(entriesPerPageStr)
     const skip = pageNumber * entriesPerPage
 
-    const specialFields = [
-      "roles"
-    ]
-    await dbConnect()
+    await dbConnect()   
+
+    //test query ///////////////////////////
+    const test: IUser[] = await User.aggregate([
+      {
+        $lookup: { from: 'roles', localField: 'roles', foreignField: '_id', as: 'roles' },
+      },
+      {
+        $match: { "roles.name": 'Superadmin' }
+      }
+    ]).exec()
+    console.log(`test: ${test.map((obj) => {return JSON.stringify(obj)})}`)
+    ////////////////////////////////////
 
     //grab list of requested users
-    let mongoQuery: Query<any, any> = User.find().populate({
-                path: 'roles',
-                populate: {
-                    path: 'permissions'
-                }
-            })
+    let mongoAggregate: Aggregate<any> = User.aggregate([
+      {
+        $lookup: { from: 'roles', localField: 'roles', foreignField: '_id', as: 'roles' },
+      },
+    ])
     if(query && query != ""){
-      keyVals.forEach((value: string, key: string) => {
-        if(specialFields.find(x => key === x)) {
-          //mongoQuery = mongoQuery.where(value).in(`${key}.name`)
-        } else {
-          mongoQuery = mongoQuery.where(key).equals(value)
-        }
+      keyVals.forEach(async (value: string, key: string) => {
+        mongoAggregate.match({ [key] : value })
+        /*const _type: FieldCase = await getFieldCase(key)
+        console.log(_type)
+        switch (_type) {
+          case FieldCase.PrimitiveSinglet:
+            mongoAggregate.match({})
+            break
+          case FieldCase.PrimitiveArray:
+            break
+          case FieldCase.ComplexSinglet:
+            break
+          case FieldCase.ComplexArray:
+            break
+          default:
+            throw new Error("unrecognized field case!")
+        }*/
       })
     }
-    const data = await mongoQuery.skip(skip)
+    const data = await mongoAggregate.skip(skip)
             .limit(entriesPerPage)
             .exec()
     //return list

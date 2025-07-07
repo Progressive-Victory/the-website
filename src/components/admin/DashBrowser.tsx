@@ -149,7 +149,7 @@ export default function DashBrowser<T extends Document>(
       const search = fd.get("search")?.toString()
       const filter = fd.get("filter")?.toString()
       if(!search) setQuery("")
-      else setQuery(`${search}`)
+      else setQuery(`${filter}:${search}`)
     }
 
     //component for each field
@@ -266,9 +266,17 @@ export default function DashBrowser<T extends Document>(
                       >
                         <option value="">filter</option>
                         {sectionData[0] ?
-                        Object.keys(sectionData[0]).map((key) => (
-                          <option value={key}>{key}</option>
-                        )) : 
+                        Object.keys(sectionData[0]).map((key) => {
+                          if (deps[key]){
+                            return (
+                              <option value={`${key}.${deps[key].dKey}`}>{key}</option>
+                            )
+                          } else {
+                            return (
+                              <option value={key}>{key}</option>
+                            )
+                          }
+                        }) : 
                           <></>
                         }
                       </select>
