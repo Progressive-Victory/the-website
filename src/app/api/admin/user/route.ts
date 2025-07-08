@@ -44,7 +44,7 @@ function updateUserObj<Key extends keyof IUser>(key: Key, obj: IUser, value: IUs
 
 export async function PATCH(req: NextRequest) {
     //check session auth
-    const response = await checkAuth()
+    const response = await checkAuth(["Superadmin"])
 
     //handle checkAuth() response
     switch(response) {
