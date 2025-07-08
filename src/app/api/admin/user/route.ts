@@ -2,51 +2,8 @@ import dbConnect from "@/util/libmongo";
 import { User, IUser } from "@/models/User"
 import { checkAuth, checkAuthPermissions, PermissionName, ResponseCode } from "@/util/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { Aggregate, Query } from "mongoose";
+import { Aggregate } from "mongoose";
 import { URLWrapper } from "@/util/url-wrapper";
-import { FieldCase } from "@/util/field-case"
-
-async function getFieldCase(name: string): Promise<FieldCase> {
-  await dbConnect()
-
-  //instantiate output
-  let out: FieldCase = FieldCase.PrimitiveSinglet
-
-  //test if type is an array or a singlet
-  const myType = (await User.aggregate(
-  [
-    { "$project": { "fieldType": { "$type": `$${name}`} } }
-  ]
-  ).sample(1).exec())[0]
-
-  console.log(myType)
-
-  if (myType.fieldType == "array") {
-    //the field must atleast be a primitive array
-    out = FieldCase.PrimitiveArray
-
-    //test if field is a complex array
-    const _type = (await User.aggregate([
-      { $unwind: { path: `$${name}` } },
-      { $project: { 
-        "fieldType": { $type: `$${name}` }
-      } }
-    ]).sample(1).exec())[0]
-    console.log(_type)
-
-    //set output based on test
-    if (_type == 'objectId') {
-      out = FieldCase.ComplexArray
-    }
-  } else {
-    //test if field is a complex singlet
-    if(myType == 'objectId') {
-      out = FieldCase.ComplexSinglet
-    }
-  }
-
-  return out
-}
 
 export async function GET(req: NextRequest) {
     // check session auth
@@ -89,19 +46,7 @@ export async function GET(req: NextRequest) {
     const entriesPerPage = Number.parseInt(entriesPerPageStr)
     const skip = pageNumber * entriesPerPage
 
-    await dbConnect()   
-
-    //test query ///////////////////////////
-    const test: IUser[] = await User.aggregate([
-      {
-        $lookup: { from: 'roles', localField: 'roles', foreignField: '_id', as: 'roles' },
-      },
-      {
-        $match: { "roles.name": 'Superadmin' }
-      }
-    ]).exec()
-    console.log(`test: ${test.map((obj) => {return JSON.stringify(obj)})}`)
-    ////////////////////////////////////
+    await dbConnect()
 
     //grab list of requested users
     let mongoAggregate: Aggregate<any> = User.aggregate([
@@ -144,7 +89,7 @@ function updateUserObj<Key extends keyof IUser>(key: Key, obj: IUser, value: IUs
 
 export async function PATCH(req: NextRequest) {
     //check session auth
-    const response = await checkAuth()
+    const response = await checkAuth(["Superadmin"])
 
     //handle checkAuth() response
     switch(response) {
