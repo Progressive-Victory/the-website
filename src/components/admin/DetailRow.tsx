@@ -23,7 +23,7 @@ export default function DetailRow(
         <div className={`flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-4 py-2 ${doDiv ? "border-b" : ""}`}>
             <span className="font-medium text-gray-700 text-sm md:text-base">{label}</span>
             <span className="col-span-2 text-gray-600 text-sm md:text-base break-words">
-                {tgtValue || 'N/A'}
+                {tgtValue ?? 'N/A'}
             </span>
         </div>
     )

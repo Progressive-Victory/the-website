@@ -5,7 +5,6 @@ import { Document} from "mongoose"
 import { ToolTip } from "../common/ToolTip"
 import { Popup } from "../common/Popup"
 import { FormEvent } from "react"
-import { useSearchParams } from "next/navigation"
 
 //interface to define a dashbrowsers permissions statically
 export interface IDashBrowserPerms {
@@ -55,7 +54,7 @@ export default function DashBrowser<T extends Document>(
 
     //retrieve data for the browser section
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchData = async (): Promise<void> => {
             try {
                 setLoading(true)
                 const res = await fetch(`${apiStr}/?pageNumber=${pageNumber}&entriesPerPage=${entriesPerPage}&query=${query}`)
@@ -170,11 +169,11 @@ export default function DashBrowser<T extends Document>(
 
           //handle adding item to array field
           const addItem = (name: string) => {
-            console.log("adding")
-            const tgt = fDeps.find(x => x[_key as keyof object] == name)
-            if(tgt && !data.find(x => x[_key as keyof object] == name)){
-              setData([...data, tgt])
-              handleModifyTArr(fKey, data)
+            const tgt = fDeps.find(x => x[_key as keyof object] === name)
+            if(tgt && !data.find(x => x[_key as keyof object] === name)){
+              const arr: object[] = [...data, tgt]
+              setData(arr)
+              handleModifyTArr(fKey, arr)
             } 
           }
 
