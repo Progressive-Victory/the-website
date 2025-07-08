@@ -89,7 +89,10 @@ export default function Volunteer() {
                 // Not every response will have JSON but errors should
                 const data = await response.json()
                 // The discord code for bad oauth2 we pass back
-                if (data?.code && data.code === RESTJSONErrorCodes.InvalidOAuth2AccessToken) {
+                if (
+                    data?.code &&
+                    data.code === RESTJSONErrorCodes.InvalidOAuth2AccessToken
+                ) {
                     void signOut({
                         callbackUrl: '/login',
                     })
@@ -100,7 +103,7 @@ export default function Volunteer() {
 
     const getUser = async () => {
         const response = await fetch('/api/user')
-        const data = await response.json() as Partial<IUser>
+        const data = (await response.json()) as Partial<IUser>
         setUser(data)
     }
 
@@ -246,8 +249,8 @@ export default function Volunteer() {
 
     return (
         <MainLayout>
-            <div className="relative flex flex-col items-center h-full justify-center bg-steel-blue">
-                <div className="absolute top-0 left-0 w-full h-full halftone opacity-10 z-1" />
+            <div className="relative flex h-screen flex-col items-center justify-center bg-steel-blue">
+                <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
                 <div
                     className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
                     style={{
@@ -258,8 +261,8 @@ export default function Volunteer() {
                         transform: 'scaleX(-1)',
                     }}
                 />
-                <div className="w-full flex justify-center">
-                    <div className="flex flex-col h-auto rounded-lg bg-black-pearl-dark p-4 my-2 shadow-md gap-y-4 mx-2 z-0">
+                <div className="flex w-full justify-center">
+                    <div className="z-0 m-2 flex h-auto flex-col gap-y-4 rounded-lg bg-black-pearl-dark p-4 shadow-md">
                         {/* User is not authenticated and needs to login */}
                         <Stage
                             stageName="unauthenticated"
@@ -308,7 +311,7 @@ export default function Volunteer() {
                                         new Map(prev).set('name', isValid)
                                     )
                                 }}
-                            />                            
+                            />
                             <Field
                                 value={lastName}
                                 placeholder="Last Name"
@@ -360,8 +363,7 @@ export default function Volunteer() {
                                     const text = e.target.value
                                     setZipCode(text)
                                     const isValid =
-                                        /^\d{5}(-\d{4})?$/g.test(text) &&
-                                        !text.startsWith('0')
+                                        /^\d{5}(-\d{4})?$/g.test(text)
                                     setValidationFlags((prev) =>
                                         new Map(prev).set('zip', isValid)
                                     )
@@ -479,7 +481,7 @@ export default function Volunteer() {
                                             void requestCode(
                                                 phoneNumber !== ''
                                                     ? phoneNumber
-                                                    : user?.phoneNumber ?? ''
+                                                    : (user?.phoneNumber ?? '')
                                             )
                                         }}
                                     >
