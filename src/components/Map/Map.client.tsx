@@ -134,43 +134,9 @@ export const ClientMap = ({
         }
     }, [zipCodes, isMarker])
 
-    // US State GeoJSON for "USMapLayer"
-    const [stateGeoJSON, setStateGeoJSON] = useState(statesData)
-
-    useEffect(() => {
-        (async () => {
-            if (statesData.type !== "FeatureCollection") return;
-
-            // api call goes here
-            const apiData = [{ state: "Alabama", count: 1 }]
-            let max = 0
-
-            let res: StateDataFeatureCollection = {
-                type: "FeatureCollection",
-                features: statesData.features.map(f => {
-                    // Redefine feature
-                    let feature = { ...f }
-
-                    // Handle api call data
-                    const stateCount = apiData.find(s => s.state === f.properties?.name)
-                    if (stateCount) {
-                        if (stateCount.count > max) max = stateCount.count;
-                        feature.properties.count = stateCount.count;
-                    }
-
-                    return feature
-                })
-            }
-
-            setStateGeoJSON(res)
-        })()
-    }, [])
-
     return (
         <MapContainer
             zoom={4.1}
-            minZoom={3}
-            maxZoom={9}
             center={US_CENTER}
             zoomSnap={0.1}
             zoomControl={false}
@@ -183,7 +149,7 @@ export const ClientMap = ({
             {children ?? (
                 <>
                     {!hideOpenStreetMap && <OpenStreetMapLayer />}
-                    <USMapLayer isHeatmap={isHeatmap} data={stateGeoJSON} />
+                    <USMapLayer isHeatmap={isHeatmap} data={statesData} />
                     {isMarker && <MarkerLayer markerList={markerList} />}
                 </>
             )}

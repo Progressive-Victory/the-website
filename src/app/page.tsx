@@ -1,4 +1,4 @@
-import { Hero, MapGraphic, MemberBanner, Volunteer, VolunteerMap } from '@/app/home'
+import { Hero, MemberBanner, VolunteerMap } from '@/app/home'
 import { MainLayout } from '@/components/layout'
 // HomePage
 export default function Home() {
@@ -7,9 +7,6 @@ export default function Home() {
       <div className="flex flex-col items-center overflow-x-hidden">
         <Hero />
         <VolunteerMap />
-        <VolunteerMap />
-        <Volunteer />
-        <MapGraphic />
         <MemberBanner />
       </div>
     </MainLayout>

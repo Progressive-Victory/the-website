@@ -1,7 +1,10 @@
 'use client'
 import { Link, Message, TiltMessage } from '@/components/common'
-import { Map } from '@/components/Map'
+import { StateMap } from '@/components/Map'
 import { Volunteer } from './Volunteer'
+import { useEffect, useState } from 'react'
+import { MapView } from '@/components/Map/types'
+import { US_STATES } from '@/components/Map/constants'
 
 const mapText = `The PV community is constantly growing! Our members are
                     organizing in their local communities, identifying campaigns
@@ -9,6 +12,30 @@ const mapText = `The PV community is constantly growing! Our members are
                     people power of Progressive Victory!`
 
 export function VolunteerMap() {
+    /* States */
+    const [hoveredState, setHoveredState] = useState<string | null>(null);
+    const [selectedState, setSelectedState] = useState<string | null>(null);
+    const [totalMemberCount, setTotalMemberCount] = useState<number>(0);
+    const [stateMemberCount, setStateMemberCount] = useState<Record<string, number>>();
+
+    useEffect(() => {
+        (async () => {
+            let statesCount: Record<string, any> = {}
+            const smc = await (await fetch("/api/map/count")).json()
+            Object.entries(smc).forEach(([k, v]) => {
+                const state = US_STATES.find(s => s.code === k)?.name
+                statesCount[state!] = v
+            })
+            const total = await (await fetch("/api/map/users-count")).json()
+            setStateMemberCount(statesCount)
+            setTotalMemberCount(total)
+        })()
+    }, [])
+
+    function onFeatureClick(state: string) {
+        setSelectedState(prev => prev === state ? null : state)
+    }
+
     return (
         <div className="flex w-full flex-col items-center gap-6 bg-black-pearl-light py-10">
             <h1 className="text-center text-4xl font-bold text-white">
@@ -35,12 +62,19 @@ export function VolunteerMap() {
                             }
                             botDivider={true}
                             botLeftContent={
-                                <p className="font-medium">Members: xx</p>
+                                <p className="font-medium">{selectedState
+                                    ? `Members in ${selectedState}: ${stateMemberCount?.[selectedState]}`
+                                    : `Total Members: ${totalMemberCount}`
+                                }</p>
                             }
                         >
-                            <div className="h-[450px] w-[750px] rounded-md">
-                                <Map disableInteraction />
-                            </div>
+                            <CombinedMap
+                                stateMemberCount={stateMemberCount}
+                                onFeatureClick={onFeatureClick}
+                                onFeatureHover={setHoveredState}
+                                hoveredState={hoveredState}
+                                selectedState={selectedState}
+                            />
                         </Message>
                     </TiltMessage>
                 </div>
@@ -49,6 +83,79 @@ export function VolunteerMap() {
                     <Volunteer />
                 </div>
             </div>
+        </div >
+    )
+}
+
+interface ExtraMap {
+    left: number;
+    h: number;
+    w: number;
+    mapView: MapView;
+}
+
+function CombinedMap(props: {
+    stateMemberCount: Record<string, number> | undefined;
+    onFeatureClick: (value: string) => void;
+    onFeatureHover: (value: string) => void;
+    selectedState: string | null;
+    hoveredState: string | null;
+}) {
+    const extraMaps: Record<string, ExtraMap> = {
+        "AK": {
+            left: 0,
+            h: 140,
+            w: 170,
+            mapView: { zoom: 2, center: { lat: 63, lng: -154 } }
+        },
+        "HI": {
+            left: 174,
+            h: 90,
+            w: 120,
+            mapView: { zoom: 4.8, center: { lat: 20.5, lng: -157.3 } }
+        },
+        "PR": {
+            left: 298,
+            h: 60,
+            w: 90,
+            mapView: { zoom: 5.5, center: { lat: 18.3, lng: -66.4 } }
+        }
+    }
+
+    return (
+        <div className="relative h-[450px] w-[750px]">
+            <StateMap
+                mapView={{
+                    zoom: 4.1,
+                    center: { lat: 36.2, lng: -96.5 }
+                }}
+                stateMemberCount={props.stateMemberCount}
+                selectedState={props.selectedState}
+                onFeatureClick={props.onFeatureClick}
+                onFeatureHover={props.onFeatureHover}
+                hoveredState={props.hoveredState}
+            />
+
+            {Object.entries(extraMaps).map(([state, map], i) => (
+                <div
+                    key={i}
+                    className={`absolute bottom-0 rounded-md border`}
+                    style={{
+                        left: map.left,
+                        height: map.h,
+                        width: map.w
+                    }}
+                >
+                    <StateMap
+                        mapView={map.mapView}
+                        stateMemberCount={props.stateMemberCount}
+                        selectedState={props.selectedState}
+                        onFeatureClick={props.onFeatureClick}
+                        onFeatureHover={props.onFeatureHover}
+                        hoveredState={props.hoveredState}
+                    />
+                </div>
+            ))}
         </div>
     )
 }
