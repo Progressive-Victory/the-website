@@ -3,7 +3,7 @@ import { Link, Message, TiltMessage } from '@/components/common'
 import { StateMap } from '@/components/Map'
 import { Volunteer } from './Volunteer'
 import { useEffect, useState } from 'react'
-import { MapView } from '@/components/Map/types'
+import { MapView, StateMapInteractionProps } from '@/components/Map/types'
 import { US_STATES } from '@/components/Map/constants'
 
 const mapText = `The PV community is constantly growing! Our members are
@@ -19,12 +19,14 @@ export function VolunteerMap() {
     const [stateMemberCount, setStateMemberCount] = useState<Record<string, number>>();
 
     useEffect(() => {
-        (async () => {
-            let statesCount: Record<string, any> = {}
+        void (async () => {
+            const statesCount: Record<string, number> = {}
             const smc = await (await fetch("/api/map/count")).json()
             Object.entries(smc).forEach(([k, v]) => {
                 const state = US_STATES.find(s => s.code === k)?.name
-                statesCount[state!] = v
+                if (typeof state === "string" && typeof v === "number") {
+                    statesCount[state] = v
+                }
             })
             const total = await (await fetch("/api/map/users-count")).json()
             setStateMemberCount(statesCount)
@@ -32,7 +34,7 @@ export function VolunteerMap() {
         })()
     }, [])
 
-    function onFeatureClick(state: string) {
+    function onFeatureClick(state: string | null) {
         setSelectedState(prev => prev === state ? null : state)
     }
 
@@ -94,13 +96,7 @@ interface ExtraMap {
     mapView: MapView;
 }
 
-function CombinedMap(props: {
-    stateMemberCount: Record<string, number> | undefined;
-    onFeatureClick: (value: string) => void;
-    onFeatureHover: (value: string) => void;
-    selectedState: string | null;
-    hoveredState: string | null;
-}) {
+function CombinedMap(props: StateMapInteractionProps) {
     const extraMaps: Record<string, ExtraMap> = {
         "AK": {
             left: 0,
@@ -136,7 +132,7 @@ function CombinedMap(props: {
                 hoveredState={props.hoveredState}
             />
 
-            {Object.entries(extraMaps).map(([state, map], i) => (
+            {Object.entries(extraMaps).map(([, map], i) => (
                 <div
                     key={i}
                     className={`absolute bottom-0 rounded-md border`}

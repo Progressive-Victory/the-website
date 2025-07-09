@@ -3,14 +3,13 @@ import { MainLayout } from "@/components/layout";
 import { useEffect, useState } from "react";
 
 export default function Test() {
-  const [stateCount, setStateCount] = useState<{ [key: string]: number } | null>(null)
+  const [stateCount, setStateCount] = useState<Record<string, number> | null>(null)
 
   useEffect(() => {
-    const test = async () => {
+    void (async () => {
       const res = await fetch('/api/map/count')
       setStateCount(await res.json())
-    }
-    test()
+    })
   }, [])
 
   return (

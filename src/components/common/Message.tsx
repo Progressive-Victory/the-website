@@ -110,7 +110,7 @@ export function Message({
             {children && <div className="flex justify-center">{children}</div>}
 
             {/* Bottom Row */}
-            {botDivider && <hr className="h-[1px] w-full border-gray-200" />}
+            {botDivider && <hr className="h-px w-full border-gray-200" />}
 
             <div className="flex flex-row items-center justify-between">
                 <div className="flex gap-x-4">

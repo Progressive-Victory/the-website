@@ -8,3 +8,11 @@ export interface MapView {
     lng: number;
   }
 }
+
+export interface StateMapInteractionProps {
+  onFeatureClick: (e: string | null) => void;
+  onFeatureHover: (e: string | null) => void;
+  selectedState: string | null;
+  hoveredState: string | null;
+  stateMemberCount?: Record<string, number>;
+}
