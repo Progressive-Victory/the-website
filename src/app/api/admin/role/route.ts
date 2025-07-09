@@ -38,7 +38,7 @@ function updateRoleObj<Key extends keyof IRole>(key: Key, obj: IRole, value: IRo
 
 export async function PATCH(req: NextRequest) {
     //check session auth
-    const response = await checkAuth()
+    const response = await checkAuth(["Superadmin"])
 
     //handle checkAuth() response
     switch(response) {
@@ -88,7 +88,7 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
         //check session auth
-        const response = await checkAuth()
+        const response = await checkAuth(["Superadmin"])
 
         //handle checkAuth() response
         switch(response) {
