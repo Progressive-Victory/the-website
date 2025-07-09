@@ -2,8 +2,8 @@
 import { MainLayout } from "@/components/layout";
 import { useEffect, useState } from "react";
 
-export default function Test(){
-  const [stateCount, setStateCount] = useState<{[key: string]: number} | null>(null)
+export default function Test() {
+  const [stateCount, setStateCount] = useState<{ [key: string]: number } | null>(null)
 
   useEffect(() => {
     const test = async () => {
@@ -20,7 +20,7 @@ export default function Test(){
           <span>{state}: </span>
           <span>{stateCount[state]}</span>
         </div>
-      )) : 
+      )) :
         <p>loading</p>
       }
     </MainLayout>
