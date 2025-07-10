@@ -3,9 +3,9 @@ import { Footer } from './Footer'
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="relative size-full">
+        <div className="relative flex size-full min-h-screen flex-col">
             <Header />
-            <div className="relative bg-steel-blue">{children}</div>
+            <div className="relative bg-steel-blue flex-1">{children}</div>
             <Footer />
         </div>
     )

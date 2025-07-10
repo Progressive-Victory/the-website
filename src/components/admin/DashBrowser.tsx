@@ -57,18 +57,18 @@ export default function DashBrowser<T extends Document>(
         const fetchData = async (): Promise<void> => {
             try {
                 setLoading(true)
-                const res = await fetch(`${apiStr}/?pageNumber=${pageNumber}&entriesPerPage=${entriesPerPage}&query=${query}`)
-                const count = await fetch(`${apiStr}/count/?query=${query}`)
+                const res = await fetch(`${apiStr}/?page=${pageNumber}&limit=${entriesPerPage}`)
 
 
-                if (!res.ok || !count.ok) throw new Error("Failed to fetch data.")
 
-                const data = await res.json()
-                const countNum: number = await count.json()
+                if (!res.ok) throw new Error("Failed to fetch data.")
+
+                const {page, limit, data, pages} = await res.json()
+
                 console.log(data)
 
                 setSectionData(data)
-                setNumPages(Math.ceil(countNum/entriesPerPage))
+                setNumPages(pages)
 
             } catch(err) {
                 setError(err instanceof Error ? err.message : "Failed to fetch data.")

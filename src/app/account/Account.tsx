@@ -36,7 +36,7 @@ export function Account() {
     } else {
         return (
             <MainLayout>
-                <div className="relative flex h-screen w-full flex-col items-center bg-steel-blue">
+                <div className="relative flex w-full flex-col items-center bg-steel-blue h-full min-h-screen xl:min-h-[unset]">
                     <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
 
                     <div className="z-2 relative mt-20 flex w-[300px] flex-col rounded-lg bg-black-pearl-dark p-4">

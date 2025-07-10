@@ -1,6 +1,5 @@
-import ProtectedPage from "@/components/ProtectedPage";
-import { Metadata } from "next";
-import AdminDash from "@/components/admin/AdminDash";
+import { Metadata } from 'next'
+import { redirect, RedirectType } from 'next/navigation'
 
 export const metadata: Metadata = {
     title: 'PV - Admin',
@@ -14,10 +13,6 @@ export const metadata: Metadata = {
     },
 }
 
-export default function AdminPage() {
-    return (
-        <ProtectedPage requiredRoles={["Superadmin"]}>
-            <AdminDash />
-        </ProtectedPage>
-    )
+export default function () {
+    redirect('/admin/members', RedirectType.replace)
 }

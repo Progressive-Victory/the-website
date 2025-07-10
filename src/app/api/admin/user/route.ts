@@ -1,16 +1,24 @@
-import dbConnect from "@/util/libmongo";
-import { User, IUser } from "@/models/User"
-import { checkAuth, checkAuthPermissions, PermissionName, ResponseCode } from "@/util/auth";
-import { NextRequest, NextResponse } from "next/server";
-import { Aggregate } from "mongoose";
-import { URLWrapper } from "@/util/url-wrapper";
+import dbConnect from '@/util/libmongo'
+import { User, IUser } from '@/models/User'
+import {
+    checkAuth,
+    checkAuthPermissions,
+    PermissionName,
+    ResponseCode,
+} from '@/util/auth'
+import { NextRequest, NextResponse } from 'next/server'
+import {
+    applyMatchFilters,
+    executeAggregationPaginated,
+} from '@/util/mongo-aggregations'
+import { parsePaginationParams } from '@/util/url-parsing'
 
 export async function GET(req: NextRequest) {
-    // check session auth
-    const response = await checkAuthPermissions([PermissionName.VIEW_MEMBER_DATA])
+    const response = await checkAuthPermissions([
+        PermissionName.VIEW_MEMBER_DATA,
+    ])
 
-    // handle session auth response
-    switch (response){
+    switch (response) {
         case ResponseCode.Successful:
             break
         case ResponseCode.Exception:
@@ -20,79 +28,67 @@ export async function GET(req: NextRequest) {
         case ResponseCode.InsufficientAccess:
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         default:
-            throw Error("Unidentified response code.")
+            throw Error('Unidentified response code.')
     }
 
-    //parse out query params
-    const url = new URLWrapper(req.url)
-    const query: string | undefined = url.getParam("query")
-    const pageNumberStr = url.getParam("pageNumber")
-    const entriesPerPageStr = url.getParam("entriesPerPage")
-    const keyVals: Map<string, string> = new Map<string, string>()
-    if(query){
-      try {
-        const queryArgs: string[] = query.split(' ')
-        queryArgs.map((str) => {
-          const pair: string[] = str.split(':')
-          keyVals.set(pair[0], pair[1])
-        })
-      } catch(err) {
-        console.error(err)
-      }
-    }
-    console.log(query)
-    if(!pageNumberStr || !entriesPerPageStr) throw new Error("pageNumber or entriesPerPage are undefiend")
-    const pageNumber = Number.parseInt(pageNumberStr)
-    const entriesPerPage = Number.parseInt(entriesPerPageStr)
-    const skip = pageNumber * entriesPerPage
+    const ALLOWED_FILTER_PARAMS = [
+        {
+            key: 'roles',
+            match_key: 'name',
+        },
+    ]
 
-    await dbConnect()
-
-    //grab list of requested users
-    let mongoAggregate: Aggregate<any> = User.aggregate([
-      {
-        $lookup: { from: 'roles', localField: 'roles', foreignField: '_id', as: 'roles' },
-      },
+    const users = User.aggregate([
+        {
+            $lookup: {
+                from: 'roles',
+                localField: 'roles',
+                foreignField: '_id',
+                as: 'roles',
+            },
+        },
     ])
-    if(query && query != ""){
-      keyVals.forEach(async (value: string, key: string) => {
-        mongoAggregate.match({ [key] : value })
-        /*const _type: FieldCase = await getFieldCase(key)
-        console.log(_type)
-        switch (_type) {
-          case FieldCase.PrimitiveSinglet:
-            mongoAggregate.match({})
-            break
-          case FieldCase.PrimitiveArray:
-            break
-          case FieldCase.ComplexSinglet:
-            break
-          case FieldCase.ComplexArray:
-            break
-          default:
-            throw new Error("unrecognized field case!")
-        }*/
-      })
-    }
-    const data = await mongoAggregate.skip(skip)
-            .limit(entriesPerPage)
-            .exec()
-    //return list
-    return NextResponse.json(data)
+
+    const { page, limit, skip, params } = parsePaginationParams(req.url)
+
+    applyMatchFilters(users, params, ALLOWED_FILTER_PARAMS)
+
+    const { data, count, pages } = await executeAggregationPaginated(
+        User,
+        users,
+        {
+            skip,
+            limit,
+        }
+    )
+
+    // TODO: remove fields based on member permissions
+
+    return NextResponse.json({
+        page,
+        limit,
+        count,
+        pages,
+        data,
+    })
 }
 
 // Helper function for updating the values of an existing object using keys.
 // No idea why but it refuses to work without using generics.
-function updateUserObj<Key extends keyof IUser>(key: Key, obj: IUser, value: IUser[Key])  {
+function updateUserObj<Key extends keyof IUser>(
+    key: Key,
+    obj: IUser,
+    value: IUser[Key]
+) {
     obj[key] = value
 }
 
 export async function PATCH(req: NextRequest) {
     //check session auth
-    const response = await checkAuth(["Superadmin"])
+    const response = await checkAuth(['Superadmin'])
 
     //handle checkAuth() response
-    switch(response) {
+    switch (response) {
         case ResponseCode.Successful:
             break
         case ResponseCode.Exception:
@@ -102,26 +98,27 @@ export async function PATCH(req: NextRequest) {
         case ResponseCode.InsufficientAccess:
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         default:
-            throw Error("Unidentified response code.")
+            throw Error('Unidentified response code.')
     }
 
     await dbConnect()
 
     // pull the data submitted in the body and parse
-    const data = await req.json() as Partial<IUser>[]
+    const data = (await req.json()) as Partial<IUser>[]
     // get a list of users from the database
-    const dbUsrList = (await User.find({})
-    .populate({
+    const dbUsrList = await User.find({}).populate({
         path: 'roles',
         populate: {
-            path: 'permissions'
-        }
-    }))
+            path: 'permissions',
+        },
+    })
 
     // iterate through every item in data to apply changes to it.
     data.forEach((usr) => {
         // grab the user object in the databaseUser list that corresponds to the current submitted list
-        const dbUsr: IUser = dbUsrList.find(x => x.discordId == usr.discordId)!
+        const dbUsr: IUser = dbUsrList.find(
+            (x) => x.discordId == usr.discordId
+        )!
         // iterate through each key of the submitted user object
         Object.keys(usr).forEach((k) => {
             // set the str key value to a Key type
@@ -129,18 +126,16 @@ export async function PATCH(req: NextRequest) {
 
             // list of fields allowed to be changed
             // needs to be fixed, lets everything through
-            const allowed = [
-                'roles'
-            ]
+            const allowed = ['roles']
 
             // wait tf. this logic makes no sense. I pulled this from /api/user but the whole thing seems to work. how? Im so god damned confused.
-            if(dbUsr[key] !== usr[key] || !allowed.includes(key)) {
+            if (dbUsr[key] !== usr[key] || !allowed.includes(key)) {
                 updateUserObj(key, dbUsr, usr[key])
             }
-         })
+        })
 
         // save the user object to commit changes.
-        void dbConnect().then(()=> void dbUsr.save()) // for some reason without this  second dbConnect() the whole thing breaks. ;w; help
+        void dbConnect().then(() => void dbUsr.save()) // for some reason without this  second dbConnect() the whole thing breaks. ;w; help
     })
-   return NextResponse.json({status: 200})
+    return NextResponse.json({ status: 200 })
 }
