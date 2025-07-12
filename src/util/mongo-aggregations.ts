@@ -13,7 +13,7 @@ export interface Filter {
 }
 
 export function applyMatchFilters(
-    aggregation: Aggregate<any>,
+    aggregation: Aggregate<unknown>,
     params: URLSearchParams,
     filters: Filter[]
 ) {
@@ -35,7 +35,7 @@ export function applyMatchFilters(
  */
 export async function executeAggregationPaginated<T>(
     model: Model<T>,
-    aggregation: Aggregate<any>,
+    aggregation: Aggregate<unknown>,
     options: {
         skip: number
         limit: number
@@ -44,17 +44,17 @@ export async function executeAggregationPaginated<T>(
     await dbConnect()
 
     const count_results = await model
-        // @ts-expect-error
-        .aggregate(aggregation)
+        // @ts-expect-error no thanks
+        .aggregate(aggregation._pipeline)
         .count('count')
         .exec()
 
-    const { count } = count_results[0]
+    const count = (count_results[0]?.count ?? 0) as number
 
     const data = await aggregation
         .skip(options.skip)
         .limit(options.limit)
-        .exec()
+        .exec() as T[]
 
     return {
         data,

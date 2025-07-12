@@ -1,10 +1,21 @@
-import { useQuery } from '@tanstack/react-query'
-import { FC, useEffect, useState } from 'react'
+import MultiSelect from '@/components/admin/MultiSelect'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useDebounce } from '@uidotdev/usehooks'
 import classNames from 'classnames'
-
-import { FaChevronRight, FaChevronLeft } from 'react-icons/fa'
+import Image from 'next/image'
+import { FC, useEffect, useState } from 'react'
+import {
+    FiChevronLeft,
+    FiChevronRight,
+    FiChevronsLeft,
+    FiChevronsRight,
+} from 'react-icons/fi'
+import { IoMdOptions } from 'react-icons/io'
+import { IoClose } from 'react-icons/io5'
+import { IconType } from 'react-icons/lib'
 
 export interface PaginatedListProps<T extends object> {
+    event_target?: EventTarget
     /**
      * The endpoint that will be used to fetch the data
      */
@@ -16,13 +27,45 @@ export interface PaginatedListProps<T extends object> {
      * for example)
      */
     before_element_selection?: (value: T) => boolean
+
     /**
      * Called after an element is selected from the list
      */
     on_element_selected: (value: T) => void
 
     id_key: keyof T
-    display_key: keyof T
+    display_key: keyof T | ((value: T) => string)
+    alternate_display_key?: keyof T | ((value: T) => string)
+    image?: {
+        key: keyof T
+        alt: string
+    }
+
+    filters: Filter[]
+    search_fields?: string[]
+}
+
+export interface Filter {
+    /**
+     * The name to display in the filter dropdown
+     */
+    name: string
+    /**
+     * The key to use when constructing the query parameters for the fetch
+     */
+    query_key: string
+    /**
+     * The key to use when displaying each option
+     */
+    display_key: string
+    /**
+     * The key to use when getting the value of an option
+     */
+    value_key: string
+    /**
+     * Values for each filter option
+     */
+    options: Record<string, string>[]
 }
 
 export interface PaginatedResponse<T> {
@@ -38,24 +81,50 @@ export default function PaginatedList<T extends object>(
 ) {
     const [page, setPage] = useState(0)
     const [pages, setPages] = useState(1)
-    const [limit, setLimit] = useState(4)
+    const [limit, setLimit] = useState(25)
     const [selected_id, set_selected_id] = useState<string | null>(null)
 
-    const { isPending, isSuccess, error, data } = useQuery<
+    const [searchQuery, setSearchQuery] = useState('')
+    const [searchField, setSearchField] = useState<string>('all')
+
+    const [filtersOpen, setFiltersOpen] = useState(false)
+    const [activeFilterMenu, setActiveFilterMenu] = useState<string | null>(
+        null
+    )
+    const [searchFilters, setSearchFilters] = useState<
+        Record<string, string[]>
+    >({})
+
+    const searchParams = useDebounce(
+        [page, pages, limit, searchQuery, searchField, searchFilters],
+        200
+    )
+
+    const { isPending, isSuccess, error, data, refetch } = useQuery<
         PaginatedResponse<T>
     >({
-        queryKey: [props.api_endpoint, page, pages, limit],
-        queryFn: async () => {
+        queryKey: [props.api_endpoint, ...searchParams],
+        queryFn: async ({ signal }) => {
             const url = new URL(location.href)
             url.pathname = props.api_endpoint
             url.searchParams.set('page', page + '')
             url.searchParams.set('limit', limit + '')
+            if (searchQuery) url.searchParams.set('query', searchQuery)
+            if (searchField !== 'all')
+                url.searchParams.set('search_field', searchField)
 
-            console.log(url)
+            for (const [key, values] of Object.entries(searchFilters)) {
+                for (const value of values) {
+                    url.searchParams.append(key, value)
+                }
+            }
 
-            const res = await fetch(url)
+            console.log(url.search)
+
+            const res = await fetch(url, { signal })
             return await res.json()
         },
+        placeholderData: keepPreviousData,
     })
 
     useEffect(() => {
@@ -64,60 +133,206 @@ export default function PaginatedList<T extends object>(
             setLimit(data?.limit)
             setPages(data?.pages)
         }
-    }, [isSuccess])
+    }, [isSuccess, data])
 
-    const handleClick = (clicked_id: string) => {
+    const handleListItemClick = (clicked_id: string) => {
         const selected = data?.data.find((e) => e[props.id_key] === selected_id)
-        const item = data?.data.find((e) => e[props.id_key] === clicked_id)
+        const clicked = data?.data.find((e) => e[props.id_key] === clicked_id)
 
-        if (!item || selected === item) return
+        if (!clicked || selected === clicked) return
 
         if (
             props.before_element_selection &&
-            !props.before_element_selection(item)
+            !props.before_element_selection(clicked)
         )
             return
 
         set_selected_id(clicked_id)
+        props.on_element_selected(clicked)
     }
 
+    useEffect(() => {
+        const { event_target } = props
+        if (!event_target) return
+
+        function handleSaveChanges() {
+            refetch()
+        }
+
+        event_target.addEventListener('refetch', handleSaveChanges)
+
+        return () => {
+            event_target.removeEventListener('refetch', handleSaveChanges)
+        }
+    }, [props.event_target])
+
     return (
-        <div>
-            <div className="flex bg-white p-4">
-                <input
-                    type="text"
-                    name=""
-                    id=""
-                    className="w-full rounded-lg border-2 border-black px-2"
-                    placeholder="Search..."
-                />
+        <div className="flex w-[24rem] flex-col self-stretch border-x-2 border-gray-200 bg-gray-50 2xl:w-[28rem]">
+            <div className="flex flex-col gap-3 border-b-2 p-4">
+                <div className="flex w-full justify-between gap-2">
+                    {props.search_fields && (
+                        <label
+                            htmlFor="search_field"
+                            className="flex flex-shrink items-center gap-2"
+                        >
+                            <span className="font-medium">Field:</span>
+                            <select
+                                name="search_field"
+                                id="search_field"
+                                className="rounded-lg border border-gray-300 bg-white px-1 py-1"
+                                defaultValue={'all'}
+                                onChange={(e) => setSearchField(e.target.value)}
+                            >
+                                <option value={'all'}>All (no fuzzy)</option>
+                                {props.search_fields.map((sf) => (
+                                    <option key={sf} value={sf}>
+                                        {sf}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                    )}
+                    <label htmlFor="limit" className="flex items-center gap-2">
+                        <span className="font-medium">Items:</span>
+                        <select
+                            name="limit"
+                            id="limit"
+                            className="rounded-lg border border-gray-300 bg-white px-1 py-1"
+                            defaultValue={limit}
+                            onChange={(e) => setLimit(+e.target.value)}
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                        </select>
+                    </label>
+                </div>
+                <div className="flex w-full items-center gap-2">
+                    <input
+                        type="text"
+                        name="search_query"
+                        id="search_query"
+                        className="w-full rounded-lg border border-gray-300 px-3 py-1"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    {props.filters.length > 0 && (
+                        <button
+                            title={
+                                filtersOpen ? 'Hide Filters' : 'Show Filters'
+                            }
+                            onClick={() => setFiltersOpen(!filtersOpen)}
+                        >
+                            {filtersOpen ? (
+                                <IoClose size={20} />
+                            ) : (
+                                <IoMdOptions size={20} />
+                            )}
+                        </button>
+                    )}
+                </div>
+                {filtersOpen &&
+                    props.filters &&
+                    props.filters.map((f) => (
+                        <div className="flex flex-wrap gap-2">
+                            <strong className="font-medium">{f.name}:</strong>
+                            <MultiSelect
+                                key={f.name}
+                                {...f}
+                                active={searchFilters[f.query_key] ?? []}
+                                addActive={(value) => {
+                                    searchFilters[f.query_key] = [
+                                        ...(searchFilters[f.query_key] ?? []),
+                                        value,
+                                    ]
+                                    setSearchFilters({ ...searchFilters })
+                                }}
+                                removeActive={(value) => {
+                                    searchFilters[f.query_key] = (
+                                        searchFilters[f.query_key] ?? []
+                                    ).filter((v) => v !== value)
+                                    setSearchFilters({ ...searchFilters })
+                                }}
+                                menuOpen={activeFilterMenu == f.query_key}
+                                setMenuOpen={(open) =>
+                                    setActiveFilterMenu(
+                                        open ? f.query_key : null
+                                    )
+                                }
+                            />
+                        </div>
+                    ))}
             </div>
 
-            {isPending && <div>Pending</div>}
-            {error && <div>Error: {error.message}</div>}
-            {data && (
-                <ul>
+            {data && data.count > 0 ? (
+                <ul className="overflow-y-auto">
                     {data.data.map((e) => (
                         <li
                             key={e[props.id_key] as string}
-                            className={classNames('p-4 hover:bg-blue-400', {
-                                'bg-white': selected_id !== e[props.id_key],
-                                'bg-blue-500': selected_id === e[props.id_key],
-                            })}
+                            className={classNames(
+                                'flex cursor-pointer items-center gap-5 p-4',
+                                {
+                                    'bg-gray-200 hover:bg-gray-300':
+                                        selected_id === e[props.id_key],
+                                    'hover:bg-gray-200':
+                                        selected_id !== e[props.id_key],
+                                }
+                            )}
                             onClick={() =>
-                                handleClick(e[props.id_key] as string)
+                                handleListItemClick(e[props.id_key] as string)
                             }
                         >
-                            {e[props.display_key] as string}
+                            {props.image && (
+                                <ImageWithFallback
+                                    src={e[props.image.key] as string}
+                                    alt={props.image.alt}
+                                />
+                            )}
+
+                            <div className="flex flex-col">
+                                <span className="font-medium text-black">
+                                    {typeof props.display_key === 'function'
+                                        ? props.display_key(e)
+                                        : (e[props.display_key] as string)}
+                                </span>
+                                {props.alternate_display_key && (
+                                    <span className="text-gray-500">
+                                        {typeof props.alternate_display_key ===
+                                        'function'
+                                            ? props.alternate_display_key(e)
+                                            : (e[
+                                                  props.alternate_display_key
+                                              ] as string)}
+                                    </span>
+                                )}
+                            </div>
                         </li>
                     ))}
                 </ul>
+            ) : (
+                <div className="flex flex-1 items-center justify-center">
+                    {isPending && (
+                        <span className="text-gray-400">Loading...</span>
+                    )}
+                    {error && (
+                        <span className="text-red-500">
+                            Error: {error.message}
+                        </span>
+                    )}
+                    {data?.count === 0 && <>No results found</>}
+                </div>
             )}
-            <div className="flex gap-4">
+
+            <div className="mt-auto flex gap-4 border-t-2">
                 <Pagination
-                    page={page}
-                    maxPage={pages - 1}
-                    onPageChange={setPage}
+                    page={page + 1}
+                    maxPage={pages}
+                    onPageChange={(page) => setPage(page - 1)}
+                    enabled={!isPending}
+                    total={data?.count ?? 0}
                 />
             </div>
         </div>
@@ -128,175 +343,122 @@ const Pagination: FC<{
     page: number
     onPageChange: (page: number) => void
     maxPage: number
-}> = ({ page, onPageChange, maxPage }) => {
-    let enabled = maxPage > 1
+    enabled: boolean
+    total: number
+}> = ({ page, onPageChange, maxPage, enabled, total }) => {
+    let can_change = maxPage > 1
 
-    let components = []
+    const [value, setValue] = useState(page.toString())
 
-    components.push(
-        <PaginationArrow
-            key={0}
-            direction="left"
-            onClick={() => onPageChange(page - 1)}
-            enabled={enabled && page > 1}
-        />
-    )
-
-    // If there are less than 7 pages, show all pages
-    if (maxPage <= 5) {
-        for (let i = 1; i <= maxPage; i++) {
-            components.push(
-                <PageNumber
-                    key={i}
-                    page={i}
-                    active={i === page}
-                    onClick={() => onPageChange(i)}
-                />
-            )
-        }
-    }
-    // Display first few, ... and last number
-    // <- 1 [2] 3 4 5 ... 9 ->
-    else if (page <= 3) {
-        for (let i = 1; i <= 5; i++) {
-            components.push(
-                <PageNumber
-                    key={i}
-                    page={i}
-                    active={i === page}
-                    onClick={() => onPageChange(i)}
-                />
-            )
-        }
-        components.push(<Ellipses key={6} />)
-        components.push(
-            <PageNumber
-                key={7}
-                page={maxPage}
-                active={maxPage === page}
-                onClick={() => onPageChange(maxPage)}
-            />
-        )
-    }
-    // display first number, ... and last few
-    // <- 1 ... 8 [9] 10 ->
-    else if (maxPage - page <= 3) {
-        components.push(
-            <PageNumber
-                key={1}
-                page={1}
-                active={1 === page}
-                onClick={() => onPageChange(1)}
-            />
-        )
-        components.push(<Ellipses key={2} />)
-        for (let i = maxPage - 4; i <= maxPage; i++) {
-            components.push(
-                <PageNumber
-                    key={i}
-                    page={i}
-                    active={i === page}
-                    onClick={() => onPageChange(i)}
-                />
-            )
-        }
-    }
-    // display first, ..., middle (selected is dead middle), ..., and last
-    // <- 1 ... 7 [8] 9 ... 12 ->
-    else {
-        components.push(
-            <PageNumber
-                key={1}
-                page={1}
-                active={1 === page}
-                onClick={() => onPageChange(1)}
-            />
-        )
-        components.push(<Ellipses key={2} />)
-        for (let i = page - 1; i <= page + 1; i++) {
-            components.push(
-                <PageNumber
-                    key={i}
-                    page={i}
-                    active={i === page}
-                    onClick={() => onPageChange(i)}
-                />
-            )
-        }
-        components.push(<Ellipses key={maxPage - 1} />)
-        components.push(
-            <PageNumber
-                key={maxPage}
-                page={maxPage}
-                active={1 === page}
-                onClick={() => onPageChange(1)}
-            />
-        )
-    }
-
-    components.push(
-        <PaginationArrow
-            key={maxPage + 1}
-            direction="right"
-            onClick={() => onPageChange(page + 1)}
-            enabled={enabled && page < maxPage}
-        />
-    )
+    useEffect(() => {
+        setValue(page.toString())
+    }, [page])
 
     return (
-        <div className="flex w-full items-center justify-center gap-3 bg-white p-4">
-            {components}
+        <div className="flex w-full items-center justify-between">
+            <div className="mx-auto flex items-center justify-center gap-1 p-4">
+                <PaginationArrow
+                    onClick={() => onPageChange(1)}
+                    icon={FiChevronsLeft}
+                    title="First"
+                    enabled={can_change && page > 1}
+                />
+                <PaginationArrow
+                    onClick={() => onPageChange(page - 1)}
+                    icon={FiChevronLeft}
+                    title="Previous"
+                    enabled={can_change && page > 1}
+                />
+                <form
+                    className="flex items-center gap-2 px-2"
+                    onSubmit={(e) => {
+                        e.preventDefault()
+
+                        const p = +value || page
+                        setValue(p.toString())
+                        onPageChange(p)
+                    }}
+                >
+                    <input
+                        type="text"
+                        value={value}
+                        onChange={(e) => {
+                            if (
+                                e.target.value.length === 0 ||
+                                (/^\d+$/.test(e.target.value) &&
+                                    e.target.value.length < 10)
+                            ) {
+                                setValue(e.target.value)
+                            }
+                        }}
+                        onBlur={() => {
+                            if (value.length === 0) setValue(page.toString())
+                        }}
+                        disabled={!enabled}
+                        className="w-[6ch] max-w-min rounded-lg border border-gray-300 px-2 py-0.5 text-center"
+                    />
+                    <input type="submit" className="hidden" />
+                    <span className="text-gray-600">
+                        of{' '}
+                        <span title={`${total} total results`}>{maxPage}</span>
+                    </span>
+                </form>
+                <PaginationArrow
+                    onClick={() => onPageChange(page + 1)}
+                    icon={FiChevronRight}
+                    title="Next"
+                    enabled={can_change && page < maxPage}
+                />
+                <PaginationArrow
+                    onClick={() => onPageChange(maxPage)}
+                    icon={FiChevronsRight}
+                    title="Last"
+                    enabled={can_change && page < maxPage}
+                />
+            </div>
         </div>
-    )
-}
-
-const PageNumber: FC<{
-    page: number
-    active: boolean
-    onClick: () => void
-}> = ({ page, active, onClick }) => {
-    return (
-        <a
-            className={classNames(
-                'flex h-8 w-8 cursor-pointer select-none items-center justify-center text-center font-bold',
-                {
-                    'text-red-500 underline': active,
-
-                    'text-gray-700': !active,
-                }
-            )}
-            onClick={onClick}
-        >
-            {page}
-        </a>
     )
 }
 
 const PaginationArrow: FC<{
-    direction: 'left' | 'right'
     onClick: () => void
+    icon: IconType
+    title: string
     enabled: boolean
-}> = ({ direction, onClick, enabled }) => {
+}> = ({ onClick, icon: Icon, title, enabled }) => {
     return (
         <a
             className={classNames(
-                'flex cursor-pointer select-none items-center justify-center font-semibold',
+                'flex select-none items-center justify-center rounded-lg p-1.5 font-semibold',
                 {
-                    'text-gray-700': enabled,
-                    'text-gray-300 cursor-not-allowed': !enabled,
+                    'cursor-pointer text-gray-700 hover:bg-gray-200 active:bg-gray-100':
+                        enabled,
+                    'cursor-not-allowed text-gray-400': !enabled,
                 }
             )}
             onClick={() => enabled && onClick()}
+            title={title}
         >
-            {direction === 'left' ? <FaChevronLeft /> : <FaChevronRight />}
+            <Icon size={20} />
         </a>
     )
 }
 
-const Ellipses: FC = () => {
+const ImageWithFallback: FC<{ src: string; alt: string }> = ({ src, alt }) => {
+    const [hasErrored, setHasErrored] = useState(false)
+
     return (
-        <div className="flex h-8 w-8 select-none items-center justify-center font-semibold text-red-500">
-            ...
-        </div>
+        <Image
+            src={
+                hasErrored
+                    ? 'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
+                    : src
+            }
+            alt={alt}
+            width={48}
+            height={48}
+            className="aspect-square max-h-[48px] rounded-full"
+            onError={() => setHasErrored(true)}
+        />
     )
 }

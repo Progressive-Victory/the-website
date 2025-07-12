@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+
 import { User, IUser } from '@/models/User'
 import dbConnect from '@/util/libmongo'
-import { authOptions, checkAuth, ResponseCode } from '@/util/auth'
+import {auth, checkAuth, ResponseCode } from '@/util/auth'
 import { OnboardingStage } from '@/util/stage'
 export const dynamic = 'force-dynamic'
 /**
@@ -24,7 +24,7 @@ export const dynamic = 'force-dynamic'
 
 //retrieves the currently logged in user
 async function retrieveUser() {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     await dbConnect()
 
     const user = await User.findOne({ discordId: session?.discordId })

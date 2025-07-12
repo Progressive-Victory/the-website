@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/util/auth'
 import { getToken } from 'next-auth/jwt'
 import { User } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
@@ -9,11 +7,12 @@ import { getMember, joinMember } from '@/util/discord'
 import { RESTJSONErrorCodes } from 'discord-api-types/v10'
 import { DiscordAPIError } from '@discordjs/rest'
 import { HTTPStatus } from '@/util/https-status'
+import { auth } from '@/util/auth'
 export const dynamic = 'force-dynamic'
 // Joins user to the server with our grant
 export async function PUT() {
   // Retrieve the session using the incoming request and auth options
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   // const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
   if (!session) {
@@ -68,7 +67,7 @@ export async function PUT() {
 // Check if they are already in the server
 export async function GET(req: NextRequest) {
   // Retrieve the session using the incoming request and auth options
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
   if (!session) return new Response('Unauthorized - session not found', { status: HTTPStatus.UnAuthorized })

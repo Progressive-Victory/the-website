@@ -1,13 +1,13 @@
-import Role from '@/models/Role'
 import Page from './client'
+import Permission from '@/models/Permission'
 
 export default async function () {
-    const roles = (await Role.find({})).map((r) =>
+    const permissions = (await Permission.find({})).map((r) =>
         r.toObject({
             flattenObjectIds: true,
             versionKey: false,
         })
     )
 
-    return <Page roles={roles} />
+    return <Page permissions={permissions} />
 }
