@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { motion, useTransform, useSpring } from 'motion/react'
 import { Link, Message } from '@/components/common'
+const avatarImage = '/images/PV_Pride_Logo.png'
 
 export function Hero() {
     return (
@@ -81,7 +82,7 @@ export function Hero() {
                             animate: { rotate: -5, y: 0 },
                             transition: { delay: 0.15, duration: 0.65 },
                         }}
-                        avatar="/images/Logo_DB_Transparent.svg"
+                        avatar={avatarImage}
                         avatarRounded={false}
                         username="Progressive Victory"
                         nameColor="red"
@@ -98,7 +99,7 @@ export function Hero() {
                             animate: { rotate: 1, y: 0 },
                             transition: { delay: 0.65, duration: 0.65 },
                         }}
-                        avatar="/images/Logo_DB_Transparent.svg"
+                        avatar={avatarImage}
                         avatarRounded={false}
                         username="Progressive Victory"
                         nameColor="red"
@@ -212,3 +213,4 @@ function TiltMessage({
         </motion.div>
     )
 }
+ 
