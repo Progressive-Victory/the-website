@@ -557,6 +557,7 @@ export default function Volunteer() {
                                 )}
                             </div>
                         </Stage>
+                        <span className='text-white'>If the join form is not working for you, please email us at: Support@progress.win</span>
                     </div>
                 </div>
             </div>
