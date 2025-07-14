@@ -30,6 +30,7 @@ export default function StateMap(props: StateMapInteractionProps & {
   return (
     <MapContainer
       {..._mapView}
+      keyboard={false}
       zoomSnap={0.1}
       zoomControl={false}
       attributionControl={false}
