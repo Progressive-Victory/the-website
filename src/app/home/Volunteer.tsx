@@ -38,11 +38,11 @@ export function Volunteer() {
     }, [inView])
 
     return (
-        <div className="flex w-full flex-col items-center justify-center gap-y-24 bg-black-pearl-light py-20">
+        <div className="flex w-full flex-col items-center justify-center gap-y-10 bg-black-pearl-dark py-20">
             <h1 className="text-4xl font-bold text-white">
                 What Can <span className="text-valencia">You </span> Do?
             </h1>
-            <div className="flex flex-col items-center justify-center gap-10 px-10">
+            <div className="flex flex-col items-center justify-center gap-10 px-[6vw] xl:flex-row">
                 {visible &&
                     actions.map((action, index) => (
                         <Card
@@ -79,14 +79,14 @@ function Card({
                 delay,
                 ease: 'backInOut',
             }}
-            className="relative flex w-full flex-row items-center justify-start rounded-lg bg-white p-10"
+            className="relative flex flex-row h-fit w-full md:h-[250px] items-center justify-start rounded-lg bg-white pl-6 py-8"
         >
             <Image src={image} alt={title} width={86} height={86} />
-            <div className="flex flex-col gap-1 px-10">
-                <h1 className="text-lg font-bold text-black-pearl-dark md:text-xl">
+            <div className="flex flex-col gap-1 px-6">
+                <h1 className="font-bold text-black-pearl-dark text-xl">
                     {title}
                 </h1>
-                <p>{description}</p>
+                <p className="text-md">{description}</p>
             </div>
         </motion.div>
     )

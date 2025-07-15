@@ -57,7 +57,7 @@ export function Message({
 
     return (
         <motion.div
-            className={`my-2 flex size-fit max-w-[800px] flex-col gap-4 rounded-md bg-white p-4 shadow-xl xl:w-[30vw] ${className ?? className}`}
+            className={`my-2 flex size-fit max-w-[800px] flex-col gap-4 rounded-md bg-white p-4 shadow-xl ${className ?? className}`}
             style={{
                 willChange: 'opacity, transform',
                 transform: 'translateZ(0)',
