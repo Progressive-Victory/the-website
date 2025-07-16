@@ -5,11 +5,6 @@ import { StateMap } from '@/components/Map'
 import { MapView, StateMapInteractionProps } from '@/components/Map/types'
 import { BBOX_AK, BBOX_HI, BBOX_PR, BBOX_US, US_STATES } from '@/components/Map/constants'
 
-const mapText = `The PV community is constantly growing! Our members are
-                    organizing in their local communities, identifying campaigns
-                    in their area, and using the shared resources, tactics, and
-                    people power of Progressive Victory!`
-
 export function VolunteerMap() {
     /* States */
     const [hoveredState, setHoveredState] = useState<string | null>(null);
@@ -50,7 +45,7 @@ export function VolunteerMap() {
                 </p>
                 <Link
                     href={'/volunteer'}
-                    className="bg-valencia w-fit justify-self-center"
+                    className="w-fit justify-self-center bg-valencia"
                 >
                     Get Involved
                 </Link>
@@ -128,7 +123,7 @@ function CombinedMap(props: StateMapInteractionProps) {
 
     return (
         <div
-            className="relative border rounded-md w-[60vw] max-w-[750px] min-w-[350px]"
+            className="relative w-[60vw] min-w-[350px] max-w-[750px] rounded-md border"
         >
             <div className="aspect-video md:aspect-[5/3]">
                 <StateMap
@@ -141,7 +136,7 @@ function CombinedMap(props: StateMapInteractionProps) {
                 />
             </div>
 
-            <div className="relative bottom-0 left-0 flex w-3/5 items-end gap-1 sm:absolute sm:w-2/5 pointer-events-none m-1">
+            <div className="pointer-events-none relative bottom-0 left-0 m-1 flex w-3/5 items-end gap-1 sm:absolute sm:w-2/5">
                 {Object.entries(extraMaps).map(([, map], i) => (
                     <div
                         key={i}
