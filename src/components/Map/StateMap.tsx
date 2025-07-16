@@ -5,6 +5,7 @@ import { StateDataFeatureCollection, statesData } from "./stateData"
 import { OPEN_ATTR, OPEN_MAP_URI } from "./constants";
 import { MapView, StateMapInteractionProps } from "./types";
 import { Feature, Geometry } from "geojson";
+import { ResponsiveFit } from "./ResponsiveFit";
 
 export default function StateMap(props: StateMapInteractionProps & {
   enableInteraction?: boolean;
@@ -14,18 +15,10 @@ export default function StateMap(props: StateMapInteractionProps & {
   const { enableInteraction, showOpenStreetMap, mapView, stateMemberCount } = props;
 
   // Map Props - Zoom and Center
-  const _mapView = mapView ?? {
+  const _mapView: MapView = mapView ?? {
     zoom: 4.1,
     center: { lat: 36.2, lng: -96.5 }
   }
-
-  // USMapLayer Data state handling
-  // const statesDataJSON = useMemo(() => {
-  //     if (!stateMemberCount) return statesData
-
-
-
-  // }, [])
 
   return (
     <MapContainer
@@ -38,9 +31,10 @@ export default function StateMap(props: StateMapInteractionProps & {
       dragging={enableInteraction}
       doubleClickZoom={enableInteraction}
       className="z-0 size-full rounded-md"
-
     >
       <>
+        {"bounds" in _mapView && <ResponsiveFit bounds={_mapView.bounds} />}
+
         {showOpenStreetMap && <TileLayer attribution={OPEN_ATTR} url={OPEN_MAP_URI} />}
         <USMapLayer
           data={statesData}

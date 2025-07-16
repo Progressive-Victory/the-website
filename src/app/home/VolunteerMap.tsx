@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link, Message, TiltMessage } from '@/components/common'
 import { StateMap } from '@/components/Map'
 import { MapView, StateMapInteractionProps } from '@/components/Map/types'
-import { US_STATES } from '@/components/Map/constants'
+import { BBOX_AK, BBOX_HI, BBOX_PR, BBOX_US, US_STATES } from '@/components/Map/constants'
 
 const mapText = `The PV community is constantly growing! Our members are
                     organizing in their local communities, identifying campaigns
@@ -39,23 +39,25 @@ export function VolunteerMap() {
 
     return (
         <div className="w-full flex flex-col justify-center xl:grid xl:grid-cols-2 items-center gap-10 bg-black-pearl-light py-20">
-            <div className="xl:justify-start text-center flex-grow text-white max-w-[800px] xl:order-last">
-                <h1 className="justify-self-start text-4xl font-bold mb-4">
+            {/* Text */}
+            <div className="text-center text-white max-w-[800px] xl:order-last">
+                <h1 className="text-4xl font-bold mb-4">
                     Thousands of <span className="text-valencia">Volunteers</span>
                     <br /> Across the US
                 </h1>
-                <p className="text-lg justify-self-start">
+                <p className="text-lg px-4 md:px-24">
                     The PV community is constantly growing! Our members are organizing in their local communities, identifying campaigns in their area, and using the shared resources, tactics, and people power of Progressive Victory!
                 </p>
             </div>
 
-            <div className="flex w-full justify-center xl:justify-end">
+            {/* Map */}
+            <div className="w-full flex justify-center xl:justify-end px-4">
                 <TiltMessage>
                     <Message
                         avatar="/images/pv_pride.png"
                         avatarRounded={false}
                         nameColor="red"
-                        className="w-[800px]"
+                        className="w-full max-w-[800px]"
                         username="Progressive Victory"
                         text={mapText}
                         topRightContent={
@@ -99,58 +101,62 @@ function CombinedMap(props: StateMapInteractionProps) {
     const extraMaps: Record<string, ExtraMap> = {
         "AK": {
             left: 0,
-            h: 140,
-            w: 170,
-            mapView: { zoom: 2, center: { lat: 63, lng: -154 } }
+            h: 120,
+            w: 140,
+            mapView: { bounds: BBOX_AK }
+            // mapView: { zoom: 2, center: { lat: 63, lng: -154 } }
         },
         "HI": {
             left: 174,
-            h: 90,
-            w: 120,
-            mapView: { zoom: 4.8, center: { lat: 20.5, lng: -157.3 } }
+            h: 75,
+            w: 100,
+            mapView: { bounds: BBOX_HI }
+
+            // mapView: { zoom: 4.8, center: { lat: 20.5, lng: -157.3 } }
         },
         "PR": {
             left: 298,
-            h: 60,
-            w: 90,
-            mapView: { zoom: 5.5, center: { lat: 18.3, lng: -66.4 } }
+            h: 50,
+            w: 70,
+            mapView: { bounds: BBOX_PR }
+            // mapView: { zoom: 5.5, center: { lat: 18.3, lng: -66.4 } }
         }
     }
 
     return (
-        <div className="relative h-[450px] w-[750px]">
-            <StateMap
-                mapView={{
-                    zoom: 4.1,
-                    center: { lat: 36.2, lng: -96.5 }
-                }}
-                stateMemberCount={props.stateMemberCount}
-                selectedState={props.selectedState}
-                onFeatureClick={props.onFeatureClick}
-                onFeatureHover={props.onFeatureHover}
-                hoveredState={props.hoveredState}
-            />
+        <div className="relative w-full">
+            <div className="max-w-[750px] aspect-video md:aspect-[5/3]">
+                <StateMap
+                    mapView={{ bounds: BBOX_US }}
+                    stateMemberCount={props.stateMemberCount}
+                    selectedState={props.selectedState}
+                    onFeatureClick={props.onFeatureClick}
+                    onFeatureHover={props.onFeatureHover}
+                    hoveredState={props.hoveredState}
+                />
+            </div>
 
-            {Object.entries(extraMaps).map(([, map], i) => (
-                <div
-                    key={i}
-                    className={`absolute bottom-0 rounded-md border`}
-                    style={{
-                        left: map.left,
-                        height: map.h,
-                        width: map.w
-                    }}
-                >
-                    <StateMap
-                        mapView={map.mapView}
-                        stateMemberCount={props.stateMemberCount}
-                        selectedState={props.selectedState}
-                        onFeatureClick={props.onFeatureClick}
-                        onFeatureHover={props.onFeatureHover}
-                        hoveredState={props.hoveredState}
-                    />
-                </div>
-            ))}
+            <div className="relative sm:absolute flex items-end bottom-0 left-0 gap-1 w-4/5">
+                {Object.entries(extraMaps).map(([, map], i) => (
+                    <div
+                        key={i}
+                        className={`relative rounded-md border w-full`}
+                        style={{
+                            aspectRatio: map.w / map.h,
+                            maxWidth: map.w
+                        }}
+                    >
+                        <StateMap
+                            mapView={map.mapView}
+                            stateMemberCount={props.stateMemberCount}
+                            selectedState={props.selectedState}
+                            onFeatureClick={props.onFeatureClick}
+                            onFeatureHover={props.onFeatureHover}
+                            hoveredState={props.hoveredState}
+                        />
+                    </div>
+                ))}
+            </div>
         </div>
     )
 }
