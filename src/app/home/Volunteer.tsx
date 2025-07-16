@@ -79,11 +79,11 @@ function Card({
                 delay,
                 ease: 'backInOut',
             }}
-            className="relative flex flex-row h-fit w-full md:h-[250px] items-center justify-start rounded-lg bg-white pl-6 py-8"
+            className="relative flex h-fit w-full flex-row items-center justify-start rounded-lg bg-white py-8 pl-6 md:h-[250px]"
         >
             <Image src={image} alt={title} width={86} height={86} />
             <div className="flex flex-col gap-1 px-6">
-                <h1 className="font-bold text-black-pearl-dark text-xl">
+                <h1 className="text-xl font-bold text-black-pearl-dark">
                     {title}
                 </h1>
                 <p className="text-md">{description}</p>

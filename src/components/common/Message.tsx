@@ -107,7 +107,7 @@ export function Message({
             )}
 
             {/* Middle - Children */}
-            {children && <div className="flex justify-center">{children}</div>}
+            {children && children}
 
             {/* Bottom Row */}
             {botDivider && <hr className="h-px w-full border-gray-200" />}

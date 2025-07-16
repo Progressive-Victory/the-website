@@ -38,55 +38,58 @@ export function VolunteerMap() {
     }
 
     return (
-        <div className="w-full flex flex-col justify-center xl:grid xl:grid-cols-2 items-center gap-10 bg-black-pearl-light py-20">
+        <div className="flex w-full flex-col items-center justify-center gap-[8vw] bg-black-pearl-light py-20 2xl:grid 2xl:grid-cols-2">
             {/* Text */}
-            <div className="text-center text-white max-w-[800px] xl:order-last">
-                <h1 className="text-4xl font-bold mb-4">
+            <div className="max-w-[750px] text-center text-white 2xl:order-last">
+                <h1 className="mb-5 text-4xl font-bold">
                     Thousands of <span className="text-valencia">Volunteers</span>
                     <br /> Across the US
                 </h1>
-                <p className="text-lg px-4 md:px-24">
+                <p className="mb-5 px-4 text-lg md:px-24">
                     The PV community is constantly growing! Our members are organizing in their local communities, identifying campaigns in their area, and using the shared resources, tactics, and people power of Progressive Victory!
                 </p>
+                <Link
+                    href={'/volunteer'}
+                    className="bg-valencia w-fit justify-self-center"
+                >
+                    Get Involved
+                </Link>
             </div>
 
             {/* Map */}
-            <div className="w-full flex justify-center xl:justify-end px-4">
-                <TiltMessage>
-                    <Message
-                        avatar="/images/pv_pride.png"
-                        avatarRounded={false}
-                        nameColor="red"
-                        className="w-full max-w-[800px]"
-                        username="Progressive Victory"
-                        text={mapText}
-                        topRightContent={
-                            <Link
-                                href={'/volunteer'}
-                                className="bg-valencia !px-3 !py-1.5 !text-sm"
-                            >
-                                Get Involved
-                            </Link>
-                        }
-                        botDivider={true}
-                        botLeftContent={
-                            <p className="font-medium">{selectedState
-                                ? `Members in ${selectedState}: ${stateMemberCount?.[selectedState]}`
-                                : `Total Members: ${totalMemberCount}`
-                            }</p>
-                        }
-                    >
-                        <CombinedMap
-                            stateMemberCount={stateMemberCount}
-                            onFeatureClick={onFeatureClick}
-                            onFeatureHover={setHoveredState}
-                            hoveredState={hoveredState}
-                            selectedState={selectedState}
-                        />
-                    </Message>
-                </TiltMessage>
-            </div>
-        </div >
+            <TiltMessage className="flex justify-center xl:justify-end">
+                <Message
+                    avatar="/images/pv_pride.png"
+                    avatarRounded={false}
+                    nameColor="red"
+                    username="Progressive Victory"
+                    text={""}
+                    // topRightContent={
+                    //     <Link
+                    //         href={'/volunteer'}
+                    //         className="bg-valencia !px-3 !py-1.5 !text-sm"
+                    //     >
+                    //         Get Involved
+                    //     </Link>
+                    // }
+                    botDivider={true}
+                    botLeftContent={
+                        <p className="font-medium">{selectedState
+                            ? `Members in ${selectedState}: ${stateMemberCount?.[selectedState]}`
+                            : `Total Members: ${totalMemberCount}`
+                        }</p>
+                    }
+                >
+                    <CombinedMap
+                        stateMemberCount={stateMemberCount}
+                        onFeatureClick={onFeatureClick}
+                        onFeatureHover={setHoveredState}
+                        hoveredState={hoveredState}
+                        selectedState={selectedState}
+                    />
+                </Message>
+            </TiltMessage>
+        </div>
     )
 }
 
@@ -124,8 +127,10 @@ function CombinedMap(props: StateMapInteractionProps) {
     }
 
     return (
-        <div className="relative w-full">
-            <div className="max-w-[750px] aspect-video md:aspect-[5/3]">
+        <div
+            className="relative border rounded-md w-[60vw] max-w-[750px] min-w-[350px]"
+        >
+            <div className="aspect-video md:aspect-[5/3]">
                 <StateMap
                     mapView={{ bounds: BBOX_US }}
                     stateMemberCount={props.stateMemberCount}
@@ -136,11 +141,12 @@ function CombinedMap(props: StateMapInteractionProps) {
                 />
             </div>
 
-            <div className="relative sm:absolute flex items-end bottom-0 left-0 gap-1 w-4/5">
+            <div className="relative bottom-0 left-0 flex w-3/5 items-end gap-1 sm:absolute sm:w-2/5 pointer-events-none m-1">
                 {Object.entries(extraMaps).map(([, map], i) => (
                     <div
                         key={i}
-                        className={`relative rounded-md border w-full`}
+                        // className={`relative w-full rounded-md border`}
+                        className={`relative w-full`}
                         style={{
                             aspectRatio: map.w / map.h,
                             maxWidth: map.w
