@@ -18,8 +18,8 @@ export function VolunteerMap() {
             const smc = await (await fetch("/api/map/count")).json()
             Object.entries(smc).forEach(([k, v]) => {
                 const state = US_STATES.find(s => s.code === k)?.name
-                if (typeof state === "string" && typeof v === "number") {
-                    statesCount[state] = v
+                if (typeof state === "string") {
+                    statesCount[state] = (typeof v === "number" ? v : 0)
                 }
             })
             const total = await (await fetch("/api/map/users-count")).json()
@@ -35,7 +35,7 @@ export function VolunteerMap() {
     return (
         <div className="flex w-full flex-col items-center justify-center gap-[8vw] bg-black-pearl-light py-20 2xl:grid 2xl:grid-cols-2">
             {/* Text */}
-            <div className="max-w-[750px] text-center text-white 2xl:order-last">
+            <div className="flex max-w-[750px] flex-col items-center text-center text-white 2xl:order-last">
                 <h1 className="mb-5 text-4xl font-bold">
                     Thousands of <span className="text-valencia">Volunteers</span>
                     <br /> Across the US
