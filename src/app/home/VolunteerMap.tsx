@@ -15,14 +15,16 @@ export function VolunteerMap() {
     useEffect(() => {
         void (async () => {
             const statesCount: Record<string, number> = {}
-            const smc = await (await fetch("/api/map/count")).json()
+            const smc = await (await fetch("/api/map/count")).json() as Record<string, number>
             Object.entries(smc).forEach(([k, v]) => {
                 const state = US_STATES.find(s => s.code === k)?.name
                 if (typeof state === "string") {
                     statesCount[state] = (typeof v === "number" ? v : 0)
                 }
             })
-            const total = await (await fetch("/api/map/users-count")).json()
+
+            const total = await (await fetch("/api/map/users-count")).json() as number
+
             setStateMemberCount(statesCount)
             setTotalMemberCount(total)
         })()

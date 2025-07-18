@@ -54,6 +54,7 @@ export const US_STATES = [
     { "name": "Oklahoma", "code": "OK" },
     { "name": "Oregon", "code": "OR" },
     { "name": "Pennsylvania", "code": "PA" },
+    { "name": "Puerto Rico", "code": "PR" },
     { "name": "Rhode Island", "code": "RI" },
     { "name": "South Carolina", "code": "SC" },
     { "name": "South Dakota", "code": "SD" },
