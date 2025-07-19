@@ -38,8 +38,8 @@ export function Volunteer() {
     }, [inView])
 
     return (
-        <div className="flex w-full flex-col items-center justify-center gap-y-10 bg-black-pearl-dark py-20">
-            <h1 className="text-4xl font-bold text-white">
+        <div className="flex w-full flex-col items-center justify-center bg-black-pearl-light py-12">
+            <h1 className="pb-10 text-4xl font-bold text-white">
                 What Can <span className="text-valencia">You </span> Do?
             </h1>
             <div className="flex flex-col items-center justify-center gap-10 px-[6vw] xl:flex-row">

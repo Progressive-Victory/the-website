@@ -77,7 +77,7 @@ export function Hero() {
             <div className="mt-20 flex flex-wrap justify-center gap-6 px-4">
                 <TiltMessage className="order-last xl:order-first">
                     <Message
-                        className="max-w-xl"
+                        className="max-w-xl xl:w-[30vw]"
                         motionProps={{
                             initial: { rotate: 20, y: 50 },
                             animate: { rotate: -5, y: 0 },
@@ -95,7 +95,7 @@ export function Hero() {
 
                 <TiltMessage className="h-fit lg:mt-24">
                     <Message
-                        className="max-w-xl"
+                        className="max-w-xl xl:w-[30vw]"
                         motionProps={{
                             initial: { rotate: 15, y: 50 },
                             animate: { rotate: 1, y: 0 },
@@ -111,7 +111,7 @@ export function Hero() {
 
                 <TiltMessage className="order-first xl:order-last">
                     <Message
-                        className="max-w-xl"
+                        className="max-w-xl xl:w-[30vw]"
                         motionProps={{
                             initial: { rotate: 30, y: 50 },
                             animate: { rotate: 6, y: 0 },
@@ -216,4 +216,4 @@ function TiltMessage({
         </motion.div>
     )
 }
- 
+

@@ -35,15 +35,15 @@ export function VolunteerMap() {
     }
 
     return (
-        <div className="flex w-full flex-col items-center justify-center gap-[8vw] bg-black-pearl-light py-20 2xl:grid 2xl:grid-cols-2">
+        <div className="relative flex w-full flex-col items-center justify-center gap-[6vw] bg-black-pearl-dark py-10 2xl:grid 2xl:grid-cols-2">
             {/* Text */}
-            <div className="flex max-w-[750px] flex-col items-center text-center text-white 2xl:order-last">
-                <h1 className="mb-5 text-4xl font-bold">
+            <div className="z-10 flex max-w-[750px] flex-col items-center text-center text-white 2xl:order-last">
+                <h1 className="mb-8 text-4xl font-bold">
                     Thousands of <span className="text-valencia">Volunteers</span>
                     <br /> Across the US
                 </h1>
-                <p className="mb-5 px-4 text-lg md:px-24">
-                    The PV community is constantly growing! Our members are organizing in their local communities, identifying campaigns in their area, and using the shared resources, tactics, and people power of Progressive Victory!
+                <p className="mb-8 px-4 text-lg font-[500] md:px-24 ">
+                    The PV community is constantly growing. Every new voice adds to the movement!
                 </p>
                 <Link
                     href={'/volunteer'}
@@ -56,19 +56,12 @@ export function VolunteerMap() {
             {/* Map */}
             <TiltMessage className="flex justify-center xl:justify-end">
                 <Message
+                    className="xl:w-[30vw]"
                     avatar="/images/pv_pride.png"
                     avatarRounded={false}
                     nameColor="red"
                     username="Progressive Victory"
-                    text={""}
-                    // topRightContent={
-                    //     <Link
-                    //         href={'/volunteer'}
-                    //         className="bg-valencia !px-3 !py-1.5 !text-sm"
-                    //     >
-                    //         Get Involved
-                    //     </Link>
-                    // }
+                    text={"Our members are organizing in their local communities, identifying campaigns in their area, and using the shared resources, tactics, and people power of Progressive Victory!"}
                     botDivider={true}
                     botLeftContent={
                         <p className="font-medium">{selectedState
@@ -104,28 +97,24 @@ function CombinedMap(props: StateMapInteractionProps) {
             h: 120,
             w: 140,
             mapView: { bounds: BBOX_AK }
-            // mapView: { zoom: 2, center: { lat: 63, lng: -154 } }
         },
         "HI": {
             left: 174,
             h: 75,
             w: 100,
             mapView: { bounds: BBOX_HI }
-
-            // mapView: { zoom: 4.8, center: { lat: 20.5, lng: -157.3 } }
         },
         "PR": {
             left: 298,
             h: 50,
             w: 70,
             mapView: { bounds: BBOX_PR }
-            // mapView: { zoom: 5.5, center: { lat: 18.3, lng: -66.4 } }
         }
     }
 
     return (
         <div
-            className="relative w-[60vw] min-w-[350px] max-w-[750px] rounded-md border"
+            className="relative min-w-[350px] max-w-[750px] rounded-md border"
         >
             <div className="aspect-video md:aspect-[5/3]">
                 <StateMap

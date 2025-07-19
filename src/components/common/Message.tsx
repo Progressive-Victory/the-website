@@ -17,7 +17,6 @@ import {
     HeartIcon as SolidHeartIcon,
     ChatBubbleLeftRightIcon as SolidChatBubbleLeftRightIcon,
     ArrowUpOnSquareIcon as SolidArrowUpOnSquareIcon,
-    EllipsisHorizontalIcon,
 } from '@heroicons/react/24/solid'
 
 export function Message({
@@ -30,7 +29,6 @@ export function Message({
     nameColor,
     image,
     children,
-    topRightContent,
     botLeftContent,
     botDivider = false,
 }: {
@@ -47,7 +45,6 @@ export function Message({
     nameColor?: string
     image?: string
     children?: JSX.Element
-    topRightContent?: JSX.Element
     botLeftContent?: JSX.Element
     botDivider?: boolean
 }) {
@@ -83,10 +80,10 @@ export function Message({
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-x-4">
+                    {/* <div className="flex items-center gap-x-4">
                         {topRightContent && topRightContent}
                         <EllipsisHorizontalIcon className="size-7 cursor-pointer" />
-                    </div>
+                    </div> */}
                 </div>
 
                 <p className="mr-auto text-left">{text}</p>

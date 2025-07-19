@@ -6,8 +6,8 @@ export default function Home() {
     <MainLayout>
       <div className="flex flex-col items-center overflow-x-hidden">
         <Hero />
-        <VolunteerMap />
         <Volunteer />
+        <VolunteerMap />
         <MemberBanner />
       </div>
     </MainLayout>
