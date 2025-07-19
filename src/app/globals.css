@@ -5,63 +5,62 @@
 .perspective-container {
   perspective: 1000px;
   transform-style: preserve-3d;
-  
+
 }
+
 .halftone {
-    --mask: linear-gradient(
-        45deg,
-        transparent 5%,
-        rgb(255 255 255) 10%,
-        rgb(255 255 255 / 0.5) 96%
-    );
-    --stop1: 10%;
-    --stop2: 96%;
-    background-color: black;
-    aspect-ratio: 1;
-    filter: contrast(55);
+  --mask: linear-gradient(45deg,
+      transparent 5%,
+      rgb(255 255 255) 10%,
+      rgb(255 255 255 / 0.5) 96%);
+  --stop1: 10%;
+  --stop2: 96%;
+  background-color: black;
+  aspect-ratio: 1;
+  filter: contrast(55);
 }
 
 .halftone::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(
-        circle at center,
-        white var(--stop1),
-        transparent var(--stop2)
-    );
-    background-size: 0.55rem 0.55rem;
-    background-repeat: round;
-    background-position: center;
-    mask-image: var(--mask);
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at center,
+      white var(--stop1),
+      transparent var(--stop2));
+  background-size: 0.55rem 0.55rem;
+  background-repeat: round;
+  background-position: center;
+  mask-image: var(--mask);
 }
 
 
 @keyframes grow {
-    0% {
-        transform: scale(0);
-    }
-    50% {
-        transform: scale(1.2);
-    }
-    100% {
-        transform: scale(1);
-    }
+  0% {
+    transform: scale(0);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .grow {
-    animation: grow 0.3s ease-in-out;
+  animation: grow 0.3s ease-in-out;
 }
 
-.custom-marker-cluster > div {
-    @apply size-full flex items-center justify-center text-white text-[1rem] font-bold rounded-full border-2 border-dashed border-white;
-    background: #10233a;
+.custom-marker-cluster>div {
+  @apply size-full flex items-center justify-center text-white text-[1rem] font-bold rounded-full border-2 border-dashed border-white;
+  background: #10233a;
 }
 
 .leaflet-container {
-    background: transparent;
+  background: transparent;
 }
 
 .leaflet-container img.leaflet-tile {
-    mix-blend-mode: unset;
+  mix-blend-mode: unset;
 }

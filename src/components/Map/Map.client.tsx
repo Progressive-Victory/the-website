@@ -4,7 +4,7 @@ import { ReactElement, useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, GeoJSON } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import { zipToLatLong } from './util'
-import { statesData } from './stateData'
+import { StateDataFeatureCollection, statesData } from './stateData'
 import { OPEN_ATTR, OPEN_MAP_URI, US_CENTER } from './constants'
 import { getBrandColor, ShadeIndex } from '@/util/theme'
 
@@ -13,7 +13,10 @@ interface MarkerCluster {
     getChildCount: () => number
 }
 
-interface LatLon { lat: string | number; lon: string | number }
+interface LatLon {
+    lat: string | number
+    lon: string | number
+}
 
 const createClusterCustomIcon = function (cluster: MarkerCluster) {
     return L.divIcon({
@@ -24,11 +27,15 @@ const createClusterCustomIcon = function (cluster: MarkerCluster) {
 }
 
 // Map Layers
-export const USMapLayer = ({ isHeatmap }: { isHeatmap?: boolean }) => {
+export const USMapLayer = ({ isHeatmap, data }: {
+    isHeatmap?: boolean,
+    data: StateDataFeatureCollection
+}) => {
+
     return (
         <>
             <GeoJSON
-                data={statesData}
+                data={data}
                 style={() => {
                     const strokeColor = getBrandColor('blue', 200)
                     return {
@@ -41,13 +48,13 @@ export const USMapLayer = ({ isHeatmap }: { isHeatmap?: boolean }) => {
                 }}
             />
             <GeoJSON
-                data={statesData}
+                data={data}
                 style={() => {
                     // TODO: pull in data from api instead of using random shades
                     const shade = getBrandColor(
                         'blue',
                         [500, 400, 300, 200, 100][
-                            Math.floor(Math.random() * 5)
+                        Math.floor(Math.random() * 5)
                         ] as ShadeIndex
                     )
 
@@ -117,6 +124,7 @@ export const ClientMap = ({
                 const data = await zipToLatLong(zipcode)
                 if (data) newList.push(data)
             }
+            console.log(newList)
             setMarkerList(newList)
         }
         if (isMarker) void fetcher()
@@ -128,21 +136,20 @@ export const ClientMap = ({
 
     return (
         <MapContainer
-            zoom={4}
-            minZoom={3}
-            maxZoom={9}
+            zoom={4.1}
             center={US_CENTER}
+            zoomSnap={0.1}
             zoomControl={false}
             attributionControl={false}
             scrollWheelZoom={!disableInteraction}
             dragging={!disableInteraction}
             doubleClickZoom={!disableInteraction}
-            className="z-0 size-full"
+            className="z-0 size-full rounded-md"
         >
             {children ?? (
                 <>
                     {!hideOpenStreetMap && <OpenStreetMapLayer />}
-                    <USMapLayer isHeatmap={isHeatmap} />
+                    <USMapLayer isHeatmap={isHeatmap} data={statesData} />
                     {isMarker && <MarkerLayer markerList={markerList} />}
                 </>
             )}

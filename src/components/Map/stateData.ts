@@ -1,6 +1,12 @@
-import { GeoJSON } from 'geojson'
+import { FeatureCollection, MultiPolygon, Polygon } from 'geojson'
 
-const statesData: GeoJSON = {
+export type StateDataFeatureCollection = FeatureCollection<
+    Polygon | MultiPolygon,
+    StateDataFeatureProps
+>
+export interface StateDataFeatureProps { name: string; count?: number }
+
+const statesData: StateDataFeatureCollection = {
     type: 'FeatureCollection',
     features: [
         {
