@@ -185,6 +185,8 @@ export async function checkAuthPermissions(
         return ResponseCode.Successful
     }
 
+    await dbConnect()
+
     const user = await User.findOne({
         discordId: session.discordId,
     })
