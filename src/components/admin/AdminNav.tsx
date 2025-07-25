@@ -3,7 +3,7 @@
 import classNames from 'classnames'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { FaKey, FaUsers, FaUserShield, FaUserTag } from 'react-icons/fa'
+import { FaUsers, FaUserShield, FaUserTag } from 'react-icons/fa'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { IconType } from 'react-icons/lib'
 

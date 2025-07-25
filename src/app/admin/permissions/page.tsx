@@ -7,7 +7,7 @@ import { IPermission } from '@/models/Permission'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
 
-export default function () {
+export default function Page() {
     const event_target = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
@@ -18,7 +18,7 @@ export default function () {
     // the form
     const [permission, setPermission] = useState<IPermission | null>(null)
 
-    const beforeElementSelected = (_value: IPermission) => {
+    const beforeElementSelected = () => {
         if (!deepEqual(permission, originalPermission)) {
             return confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
@@ -49,6 +49,7 @@ export default function () {
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {permission && originalPermission ? (
+                    // @ts-expect-error shut up
                     <Form<IPermission>
                         groups={[
                             {

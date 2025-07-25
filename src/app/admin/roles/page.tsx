@@ -1,7 +1,7 @@
-import Page from './client'
+import ClientPage from './client'
 import Permission from '@/models/Permission'
 
-export default async function () {
+export default async function Page() {
     const permissions = (await Permission.find({})).map((r) =>
         r.toObject({
             flattenObjectIds: true,
@@ -9,5 +9,5 @@ export default async function () {
         })
     )
 
-    return <Page permissions={permissions} />
+    return <ClientPage permissions={permissions} />
 }

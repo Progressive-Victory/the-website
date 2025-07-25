@@ -2,7 +2,7 @@ import ProtectedPage from '@/components/ProtectedPage'
 import AdminNav from '@/components/admin/AdminNav'
 import { Header } from '@/components/layout'
 
-export default function ({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <ProtectedPage requiredRoles={['Superadmin']}>
             <div className="relative flex size-full min-h-screen flex-col">

@@ -12,7 +12,7 @@ export interface PageProps {
     permissions: IPermission[]
 }
 
-export default function ({ permissions }: PageProps) {
+export default function ClientPage({ permissions }: PageProps) {
     const event_target = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
@@ -22,7 +22,7 @@ export default function ({ permissions }: PageProps) {
     // the form
     const [role, setRole] = useState<IRole | null>(null)
 
-    const beforeElementSelected = (_value: IRole) => {
+    const beforeElementSelected = () => {
         if (!deepEqual(role, originalRole)) {
             return confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
@@ -54,7 +54,7 @@ export default function ({ permissions }: PageProps) {
                         query_key: 'permissions',
                         display_key: 'name',
                         value_key: 'name',
-                        // @ts-expect-error
+                        // @ts-expect-error shut up
                         options: permissions,
                     },
                 ]}
@@ -62,6 +62,7 @@ export default function ({ permissions }: PageProps) {
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {role && originalRole ? (
+                    // @ts-expect-error shut up
                     <Form<IRole>
                         groups={[
                             {

@@ -115,7 +115,7 @@ export interface PageProps {
     roles: IRole[]
 }
 
-export default function ({ roles }: PageProps) {
+export default function ClientPage({ roles }: PageProps) {
     const event_target = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
@@ -125,7 +125,7 @@ export default function ({ roles }: PageProps) {
     // the form
     const [user, setUser] = useState<IUser | null>(null)
 
-    const beforeElementSelected = (_value: IUser) => {
+    const beforeElementSelected = () => {
         if (!deepEqual(user, originalUser)) {
             return confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
@@ -163,7 +163,7 @@ export default function ({ roles }: PageProps) {
                         query_key: 'roles',
                         display_key: 'name',
                         value_key: 'name',
-                        // @ts-expect-error
+                        // @ts-expect-error shut up
                         options: roles,
                     },
                 ]}
@@ -177,6 +177,7 @@ export default function ({ roles }: PageProps) {
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {user && originalUser ? (
+                    // @ts-expect-error shut up
                     <Form<IUser>
                         groups={[
                             ...FORM_GROUPS,

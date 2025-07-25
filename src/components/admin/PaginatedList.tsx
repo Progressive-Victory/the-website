@@ -122,7 +122,7 @@ export default function PaginatedList<T extends object>(
             console.log(url.search)
 
             const res = await fetch(url, { signal })
-            return await res.json()
+            return (await res.json()) as PaginatedResponse<T>
         },
         placeholderData: keepPreviousData,
     })
@@ -156,7 +156,7 @@ export default function PaginatedList<T extends object>(
         if (!event_target) return
 
         function handleSaveChanges() {
-            refetch()
+            void refetch()
         }
 
         event_target.addEventListener('refetch', handleSaveChanges)
@@ -235,12 +235,10 @@ export default function PaginatedList<T extends object>(
                     )}
                 </div>
                 {filtersOpen &&
-                    props.filters &&
-                    props.filters.map((f) => (
-                        <div className="flex flex-wrap gap-2">
+                    props.filters?.map((f) => (
+                        <div key={f.name} className="flex flex-wrap gap-2">
                             <strong className="font-medium">{f.name}:</strong>
                             <MultiSelect
-                                key={f.name}
                                 {...f}
                                 active={searchFilters[f.query_key] ?? []}
                                 addActive={(value) => {
@@ -346,7 +344,7 @@ const Pagination: FC<{
     enabled: boolean
     total: number
 }> = ({ page, onPageChange, maxPage, enabled, total }) => {
-    let can_change = maxPage > 1
+    const can_change = maxPage > 1
 
     const [value, setValue] = useState(page.toString())
 

@@ -1,7 +1,7 @@
 import Role from '@/models/Role'
-import Page from './client'
+import ClientPage from './client'
 
-export default async function () {
+export default async function Page() {
     const roles = (await Role.find({})).map((r) =>
         r.toObject({
             flattenObjectIds: true,
@@ -9,5 +9,5 @@ export default async function () {
         })
     )
 
-    return <Page roles={roles} />
+    return <ClientPage roles={roles} />
 }

@@ -36,7 +36,7 @@ export const POST = async (req: NextRequest) => {
                 // next-auth automatically appends this to the end of the
                 // redirectProxyUrl when constructing the redirect_uri for token
                 // grants so we need to add it here too
-                `${process.env.BOOMERANG_URI!}/callback/discord`
+                `${process.env.BOOMERANG_URI}/callback/discord`
             )
 
             // Return our modified response back to the user for them to redirect
