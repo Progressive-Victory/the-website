@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/react'
 import Script from 'next/script'
 import 'leaflet/dist/leaflet.css'
 import './globals.css'
+import QueryClientWrapper from '@/app/QueryClientWrapper'
 
 export const metadata: Metadata = {
     title: 'Progressive Victory',
@@ -39,8 +40,10 @@ export default function RootLayout({
                 />
             </head>
             <body className={montserrat.className}>
-                <Analytics />
-                <AuthProvider>{children}</AuthProvider>
+                <QueryClientWrapper>
+                    <Analytics />
+                    <AuthProvider>{children}</AuthProvider>
+                </QueryClientWrapper>
             </body>
         </html>
     )

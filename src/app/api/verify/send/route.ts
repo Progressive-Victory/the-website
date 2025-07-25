@@ -1,12 +1,11 @@
-import { NextRequest } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/util/auth'
-import { getToken } from 'next-auth/jwt'
 import { User } from '@/models/User'
-import { OnboardingStage } from '@/util/stage'
-import dbConnect from '@/util/libmongo'
+import { auth } from '@/util/auth'
 import { HTTPStatus } from '@/util/https-status'
+import dbConnect from '@/util/libmongo'
 import { neutrino } from '@/util/neutrino'
+import { OnboardingStage } from '@/util/stage'
+import { getToken } from 'next-auth/jwt'
+import { NextRequest } from 'next/server'
 export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
   // Parse incoming JSON body
@@ -18,7 +17,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Retrieve the session using the incoming request and auth options
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
   if (!session || !token) {

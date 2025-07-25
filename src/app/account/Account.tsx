@@ -36,7 +36,7 @@ export function Account() {
     } else {
         return (
             <MainLayout>
-                <div className="relative flex h-screen w-full flex-col items-center bg-steel-blue">
+                <div className="relative flex flex-1 size-full min-h-screen flex-col items-center bg-steel-blue xl:min-h-[unset]">
                     <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
 
                     <div className="z-2 relative mt-20 flex w-[300px] flex-col rounded-lg bg-black-pearl-dark p-4">
@@ -45,7 +45,9 @@ export function Account() {
                         </p>
                         <div className="flex flex-row items-center justify-between">
                             <button
-                                onClick={() => void signOut({ callbackUrl: '/' })}
+                                onClick={() =>
+                                    void signOut({ callbackUrl: '/' })
+                                }
                                 className="rounded-full bg-valencia px-4 py-2 font-bold text-white transition duration-300 ease-in-out hover:bg-white hover:text-black-pearl-dark"
                             >
                                 Sign Out
