@@ -557,8 +557,17 @@ export default function Volunteer() {
                                 )}
                             </div>
                         </Stage>
-                        <span className='text-red-500'>Make sure your discord account has a verified email attached to it.</span>
-                        <span className='text-red-500'>If the join form is not working for you, please email us at: support@progress.win</span>
+
+                        <div className="text-center font-bold">
+                            <p className="text-red-500 mb-2">
+                                Make sure your discord account has a verified
+                                email attached to it.
+                            </p>
+                            <p className="text-red-500">
+                                If the join form is not working for you, please
+                                email us at: support@progress.win
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
