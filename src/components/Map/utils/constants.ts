@@ -68,3 +68,68 @@ export const US_STATES = [
   { "name": "Wisconsin", "code": "WI" },
   { "name": "Wyoming", "code": "WY" }
 ]
+
+export type StateCoalitionName = "Northeastern" | "Southern" | "Midwestern" | "Western"
+
+export const STATE_COALITIONS: Record<StateCoalitionName, string[]> = {
+  "Northeastern": [
+    "Connecticut",
+    "Delaware",
+    "DC",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "New Hampshire",
+    "Rhode Island",
+    "Pennsylvania",
+    "New Jersey",
+    "New York",
+    "Vermont",
+    "Virginia"
+  ],
+  "Southern": [
+    "Alabama",
+    "Arkansas",
+    "Florida",
+    "Georgia",
+    "Louisiana",
+    "Mississippi",
+    "North Carolina",
+    "Oklahoma",
+    "Puerto Rico",
+    "South Carolina",
+    "Tennessee",
+    "Texas"
+  ],
+  "Midwestern": [
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Michigan",
+    "Minnesota",
+    "Missouri",
+    "Nebraska",
+    "North Dakota",
+    "Ohio",
+    "South Dakota",
+    "West Virginia",
+    "Wisconsin"
+  ],
+  "Western": [
+    "Alaska",
+    "Arizona",
+    "California",
+    "Colorado",
+    "Hawaii",
+    "Idaho",
+    "Montana",
+    "Nevada",
+    "New Mexico",
+    "Oregon",
+    "Utah",
+    "Washington",
+    "Wyoming"
+  ]
+}
