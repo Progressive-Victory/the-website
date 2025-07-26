@@ -68,3 +68,8 @@ html, body {
 .leaflet-container img.leaflet-tile {
   mix-blend-mode: unset;
 }
+
+.truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

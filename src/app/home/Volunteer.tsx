@@ -79,7 +79,7 @@ function Card({
                 delay,
                 ease: 'backInOut',
             }}
-            className="relative flex h-fit w-full flex-row items-center justify-start rounded-lg bg-white py-8 pl-6 md:h-[250px]"
+            className="relative flex h-fit w-full flex-row items-center truncate-text justify-start rounded-lg bg-white py-8 pl-6 md:h-[250px]"
         >
             <Image src={image} alt={title} width={86} height={86} />
             <div className="flex flex-col gap-1 px-6">
