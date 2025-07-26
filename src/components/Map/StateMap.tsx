@@ -10,7 +10,7 @@ export default function StateMap(props: StateMapInteractionProps & {
   showOpenStreetMap?: boolean;
   mapView: MapView;
 }) {
-  const { enableInteraction, showOpenStreetMap, mapView, stateMemberCount } = props;
+  const { coalition, enableInteraction, showOpenStreetMap, mapView, stateMemberCount } = props;
 
   // Map Props - Zoom and Center
   const _mapView: MapView = mapView ?? {
@@ -41,7 +41,7 @@ export default function StateMap(props: StateMapInteractionProps & {
           onFeatureHover={props.onFeatureHover}
           selectedState={props.selectedState}
           hoveredState={props.hoveredState}
-
+          coalition={coalition}
         />
       </>
     </MapContainer>

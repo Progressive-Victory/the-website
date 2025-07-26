@@ -18,4 +18,5 @@ export interface StateMapInteractionProps {
   selectedState: string | null;
   hoveredState: string | null;
   stateMemberCount?: Record<string, number>;
+  coalition?: boolean;
 }
