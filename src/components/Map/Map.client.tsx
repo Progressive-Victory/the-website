@@ -3,9 +3,9 @@ import L from 'leaflet'
 import { ReactElement, useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, GeoJSON } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
-import { zipToLatLong } from './util'
-import { StateDataFeatureCollection, statesData } from './stateData'
-import { OPEN_ATTR, OPEN_MAP_URI, US_CENTER } from './constants'
+import { zipToLatLong } from './utils/util'
+import { StateDataFeatureCollection, statesData } from './utils/stateData'
+import { OPEN_ATTR, OPEN_MAP_URI, US_CENTER } from './utils/constants'
 import { getBrandColor, ShadeIndex } from '@/util/theme'
 
 // Types

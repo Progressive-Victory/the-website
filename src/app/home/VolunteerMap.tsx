@@ -10,6 +10,7 @@ import {
     BBOX_US,
     US_STATES,
 } from '@/components/Map/constants'
+//import { BBOX_AK, BBOX_HI, BBOX_PR, BBOX_US, US_STATES } from '@/components/Map/utils/constants'
 
 export function VolunteerMap() {
     /* States */

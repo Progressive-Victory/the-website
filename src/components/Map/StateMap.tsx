@@ -1,11 +1,11 @@
 import { useCallback, useMemo } from "react";
 import { GeoJSON, MapContainer, TileLayer } from "react-leaflet";
 import { getBrandColor } from "@/util/theme"
-import { StateDataFeatureCollection, statesData } from "./stateData"
-import { OPEN_ATTR, OPEN_MAP_URI } from "./constants";
+import { StateDataFeatureCollection, statesData } from "./utils/stateData"
+import { OPEN_ATTR, OPEN_MAP_URI } from "./utils/constants";
 import { MapView, StateMapInteractionProps } from "./types";
 import { Feature, Geometry } from "geojson";
-import { ResponsiveFit } from "./ResponsiveFit";
+import { ResponsiveFit } from "./utils/ResponsiveFit";
 
 export default function StateMap(props: StateMapInteractionProps & {
   enableInteraction?: boolean;
@@ -76,7 +76,7 @@ function USMapLayer({ data, hoveredState, stateMemberCount, onFeatureClick, onFe
 
     const shade = gradientShades[index];
     return getBrandColor('blue', shade);
-  }, [stateMemberCount]);
+  }, [stateMemberCount, max]);
 
   const baseStateColors = useMemo(() => {
     const newObj: Record<string, string | undefined> = {}
@@ -86,7 +86,7 @@ function USMapLayer({ data, hoveredState, stateMemberCount, onFeatureClick, onFe
       })
     }
     return newObj
-  }, [stateMemberCount])
+  }, [stateMemberCount, getFillColor])
 
   function onEachFeature(f: Feature<Geometry, { name: string }>, layer: L.Layer) {
     layer.on({
@@ -134,4 +134,3 @@ function USMapLayer({ data, hoveredState, stateMemberCount, onFeatureClick, onFe
     </>
   )
 }
-
