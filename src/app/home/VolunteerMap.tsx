@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Link, Message, TiltMessage } from '@/components/common'
+import { Button, Link, Message, TiltMessage } from '@/components/common'
 import { StateMap } from '@/components/Map'
 import { MapView, StateMapInteractionProps } from '@/components/Map/types'
 import {
@@ -12,6 +12,9 @@ import {
 } from '@/components/Map/constants'
 //import { BBOX_AK, BBOX_HI, BBOX_PR, BBOX_US, US_STATES } from '@/components/Map/utils/constants'
 
+type MapScene = "States" | "Coalition"
+const mapScenes: MapScene[] = ["States", "Coalition"]
+
 export function VolunteerMap() {
     /* States */
     const [hoveredState, setHoveredState] = useState<string | null>(null)
@@ -19,6 +22,12 @@ export function VolunteerMap() {
     const [totalMemberCount, setTotalMemberCount] = useState<number>(0)
     const [stateMemberCount, setStateMemberCount] =
         useState<Record<string, number>>()
+
+    //const [hoveredState, setHoveredState] = useState<string | null>(null);
+    //const [selectedState, setSelectedState] = useState<string | null>(null);
+    //const [totalMemberCount, setTotalMemberCount] = useState<number>(0);
+    //const [stateMemberCount, setStateMemberCount] = useState<Record<string, number>>();
+    //const [mapScene, setMapScene] = useState<MapScene>(mapScenes[0])
 
     useEffect(() => {
         void (async () => {
@@ -86,8 +95,22 @@ export function VolunteerMap() {
                                 : `Total Members: ${totalMemberCount}`}
                         </p>
                     }
+                    topRightContent={
+                        <div className="flex gap-1">
+                            {mapScenes.map((ms, i) => (
+                                <Button
+                                    key={i}
+                                    className={`!text-sm ${mapScene === ms ? 'bg-valencia' : 'bg-black-pearl-dark'}`}
+                                    onClick={() => setMapScene(ms)}
+                                >
+                                    {ms}
+                                </Button>
+                            ))}
+                        </div>
+                    }
                 >
                     <CombinedMap
+                        coalition={mapScene === "Coalition"}
                         stateMemberCount={stateMemberCount}
                         onFeatureClick={onFeatureClick}
                         onFeatureHover={setHoveredState}
@@ -133,6 +156,7 @@ function CombinedMap(props: StateMapInteractionProps) {
         <div className="relative min-w-[350px] max-w-[750px] rounded-md border">
             <div className="aspect-video md:aspect-[5/3]">
                 <StateMap
+                    coalition={props.coalition}
                     mapView={{ bounds: BBOX_US }}
                     stateMemberCount={props.stateMemberCount}
                     selectedState={props.selectedState}
@@ -154,6 +178,7 @@ function CombinedMap(props: StateMapInteractionProps) {
                         }}
                     >
                         <StateMap
+                            coalition={props.coalition}
                             mapView={map.mapView}
                             stateMemberCount={props.stateMemberCount}
                             selectedState={props.selectedState}
