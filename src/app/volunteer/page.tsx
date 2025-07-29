@@ -559,7 +559,7 @@ export default function Volunteer() {
                         </Stage>
 
                         <div className="text-center font-bold">
-                            <p className="text-red-500 mb-2">
+                            <p className="mb-2 text-red-500">
                                 Make sure your discord account has a verified
                                 email attached to it.
                             </p>

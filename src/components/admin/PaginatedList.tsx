@@ -167,19 +167,19 @@ export default function PaginatedList<T extends object>(
     }, [props.event_target])
 
     return (
-        <div className="flex w-[24rem] flex-col self-stretch border-x-2 border-gray-200 bg-gray-50 2xl:w-[28rem]">
+        <div className="flex w-96 flex-col self-stretch border-x-2 border-gray-200 bg-gray-50 2xl:w-[28rem]">
             <div className="flex flex-col gap-3 border-b-2 p-4">
                 <div className="flex w-full justify-between gap-2">
                     {props.search_fields && (
                         <label
                             htmlFor="search_field"
-                            className="flex flex-shrink items-center gap-2"
+                            className="flex shrink items-center gap-2"
                         >
                             <span className="font-medium">Field:</span>
                             <select
                                 name="search_field"
                                 id="search_field"
-                                className="rounded-lg border border-gray-300 bg-white px-1 py-1"
+                                className="rounded-lg border border-gray-300 bg-white p-1"
                                 defaultValue={'all'}
                                 onChange={(e) => setSearchField(e.target.value)}
                             >
@@ -197,7 +197,7 @@ export default function PaginatedList<T extends object>(
                         <select
                             name="limit"
                             id="limit"
-                            className="rounded-lg border border-gray-300 bg-white px-1 py-1"
+                            className="rounded-lg border border-gray-300 bg-white p-1"
                             defaultValue={limit}
                             onChange={(e) => setLimit(+e.target.value)}
                         >

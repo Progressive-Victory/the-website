@@ -42,7 +42,7 @@ export function Volunteer() {
             <h1 className="pb-10 text-4xl font-bold text-white">
                 What Can <span className="text-valencia">You </span> Do?
             </h1>
-            <div className="flex flex-col items-center justify-center gap-10 px-[6vw] xl:flex-row">
+            <div className="flex flex-col items-center justify-center gap-10 px-[2vw] xl:flex-row 2xl:px-[8vw]">
                 {visible &&
                     actions.map((action, index) => (
                         <Card
@@ -79,7 +79,7 @@ function Card({
                 delay,
                 ease: 'backInOut',
             }}
-            className="relative flex h-fit w-full flex-row items-center justify-start rounded-lg bg-white py-8 pl-6 md:h-[250px]"
+            className="truncate-text relative flex h-fit w-full flex-row items-center justify-start rounded-lg bg-white py-8 pl-6 md:h-[250px]"
         >
             <Image src={image} alt={title} width={86} height={86} />
             <div className="flex flex-col gap-1 px-6">
