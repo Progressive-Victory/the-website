@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+ 
 import { handlers } from '@/util/auth'
 import { NextRequest, NextResponse } from 'next/server'
 

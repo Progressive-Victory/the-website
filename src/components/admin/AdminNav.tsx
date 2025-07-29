@@ -69,7 +69,7 @@ export default function AdminNav() {
             </ul>
 
             <button
-                className="absolute bottom-3 right-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 text-gray-400 hover:text-gray-500"
+                className="absolute bottom-3 right-3 flex size-8 cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 text-gray-400 hover:text-gray-500"
                 onClick={() => setOpen(!open)}
                 title={open ? 'Collapse' : 'Expand'}
             >
