@@ -1,5 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getToken } from 'next-auth/jwt'
+import { NextResponse } from 'next/server'
 import { User } from '@/models/User'
 import { OnboardingStage } from '@/util/stage'
 import dbConnect from '@/util/libmongo'
@@ -11,9 +10,7 @@ import { auth } from '@/util/auth'
 export const dynamic = 'force-dynamic'
 // Joins user to the server with our grant
 export async function PUT() {
-  // Retrieve the session using the incoming request and auth options
   const session = await auth()
-  // const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
   if (!session) {
     return new Response('Unauthorized', { status: 401 })
@@ -65,17 +62,15 @@ export async function PUT() {
 }
 
 // Check if they are already in the server
-export async function GET(req: NextRequest) {
+export async function GET() {
   // Retrieve the session using the incoming request and auth options
   const session = await auth()
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
   if (!session) return new Response('Unauthorized - session not found', { status: HTTPStatus.UnAuthorized })
-  if (!token) return new Response('Unauthorized - token not found', { status: HTTPStatus.UnAuthorized })
 
   await dbConnect()
 
-  const user = await User.findOne({ discordId: token?.discordId })
+  const user = await User.findOne({ discordId: session?.discordId })
 
   if (!user) return new Response('Internal Error', { status: HTTPStatus.InternalServerError })
 
@@ -90,7 +85,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    void getMember(token?.discordId as string)
+    void getMember(session?.discordId)
     if (user && user.onboardingStage === OnboardingStage.VERIFIED) {
       user.onboardingStage = OnboardingStage.JOINED
       void user?.save()
