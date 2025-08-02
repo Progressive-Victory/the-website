@@ -14,11 +14,27 @@ export function Account() {
         if (user.data && !user.error && !user.loading) {
             if (hasPermission(user.data, 'Admin Panel Access')) {
                 return (
-                    <Link href="/admin">
-                        <button className="rounded-full bg-valencia px-4 py-2 font-bold text-white transition duration-300 ease-in-out hover:bg-white hover:text-black-pearl-dark">
-                            Admin Panel
-                        </button>
-                    </Link>
+                    <>
+                        {user.data.verified ? (
+                            <button
+                                className="rounded-full bg-valencia px-4 py-2 font-bold text-white transition duration-300 ease-in-out hover:bg-white hover:text-black-pearl-dark"
+                                onClick={() => {
+                                    void fetch('/api/discord/join', {
+                                        method: 'PUT',
+                                    })
+                                }}
+                            >
+                                Join Server
+                            </button>
+                        ) : (
+                            <></>
+                        )}
+                        <Link href="/admin">
+                            <button className="rounded-full bg-valencia px-4 py-2 font-bold text-white transition duration-300 ease-in-out hover:bg-white hover:text-black-pearl-dark">
+                                Admin Panel
+                            </button>
+                        </Link>
+                    </>
                 )
             }
         }
