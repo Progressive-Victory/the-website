@@ -96,6 +96,9 @@ export default function Volunteer() {
                     void signOut({
                         callbackUrl: '/login',
                     })
+                // If the user account is not verified
+                } else if (data?.code && data.code === RESTJSONErrorCodes.TheUserAccountMustFirstBeVerified) {
+                  setCurrentStage('failed_to_join')
                 }
             }
         })
@@ -557,12 +560,29 @@ export default function Volunteer() {
                                 )}
                             </div>
                         </Stage>
+                        <Stage stageName="failed_to_join" currentStage={currentStage}>
+                          <div className="text-center font-bold">
+                            <p className="mb-2 text-red-500">
+                              Failed to join the discord server.
+                              Your discord account must have a verified email in order to join.
+                            </p>
+                              <TrophyIcon className="size-12 text-steel-blue" />
+                              <p className="mt-6 text-center text-lg font-bold text-white">
+                                  Retry joining the server?
+                              </p>
+                              <button
+                                  onClick={() => {
+                                      setShowRejoin(false)
+                                      setCurrentStage('joining')
+                                  }}
+                                  className="mt-2 rounded-full bg-valencia px-4 py-2 font-bold text-white hover:bg-red-900"
+                                >
+                                    Rejoin
+                              </button>
+                          </div>
+                        </Stage>
 
                         <div className="text-center font-bold">
-                            <p className="mb-2 text-red-500">
-                                Make sure your discord account has a verified
-                                email attached to it.
-                            </p>
                             <p className="text-red-500">
                                 If the join form is not working for you, please
                                 email us at: support@progress.win
