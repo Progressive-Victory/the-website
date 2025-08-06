@@ -1,0 +1,142 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { phone } from 'phone'
+import z from 'zod'
+
+import { User } from '@/models/User'
+import { auth } from '@/util/auth'
+import { HTTPStatus } from '@/util/https-status'
+import dbConnect from '@/util/libmongo'
+import { neutrino } from '@/util/neutrino'
+import { OnboardingStage } from '@/util/stage'
+
+export const dynamic = 'force-dynamic'
+
+const PostSmsSendRequest = z
+    .object({
+        number: z.string(),
+    })
+    .strict()
+
+export async function POST(req: NextRequest) {
+    const session = await auth()
+    if (!session) {
+        return new NextResponse(null, { status: HTTPStatus.UnAuthorized })
+    }
+
+    /* Parse and validate phone number */
+
+    const result = PostSmsSendRequest.safeParse(await req.json())
+    if (!result.success) {
+        return NextResponse.json(
+            {
+                message: 'Invalid body schema',
+                errors: result.error.issues,
+            },
+            { status: HTTPStatus.BadRequest }
+        )
+    }
+
+    const { number } = result.data
+    const parsed = phone(number, {
+        country: 'US',
+        strictDetection: false,
+        validateMobilePrefix: true,
+    })
+
+    if (!parsed.isValid) {
+        return NextResponse.json(
+            {
+                message: 'Invalid US mobile phone number',
+            },
+            { status: HTTPStatus.BadRequest }
+        )
+    }
+
+    /* Find user */
+
+    await dbConnect()
+
+    const user = await User.findOne({ discordId: session?.discordId })
+    if (!user) {
+        console.error(`Failed to load user with valid session:`, session)
+        return new NextResponse(null, {
+            status: HTTPStatus.InternalServerError,
+        })
+    }
+
+    switch (user.onboardingStage) {
+        case OnboardingStage.NOT_STARTED: {
+            // Update user to await state
+            user.onboardingStage = OnboardingStage.AWAIT_VERIFICATION
+            await user.save()
+            break
+        }
+        case OnboardingStage.AWAIT_VERIFICATION: {
+            // Do nothing we can send another code if they need it
+            break
+        }
+        default: {
+            // They cannot request a code after being verified
+            return NextResponse.json(
+                {
+                    message: 'Already verified',
+                },
+                {
+                    status: HTTPStatus.BadRequest,
+                }
+            )
+        }
+    }
+
+    /* Check last sent timestamp */
+
+    const RATE_LIMIT_MS = 1_000 * 60
+
+    if (user.lastSmsCodeSentAt) {
+        const elapsed = user.lastSmsCodeSentAt.getTime() - Date.now()
+
+        if (elapsed < RATE_LIMIT_MS) {
+            const remaining = RATE_LIMIT_MS - elapsed
+
+            return NextResponse.json(
+                {
+                    message: `Please wait ${remaining / 1000} more seconds`,
+                },
+                {
+                    status: HTTPStatus.TooManyRequests,
+                }
+            )
+        }
+    }
+
+    /* Send code to the user */
+
+    const data = await neutrino.smsVerify(parsed.phoneNumber, {
+        codeLength: 6,
+        brandName: 'Progressive Victory',
+        limit: 20,
+        countryCode: 'US',
+    })
+
+    if ('api-error-msg' in data) {
+        console.error('Failed to send SMS code:', data)
+        return NextResponse.json(null, {
+            status: HTTPStatus.InternalServerError,
+        })
+    }
+
+    if (!data.sent) {
+        console.error('Failed to send SMS code, and not an error:', data)
+        return NextResponse.json(null, {
+            status: HTTPStatus.InternalServerError,
+        })
+    }
+
+    /* Record that we just sent a code */
+
+    user.lastSmsCodeSent = data['security-code']
+    user.lastSmsCodeSentAt = new Date()
+    await user.save()
+
+    return new Response(null, { status: HTTPStatus.Ok })
+}

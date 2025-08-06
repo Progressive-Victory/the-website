@@ -46,7 +46,7 @@ export default function Volunteer() {
             return false
         }
 
-        const resp = await fetch('/api/verify/send', {
+        const resp = await fetch('/api/onboarding/sms/send', {
             method: 'POST',
             body: JSON.stringify({ number: phone }),
         })
@@ -80,8 +80,8 @@ export default function Volunteer() {
     }, [])
 
     const joinToServer = useCallback(() => {
-        void fetch('/api/discord/join', {
-            method: 'PUT',
+        void fetch('/api/onboarding/discord/join', {
+            method: 'POST',
         }).then(async (response) => {
             if (response.ok) {
                 void getUser()
@@ -109,10 +109,10 @@ export default function Volunteer() {
 
     const checkCode = async (code: string) => {
         setCheckingCode(true)
-        const resp = await fetch('/api/verify/check', {
+        const resp = await fetch('/api/onboarding/sms/check', {
             method: 'POST',
             body: JSON.stringify({
-                code: code,
+                code,
             }),
         })
 
@@ -168,23 +168,28 @@ export default function Volunteer() {
 
                             setCurrentStage('joining')
                             // Join the user
-                            void fetch('/api/discord/join').then((result) => {
-                                if (result.status === 404) {
-                                    void joinToServer()
-                                } else {
-                                    void getUser()
-                                    setShowRejoin(false)
-                                }
+                            void fetch('/api/onboarding/discord/status')
+                                .then((result) => result.json())
+                                .then(data => {
+                                    if (!data.joined) {
+                                        void joinToServer()
+                                    } else {
+                                        void getUser()
+                                        setShowRejoin(false)
+                                    }
                             })
                             break
                         case OnboardingStage.JOINED:
                             setCurrentStage('joined')
-                            void fetch('/api/discord/join').then((result) => {
-                                if (result.status === 404) {
-                                    setShowRejoin(true)
-                                } else {
-                                    setShowRejoin(false)
-                                }
+                             void fetch('/api/onboarding/discord/status')
+                                .then((result) => result.json())
+                                .then(data => {
+                                    if (!data.joined) {
+                                        void joinToServer()
+                                    } else {
+                                        void getUser()
+                                        setShowRejoin(false)
+                                    }
                             })
                             break
                         default:
