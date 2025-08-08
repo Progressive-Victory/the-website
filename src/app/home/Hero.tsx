@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { motion, useTransform, useSpring } from 'motion/react'
 import { Link, Message } from '@/components/common'
+// Quick avatar changer
 const avatarImage = '/images/PV_Pride_Logo.png'
 
 export function Hero() {
@@ -148,6 +149,7 @@ function TiltMessage({
 }) {
     const [isHovered, setIsHovered] = useState(false)
     const [canTilt, setCanTilt] = useState(false)
+    const [touched, setTouched] = useState(false)
     const [elementPosition, setElementPosition] = useState({
         left: 0,
         top: 0,
@@ -164,21 +166,32 @@ function TiltMessage({
     const rotateY = useTransform(tiltX, [-1, 1], [-10, 10])
 
     const handleMouseEnter = (e: React.MouseEvent) => {
-        setIsHovered(true)
-        const rect = e.currentTarget.getBoundingClientRect()
-        setElementPosition({
-            left: rect.left,
-            top: rect.top,
-            width: rect.width,
-            height: rect.height,
-        })
+        if (!touched) {
+            setIsHovered(true)
+            const rect = e.currentTarget.getBoundingClientRect()
+            setElementPosition({
+                left: rect.left,
+                top: rect.top,
+                width: rect.width,
+                height: rect.height,
+            })
+        }
     }
 
-    const handleMouseLeave = () => {
+    const stopHoverAnimations = () => {
         setIsHovered(false)
         setCanTilt(false)
         tiltX.set(0)
         tiltY.set(0)
+    }
+
+    const handleTouchStart = () => {
+        setTouched(true)
+        stopHoverAnimations()
+    }
+
+    const handleTouchEnd = () => {
+        setTouched(false)
     }
 
     // tilt when rotation is done
@@ -209,11 +222,12 @@ function TiltMessage({
                 if (isHovered) setCanTilt(true) // tilt after rotation
             }}
             onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseLeave={stopHoverAnimations}
             onMouseMove={handleMouseMove}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
         >
             {children}
         </motion.div>
     )
 }
-
