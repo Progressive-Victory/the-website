@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { motion, useTransform, useSpring } from 'motion/react'
 import { Link, Message } from '@/components/common'
+// Quick avatar changer
 const avatarImage = '/images/PV_Pride_Logo.png'
 
 export function Hero() {
@@ -75,55 +76,60 @@ export function Hero() {
 
             {/* Message Blocks with Tilt Effect */}
             <div className="mt-20 flex flex-wrap justify-center gap-6 px-4">
-                <TiltMessage className="order-last xl:order-first">
-                    <Message
-                        className="max-w-xl xl:w-[30vw]"
-                        motionProps={{
-                            initial: { rotate: 20, y: 50 },
-                            animate: { rotate: -5, y: 0 },
-                            transition: { delay: 0.15, duration: 0.65 },
-                        }}
-                        avatar={avatarImage}
-                        avatarRounded={false}
-                        username="Progressive Victory"
-                        nameColor="red"
-                        text="Progressive Victory is proud to support @benwikler for @DNC chair! 💙
-            We need more bold Democrats with track records of proven results leading the charge 💪"
-                        image="/images/ben.jpg"
-                    />
-                </TiltMessage>
+                <div className="order-last xl:order-first">
+                    <TiltMessage>
+                        <Message
+                            className="max-w-xl xl:w-[30vw]"
+                            motionProps={{
+                                initial: { rotate: 20, y: 50 },
+                                animate: { rotate: -5, y: 0 },
+                                transition: { delay: 0.15, duration: 0.65 },
+                            }}
+                            avatar={avatarImage}
+                            avatarRounded={false}
+                            username="Progressive Victory"
+                            nameColor="red"
+                            text="Progressive Victory is proud to support @benwikler for @DNC chair! 💙
+            				We need more bold Democrats with track records of proven results leading the charge 💪"
+                            image="/images/ben.jpg"
+                        />
+                    </TiltMessage>
+                </div>
 
-                <TiltMessage className="h-fit lg:mt-24">
-                    <Message
-                        className="max-w-xl xl:w-[30vw]"
-                        motionProps={{
-                            initial: { rotate: 15, y: 50 },
-                            animate: { rotate: 1, y: 0 },
-                            transition: { delay: 0.65, duration: 0.65 },
-                        }}
-                        avatar={avatarImage}
-                        avatarRounded={false}
-                        username="Progressive Victory"
-                        nameColor="red"
-                        text="Built by the internet, for the internet! — Progressive Victory is a new kind of political community turning the tides of elections across the country."
-                    />
-                </TiltMessage>
-
-                <TiltMessage className="order-first xl:order-last">
-                    <Message
-                        className="max-w-xl xl:w-[30vw]"
-                        motionProps={{
-                            initial: { rotate: 30, y: 50 },
-                            animate: { rotate: 6, y: 0 },
-                            transition: { delay: 0.3, duration: 0.9 },
-                        }}
-                        avatar="/images/sam_twitter_photo.jpeg"
-                        image="/images/sam.jpg"
-                        username="Sam Dryzmala"
-                        nameColor="purple"
-                        text="I founded Progressive Victory with the dream of creating a political action community that comes together to get progressive policies & candidates the attention they deserve!"
-                    />
-                </TiltMessage>
+                <div className="h-fit lg:mt-24">
+                    <TiltMessage>
+                        <Message
+                            className="max-w-xl xl:w-[30vw]"
+                            motionProps={{
+                                initial: { rotate: 15, y: 50 },
+                                animate: { rotate: 1, y: 0 },
+                                transition: { delay: 0.65, duration: 0.65 },
+                            }}
+                            avatar={avatarImage}
+                            avatarRounded={false}
+                            username="Progressive Victory"
+                            nameColor="red"
+                            text="Built by the internet, for the internet! — Progressive Victory is a new kind of political community turning the tides of elections across the country."
+                        />
+                    </TiltMessage>
+                </div>
+                <div className="order-first xl:order-last">
+                    <TiltMessage>
+                        <Message
+                            className="max-w-xl xl:w-[30vw]"
+                            motionProps={{
+                                initial: { rotate: 30, y: 50 },
+                                animate: { rotate: 6, y: 0 },
+                                transition: { delay: 0.3, duration: 0.9 },
+                            }}
+                            avatar="/images/sam_twitter_photo.jpeg"
+                            image="/images/sam.jpg"
+                            username="Sam Dryzmala"
+                            nameColor="purple"
+                            text="I founded Progressive Victory with the dream of creating a political action community that comes together to get progressive policies & candidates the attention they deserve!"
+                        />
+                    </TiltMessage>
+                </div>
             </div>
         </div>
     )
@@ -148,6 +154,7 @@ function TiltMessage({
 }) {
     const [isHovered, setIsHovered] = useState(false)
     const [canTilt, setCanTilt] = useState(false)
+    const [touched, setTouched] = useState(false)
     const [elementPosition, setElementPosition] = useState({
         left: 0,
         top: 0,
@@ -164,21 +171,32 @@ function TiltMessage({
     const rotateY = useTransform(tiltX, [-1, 1], [-10, 10])
 
     const handleMouseEnter = (e: React.MouseEvent) => {
-        setIsHovered(true)
-        const rect = e.currentTarget.getBoundingClientRect()
-        setElementPosition({
-            left: rect.left,
-            top: rect.top,
-            width: rect.width,
-            height: rect.height,
-        })
+        if (!touched) {
+            setIsHovered(true)
+            const rect = e.currentTarget.getBoundingClientRect()
+            setElementPosition({
+                left: rect.left,
+                top: rect.top,
+                width: rect.width,
+                height: rect.height,
+            })
+        }
     }
 
-    const handleMouseLeave = () => {
+    const stopHoverAnimations = () => {
         setIsHovered(false)
         setCanTilt(false)
         tiltX.set(0)
         tiltY.set(0)
+    }
+
+    const handleTouchStart = () => {
+        setTouched(true)
+        stopHoverAnimations()
+    }
+
+    const handleTouchEnd = () => {
+        setTouched(false)
     }
 
     // tilt when rotation is done
@@ -203,17 +221,20 @@ function TiltMessage({
             animate={{
                 rotateZ: isHovered ? -2.5 : 0,
                 scale: isHovered ? 1.02 : 1,
+                padding: isHovered ? '2% 2% 2% 2%' : 0,
+                margin: isHovered ? '-2% -2% -2% -2%' : 0,
             }}
             transition={{ duration: 0.2 }}
             onAnimationComplete={() => {
                 if (isHovered) setCanTilt(true) // tilt after rotation
             }}
             onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseLeave={stopHoverAnimations}
             onMouseMove={handleMouseMove}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
         >
             {children}
         </motion.div>
     )
 }
-
