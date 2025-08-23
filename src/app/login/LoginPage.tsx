@@ -13,6 +13,7 @@ export function LoginPage() {
     const [redirect, setRedirect] = useState<string>('/account')
     const params = useSearchParams()
     const router = useRouter()
+
     // If we had some redirect, e.g. to volunteer form we should handle it with next-auth
     useEffect(() => {
         console.log(session)
@@ -42,7 +43,7 @@ export function LoginPage() {
             />
             <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
 
-            <div className="z-2 relative flex h-screen w-full flex-col items-center justify-center">
+            <div className="z-2 relative flex h-screen w-full flex-col items-center justify-center px-2 ">
                 <LoginCard
                     signIn={(provider, options, params) =>
                         void signIn(provider, options, params)

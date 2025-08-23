@@ -38,6 +38,7 @@
     "react-leaflet": "5.0.0-rc.2",
     "react-leaflet-cluster": "^2.1.0",
     "react-social-icons": "^6.24.0",
+    "react-spinners": "^0.17.0",
     "zod": "^4.0.5"
   },
   "devDependencies": {

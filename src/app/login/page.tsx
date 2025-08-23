@@ -20,9 +20,5 @@ export const metadata: Metadata = {
  * a flash of unauthenticated content.
  */
 export default function Login() {
-    return (
-        <Suspense>
-            <LoginPage />
-        </Suspense>
-    )
+    return <LoginPage />
 }

@@ -73,3 +73,11 @@ html, body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+input::placeholder {
+    color: #a9a9a9;
+}
+
+input[type='date'][data-empty='true'] {
+    color: #a9a9a9;
+}
