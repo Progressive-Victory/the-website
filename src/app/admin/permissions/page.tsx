@@ -45,7 +45,12 @@ export default function Page() {
                 id_key="_id"
                 display_key={'name'}
                 filters={[]}
-                search_fields={['name']}
+                search_fields={[
+                    {
+                        id: 'name',
+                        name: 'Name',
+                    },
+                ]}
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {permission && originalPermission ? (

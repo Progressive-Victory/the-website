@@ -42,7 +42,7 @@ export interface PaginatedListProps<T extends object> {
     }
 
     filters: Filter[]
-    search_fields?: string[]
+    search_fields?: ({ name: string; id: string } | string)[]
 }
 
 export interface Filter {
@@ -97,7 +97,7 @@ export default function PaginatedList<T extends object>(
 
     const searchParams = useDebounce(
         [page, pages, limit, searchQuery, searchField, searchFilters],
-        200
+        50
     )
 
     const { isPending, isSuccess, error, data, refetch } = useQuery<
@@ -185,8 +185,15 @@ export default function PaginatedList<T extends object>(
                             >
                                 <option value={'all'}>All (no fuzzy)</option>
                                 {props.search_fields.map((sf) => (
-                                    <option key={sf} value={sf}>
-                                        {sf}
+                                    <option
+                                        key={
+                                            typeof sf === 'string' ? sf : sf.id
+                                        }
+                                        value={
+                                            typeof sf === 'string' ? sf : sf.id
+                                        }
+                                    >
+                                        {typeof sf === 'string' ? sf : sf.name}
                                     </option>
                                 ))}
                             </select>

@@ -1,14 +1,21 @@
+import { get_collection_stats } from '@/app/api/admin/stats/route'
 import ProtectedPage from '@/components/ProtectedPage'
 import AdminNav from '@/components/admin/AdminNav'
 import { Header } from '@/components/layout'
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+    children,
+}: {
+    children: React.ReactNode
+}) {
+    const stats = await get_collection_stats()
+
     return (
         <ProtectedPage requiredRoles={['Superadmin']}>
             <div className="relative flex size-full min-h-screen flex-col">
                 <Header />
                 <div className="flex flex-1 bg-gray-50">
-                    <AdminNav />
+                    <AdminNav stats={stats} />
                     <div className="flex h-[calc(100vh-100px)] flex-1">
                         {children}
                     </div>

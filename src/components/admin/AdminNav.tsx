@@ -1,34 +1,44 @@
 'use client'
 
+import { useLocalStorage } from '@uidotdev/usehooks'
 import classNames from 'classnames'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { FaUsers, FaUserShield, FaUserTag } from 'react-icons/fa'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { IconType } from 'react-icons/lib'
 
-const NAV_LINKS: { title: string; href: string; icon: IconType }[] = [
+const NAV_LINKS: {
+    title: string
+    href: string
+    icon: IconType
+    stats_key: string
+}[] = [
     {
         title: 'Members',
         href: '/admin/members',
         icon: FaUsers,
+        stats_key: 'users_count',
     },
     {
         title: 'Roles',
         href: '/admin/roles',
         icon: FaUserTag,
+        stats_key: 'roles_count',
     },
     {
         title: 'Permissions',
         href: '/admin/permissions',
         icon: FaUserShield,
+        stats_key: 'permissions_count',
     },
 ]
 
-export default function AdminNav() {
+export default function AdminNav({ stats }: { stats: Record<string, number> }) {
     const pathname = usePathname()
 
-    const [open, setOpen] = useState(true)
+    const [open, setOpen] = useLocalStorage('pv.admin-nav-open', true)
 
     return (
         <div
@@ -45,7 +55,7 @@ export default function AdminNav() {
             </h1>
 
             <ul>
-                {NAV_LINKS.map(({ href, title, icon: Icon }) => {
+                {NAV_LINKS.map(({ href, title, icon: Icon, stats_key }) => {
                     const active = pathname === href
 
                     return (
@@ -60,9 +70,18 @@ export default function AdminNav() {
                                 }
                             )}
                         >
-                            <a href={href} title={title}>
-                                {open ? title : <Icon size={24} />}
-                            </a>
+                            <Link href={href} title={title}>
+                                {open ? (
+                                    <span className="flex w-full items-center justify-between">
+                                        <span>{title}</span>
+                                        <span className="text-right text-sm">
+                                            {stats[stats_key]}
+                                        </span>
+                                    </span>
+                                ) : (
+                                    <Icon size={24} />
+                                )}
+                            </Link>
                         </li>
                     )
                 })}

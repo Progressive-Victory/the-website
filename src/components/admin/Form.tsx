@@ -1,4 +1,3 @@
-
 /* eslint @typescript-eslint/no-explicit-any: 0 */
 /* eslint @typescript-eslint/no-unsafe-call: 0 */
 /* eslint @typescript-eslint/no-unsafe-return: 0 */
@@ -8,8 +7,8 @@ import { IDocumentUpdate } from '@/models/DocumentUpdate'
 import { IUser } from '@/models/User'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import deepEqual from 'deep-equal'
-import { FC, useState } from 'react'
-import { FaSave, FaTrashAlt } from 'react-icons/fa'
+import { FC, useEffect, useState } from 'react'
+import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 
 export interface IForm<T extends { updateHistory?: IDocumentUpdate[] }> {
     groups: IFormGroup[]
@@ -72,6 +71,7 @@ export function Form<
     onChangesSaved,
     updateHistory,
 }: IForm<T>) {
+    const [editMode, setEditMode] = useState(false)
     const [activeFieldMenu, setActiveFieldMenu] = useState<string | null>(null)
 
     // FIXME: memoize?
@@ -101,7 +101,7 @@ export function Form<
         },
     })
 
-    const saveChanges = () => {
+    const saveChanges = async () => {
         const payload = { id: currentValue._id }
 
         for (const g of groups) {
@@ -131,12 +131,16 @@ export function Form<
         }
 
         // @ts-expect-error shut up
-        mutation.mutate(payload)
+        await mutation.mutateAsync(payload)
+        setEditMode(false)
     }
 
     const discardChanges = () => {
         setCurrentValue({ ...initialValue })
+        setEditMode(false)
     }
+
+    useEffect(() => setEditMode(false), [initialValue])
 
     return (
         <form
@@ -150,21 +154,33 @@ export function Form<
                     {computeTitle?.(currentValue) ?? 'Details'}
                 </h1>
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={saveChanges}
-                        disabled={equal}
-                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-sky-600 bg-sky-500 px-3 py-1 text-sm font-medium text-white disabled:cursor-not-allowed disabled:border-[hsl(200,68%,39%)] disabled:bg-[hsl(201,66%,32%)]"
-                    >
-                        <FaSave /> Save Changes
-                    </button>
-                    <button
-                        onClick={discardChanges}
-                        disabled={equal}
-                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-red-600 bg-red-500 px-3 py-1 text-sm font-medium text-white disabled:cursor-not-allowed disabled:border-[hsl(0,42%,55%)] disabled:bg-[hsl(0,54%,60%)]"
-                    >
-                        <FaTrashAlt />
-                        Discard Changes
-                    </button>
+                    {editMode ? (
+                        <>
+                            <button
+                                onClick={saveChanges}
+                                disabled={equal}
+                                className="flex cursor-pointer items-center gap-2 rounded-lg border border-sky-600 bg-sky-500 px-3 py-1 text-sm font-medium text-white disabled:cursor-not-allowed disabled:border-[hsl(200,68%,39%)] disabled:bg-[hsl(201,66%,32%)]"
+                            >
+                                <FaSave /> Save Changes
+                            </button>
+                            <button
+                                onClick={discardChanges}
+                                className="flex cursor-pointer items-center gap-2 rounded-lg border border-red-600 bg-red-500 px-3 py-1 text-sm font-medium text-white disabled:cursor-not-allowed disabled:border-[hsl(0,42%,55%)] disabled:bg-[hsl(0,54%,60%)]"
+                            >
+                                <FaTrashAlt />
+                                Discard Changes
+                            </button>{' '}
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                onClick={() => setEditMode(true)}
+                                className="flex cursor-pointer items-center gap-2 rounded-lg border border-sky-600 bg-sky-500 px-3 py-1 text-sm font-medium text-white disabled:cursor-not-allowed disabled:border-[hsl(200,68%,39%)] disabled:bg-[hsl(201,66%,32%)]"
+                            >
+                                <FaEdit /> Edit
+                            </button>
+                        </>
+                    )}
                 </div>
             </header>
             {groups.map((g) => (
@@ -202,38 +218,43 @@ export function Form<
                                         )}
                                     </label>
                                 </div>
-                                {f.readonly ? (
-                                    <div className="col-span-2 w-full">
-                                        {`${
-                                            currentValue[f.key as keyof T] ??
-                                            null
-                                        }`}
-                                    </div>
-                                ) : f.type === 'text' ? (
-                                    <input
-                                        type="text"
-                                        name={f.key}
-                                        id={f.key}
-                                        disabled={mutation.isPending}
-                                        required={f.required}
-                                        value={
-                                            (currentValue[
-                                                f.key as keyof T
-                                            ] as string) ?? ''
-                                        }
-                                        onInput={(e) => {
-                                            // @ts-expect-error shut up
-                                            currentValue[f.key] = e.target.value
-                                            setCurrentValue({
-                                                ...currentValue,
-                                            })
-                                        }}
-                                        className="col-span-2 w-full max-w-96 rounded-lg border border-gray-300 px-3 py-0.5"
-                                    />
+                                {f.type === 'text' ? (
+                                    f.readonly || !editMode ? (
+                                        <div className="col-span-2 w-full">
+                                            {`${
+                                                currentValue[
+                                                    f.key as keyof T
+                                                ] ?? null
+                                            }`}
+                                        </div>
+                                    ) : (
+                                        <input
+                                            type="text"
+                                            name={f.key}
+                                            id={f.key}
+                                            disabled={mutation.isPending}
+                                            required={f.required}
+                                            value={
+                                                (currentValue[
+                                                    f.key as keyof T
+                                                ] as string) ?? ''
+                                            }
+                                            onInput={(e) => {
+                                                // @ts-expect-error shut up
+                                                currentValue[f.key] =
+                                                    e.target.value
+                                                setCurrentValue({
+                                                    ...currentValue,
+                                                })
+                                            }}
+                                            className="col-span-2 w-full max-w-96 rounded-lg border border-gray-300 px-3 py-0.5"
+                                        />
+                                    )
                                 ) : f.type === 'select_many' ? (
                                     <div className="col-span-2 flex flex-wrap gap-2">
                                         <MultiSelect
                                             disabled={mutation.isPending}
+                                            readonly={f.readonly || !editMode}
                                             name={f.name}
                                             options={f.options}
                                             query_key={f.key}
@@ -280,6 +301,13 @@ export function Form<
                                             }
                                         />
                                     </div>
+                                ) : f.readonly || !editMode ? (
+                                    <div className="col-span-2 w-full">
+                                        {`${
+                                            currentValue[f.key as keyof T] ??
+                                            null
+                                        }`}
+                                    </div>
                                 ) : (
                                     <div className="col-span-2 flex items-center">
                                         <input
@@ -317,13 +345,21 @@ export function Form<
                             Update History
                         </h2>
                         <div className="grid grid-cols-3 gap-2 gap-x-4">
-                            {initialValue.updateHistory.map((update) => (
-                                // @ts-expect-error shut up
-                                <UpdateHistoryEntry
-                                    key={update.updated_at as unknown as string}
-                                    {...update}
-                                />
-                            ))}
+                            {initialValue.updateHistory
+                                .sort(
+                                    (a, b) =>
+                                        new Date(b.updated_at).getTime() -
+                                        new Date(a.updated_at).getTime()
+                                )
+                                .map((update) => (
+                                    // @ts-expect-error shut up
+                                    <UpdateHistoryEntry
+                                        key={
+                                            update.updated_at as unknown as string
+                                        }
+                                        {...update}
+                                    />
+                                ))}
                         </div>
                     </section>
                 )}
@@ -337,7 +373,9 @@ const UpdateHistoryEntry: FC<IDocumentUpdate> = (update) => {
         async queryFn() {
             if (!update.updated_by) return null
 
-            const res = await fetch(`/api/admin/users/${update.updated_by as unknown as string}`)
+            const res = await fetch(
+                `/api/admin/users/${update.updated_by as unknown as string}`
+            )
 
             const data = await res.json()
 
@@ -376,9 +414,18 @@ const UpdateHistoryEntry: FC<IDocumentUpdate> = (update) => {
                     <span className="text-gray-600">&lt;pending&gt;</span>
                 ) : (
                     <>
-                        <code className="font-mono">{data?.name}</code> (
-                        <code className="font-mono">{data?._id as string}</code>
-                        )
+                        <code className="font-mono">
+                            {data?.name ?? 'deleted user'}
+                        </code>
+                        {data?._id && (
+                            <>
+                                (
+                                <code className="font-mono">
+                                    {(data?._id as string) ?? 'deleted user'}
+                                </code>
+                                )
+                            </>
+                        )}
                     </>
                 )}
             </div>
