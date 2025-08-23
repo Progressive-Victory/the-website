@@ -19,6 +19,8 @@ export interface IUser extends Document {
     preferredName?: string
     phoneNumber?: string
     acceptedAlerts?: boolean
+    lastSmsCodeSent?: string
+    lastSmsCodeSentAt?: Date
     verified: boolean
     onboardingStage: OnboardingStage
     roles: IRole[]
@@ -41,6 +43,12 @@ const schema = new Schema<IUser>({
     preferredName: { type: String, required: false },
     phoneNumber: { type: String, required: false },
     acceptedAlerts: { type: Boolean, required: false, default: false },
+    lastSmsCodeSent: { type: String, required: false, default: null },
+    lastSmsCodeSentAt: {
+        type: Schema.Types.Date,
+        required: false,
+        default: null,
+    },
     verified: { type: Boolean, required: false, default: false },
     onboardingStage: {
         type: String,
@@ -50,7 +58,9 @@ const schema = new Schema<IUser>({
     roles: [{ type: Schema.Types.ObjectId, ref: Role }],
     firstName: { type: String, required: false },
     lastName: { type: String, required: false },
-    updateHistory: [{ type: Schema.Types.ObjectId, ref: DocumentUpdate, required: false }],
+    updateHistory: [
+        { type: Schema.Types.ObjectId, ref: DocumentUpdate, required: false },
+    ],
 })
 
 schema.post('save', (doc: Document<IUser>, next) => {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { User, IUser } from '@/models/User'
 import dbConnect from '@/util/libmongo'
-import {auth, checkAuth, ResponseCode } from '@/util/auth'
+import { auth, checkAuth, ResponseCode } from '@/util/auth'
 import { OnboardingStage } from '@/util/stage'
 export const dynamic = 'force-dynamic'
 /**
@@ -56,8 +56,8 @@ export async function GET() {
             throw Error('Unidentified response code.')
     }
 
-    const usr: IUser = await retrieveUser() as IUser
-    return NextResponse.json(usr)
+    const usr: IUser = (await retrieveUser()) as IUser
+    return NextResponse.json(sanitizeUser(usr.toObject()))
 }
 
 export async function PATCH(req: NextRequest) {
@@ -113,5 +113,14 @@ export async function PATCH(req: NextRequest) {
 
     await user.save()
 
-    return NextResponse.json(user)
+    return NextResponse.json(sanitizeUser(user.toObject()))
+}
+
+/**
+ * Removes server-only fields from user objects before they are sent to the
+ * client
+ */
+function sanitizeUser(user: IUser) {
+    delete user.lastSmsCodeSent
+    return user
 }

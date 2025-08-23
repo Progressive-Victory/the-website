@@ -28,7 +28,7 @@ export function Account() {
 
     useEffect(() => {
         // Check if the user is already on the server
-        void fetch('/api/discord/join')
+        void fetch('/api/onboarding/discord/status')
     }, [])
 
     if (!session) {
