@@ -93,14 +93,14 @@ export async function POST(req: NextRequest) {
     const RATE_LIMIT_MS = 1_000 * 60
 
     if (user.lastSmsCodeSentAt) {
-        const elapsed = user.lastSmsCodeSentAt.getTime() - Date.now()
+        const elapsed_ms = Date.now() - user.lastSmsCodeSentAt.getTime()
 
-        if (elapsed < RATE_LIMIT_MS) {
-            const remaining = RATE_LIMIT_MS - elapsed
+        if (elapsed_ms < RATE_LIMIT_MS) {
+            const remaining = RATE_LIMIT_MS - elapsed_ms
 
             return NextResponse.json(
                 {
-                    message: `Please wait ${remaining / 1000} more seconds`,
+                    message: `Please wait ${Math.floor(remaining / 1000)} more seconds`,
                 },
                 {
                     status: HTTPStatus.TooManyRequests,

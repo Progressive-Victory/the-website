@@ -43,11 +43,11 @@ const schema = new Schema<IUser>({
     preferredName: { type: String, required: false },
     phoneNumber: { type: String, required: false },
     acceptedAlerts: { type: Boolean, required: false, default: false },
-    lastSmsCodeSent: { type: String, required: false, default: false },
+    lastSmsCodeSent: { type: String, required: false, default: null },
     lastSmsCodeSentAt: {
         type: Schema.Types.Date,
         required: false,
-        default: false,
+        default: null,
     },
     verified: { type: Boolean, required: false, default: false },
     onboardingStage: {
