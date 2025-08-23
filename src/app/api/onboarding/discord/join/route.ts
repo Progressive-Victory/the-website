@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 import { User } from '@/models/User'
 import { auth } from '@/util/auth'
-import { joinMember } from '@/util/discord'
+import { isEmailVerified, joinMember } from '@/util/discord'
 import { HTTPStatus } from '@/util/https-status'
 import dbConnect from '@/util/libmongo'
 import { OnboardingStage } from '@/util/stage'
@@ -40,11 +40,32 @@ export async function POST() {
             break
         default:
             return NextResponse.json(
-                { message: 'user is not yet verified' },
+                {
+                    message: 'user is not yet verified',
+                    code: 'PHONE_NUMBER_NOT_VERIFIED',
+                },
                 {
                     status: HTTPStatus.BadRequest,
                 }
             )
+    }
+
+    try {
+        if (!(await isEmailVerified(session.accessToken))) {
+            return NextResponse.json(
+                {
+                    message: 'discord user does not have a verified email',
+                    code: 'DISCORD_EMAIL_NOT_VERIFIED',
+                },
+                {
+                    status: HTTPStatus.BadRequest,
+                }
+            )
+        }
+    } catch (e) {
+        return new NextResponse(null, {
+            status: HTTPStatus.InternalServerError,
+        })
     }
 
     try {
@@ -83,7 +104,7 @@ export async function POST() {
             return NextResponse.json(
                 {
                     message: 'Invalid OAuth2 access token provided',
-                    code: error.code,
+                    code: 'INVALID_OAUTH2_ACCESS_CODE',
                 },
                 { status: HTTPStatus.BadRequest }
             )

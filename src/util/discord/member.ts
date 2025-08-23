@@ -1,6 +1,6 @@
 import { Snowflake } from 'discord-api-types/globals'
 import { rest } from './rest'
-import { APIGuildMember, Routes } from 'discord-api-types/v10'
+import { APIGuildMember, APIUser, Routes } from 'discord-api-types/v10'
 import { RequestMethod } from '@discordjs/rest'
 
 /**
@@ -41,4 +41,20 @@ export function getMember(userId: Snowflake) {
     return rest.get(
         Routes.guildMember(process.env.GUILD_ID, userId)
     ) as Promise<APIGuildMember>
+}
+
+export async function isEmailVerified(accessToken: string) {
+    const res = await rest.queueRequest({
+        fullRoute: Routes.user('@me'),
+        method: RequestMethod.Get,
+        body: { access_token: accessToken },
+    })
+
+    switch (res.status) {
+        case 200:
+            const user = (await res.json()) as APIUser
+            return user.verified
+        default:
+            throw new Error('unexpected return value')
+    }
 }
