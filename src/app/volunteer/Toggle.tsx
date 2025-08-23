@@ -20,7 +20,7 @@ export function Toggle({
             <div className="flex gap-1.5 md:gap-2 flex-row items-center w-full">
                 <div
                     tabIndex={0}
-                    className="touch-pan-zoom group relative cursor-pointer flex-shrink-0  size-4 md:size-[1.125rem] w-full"
+                    className="touch-pan-zoom group relative cursor-pointer flex-shrink-0  size-4 md:size-[1.125rem]"
                 >
                     <InformationCircleIcon className=" size-4 md:size-[1.125rem] rounded-full bg-white text-steel-blue" />
                     <div className="pointer-events-none absolute top-0 z-10 flex flex-col items-center rounded-md bg-black px-px py-2 text-center text-sm text-gray-700 opacity-0 transition-all duration-100 group-hover:translate-y-[25px] group-hover:opacity-75 group-focus:translate-y-[25px] group-focus:opacity-75">

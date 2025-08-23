@@ -264,64 +264,90 @@ export default function VolunteerPage({
                                     Join us on Discord and make a difference ✨
                                 </p>
                             </header>
-                            <section className="flex flex-col gap-2">
-                                <Field
-                                    value={firstName}
-                                    placeholder="First Name"
-                                    error={!validationFlags['first_name']}
-                                    errorText="Enter a valid name with no special characters"
-                                    maxLength={40} // sensible default, may be too premissive
-                                    onChange={(e) => {
-                                        const text = e.target.value
-                                        setFirstName(text)
-                                        const isValid =
-                                            /^[A-Za-z. \s_-]*$/g.test(text) &&
-                                            text.trim() !== ''
+                            <section className="flex flex-col gap-2 ">
+                                <section className="flex flex-col sm:flex-row gap-2">
+                                    <Field
+                                        value={firstName}
+                                        placeholder="First Name"
+                                        error={!validationFlags['first_name']}
+                                        errorText="Enter a valid name with no special characters"
+                                        maxLength={40} // sensible default, may be too premissive
+                                        onChange={(e) => {
+                                            const text = e.target.value
+                                            setFirstName(text)
+                                            const isValid =
+                                                /^[A-Za-z. \s_-]*$/g.test(
+                                                    text
+                                                ) && text.trim() !== ''
 
-                                        setValidationFlags({
-                                            ...validationFlags,
-                                            first_name: isValid,
-                                        })
-                                    }}
-                                />
-                                <Field
-                                    value={lastName}
-                                    placeholder="Last Name"
-                                    error={!validationFlags['last_name']}
-                                    errorText="Enter a valid name with no special characters"
-                                    maxLength={40} // sensible default, may be too permissive
-                                    onChange={(e) => {
-                                        const text = e.target.value
-                                        setLastName(text)
-                                        setLastName(text)
-                                        const isValid =
-                                            /^[A-Za-z. \s_-]*$/g.test(text) &&
-                                            text.trim() !== ''
+                                            setValidationFlags({
+                                                ...validationFlags,
+                                                first_name: isValid,
+                                            })
+                                        }}
+                                    />
+                                    <Field
+                                        value={lastName}
+                                        placeholder="Last Name"
+                                        error={!validationFlags['last_name']}
+                                        errorText="Enter a valid name with no special characters"
+                                        maxLength={40} // sensible default, may be too permissive
+                                        onChange={(e) => {
+                                            const text = e.target.value
+                                            setLastName(text)
+                                            setLastName(text)
+                                            const isValid =
+                                                /^[A-Za-z. \s_-]*$/g.test(
+                                                    text
+                                                ) && text.trim() !== ''
 
-                                        setValidationFlags({
-                                            ...validationFlags,
-                                            last_name: isValid,
-                                        })
-                                    }}
-                                />
-                                <Field
-                                    type="date"
-                                    value={dateOfBirth}
-                                    placeholder="Date of Birth"
-                                    error={!validationFlags['date_of_birth']}
-                                    errorText="Must be 16 or older"
-                                    maxLength={40} // sensible default, may be too permissive
-                                    onInput={(e) => {
-                                        const date = e.target.value
-                                        setDateOfBirth(date)
-                                        const isValid = !!date
+                                            setValidationFlags({
+                                                ...validationFlags,
+                                                last_name: isValid,
+                                            })
+                                        }}
+                                    />
+                                </section>
+                                <section className="flex flex-col sm:flex-row gap-2">
+                                    <Field
+                                        type="date"
+                                        value={dateOfBirth}
+                                        placeholder="Date of Birth"
+                                        error={
+                                            !validationFlags['date_of_birth']
+                                        }
+                                        errorText="Must be 16 or older"
+                                        maxLength={40} // sensible default, may be too permissive
+                                        onInput={(e) => {
+                                            const date = e.target.value
+                                            setDateOfBirth(date)
+                                            const isValid = !!date
 
-                                        setValidationFlags({
-                                            ...validationFlags,
-                                            date_of_birth: isValid,
-                                        })
-                                    }}
-                                />
+                                            setValidationFlags({
+                                                ...validationFlags,
+                                                date_of_birth: isValid,
+                                            })
+                                        }}
+                                    />{' '}
+                                    <Field
+                                        value={zipCode}
+                                        placeholder="Zip Code"
+                                        error={!validationFlags['zip_code']}
+                                        errorText="Enter a valid zip code"
+                                        maxLength={10}
+                                        onChange={(e) => {
+                                            const text = e.target.value
+                                            setZipCode(text)
+                                            const isValid =
+                                                /^\d{5}(-\d{4})?$/g.test(text)
+
+                                            setValidationFlags({
+                                                ...validationFlags,
+                                                zip_code: isValid,
+                                            })
+                                        }}
+                                    />
+                                </section>
                                 <Field
                                     value={phoneNumber}
                                     placeholder="Phone Number"
@@ -351,24 +377,6 @@ export default function VolunteerPage({
                                         may apply. Must be SMS reachable.
                                     </em>
                                 </p>
-                                <Field
-                                    value={zipCode}
-                                    placeholder="Zip Code"
-                                    error={!validationFlags['zip_code']}
-                                    errorText="Enter a valid zip code"
-                                    maxLength={10}
-                                    onChange={(e) => {
-                                        const text = e.target.value
-                                        setZipCode(text)
-                                        const isValid =
-                                            /^\d{5}(-\d{4})?$/g.test(text)
-
-                                        setValidationFlags({
-                                            ...validationFlags,
-                                            zip_code: isValid,
-                                        })
-                                    }}
-                                />
                             </section>
                             <section className="flex flex-col gap-2">
                                 <Toggle
@@ -436,7 +444,7 @@ export default function VolunteerPage({
                                     !privacyPolicy ||
                                     !usCitizen
                                 }
-                                className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[101%]"
+                                className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
                             >
                                 Join Now
                             </button>
@@ -489,10 +497,10 @@ export default function VolunteerPage({
                                                 requestCodeMutation.isPending
                                             }
                                             className={classNames(
-                                                `flex w-fit items-center whitespace-nowrap rounded-lg bg-steel-blue px-4 py-3 text-center text-sm text-white transition-all duration-100 disabled:cursor-not-allowed [&:not(:disabled)]:hover:scale-[101%]`,
+                                                `flex w-fit items-center whitespace-nowrap rounded-lg bg-steel-blue px-4 py-3 text-center text-sm text-white transition-all duration-100 disabled:cursor-not-allowed [&:not(:disabled)]:hover:scale-[103%]`,
                                                 requestCodeMutation.isPending
                                                     ? ''
-                                                    : 'hover:bg-blue-600 disabled:bg-gray-500'
+                                                    : 'hover:bg-valencia disabled:bg-gray-500'
                                             )}
                                             onClick={() => {
                                                 // Get a new OTP
@@ -541,7 +549,7 @@ export default function VolunteerPage({
                                         securityCode.length < 6 ||
                                         checkCodeMutation.isPending
                                     }
-                                    className="my-4 w-full rounded-md bg-steel-blue py-2 text-center text-lg font-bold text-white transition-all duration-100 hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[101%]"
+                                    className="my-4 w-full rounded-md bg-steel-blue py-2 text-center text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
                                 >
                                     Verify
                                 </button>
@@ -578,7 +586,7 @@ export default function VolunteerPage({
                                             onClick={() =>
                                                 joinToServerMutation.mutate()
                                             }
-                                            className="my-4 w-full rounded-md bg-steel-blue py-2 text-center text-lg font-bold text-white transition-all duration-100 hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[101%]"
+                                            className="my-4 w-full rounded-md bg-steel-blue py-2 text-center text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
                                         >
                                             Try Again
                                         </button>
@@ -599,8 +607,8 @@ export default function VolunteerPage({
                                     <>
                                         <TrophyIcon className="size-12 text-steel-blue" />
                                         <p className="mt-6 text-center text-lg font-bold text-white">
-                                            Looks like you&apos;re no longer in the
-                                            server!
+                                            Looks like you&apos;re no longer in
+                                            the server!
                                         </p>
                                         <p className="mb-2 mt-2 text-center text-sm text-white">
                                             Click the button below to rejoin
