@@ -169,53 +169,6 @@ export default function PaginatedList<T extends object>(
     return (
         <div className="flex w-96 flex-col self-stretch border-x-2 border-gray-200 bg-gray-50 2xl:w-[28rem]">
             <div className="flex flex-col gap-3 border-b-2 p-4">
-                <div className="flex w-full justify-between gap-2">
-                    {props.search_fields && (
-                        <label
-                            htmlFor="search_field"
-                            className="flex shrink items-center gap-2"
-                        >
-                            <span className="font-medium">Field:</span>
-                            <select
-                                name="search_field"
-                                id="search_field"
-                                className="rounded-lg border border-gray-300 bg-white p-1"
-                                defaultValue={'all'}
-                                onChange={(e) => setSearchField(e.target.value)}
-                            >
-                                <option value={'all'}>All (no fuzzy)</option>
-                                {props.search_fields.map((sf) => (
-                                    <option
-                                        key={
-                                            typeof sf === 'string' ? sf : sf.id
-                                        }
-                                        value={
-                                            typeof sf === 'string' ? sf : sf.id
-                                        }
-                                    >
-                                        {typeof sf === 'string' ? sf : sf.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-                    )}
-                    <label htmlFor="limit" className="flex items-center gap-2">
-                        <span className="font-medium">Items:</span>
-                        <select
-                            name="limit"
-                            id="limit"
-                            className="rounded-lg border border-gray-300 bg-white p-1"
-                            defaultValue={limit}
-                            onChange={(e) => setLimit(+e.target.value)}
-                        >
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={25}>25</option>
-                            <option value={50}>50</option>
-                            <option value={100}>100</option>
-                        </select>
-                    </label>
-                </div>
                 <div className="flex w-full items-center gap-2">
                     <input
                         type="text"
@@ -241,35 +194,102 @@ export default function PaginatedList<T extends object>(
                         </button>
                     )}
                 </div>
-                {filtersOpen &&
-                    props.filters?.map((f) => (
-                        <div key={f.name} className="flex flex-wrap gap-2">
-                            <strong className="font-medium">{f.name}:</strong>
-                            <MultiSelect
-                                {...f}
-                                active={searchFilters[f.query_key] ?? []}
-                                addActive={(value) => {
-                                    searchFilters[f.query_key] = [
-                                        ...(searchFilters[f.query_key] ?? []),
-                                        value,
-                                    ]
-                                    setSearchFilters({ ...searchFilters })
-                                }}
-                                removeActive={(value) => {
-                                    searchFilters[f.query_key] = (
-                                        searchFilters[f.query_key] ?? []
-                                    ).filter((v) => v !== value)
-                                    setSearchFilters({ ...searchFilters })
-                                }}
-                                menuOpen={activeFilterMenu == f.query_key}
-                                setMenuOpen={(open) =>
-                                    setActiveFilterMenu(
-                                        open ? f.query_key : null
-                                    )
-                                }
-                            />
+                {filtersOpen && (
+                    <>
+                        <div className="flex w-full justify-between gap-2">
+                            {props.search_fields && (
+                                <label
+                                    htmlFor="search_field"
+                                    className="flex shrink items-center gap-2"
+                                >
+                                    <span className="font-medium">Field:</span>
+                                    <select
+                                        name="search_field"
+                                        id="search_field"
+                                        className="rounded-lg border border-gray-300 bg-white p-1"
+                                        defaultValue={'all'}
+                                        onChange={(e) =>
+                                            setSearchField(e.target.value)
+                                        }
+                                    >
+                                        <option value={'all'}>
+                                            All (exact only)
+                                        </option>
+                                        {props.search_fields.map((sf) => (
+                                            <option
+                                                key={
+                                                    typeof sf === 'string'
+                                                        ? sf
+                                                        : sf.id
+                                                }
+                                                value={
+                                                    typeof sf === 'string'
+                                                        ? sf
+                                                        : sf.id
+                                                }
+                                            >
+                                                {typeof sf === 'string'
+                                                    ? sf
+                                                    : sf.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                            )}
+                            <label
+                                htmlFor="limit"
+                                className="flex items-center gap-2"
+                            >
+                                <span className="font-medium">Items:</span>
+                                <select
+                                    name="limit"
+                                    id="limit"
+                                    className="rounded-lg border border-gray-300 bg-white p-1"
+                                    defaultValue={limit}
+                                    onChange={(e) => setLimit(+e.target.value)}
+                                >
+                                    <option value={5}>5</option>
+                                    <option value={10}>10</option>
+                                    <option value={25}>25</option>
+                                    <option value={50}>50</option>
+                                    <option value={100}>100</option>
+                                </select>
+                            </label>
                         </div>
-                    ))}
+
+                        {props.filters?.map((f) => (
+                            <div key={f.name} className="flex flex-wrap gap-2">
+                                <strong className="font-medium">
+                                    {f.name}:
+                                </strong>
+                                <MultiSelect
+                                    {...f}
+                                    active={searchFilters[f.query_key] ?? []}
+                                    addActive={(value) => {
+                                        searchFilters[f.query_key] = [
+                                            ...(searchFilters[f.query_key] ??
+                                                []),
+                                            value,
+                                        ]
+                                        setSearchFilters({ ...searchFilters })
+                                    }}
+                                    removeActive={(value) => {
+                                        searchFilters[f.query_key] = (
+                                            searchFilters[f.query_key] ?? []
+                                        ).filter((v) => v !== value)
+                                        setSearchFilters({ ...searchFilters })
+                                    }}
+                                    menuOpen={activeFilterMenu == f.query_key}
+                                    setMenuOpen={(open) =>
+                                        setActiveFilterMenu(
+                                            open ? f.query_key : null
+                                        )
+                                    }
+                                />
+                            </div>
+                        ))}
+                    </>
+                )}
             </div>
 
             {data && data.count > 0 ? (

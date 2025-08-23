@@ -5,7 +5,14 @@ import classNames from 'classnames'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { FaUsers, FaUserShield, FaUserTag } from 'react-icons/fa'
+import {
+    FaDonate,
+    FaUserAstronaut,
+    FaUsers,
+    FaUserShield,
+    FaUserTag,
+} from 'react-icons/fa'
+import { FaClipboardUser } from 'react-icons/fa6'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { IconType } from 'react-icons/lib'
 
@@ -20,6 +27,18 @@ const NAV_LINKS: {
         href: '/admin/members',
         icon: FaUsers,
         stats_key: 'users_count',
+    },
+    {
+        title: 'Donors',
+        href: '/admin/donors',
+        icon: FaDonate,
+        stats_key: 'donors_count',
+    },
+    {
+        title: 'Positions',
+        href: '/admin/positions',
+        icon: FaClipboardUser,
+        stats_key: 'positions_count',
     },
     {
         title: 'Roles',
@@ -51,7 +70,7 @@ export default function AdminNav({ stats }: { stats: Record<string, number> }) {
             )}
         >
             <h1 className="text-lg font-semibold text-black-pearl-dark">
-                {open ? <>Admin Portal</> : null}
+                {open ? <>Volunteer Dashboard</> : null}
             </h1>
 
             <ul>
@@ -70,17 +89,14 @@ export default function AdminNav({ stats }: { stats: Record<string, number> }) {
                                 }
                             )}
                         >
-                            <Link href={href} title={title}>
-                                {open ? (
-                                    <span className="flex w-full items-center justify-between">
-                                        <span>{title}</span>
-                                        <span className="text-right text-sm">
-                                            {stats[stats_key]}
-                                        </span>
+                            <Link href={href} title={title} className='flex gap-2 items-center'>
+                                <Icon size={22} />
+                                <span className="flex w-full items-center justify-between">
+                                    <span>{title}</span>
+                                    <span className="text-right text-sm">
+                                        {stats[stats_key] ?? 0}
                                     </span>
-                                ) : (
-                                    <Icon size={24} />
-                                )}
+                                </span>
                             </Link>
                         </li>
                     )

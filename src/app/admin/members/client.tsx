@@ -55,6 +55,19 @@ const FORM_GROUPS: IFormGroup[] = [
                 key: 'lastName',
                 required: false,
             },
+            {
+                type: 'text',
+                name: 'Date of Birth',
+                key: 'dateOfBirth',
+                required: false,
+            },
+            {
+                type: 'text',
+                name: 'Age',
+                key: 'age',
+                required: false,
+                readonly: true,
+            },
         ],
     },
     {
