@@ -19,8 +19,8 @@ export function LoginCard({
                 Log In to Continue
             </h1>
             <p className="text-sm font-medium text-white">
-                Click the button below to log in. If you haven't completed the
-                onboarding form yet, you'll be prompted to do that before you
+                Click the button below to log in. If you haven&apos;t completed the
+                onboarding form yet, you&apos;ll be prompted to do that before you
                 can join the server.
                 <br />
                 <br />

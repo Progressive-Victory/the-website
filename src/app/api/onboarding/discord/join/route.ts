@@ -63,6 +63,11 @@ export async function POST() {
             )
         }
     } catch (e) {
+        console.log(
+            'Failed to check email verification status:',
+            session.discordId,
+            e
+        )
         return new NextResponse(null, {
             status: HTTPStatus.InternalServerError,
         })

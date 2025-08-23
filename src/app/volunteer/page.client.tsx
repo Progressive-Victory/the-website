@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/dot-notation */
+
 'use client'
 
 import { Field, Stage, Toggle } from '@/app/volunteer'
@@ -47,7 +49,7 @@ export default function VolunteerPage({
 
             if (resp.status === 200) {
                 const data = await resp.json()
-                queryClient.setQueryData(['user'], () => data)
+                queryClient.setQueryData(['user'], () => data as IUser)
 
                 return
             }
@@ -66,7 +68,7 @@ export default function VolunteerPage({
             })
 
             if (resp.ok) {
-                queryClient.invalidateQueries({ queryKey: ['user'] })
+                await queryClient.invalidateQueries({ queryKey: ['user'] })
                 setCodeSentAt(new Date())
                 return
             }
@@ -107,12 +109,13 @@ export default function VolunteerPage({
             })
 
             if (res.ok) {
-                queryClient.invalidateQueries({ queryKey: ['user'] })
+                await queryClient.invalidateQueries({ queryKey: ['user'] })
                 setIsInServer(true)
                 setCurrentStage('complete')
             } else {
                 try {
                     // Not every response will have JSON but errors should
+                    /* eslint-disable no-var */
                     var data = await res.json()
                 } catch (e) {
                     console.error('Failed to parse join server response:', e)
@@ -152,7 +155,7 @@ export default function VolunteerPage({
         } else if (
             userQuery.data.onboardingStage === OnboardingStage.VERIFIED
         ) {
-            joinToServerMutation.mutateAsync()
+            joinToServerMutation.mutate()
             return 'joining'
         } else if (userQuery.data.onboardingStage === OnboardingStage.JOINED) {
             return 'complete'
@@ -160,9 +163,7 @@ export default function VolunteerPage({
 
         return 'collect_info'
     }, [])
-    const [currentStage, setCurrentStage] = useState<FormStage>(
-        initialStage as FormStage
-    )
+    const [currentStage, setCurrentStage] = useState<FormStage>(initialStage)
 
     const [firstName, setFirstName] = useState<string>('')
     const [lastName, setLastName] = useState<string>('')
@@ -231,6 +232,7 @@ export default function VolunteerPage({
                 />
                 <div className="flex w-full justify-center">
                     <form
+                        /* eslint-disable @typescript-eslint/no-misused-promises */
                         onSubmit={async (e) => {
                             e.preventDefault()
 
@@ -546,6 +548,7 @@ export default function VolunteerPage({
 
                                 <button
                                     type="button"
+                                    /* eslint-disable @typescript-eslint/no-misused-promises */
                                     onClick={async () => {
                                         await updateUserMutation.mutateAsync({
                                             onboardingStage:
@@ -596,12 +599,11 @@ export default function VolunteerPage({
                                     <>
                                         <TrophyIcon className="size-12 text-steel-blue" />
                                         <p className="mt-6 text-center text-lg font-bold text-white">
-                                            Looks like you're no longer in the
+                                            Looks like you&apos;re no longer in the
                                             server!
                                         </p>
                                         <p className="mb-2 mt-2 text-center text-sm text-white">
-                                            Click the button below to rejoin the
-                                            server.
+                                            Click the button below to rejoin
                                         </p>
                                         <button
                                             onClick={() => {

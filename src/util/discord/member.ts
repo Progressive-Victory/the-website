@@ -51,9 +51,10 @@ export async function isEmailVerified(accessToken: string) {
     })
 
     switch (res.status) {
-        case 200:
+        case 200: {
             const user = (await res.json()) as APIUser
             return user.verified
+        }
         default:
             throw new Error('unexpected return value')
     }
