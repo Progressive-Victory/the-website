@@ -94,6 +94,7 @@ export async function PATCH(req: NextRequest) {
                 'preferredNamed',
                 'phoneNumber',
                 'acceptedAlerts',
+                'dateOfBirth',
                 // A user may go back one stage in case they enter a bad number
                 user.onboardingStage === OnboardingStage.AWAIT_VERIFICATION
                     ? 'onboardingStage'

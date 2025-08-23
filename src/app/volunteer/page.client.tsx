@@ -244,6 +244,7 @@ export default function VolunteerPage({
                                     phoneNumber,
                                     zipCode,
                                     acceptedAlerts: getAlerts,
+                                    dateOfBirth
                                 })
                                 requestCodeMutation.mutate(phoneNumber)
                                 setCurrentStage('phone_verify')

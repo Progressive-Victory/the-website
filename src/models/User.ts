@@ -26,6 +26,7 @@ export interface IUser extends Document {
     roles: IRole[]
     firstName?: string
     lastName?: string
+    dateOfBirth?: string
     updateHistory?: IDocumentUpdate[]
 }
 
@@ -56,8 +57,9 @@ const schema = new Schema<IUser>({
         default: OnboardingStage.NOT_STARTED,
     },
     roles: [{ type: Schema.Types.ObjectId, ref: Role }],
-    firstName: { type: String, required: false },
-    lastName: { type: String, required: false },
+    firstName: { type: String, required: false, default: null },
+    lastName: { type: String, required: false, default: null },
+    dateOfBirth: { type: String, required: false, default: null },
     updateHistory: [
         { type: Schema.Types.ObjectId, ref: DocumentUpdate, required: false },
     ],
