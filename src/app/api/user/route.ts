@@ -95,10 +95,7 @@ export async function PATCH(req: NextRequest) {
                 'phoneNumber',
                 'acceptedAlerts',
                 'dateOfBirth',
-                // A user may go back one stage in case they enter a bad number
-                user.onboardingStage === OnboardingStage.AWAIT_VERIFICATION
-                    ? 'onboardingStage'
-                    : '',
+                'onboardingStage',
             ]
             if (user[key] !== data[key] || !allowed.includes(key)) {
                 // @ts-expect-error potential bad key
