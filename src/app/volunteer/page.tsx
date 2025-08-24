@@ -1,7 +1,7 @@
 import VolunteerPage from '@/app/volunteer/page.client'
 import User from '@/models/User'
 import { auth } from '@/util/auth'
-import { getMember } from '@/util/discord'
+import { isUserAGuildMember } from '@/util/discord'
 import dbConnect from '@/util/libmongo'
 import { redirect } from 'next/navigation'
 
@@ -21,7 +21,7 @@ export default async function Page() {
         throw new Error('well this is awkward')
     }
 
-    const member = await getMember(user.discordId)
+    const isInServer = await isUserAGuildMember(user.discordId)
 
     return (
         <VolunteerPage
@@ -32,7 +32,7 @@ export default async function Page() {
                     })
                 )
             )}
-            isInSever={!!member}
+            isInSever={isInServer}
         />
     )
 }

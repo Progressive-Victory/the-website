@@ -1,7 +1,12 @@
 import { Snowflake } from 'discord-api-types/globals'
 import { rest } from './rest'
-import { APIGuildMember, APIUser, Routes } from 'discord-api-types/v10'
-import { RequestMethod } from '@discordjs/rest'
+import {
+    APIGuildMember,
+    APIUser,
+    RESTJSONErrorCodes,
+    Routes,
+} from 'discord-api-types/v10'
+import { DiscordAPIError, RequestMethod } from '@discordjs/rest'
 
 /**
  * Tries to join the user to the Discord guild
@@ -57,5 +62,20 @@ export async function isEmailVerified(accessToken: string) {
         }
         default:
             throw new Error('unexpected return value')
+    }
+}
+
+export async function isUserAGuildMember(userId: Snowflake) {
+    try {
+        return !!(await getMember(userId))
+    } catch (error) {
+        if (
+            error instanceof DiscordAPIError &&
+            error.code === RESTJSONErrorCodes.UnknownMember
+        ) {
+            return false
+        }
+
+        throw error
     }
 }
