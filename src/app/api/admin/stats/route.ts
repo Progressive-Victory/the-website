@@ -1,8 +1,5 @@
-import Permission from '@/models/Permission'
-import Role from '@/models/Role'
-import User from '@/models/User'
 import { checkAuth, ResponseCode } from '@/util/auth'
-import dbConnect from '@/util/libmongo'
+import { get_collection_stats } from '@/util/stats'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -22,18 +19,4 @@ export async function GET() {
     }
 
     return NextResponse.json(await get_collection_stats())
-}
-
-export async function get_collection_stats() {
-    await dbConnect()
-
-    const users_count = await User.countDocuments()
-    const roles_count = await Role.countDocuments()
-    const permissions_count = await Permission.countDocuments()
-
-    return {
-        users_count,
-        roles_count,
-        permissions_count,
-    }
 }
