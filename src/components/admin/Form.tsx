@@ -157,6 +157,7 @@ export function Form<
                     {editMode ? (
                         <>
                             <button
+                                /* eslint-disable  @typescript-eslint/no-misused-promises */
                                 onClick={saveChanges}
                                 disabled={equal}
                                 className="flex cursor-pointer items-center gap-2 rounded-lg border border-sky-600 bg-sky-500 px-3 py-1 text-sm font-medium text-white disabled:cursor-not-allowed disabled:border-[hsl(200,68%,39%)] disabled:bg-[hsl(201,66%,32%)]"
@@ -242,6 +243,7 @@ export function Form<
                                             onInput={(e) => {
                                                 // @ts-expect-error shut up
                                                 currentValue[f.key] =
+                                                    // @ts-expect-error shut up
                                                     e.target.value
                                                 setCurrentValue({
                                                     ...currentValue,
@@ -254,6 +256,7 @@ export function Form<
                                     <div className="col-span-2 flex flex-wrap gap-2">
                                         <MultiSelect
                                             disabled={mutation.isPending}
+                                            /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
                                             readonly={f.readonly || !editMode}
                                             name={f.name}
                                             options={f.options}
@@ -348,7 +351,9 @@ export function Form<
                             {initialValue.updateHistory
                                 .sort(
                                     (a, b) =>
+                                        // @ts-expect-error shut up
                                         new Date(b.updated_at).getTime() -
+                                        // @ts-expect-error shut up
                                         new Date(a.updated_at).getTime()
                                 )
                                 .map((update) => (

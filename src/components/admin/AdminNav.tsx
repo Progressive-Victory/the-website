@@ -4,13 +4,11 @@ import { useLocalStorage } from '@uidotdev/usehooks'
 import classNames from 'classnames'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
 import {
-    FaDonate,
-    FaUserAstronaut,
-    FaUsers,
-    FaUserShield,
-    FaUserTag,
+  FaDonate,
+  FaUsers,
+  FaUserShield,
+  FaUserTag
 } from 'react-icons/fa'
 import { FaClipboardUser } from 'react-icons/fa6'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'

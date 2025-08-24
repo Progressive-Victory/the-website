@@ -1,7 +1,9 @@
+import dbConnect from '@/util/libmongo'
 import ClientPage from './client'
 import Permission from '@/models/Permission'
 
 export default async function Page() {
+    await dbConnect()
     const permissions = (await Permission.find({})).map((r) =>
         r.toObject({
             flattenObjectIds: true,
