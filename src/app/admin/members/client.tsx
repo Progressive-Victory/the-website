@@ -55,6 +55,19 @@ const FORM_GROUPS: IFormGroup[] = [
                 key: 'lastName',
                 required: false,
             },
+            {
+                type: 'text',
+                name: 'Date of Birth',
+                key: 'dateOfBirth',
+                required: false,
+            },
+            {
+                type: 'text',
+                name: 'Age',
+                key: 'age',
+                required: false,
+                readonly: true,
+            },
         ],
     },
     {
@@ -168,11 +181,26 @@ export default function ClientPage({ roles }: PageProps) {
                     },
                 ]}
                 search_fields={[
-                    'name',
-                    'email',
-                    'firstName',
-                    'lastName',
-                    'preferredName',
+                    {
+                        id: 'name',
+                        name: 'Name',
+                    },
+                    {
+                        id: 'email',
+                        name: 'Email',
+                    },
+                    {
+                        id: 'firstName',
+                        name: 'First Name',
+                    },
+                    {
+                        id: 'lastName',
+                        name: 'Last Name',
+                    },
+                    {
+                        id: 'preferredName',
+                        name: 'Preferred Name',
+                    },
                 ]}
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">

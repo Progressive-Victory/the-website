@@ -1,9 +1,11 @@
 import { Filter } from '@/components/admin/PaginatedList'
 import { useClickAway } from '@uidotdev/usehooks'
+import classNames from 'classnames'
 import { createRef, FC } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 
 type MultiSelectProps = Filter & {
+    readonly?: boolean
     active: string[]
     addActive: (value: string) => void
     removeActive: (value: string) => void
@@ -14,6 +16,7 @@ type MultiSelectProps = Filter & {
 
 const MultiSelect: FC<MultiSelectProps> = ({
     name,
+    readonly,
     options,
     display_key,
     value_key,
@@ -39,25 +42,33 @@ const MultiSelect: FC<MultiSelectProps> = ({
         <>
             {active.map((v) => (
                 <button
-                    disabled={disabled}
+                    /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+                    disabled={disabled || readonly}
                     key={v}
                     onClick={() => removeActive(v)}
-                    className="cursor-pointer select-none rounded-xl border border-gray-200 px-2 text-sm text-gray-700 hover:text-red-400 hover:line-through disabled:cursor-not-allowed disabled:text-gray-700 disabled:no-underline"
+                    className={classNames(
+                        'rounded-xl border border-gray-200 px-2 text-sm text-gray-700',
+                        !readonly &&
+                            'cursor-pointer select-none hover:text-red-400 hover:line-through disabled:cursor-not-allowed disabled:text-gray-700 disabled:no-underline'
+                    )}
                 >
                     {options.find((o) => o[value_key] === v)![display_key]}
                 </button>
             ))}
+            {active.length === 0 && readonly && <span>None</span>}
             {active.length < options.length && (
                 <div className="relative">
-                    <button
-                        ref={buttonRef}
-                        disabled={disabled}
-                        className="flex aspect-square w-6 cursor-pointer items-center justify-center rounded-xl border border-gray-200 text-sm text-gray-600 hover:text-gray-700 disabled:cursor-not-allowed"
-                        title={`Add ${name}`}
-                        onClick={() => setMenuOpen(!menuOpen)}
-                    >
-                        <FaPlus size={11} />
-                    </button>
+                    {!readonly && (
+                        <button
+                            ref={buttonRef}
+                            disabled={disabled}
+                            className="flex aspect-square w-6 cursor-pointer items-center justify-center rounded-xl border border-gray-200 text-sm text-gray-600 hover:text-gray-700 disabled:cursor-not-allowed"
+                            title={`Add ${name}`}
+                            onClick={() => setMenuOpen(!menuOpen)}
+                        >
+                            <FaPlus size={11} />
+                        </button>
+                    )}
                     {menuOpen && (
                         <div
                             ref={menuRef}
