@@ -16,9 +16,7 @@ async function dbConnect() {
     try {
         // Connect to MongoDB; note that in a serverless environment it is
         // acceptable to connect on every invocation since cold starts are expected.
-        await mongoose.connect(MONGODB_URI!, {
-            bufferCommands: false, // Disable mongoose buffering, recommended for serverless.
-        })
+        await mongoose.connect(MONGODB_URI!, {})
 
         return mongoose
     } catch (error) {
