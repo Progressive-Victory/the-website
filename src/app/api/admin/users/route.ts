@@ -156,6 +156,7 @@ const PatchUserRequest = z
         phoneNumber: z.string().optional(),
         verified: z.boolean().optional(),
         onboardingStage: z.enum(OnboardingStage).optional(),
+        dateOfBirth: z.string().optional(),
         roles: z.array(z.string()).optional(),
         firstName: z.string().optional(),
         lastName: z.string().optional(),
