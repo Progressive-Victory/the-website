@@ -13,6 +13,11 @@ export enum PermissionName {
 }
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
+    pages: {
+        signIn: '/login',
+        error: '/login',
+        newUser: '/volunteer',
+    },
     providers: [
         Discord({
             clientId: process.env.DISCORD_CLIENT_ID!,
@@ -58,6 +63,13 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }),
     ],
     callbacks: {
+        signIn({ profile }) {
+            if (!profile?.email || !profile?.verified) {
+                return '/login?error=DiscordEmailNotVerified'
+            }
+
+            return true
+        },
         // session call back assigns the discordId from the token to the session object
         session({ session, token }) {
             session.discordId = token.discordId as string
