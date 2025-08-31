@@ -11,7 +11,7 @@ const questions = [
 
 export default function FAQ() {
     return (
-        <div className="flex w-full flex-col items-center justify-center gap-y-10 rounded-lg bg-black-pearl-dark py-12 lg:w-2/3">
+        <div className="mx-3 flex flex-col items-center justify-center gap-y-10 rounded-lg bg-black-pearl-dark py-12 lg:w-2/3">
             <h1 className="w-full px-2 text-center text-4xl font-bold text-white">
                 Frequently <span className="text-valencia">Asked</span>{' '}
                 Questions?

@@ -71,12 +71,12 @@ function MobileFooter() {
                         />
                     </div>
                 </div>
-                <div className="flex w-[293px] items-center justify-center border-y-2 border-footer-grey py-2 xxs:w-full sm:py-4">
+                <div className="flex w-[293px] items-center justify-around border-y-2 border-footer-grey py-2 xxs:w-full sm:py-4">
                     {navitems.map((item) => (
                         <Link
                             key={item.name}
                             href={item.href}
-                            className="m-auto mx-px rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:mx-1 xs:px-4 xs:py-2 xs:text-lg"
+                            className="m-auto mx-px rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:mx-1 xxs:text-base xs:px-4 xs:py-2 xs:text-lg"
                         >
                             {item.name}
                         </Link>
@@ -109,7 +109,7 @@ function MobileFooter() {
                         <SocialIcon key={social} url={social} fgColor="white" />
                     ))}
                 </div>
-                <div className="w-310 my-4 border-2 border-white p-1 text-center text-sm font-bold text-steel-blue xxs:w-full xs:text-lg sm:my-6">
+                <div className="my-4 w-[293px] border-2 border-white p-1 text-center text-sm font-bold text-steel-blue xxs:w-full xs:text-lg sm:my-6">
                     PAID FOR BY PROGRESSIVE VICTORY{' '}
                     <Link
                         href="https://progressivevictory.win"
@@ -119,30 +119,30 @@ function MobileFooter() {
                     </Link>{' '}
                     NOT AUTHORIZED BY ANY CANDIDATE OR CANDIDATE’S COMMITTEE.
                 </div>
-                <div className="flex w-full items-center justify-around border-y-2 border-footer-grey py-4">
+                <div className="flex w-[293px] items-center justify-around border-y-2 border-footer-grey py-4 xxs:w-full">
                     <Link
-                        className="xxs:text-md mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xs:px-4 xs:py-2 xs:text-lg"
+                        className="mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:text-base xs:px-4 xs:py-2 xs:text-lg"
                         key="Contact"
                         href="https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform"
                     >
                         Contact
                     </Link>
                     <Link href="/privacy">
-                        <p className="xxs:text-md mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xs:px-4 xs:py-2 xs:text-lg">
+                        <p className="mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:text-base xs:px-4 xs:py-2 xs:text-lg">
                             Privacy Policy
                         </p>
                     </Link>
                     {session ? (
                         <button
                             onClick={() => void signOut({ callbackUrl: '/' })}
-                            className="xxs:text-md mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xs:px-4 xs:py-2 xs:text-lg"
+                            className="mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:text-base xs:px-4 xs:py-2 xs:text-lg"
                         >
                             Sign Out
                         </button>
                     ) : (
                         <Link
                             href="/login"
-                            className="xxs:text-md mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xs:px-4 xs:py-2 xs:text-lg"
+                            className="mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:text-base xs:px-4 xs:py-2 xs:text-lg"
                         >
                             Log In
                         </Link>
@@ -157,10 +157,10 @@ function DesktopFooter() {
     const { data: session } = useSession()
 
     return (
-        <div className="hidden w-full items-center justify-center bg-black-pearl-dark py-8 lg:flex">
+        <div className="hidden w-full items-center justify-center bg-black-pearl-dark py-6 lg:flex">
             <div className="w-full flex-col">
                 <div className="flex items-center">
-                    <div className="ml-10 mr-4 flex w-full border-t-4 border-footer-grey pt-3"></div>
+                    <div className="ml-10 mr-4 flex w-full border-t-[3px] border-footer-grey pt-3 opacity-20"></div>
                     <div className="flex justify-end">
                         {navitems.map((item) => (
                             <Link
@@ -171,6 +171,12 @@ function DesktopFooter() {
                                 {item.name}
                             </Link>
                         ))}
+                        <Link
+                            href="https://secure.actblue.com/donate/pvwebsite"
+                            className="mx-6 flex items-center rounded-full bg-valencia px-4 py-2 text-center text-xl font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xl:hidden"
+                        >
+                            Donate
+                        </Link>
                     </div>
                 </div>
                 <div className="my-4 flex items-center">
@@ -195,7 +201,7 @@ function DesktopFooter() {
                             height={250}
                         />
                     </div>
-                    <div className="flex w-full justify-end">
+                    <div className="m-6 flex w-full justify-end">
                         <div className="flex flex-row items-center justify-center gap-x-4">
                             {socials.map((social) => (
                                 <SocialIcon
@@ -207,14 +213,14 @@ function DesktopFooter() {
                         </div>
                         <Link
                             href="https://secure.actblue.com/donate/pvwebsite"
-                            className="mx-6 flex items-center rounded-full bg-valencia px-4 py-2 text-center text-xl font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia"
+                            className="mx-6 hidden items-center rounded-full bg-valencia px-4 py-2 text-center text-xl font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xl:flex"
                         >
                             Donate
                         </Link>
                     </div>
                 </div>
                 <div className="flex items-center">
-                    <div className="ml-10 mr-8 flex w-full border-b-4 border-footer-grey pb-3"></div>
+                    <div className="ml-10 mr-8 flex w-full border-b-[3px] border-footer-grey pb-3 opacity-20"></div>
                     <div className="flex items-center justify-end">
                         <Link
                             className="mx-2 rounded-full px-4 py-2 text-center text-lg font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia"
