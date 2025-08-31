@@ -56,14 +56,26 @@ export function Header() {
     return (
         <>
             <div className="sticky top-0 z-20 flex h-[100px] w-full flex-row items-center justify-between bg-black-pearl-dark px-6">
-                <NextLink href="/">
-                    <Image
-                        src="/images/LogoFull.webp"
-                        alt="progressive-victory-logo"
-                        width={256}
-                        height={78}
-                    />
-                </NextLink>
+                <div className="flex lg:hidden">
+                    <NextLink href="/">
+                        <Image
+                            src="/images/Logo_White.svg"
+                            alt="progressive-victory-logo"
+                            width={70}
+                            height={78}
+                        />
+                    </NextLink>
+                </div>
+                <div className="hidden lg:flex">
+                    <NextLink href="/">
+                        <Image
+                            src="/images/LogoFull.webp"
+                            alt="progressive-victory-logo"
+                            width={256}
+                            height={78}
+                        />
+                    </NextLink>
+                </div>
                 <div className="hidden w-full justify-center gap-x-12 xl:flex">
                     {navitems.map((item) => (
                         <Link key={item.name} href={item.href}>
