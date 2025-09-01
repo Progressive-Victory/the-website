@@ -202,8 +202,8 @@ export default function ClientPage({ roles }: PageProps) {
                         name: 'Preferred Name',
                     },
                     {
-                        id: 'State',
-                        name: 'state',
+                        id: 'state',
+                        name: 'State',
                     },
                 ]}
             />
