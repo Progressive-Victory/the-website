@@ -201,6 +201,10 @@ export default function ClientPage({ roles }: PageProps) {
                         id: 'preferredName',
                         name: 'Preferred Name',
                     },
+                    {
+                        id: 'State',
+                        name: 'state',
+                    },
                 ]}
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">

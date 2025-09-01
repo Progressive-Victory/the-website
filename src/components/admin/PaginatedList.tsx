@@ -119,7 +119,11 @@ export default function PaginatedList<T extends object>(
                 }
             }
 
+            // *** For some reason, queries for location data return null. ***
+            console.log(searchParams)
+            console.log(data)
             console.log(url.search)
+            console.log(url)
 
             const res = await fetch(url, { signal })
             return (await res.json()) as PaginatedResponse<T>
