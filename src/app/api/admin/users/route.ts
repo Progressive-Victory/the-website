@@ -53,6 +53,7 @@ export async function GET(req: NextRequest) {
         'lastName',
         'preferredName',
         'phoneNumber',
+        'state',
     ]
 
     const { page, limit, skip, query, params } = parsePaginationParams(req.url)
