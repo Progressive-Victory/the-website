@@ -13,6 +13,7 @@ const socials = [
     'https://x.com/ProgressiveVic?mx=2',
 ]
 
+
 const navitems: NavItem[] = [
     {
         name: 'About',
