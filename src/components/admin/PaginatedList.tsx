@@ -101,6 +101,8 @@ export default function PaginatedList<T extends object>(
     [page, pages, limit, searchQuery, searchField, searchFilters, sortOrder],
     50
   )
+
+  // takes info from PaginatedResponse object and constructs new object with filtered data so that the unordered list is still avialable when filters are cleared
   const sortedData = (arr: T[], count: number, setting: string, field: string) => {
     const obj: PaginatedResponse<T> = {
       page: page,
@@ -117,7 +119,6 @@ export default function PaginatedList<T extends object>(
     }
     return obj
   }
-
 
   const { isPending, isSuccess, error, data, refetch } = useQuery<
     PaginatedResponse<T>
@@ -145,8 +146,9 @@ export default function PaginatedList<T extends object>(
     placeholderData: keepPreviousData,
   })
 
+  // new list object with filtered 'data: T[]' property to be updated with useEffect function
   const sortedList = sortedData(data?.data, data?.count, sortOrder, searchField)
-  console.log(sortedList)
+
   useEffect(() => {
     if (isSuccess) {
       setPage(data?.page)
