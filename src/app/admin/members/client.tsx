@@ -15,7 +15,7 @@ const FORM_GROUPS: IFormGroup[] = [
             {
                 type: 'text',
                 name: 'Username',
-                key: 'name',
+                key: 'discordUsername',
                 required: true,
             },
             {
