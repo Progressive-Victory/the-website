@@ -101,20 +101,22 @@ export default function PaginatedList<T extends object>(
     [page, pages, limit, searchQuery, searchField, searchFilters, sortOrder],
     50
   )
-  const sortedData = (arr: T[], count: number, setting: string): PaginatedResponse<T> => ({
-    page: page,
-    limit: limit,
-    pages: pages,
-    count: count,
-    data: setting === '' 
-      ? arr 
-      : setting === 'A-Z' 
-        ? arr.sort() 
-        : setting === 'Z-A' 
-          ? arr.sort() 
-          : arr
-  })
-
+  const sortedData = (arr: T[], count: number, setting: string, field: string) => {
+    const obj: PaginatedResponse<T> = {
+      page: page,
+      limit: limit,
+      pages: pages,
+      count: count,
+      data: setting === ''
+        ? arr
+        : setting === 'A-Z'
+          ? arr.sort((a, b) => (a[field] < b[field] ? -1 : 1))
+          : setting === 'Z-A'
+            ? arr.sort((a, b) => (a[field] > b[field] ? -1 : 1))
+            : arr
+    }
+    return obj
+  }
 
 
   const { isPending, isSuccess, error, data, refetch } = useQuery<
@@ -143,7 +145,8 @@ export default function PaginatedList<T extends object>(
     placeholderData: keepPreviousData,
   })
 
-  const sortedList = sortedData(data?.data, data?.count, sortOrder)
+  const sortedList = sortedData(data?.data, data?.count, sortOrder, searchField)
+  console.log(sortedList)
   useEffect(() => {
     if (isSuccess) {
       setPage(data?.page)
@@ -278,8 +281,8 @@ export default function PaginatedList<T extends object>(
               ) :
                 <div
                   className='d-none'
-                  >
-                  </div>
+                >
+                </div>
               }
 
               <label
