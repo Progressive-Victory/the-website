@@ -259,33 +259,7 @@ export default function PaginatedList<T extends object>(
                   </select>
                 </label>
               )}
-              {data && searchField !== 'all' ? (
-                <label
-                  htmlFor='Sort'
-                  className='flex items-center gap-2'
-                >
-                  <span className='font-medium'>Sort:</span>
-                  <select
-                    name="sort"
-                    id="sort"
-                    className='rounded-lg border border-gray-300 bg-white p-1'
-                    value={sortOrder}
-                    onChange={(e) => {
-                      setSortOrder(e.target.value)
-                    }
-                    }
-                  >
-                    <option value={''}>...</option>
-                    <option value={'A-Z'}>A-Z</option>
-                    <option value={'Z-A'}>Z-A</option>
-                  </select>
-                </label>
-              ) :
-                <div
-                  className='d-none'
-                >
-                </div>
-              }
+
 
               <label
                 htmlFor="limit"
@@ -307,7 +281,33 @@ export default function PaginatedList<T extends object>(
                 </select>
               </label>
             </div>
-
+            {data && searchField !== 'all' ? (
+              <label
+                htmlFor='Sort'
+                className='flex items-center gap-2'
+              >
+                <span className='font-medium'>Sort:</span>
+                <select
+                  name="sort"
+                  id="sort"
+                  className='rounded-lg border border-gray-300 bg-white p-1'
+                  value={sortOrder}
+                  onChange={(e) => {
+                    setSortOrder(e.target.value)
+                  }
+                  }
+                >
+                  <option value={''}>...</option>
+                  <option value={'A-Z'}>A-Z</option>
+                  <option value={'Z-A'}>Z-A</option>
+                </select>
+              </label>
+            ) :
+              <div
+                className='d-none'
+              >
+              </div>
+            }
             {props.filters?.map((f) => (
               <div key={f.name} className="flex flex-wrap gap-2">
                 <strong className="font-medium">
