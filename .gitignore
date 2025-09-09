@@ -45,3 +45,8 @@ node_modules/
 /playwright/.cache/
 .env
 !.env.example
+
+# nix
+.envrc
+.direnv/
+shell.nix
