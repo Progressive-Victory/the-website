@@ -69,6 +69,7 @@ export function VolunteerMap() {
             {/* Map */}
             <TiltMessage className="flex justify-center xl:justify-end">
                 <Message
+                    className="xl:w-[30vw]"
                     avatar="/images/pv_pride.png"
                     avatarRounded={false}
                     nameColor="red"
