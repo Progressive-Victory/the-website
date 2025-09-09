@@ -3,27 +3,38 @@ import { useEffect, useState } from 'react'
 import { Link, Message, TiltMessage } from '@/components/common'
 import { StateMap } from '@/components/Map'
 import { MapView, StateMapInteractionProps } from '@/components/Map/types'
-import { BBOX_AK, BBOX_HI, BBOX_PR, BBOX_US, US_STATES } from '@/components/Map/constants'
+import {
+    BBOX_AK,
+    BBOX_HI,
+    BBOX_PR,
+    BBOX_US,
+    US_STATES,
+} from '@/components/Map/constants'
 
 export function VolunteerMap() {
     /* States */
-    const [hoveredState, setHoveredState] = useState<string | null>(null);
-    const [selectedState, setSelectedState] = useState<string | null>(null);
-    const [totalMemberCount, setTotalMemberCount] = useState<number>(0);
-    const [stateMemberCount, setStateMemberCount] = useState<Record<string, number>>();
+    const [hoveredState, setHoveredState] = useState<string | null>(null)
+    const [selectedState, setSelectedState] = useState<string | null>(null)
+    const [totalMemberCount, setTotalMemberCount] = useState<number>(0)
+    const [stateMemberCount, setStateMemberCount] =
+        useState<Record<string, number>>()
 
     useEffect(() => {
         void (async () => {
             const statesCount: Record<string, number> = {}
-            const smc = await (await fetch("/api/map/count")).json() as Record<string, number>
+            const smc = (await (
+                await fetch('/api/map/count')
+            ).json()) as Record<string, number>
             Object.entries(smc).forEach(([k, v]) => {
-                const state = US_STATES.find(s => s.code === k)?.name
-                if (typeof state === "string") {
-                    statesCount[state] = (typeof v === "number" ? v : 0)
+                const state = US_STATES.find((s) => s.code === k)?.name
+                if (typeof state === 'string') {
+                    statesCount[state] = typeof v === 'number' ? v : 0
                 }
             })
 
-            const total = await (await fetch("/api/map/users-count")).json() as number
+            const total = (await (
+                await fetch('/api/map/users-count')
+            ).json()) as number
 
             setStateMemberCount(statesCount)
             setTotalMemberCount(total)
@@ -31,7 +42,7 @@ export function VolunteerMap() {
     }, [])
 
     function onFeatureClick(state: string | null) {
-        setSelectedState(prev => prev === state ? null : state)
+        setSelectedState((prev) => (prev === state ? null : state))
     }
 
     return (
@@ -39,11 +50,13 @@ export function VolunteerMap() {
             {/* Text */}
             <div className="z-10 flex max-w-[750px] flex-col items-center text-center text-white 2xl:order-last">
                 <h1 className="mb-8 text-4xl font-bold">
-                    Thousands of <span className="text-valencia">Volunteers</span>
+                    Thousands of{' '}
+                    <span className="text-valencia">Volunteers</span>
                     <br /> Across the US
                 </h1>
-                <p className="mb-8 px-4 text-lg font-[500] md:px-24 ">
-                    The PV community is constantly growing. Every new voice adds to the movement!
+                <p className="mb-8 px-4 text-lg font-[500] md:px-24">
+                    The PV community is constantly growing. Every new voice adds
+                    to the movement!
                 </p>
                 <Link
                     href={'/volunteer'}
@@ -61,13 +74,16 @@ export function VolunteerMap() {
                     avatarRounded={false}
                     nameColor="red"
                     username="Progressive Victory"
-                    text={"Our members are organizing in their local communities, identifying campaigns in their area, and using the shared resources, tactics, and people power of Progressive Victory!"}
+                    text={
+                        'Our members are organizing in their local communities, identifying campaigns in their area, and using the shared resources, tactics, and people power of Progressive Victory!'
+                    }
                     botDivider={true}
                     botLeftContent={
-                        <p className="font-medium">{selectedState
-                            ? `Members in ${selectedState}: ${stateMemberCount?.[selectedState]}`
-                            : `Total Members: ${totalMemberCount}`
-                        }</p>
+                        <p className="font-medium">
+                            {selectedState
+                                ? `Members in ${selectedState}: ${stateMemberCount?.[selectedState]}`
+                                : `Total Members: ${totalMemberCount}`}
+                        </p>
                     }
                 >
                     <CombinedMap
@@ -84,38 +100,36 @@ export function VolunteerMap() {
 }
 
 interface ExtraMap {
-    left: number;
-    h: number;
-    w: number;
-    mapView: MapView;
+    left: number
+    h: number
+    w: number
+    mapView: MapView
 }
 
 function CombinedMap(props: StateMapInteractionProps) {
     const extraMaps: Record<string, ExtraMap> = {
-        "AK": {
+        AK: {
             left: 0,
             h: 120,
             w: 140,
-            mapView: { bounds: BBOX_AK }
+            mapView: { bounds: BBOX_AK },
         },
-        "HI": {
+        HI: {
             left: 174,
             h: 75,
             w: 100,
-            mapView: { bounds: BBOX_HI }
+            mapView: { bounds: BBOX_HI },
         },
-        "PR": {
+        PR: {
             left: 298,
             h: 50,
             w: 70,
-            mapView: { bounds: BBOX_PR }
-        }
+            mapView: { bounds: BBOX_PR },
+        },
     }
 
     return (
-        <div
-            className="relative min-w-[350px] max-w-[750px] rounded-md border"
-        >
+        <div className="relative min-w-[350px] max-w-[750px] rounded-md border">
             <div className="aspect-video md:aspect-[5/3]">
                 <StateMap
                     mapView={{ bounds: BBOX_US }}
@@ -135,7 +149,7 @@ function CombinedMap(props: StateMapInteractionProps) {
                         className={`relative w-full`}
                         style={{
                             aspectRatio: map.w / map.h,
-                            maxWidth: map.w
+                            maxWidth: map.w,
                         }}
                     >
                         <StateMap
