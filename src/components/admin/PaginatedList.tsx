@@ -16,7 +16,6 @@ import { IconType } from 'react-icons/lib'
 
 export interface PaginatedListProps<T extends object> {
     event_target?: EventTarget
-
     /**
      * The endpoint that will be used to fetch the data
      */
