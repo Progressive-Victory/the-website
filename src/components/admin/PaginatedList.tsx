@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useDebounce } from '@uidotdev/usehooks'
 import classNames from 'classnames'
 import Image from 'next/image'
+import User from '@/models/User'
 import { FC, useEffect, useState } from 'react'
 import {
     FiChevronLeft,
@@ -111,8 +112,8 @@ export default function PaginatedList<T extends object>(
 
     // takes info from PaginatedResponse object and constructs new object with filtered data so that the unordered list is still avialable when filters are cleared
     const sortedData = (
-        arr: T[],
-        count: number,
+        arr: T[] | undefined,
+        count: number | undefined,
         setting: string,
         field: string
     ) => {
@@ -120,15 +121,15 @@ export default function PaginatedList<T extends object>(
             page: page,
             limit: limit,
             pages: pages,
-            count: count,
+            count: count!,
             data:
                 setting === ''
-                    ? arr
+                    ? arr!
                     : setting === 'A-Z'
-                      ? arr.sort((a, b) => (a[field] < b[field] ? -1 : 1))
+                      ? (arr!).sort((a, b) => (a[field] < b[field] ? -1 : 1))
                       : setting === 'Z-A'
-                        ? arr.sort((a, b) => (a[field] > b[field] ? -1 : 1))
-                        : arr,
+                        ? (arr!).sort((a, b) => (a[field] > b[field] ? -1 : 1))
+                        : arr!,
         }
         return obj
     }
