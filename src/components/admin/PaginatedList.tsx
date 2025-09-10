@@ -115,7 +115,7 @@ export default function PaginatedList<T extends object>(
         arr: T[] | undefined,
         count: number | undefined,
         setting: string,
-        field: string
+        field: T
     ) => {
         const obj: PaginatedResponse<T> = {
             page: page,
