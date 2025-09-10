@@ -219,7 +219,7 @@ export default function PaginatedList<T extends object>(
         </div>
         {filtersOpen && (
           <>
-            <div className="flex w-full justify-between gap-2">
+            <div className="flex w-full flex-wrap justify-between gap-2">
               {props.search_fields && (
                 <label
                   htmlFor="search_field"
