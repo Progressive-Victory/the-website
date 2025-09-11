@@ -114,14 +114,17 @@ export function Form<
                 switch (f.type) {
                     case 'text':
                     case 'checkbox': {
-                        // @ts-expect-error shut up
+                        // must be ignore
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
                         payload[f.key] = currentValue[f.key]
                         break
                     }
                     case 'select_many': {
-                        // @ts-expect-error shut up
+                        // must be ignore
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
                         payload[f.key] = currentValue[f.key].map(
-                            // @ts-expect-error shut up
                             (v) => v[f.value_key]
                         )
                         break
@@ -265,7 +268,9 @@ export function Form<
                                             value_key={f.value_key}
                                             active={
                                                 currentValue[f.key].map(
-                                                    // @ts-expect-error shut up
+                                                    // must be ignore
+                                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                                    // @ts-ignore
                                                     (v) => v[f.value_key]
                                                 ) ?? []
                                             }
