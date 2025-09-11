@@ -282,7 +282,6 @@ export async function PATCH(req: NextRequest) {
         }
 
         for (const key in rest) {
-            // @ts-expect-error shut up
             if (rest[key] !== undefined) role[key] = rest[key]
         }
 

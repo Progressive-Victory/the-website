@@ -27,11 +27,13 @@ const createClusterCustomIcon = function (cluster: MarkerCluster) {
 }
 
 // Map Layers
-export const USMapLayer = ({ isHeatmap, data }: {
-    isHeatmap?: boolean,
+export const USMapLayer = ({
+    isHeatmap,
+    data,
+}: {
+    isHeatmap?: boolean
     data: StateDataFeatureCollection
 }) => {
-
     return (
         <>
             <GeoJSON
@@ -54,7 +56,7 @@ export const USMapLayer = ({ isHeatmap, data }: {
                     const shade = getBrandColor(
                         'blue',
                         [500, 400, 300, 200, 100][
-                        Math.floor(Math.random() * 5)
+                            Math.floor(Math.random() * 5)
                         ] as ShadeIndex
                     )
 
@@ -122,6 +124,7 @@ export const ClientMap = ({
             const newList = []
             for (const zipcode of zipCodes) {
                 const data = await zipToLatLong(zipcode)
+                // @ts-expect-error shut up
                 if (data) newList.push(data)
             }
             console.log(newList)

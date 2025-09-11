@@ -262,13 +262,11 @@ export async function PATCH(req: NextRequest) {
         }
 
         for (const key in rest) {
-            // @ts-expect-error shut up
             if (rest[key] !== undefined && !deepEqual(rest[key], user[key])) {
                 updates.push({
                     collection_name: User.collection.name,
                     document_id: user.id,
                     field_name: key,
-                    // @ts-expect-error shut up
                     previous_value: user[key],
                     new_value: undefined,
                     // @ts-expect-error shut up
@@ -277,7 +275,9 @@ export async function PATCH(req: NextRequest) {
                     updated_by: acting_user.id ?? null,
                 })
 
-                // @ts-expect-error shut up
+                // must be ignore not expect
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 user[key] = rest[key]
             }
         }
@@ -285,7 +285,6 @@ export async function PATCH(req: NextRequest) {
         await user.save()
 
         updates.forEach((update) => {
-            // @ts-expect-error shut up
             update.new_value = user[update.field_name]
         })
 

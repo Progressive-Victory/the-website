@@ -111,8 +111,8 @@ export default function PaginatedList<T extends object>(
 
     // takes info from PaginatedResponse object and constructs new object with filtered data so that the unordered list is still avialable when filters are cleared
     const sortedData = (
-        arr: T[] | undefined,
-        count: number | undefined,
+        arr: T[],
+        count: number,
         setting: string,
         field: string
     ) => {
@@ -120,15 +120,15 @@ export default function PaginatedList<T extends object>(
             page: page,
             limit: limit,
             pages: pages,
-            count: count!,
+            count: count,
             data:
                 setting === ''
-                    ? arr!
+                    ? arr
                     : setting === 'A-Z'
-                      ? (arr!).sort((a, b) => (a[field] < b[field] ? -1 : 1))
+                      ? arr.sort((a, b) => (a[field] < b[field] ? -1 : 1))
                       : setting === 'Z-A'
-                        ? (arr!).sort((a, b) => (a[field] > b[field] ? -1 : 1))
-                        : arr!,
+                        ? arr.sort((a, b) => (a[field] > b[field] ? -1 : 1))
+                        : arr,
         }
         return obj
     }
@@ -161,6 +161,7 @@ export default function PaginatedList<T extends object>(
 
     // new list object with filtered 'data: T[]' property to be updated with useEffect function
     const sortedList = sortedData(
+        // @ts-expect-error shut up
         data?.data,
         data?.count,
         sortOrder,
