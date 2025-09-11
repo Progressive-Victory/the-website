@@ -3,7 +3,6 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useDebounce } from '@uidotdev/usehooks'
 import classNames from 'classnames'
 import Image from 'next/image'
-import User from '@/models/User'
 import { FC, useEffect, useState } from 'react'
 import {
     FiChevronLeft,
@@ -115,7 +114,7 @@ export default function PaginatedList<T extends object>(
         arr: T[] | undefined,
         count: number | undefined,
         setting: string,
-        field: T
+        field: string
     ) => {
         const obj: PaginatedResponse<T> = {
             page: page,

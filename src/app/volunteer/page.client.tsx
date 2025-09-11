@@ -266,7 +266,7 @@ export default function VolunteerPage({
                                 </p>
                             </header>
                             <section className="flex flex-col gap-2 ">
-                                <section className="flex flex-col sm:flex-row gap-2">
+                                <section className="flex flex-col gap-2 sm:flex-row">
                                     <Field
                                         value={firstName}
                                         placeholder="First Name"
@@ -309,7 +309,7 @@ export default function VolunteerPage({
                                         }}
                                     />
                                 </section>
-                                <section className="flex flex-col sm:flex-row gap-2">
+                                <section className="flex flex-col gap-2 sm:flex-row">
                                     <Field
                                         type="date"
                                         value={dateOfBirth}
@@ -455,7 +455,7 @@ export default function VolunteerPage({
                             stageName="phone_verify"
                             currentStage={currentStage}
                         >
-                            <div className="flex w-full flex-col items-center gap-0 md:min-w-[24rem]">
+                            <div className="flex w-full flex-col items-center gap-0 md:min-w-96">
                                 <p className="font-white text-center text-lg font-bold text-white">
                                     Enter your Verification Code
                                 </p>
@@ -611,7 +611,7 @@ export default function VolunteerPage({
                                             Looks like you&apos;re no longer in
                                             the server!
                                         </p>
-                                        <p className="mb-2 mt-2 text-center text-sm text-white">
+                                        <p className="my-2 text-center text-sm text-white">
                                             Click the button below to rejoin
                                         </p>
                                         <button
