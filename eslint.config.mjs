@@ -32,6 +32,8 @@ export default defineConfig([
       "@typescript-eslint/no-unsafe-member-access": "warn",
       "@typescript-eslint/no-unsafe-argument": "warn",
       "@typescript-eslint/no-unsafe-enum-comparison":"off",
+      "@typescript-eslint/no-unsafe-call": "warn",
+      "@typescript-eslint/no-unsafe-return": "warn",
       "tailwindcss/no-custom-classname": "off"
     }
   },

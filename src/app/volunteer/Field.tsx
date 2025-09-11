@@ -32,7 +32,7 @@ export function Field({
                 {placeholder}
                 {required && <span className="ml-1 text-red-500">*</span>}
             </label>
-            <div className='flex gap-2 flex-wrap w-full'>
+            <div className='flex w-full flex-wrap gap-2'>
                 <input
                     type={type}
                     value={value}
@@ -47,7 +47,7 @@ export function Field({
                     placeholder={placeholder ?? ''}
                     onChange={onChange}
                     onInput={onInput}
-                    className={`flex-grow rounded-md bg-white px-4 py-2 ring-steel-blue ${
+                    className={`grow rounded-md bg-white px-4 py-2 ring-steel-blue ${
                         error !== null && value !== '' && !!error
                             ? 'border-2 border-red-500'
                             : ''
