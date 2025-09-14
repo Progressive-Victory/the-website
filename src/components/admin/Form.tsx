@@ -192,6 +192,7 @@ export function Form<
                 <CollapsingSection
                     group={g}
                     defaultOpenState={g.title !== 'Account Status'}
+                    key={g.title}
                 >
                     <div className="grid grid-cols-3 gap-2 gap-x-4">
                         {g.fields.map((f) => (
@@ -446,12 +447,15 @@ const CollapsingSection = ({ children, group, defaultOpenState }) => {
     const [open, setOpen] = useState(defaultOpenState)
 
     return (
-        <section key={group.title}>
+        <section>
             {group.title && (
                 <>
-                    <h2 className="my-4 text-xl font-semibold">
+                    <h2 className="relative my-4 text-xl font-semibold">
                         {group.title}
-                        <button onClick={() => setOpen(!open)}>
+                        <button
+                            className="absolute right-0 top-0 flex size-8 cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 text-gray-400 hover:text-gray-500"
+                            onClick={() => setOpen(!open)}
+                        >
                             {open ? <FiChevronDown /> : <FiChevronLeft />}
                         </button>
                     </h2>
