@@ -96,7 +96,7 @@ export function Message({
                         src={image}
                         alt={username}
                         className="rounded-lg object-cover"
-                        style={{ objectFit: 'contain' }}
+                        style={{ objectPosition: '0 20%' }}
                         fill={true}
                         sizes="100%"
                     />
