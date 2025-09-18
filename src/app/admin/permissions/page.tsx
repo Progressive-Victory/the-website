@@ -43,12 +43,12 @@ export default function Page() {
                 before_element_selection={beforeElementSelected}
                 on_element_selected={onElementSelected}
                 id_key="_id"
-                display_key={'name'}
+                display_key={'discordUsername'}
                 filters={[]}
                 search_fields={[
                     {
-                        id: 'name',
-                        name: 'Name',
+                        id: 'discordUsername',
+                        name: 'Username',
                     },
                 ]}
             />
@@ -61,8 +61,8 @@ export default function Page() {
                                 fields: [
                                     {
                                         type: 'text',
-                                        name: 'Name',
-                                        key: 'name',
+                                        name: 'Username',
+                                        key: 'discordUsername',
                                         required: true,
                                     },
                                 ],

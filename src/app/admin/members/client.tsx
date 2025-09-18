@@ -174,16 +174,16 @@ export default function ClientPage({ roles }: PageProps) {
                     {
                         name: 'Role',
                         query_key: 'roles',
-                        display_key: 'name',
-                        value_key: 'name',
+                        display_key: 'discordUsername',
+                        value_key: 'discordUsername',
                         // @ts-expect-error shut up
                         options: roles,
                     },
                 ]}
                 search_fields={[
                     {
-                        id: 'name',
-                        name: 'Name',
+                        id: 'discordUsername',
+                        name: 'Username',
                     },
                     {
                         id: 'email',
@@ -220,7 +220,7 @@ export default function ClientPage({ roles }: PageProps) {
                                         type: 'select_many',
                                         name: 'Roles',
                                         key: 'roles',
-                                        display_key: 'name',
+                                        display_key: 'discordUsername',
                                         value_key: '_id',
                                         options: roles,
                                     },
@@ -235,7 +235,7 @@ export default function ClientPage({ roles }: PageProps) {
                             if (user.firstName && user.lastName)
                                 return `${user.firstName} ${user.lastName}`
                             if (user.preferredName) return user.preferredName
-                            if (user.name) return user.name
+                            if (user.discordUsername) return user.discordUsername
                             return ''
                         }}
                         patchEndpoint="/api/admin/users"
