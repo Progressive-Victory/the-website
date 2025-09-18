@@ -189,7 +189,7 @@ export function Form<
                 </div>
             </header>
             {groups.map((g) => (
-                <CollapsingSection
+                <CollapsableSection
                     group={g}
                     defaultOpenState={g.title !== 'Account Status'}
                     key={g.title}
@@ -343,7 +343,7 @@ export function Form<
                             </div>
                         ))}
                     </div>
-                </CollapsingSection>
+                </CollapsableSection>
             ))}
             {updateHistory &&
                 initialValue.updateHistory &&
@@ -443,7 +443,7 @@ const UpdateHistoryEntry: FC<IDocumentUpdate> = (update) => {
     )
 }
 
-const CollapsingSection = ({ children, group, defaultOpenState }) => {
+const CollapsableSection = ({ children, group, defaultOpenState }) => {
     const [open, setOpen] = useState(defaultOpenState)
 
     return (
