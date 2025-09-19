@@ -52,16 +52,16 @@ export default function ClientPage({ permissions }: PageProps) {
                     {
                         name: 'Permission',
                         query_key: 'permissions',
-                        display_key: 'discordUsername',
-                        value_key: 'discordUsername',
+                        display_key: 'name',
+                        value_key: 'name',
                         // @ts-expect-error shut up
                         options: permissions,
                     },
                 ]}
                 search_fields={[
                     {
-                        id: 'discordUsername',
-                        name: 'Username',
+                        id: 'name',
+                        name: 'Name',
                     },
                 ]}
             />
@@ -74,15 +74,15 @@ export default function ClientPage({ permissions }: PageProps) {
                                 fields: [
                                     {
                                         type: 'text',
-                                        name: 'Username',
-                                        key: 'discordUsername',
+                                        name: 'Name',
+                                        key: 'name',
                                         required: true,
                                     },
                                     {
                                         type: 'select_many',
                                         name: 'Permissions',
                                         key: 'permissions',
-                                        display_key: 'discordUsername',
+                                        display_key: 'name',
                                         value_key: '_id',
                                         options: permissions,
                                     },
