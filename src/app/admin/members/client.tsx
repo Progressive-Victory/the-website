@@ -235,7 +235,7 @@ export default function ClientPage({ roles }: PageProps) {
                             if (user.firstName && user.lastName)
                                 return `${user.firstName} ${user.lastName}`
                             if (user.preferredName) return user.preferredName
-                            if (user.discordUsername) return user.discordUsername
+                            if (user.discordUsername) return user.discordUsername as string;
                             return ''
                         }}
                         patchEndpoint="/api/admin/users"
