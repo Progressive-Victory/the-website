@@ -7,7 +7,7 @@ import DocumentUpdate, { IDocumentUpdate } from './DocumentUpdate'
 // Here is a user document
 // It defines the structure of the user and provides a POJO for interacting with user data
 export interface IUser extends Document {
-    name: string
+    discordUsername: string
     email: string
     image: string
     discordId: string
@@ -32,7 +32,7 @@ export interface IUser extends Document {
 
 // We then create a schema for the user document, tells Mongoose how the document should be structured
 const schema = new Schema<IUser>({
-    name: { type: String, required: true },
+    discordUsername: { type: String, required: true },
     email: { type: String, required: true },
     image: { type: String, required: true },
     discordId: { type: String, required: true },
