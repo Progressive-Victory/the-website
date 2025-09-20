@@ -54,7 +54,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
                 return {
                     id: profile.id,
-                    name: profile.username,
+                    discordUsername: profile.username,
                     email: profile.email,
                     // Using long form here to adjust size of image
                     image,
@@ -100,7 +100,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                 if (!existingUser) {
                     // Create new user
                     const newUser = new User({
-                        name: eprofile.username,
+                        discordUsername: eprofile.username,
                         email: profile.email,
                         // Using long form here to adjust size of image
                         image: await getUserAvatarURL(

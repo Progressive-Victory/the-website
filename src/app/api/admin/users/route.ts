@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
     ]
 
     const ALLOWED_SEARCH_FIELDS = [
-        'name',
+        'discordUsername',
         'email',
         'firstName',
         'lastName',
@@ -147,7 +147,7 @@ function calculate_age(date: string | null) {
 const PatchUserRequest = z
     .object({
         id: z.string(),
-        name: z.string().optional(),
+        discordUsername: z.string().optional(),
         email: z.string().optional(),
         zipCode: z.string().optional(),
         state: z.string().optional(),
@@ -188,7 +188,7 @@ export async function PATCH(req: NextRequest) {
         acting_user = await User.findOne({
             discordId: session.discordId,
         })
-    }
+    
 
     const result = PatchUserRequest.safeParse(await req.json())
 

@@ -420,7 +420,7 @@ const UpdateHistoryEntry: FC<IDocumentUpdate> = (update) => {
                 ) : (
                     <>
                         <code className="font-mono">
-                            {data?.name ?? 'deleted user'}
+                            {data?.discordUsername ?? 'deleted user'}
                         </code>
                         {data?._id && (
                             <>
