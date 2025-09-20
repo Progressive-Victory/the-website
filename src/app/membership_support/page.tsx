@@ -1,7 +1,5 @@
 import { Metadata } from 'next'
 import { MainLayout } from '@/components/layout'
-import FAQ from './FAQ'
-import AboutCards from './AboutCards'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
