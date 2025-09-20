@@ -168,7 +168,7 @@ export default function ClientPage({ roles }: PageProps) {
                         ? `${u.firstName} ${u.lastName}`
                         : u.preferredName) ?? u.email
                 }
-                alternate_display_key="name"
+                alternate_display_key="discordUsername"
                 image={{ key: 'image', alt: 'user profile picture' }}
                 filters={[
                     {
