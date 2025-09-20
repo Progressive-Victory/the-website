@@ -91,12 +91,12 @@ export function Message({
 
             {/* Middle - Image */}
             {image && (
-                <div className="relative h-[300px] w-full">
+                <div className="relative h-[400px] w-full">
                     <Image
                         src={image}
                         alt={username}
                         className="rounded-lg object-cover"
-                        style={{ objectPosition: '0 20%' }}
+                        style={{ objectFit: 'contain' }}
                         fill={true}
                         sizes="100%"
                     />

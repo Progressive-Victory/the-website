@@ -89,7 +89,7 @@ export function Hero() {
                         nameColor="red"
                         text="Progressive Victory is proud to support @benwikler for @DNC chair! 💙
             We need more bold Democrats with track records of proven results leading the charge 💪"
-                        image="/images/ben.jpg"
+                        image="/images/our_mission.png"
                     />
                 </TiltMessage>
 
