@@ -188,6 +188,7 @@ export async function PATCH(req: NextRequest) {
         acting_user = await User.findOne({
             discordId: session.discordId,
         })
+    }
     
 
     const result = PatchUserRequest.safeParse(await req.json())
