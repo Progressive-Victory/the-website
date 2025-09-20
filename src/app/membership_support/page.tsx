@@ -29,7 +29,6 @@ export const metadata: Metadata = {
  * @returns The About page.
  */
 export default function About() {
-    // redirect to form from Jay for now
     redirect('https://forms.gle/jbNftCSaqv416q3V6')
 
     return (
