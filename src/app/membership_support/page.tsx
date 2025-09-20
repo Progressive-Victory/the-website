@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { MainLayout } from '@/components/layout'
 import FAQ from './FAQ'
 import AboutCards from './AboutCards'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
     title: 'PV - Membership Support',
@@ -28,14 +29,15 @@ export const metadata: Metadata = {
  * @returns The About page.
  */
 export default function About() {
+    redirect('https://forms.gle/jbNftCSaqv416q3V6')
+
     return (
         <MainLayout>
             {/* Halftone background */}
             <div className="halftone z-1 absolute inset-0 size-full opacity-10" />
 
             <div className="z-2 relative m-auto flex min-h-screen w-full flex-col items-center justify-start gap-y-10 pb-16 pt-10 xl:min-h-[unset]">
-                <AboutCards />
-                <FAQ />
+                Redirecting you to form...
             </div>
         </MainLayout>
     )
