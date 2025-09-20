@@ -9,6 +9,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import deepEqual from 'deep-equal'
 import { FC, useEffect, useState } from 'react'
 import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
+import { FiChevronDown, FiChevronLeft } from 'react-icons/fi'
 
 export interface IForm<T extends { updateHistory?: IDocumentUpdate[] }> {
     groups: IFormGroup[]
@@ -188,12 +189,11 @@ export function Form<
                 </div>
             </header>
             {groups.map((g) => (
-                <section key={g.title}>
-                    {g.title && (
-                        <h2 className="my-4 text-xl font-semibold">
-                            {g.title}
-                        </h2>
-                    )}
+                <CollapsableSection
+                    group={g}
+                    defaultOpenState={g.title !== 'Account Status'}
+                    key={g.title}
+                >
                     <div className="grid grid-cols-3 gap-2 gap-x-4">
                         {g.fields.map((f) => (
                             <div key={f.name} className="contents">
@@ -343,7 +343,7 @@ export function Form<
                             </div>
                         ))}
                     </div>
-                </section>
+                </CollapsableSection>
             ))}
             {updateHistory &&
                 initialValue.updateHistory &&
@@ -440,5 +440,28 @@ const UpdateHistoryEntry: FC<IDocumentUpdate> = (update) => {
                 )}
             </div>
         </div>
+    )
+}
+
+const CollapsableSection = ({ children, group, defaultOpenState }) => {
+    const [open, setOpen] = useState(defaultOpenState)
+
+    return (
+        <section>
+            {group.title && (
+                <>
+                    <h2 className="relative my-4 text-xl font-semibold">
+                        {group.title}
+                        <button
+                            className="absolute right-0 top-0 flex size-8 cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 text-gray-400 hover:text-gray-500"
+                            onClick={() => setOpen(!open)}
+                        >
+                            {open ? <FiChevronDown /> : <FiChevronLeft />}
+                        </button>
+                    </h2>
+                </>
+            )}{' '}
+            {open ? children : null}
+        </section>
     )
 }
