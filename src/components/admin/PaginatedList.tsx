@@ -205,7 +205,7 @@ export default function PaginatedList<T extends object>(
         return () => {
             event_target.removeEventListener('refetch', handleSaveChanges)
         }
-    }, [props.event_target])
+    }, [props, props.event_target, refetch])
 
     return (
         <div className="flex w-96 flex-col self-stretch border-x-2 border-gray-200 bg-gray-50 2xl:w-[28rem]">
