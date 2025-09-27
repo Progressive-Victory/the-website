@@ -89,7 +89,7 @@ export function Hero() {
                         nameColor="red"
                         text="Progressive Victory is proud to support progressive candidates! 💙
             We need more bold Democrats with track records of proven results leading the charge 💪"
-                        image="/images/our_mission.png"
+                        image="/images/ben.jpg"
                     />
                 </TiltMessage>
 
