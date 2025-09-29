@@ -13,6 +13,7 @@ import {
 import { IoMdOptions } from 'react-icons/io'
 import { IoClose } from 'react-icons/io5'
 import { IconType } from 'react-icons/lib'
+import { useUser } from '@/util/hooks'
 
 export interface PaginatedListProps<T extends object> {
     event_target?: EventTarget
@@ -109,6 +110,8 @@ export default function PaginatedList<T extends object>(
         50
     )
 
+    const user = useUser()
+
     // takes info from PaginatedResponse object and constructs new object with filtered data so that the unordered list is still avialable when filters are cleared
     const sortedData = (
         arr: T[],
@@ -167,6 +170,8 @@ export default function PaginatedList<T extends object>(
         sortOrder,
         searchField
     )
+
+    const testList = filterOutUser(sortedList, user)
 
     useEffect(() => {
         if (isSuccess) {
@@ -353,11 +358,69 @@ export default function PaginatedList<T extends object>(
                         ))}
                     </>
                 )}
+                <div className="overflow-y-auto">
+                    {user?.data ? (
+                        <>
+                            <div
+                                className={classNames(
+                                    'flex cursor-pointer items-center gap-5 bg-gray-200 p-4',
+                                    {
+                                        'bg-gray-300 hover:bg-gray-400':
+                                            selected_id ===
+                                            user?.data[props.id_key],
+                                        'hover:bg-gray-300':
+                                            selected_id !==
+                                            user?.data[props.id_key],
+                                    }
+                                )}
+                                onClick={() =>
+                                    handleListItemClick(
+                                        user?.data[props.id_key] as string
+                                    )
+                                }
+                            >
+                                {props.image && (
+                                    <ImageWithFallback
+                                        src={
+                                            user?.data[
+                                                props.image.key
+                                            ] as string
+                                        }
+                                        alt={props.image.alt}
+                                    />
+                                )}
+
+                                <div className="flex flex-col">
+                                    <span className="font-medium text-black">
+                                        {typeof props.display_key === 'function'
+                                            ? props.display_key(user?.data)
+                                            : (user?.data[
+                                                  props.display_key
+                                              ] as string)}
+                                    </span>
+                                    {props.alternate_display_key && (
+                                        <span className="text-gray-500">
+                                            {typeof props.alternate_display_key ===
+                                            'function'
+                                                ? props.alternate_display_key(
+                                                      user?.data
+                                                  )
+                                                : (user?.data[
+                                                      props
+                                                          .alternate_display_key
+                                                  ] as string)}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    ) : null}
+                </div>
             </div>
 
             {sortedList && sortedList.count > 0 ? (
                 <ul className="overflow-y-auto">
-                    {sortedList.data.map((e) => (
+                    {testList.map((e) => (
                         <li
                             key={e[props.id_key] as string}
                             className={classNames(
@@ -425,6 +488,16 @@ export default function PaginatedList<T extends object>(
             </div>
         </div>
     )
+}
+
+function filterOutUser(sortedList, user) {
+    if (sortedList.data && user) {
+        const filteredSortedList = sortedList?.data.filter(
+            (usr) => usr.discordId !== user?.data.discordId
+        )
+        return filteredSortedList
+    }
+    return sortedList
 }
 
 const Pagination: FC<{

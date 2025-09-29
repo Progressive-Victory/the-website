@@ -1,5 +1,5 @@
-import { IUser } from "@/models/User";
-import { DependencyList, useEffect, useState } from "react";
+import { IUser } from '@/models/User'
+import { DependencyList, useEffect, useState } from 'react'
 
 /**
  * Optional props
@@ -7,47 +7,47 @@ import { DependencyList, useEffect, useState } from "react";
  * @param {boolean} autoLoad - Default to `true`.  If true, loads on first render.
  */
 interface DataProps {
-  dependencies?: DependencyList[];
-  autoLoad?: boolean;
+    dependencies?: DependencyList[]
+    autoLoad?: boolean
 }
 
 interface DataState {
-  data: IUser | undefined;
-  loading: boolean;
-  error: string;
-  reload: () => void;
+    data: IUser | undefined
+    loading: boolean
+    error: string
+    reload: () => void
 }
 
 export default function useUser(props?: DataProps): DataState {
-  // States
-  const [autoLoad, setAutoLoad] = useState<boolean>(props?.autoLoad ?? true);
-  const [data, setData] = useState<IUser | undefined>(undefined);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+    // States
+    const [autoLoad, setAutoLoad] = useState<boolean>(props?.autoLoad ?? true)
+    const [data, setData] = useState<IUser | undefined>(undefined)
+    const [loading, setLoading] = useState<boolean>(false)
+    const [error, setError] = useState<string>('')
 
-  function reload() {
-    setLoading(true)
+    function reload() {
+        setLoading(true)
 
-    void fetch('api/user')
-      .then(async response => {
-        const body = await response.json()
-        setData(body)
-      })
-      .catch(err => setError(err))
+        void fetch('/api/user')
+            .then(async (response) => {
+                const body = await response.json()
+                setData(body)
+            })
+            .catch((err) => setError(err))
 
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    if (!autoLoad) {
-      setAutoLoad(true)
-      return;
+        setLoading(false)
     }
 
-    reload()
-  }, [autoLoad])
+    useEffect(() => {
+        if (!autoLoad) {
+            setAutoLoad(true)
+            return
+        }
 
-  return { data, loading, error, reload }
+        reload()
+    }, [autoLoad])
+
+    return { data, loading, error, reload }
 }
 
 /**
@@ -57,13 +57,13 @@ export default function useUser(props?: DataProps): DataState {
  */
 export function hasPermission(user: IUser, permission: string): boolean {
     console.log(user)
-  let res = false
+    let res = false
 
-  for (const r of user.roles) {
-    if (r.permissions?.map(p => p.name).includes(permission)) {
-      res = true
+    for (const r of user.roles) {
+        if (r.permissions?.map((p) => p.name).includes(permission)) {
+            res = true
+        }
     }
-  }
 
-  return res
+    return res
 }
