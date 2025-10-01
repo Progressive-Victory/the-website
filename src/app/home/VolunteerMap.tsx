@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Button, Link, Message, TiltMessage } from '@/components/common'
 import { StateMap } from '@/components/Map'
 import { MapView, StateMapInteractionProps } from '@/components/Map/types'
+
 import {
     BBOX_AK,
     BBOX_HI,
@@ -11,6 +12,7 @@ import {
     US_STATES,
 } from '@/components/Map/constants'
 //import { BBOX_AK, BBOX_HI, BBOX_PR, BBOX_US, US_STATES } from '@/components/Map/utils/constants'
+
 
 type MapScene = "States" | "Coalition"
 const mapScenes: MapScene[] = ["States", "Coalition"]
