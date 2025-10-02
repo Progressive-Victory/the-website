@@ -21,8 +21,17 @@ export interface IForm<T extends { updateHistory?: IDocumentUpdate[] }> {
 }
 
 export interface IFormGroup {
-    title?: string
+    title: string
     fields: IFormField[]
+    defaultCollapsed?: boolean
+}
+
+export function FormGroup(
+    title: string,
+    fields: IFormField[],
+    flags?: { defaultCollapsed?: boolean }
+): IFormGroup {
+    return { title, fields, ...(flags ?? {}) }
 }
 
 export interface IFormFieldBase {
@@ -33,18 +42,76 @@ export interface IFormFieldBase {
     deprecated?: boolean
 }
 
-export type IFormFieldText = IFormFieldBase & {
+export interface IFormFieldText extends IFormFieldBase {
     type: 'text'
 }
 
-export type IFormFieldCheckbox = IFormFieldBase & {
+export function TextField(
+    name: string,
+    key: string,
+    flags?: {
+        required?: boolean
+        readonly?: boolean
+        deprecated?: boolean
+    }
+): IFormFieldText {
+    return {
+        type: 'text',
+        name,
+        key,
+        ...(flags ?? {}),
+    }
+}
+
+export interface IFormFieldCheckbox extends IFormFieldBase {
     type: 'checkbox'
 }
-export type IFormFieldSelectMany = IFormFieldBase & {
+
+export function CheckboxField(
+    name: string,
+    key: string,
+    flags?: {
+        required?: boolean
+        readonly?: boolean
+        deprecated?: boolean
+    }
+): IFormFieldCheckbox {
+    return {
+        type: 'checkbox',
+        name,
+        key,
+        ...(flags ?? {}),
+    }
+}
+
+export interface IFormFieldSelectMany extends IFormFieldBase {
     type: 'select_many'
     display_key: string
     value_key: string
-    options: unknown[]
+    options: string[]
+}
+
+export function SelectManyField(
+    name: string,
+    key: string,
+    displayKey: string,
+    valueKey: string,
+    options: string[],
+    flags?: {
+        required?: boolean
+        readonly?: boolean
+        deprecated?: boolean
+    }
+): IFormFieldSelectMany {
+    return {
+        type: 'select_many',
+        name,
+        key,
+        display_key: displayKey,
+        value_key: valueKey,
+        options,
+        ...(flags ?? {}),
+    }
 }
 
 export type IFormField =

@@ -1,6 +1,11 @@
 'use client'
 
-import { Form, IFormGroup } from '@/components/admin/Form'
+import {
+    CheckboxField,
+    Form,
+    FormGroup,
+    TextField,
+} from '@/components/admin/Form'
 
 import PaginatedList from '@/components/admin/PaginatedList'
 import { IRole } from '@/models/Role'
@@ -8,120 +13,37 @@ import { IUser } from '@/models/User'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
 
-const FORM_GROUPS: IFormGroup[] = [
-    {
-        title: 'Account Information',
-        fields: [
-            {
-                type: 'text',
-                name: 'Username',
-                key: 'name',
-                required: true,
-            },
-            {
-                type: 'text',
-                name: 'Email',
-                key: 'email',
-                required: true,
-            },
-            {
-                type: 'text',
-                name: 'Discord ID',
-                key: 'discordId',
+const FORM_GROUPS = [
+    FormGroup('Account Information', [
+        TextField('Username', 'name', { required: true }),
+        TextField('Email', 'email', { required: true }),
+        TextField('Discord ID', 'discordId', { readonly: true }),
+        TextField('Phone Number', 'phoneNumber', { required: true }),
+        TextField('Preferred Name', 'preferredName', { deprecated: true }),
+        TextField('First Name', 'firstName'),
+        TextField('Last Name', 'lastName'),
+        TextField('Date of Birth', 'dateOfBirth'),
+        TextField('Age', 'age', { readonly: true }),
+    ]),
+    FormGroup('Address', [
+        TextField('City', 'city'),
+        TextField('County', 'county'),
+        TextField('State', 'state'),
+        TextField('Zip Code', 'zipCode'),
+    ]),
+    FormGroup(
+        'Account Status',
+        [
+            CheckboxField('Accepted Alerts', 'acceptedAlerts', {
                 readonly: true,
-            },
-            {
-                type: 'text',
-                name: 'Phone Number',
-                key: 'phoneNumber',
-                required: true,
-            },
-            {
-                type: 'text',
-                name: 'Preferred Name',
-                key: 'preferredName',
-                required: false,
-                deprecated: true,
-            },
-            {
-                type: 'text',
-                name: 'First Name',
-                key: 'firstName',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'Last Name',
-                key: 'lastName',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'Date of Birth',
-                key: 'dateOfBirth',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'Age',
-                key: 'age',
-                required: false,
+            }),
+            CheckboxField('Verified', 'verified'),
+            TextField('Onboarding Stage', 'onboardingState', {
                 readonly: true,
-            },
+            }),
         ],
-    },
-    {
-        title: 'Address',
-        fields: [
-            {
-                type: 'text',
-                name: 'City',
-                key: 'city',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'County',
-                key: 'county',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'State',
-                key: 'state',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'Zip Code',
-                key: 'zipCode',
-                required: false,
-            },
-        ],
-    },
-    {
-        title: 'Account Status',
-        fields: [
-            {
-                type: 'checkbox',
-                name: 'Accepted Alerts',
-                key: 'acceptedAlerts',
-                readonly: true,
-            },
-            {
-                type: 'checkbox',
-                name: 'Verified',
-                key: 'verified',
-                readonly: false,
-            },
-            {
-                type: 'text',
-                name: 'Onboarding Stage',
-                key: 'onboardingStage',
-                readonly: true,
-            },
-        ],
-    },
+        { defaultCollapsed: true }
+    ),
 ]
 
 export interface PageProps {
