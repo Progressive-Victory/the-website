@@ -151,7 +151,6 @@ export default function PaginatedList<T extends object>(
                     url.searchParams.append(key, value)
                 }
             }
-            console.log(url.search)
 
             const res = await fetch(url, { signal })
             return (await res.json()) as PaginatedResponse<T>
