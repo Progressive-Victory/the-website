@@ -244,7 +244,7 @@ export default function VolunteerPage({
                                     phoneNumber,
                                     zipCode,
                                     acceptedAlerts: getAlerts,
-                                    dateOfBirth
+                                    dateOfBirth,
                                 })
                                 requestCodeMutation.mutate(phoneNumber)
                                 setCurrentStage('phone_verify')
@@ -265,7 +265,7 @@ export default function VolunteerPage({
                                     Join us on Discord and make a difference ✨
                                 </p>
                             </header>
-                            <section className="flex flex-col gap-2 ">
+                            <section className="flex flex-col gap-2">
                                 <section className="flex flex-col gap-2 sm:flex-row">
                                     <Field
                                         value={firstName}
@@ -353,14 +353,14 @@ export default function VolunteerPage({
                                     value={phoneNumber}
                                     placeholder="Phone Number"
                                     error={!validationFlags['phone_number']}
-                                    errorText="Enter a valid 10 digit phone, e.g., 1234567890"
-                                    maxLength={12}
+                                    errorText="Enter a valid phone number, e.g., (234) 567-8901"
+                                    maxLength={20}
                                     onChange={(e) => {
                                         const text = e.target.value
                                         setPhoneNumber(text)
 
                                         const parsed = phone(text, {
-                                            strictDetection: true,
+                                            strictDetection: false,
                                             validateMobilePrefix: true,
                                         })
 
@@ -374,8 +374,8 @@ export default function VolunteerPage({
                                     className={`-mt-0.5 mb-1 text-[12px] text-gray-300`}
                                 >
                                     <em>
-                                        US numbers only. Message and data rates
-                                        may apply. Must be SMS reachable.
+                                        Message and data rates may apply. Must
+                                        be SMS reachable.
                                     </em>
                                 </p>
                             </section>
@@ -628,7 +628,7 @@ export default function VolunteerPage({
                                     <>
                                         <CakeIcon className="size-12 text-steel-blue" />
                                         <p className="mt-6 text-center text-lg font-bold text-white">
-                                            Congrats you are in the server!
+                                            Congrats, you are in the server!
                                         </p>
                                         <p className="mt-6 text-center text-sm text-white">
                                             Check your Discord client to start

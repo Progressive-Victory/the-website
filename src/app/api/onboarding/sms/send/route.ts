@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
 
     const { number } = result.data
     const parsed = phone(number, {
-        country: 'US',
         strictDetection: false,
         validateMobilePrefix: true,
     })
@@ -46,7 +45,7 @@ export async function POST(req: NextRequest) {
     if (!parsed.isValid) {
         return NextResponse.json(
             {
-                message: 'Invalid US mobile phone number',
+                message: 'Invalid mobile phone number',
             },
             { status: HTTPStatus.BadRequest }
         )
@@ -115,7 +114,7 @@ export async function POST(req: NextRequest) {
         codeLength: 6,
         brandName: 'Progressive Victory',
         limit: 20,
-        countryCode: 'US',
+        countryCode: parsed.countryIso2,
     })
 
     if ('api-error-msg' in data) {
