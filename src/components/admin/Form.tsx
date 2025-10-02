@@ -146,9 +146,6 @@ export function Form<
 
     useEffect(() => setEditMode(false), [initialValue])
 
-    console.log(groups)
-    console.log(currentValue)
-
     return (
         <form
             className="p-6"
@@ -190,14 +187,14 @@ export function Form<
                     )}
                 </div>
             </header>
-            {groups.map((g) => (
+            {groups.map((g, groupIndex) => (
                 <CollapsableSection
                     group={g}
                     defaultOpenState={g.title !== 'Account Status'}
-                    key={g.title}
+                    key={g.title ?? groupIndex}
                 >
                     <div className="grid grid-cols-3 gap-2 gap-x-4">
-                        {g.fields.map((f) => (
+                        {(g.fields ?? []).map((f) => (
                             <div key={f.name} className="contents">
                                 <div className="pl-6">
                                     <label
