@@ -1,7 +1,3 @@
-/* eslint @typescript-eslint/no-explicit-any: 0 */
-/* eslint @typescript-eslint/no-unsafe-call: 0 */
-/* eslint @typescript-eslint/no-unsafe-return: 0 */
-
 import MultiSelect from '@/components/admin/MultiSelect'
 import { IDocumentUpdate } from '@/models/DocumentUpdate'
 import { IUser } from '@/models/User'
@@ -48,7 +44,7 @@ export type IFormFieldSelectMany = IFormFieldBase & {
     type: 'select_many'
     display_key: string
     value_key: string
-    options: any[]
+    options: unknown[]
 }
 
 export type IFormField =
@@ -56,10 +52,13 @@ export type IFormField =
     | IFormFieldCheckbox
     | IFormFieldSelectMany
 
+const getHistoryUpdatedAt = (update: Partial<IDocumentUpdate>) =>
+    new Date(update.updated_at as unknown as string)
+
 export function Form<
     T extends { _id: string; updateHistory?: IDocumentUpdate[] } & Record<
         string,
-        any
+        unknown
     >,
 >({
     groups,
@@ -78,7 +77,7 @@ export function Form<
     // FIXME: memoize?
     const equal = deepEqual(initialValue, currentValue)
 
-    const mutation = useMutation({
+    const mutation = useMutation<T, Error, Record<string, unknown>>({
         mutationKey: [patchEndpoint, currentValue._id],
         async mutationFn(payload) {
             const res = await fetch(patchEndpoint, {
@@ -89,7 +88,7 @@ export function Form<
                 body: JSON.stringify(payload),
             })
 
-            return await res.json()
+            return (await res.json()) as T
         },
         onSuccess(data) {
             setInitialValue({ ...data })
@@ -103,7 +102,7 @@ export function Form<
     })
 
     const saveChanges = async () => {
-        const payload = { id: currentValue._id }
+        const payload: Record<string, unknown> = { id: currentValue._id }
 
         for (const g of groups) {
             for (const f of g.fields) {
@@ -115,26 +114,19 @@ export function Form<
                 switch (f.type) {
                     case 'text':
                     case 'checkbox': {
-                        // must be ignore
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
                         payload[f.key] = currentValue[f.key]
                         break
                     }
                     case 'select_many': {
-                        // must be ignore
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        payload[f.key] = currentValue[f.key].map(
-                            (v) => v[f.value_key]
-                        )
+                        payload[f.key] = (
+                            currentValue[f.key] as Record<string, unknown>[]
+                        ).map((v) => v[f.value_key])
                         break
                     }
                 }
             }
         }
 
-        // @ts-expect-error shut up
         await mutation.mutateAsync(payload)
         setEditMode(false)
     }
@@ -144,7 +136,18 @@ export function Form<
         setEditMode(false)
     }
 
+    const getFieldAsText = (key: string) => (currentValue[key] as string) ?? ''
+    const getFieldAsCheckbox = (key: string) =>
+        (currentValue[key] as boolean) ?? false
+    const getFieldAsSelectMany = (key: string) =>
+        (currentValue[key] as Record<string, string>[]) ?? []
+    const getSelectManyOptions = (options: unknown) =>
+        (options as Record<string, string>[]) ?? []
+
     useEffect(() => setEditMode(false), [initialValue])
+
+    console.log(groups)
+    console.log(currentValue)
 
     return (
         <form
@@ -161,8 +164,7 @@ export function Form<
                     {editMode ? (
                         <>
                             <button
-                                /* eslint-disable  @typescript-eslint/no-misused-promises */
-                                onClick={saveChanges}
+                                onClick={() => void saveChanges()}
                                 disabled={equal}
                                 className="flex cursor-pointer items-center gap-2 rounded-lg border border-sky-600 bg-sky-500 px-3 py-1 text-sm font-medium text-white disabled:cursor-not-allowed disabled:border-[hsl(200,68%,39%)] disabled:bg-[hsl(201,66%,32%)]"
                             >
@@ -225,11 +227,7 @@ export function Form<
                                 {f.type === 'text' ? (
                                     f.readonly || !editMode ? (
                                         <div className="col-span-2 w-full">
-                                            {`${
-                                                currentValue[
-                                                    f.key as keyof T
-                                                ] ?? null
-                                            }`}
+                                            {getFieldAsText(f.key)}
                                         </div>
                                     ) : (
                                         <input
@@ -238,20 +236,15 @@ export function Form<
                                             id={f.key}
                                             disabled={mutation.isPending}
                                             required={f.required}
-                                            value={
-                                                (currentValue[
-                                                    f.key as keyof T
-                                                ] as string) ?? ''
-                                            }
-                                            onInput={(e) => {
-                                                // @ts-expect-error shut up
-                                                currentValue[f.key] =
-                                                    // @ts-expect-error shut up
-                                                    e.target.value
+                                            value={getFieldAsText(f.key)}
+                                            onInput={(e) =>
                                                 setCurrentValue({
                                                     ...currentValue,
+                                                    [f.key]: (
+                                                        e.target as HTMLTextAreaElement
+                                                    ).value,
                                                 })
-                                            }}
+                                            }
                                             className="col-span-2 w-full max-w-96 rounded-lg border border-gray-300 px-3 py-0.5"
                                         />
                                     )
@@ -259,48 +252,52 @@ export function Form<
                                     <div className="col-span-2 flex flex-wrap gap-2">
                                         <MultiSelect
                                             disabled={mutation.isPending}
-                                            /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-                                            readonly={f.readonly || !editMode}
+                                            readonly={
+                                                (f.readonly ?? false) ||
+                                                !editMode
+                                            }
                                             name={f.name}
-                                            options={f.options}
+                                            options={getSelectManyOptions(
+                                                f.options
+                                            )}
                                             query_key={f.key}
                                             display_key={f.display_key}
                                             value_key={f.value_key}
-                                            active={
-                                                currentValue[f.key].map(
-                                                    // must be ignore
-                                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                                    // @ts-ignore
-                                                    (v) => v[f.value_key]
-                                                ) ?? []
+                                            active={getFieldAsSelectMany(
+                                                f.key
+                                            ).map((v) => v[f.value_key])}
+                                            addActive={(value) =>
+                                                setCurrentValue({
+                                                    ...currentValue,
+                                                    [f.key]: [
+                                                        ...getFieldAsSelectMany(
+                                                            f.key
+                                                        ),
+                                                        getSelectManyOptions(
+                                                            f.options
+                                                        ).find(
+                                                            (o) =>
+                                                                o[
+                                                                    f.value_key
+                                                                ] == value
+                                                        ),
+                                                    ],
+                                                })
                                             }
-                                            addActive={(value) => {
-                                                // @ts-expect-error shut up
-                                                currentValue[f.key] = [
-                                                    ...(currentValue[f.key] ??
-                                                        []),
-                                                    f.options.find(
-                                                        (o) =>
-                                                            o[f.value_key] ==
-                                                            value
-                                                    ),
-                                                ]
+                                            removeActive={(value) =>
                                                 setCurrentValue({
                                                     ...currentValue,
+                                                    [f.key]:
+                                                        getFieldAsSelectMany(
+                                                            f.key
+                                                        ).filter(
+                                                            (v) =>
+                                                                v[
+                                                                    f.value_key
+                                                                ] !== value
+                                                        ),
                                                 })
-                                            }}
-                                            removeActive={(value) => {
-                                                // @ts-expect-error shut up
-                                                currentValue[f.key] =
-                                                    currentValue[f.key].filter(
-                                                        (v: any) =>
-                                                            v[f.value_key] !==
-                                                            value
-                                                    )
-                                                setCurrentValue({
-                                                    ...currentValue,
-                                                })
-                                            }}
+                                            }
                                             menuOpen={activeFieldMenu == f.key}
                                             setMenuOpen={(open) =>
                                                 setActiveFieldMenu(
@@ -311,10 +308,7 @@ export function Form<
                                     </div>
                                 ) : f.readonly || !editMode ? (
                                     <div className="col-span-2 w-full">
-                                        {`${
-                                            currentValue[f.key as keyof T] ??
-                                            null
-                                        }`}
+                                        {`${getFieldAsCheckbox(f.key)}`}
                                     </div>
                                 ) : (
                                     <div className="col-span-2 flex items-center">
@@ -324,17 +318,11 @@ export function Form<
                                             id={f.key}
                                             disabled={mutation.isPending}
                                             required={f.required}
-                                            checked={
-                                                currentValue[
-                                                    f.key as keyof T
-                                                ] as boolean
-                                            }
+                                            checked={getFieldAsCheckbox(f.key)}
                                             onChange={(e) => {
-                                                // @ts-expect-error shut up
-                                                currentValue[f.key] =
-                                                    e.target.checked
                                                 setCurrentValue({
                                                     ...currentValue,
+                                                    [f.key]: e.target.checked,
                                                 })
                                             }}
                                         />
@@ -356,13 +344,10 @@ export function Form<
                             {initialValue.updateHistory
                                 .sort(
                                     (a, b) =>
-                                        // @ts-expect-error shut up
-                                        new Date(b.updated_at).getTime() -
-                                        // @ts-expect-error shut up
-                                        new Date(a.updated_at).getTime()
+                                        getHistoryUpdatedAt(b).getTime() -
+                                        getHistoryUpdatedAt(a).getTime()
                                 )
                                 .map((update) => (
-                                    // @ts-expect-error shut up
                                     <UpdateHistoryEntry
                                         key={
                                             update.updated_at as unknown as string
@@ -377,7 +362,7 @@ export function Form<
     )
 }
 
-const UpdateHistoryEntry: FC<IDocumentUpdate> = (update) => {
+const UpdateHistoryEntry: FC<Partial<IDocumentUpdate>> = (update) => {
     const { isPending, data } = useQuery<IUser | null>({
         queryKey: ['admin', 'users', update.updated_by],
         async queryFn() {
@@ -387,9 +372,7 @@ const UpdateHistoryEntry: FC<IDocumentUpdate> = (update) => {
                 `/api/admin/users/${update.updated_by as unknown as string}`
             )
 
-            const data = await res.json()
-
-            return data as IUser
+            return (await res.json()) as IUser
         },
     })
 
@@ -402,10 +385,7 @@ const UpdateHistoryEntry: FC<IDocumentUpdate> = (update) => {
     return (
         <div className="contents">
             <div className="pl-6 font-medium">
-                {
-                    // @ts-expect-error shut up
-                    new Date(update.updated_at).toLocaleString()
-                }
+                {getHistoryUpdatedAt(update).toLocaleString()}
             </div>
             <div>
                 <code className="font-mono">{update.field_name}</code>{' '}
@@ -443,7 +423,11 @@ const UpdateHistoryEntry: FC<IDocumentUpdate> = (update) => {
     )
 }
 
-const CollapsableSection = ({ children, group, defaultOpenState }) => {
+const CollapsableSection: FC<{
+    children?: React.ReactNode
+    group: IFormGroup
+    defaultOpenState: boolean
+}> = ({ children, group, defaultOpenState }) => {
     const [open, setOpen] = useState(defaultOpenState)
 
     return (
