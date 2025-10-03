@@ -13,6 +13,6 @@ export const metadata: Metadata = {
     },
 }
 
-export default function () {
+export default function Page() {
     redirect('/admin/members', RedirectType.replace)
 }

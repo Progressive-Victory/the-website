@@ -1,7 +1,7 @@
 'use client'
 
-import { Form, FormGroup, TextField } from '@/components/admin/Form'
 import PaginatedList from '@/components/admin/PaginatedList'
+import { Form, MakeFormGroup, MakeTextField } from '@/components/form'
 import { IPermission } from '@/models/Permission'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
@@ -18,7 +18,9 @@ export default function Page() {
     const [permission, setPermission] = useState<IPermission | null>(null)
 
     const constructFormGroups = () => [
-        FormGroup('Details', [TextField('Name', 'name', { required: true })]),
+        MakeFormGroup('Details', [
+            MakeTextField('Name', 'name', { required: true }),
+        ]),
     ]
 
     const beforeElementSelected = () => {

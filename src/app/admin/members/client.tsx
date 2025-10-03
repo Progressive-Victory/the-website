@@ -1,45 +1,44 @@
 'use client'
 
-import {
-    CheckboxField,
-    Form,
-    FormGroup,
-    SelectManyField,
-    TextField,
-} from '@/components/admin/Form'
-
 import PaginatedList from '@/components/admin/PaginatedList'
+import {
+    Form,
+    MakeCheckboxField,
+    MakeFormGroup,
+    MakeSelectManyField,
+    MakeTextField,
+} from '@/components/form'
 import { IRole } from '@/models/Role'
 import { IUser } from '@/models/User'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
 
 const STATIC_FORM_GROUPS = [
-    FormGroup('Account Information', [
-        TextField('Username', 'name', { required: true }),
-        TextField('Email', 'email', { required: true }),
-        TextField('Discord ID', 'discordId', { readonly: true }),
-        TextField('Phone Number', 'phoneNumber', { required: true }),
-        TextField('Preferred Name', 'preferredName', { deprecated: true }),
-        TextField('First Name', 'firstName'),
-        TextField('Last Name', 'lastName'),
-        TextField('Date of Birth', 'dateOfBirth'),
-        TextField('Age', 'age', { readonly: true }),
+    MakeFormGroup('Account Information', [
+        MakeTextField('Username', 'name', { required: true }),
+        MakeTextField('Email', 'email', { required: true }),
+        MakeTextField('Discord ID', 'discordId', { readonly: true }),
+        MakeTextField('Phone Number', 'phoneNumber', { required: true }),
+        MakeTextField('Preferred Name', 'preferredName', { deprecated: true }),
+        MakeTextField('First Name', 'firstName'),
+        MakeTextField('Last Name', 'lastName'),
+        MakeTextField('Date of Birth', 'dateOfBirth'),
+        MakeTextField('Age', 'age', { readonly: true }),
     ]),
-    FormGroup('Address', [
-        TextField('City', 'city'),
-        TextField('County', 'county'),
-        TextField('State', 'state'),
-        TextField('Zip Code', 'zipCode'),
+    MakeFormGroup('Address', [
+        MakeTextField('City', 'city'),
+        MakeTextField('County', 'county'),
+        MakeTextField('State', 'state'),
+        MakeTextField('Zip Code', 'zipCode'),
     ]),
-    FormGroup(
+    MakeFormGroup(
         'Account Status',
         [
-            CheckboxField('Accepted Alerts', 'acceptedAlerts', {
+            MakeCheckboxField('Accepted Alerts', 'acceptedAlerts', {
                 readonly: true,
             }),
-            CheckboxField('Verified', 'verified'),
-            TextField('Onboarding Stage', 'onboardingState', {
+            MakeCheckboxField('Verified', 'verified'),
+            MakeTextField('Onboarding Stage', 'onboardingState', {
                 readonly: true,
             }),
         ],
@@ -63,8 +62,8 @@ export default function ClientPage({ roles }: PageProps) {
 
     const constructFormGroups = (roles: IRole[]) => [
         ...STATIC_FORM_GROUPS,
-        FormGroup('Permissions', [
-            SelectManyField('Roles', 'roles', 'name', '_id', roles),
+        MakeFormGroup('Permissions', [
+            MakeSelectManyField('Roles', 'roles', 'name', '_id', roles),
         ]),
     ]
 

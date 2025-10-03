@@ -1,13 +1,12 @@
 'use client'
 
-import {
-    Form,
-    FormGroup,
-    SelectManyField,
-    TextField,
-} from '@/components/admin/Form'
-
 import PaginatedList from '@/components/admin/PaginatedList'
+import {
+    MakeFormGroup,
+    MakeTextField,
+    MakeSelectManyField,
+    Form,
+} from '@/components/form'
 import { IPermission } from '@/models/Permission'
 import { IRole } from '@/models/Role'
 import deepEqual from 'deep-equal'
@@ -19,9 +18,9 @@ export interface PageProps {
 
 function constructFormGroups(permissions: IPermission[]) {
     return [
-        FormGroup('Details', [
-            TextField('Name', 'name', { required: true }),
-            SelectManyField(
+        MakeFormGroup('Details', [
+            MakeTextField('Name', 'name', { required: true }),
+            MakeSelectManyField(
                 'Permissions',
                 'permissions',
                 'name',
