@@ -38,7 +38,7 @@ const STATIC_FORM_GROUPS = [
                 readonly: true,
             }),
             MakeCheckboxField('Verified', 'verified'),
-            MakeTextField('Onboarding Stage', 'onboardingState', {
+            MakeTextField('Onboarding Stage', 'onboardingStage', {
                 readonly: true,
             }),
         ],
