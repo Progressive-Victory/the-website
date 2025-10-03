@@ -1,82 +1,65 @@
-import { IFormField } from '.'
+import { FormField, IBaseFormField } from '.'
 import MultiSelect from '../admin/MultiSelect'
+import { useState } from 'react'
 
-export interface IFormFieldSelectMany extends IFormField {
-    type: 'select_many'
-    display_key: string
-    value_key: string
-    options: Record<string, string>[]
-}
-
-export function MakeSelectManyField(
-    name: string,
-    key: string,
-    displayKey: string,
-    valueKey: string,
-    options: unknown[],
-    flags?: {
-        required?: boolean
-        readonly?: boolean
-        deprecated?: boolean
-    }
-): IFormFieldSelectMany {
-    return {
-        type: 'select_many',
-        name,
-        key,
-        display_key: displayKey,
-        value_key: valueKey,
-        options: options as Record<string, string>[],
-        ...(flags ?? {}),
-    }
-}
-
-export interface SelectManyFieldProps {
-    field: IFormFieldSelectMany
-    value?: Record<string, string>[]
-    isDisabled: boolean
-    isLoading: boolean
-    activeFieldMenu: string | null
-    setActiveFieldMenu: (value: string | null) => void
-    onUpdate: (value: Record<string, string>[]) => void
+export interface SelectManyFieldProps extends IBaseFormField {
+    nameKey: string
+    valueKey: string
+    options: unknown[]
 }
 
 export function SelectManyField({
+    name,
     field,
-    value,
-    isDisabled,
-    isLoading,
-    activeFieldMenu,
-    setActiveFieldMenu,
-    onUpdate,
+    nameKey,
+    valueKey,
+    options,
+    required = false,
+    readonly = false,
+    deprecated = false,
+    dynamic,
 }: SelectManyFieldProps) {
-    const handleAddActive = (added: string) =>
-        onUpdate([
-            ...(value ?? []),
-            field.options.find((o) => o[field.value_key] === added) ?? {},
-        ])
+    const [menuOpen, setMenuOpen] = useState(false)
 
-    const handleRemoveActive = (removed: string) =>
-        onUpdate((value ?? []).filter((v) => v[field.value_key] !== removed))
+    const values = (dynamic?.value as Record<string, string>[]) ?? []
+    const active = values.map((value) => value[valueKey])
+    const recordOptions = options as Record<string, string>[]
+
+    const isValid = (values: unknown[]) => !required || values.length > 0
+
+    const handleUpdate = (values: string[]) => {
+        const selected = recordOptions.filter((option) =>
+            values.some((value) => option[valueKey] == value)
+        )
+        dynamic?.onUpdate?.(field, selected, values, isValid(selected))
+    }
 
     return (
-        <div className="col-span-2 flex flex-wrap gap-2">
-            <MultiSelect
-                disabled={isLoading}
-                readonly={(field.readonly ?? false) || isDisabled}
-                name={field.name}
-                options={field.options ?? []}
-                query_key={field.key}
-                display_key={field.display_key}
-                value_key={field.value_key}
-                active={(value ?? []).map((v) => v[field.value_key])}
-                addActive={handleAddActive}
-                removeActive={handleRemoveActive}
-                menuOpen={activeFieldMenu == field.key}
-                setMenuOpen={(open) =>
-                    setActiveFieldMenu(open ? field.key : null)
-                }
-            />
-        </div>
+        <FormField
+            name={name}
+            field={field}
+            required={required}
+            deprecated={deprecated}
+        >
+            <div className="col-span-2 flex flex-wrap gap-2">
+                <MultiSelect
+                    name={name}
+                    readonly={readonly || dynamic?.disabled}
+                    options={recordOptions}
+                    displayKey={nameKey}
+                    valueKey={valueKey}
+                    active={active}
+                    addActive={(value) => handleUpdate([...active, value])}
+                    removeActive={(value) =>
+                        handleUpdate(
+                            active.filter((active) => active !== value)
+                        )
+                    }
+                    menuOpen={menuOpen}
+                    setMenuOpen={setMenuOpen}
+                    disabled={dynamic?.loading}
+                />
+            </div>
+        </FormField>
     )
 }

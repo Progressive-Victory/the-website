@@ -2,49 +2,16 @@
 
 import PaginatedList from '@/components/admin/PaginatedList'
 import {
+    CheckboxField,
     Form,
-    MakeCheckboxField,
-    MakeFormGroup,
-    MakeSelectManyField,
-    MakeTextField,
+    FormGroup,
+    SelectManyField,
+    TextField,
 } from '@/components/form'
 import { IRole } from '@/models/Role'
 import { IUser } from '@/models/User'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
-
-const STATIC_FORM_GROUPS = [
-    MakeFormGroup('Account Information', [
-        MakeTextField('Username', 'name', { required: true }),
-        MakeTextField('Email', 'email', { required: true }),
-        MakeTextField('Discord ID', 'discordId', { readonly: true }),
-        MakeTextField('Phone Number', 'phoneNumber', { required: true }),
-        MakeTextField('Preferred Name', 'preferredName', { deprecated: true }),
-        MakeTextField('First Name', 'firstName'),
-        MakeTextField('Last Name', 'lastName'),
-        MakeTextField('Date of Birth', 'dateOfBirth'),
-        MakeTextField('Age', 'age', { readonly: true }),
-    ]),
-    MakeFormGroup('Address', [
-        MakeTextField('City', 'city'),
-        MakeTextField('County', 'county'),
-        MakeTextField('State', 'state'),
-        MakeTextField('Zip Code', 'zipCode'),
-    ]),
-    MakeFormGroup(
-        'Account Status',
-        [
-            MakeCheckboxField('Accepted Alerts', 'acceptedAlerts', {
-                readonly: true,
-            }),
-            MakeCheckboxField('Verified', 'verified'),
-            MakeTextField('Onboarding Stage', 'onboardingStage', {
-                readonly: true,
-            }),
-        ],
-        { defaultCollapsed: true }
-    ),
-]
 
 export interface PageProps {
     roles: IRole[]
@@ -59,13 +26,6 @@ export default function ClientPage({ roles }: PageProps) {
     // This is the mutable copy we actually update when the user interacts with
     // the form
     const [user, setUser] = useState<IUser | null>(null)
-
-    const constructFormGroups = (roles: IRole[]) => [
-        ...STATIC_FORM_GROUPS,
-        MakeFormGroup('Permissions', [
-            MakeSelectManyField('Roles', 'roles', 'name', '_id', roles),
-        ]),
-    ]
 
     const beforeElementSelected = () => {
         if (!deepEqual(user, originalUser)) {
@@ -139,7 +99,6 @@ export default function ClientPage({ roles }: PageProps) {
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {user && originalUser ? (
                     <Form<IUser>
-                        groups={constructFormGroups(roles)}
                         initialValue={originalUser}
                         setInitialValue={setOriginalUser}
                         currentValue={user}
@@ -158,7 +117,62 @@ export default function ClientPage({ roles }: PageProps) {
                             )
                         }}
                         updateHistory
-                    />
+                    >
+                        <FormGroup title="Account Information">
+                            <TextField name="Username" field="name" required />
+                            <TextField name="Email" field="email" required />
+                            <TextField
+                                name="Discord ID"
+                                field="discordId"
+                                readonly
+                            />
+                            <TextField
+                                name="Phone Number"
+                                field="phoneNumber"
+                                required
+                            />
+                            <TextField
+                                name="Preferred Name"
+                                field="preferredName"
+                                deprecated
+                            />
+                            <TextField name="First Name" field="firstName" />
+                            <TextField name="Last Name" field="lastName" />
+                            <TextField
+                                name="Date of Birth"
+                                field="dateOfBirth"
+                            />
+                            <TextField name="Age" field="age" readonly />
+                        </FormGroup>
+                        <FormGroup title="Address">
+                            <TextField name="City" field="city" />
+                            <TextField name="County" field="county" />
+                            <TextField name="State" field="state" />
+                            <TextField name="Zip Code" field="zipCode" />
+                        </FormGroup>
+                        <FormGroup title="Account Status" defaultCollapsed>
+                            <CheckboxField
+                                name="Accepted Alerts"
+                                field="acceptedAlerts"
+                                readonly
+                            />
+                            <CheckboxField name="Verified" field="verified" />
+                            <TextField
+                                name="Onboarding Stage"
+                                field="onboardingStage"
+                                readonly
+                            />
+                        </FormGroup>
+                        <FormGroup title="Permissions">
+                            <SelectManyField
+                                name="Roles"
+                                field="roles"
+                                nameKey="name"
+                                valueKey="_id"
+                                options={roles}
+                            />
+                        </FormGroup>
+                    </Form>
                 ) : (
                     <div className="flex h-full items-center justify-center">
                         No user selected

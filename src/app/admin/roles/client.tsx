@@ -1,12 +1,7 @@
 'use client'
 
 import PaginatedList from '@/components/admin/PaginatedList'
-import {
-    MakeFormGroup,
-    MakeTextField,
-    MakeSelectManyField,
-    Form,
-} from '@/components/form'
+import { Form, FormGroup, SelectManyField, TextField } from '@/components/form'
 import { IPermission } from '@/models/Permission'
 import { IRole } from '@/models/Role'
 import deepEqual from 'deep-equal'
@@ -14,21 +9,6 @@ import { useRef, useState } from 'react'
 
 export interface PageProps {
     permissions: IPermission[]
-}
-
-function constructFormGroups(permissions: IPermission[]) {
-    return [
-        MakeFormGroup('Details', [
-            MakeTextField('Name', 'name', { required: true }),
-            MakeSelectManyField(
-                'Permissions',
-                'permissions',
-                'name',
-                '_id',
-                permissions
-            ),
-        ]),
-    ]
 }
 
 export default function ClientPage({ permissions }: PageProps) {
@@ -87,7 +67,6 @@ export default function ClientPage({ permissions }: PageProps) {
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {role && originalRole ? (
                     <Form<IRole>
-                        groups={constructFormGroups(permissions)}
                         initialValue={originalRole}
                         setInitialValue={setOriginalRole}
                         currentValue={role}
@@ -99,7 +78,18 @@ export default function ClientPage({ permissions }: PageProps) {
                                 new Event('refetch')
                             )
                         }}
-                    />
+                    >
+                        <FormGroup title="Details">
+                            <TextField name="Name" field="name" required />
+                            <SelectManyField
+                                name="Permissions"
+                                field="permissions"
+                                nameKey="name"
+                                valueKey="_id"
+                                options={permissions}
+                            />
+                        </FormGroup>
+                    </Form>
                 ) : (
                     <div className="flex h-full items-center justify-center">
                         No role selected

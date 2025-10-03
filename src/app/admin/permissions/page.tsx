@@ -1,7 +1,7 @@
 'use client'
 
 import PaginatedList from '@/components/admin/PaginatedList'
-import { Form, MakeFormGroup, MakeTextField } from '@/components/form'
+import { Form, FormGroup, TextField } from '@/components/form'
 import { IPermission } from '@/models/Permission'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
@@ -16,12 +16,6 @@ export default function Page() {
     // This is the mutable copy we actually update when the user interacts with
     // the form
     const [permission, setPermission] = useState<IPermission | null>(null)
-
-    const constructFormGroups = () => [
-        MakeFormGroup('Details', [
-            MakeTextField('Name', 'name', { required: true }),
-        ]),
-    ]
 
     const beforeElementSelected = () => {
         if (!deepEqual(permission, originalPermission)) {
@@ -60,7 +54,6 @@ export default function Page() {
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {permission && originalPermission ? (
                     <Form<IPermission>
-                        groups={constructFormGroups()}
                         initialValue={originalPermission}
                         setInitialValue={setOriginalPermission}
                         currentValue={permission}
@@ -72,7 +65,11 @@ export default function Page() {
                                 new Event('refetch')
                             )
                         }}
-                    />
+                    >
+                        <FormGroup title="Details">
+                            <TextField name="Name" field="name" required />
+                        </FormGroup>
+                    </Form>
                 ) : (
                     <div className="flex h-full items-center justify-center">
                         No permission selected

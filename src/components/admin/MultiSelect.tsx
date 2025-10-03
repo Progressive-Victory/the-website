@@ -1,11 +1,14 @@
-import { Filter } from '@/components/admin/PaginatedList'
 import { useClickAway } from '@uidotdev/usehooks'
 import classNames from 'classnames'
-import { createRef, FC } from 'react'
+import { createRef } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 
-type MultiSelectProps = Filter & {
+export interface MultiSelectProps {
+    name: string
     readonly?: boolean
+    options: Record<string, string>[]
+    displayKey: string
+    valueKey: string
     active: string[]
     addActive: (value: string) => void
     removeActive: (value: string) => void
@@ -14,19 +17,19 @@ type MultiSelectProps = Filter & {
     disabled?: boolean
 }
 
-const MultiSelect: FC<MultiSelectProps> = ({
+export function MultiSelect({
     name,
     readonly,
     options,
-    display_key,
-    value_key,
+    displayKey,
+    valueKey,
     active,
     addActive,
     removeActive,
     menuOpen,
     setMenuOpen,
     disabled,
-}) => {
+}: MultiSelectProps) {
     const buttonRef = createRef<HTMLButtonElement>()
     const menuRef = useClickAway<HTMLDivElement>((e) => {
         const contains =
@@ -51,7 +54,7 @@ const MultiSelect: FC<MultiSelectProps> = ({
                             'cursor-pointer select-none hover:text-red-400 hover:line-through disabled:cursor-not-allowed disabled:text-gray-700 disabled:no-underline'
                     )}
                 >
-                    {options.find((o) => o[value_key] === v)![display_key]}
+                    {options.find((o) => o[valueKey] === v)![displayKey]}
                 </button>
             ))}
             {active.length === 0 && readonly && <span>None</span>}
@@ -75,17 +78,17 @@ const MultiSelect: FC<MultiSelectProps> = ({
                             style={{ boxShadow: '0 0 8px 2px #00000008' }}
                         >
                             {options
-                                .filter((v) => !active.includes(v[value_key]))
+                                .filter((v) => !active.includes(v[valueKey]))
                                 .map((v, i) => (
                                     <button
                                         key={i}
                                         className="block w-full cursor-pointer overflow-x-hidden rounded-md px-2 py-1 text-left hover:bg-gray-200"
                                         onClick={() => {
-                                            addActive(v[value_key])
+                                            addActive(v[valueKey])
                                             setMenuOpen(false)
                                         }}
                                     >
-                                        {v[display_key]}
+                                        {v[displayKey]}
                                     </button>
                                 ))}
                         </div>

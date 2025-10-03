@@ -1,4 +1,4 @@
-import { FormGroup, IFormFieldSelectMany, IFormGroup } from '.'
+import { FormGroupProps } from '.'
 import { IDocumentUpdate } from '@/models/DocumentUpdate'
 import { IUser } from '@/models/User'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -10,16 +10,18 @@ import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 export interface FormProps<
     T extends Document & { updateHistory?: IDocumentUpdate[] },
 > {
-    groups: IFormGroup[]
     initialValue: T
     setInitialValue: (value: T) => void
     currentValue: T
     setCurrentValue: (value: T) => void
-    computeTitle?: (value: T) => string
+    computeTitle: (value: T) => string
     patchEndpoint: string
     postEndpoint?: string
     onChangesSaved?: (value: T) => void
     updateHistory?: boolean
+    children?:
+        | React.ReactElement<FormGroupProps>
+        | React.ReactElement<FormGroupProps>[]
 }
 
 const getHistoryUpdatedAt = (update: Partial<IDocumentUpdate>) =>
@@ -28,7 +30,6 @@ const getHistoryUpdatedAt = (update: Partial<IDocumentUpdate>) =>
 export function Form<
     T extends Document & { updateHistory?: IDocumentUpdate[] },
 >({
-    groups,
     initialValue,
     setInitialValue,
     currentValue,
@@ -37,12 +38,14 @@ export function Form<
     patchEndpoint,
     onChangesSaved,
     updateHistory,
+    children = [],
 }: FormProps<T>) {
+    const [patchMap, setPatchMap] = useState<Record<string, unknown>>({})
+    const [invalidMap, setInvalidMap] = useState<Record<string, boolean>>({})
     const [editMode, setEditMode] = useState(false)
-    const [activeFieldMenu, setActiveFieldMenu] = useState<string | null>(null)
 
-    // FIXME: memoize?
-    const equal = deepEqual(initialValue, currentValue)
+    const invalid = Object.values(invalidMap).length > 0
+    const equal = Object.values(patchMap).length == 0
 
     const mutation = useMutation<T, Error, unknown>({
         mutationKey: [patchEndpoint, currentValue._id],
@@ -60,6 +63,8 @@ export function Form<
         onSuccess(data) {
             setInitialValue({ ...data })
             setCurrentValue({ ...data })
+            setPatchMap({})
+            setInvalidMap({})
             onChangesSaved?.({ ...data })
         },
         onError(e) {
@@ -69,41 +74,68 @@ export function Form<
     })
 
     const saveChanges = async () => {
-        const payload: Record<string, unknown> = { id: currentValue._id }
-
-        for (const g of groups) {
-            for (const f of g.fields) {
-                if (f.readonly) continue
-
-                if (deepEqual(initialValue[f.key], currentValue[f.key]))
-                    continue
-
-                switch (f.type) {
-                    case 'text':
-                    case 'checkbox': {
-                        payload[f.key] = currentValue[f.key]
-                        break
-                    }
-                    case 'select_many': {
-                        payload[f.key] = (
-                            currentValue[f.key] as Record<string, unknown>[]
-                        ).map((v) => v[(f as IFormFieldSelectMany).value_key])
-                        break
-                    }
-                }
-            }
-        }
-
-        await mutation.mutateAsync(payload)
+        await mutation.mutateAsync({
+            ...patchMap,
+            id: currentValue._id,
+        })
         setEditMode(false)
     }
 
     const discardChanges = () => {
         setCurrentValue({ ...initialValue })
+        setPatchMap({})
+        setInvalidMap({})
         setEditMode(false)
     }
 
     useEffect(() => setEditMode(false), [initialValue])
+
+    const handleUpdate = (
+        field: string,
+        value: unknown,
+        patchValue: unknown,
+        valid: boolean
+    ) => {
+        const prev = (initialValue as Record<string, unknown>)[field]
+        const hasField = (map: unknown) =>
+            Object.prototype.hasOwnProperty.call(map, field)
+
+        if (deepEqual(prev, value) || (!prev && !value)) {
+            if (hasField(patchMap)) {
+                delete patchMap[field]
+                setPatchMap({ ...patchMap })
+            }
+        } else {
+            setPatchMap({ ...patchMap, [field]: patchValue })
+        }
+
+        if (valid) {
+            if (hasField(invalidMap)) {
+                delete invalidMap[field]
+                setPatchMap({ ...invalidMap })
+            }
+        } else {
+            setInvalidMap({ ...invalidMap, [field]: true })
+        }
+
+        setCurrentValue({ ...currentValue, [field]: value })
+    }
+
+    const groups = Array.isArray(children) ? children : [children]
+
+    const hydratedGroups = groups.map((group) => ({
+        ...group,
+        props: {
+            ...group.props,
+            dynamic: {
+                ...group.props.dynamic,
+                value: group.props.dynamic?.value ?? currentValue,
+                disabled: group.props.dynamic?.disabled ?? !editMode,
+                loading: group.props.dynamic?.loading ?? mutation.isPending,
+                onUpdate: group.props.dynamic?.onUpdate ?? handleUpdate,
+            },
+        },
+    }))
 
     return (
         <form
@@ -114,14 +146,14 @@ export function Form<
         >
             <header className="mb-4 flex items-center justify-between">
                 <h1 className="text-2xl font-semibold">
-                    {computeTitle?.(currentValue) ?? 'Details'}
+                    {computeTitle(currentValue)}
                 </h1>
                 <div className="flex items-center gap-2">
                     {editMode ? (
                         <>
                             <button
                                 onClick={() => void saveChanges()}
-                                disabled={equal}
+                                disabled={equal || invalid}
                                 className="flex cursor-pointer items-center gap-2 rounded-lg border border-sky-600 bg-sky-500 px-3 py-1 text-sm font-medium text-white disabled:cursor-not-allowed disabled:border-[hsl(200,68%,39%)] disabled:bg-[hsl(201,66%,32%)]"
                             >
                                 <FaSave /> Save Changes
@@ -145,18 +177,7 @@ export function Form<
                     )}
                 </div>
             </header>
-            {groups.map((group, groupIndex) => (
-                <FormGroup
-                    key={groupIndex}
-                    group={group}
-                    value={currentValue as Record<string, unknown>}
-                    isDisabled={!editMode}
-                    isLoading={mutation.isPending}
-                    activeFieldMenu={activeFieldMenu}
-                    setActiveFieldMenu={setActiveFieldMenu}
-                    onUpdate={(updated) => setCurrentValue(updated as T)}
-                />
-            ))}
+            {hydratedGroups}
             {updateHistory &&
                 initialValue.updateHistory &&
                 initialValue.updateHistory.length > 0 && (

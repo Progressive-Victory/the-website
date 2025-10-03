@@ -325,7 +325,10 @@ export default function PaginatedList<T extends object>(
                                     {f.name}:
                                 </strong>
                                 <MultiSelect
-                                    {...f}
+                                    name={f.name}
+                                    displayKey={f.display_key}
+                                    valueKey={f.value_key}
+                                    options={f.options}
                                     active={searchFilters[f.query_key] ?? []}
                                     addActive={(value) => {
                                         searchFilters[f.query_key] = [

@@ -1,54 +1,48 @@
-import { IFormField } from '.'
-
-export interface IFormFieldText extends IFormField {
-    type: 'text'
-}
-
-export function MakeTextField(
-    name: string,
-    key: string,
-    flags?: {
-        required?: boolean
-        readonly?: boolean
-        deprecated?: boolean
-    }
-): IFormFieldText {
-    return {
-        type: 'text',
-        name,
-        key,
-        ...(flags ?? {}),
-    }
-}
-
-export interface TextFieldProps {
-    field: IFormFieldText
-    value?: string
-    isDisabled: boolean
-    isLoading: boolean
-    onUpdate: (value: string) => void
-}
+import { FormField, IBaseFormField } from '.'
+import classNames from 'classnames'
+import { FormEvent } from 'react'
 
 export function TextField({
+    name,
     field,
-    value,
-    isDisabled,
-    isLoading,
-    onUpdate,
-}: TextFieldProps) {
-    if (field.readonly || isDisabled)
-        return <div className="col-span-2 w-full">{value ?? ''}</div>
+    required = false,
+    readonly = false,
+    deprecated = false,
+    dynamic,
+}: IBaseFormField) {
+    const value = (dynamic?.value as string) ?? ''
+
+    const isValid = (text: string) => !required || text.trim().length > 0
+
+    const handleInput = (event: FormEvent<HTMLInputElement>) => {
+        const newValue = (event.target as HTMLTextAreaElement).value
+        dynamic?.onUpdate?.(field, newValue, newValue.trim(), isValid(newValue))
+    }
 
     return (
-        <input
-            type="text"
-            name={field.key}
-            id={field.key}
-            disabled={isLoading}
-            required={field.required}
-            value={value ?? ''}
-            onInput={(e) => onUpdate((e.target as HTMLTextAreaElement).value)}
-            className="col-span-2 w-full max-w-96 rounded-lg border border-gray-300 px-3 py-0.5"
-        />
+        <FormField
+            name={name}
+            field={field}
+            required={required}
+            deprecated={deprecated}
+        >
+            {readonly || dynamic?.disabled ? (
+                <div className="col-span-2 w-full">{value}</div>
+            ) : (
+                <input
+                    type="text"
+                    name={name}
+                    id={field}
+                    disabled={dynamic?.loading}
+                    required={required}
+                    value={value}
+                    onInput={handleInput}
+                    className={classNames(
+                        'col-span-2 w-full max-w-96 rounded-lg border border-gray-300 px-3 py-0.5',
+                        !isValid(value) && 'border-red-300'
+                    )}
+                />
+            )}
+        </FormField>
     )
 }
