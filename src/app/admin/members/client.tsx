@@ -4,6 +4,7 @@ import {
     CheckboxField,
     Form,
     FormGroup,
+    SelectManyField,
     TextField,
 } from '@/components/admin/Form'
 
@@ -13,7 +14,7 @@ import { IUser } from '@/models/User'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
 
-const FORM_GROUPS = [
+const STATIC_FORM_GROUPS = [
     FormGroup('Account Information', [
         TextField('Username', 'name', { required: true }),
         TextField('Email', 'email', { required: true }),
@@ -59,6 +60,13 @@ export default function ClientPage({ roles }: PageProps) {
     // This is the mutable copy we actually update when the user interacts with
     // the form
     const [user, setUser] = useState<IUser | null>(null)
+
+    const constructFormGroups = (roles: IRole[]) => [
+        ...STATIC_FORM_GROUPS,
+        FormGroup('Permissions', [
+            SelectManyField('Roles', 'roles', 'name', '_id', roles),
+        ]),
+    ]
 
     const beforeElementSelected = () => {
         if (!deepEqual(user, originalUser)) {
@@ -131,24 +139,8 @@ export default function ClientPage({ roles }: PageProps) {
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {user && originalUser ? (
-                    // @ts-expect-error shut up
                     <Form<IUser>
-                        groups={[
-                            ...FORM_GROUPS,
-                            {
-                                title: 'Permissions',
-                                fields: [
-                                    {
-                                        type: 'select_many',
-                                        name: 'Roles',
-                                        key: 'roles',
-                                        display_key: 'name',
-                                        value_key: '_id',
-                                        options: roles,
-                                    },
-                                ],
-                            },
-                        ]}
+                        groups={constructFormGroups(roles)}
                         initialValue={originalUser}
                         setInitialValue={setOriginalUser}
                         currentValue={user}
