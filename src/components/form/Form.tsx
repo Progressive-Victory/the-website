@@ -4,7 +4,7 @@ import { IUser } from '@/models/User'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import deepEqual from 'deep-equal'
 import { Document } from 'mongoose'
-import { FC, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 
 export interface FormProps<
@@ -145,9 +145,9 @@ export function Form<
                     )}
                 </div>
             </header>
-            {groups.map((group) => (
+            {groups.map((group, groupIndex) => (
                 <FormGroup
-                    key={group.title}
+                    key={groupIndex}
                     group={group}
                     value={currentValue as Record<string, unknown>}
                     isDisabled={!editMode}
@@ -171,11 +171,9 @@ export function Form<
                                         getHistoryUpdatedAt(b).getTime() -
                                         getHistoryUpdatedAt(a).getTime()
                                 )
-                                .map((update) => (
+                                .map((update, updateIndex) => (
                                     <UpdateHistoryEntry
-                                        key={
-                                            update.updated_at as unknown as string
-                                        }
+                                        key={updateIndex}
                                         {...update}
                                     />
                                 ))}
@@ -186,7 +184,7 @@ export function Form<
     )
 }
 
-const UpdateHistoryEntry: FC<Partial<IDocumentUpdate>> = (update) => {
+function UpdateHistoryEntry(update: Partial<IDocumentUpdate>) {
     const { isPending, data } = useQuery<IUser | null>({
         queryKey: ['admin', 'users', update.updated_by],
         async queryFn() {

@@ -65,7 +65,7 @@ export function SelectManyField({
                 disabled={isLoading}
                 readonly={(field.readonly ?? false) || isDisabled}
                 name={field.name}
-                options={value ?? []}
+                options={field.options ?? []}
                 query_key={field.key}
                 display_key={field.display_key}
                 value_key={field.value_key}

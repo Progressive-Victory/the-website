@@ -42,8 +42,7 @@ const MultiSelect: FC<MultiSelectProps> = ({
         <>
             {active.map((v) => (
                 <button
-                    /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-                    disabled={disabled || readonly}
+                    disabled={(disabled ?? false) || readonly}
                     key={v}
                     onClick={() => removeActive(v)}
                     className={classNames(

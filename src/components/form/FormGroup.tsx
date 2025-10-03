@@ -40,9 +40,9 @@ export function FormGroup({
             initialOpenState={!group.defaultCollapsed}
         >
             <div className="grid grid-cols-3 gap-2 gap-x-4">
-                {(group.fields ?? []).map((field) => (
+                {(group.fields ?? []).map((field, fieldIndex) => (
                     <FormField
-                        key={field.name}
+                        key={fieldIndex}
                         field={field}
                         value={value ? value[field.key] : undefined}
                         isDisabled={isDisabled}
