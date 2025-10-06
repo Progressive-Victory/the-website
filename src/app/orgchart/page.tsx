@@ -16,27 +16,13 @@ export default function OrgChart<T extends object>() {
     const [page, setPage] = useState(0)
     const [pages, setPages] = useState(1)
     const [limit, setLimit] = useState(25)
-    /*
-    const searchParams = useDebounce(
-        [
-            page,
-            pages,
-            limit,
-            searchQuery,
-            searchField,
-            searchFilters,
-            sortOrder,
-        ],
-        50
-    )
-    */
 
     const { data } = useQuery<PaginatedResponse<T>>({
         queryKey: ['users'],
         queryFn: async ({ signal }) => {
             const url = new URL(location.href)
             url.pathname = 'api/admin/users'
-            console.log(url.pathname)
+
             url.searchParams.set('page', page + '')
             url.searchParams.set('limit', limit + '')
 
@@ -51,21 +37,16 @@ export default function OrgChart<T extends object>() {
     async function test() {
         const filteredData = data?.data.filter((e) => e.userPositions)
 
-        console.log(filteredData)
-
         if (filteredData) {
             console.log(filteredData)
+
             const userPositions = filteredData[0].userPositions
-            console.log(userPositions[0])
             const url = new URL(location.href)
             url.pathname = `api/admin/positions/${userPositions[0]}`
             const res = await fetch(url)
 
             const data = await res.json()
-
             console.log(data)
-
-            //retrievePosition(userPositions[0])
         }
     }
     test()
