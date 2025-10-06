@@ -1,11 +1,17 @@
 import mongoose from 'mongoose'
+import { IPosition, Position } from '@/models/Position'
 import { NextRequest, NextResponse } from 'next/server'
-
-import User from '@/models/User'
-import { checkAuthPermissions, PermissionName, ResponseCode } from '@/util/auth'
+import dbConnect from '@/util/libmongo'
+import {
+    auth,
+    checkAuth,
+    checkAuthPermissions,
+    PermissionName,
+    ResponseCode,
+} from '@/util/auth'
 
 export async function GET(
-    _req: NextRequest,
+    req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     const response = await checkAuthPermissions([
@@ -24,8 +30,9 @@ export async function GET(
         default:
             throw Error('Unidentified response code.')
     }
-
     const { id } = await params
+
+    await dbConnect()
 
     if (!mongoose.isValidObjectId(id)) {
         return NextResponse.json(
@@ -37,27 +44,22 @@ export async function GET(
         )
     }
 
-    const user = await User.findById(id)
-        .populate([
-            {
-                path: 'roles',
-                populate: 'permissions',
-            },
-            'updateHistory',
-        ])
-        .exec()
+    //const positions = Position.aggregate()
+    const position = await Position.findById(id).exec()
 
-    if (!user) {
-        return NextResponse.json(
-            {
-                error: 'Not Found',
-                message: 'The requested object does not exist',
-            },
-            { status: 404 }
-        )
-    }
+    if (!position)
+        return NextResponse.json({
+            error: 'Not Found',
+            message: 'The requested object does not exist',
+        })
 
-    // TODO: redact fields based on member permissions
+    console.log(position)
 
-    return NextResponse.json(user)
+    return NextResponse.json(position)
+}
+
+async function retrievePosition(id) {
+    const position = await Position.findById(id)
+
+    return position
 }

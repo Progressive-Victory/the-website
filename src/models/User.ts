@@ -1,5 +1,6 @@
 import mongoose, { Document, Model, Schema } from 'mongoose'
 import { IRole, Role } from './Role'
+import { IPosition, Position } from './Position'
 import { OnboardingStage } from '@/util/stage'
 import { Location } from '@/models/Location'
 import DocumentUpdate, { IDocumentUpdate } from './DocumentUpdate'
@@ -28,6 +29,7 @@ export interface IUser extends Document {
     lastName?: string
     dateOfBirth?: string
     updateHistory?: IDocumentUpdate[]
+    userPositions?: IPosition[]
 }
 
 // We then create a schema for the user document, tells Mongoose how the document should be structured
@@ -62,6 +64,9 @@ const schema = new Schema<IUser>({
     dateOfBirth: { type: String, required: false, default: null },
     updateHistory: [
         { type: Schema.Types.ObjectId, ref: DocumentUpdate, required: false },
+    ],
+    userPositions: [
+        { type: Schema.Types.ObjectId, ref: Position, required: false },
     ],
 })
 

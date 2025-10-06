@@ -103,6 +103,13 @@ export async function GET(req: NextRequest) {
         as: 'updateHistory',
     })
 
+    users.lookup({
+        from: 'positions',
+        localField: 'userPositions',
+        foreignField: '_id',
+        as: 'userPositions',
+    })
+
     applyMatchFilters(users, params, ALLOWED_FILTER_PARAMS)
 
     const { data, count, pages } = await executeAggregationPaginated(
