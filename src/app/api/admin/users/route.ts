@@ -87,22 +87,6 @@ export async function GET(req: NextRequest) {
         })
     }
 
-    // Join with roles collection
-    users.lookup({
-        from: 'roles',
-        localField: 'roles',
-        foreignField: '_id',
-        as: 'roles',
-    })
-
-    // Join with document_updates collection
-    users.lookup({
-        from: 'document_updates',
-        localField: 'updateHistory',
-        foreignField: '_id',
-        as: 'updateHistory',
-    })
-
     applyMatchFilters(users, params, ALLOWED_FILTER_PARAMS)
 
     const { data, count, pages } = await executeAggregationPaginated(
