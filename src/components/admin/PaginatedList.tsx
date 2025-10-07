@@ -378,7 +378,7 @@ export default function PaginatedList<T extends object>(
                                 )}
                                 onClick={() =>
                                     handleListItemClick(
-                                        user?.data[
+                                        user?.data?.[
                                             props.id_key as string
                                         ] as string
                                     )
