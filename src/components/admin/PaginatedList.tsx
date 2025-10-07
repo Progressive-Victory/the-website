@@ -171,7 +171,7 @@ export default function PaginatedList<T extends object>(
         searchField
     )
 
-    const testList = filterOutUser(sortedList, user)
+    const filteredSortedList = filterOutUser(sortedList, user)
 
     useEffect(() => {
         if (isSuccess) {
@@ -214,7 +214,7 @@ export default function PaginatedList<T extends object>(
 
     return (
         <div className="flex w-96 flex-col self-stretch border-x-2 border-gray-200 bg-gray-50 2xl:w-[28rem]">
-            <div className="flex flex-col gap-3 border-b-2 p-4">
+            <div className="flex flex-col gap-3 border-b-0 p-4">
                 <div className="flex w-full items-center gap-2">
                     <input
                         type="text"
@@ -358,6 +358,9 @@ export default function PaginatedList<T extends object>(
                         ))}
                     </>
                 )}
+            </div>
+
+            <div className="flex flex-col gap-3 border-b-2 border-gray-300">
                 <div className="overflow-y-auto">
                     {user?.data ? (
                         <>
@@ -367,15 +370,17 @@ export default function PaginatedList<T extends object>(
                                     {
                                         'bg-gray-300 hover:bg-gray-400':
                                             selected_id ===
-                                            user?.data[props.id_key],
+                                            user?.data[props.id_key as string],
                                         'hover:bg-gray-300':
                                             selected_id !==
-                                            user?.data[props.id_key],
+                                            user?.data[props.id_key as string],
                                     }
                                 )}
                                 onClick={() =>
                                     handleListItemClick(
-                                        user?.data[props.id_key] as string
+                                        user?.data[
+                                            props.id_key as string
+                                        ] as string
                                     )
                                 }
                             >
@@ -383,7 +388,7 @@ export default function PaginatedList<T extends object>(
                                     <ImageWithFallback
                                         src={
                                             user?.data[
-                                                props.image.key
+                                                props.image.key as string
                                             ] as string
                                         }
                                         alt={props.image.alt}
@@ -393,9 +398,9 @@ export default function PaginatedList<T extends object>(
                                 <div className="flex flex-col">
                                     <span className="font-medium text-black">
                                         {typeof props.display_key === 'function'
-                                            ? props.display_key(user?.data)
+                                            ? props.display_key(user?.data as T)
                                             : (user?.data[
-                                                  props.display_key
+                                                  props.display_key as string
                                               ] as string)}
                                     </span>
                                     {props.alternate_display_key && (
@@ -403,11 +408,10 @@ export default function PaginatedList<T extends object>(
                                             {typeof props.alternate_display_key ===
                                             'function'
                                                 ? props.alternate_display_key(
-                                                      user?.data
+                                                      user?.data as T
                                                   )
                                                 : (user?.data[
-                                                      props
-                                                          .alternate_display_key
+                                                      props.alternate_display_key as string
                                                   ] as string)}
                                         </span>
                                     )}
@@ -420,7 +424,7 @@ export default function PaginatedList<T extends object>(
 
             {sortedList && sortedList.count > 0 ? (
                 <ul className="overflow-y-auto">
-                    {testList.map((e) => (
+                    {filteredSortedList.map((e) => (
                         <li
                             key={e[props.id_key] as string}
                             className={classNames(
