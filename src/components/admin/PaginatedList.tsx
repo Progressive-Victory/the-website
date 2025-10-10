@@ -13,6 +13,7 @@ import {
 import { IoMdOptions } from 'react-icons/io'
 import { IoClose } from 'react-icons/io5'
 import { IconType } from 'react-icons/lib'
+import { useUser } from '@/util/hooks'
 
 export interface PaginatedListProps<T extends object> {
     event_target?: EventTarget
@@ -167,6 +168,10 @@ export default function PaginatedList<T extends object>(
         sortOrder,
         searchField
     )
+
+    const user = useUser()
+
+    console.log(user)
 
     useEffect(() => {
         if (isSuccess) {
