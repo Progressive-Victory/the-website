@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import User from '@/models/User'
 import { checkAuthPermissions, PermissionName, ResponseCode } from '@/util/auth'
 
-
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -58,7 +57,7 @@ export async function GET(
         )
     }
 
-    // TODO: redact fields based on member permissions
+    // TODO: redact fields based on member permission
 
     return NextResponse.json(user)
 }
