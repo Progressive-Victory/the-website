@@ -1,8 +1,7 @@
 'use client'
 
-import { Form } from '@/components/admin/Form'
-
 import PaginatedList from '@/components/admin/PaginatedList'
+import { Form, FormGroup, SelectManyField, TextField } from '@/components/form'
 import { IPermission } from '@/models/Permission'
 import { IRole } from '@/models/Role'
 import deepEqual from 'deep-equal'
@@ -67,39 +66,30 @@ export default function ClientPage({ permissions }: PageProps) {
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {role && originalRole ? (
-                    // @ts-expect-error shut up
                     <Form<IRole>
-                        groups={[
-                            {
-                                fields: [
-                                    {
-                                        type: 'text',
-                                        name: 'Name',
-                                        key: 'name',
-                                        required: true,
-                                    },
-                                    {
-                                        type: 'select_many',
-                                        name: 'Permissions',
-                                        key: 'permissions',
-                                        display_key: 'name',
-                                        value_key: '_id',
-                                        options: permissions,
-                                    },
-                                ],
-                            },
-                        ]}
                         initialValue={originalRole}
                         setInitialValue={setOriginalRole}
                         currentValue={role}
                         setCurrentValue={setRole}
+                        computeTitle={(role) => role.name ?? ''}
                         patchEndpoint="/api/admin/roles"
                         onChangesSaved={() => {
                             event_target.current.dispatchEvent(
                                 new Event('refetch')
                             )
                         }}
-                    />
+                    >
+                        <FormGroup title="Details">
+                            <TextField name="Name" field="name" required />
+                            <SelectManyField
+                                name="Permissions"
+                                field="permissions"
+                                nameKey="name"
+                                valueKey="_id"
+                                options={permissions}
+                            />
+                        </FormGroup>
+                    </Form>
                 ) : (
                     <div className="flex h-full items-center justify-center">
                         No role selected

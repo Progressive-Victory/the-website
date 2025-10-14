@@ -1,8 +1,7 @@
 'use client'
 
-import { Form } from '@/components/admin/Form'
-
 import PaginatedList from '@/components/admin/PaginatedList'
+import { Form, FormGroup, TextField } from '@/components/form'
 import { IPermission } from '@/models/Permission'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
@@ -54,31 +53,23 @@ export default function Page() {
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {permission && originalPermission ? (
-                    // @ts-expect-error shut up
                     <Form<IPermission>
-                        groups={[
-                            {
-                                fields: [
-                                    {
-                                        type: 'text',
-                                        name: 'Name',
-                                        key: 'name',
-                                        required: true,
-                                    },
-                                ],
-                            },
-                        ]}
                         initialValue={originalPermission}
                         setInitialValue={setOriginalPermission}
                         currentValue={permission}
                         setCurrentValue={setPermission}
+                        computeTitle={(permission) => permission.name ?? ''}
                         patchEndpoint="/api/admin/permissions"
                         onChangesSaved={() => {
                             event_target.current.dispatchEvent(
                                 new Event('refetch')
                             )
                         }}
-                    />
+                    >
+                        <FormGroup title="Details">
+                            <TextField name="Name" field="name" required />
+                        </FormGroup>
+                    </Form>
                 ) : (
                     <div className="flex h-full items-center justify-center">
                         No permission selected

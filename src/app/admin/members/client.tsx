@@ -1,128 +1,17 @@
 'use client'
 
-import { Form, IFormGroup } from '@/components/admin/Form'
-
 import PaginatedList from '@/components/admin/PaginatedList'
+import {
+    CheckboxField,
+    Form,
+    FormGroup,
+    SelectManyField,
+    TextField,
+} from '@/components/form'
 import { IRole } from '@/models/Role'
 import { IUser } from '@/models/User'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
-
-const FORM_GROUPS: IFormGroup[] = [
-    {
-        title: 'Account Information',
-        fields: [
-            {
-                type: 'text',
-                name: 'Username',
-                key: 'name',
-                required: true,
-            },
-            {
-                type: 'text',
-                name: 'Email',
-                key: 'email',
-                required: true,
-            },
-            {
-                type: 'text',
-                name: 'Discord ID',
-                key: 'discordId',
-                readonly: true,
-            },
-            {
-                type: 'text',
-                name: 'Phone Number',
-                key: 'phoneNumber',
-                required: true,
-            },
-            {
-                type: 'text',
-                name: 'Preferred Name',
-                key: 'preferredName',
-                required: false,
-                deprecated: true,
-            },
-            {
-                type: 'text',
-                name: 'First Name',
-                key: 'firstName',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'Last Name',
-                key: 'lastName',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'Date of Birth',
-                key: 'dateOfBirth',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'Age',
-                key: 'age',
-                required: false,
-                readonly: true,
-            },
-        ],
-    },
-    {
-        title: 'Address',
-        fields: [
-            {
-                type: 'text',
-                name: 'City',
-                key: 'city',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'County',
-                key: 'county',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'State',
-                key: 'state',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'Zip Code',
-                key: 'zipCode',
-                required: false,
-            },
-        ],
-    },
-    {
-        title: 'Account Status',
-        fields: [
-            {
-                type: 'checkbox',
-                name: 'Accepted Alerts',
-                key: 'acceptedAlerts',
-                readonly: true,
-            },
-            {
-                type: 'checkbox',
-                name: 'Verified',
-                key: 'verified',
-                readonly: false,
-            },
-            {
-                type: 'text',
-                name: 'Onboarding Stage',
-                key: 'onboardingStage',
-                readonly: true,
-            },
-        ],
-    },
-]
 
 export interface PageProps {
     roles: IRole[]
@@ -209,24 +98,7 @@ export default function ClientPage({ roles }: PageProps) {
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {user && originalUser ? (
-                    // @ts-expect-error shut up
                     <Form<IUser>
-                        groups={[
-                            ...FORM_GROUPS,
-                            {
-                                title: 'Permissions',
-                                fields: [
-                                    {
-                                        type: 'select_many',
-                                        name: 'Roles',
-                                        key: 'roles',
-                                        display_key: 'name',
-                                        value_key: '_id',
-                                        options: roles,
-                                    },
-                                ],
-                            },
-                        ]}
                         initialValue={originalUser}
                         setInitialValue={setOriginalUser}
                         currentValue={user}
@@ -245,7 +117,62 @@ export default function ClientPage({ roles }: PageProps) {
                             )
                         }}
                         updateHistory
-                    />
+                    >
+                        <FormGroup title="Account Information">
+                            <TextField name="Username" field="name" required />
+                            <TextField name="Email" field="email" required />
+                            <TextField
+                                name="Discord ID"
+                                field="discordId"
+                                readonly
+                            />
+                            <TextField
+                                name="Phone Number"
+                                field="phoneNumber"
+                                required
+                            />
+                            <TextField
+                                name="Preferred Name"
+                                field="preferredName"
+                                deprecated
+                            />
+                            <TextField name="First Name" field="firstName" />
+                            <TextField name="Last Name" field="lastName" />
+                            <TextField
+                                name="Date of Birth"
+                                field="dateOfBirth"
+                            />
+                            <TextField name="Age" field="age" readonly />
+                        </FormGroup>
+                        <FormGroup title="Address">
+                            <TextField name="City" field="city" />
+                            <TextField name="County" field="county" />
+                            <TextField name="State" field="state" />
+                            <TextField name="Zip Code" field="zipCode" />
+                        </FormGroup>
+                        <FormGroup title="Account Status" defaultCollapsed>
+                            <CheckboxField
+                                name="Accepted Alerts"
+                                field="acceptedAlerts"
+                                readonly
+                            />
+                            <CheckboxField name="Verified" field="verified" />
+                            <TextField
+                                name="Onboarding Stage"
+                                field="onboardingStage"
+                                readonly
+                            />
+                        </FormGroup>
+                        <FormGroup title="Permissions">
+                            <SelectManyField
+                                name="Roles"
+                                field="roles"
+                                nameKey="name"
+                                valueKey="_id"
+                                options={roles}
+                            />
+                        </FormGroup>
+                    </Form>
                 ) : (
                     <div className="flex h-full items-center justify-center">
                         No user selected

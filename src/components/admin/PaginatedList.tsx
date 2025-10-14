@@ -154,7 +154,6 @@ export default function PaginatedList<T extends object>(
                     url.searchParams.append(key, value)
                 }
             }
-            console.log(url.search)
 
             const res = await fetch(url, { signal })
             return (await res.json()) as PaginatedResponse<T>
@@ -331,7 +330,10 @@ export default function PaginatedList<T extends object>(
                                     {f.name}:
                                 </strong>
                                 <MultiSelect
-                                    {...f}
+                                    name={f.name}
+                                    displayKey={f.display_key}
+                                    valueKey={f.value_key}
+                                    options={f.options}
                                     active={searchFilters[f.query_key] ?? []}
                                     addActive={(value) => {
                                         searchFilters[f.query_key] = [
