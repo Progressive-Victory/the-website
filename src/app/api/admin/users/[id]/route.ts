@@ -57,7 +57,7 @@ export async function GET(
         )
     }
 
-    // TODO: redact fields based on member permissions
+    // TODO: redact fields based on member permission
 
     return NextResponse.json(user)
 }

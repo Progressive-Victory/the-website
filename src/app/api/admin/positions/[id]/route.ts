@@ -57,9 +57,3 @@ export async function GET(
 
     return NextResponse.json(position)
 }
-
-async function retrievePosition(id) {
-    const position = await Position.findById(id)
-
-    return position
-}
