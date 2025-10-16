@@ -1,8 +1,3 @@
-import deepEqual from 'deep-equal'
-import mongoose from 'mongoose'
-import { NextRequest, NextResponse } from 'next/server'
-import z from 'zod'
-
 import DocumentUpdate, { IDocumentUpdate } from '@/models/DocumentUpdate'
 import Role from '@/models/Role'
 import { IUser, User } from '@/models/User'
@@ -20,6 +15,10 @@ import {
 } from '@/util/mongo-aggregations'
 import { OnboardingStage } from '@/util/stage'
 import { parsePaginationParams } from '@/util/url-parsing'
+import deepEqual from 'deep-equal'
+import mongoose from 'mongoose'
+import { NextRequest, NextResponse } from 'next/server'
+import z from 'zod'
 
 export async function GET(req: NextRequest) {
     const response = await checkAuthPermissions([
@@ -123,24 +122,8 @@ export async function GET(req: NextRequest) {
         pages,
         data: data.map((u) => ({
             ...u,
-            age: calculate_age(u.dateOfBirth ?? null),
         })),
     })
-}
-
-function calculate_age(date: string | null) {
-    if (!date) return null
-
-    const today = new Date()
-    const birthDate = new Date(date)
-    let age = today.getFullYear() - birthDate.getFullYear()
-    const m = today.getMonth() - birthDate.getMonth()
-
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--
-    }
-
-    return age
 }
 
 // missing fields are readonly and cannot be changed through the API
