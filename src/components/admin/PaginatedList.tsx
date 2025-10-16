@@ -3,7 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useDebounce } from '@uidotdev/usehooks'
 import classNames from 'classnames'
 import Image from 'next/image'
-import { FC, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
     FiChevronLeft,
     FiChevronRight,
@@ -592,12 +592,19 @@ function Pagination({
     )
 }
 
-const PaginationArrow: FC<{
+interface PaginationArrowProps {
     onClick: () => void
     icon: IconType
     title: string
     enabled: boolean
-}> = ({ onClick, icon: Icon, title, enabled }) => {
+}
+
+function PaginationArrow({
+    onClick,
+    icon: Icon,
+    title,
+    enabled,
+}: PaginationArrowProps) {
     return (
         <a
             className={classNames(
@@ -616,7 +623,12 @@ const PaginationArrow: FC<{
     )
 }
 
-const ImageWithFallback: FC<{ src: string; alt: string }> = ({ src, alt }) => {
+interface ImageWithFallbackProps {
+    src: string
+    alt: string
+}
+
+function ImageWithFallback({ src, alt }: ImageWithFallbackProps) {
     const [hasErrored, setHasErrored] = useState(false)
 
     return (
