@@ -8,6 +8,7 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/form'
+import { DateField, parseTimezonelessDate } from '@/components/form/DateField'
 import { IRole } from '@/models/Role'
 import { IUser } from '@/models/User'
 import deepEqual from 'deep-equal'
@@ -43,6 +44,13 @@ export default function ClientPage({ roles }: PageProps) {
         // modified until we save
         setOriginalUser({ ...value } as IUser)
     }
+
+    const userAge = user?.dateOfBirth
+        ? new Date(
+              Date.now().valueOf() -
+                  parseTimezonelessDate(user.dateOfBirth).valueOf()
+          ).getUTCFullYear() - 1970
+        : undefined
 
     return (
         <>
@@ -138,11 +146,16 @@ export default function ClientPage({ roles }: PageProps) {
                             />
                             <TextField name="First Name" field="firstName" />
                             <TextField name="Last Name" field="lastName" />
-                            <TextField
+                            <DateField
                                 name="Date of Birth"
                                 field="dateOfBirth"
                             />
-                            <TextField name="Age" field="age" readonly />
+                            <TextField
+                                name="Age"
+                                field="age"
+                                readonly
+                                dynamic={{ value: userAge }}
+                            />
                         </FormGroup>
                         <FormGroup title="Address">
                             <TextField name="City" field="city" />
