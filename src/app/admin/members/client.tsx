@@ -10,6 +10,7 @@ import {
 } from '@/components/form'
 import { IRole } from '@/models/Role'
 import { IUser } from '@/models/User'
+import { useUser } from '@/util/hooks'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
 
@@ -44,6 +45,8 @@ export default function ClientPage({ roles }: PageProps) {
         setOriginalUser({ ...value } as IUser)
     }
 
+    const loggedInUser = useUser()
+
     return (
         <>
             <PaginatedList<IUser>
@@ -69,6 +72,7 @@ export default function ClientPage({ roles }: PageProps) {
                         options: roles,
                     },
                 ]}
+                pinnedItem={loggedInUser.data}
                 search_fields={[
                     {
                         id: 'name',

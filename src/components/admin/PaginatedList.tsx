@@ -13,7 +13,6 @@ import {
 import { IoMdOptions } from 'react-icons/io'
 import { IoClose } from 'react-icons/io5'
 import { IconType } from 'react-icons/lib'
-import { useUser } from '@/util/hooks'
 
 export interface PaginatedListProps<T extends object> {
     event_target?: EventTarget
@@ -44,6 +43,8 @@ export interface PaginatedListProps<T extends object> {
 
     filters: Filter[]
     search_fields?: ({ name: string; id: string } | string)[]
+
+    pinnedItem?: T
 }
 
 export interface Filter {
@@ -77,9 +78,10 @@ export interface PaginatedResponse<T> {
     data: T[]
 }
 
-export default function PaginatedList<T extends object>(
-    props: PaginatedListProps<T>
-) {
+export default function PaginatedList<T extends object>({
+    pinnedItem,
+    ...props
+}: PaginatedListProps<T>) {
     const [page, setPage] = useState(0)
     const [pages, setPages] = useState(1)
     const [limit, setLimit] = useState(25)
@@ -110,9 +112,9 @@ export default function PaginatedList<T extends object>(
         50
     )
 
-    const user = useUser()
-
-    // takes info from PaginatedResponse object and constructs new object with filtered data so that the unordered list is still avialable when filters are cleared
+    // Takes info from PaginatedResponse object and constructs new object with
+    // filtered data so that the unordered list is still available when filters
+    // are cleared.
     const sortedData = (
         arr: T[],
         count: number,
@@ -120,18 +122,16 @@ export default function PaginatedList<T extends object>(
         field: string
     ) => {
         const obj: PaginatedResponse<T> = {
-            page: page,
-            limit: limit,
-            pages: pages,
-            count: count,
+            page,
+            limit,
+            pages,
+            count,
             data:
-                setting === ''
-                    ? arr
-                    : setting === 'A-Z'
-                      ? arr.sort((a, b) => (a[field] < b[field] ? -1 : 1))
-                      : setting === 'Z-A'
-                        ? arr.sort((a, b) => (a[field] > b[field] ? -1 : 1))
-                        : arr,
+                setting === 'A-Z'
+                    ? arr.sort((a, b) => (a[field] < b[field] ? -1 : 1))
+                    : setting === 'Z-A'
+                      ? arr.sort((a, b) => (a[field] > b[field] ? -1 : 1))
+                      : arr,
         }
         return obj
     }
@@ -161,16 +161,20 @@ export default function PaginatedList<T extends object>(
         placeholderData: keepPreviousData,
     })
 
-    // new list object with filtered 'data: T[]' property to be updated with useEffect function
+    // New list object with filtered 'data: T[]' property to be updated with
+    // useEffect function.
     const sortedList = sortedData(
-        // @ts-expect-error shut up
-        data?.data,
-        data?.count,
+        data?.data ?? [],
+        data?.count ?? 0,
         sortOrder,
         searchField
     )
 
-    const filteredSortedList = filterOutUser(sortedList, user)
+    const filteredSortedList = filterOutPinnedItem(
+        sortedList,
+        props.id_key,
+        pinnedItem
+    )
 
     useEffect(() => {
         if (isSuccess) {
@@ -362,111 +366,37 @@ export default function PaginatedList<T extends object>(
                 )}
             </div>
 
-            <div className="flex flex-col gap-3 border-b-2 border-gray-300">
-                <div className="overflow-y-auto">
-                    {user?.data ? (
-                        <>
-                            <div
-                                className={classNames(
-                                    'flex cursor-pointer items-center gap-5 bg-gray-200 p-4',
-                                    {
-                                        'bg-gray-300 hover:bg-gray-400':
-                                            selected_id ===
-                                            user?.data[props.id_key as string],
-                                        'hover:bg-gray-300':
-                                            selected_id !==
-                                            user?.data[props.id_key as string],
-                                    }
-                                )}
-                                onClick={() =>
-                                    handleListItemClick(
-                                        user?.data?.[
-                                            props.id_key as string
-                                        ] as string
-                                    )
-                                }
-                            >
-                                {props.image && (
-                                    <ImageWithFallback
-                                        src={
-                                            user?.data[
-                                                props.image.key as string
-                                            ] as string
-                                        }
-                                        alt={props.image.alt}
-                                    />
-                                )}
-
-                                <div className="flex flex-col">
-                                    <span className="font-medium text-black">
-                                        {typeof props.display_key === 'function'
-                                            ? props.display_key(user?.data as T)
-                                            : (user?.data[
-                                                  props.display_key as string
-                                              ] as string)}
-                                    </span>
-                                    {props.alternate_display_key && (
-                                        <span className="text-gray-500">
-                                            {typeof props.alternate_display_key ===
-                                            'function'
-                                                ? props.alternate_display_key(
-                                                      user?.data as T
-                                                  )
-                                                : (user?.data[
-                                                      props.alternate_display_key as string
-                                                  ] as string)}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </>
-                    ) : null}
+            {pinnedItem && (
+                <div className="flex flex-col gap-3 border-b-2 border-gray-300">
+                    <div className="overflow-y-auto">
+                        <ListElement
+                            key={pinnedItem[props.id_key] as string}
+                            item={pinnedItem}
+                            selectedId={selected_id}
+                            idKey={props.id_key}
+                            displayKey={props.display_key}
+                            alternateDisplayKey={props.alternate_display_key}
+                            image={props.image}
+                            pinned
+                            onClick={handleListItemClick}
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {sortedList && sortedList.count > 0 ? (
+            {sortedList?.count > 0 ? (
                 <ul className="overflow-y-auto">
-                    {filteredSortedList.map((e) => (
-                        <li
-                            key={e[props.id_key] as string}
-                            className={classNames(
-                                'flex cursor-pointer items-center gap-5 p-4',
-                                {
-                                    'bg-gray-200 hover:bg-gray-300':
-                                        selected_id === e[props.id_key],
-                                    'hover:bg-gray-200':
-                                        selected_id !== e[props.id_key],
-                                }
-                            )}
-                            onClick={() =>
-                                handleListItemClick(e[props.id_key] as string)
-                            }
-                        >
-                            {props.image && (
-                                <ImageWithFallback
-                                    src={e[props.image.key] as string}
-                                    alt={props.image.alt}
-                                />
-                            )}
-
-                            <div className="flex flex-col">
-                                <span className="font-medium text-black">
-                                    {typeof props.display_key === 'function'
-                                        ? props.display_key(e)
-                                        : (e[props.display_key] as string)}
-                                </span>
-                                {props.alternate_display_key && (
-                                    <span className="text-gray-500">
-                                        {typeof props.alternate_display_key ===
-                                        'function'
-                                            ? props.alternate_display_key(e)
-                                            : (e[
-                                                  props.alternate_display_key
-                                              ] as string)}
-                                    </span>
-                                )}
-                            </div>
-                        </li>
+                    {filteredSortedList.map((item) => (
+                        <ListElement
+                            key={item[props.id_key] as string}
+                            item={item}
+                            selectedId={selected_id}
+                            idKey={props.id_key}
+                            displayKey={props.display_key}
+                            alternateDisplayKey={props.alternate_display_key}
+                            image={props.image}
+                            onClick={handleListItemClick}
+                        />
                     ))}
                 </ul>
             ) : (
@@ -485,9 +415,9 @@ export default function PaginatedList<T extends object>(
 
             <div className="mt-auto flex gap-4 border-t-2">
                 <Pagination
-                    page={page + 1}
-                    maxPage={pages}
-                    onPageChange={(page) => setPage(page - 1)}
+                    page={page}
+                    pages={pages}
+                    onPageChange={setPage}
                     enabled={!isPending}
                     total={data?.count ?? 0}
                 />
@@ -496,54 +426,129 @@ export default function PaginatedList<T extends object>(
     )
 }
 
-function filterOutUser(sortedList, user) {
-    if (sortedList.data && user) {
-        const filteredSortedList = sortedList?.data.filter(
-            (usr) => usr.discordId !== user?.data.discordId
-        )
-        return filteredSortedList
-    }
-    return sortedList
+function filterOutPinnedItem<T>(
+    sortedList: PaginatedResponse<T>,
+    idKey: keyof T,
+    pinnedItem?: T
+): T[] {
+    return (
+        (pinnedItem
+            ? sortedList.data?.filter(
+                  (item) => item[idKey] !== pinnedItem[idKey]
+              )
+            : sortedList.data) ?? []
+    )
 }
 
-const Pagination: FC<{
+interface ListElementProps<T> {
+    item: T
+    selectedId: string | null
+    idKey: keyof T
+    displayKey: keyof T | ((value: T) => string)
+    alternateDisplayKey?: keyof T | ((value: T) => string)
+    image?: {
+        key: keyof T
+        alt: string
+    }
+    pinned?: boolean
+    onClick: (itemId: string) => void
+}
+
+function ListElement<T>({
+    item,
+    selectedId,
+    idKey,
+    displayKey,
+    alternateDisplayKey,
+    image,
+    pinned,
+    onClick,
+}: ListElementProps<T>) {
+    return (
+        <li
+            key={item[idKey] as string}
+            className={classNames(
+                'flex cursor-pointer items-center gap-5 p-4',
+                {
+                    'bg-gray-200': pinned,
+                    'bg-gray-300 hover:bg-gray-400':
+                        pinned && selectedId === item[idKey],
+                    'hover:bg-gray-300': pinned && selectedId !== item[idKey],
+                    'bg-gray-200 hover:bg-gray-300':
+                        !pinned && selectedId === item[idKey],
+                    'hover:bg-gray-200': !pinned && selectedId !== item[idKey],
+                }
+            )}
+            onClick={() => onClick(item[idKey] as string)}
+        >
+            {image && (
+                <ImageWithFallback
+                    src={item[image.key] as string}
+                    alt={image.alt}
+                />
+            )}
+
+            <div className="flex flex-col">
+                <span className="font-medium text-black">
+                    {typeof displayKey === 'function'
+                        ? displayKey(item)
+                        : (item[displayKey] as string)}
+                </span>
+                {alternateDisplayKey && (
+                    <span className="text-gray-500">
+                        {typeof alternateDisplayKey === 'function'
+                            ? alternateDisplayKey(item)
+                            : (item[alternateDisplayKey] as string)}
+                    </span>
+                )}
+            </div>
+        </li>
+    )
+}
+
+interface PaginationProps {
     page: number
-    onPageChange: (page: number) => void
-    maxPage: number
+    pages: number
     enabled: boolean
     total: number
-}> = ({ page, onPageChange, maxPage, enabled, total }) => {
-    const can_change = maxPage > 1
+    onPageChange: (page: number) => void
+}
 
-    const [value, setValue] = useState(page.toString())
+function Pagination({
+    page,
+    pages,
+    enabled,
+    total,
+    onPageChange,
+}: PaginationProps) {
+    const [value, setValue] = useState((page + 1).toString())
+
+    const canChange = pages > 1
 
     useEffect(() => {
-        setValue(page.toString())
+        setValue((page + 1).toString())
     }, [page])
 
     return (
         <div className="flex w-full items-center justify-between">
             <div className="mx-auto flex items-center justify-center gap-1 p-4">
                 <PaginationArrow
-                    onClick={() => onPageChange(1)}
+                    onClick={() => onPageChange(0)}
                     icon={FiChevronsLeft}
                     title="First"
-                    enabled={can_change && page > 1}
+                    enabled={canChange && page > 0}
                 />
                 <PaginationArrow
                     onClick={() => onPageChange(page - 1)}
                     icon={FiChevronLeft}
                     title="Previous"
-                    enabled={can_change && page > 1}
+                    enabled={canChange && page > 0}
                 />
                 <form
                     className="flex items-center gap-2 px-2"
                     onSubmit={(e) => {
                         e.preventDefault()
-
-                        const p = +value || page
-                        setValue(p.toString())
-                        onPageChange(p)
+                        onPageChange(+value + 1 || page)
                     }}
                 >
                     <input
@@ -559,28 +564,28 @@ const Pagination: FC<{
                             }
                         }}
                         onBlur={() => {
-                            if (value.length === 0) setValue(page.toString())
+                            if (value.length === 0)
+                                setValue((page + 1).toString())
                         }}
                         disabled={!enabled}
                         className="w-[6ch] max-w-min rounded-lg border border-gray-300 px-2 py-0.5 text-center"
                     />
                     <input type="submit" className="hidden" />
                     <span className="text-gray-600">
-                        of{' '}
-                        <span title={`${total} total results`}>{maxPage}</span>
+                        of <span title={`${total} total results`}>{pages}</span>
                     </span>
                 </form>
                 <PaginationArrow
                     onClick={() => onPageChange(page + 1)}
                     icon={FiChevronRight}
                     title="Next"
-                    enabled={can_change && page < maxPage}
+                    enabled={canChange && page < pages - 1}
                 />
                 <PaginationArrow
-                    onClick={() => onPageChange(maxPage)}
+                    onClick={() => onPageChange(pages - 1)}
                     icon={FiChevronsRight}
                     title="Last"
-                    enabled={can_change && page < maxPage}
+                    enabled={canChange && page < pages - 1}
                 />
             </div>
         </div>
