@@ -20,6 +20,29 @@ const departments = [
     'Technology',
 ]
 
+const teams = [
+    'Welcome Team',
+    'Events Team',
+    'Moderation Team',
+    'Writing Team',
+    'Audio-Video Team',
+    'Design Team',
+    'Fundraising Team',
+    'Documentation Team',
+    'Research Team',
+    'Recruitment Team',
+    'Mobilization Team',
+]
+
+const coalitions = [
+    'Eastern Coalition',
+    'Midwest Coalition',
+    'Northeastern Coalition',
+    'Southern Coalition',
+]
+
+const state_teams = ['Western', 'Midwest', 'Northeast', 'Southern']
+
 const senior_roles = ['Top Director']
 
 export default function OrgChart<T extends object>() {
@@ -72,7 +95,7 @@ export default function OrgChart<T extends object>() {
 
     /*
     const DeputyDirectors = () => {
-      
+
     }
     */
 
@@ -93,6 +116,11 @@ export default function OrgChart<T extends object>() {
     /*
     - Idea #1 - Try to split Top Director and Deputy Director roles separately from State Lead in the JSX code itself.
     - Idea #2 - Try to split these into separate arrays before the JSX code.
+    */
+
+    /*
+      - IDEA - Create a function to filter out users by parameters like department name and team name (possibly using includes)
+      - Figure out who are diectors and so on
     */
 
     //const filteredData = data?.data.filter((e) => (e.userPositions.length > 0 && e.userPositions.positionName === "Top Director"))
@@ -123,9 +151,126 @@ export default function OrgChart<T extends object>() {
                         ))}
 
                         <div className="flex">
-                            {departments?.map((e) => (
-                                <DepartmentBubble name={e} />
-                            ))}
+                            <div>
+                                <DepartmentBubble name="Community" />
+                                {
+                                    //Map through team directors
+                                }
+                                <div className="flex">
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                </div>
+                            </div>
+                            <div>
+                                <DepartmentBubble name="Media" />
+                                {
+                                    //Map through team directors
+                                }
+                                <div className="flex">
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                </div>
+                            </div>
+                            <div>
+                                <DepartmentBubble name="Operations" />
+                                {
+                                    //Map through team directors
+                                }
+                                <div className="flex">
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                </div>
+                            </div>
+                            <div>
+                                <DepartmentBubble name="Infrastructure" />
+                                {
+                                    //Map through team directors
+                                }
+                                <div className="flex">
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                </div>
+                            </div>
+                            <div>
+                                <DepartmentBubble name="Organizing" />
+                                {
+                                    //Map through team directors
+                                }
+                                <div className="flex">
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                </div>
+                            </div>
+                            <div>
+                                <DepartmentBubble name="Technology" />
+                                {
+                                    //Map through team directors
+                                }
+                                <div className="flex">
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                    <TeamBubble name="" />
+                                    {
+                                        //Map through team members
+                                    }
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {/*
