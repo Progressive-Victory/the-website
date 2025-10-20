@@ -16,6 +16,8 @@ export interface IUser extends Document {
     state?: string
     county?: string
     city?: string
+    firstAddressLine?: string
+    secondAddressLine?: string
     preferredName?: string
     phoneNumber?: string
     acceptedAlerts?: boolean
@@ -41,6 +43,8 @@ const schema = new Schema<IUser>({
     state: { type: String, required: false },
     county: { type: String, required: false },
     city: { type: String, required: false },
+    firstAddressLine: { type: String, required: false},
+    secondAddressLine: { type: String, required: false},
     preferredName: { type: String, required: false },
     phoneNumber: { type: String, required: false },
     acceptedAlerts: { type: Boolean, required: false, default: false },

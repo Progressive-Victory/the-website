@@ -145,6 +145,8 @@ export default function ClientPage({ roles }: PageProps) {
                             <TextField name="Age" field="age" readonly />
                         </FormGroup>
                         <FormGroup title="Address">
+                            <TextField name="First Address Line" field="firstAddressLine" />
+                            <TextField name="Second Address Line" field="secondAddressLine" />
                             <TextField name="City" field="city" />
                             <TextField name="County" field="county" />
                             <TextField name="State" field="state" />
