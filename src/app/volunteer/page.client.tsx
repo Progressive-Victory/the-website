@@ -153,8 +153,8 @@ export default function VolunteerPage({
         ) {
             joinToServerMutation.mutate()
             return 'joining'
-        } else if (userQuery.data?.onboardingStage === OnboardingStage.JOINED) {
-            return 'complete'
+            // } else if (userQuery.data?.onboardingStage === OnboardingStage.JOINED) {
+            //     return 'complete'
         }
 
         return 'collect_info'
@@ -200,15 +200,29 @@ export default function VolunteerPage({
         }
     }, [codeSentAt])
 
-    const [validationFlags, setValidationFlags] = useState<
-        Record<string, boolean>
-    >({
-        first_name: false,
-        last_name: false,
-        date_of_birth: false,
-        phone_number: false,
-        zip_code: false,
-    })
+    const validName = (name: string) =>
+        /^[A-Za-z. \s_-]*$/g.test(name) && name.trim() !== ''
+    const firstNameIsValid = validName(firstName)
+    const lastNameIsValid = validName(lastName)
+
+    const age = new Date().getFullYear() - new Date(dateOfBirth).getFullYear()
+    const dateOfBirthIsValid = !isNaN(age) && age > 16 && age < 120
+
+    const zipCodeIsValid = /^\d{5}(?:-\d{4})?$/g.test(zipCode)
+    const phoneNumberIsValid = phone(phoneNumber, {
+        strictDetection: true,
+        validateMobilePrefix: true,
+    }).isValid
+
+    const canSubmit =
+        !updateUserMutation.isPending &&
+        privacyPolicy &&
+        usCitizen &&
+        firstNameIsValid &&
+        lastNameIsValid &&
+        dateOfBirthIsValid &&
+        zipCodeIsValid &&
+        phoneNumberIsValid
 
     const [isInServer, setIsInServer] = useState(initialIsInServer)
 
@@ -253,7 +267,7 @@ export default function VolunteerPage({
                 <div className="flex w-full justify-center">
                     <form
                         onSubmit={(e) => void handleSubmit(e)}
-                        className="z-0 m-4 flex h-auto max-w-[33rem] flex-col gap-y-4 rounded-lg bg-black-pearl-dark p-4 shadow-md md:m-8 md:p-6"
+                        className="z-0 m-4 flex h-auto flex-col gap-y-4 rounded-lg bg-black-pearl-dark p-4 shadow-md md:m-8 md:p-6"
                     >
                         {/* User is authenticated and needs to do onboarding */}
                         <Stage
@@ -273,43 +287,22 @@ export default function VolunteerPage({
                                     <Field
                                         value={firstName}
                                         placeholder="First Name"
-                                        error={!validationFlags.first_name}
+                                        error={!firstNameIsValid}
                                         errorText="Enter a valid name with no special characters"
-                                        maxLength={40} // sensible default, may be too premissive
-                                        onChange={(e) => {
-                                            const text = e.target.value
-                                            setFirstName(text)
-                                            const isValid =
-                                                /^[A-Za-z. \s_-]*$/g.test(
-                                                    text
-                                                ) && text.trim() !== ''
-
-                                            setValidationFlags({
-                                                ...validationFlags,
-                                                first_name: isValid,
-                                            })
-                                        }}
+                                        maxLength={40}
+                                        onChange={(e) =>
+                                            setFirstName(e.target.value)
+                                        }
                                     />
                                     <Field
                                         value={lastName}
                                         placeholder="Last Name"
-                                        error={!validationFlags.last_name}
+                                        error={!lastNameIsValid}
                                         errorText="Enter a valid name with no special characters"
-                                        maxLength={40} // sensible default, may be too permissive
-                                        onChange={(e) => {
-                                            const text = e.target.value
-                                            setLastName(text)
-                                            setLastName(text)
-                                            const isValid =
-                                                /^[A-Za-z. \s_-]*$/g.test(
-                                                    text
-                                                ) && text.trim() !== ''
-
-                                            setValidationFlags({
-                                                ...validationFlags,
-                                                last_name: isValid,
-                                            })
-                                        }}
+                                        maxLength={40}
+                                        onChange={(e) =>
+                                            setLastName(e.target.value)
+                                        }
                                     />
                                 </section>
                                 <section className="flex flex-col gap-2 sm:flex-row">
@@ -317,59 +310,33 @@ export default function VolunteerPage({
                                         type="date"
                                         value={dateOfBirth}
                                         placeholder="Date of Birth"
-                                        error={!validationFlags.date_of_birth}
+                                        error={!dateOfBirthIsValid}
                                         errorText="Must be 16 or older"
-                                        maxLength={40} // sensible default, may be too permissive
-                                        onInput={(e) => {
-                                            const date = e.target.value
-                                            setDateOfBirth(date)
-                                            const isValid = !!date
-
-                                            setValidationFlags({
-                                                ...validationFlags,
-                                                date_of_birth: isValid,
-                                            })
-                                        }}
-                                    />{' '}
+                                        maxLength={10}
+                                        onInput={(e) =>
+                                            setDateOfBirth(e.target.value)
+                                        }
+                                    />
                                     <Field
                                         value={zipCode}
                                         placeholder="Zip Code"
-                                        error={!validationFlags.zip_code}
+                                        error={!zipCodeIsValid}
                                         errorText="Enter a valid zip code"
                                         maxLength={10}
-                                        onChange={(e) => {
-                                            const text = e.target.value
-                                            setZipCode(text)
-                                            const isValid =
-                                                /^\d{5}(-\d{4})?$/g.test(text)
-
-                                            setValidationFlags({
-                                                ...validationFlags,
-                                                zip_code: isValid,
-                                            })
-                                        }}
+                                        onChange={(e) =>
+                                            setZipCode(e.target.value)
+                                        }
                                     />
                                 </section>
                                 <Field
                                     value={phoneNumber}
                                     placeholder="Phone Number"
-                                    error={!validationFlags.phone_number}
+                                    error={!phoneNumberIsValid}
                                     errorText="Enter a valid 10 digit phone, e.g., 1234567890"
                                     maxLength={12}
-                                    onChange={(e) => {
-                                        const text = e.target.value
-                                        setPhoneNumber(text)
-
-                                        const parsed = phone(text, {
-                                            strictDetection: true,
-                                            validateMobilePrefix: true,
-                                        })
-
-                                        setValidationFlags({
-                                            ...validationFlags,
-                                            phone_number: parsed.isValid,
-                                        })
-                                    }}
+                                    onChange={(e) =>
+                                        setPhoneNumber(e.target.value)
+                                    }
                                 />
                                 <p
                                     className={`-mt-0.5 mb-1 text-[12px] text-gray-300`}
@@ -441,11 +408,7 @@ export default function VolunteerPage({
                             </div>
                             <button
                                 type="submit"
-                                disabled={
-                                    updateUserMutation.isPending ||
-                                    !privacyPolicy ||
-                                    !usCitizen
-                                }
+                                disabled={!canSubmit}
                                 className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
                             >
                                 Join Now
