@@ -13,6 +13,18 @@ import phone from 'phone'
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
+interface IOnboardingForm {
+    firstName: string
+    lastName: string
+    dateOfBirth: string
+    zipCode: string
+    phoneNumber: string
+
+    getAlerts: boolean
+    usCitizen: boolean
+    privacyPolicy: boolean
+}
+
 export interface VolunteerPageProps {
     user: IUser | null
     isInSever: boolean
@@ -161,15 +173,16 @@ export default function VolunteerPage({
     }, [joinToServerMutation, userQuery])
     const [currentStage, setCurrentStage] = useState<FormStage>(initialStage)
 
-    const [firstName, setFirstName] = useState<string>('')
-    const [lastName, setLastName] = useState<string>('')
-    const [dateOfBirth, setDateOfBirth] = useState<string>('')
-    const [phoneNumber, setPhoneNumber] = useState<string>('')
-    const [zipCode, setZipCode] = useState<string>('')
-
-    const [getAlerts, setGetAlerts] = useState<boolean>(false)
-    const [usCitizen, setUsCitizen] = useState<boolean>(false)
-    const [privacyPolicy, setPrivacyPolicy] = useState<boolean>(false)
+    const [infoForm, setInfoForm] = useState<IOnboardingForm>({
+        firstName: userQuery.data?.firstName ?? '',
+        lastName: userQuery.data?.lastName ?? '',
+        dateOfBirth: userQuery.data?.dateOfBirth ?? '',
+        zipCode: userQuery.data?.zipCode ?? '',
+        phoneNumber: userQuery.data?.phoneNumber ?? '',
+        getAlerts: false,
+        usCitizen: false,
+        privacyPolicy: false,
+    })
 
     const [securityCode, setSecurityCode] = useState<string>('')
     const [codeSentAt, setCodeSentAt] = useState<Date | null>(
@@ -200,30 +213,6 @@ export default function VolunteerPage({
         }
     }, [codeSentAt])
 
-    const validName = (name: string) =>
-        /^[A-Za-z. \s_-]*$/g.test(name) && name.trim() !== ''
-    const firstNameIsValid = validName(firstName)
-    const lastNameIsValid = validName(lastName)
-
-    const age = new Date().getFullYear() - new Date(dateOfBirth).getFullYear()
-    const dateOfBirthIsValid = !isNaN(age) && age > 16 && age < 120
-
-    const zipCodeIsValid = /^\d{5}(?:-\d{4})?$/g.test(zipCode)
-    const phoneNumberIsValid = phone(phoneNumber, {
-        strictDetection: true,
-        validateMobilePrefix: true,
-    }).isValid
-
-    const canSubmit =
-        !updateUserMutation.isPending &&
-        privacyPolicy &&
-        usCitizen &&
-        firstNameIsValid &&
-        lastNameIsValid &&
-        dateOfBirthIsValid &&
-        zipCodeIsValid &&
-        phoneNumberIsValid
-
     const [isInServer, setIsInServer] = useState(initialIsInServer)
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -231,14 +220,14 @@ export default function VolunteerPage({
 
         if (currentStage === 'collect_info') {
             await updateUserMutation.mutateAsync({
-                firstName,
-                lastName,
-                phoneNumber,
-                zipCode,
-                acceptedAlerts: getAlerts,
-                dateOfBirth,
+                firstName: infoForm.firstName,
+                lastName: infoForm.lastName,
+                phoneNumber: infoForm.phoneNumber,
+                zipCode: infoForm.zipCode,
+                acceptedAlerts: infoForm.getAlerts,
+                dateOfBirth: infoForm.dateOfBirth,
             })
-            requestCodeMutation.mutate(phoneNumber)
+            requestCodeMutation.mutate(infoForm.phoneNumber)
             setCurrentStage('phone_verify')
         }
     }
@@ -274,145 +263,10 @@ export default function VolunteerPage({
                             stageName="collect_info"
                             currentStage={currentStage}
                         >
-                            <header>
-                                <p className="mx-auto text-center text-3xl font-bold text-white">
-                                    Volunteer with PV
-                                </p>
-                                <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
-                                    Join us on Discord and make a difference ✨
-                                </p>
-                            </header>
-                            <section className="flex flex-col gap-2 ">
-                                <section className="flex flex-col gap-2 sm:flex-row">
-                                    <Field
-                                        value={firstName}
-                                        placeholder="First Name"
-                                        error={!firstNameIsValid}
-                                        errorText="Enter a valid name with no special characters"
-                                        maxLength={40}
-                                        onChange={(e) =>
-                                            setFirstName(e.target.value)
-                                        }
-                                    />
-                                    <Field
-                                        value={lastName}
-                                        placeholder="Last Name"
-                                        error={!lastNameIsValid}
-                                        errorText="Enter a valid name with no special characters"
-                                        maxLength={40}
-                                        onChange={(e) =>
-                                            setLastName(e.target.value)
-                                        }
-                                    />
-                                </section>
-                                <section className="flex flex-col gap-2 sm:flex-row">
-                                    <Field
-                                        type="date"
-                                        value={dateOfBirth}
-                                        placeholder="Date of Birth"
-                                        error={!dateOfBirthIsValid}
-                                        errorText="Must be 16 or older"
-                                        maxLength={10}
-                                        onInput={(e) =>
-                                            setDateOfBirth(e.target.value)
-                                        }
-                                    />
-                                    <Field
-                                        value={zipCode}
-                                        placeholder="Zip Code"
-                                        error={!zipCodeIsValid}
-                                        errorText="Enter a valid zip code"
-                                        maxLength={10}
-                                        onChange={(e) =>
-                                            setZipCode(e.target.value)
-                                        }
-                                    />
-                                </section>
-                                <Field
-                                    value={phoneNumber}
-                                    placeholder="Phone Number"
-                                    error={!phoneNumberIsValid}
-                                    errorText="Enter a valid 10 digit phone, e.g., 1234567890"
-                                    maxLength={12}
-                                    onChange={(e) =>
-                                        setPhoneNumber(e.target.value)
-                                    }
-                                />
-                                <p
-                                    className={`-mt-0.5 mb-1 text-[12px] text-gray-300`}
-                                >
-                                    <em>
-                                        US numbers only. Message and data rates
-                                        may apply. Must be SMS reachable.
-                                    </em>
-                                </p>
-                            </section>
-                            <section className="flex flex-col gap-2">
-                                <Toggle
-                                    name="subscribe-alerts"
-                                    value={getAlerts}
-                                    placeholder="I want to receive community updates"
-                                    tooltip="Alerts may be delivered to your phone and/or email periodically. Text STOP to opt-out."
-                                    onChange={() => {
-                                        setGetAlerts(!getAlerts)
-                                    }}
-                                />
-                                <Toggle
-                                    name="us-citizen"
-                                    value={usCitizen}
-                                    placeholder={
-                                        <span>
-                                            <span className="text-red-500">
-                                                *
-                                            </span>{' '}
-                                            I swear that I am a resident (or
-                                            citizen living abroad) of the United
-                                            States of America
-                                        </span>
-                                    }
-                                    tooltip="Only US residents and citizens may participate in Progressive Victory"
-                                    onChange={() => {
-                                        setUsCitizen(!usCitizen)
-                                    }}
-                                    required
-                                />
-                                <Toggle
-                                    name="accept-privacy"
-                                    value={privacyPolicy}
-                                    placeholder={
-                                        <span>
-                                            <span className="text-red-500">
-                                                *
-                                            </span>{' '}
-                                            I agree to the{' '}
-                                            <Link
-                                                href="/privacy"
-                                                target="_blank"
-                                                referrerPolicy="no-referrer"
-                                                className="text-steel-blue underline"
-                                            >
-                                                Privacy Policy
-                                            </Link>
-                                        </span>
-                                    }
-                                    tooltip="You are agreeing to the usage of your data as described by the policy"
-                                    onChange={() => {
-                                        setPrivacyPolicy(!privacyPolicy)
-                                    }}
-                                    required
-                                />
-                            </section>
-                            <div className="w-full px-1 text-left text-xs text-white">
-                                <span className="text-red-500">*</span> =
-                                required field
-                            </div>
-                            <button
-                                type="submit"
-                                disabled={!canSubmit}
-                                className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
-                            >
-                                Join Now
-                            </button>
+                            <CollectInfoStage
+                                initialForm={infoForm}
+                                onUpdate={setInfoForm}
+                            />
                         </Stage>
                         {/* Phone verification state presentation */}
                         <Stage
@@ -470,11 +324,7 @@ export default function VolunteerPage({
                                             onClick={() => {
                                                 // Get a new OTP
                                                 requestCodeMutation.mutate(
-                                                    phoneNumber !== ''
-                                                        ? phoneNumber
-                                                        : (userQuery.data
-                                                              ?.phoneNumber ??
-                                                              '')
+                                                    infoForm.phoneNumber
                                                 )
                                             }}
                                         >
@@ -609,5 +459,185 @@ export default function VolunteerPage({
                 </div>
             </div>
         </MainLayout>
+    )
+}
+
+interface CollectInfoStageProps {
+    initialForm: IOnboardingForm
+    onUpdate: (form: IOnboardingForm) => void
+}
+
+function CollectInfoStage({ initialForm, onUpdate }: CollectInfoStageProps) {
+    const [form, setForm] = useState(initialForm)
+
+    const validName = (name: string) =>
+        /^[A-Za-z. \s_-]*$/g.test(name) && name.trim() !== ''
+    const firstNameIsValid = validName(form.firstName)
+    const lastNameIsValid = validName(form.lastName)
+
+    const age =
+        new Date().getFullYear() - new Date(form.dateOfBirth).getFullYear()
+    const dateOfBirthIsValid = !isNaN(age) && age > 16 && age < 120
+
+    const zipCodeIsValid = /^\d{5}(?:-\d{4})?$/g.test(form.zipCode)
+
+    const phoneNumberIsValid = phone(form.phoneNumber, {
+        strictDetection: true,
+        validateMobilePrefix: true,
+    }).isValid
+
+    const isValid =
+        firstNameIsValid &&
+        lastNameIsValid &&
+        dateOfBirthIsValid &&
+        zipCodeIsValid &&
+        phoneNumberIsValid &&
+        form.usCitizen &&
+        form.privacyPolicy
+
+    useEffect(() => {
+        if (isValid) {
+            onUpdate(form)
+        }
+    }, [form, isValid, onUpdate])
+
+    useEffect(() => {
+        setForm(initialForm)
+    }, [initialForm])
+
+    return (
+        <>
+            <header>
+                <p className="mx-auto text-center text-3xl font-bold text-white">
+                    Volunteer with PV
+                </p>
+                <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
+                    Join us on Discord and make a difference ✨
+                </p>
+            </header>
+            <section className="flex flex-col gap-2 ">
+                <section className="flex flex-col gap-2 sm:flex-row">
+                    <Field
+                        value={form.firstName}
+                        placeholder="First Name"
+                        error={!firstNameIsValid}
+                        errorText="Enter a valid name with no special characters"
+                        maxLength={40}
+                        onChange={(e) =>
+                            setForm({ ...form, firstName: e.target.value })
+                        }
+                    />
+                    <Field
+                        value={form.lastName}
+                        placeholder="Last Name"
+                        error={!lastNameIsValid}
+                        errorText="Enter a valid name with no special characters"
+                        maxLength={40}
+                        onChange={(e) =>
+                            setForm({ ...form, lastName: e.target.value })
+                        }
+                    />
+                </section>
+                <section className="flex flex-col gap-2 sm:flex-row">
+                    <Field
+                        type="date"
+                        value={form.dateOfBirth}
+                        placeholder="Date of Birth"
+                        error={!dateOfBirthIsValid}
+                        errorText="Must be 16 or older"
+                        maxLength={10}
+                        onInput={(e) =>
+                            setForm({ ...form, dateOfBirth: e.target.value })
+                        }
+                    />
+                    <Field
+                        value={form.zipCode}
+                        placeholder="Zip Code"
+                        error={!zipCodeIsValid}
+                        errorText="Enter a valid zip code"
+                        maxLength={10}
+                        onChange={(e) =>
+                            setForm({ ...form, zipCode: e.target.value })
+                        }
+                    />
+                </section>
+                <Field
+                    value={form.phoneNumber}
+                    placeholder="Phone Number"
+                    error={!phoneNumberIsValid}
+                    errorText="Enter a valid 10 digit phone, e.g., 1234567890"
+                    maxLength={12}
+                    onChange={(e) =>
+                        setForm({ ...form, phoneNumber: e.target.value })
+                    }
+                />
+                <p className={`-mt-0.5 mb-1 text-[12px] text-gray-300`}>
+                    <em>
+                        US numbers only. Message and data rates may apply. Must
+                        be SMS reachable.
+                    </em>
+                </p>
+            </section>
+            <section className="flex flex-col gap-2">
+                <Toggle
+                    name="subscribe-alerts"
+                    value={form.getAlerts}
+                    placeholder="I want to receive community updates"
+                    tooltip="Alerts may be delivered to your phone and/or email periodically. Text STOP to opt-out."
+                    onChange={() => {
+                        setForm({ ...form, getAlerts: !form.getAlerts })
+                    }}
+                />
+                <Toggle
+                    name="us-citizen"
+                    value={form.usCitizen}
+                    placeholder={
+                        <span>
+                            <span className="text-red-500">*</span> I swear that
+                            I am a resident (or citizen living abroad) of the
+                            United States of America
+                        </span>
+                    }
+                    tooltip="Only US residents and citizens may participate in Progressive Victory"
+                    onChange={() => {
+                        setForm({ ...form, usCitizen: !form.usCitizen })
+                    }}
+                    required
+                />
+                <Toggle
+                    name="accept-privacy"
+                    value={form.privacyPolicy}
+                    placeholder={
+                        <span>
+                            <span className="text-red-500">*</span> I agree to
+                            the{' '}
+                            <Link
+                                href="/privacy"
+                                target="_blank"
+                                referrerPolicy="no-referrer"
+                                className="text-steel-blue underline"
+                            >
+                                Privacy Policy
+                            </Link>
+                        </span>
+                    }
+                    tooltip="You are agreeing to the usage of your data as described by the policy"
+                    onChange={() => {
+                        setForm({ ...form, privacyPolicy: !form.privacyPolicy })
+                    }}
+                    required
+                />
+            </section>
+            <div className="w-full px-1 text-left text-xs text-white">
+                <span className="text-red-500">*</span> = required field
+            </div>
+            <button
+                type="submit"
+                disabled={!isValid}
+                className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
+            >
+                Join Now
+            </button>
+        </>
     )
 }
