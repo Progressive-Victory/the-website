@@ -156,7 +156,7 @@ export default function VolunteerPage({
                                     dateOfBirth: user?.dateOfBirth ?? '',
                                     zipCode: user?.zipCode ?? '',
                                     phoneNumber: user?.phoneNumber ?? '',
-                                    getAlerts: false,
+                                    getAlerts: user?.acceptedAlerts ?? false,
                                     usCitizen: false,
                                     privacyPolicy: false,
                                 }}
@@ -172,7 +172,9 @@ export default function VolunteerPage({
                                 queryClient={queryClient}
                                 phoneNumber={user?.phoneNumber ?? ''}
                                 lastSmsCodeSentAt={
-                                    user?.lastSmsCodeSentAt ?? null
+                                    user?.lastSmsCodeSentAt
+                                        ? new Date(user?.lastSmsCodeSentAt)
+                                        : null
                                 }
                                 goBack={() => void handleReturnToStart()}
                                 onSuccess={handlePhoneVerifySuccess}
@@ -224,7 +226,7 @@ function CollectInfoStage({ initialForm, onSuccess }: CollectInfoStageProps) {
 
     const age =
         new Date().getFullYear() - new Date(form.dateOfBirth).getFullYear()
-    const dateOfBirthIsValid = !isNaN(age) && age > 16 && age < 120
+    const dateOfBirthIsValid = !isNaN(age) && age >= 18 && age < 120
 
     const zipCodeIsValid = /^\d{5}(?:-\d{4})?$/g.test(form.zipCode)
 
@@ -420,7 +422,6 @@ function PhoneVerifyStage({
 
             if (resp.ok) {
                 await queryClient.invalidateQueries({ queryKey: ['user'] })
-                setCodeSentAt(new Date())
                 return
             }
 
@@ -457,6 +458,12 @@ function PhoneVerifyStage({
     }
 
     useEffect(() => {
+        if (requestCodeMutation.isSuccess) {
+            setCodeSentAt(new Date())
+        }
+    }, [requestCodeMutation.isSuccess])
+
+    useEffect(() => {
         if (!codeSentAt) return
 
         const interval = setInterval(() => {
@@ -469,7 +476,9 @@ function PhoneVerifyStage({
     }, [codeSentAt])
 
     useInit(() => {
-        requestCodeMutation.mutate(phoneNumber)
+        setTimeout(() => {
+            requestCodeMutation.mutate(phoneNumber)
+        }, 200)
     })
 
     return (
@@ -523,17 +532,17 @@ function PhoneVerifyStage({
                         {requestCodeMutation.isPending ? (
                             <PulseLoader color="#ffffff" size={8} />
                         ) : (
-                            <>
-                                Resend
+                            <span>
+                                Resend{' '}
                                 {codeTimer > 0 && (
                                     <span
                                         className="font-mono"
                                         suppressHydrationWarning
                                     >
-                                        {` ${codeTimer}`}
+                                        {codeTimer}
                                     </span>
                                 )}
-                            </>
+                            </span>
                         )}
                     </button>
                 </Field>
