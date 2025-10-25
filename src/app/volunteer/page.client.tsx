@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/dot-notation */
-
 'use client'
 
 import { Field, Stage, Toggle } from '@/app/volunteer'
@@ -12,11 +10,11 @@ import classNames from 'classnames'
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import phone from 'phone'
-import { useEffect, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
 export interface VolunteerPageProps {
-    user: IUser
+    user: IUser | null
     isInSever: boolean
 }
 
@@ -31,11 +29,10 @@ export default function VolunteerPage({
     const userQuery = useQuery({
         queryKey: ['user'],
         async queryFn() {
-            // @ts-expect-error shut up
             initialUser = null
 
             const response = await fetch('/api/user')
-            return (await response.json()) as Partial<IUser>
+            return (await response.json()) as IUser
         },
         initialData: initialUser,
     })
@@ -48,8 +45,8 @@ export default function VolunteerPage({
             })
 
             if (resp.status === 200) {
-                const data = await resp.json()
-                queryClient.setQueryData(['user'], () => data as IUser)
+                const data = (await resp.json()) as IUser
+                queryClient.setQueryData(['user'], () => data)
 
                 return
             }
@@ -115,54 +112,53 @@ export default function VolunteerPage({
             } else {
                 try {
                     // Not every response will have JSON but errors should
-                    /* eslint-disable no-var */
-                    var data = await res.json()
+                    const data = (await res.json()) as { code: string }
+
+                    console.error('Failed to join server:', res)
+
+                    if (data.code === 'INVALID_OAUTH2_ACCESS_CODE') {
+                        await signOut({
+                            callbackUrl: '/login',
+                        })
+                    } else if (data.code === 'DISCORD_EMAIL_NOT_VERIFIED') {
+                        throw new Error(
+                            'Your Discord email is not verified! Please verify it and then try again.'
+                        )
+                    }
+
+                    throw new Error(
+                        data.code ??
+                            'An unknown error occurred. Please try again or contact the email below if the issue persists'
+                    )
                 } catch (e) {
                     console.error('Failed to parse join server response:', e)
                     throw new Error(
                         'Failed to join Discord server (unknown error)'
                     )
                 }
-
-                console.error('Failed to join server:', res)
-
-                if (data.code === 'INVALID_OAUTH2_ACCESS_CODE') {
-                    await signOut({
-                        callbackUrl: '/login',
-                    })
-                } else if (data.code === 'DISCORD_EMAIL_NOT_VERIFIED') {
-                    throw new Error(
-                        'Your Discord email is not verified! Please verify it and then try again.'
-                    )
-                }
-
-                throw new Error(
-                    data.code ??
-                        'An unknown error occurred. Please try again or contact the email below if the issue persists'
-                )
             }
         },
     })
 
     const initialStage = useMemo<FormStage>(() => {
-        if (userQuery.data.onboardingStage === OnboardingStage.NOT_STARTED) {
+        if (userQuery.data?.onboardingStage === OnboardingStage.NOT_STARTED) {
             return 'collect_info'
         } else if (
-            userQuery.data.onboardingStage ===
+            userQuery.data?.onboardingStage ===
             OnboardingStage.AWAIT_VERIFICATION
         ) {
             return 'phone_verify'
         } else if (
-            userQuery.data.onboardingStage === OnboardingStage.VERIFIED
+            userQuery.data?.onboardingStage === OnboardingStage.VERIFIED
         ) {
             joinToServerMutation.mutate()
             return 'joining'
-        } else if (userQuery.data.onboardingStage === OnboardingStage.JOINED) {
+        } else if (userQuery.data?.onboardingStage === OnboardingStage.JOINED) {
             return 'complete'
         }
 
         return 'collect_info'
-    }, [])
+    }, [joinToServerMutation, userQuery])
     const [currentStage, setCurrentStage] = useState<FormStage>(initialStage)
 
     const [firstName, setFirstName] = useState<string>('')
@@ -177,8 +173,8 @@ export default function VolunteerPage({
 
     const [securityCode, setSecurityCode] = useState<string>('')
     const [codeSentAt, setCodeSentAt] = useState<Date | null>(
-        (initialUser.lastSmsCodeSentAt &&
-            new Date(initialUser.lastSmsCodeSentAt)) ??
+        (initialUser?.lastSmsCodeSentAt &&
+            new Date(initialUser?.lastSmsCodeSentAt)) ??
             null
     )
     const [codeTimer, setCodeTimer] = useState<number>(
@@ -216,6 +212,30 @@ export default function VolunteerPage({
 
     const [isInServer, setIsInServer] = useState(initialIsInServer)
 
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
+        if (currentStage === 'collect_info') {
+            await updateUserMutation.mutateAsync({
+                firstName,
+                lastName,
+                phoneNumber,
+                zipCode,
+                acceptedAlerts: getAlerts,
+                dateOfBirth,
+            })
+            requestCodeMutation.mutate(phoneNumber)
+            setCurrentStage('phone_verify')
+        }
+    }
+
+    const handleReturnToStart = async () => {
+        await updateUserMutation.mutateAsync({
+            onboardingStage: OnboardingStage.NOT_STARTED,
+        })
+        setCurrentStage('collect_info')
+    }
+
     return (
         <MainLayout>
             <div className="relative flex min-h-screen flex-col items-center justify-center bg-steel-blue">
@@ -232,24 +252,7 @@ export default function VolunteerPage({
                 />
                 <div className="flex w-full justify-center">
                     <form
-                        /* eslint-disable @typescript-eslint/no-misused-promises */
-                        onSubmit={async (e) => {
-                            e.preventDefault()
-
-                            if (currentStage === 'collect_info') {
-                                console.log('submitting')
-                                await updateUserMutation.mutateAsync({
-                                    firstName,
-                                    lastName,
-                                    phoneNumber,
-                                    zipCode,
-                                    acceptedAlerts: getAlerts,
-                                    dateOfBirth
-                                })
-                                requestCodeMutation.mutate(phoneNumber)
-                                setCurrentStage('phone_verify')
-                            }
-                        }}
+                        onSubmit={(e) => void handleSubmit(e)}
                         className="z-0 m-4 flex h-auto max-w-[33rem] flex-col gap-y-4 rounded-lg bg-black-pearl-dark p-4 shadow-md md:m-8 md:p-6"
                     >
                         {/* User is authenticated and needs to do onboarding */}
@@ -270,7 +273,7 @@ export default function VolunteerPage({
                                     <Field
                                         value={firstName}
                                         placeholder="First Name"
-                                        error={!validationFlags['first_name']}
+                                        error={!validationFlags.first_name}
                                         errorText="Enter a valid name with no special characters"
                                         maxLength={40} // sensible default, may be too premissive
                                         onChange={(e) => {
@@ -290,7 +293,7 @@ export default function VolunteerPage({
                                     <Field
                                         value={lastName}
                                         placeholder="Last Name"
-                                        error={!validationFlags['last_name']}
+                                        error={!validationFlags.last_name}
                                         errorText="Enter a valid name with no special characters"
                                         maxLength={40} // sensible default, may be too permissive
                                         onChange={(e) => {
@@ -314,9 +317,7 @@ export default function VolunteerPage({
                                         type="date"
                                         value={dateOfBirth}
                                         placeholder="Date of Birth"
-                                        error={
-                                            !validationFlags['date_of_birth']
-                                        }
+                                        error={!validationFlags.date_of_birth}
                                         errorText="Must be 16 or older"
                                         maxLength={40} // sensible default, may be too permissive
                                         onInput={(e) => {
@@ -333,7 +334,7 @@ export default function VolunteerPage({
                                     <Field
                                         value={zipCode}
                                         placeholder="Zip Code"
-                                        error={!validationFlags['zip_code']}
+                                        error={!validationFlags.zip_code}
                                         errorText="Enter a valid zip code"
                                         maxLength={10}
                                         onChange={(e) => {
@@ -352,7 +353,7 @@ export default function VolunteerPage({
                                 <Field
                                     value={phoneNumber}
                                     placeholder="Phone Number"
-                                    error={!validationFlags['phone_number']}
+                                    error={!validationFlags.phone_number}
                                     errorText="Enter a valid 10 digit phone, e.g., 1234567890"
                                     maxLength={12}
                                     onChange={(e) => {
@@ -527,8 +528,7 @@ export default function VolunteerPage({
                                                             className="font-mono"
                                                             suppressHydrationWarning
                                                         >
-                                                            {' '}
-                                                            ({codeTimer})
+                                                            {` ${codeTimer}`}
                                                         </span>
                                                     )}
                                                 </>
@@ -557,14 +557,7 @@ export default function VolunteerPage({
 
                                 <button
                                     type="button"
-                                    /* eslint-disable @typescript-eslint/no-misused-promises */
-                                    onClick={async () => {
-                                        await updateUserMutation.mutateAsync({
-                                            onboardingStage:
-                                                OnboardingStage.NOT_STARTED,
-                                        })
-                                        setCurrentStage('collect_info')
-                                    }}
+                                    onClick={() => void handleReturnToStart()}
                                     className="mx-auto text-center text-xs text-steel-blue underline hover:text-white"
                                 >
                                     I made a mistake!
@@ -579,7 +572,7 @@ export default function VolunteerPage({
                                         <p className="font-white text-center text-xl font-bold text-red-400">
                                             Error
                                         </p>
-                                        <p className="mx-2 mb-2 max-w-[20rem] text-center text-sm font-medium text-red-400">
+                                        <p className="mx-2 mb-2 max-w-80 text-center text-sm font-medium text-red-400">
                                             {joinToServerMutation.error.message}
                                         </p>
                                         <button
