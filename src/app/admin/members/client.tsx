@@ -65,7 +65,7 @@ export default function ClientPage({ roles }: PageProps) {
                         options: roles,
                     },
                 ]}
-                search_fields={[
+                searchFields={[
                     {
                         id: 'name',
                         name: 'Name',

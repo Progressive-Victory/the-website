@@ -25,7 +25,7 @@ export interface PaginatedListProps<T extends object> {
     eventTarget?: EventTarget
     endpoint: string
     filters: Filter[]
-    searchFields?: ({ name: string; id: string } | string)[]
+    searchFields: ({ name: string; id: string } | string)[]
     items: IPaginatedListItem<T>[]
     pinnedItem?: IPaginatedListItem<T> | null
     selectedItem: IPaginatedListItem<T> | null
@@ -172,30 +172,26 @@ export default function PaginatedList<T extends object>({
                         id="search_query"
                         className="w-full rounded-lg border border-gray-300 px-3 py-1"
                         placeholder="Search..."
-                        value={search.query}
+                        value={search.query ?? ''}
                         onChange={(e) =>
                             setSearch({ ...search, query: e.target.value })
                         }
                     />
-                    {filters.length > 0 && (
-                        <button
-                            title={
-                                filtersOpen ? 'Hide Filters' : 'Show Filters'
-                            }
-                            onClick={() => setFiltersOpen(!filtersOpen)}
-                        >
-                            {filtersOpen ? (
-                                <IoClose size={20} />
-                            ) : (
-                                <IoMdOptions size={20} />
-                            )}
-                        </button>
-                    )}
+                    <button
+                        title={filtersOpen ? 'Hide Filters' : 'Show Filters'}
+                        onClick={() => setFiltersOpen(!filtersOpen)}
+                    >
+                        {filtersOpen ? (
+                            <IoClose size={20} />
+                        ) : (
+                            <IoMdOptions size={20} />
+                        )}
+                    </button>
                 </div>
                 {filtersOpen && (
                     <>
                         <div className="flex w-full flex-wrap justify-between gap-2">
-                            {searchFields && (
+                            {searchFields.length && (
                                 <label
                                     htmlFor="search_field"
                                     className="flex shrink items-center gap-2"
