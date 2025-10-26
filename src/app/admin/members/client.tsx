@@ -14,6 +14,7 @@ import { IUser } from '@/models/User'
 import { useUser } from '@/util/hooks'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
+import { PulseLoader } from 'react-spinners'
 
 export interface PageProps {
     roles: IRole[]
@@ -93,27 +94,42 @@ export default function ClientPage({ roles }: PageProps) {
                 ]}
                 items={users.map(makeItem)}
                 pinnedItem={
-                    loggedInUser.data ? makeItem(loggedInUser.data) : null
+                    loggedInUser.data
+                        ? makeItem(loggedInUser.data)
+                        : { id: '', value: {} as IUser }
                 }
                 selectedItem={selectedUser ? makeItem(selectedUser) : null}
                 onSelectItem={({ value }) => handleSelectItem(value)}
                 setItems={setUsers}
-                renderItem={({ value }) => (
-                    <>
-                        <ImageWithFallback
-                            src={value.image}
-                            alt={'user profile picture'}
-                        />
-                        <div className="flex flex-col">
-                            <span className="font-medium text-black">
-                                {(value.firstName
-                                    ? `${value.firstName} ${value.lastName}`
-                                    : value.preferredName) ?? value.email}
-                            </span>
-                            <span className="text-gray-500">{value.name}</span>
-                        </div>
-                    </>
-                )}
+                renderItem={({ id, value }) =>
+                    id ? (
+                        <>
+                            <ImageWithFallback
+                                src={value.image}
+                                alt="user profile picture"
+                            />
+                            <div className="flex flex-col">
+                                <span className="font-medium text-black">
+                                    {(value.firstName
+                                        ? `${value.firstName} ${value.lastName}`
+                                        : value.preferredName) ?? value.email}
+                                </span>
+                                <span className="text-gray-500">
+                                    {value.name}
+                                </span>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <ImageWithFallback
+                                src=""
+                                alt="user profile picture"
+                                useFallback
+                            />
+                            <PulseLoader size={8} color="#bbb" />
+                        </>
+                    )
+                }
             />
 
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
@@ -135,6 +151,8 @@ export default function ClientPage({ roles }: PageProps) {
                             eventTarget.current.dispatchEvent(
                                 new Event('refetch')
                             )
+                            if (selectedUser._id === loggedInUser.data?._id)
+                                loggedInUser.reload()
                         }}
                         updateHistory
                     >

@@ -4,15 +4,20 @@ import { useState } from 'react'
 export interface ImageWithFallbackProps {
     src: string
     alt: string
+    useFallback?: boolean
 }
 
-export function ImageWithFallback({ src, alt }: ImageWithFallbackProps) {
+export function ImageWithFallback({
+    src,
+    alt,
+    useFallback = false,
+}: ImageWithFallbackProps) {
     const [hasErrored, setHasErrored] = useState(false)
 
     return (
         <Image
             src={
-                hasErrored
+                hasErrored || useFallback
                     ? 'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
                     : src
             }
