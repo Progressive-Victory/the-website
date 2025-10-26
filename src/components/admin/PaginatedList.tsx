@@ -2,7 +2,6 @@ import MultiSelect from '@/components/admin/MultiSelect'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useDebounce } from '@uidotdev/usehooks'
 import classNames from 'classnames'
-import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import {
     FiChevronLeft,
@@ -14,6 +13,11 @@ import { IoMdOptions } from 'react-icons/io'
 import { IoClose } from 'react-icons/io5'
 import { IconType } from 'react-icons/lib'
 
+export interface IPaginatedListItem<T> {
+    id: string
+    value: T
+}
+
 export interface PaginatedListProps<T extends object> {
     event_target?: EventTarget
     /**
@@ -21,30 +25,17 @@ export interface PaginatedListProps<T extends object> {
      */
     api_endpoint: string
 
-    /**
-     * Called when an element in the list is selected by the user. The handler can
-     * return false to disallow the selection (like if there are edits in progress
-     * for example)
-     */
-    before_element_selection?: (value: T) => boolean
-
-    /**
-     * Called after an element is selected from the list
-     */
-    on_element_selected: (value: T) => void
-
     id_key: keyof T
-    display_key: keyof T | ((value: T) => string)
-    alternate_display_key?: keyof T | ((value: T) => string)
-    image?: {
-        key: keyof T
-        alt: string
-    }
 
     filters: Filter[]
     search_fields?: ({ name: string; id: string } | string)[]
 
-    pinnedItem?: T
+    items: IPaginatedListItem<T>[]
+    pinnedItem?: IPaginatedListItem<T> | null
+    selectedItem: IPaginatedListItem<T> | null
+    renderItem: (item: IPaginatedListItem<T>) => React.ReactElement
+    onSelectItem: (item: IPaginatedListItem<T>) => void
+    setItems: (items: T[]) => void
 }
 
 export interface Filter {
@@ -80,12 +71,16 @@ export interface PaginatedResponse<T> {
 
 export default function PaginatedList<T extends object>({
     pinnedItem,
+    selectedItem,
+    items,
+    renderItem,
+    onSelectItem,
+    setItems,
     ...props
 }: PaginatedListProps<T>) {
     const [page, setPage] = useState(0)
     const [pages, setPages] = useState(1)
     const [limit, setLimit] = useState(25)
-    const [selected_id, set_selected_id] = useState<string | null>(null)
 
     const [searchQuery, setSearchQuery] = useState('')
     const [searchField, setSearchField] = useState<string>('all')
@@ -170,35 +165,18 @@ export default function PaginatedList<T extends object>({
         searchField
     )
 
-    const filteredSortedList = filterOutPinnedItem(
-        sortedList,
-        props.id_key,
-        pinnedItem
-    )
+    const itemsWithoutPinned = pinnedItem
+        ? items.filter((item) => item.id !== pinnedItem.id)
+        : items
 
     useEffect(() => {
         if (isSuccess) {
             setPage(data?.page)
             setLimit(data?.limit)
             setPages(data?.pages)
+            setItems(sortedList.data)
         }
     }, [isSuccess, data, sortedList])
-
-    const handleListItemClick = (clicked_id: string) => {
-        const selected = data?.data.find((e) => e[props.id_key] === selected_id)
-        const clicked = data?.data.find((e) => e[props.id_key] === clicked_id)
-
-        if (!clicked || selected === clicked) return
-
-        if (
-            props.before_element_selection &&
-            !props.before_element_selection(clicked)
-        )
-            return
-
-        set_selected_id(clicked_id)
-        props.on_element_selected(clicked)
-    }
 
     useEffect(() => {
         const { event_target } = props
@@ -366,50 +344,30 @@ export default function PaginatedList<T extends object>({
                 )}
             </div>
 
-            {pinnedItem && (
-                <div className="flex flex-col gap-3 border-b-2 border-gray-300">
-                    <div className="overflow-y-auto">
-                        <ListElement
-                            key={pinnedItem[props.id_key] as string}
-                            item={pinnedItem}
-                            selectedId={selected_id}
-                            idKey={props.id_key}
-                            displayKey={props.display_key}
-                            alternateDisplayKey={props.alternate_display_key}
-                            image={props.image}
-                            pinned
-                            onClick={handleListItemClick}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {sortedList?.count > 0 ? (
-                <ul className="overflow-y-auto">
-                    {filteredSortedList.map((item) => (
-                        <ListElement
-                            key={item[props.id_key] as string}
-                            item={item}
-                            selectedId={selected_id}
-                            idKey={props.id_key}
-                            displayKey={props.display_key}
-                            alternateDisplayKey={props.alternate_display_key}
-                            image={props.image}
-                            onClick={handleListItemClick}
-                        />
-                    ))}
-                </ul>
+            {itemsWithoutPinned.length > 0 ? (
+                itemsWithoutPinned.map((item) => (
+                    <ListElement
+                        key={item.id}
+                        selected={item.id === selectedItem?.id}
+                        pinned={item.id === pinnedItem?.id}
+                        onClick={() =>
+                            item.id === selectedItem?.id && onSelectItem(item)
+                        }
+                    >
+                        {renderItem(item)}
+                    </ListElement>
+                ))
             ) : (
                 <div className="flex flex-1 items-center justify-center">
-                    {isPending && (
+                    {isPending ? (
                         <span className="text-gray-400">Loading...</span>
-                    )}
-                    {error && (
+                    ) : error ? (
                         <span className="text-red-500">
                             Error: {error.message}
                         </span>
+                    ) : (
+                        <span>No results found</span>
                     )}
-                    {data?.count === 0 && <>No results found</>}
                 </div>
             )}
 
@@ -426,82 +384,34 @@ export default function PaginatedList<T extends object>({
     )
 }
 
-function filterOutPinnedItem<T>(
-    sortedList: PaginatedResponse<T>,
-    idKey: keyof T,
-    pinnedItem?: T
-): T[] {
-    return (
-        (pinnedItem
-            ? sortedList.data?.filter(
-                  (item) => item[idKey] !== pinnedItem[idKey]
-              )
-            : sortedList.data) ?? []
-    )
-}
-
-interface ListElementProps<T> {
-    item: T
-    selectedId: string | null
-    idKey: keyof T
-    displayKey: keyof T | ((value: T) => string)
-    alternateDisplayKey?: keyof T | ((value: T) => string)
-    image?: {
-        key: keyof T
-        alt: string
-    }
+export interface ListElementProps {
+    selected: boolean
     pinned?: boolean
-    onClick: (itemId: string) => void
+    children: React.ReactNode
+    onClick: () => void
 }
 
-function ListElement<T>({
-    item,
-    selectedId,
-    idKey,
-    displayKey,
-    alternateDisplayKey,
-    image,
+export function ListElement({
+    selected,
     pinned,
+    children,
     onClick,
-}: ListElementProps<T>) {
+}: ListElementProps) {
     return (
         <li
-            key={item[idKey] as string}
             className={classNames(
                 'flex cursor-pointer items-center gap-5 p-4',
                 {
                     'bg-gray-200': pinned,
-                    'bg-gray-300 hover:bg-gray-400':
-                        pinned && selectedId === item[idKey],
-                    'hover:bg-gray-300': pinned && selectedId !== item[idKey],
-                    'bg-gray-200 hover:bg-gray-300':
-                        !pinned && selectedId === item[idKey],
-                    'hover:bg-gray-200': !pinned && selectedId !== item[idKey],
+                    'bg-gray-300 hover:bg-gray-400': pinned && selected,
+                    'hover:bg-gray-300': pinned && !selected,
+                    'bg-gray-200 hover:bg-gray-300': !pinned && selected,
+                    'hover:bg-gray-200': !pinned && !selected,
                 }
             )}
-            onClick={() => onClick(item[idKey] as string)}
+            onClick={onClick}
         >
-            {image && (
-                <ImageWithFallback
-                    src={item[image.key] as string}
-                    alt={image.alt}
-                />
-            )}
-
-            <div className="flex flex-col">
-                <span className="font-medium text-black">
-                    {typeof displayKey === 'function'
-                        ? displayKey(item)
-                        : (item[displayKey] as string)}
-                </span>
-                {alternateDisplayKey && (
-                    <span className="text-gray-500">
-                        {typeof alternateDisplayKey === 'function'
-                            ? alternateDisplayKey(item)
-                            : (item[alternateDisplayKey] as string)}
-                    </span>
-                )}
-            </div>
+            {children}
         </li>
     )
 }
@@ -620,29 +530,5 @@ function PaginationArrow({
         >
             <Icon size={20} />
         </a>
-    )
-}
-
-interface ImageWithFallbackProps {
-    src: string
-    alt: string
-}
-
-function ImageWithFallback({ src, alt }: ImageWithFallbackProps) {
-    const [hasErrored, setHasErrored] = useState(false)
-
-    return (
-        <Image
-            src={
-                hasErrored
-                    ? 'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
-                    : src
-            }
-            alt={alt}
-            width={48}
-            height={48}
-            className="aspect-square max-h-[48px] rounded-full"
-            onError={() => setHasErrored(true)}
-        />
     )
 }

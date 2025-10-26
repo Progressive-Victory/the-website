@@ -15,34 +15,37 @@ export default function Page() {
         useState<IPermission | null>(null)
     // This is the mutable copy we actually update when the user interacts with
     // the form
-    const [permission, setPermission] = useState<IPermission | null>(null)
+    const [selectedPermission, setSelectedPermission] =
+        useState<IPermission | null>(null)
+    const [permissions, setPermissions] = useState<IPermission[]>([])
 
-    const beforeElementSelected = () => {
-        if (!deepEqual(permission, originalPermission)) {
-            return confirm(
+    const handleSelectItem = (value: IPermission) => {
+        if (value._id === selectedPermission?._id) return
+
+        if (!deepEqual(selectedPermission, originalPermission)) {
+            const proceed = confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
             )
+            if (!proceed) return
         }
 
-        return true
-    }
-
-    const onElementSelected = (value: IPermission) => {
-        setPermission({ ...value } as IPermission)
         // We need to copy to make sure that the value in the list is not
         // modified until we save
+        setSelectedPermission({ ...value } as IPermission)
         setOriginalPermission({ ...value } as IPermission)
     }
+
+    const makeItem = (permission: IPermission) => ({
+        id: permission._id as string,
+        value: permission,
+    })
 
     return (
         <>
             <PaginatedList<IPermission>
                 event_target={event_target.current}
                 api_endpoint="/api/admin/permissions"
-                before_element_selection={beforeElementSelected}
-                on_element_selected={onElementSelected}
                 id_key="_id"
-                display_key={'name'}
                 filters={[]}
                 search_fields={[
                     {
@@ -50,14 +53,23 @@ export default function Page() {
                         name: 'Name',
                     },
                 ]}
+                items={permissions.map(makeItem)}
+                selectedItem={
+                    selectedPermission ? makeItem(selectedPermission) : null
+                }
+                onSelectItem={({ value }) => handleSelectItem(value)}
+                setItems={setPermissions}
+                renderItem={({ value }) => (
+                    <span className="font-medium text-black">{value.name}</span>
+                )}
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
-                {permission && originalPermission ? (
+                {selectedPermission && originalPermission ? (
                     <Form<IPermission>
                         initialValue={originalPermission}
                         setInitialValue={setOriginalPermission}
-                        currentValue={permission}
-                        setCurrentValue={setPermission}
+                        currentValue={selectedPermission}
+                        setCurrentValue={setSelectedPermission}
                         computeTitle={(permission) => permission.name ?? ''}
                         patchEndpoint="/api/admin/permissions"
                         onChangesSaved={() => {
