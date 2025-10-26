@@ -20,7 +20,7 @@ export interface PageProps {
 }
 
 export default function ClientPage({ roles }: PageProps) {
-    const event_target = useRef(new EventTarget())
+    const eventTarget = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
     // discard changes without saving
@@ -53,9 +53,8 @@ export default function ClientPage({ roles }: PageProps) {
     return (
         <>
             <PaginatedList<IUser>
-                event_target={event_target.current}
-                api_endpoint="/api/admin/users"
-                id_key="_id"
+                eventTarget={eventTarget.current}
+                endpoint="/api/admin/users"
                 filters={[
                     {
                         name: 'Role',
@@ -100,7 +99,7 @@ export default function ClientPage({ roles }: PageProps) {
                 onSelectItem={({ value }) => handleSelectItem(value)}
                 setItems={setUsers}
                 renderItem={({ value }) => (
-                    <div>
+                    <>
                         <ImageWithFallback
                             src={value.image}
                             alt={'user profile picture'}
@@ -113,7 +112,7 @@ export default function ClientPage({ roles }: PageProps) {
                             </span>
                             <span className="text-gray-500">{value.name}</span>
                         </div>
-                    </div>
+                    </>
                 )}
             />
 
@@ -133,7 +132,7 @@ export default function ClientPage({ roles }: PageProps) {
                         }}
                         patchEndpoint="/api/admin/users"
                         onChangesSaved={() => {
-                            event_target.current.dispatchEvent(
+                            eventTarget.current.dispatchEvent(
                                 new Event('refetch')
                             )
                         }}

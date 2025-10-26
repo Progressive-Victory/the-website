@@ -12,7 +12,7 @@ export interface PageProps {
 }
 
 export default function ClientPage({ permissions }: PageProps) {
-    const event_target = useRef(new EventTarget())
+    const eventTarget = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
     // discard changes without saving
@@ -43,9 +43,8 @@ export default function ClientPage({ permissions }: PageProps) {
     return (
         <>
             <PaginatedList<IRole>
-                event_target={event_target.current}
-                api_endpoint="/api/admin/roles"
-                id_key="_id"
+                eventTarget={eventTarget.current}
+                endpoint="/api/admin/roles"
                 filters={[
                     {
                         name: 'Permission',
@@ -56,7 +55,7 @@ export default function ClientPage({ permissions }: PageProps) {
                         options: permissions,
                     },
                 ]}
-                search_fields={[
+                searchFields={[
                     {
                         id: 'name',
                         name: 'Name',
@@ -80,7 +79,7 @@ export default function ClientPage({ permissions }: PageProps) {
                         computeTitle={(role) => role.name ?? ''}
                         patchEndpoint="/api/admin/roles"
                         onChangesSaved={() => {
-                            event_target.current.dispatchEvent(
+                            eventTarget.current.dispatchEvent(
                                 new Event('refetch')
                             )
                         }}

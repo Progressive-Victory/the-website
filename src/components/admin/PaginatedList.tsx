@@ -1,6 +1,9 @@
 import MultiSelect from '@/components/admin/MultiSelect'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { useDebounce } from '@uidotdev/usehooks'
+import {
+    keepPreviousData,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query'
 import classNames from 'classnames'
 import { useEffect, useState } from 'react'
 import {
@@ -19,17 +22,10 @@ export interface IPaginatedListItem<T> {
 }
 
 export interface PaginatedListProps<T extends object> {
-    event_target?: EventTarget
-    /**
-     * The endpoint that will be used to fetch the data
-     */
-    api_endpoint: string
-
-    id_key: keyof T
-
+    eventTarget?: EventTarget
+    endpoint: string
     filters: Filter[]
-    search_fields?: ({ name: string; id: string } | string)[]
-
+    searchFields?: ({ name: string; id: string } | string)[]
     items: IPaginatedListItem<T>[]
     pinnedItem?: IPaginatedListItem<T> | null
     selectedItem: IPaginatedListItem<T> | null
@@ -61,94 +57,67 @@ export interface Filter {
     options: Record<string, string>[]
 }
 
+export interface IPaginatedSearch {
+    page: number
+    limit: number
+
+    query?: string
+    field?: string
+    sort?: 'asc' | 'desc'
+
+    filters: Record<string, string[]>
+}
+
 export interface PaginatedResponse<T> {
     page: number
     limit: number
-    pages: number
     count: number
     data: T[]
 }
 
 export default function PaginatedList<T extends object>({
+    eventTarget,
+    endpoint,
+    filters,
+    searchFields,
     pinnedItem,
     selectedItem,
     items,
     renderItem,
     onSelectItem,
     setItems,
-    ...props
 }: PaginatedListProps<T>) {
-    const [page, setPage] = useState(0)
-    const [pages, setPages] = useState(1)
-    const [limit, setLimit] = useState(25)
-
-    const [searchQuery, setSearchQuery] = useState('')
-    const [searchField, setSearchField] = useState<string>('all')
+    const [search, setSearch] = useState<IPaginatedSearch>({
+        page: 0,
+        limit: 25,
+        filters: {},
+    })
 
     const [filtersOpen, setFiltersOpen] = useState(false)
     const [activeFilterMenu, setActiveFilterMenu] = useState<string | null>(
         null
     )
-    const [searchFilters, setSearchFilters] = useState<
-        Record<string, string[]>
-    >({})
-    const [sortOrder, setSortOrder] = useState('')
 
-    const searchParams = useDebounce(
-        [
-            page,
-            pages,
-            limit,
-            searchQuery,
-            searchField,
-            searchFilters,
-            sortOrder,
-        ],
-        50
-    )
+    const queryClient = useQueryClient()
+    const { isPending, isSuccess, data, error, refetch } = useQuery({
+        queryKey: [endpoint, search],
+        async queryFn({ signal }) {
+            if (!search) return null
 
-    // Takes info from PaginatedResponse object and constructs new object with
-    // filtered data so that the unordered list is still available when filters
-    // are cleared.
-    const sortedData = (
-        arr: T[],
-        count: number,
-        setting: string,
-        field: string
-    ) => {
-        const obj: PaginatedResponse<T> = {
-            page,
-            limit,
-            pages,
-            count,
-            data:
-                setting === 'A-Z'
-                    ? arr.sort((a, b) => (a[field] < b[field] ? -1 : 1))
-                    : setting === 'Z-A'
-                      ? arr.sort((a, b) => (a[field] > b[field] ? -1 : 1))
-                      : arr,
-        }
-        return obj
-    }
-
-    const { isPending, isSuccess, error, data, refetch } = useQuery<
-        PaginatedResponse<T>
-    >({
-        queryKey: [props.api_endpoint, ...searchParams],
-        queryFn: async ({ signal }) => {
             const url = new URL(location.href)
-            url.pathname = props.api_endpoint
-            url.searchParams.set('page', page + '')
-            url.searchParams.set('limit', limit + '')
-            if (searchQuery) url.searchParams.set('query', searchQuery)
-            if (searchField !== 'all')
-                url.searchParams.set('search_field', searchField)
+            url.pathname = endpoint
 
-            for (const [key, values] of Object.entries(searchFilters)) {
+            for (const [key, values] of Object.entries(search.filters)) {
                 for (const value of values) {
-                    url.searchParams.append(key, value)
+                    url.searchParams.set(key, value)
                 }
             }
+
+            url.searchParams.set('page', search.page.toString())
+            url.searchParams.set('limit', search.limit.toString())
+            if (search.query) url.searchParams.set('query', search.query)
+            if (search.field) url.searchParams.set('field', search.field)
+            if (search.sort) url.searchParams.set('sort', search.sort)
 
             const res = await fetch(url, { signal })
             return (await res.json()) as PaginatedResponse<T>
@@ -156,46 +125,46 @@ export default function PaginatedList<T extends object>({
         placeholderData: keepPreviousData,
     })
 
-    // New list object with filtered 'data: T[]' property to be updated with
-    // useEffect function.
-    const sortedList = sortedData(
-        data?.data ?? [],
-        data?.count ?? 0,
-        sortOrder,
-        searchField
-    )
-
-    const itemsWithoutPinned = pinnedItem
-        ? items.filter((item) => item.id !== pinnedItem.id)
-        : items
-
     useEffect(() => {
-        if (isSuccess) {
-            setPage(data?.page)
-            setLimit(data?.limit)
-            setPages(data?.pages)
-            setItems(sortedList.data)
+        console.log('Checking success...')
+        if (isSuccess && data) {
+            setItems(data.data)
         }
-    }, [isSuccess, data, sortedList])
+    }, [isSuccess, data, setItems])
 
     useEffect(() => {
-        const { event_target } = props
-        if (!event_target) return
+        console.log('Refetching...')
+        void refetch()
+        return () =>
+            void queryClient.cancelQueries({
+                queryKey: ['/api/admin/users', search],
+            })
+    }, [search, refetch, queryClient])
+
+    useEffect(() => {
+        if (!eventTarget) return
 
         function handleSaveChanges() {
             void refetch()
         }
 
-        event_target.addEventListener('refetch', handleSaveChanges)
+        eventTarget.addEventListener('refetch', handleSaveChanges)
 
         return () => {
-            event_target.removeEventListener('refetch', handleSaveChanges)
+            eventTarget.removeEventListener('refetch', handleSaveChanges)
         }
-    }, [props, props.event_target, refetch])
+    }, [eventTarget, refetch])
+
+    const itemsWithPinned = pinnedItem
+        ? [pinnedItem, ...items.filter((item) => item.id !== pinnedItem.id)]
+        : items
+    const pages = data
+        ? Math.ceil((pinnedItem ? data.count - 1 : data.count) / data.limit)
+        : 0
 
     return (
         <div className="flex w-96 flex-col self-stretch border-x-2 border-gray-200 bg-gray-50 2xl:w-[28rem]">
-            <div className="flex flex-col gap-3 border-b-0 p-4">
+            <div className="flex flex-col gap-3 border-b-2 p-4">
                 <div className="flex w-full items-center gap-2">
                     <input
                         type="text"
@@ -203,10 +172,12 @@ export default function PaginatedList<T extends object>({
                         id="search_query"
                         className="w-full rounded-lg border border-gray-300 px-3 py-1"
                         placeholder="Search..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        value={search.query}
+                        onChange={(e) =>
+                            setSearch({ ...search, query: e.target.value })
+                        }
                     />
-                    {props.filters.length > 0 && (
+                    {filters.length > 0 && (
                         <button
                             title={
                                 filtersOpen ? 'Hide Filters' : 'Show Filters'
@@ -224,7 +195,7 @@ export default function PaginatedList<T extends object>({
                 {filtersOpen && (
                     <>
                         <div className="flex w-full flex-wrap justify-between gap-2">
-                            {props.search_fields && (
+                            {searchFields && (
                                 <label
                                     htmlFor="search_field"
                                     className="flex shrink items-center gap-2"
@@ -236,13 +207,16 @@ export default function PaginatedList<T extends object>({
                                         className="rounded-lg border border-gray-300 bg-white p-1"
                                         defaultValue={'all'}
                                         onChange={(e) =>
-                                            setSearchField(e.target.value)
+                                            setSearch({
+                                                ...search,
+                                                field: e.target.value,
+                                            })
                                         }
                                     >
                                         <option value={'all'}>
                                             All (exact only)
                                         </option>
-                                        {props.search_fields.map((sf) => (
+                                        {searchFields.map((sf) => (
                                             <option
                                                 key={
                                                     typeof sf === 'string'
@@ -272,8 +246,13 @@ export default function PaginatedList<T extends object>({
                                     name="limit"
                                     id="limit"
                                     className="rounded-lg border border-gray-300 bg-white p-1"
-                                    defaultValue={limit}
-                                    onChange={(e) => setLimit(+e.target.value)}
+                                    defaultValue={search.limit}
+                                    onChange={(e) =>
+                                        setSearch({
+                                            ...search,
+                                            limit: +e.target.value,
+                                        })
+                                    }
                                 >
                                     <option value={5}>5</option>
                                     <option value={10}>10</option>
@@ -283,7 +262,7 @@ export default function PaginatedList<T extends object>({
                                 </select>
                             </label>
                         </div>
-                        {data && searchField !== 'all' ? (
+                        {data && search.field !== 'all' ? (
                             <label
                                 htmlFor="Sort"
                                 className="flex items-center gap-2"
@@ -293,20 +272,27 @@ export default function PaginatedList<T extends object>({
                                     name="sort"
                                     id="sort"
                                     className="rounded-lg border border-gray-300 bg-white p-1"
-                                    value={sortOrder}
+                                    value={search.sort}
                                     onChange={(e) => {
-                                        setSortOrder(e.target.value)
+                                        setSearch({
+                                            ...search,
+                                            sort: e.target.value
+                                                ? undefined
+                                                : (e.target.value as
+                                                      | 'asc'
+                                                      | 'desc'),
+                                        })
                                     }}
                                 >
                                     <option value={''}>...</option>
-                                    <option value={'A-Z'}>A-Z</option>
-                                    <option value={'Z-A'}>Z-A</option>
+                                    <option value={'asc'}>A-Z</option>
+                                    <option value={'desc'}>Z-A</option>
                                 </select>
                             </label>
                         ) : (
                             <div className="d-none"></div>
                         )}
-                        {props.filters?.map((f) => (
+                        {filters?.map((f) => (
                             <div key={f.name} className="flex flex-wrap gap-2">
                                 <strong className="font-medium">
                                     {f.name}:
@@ -316,20 +302,26 @@ export default function PaginatedList<T extends object>({
                                     displayKey={f.display_key}
                                     valueKey={f.value_key}
                                     options={f.options}
-                                    active={searchFilters[f.query_key] ?? []}
+                                    active={search.filters[f.query_key] ?? []}
                                     addActive={(value) => {
-                                        searchFilters[f.query_key] = [
-                                            ...(searchFilters[f.query_key] ??
+                                        search.filters[f.query_key] = [
+                                            ...(search.filters[f.query_key] ??
                                                 []),
                                             value,
                                         ]
-                                        setSearchFilters({ ...searchFilters })
+                                        setSearch({
+                                            ...search,
+                                            filters: { ...search.filters },
+                                        })
                                     }}
                                     removeActive={(value) => {
-                                        searchFilters[f.query_key] = (
-                                            searchFilters[f.query_key] ?? []
+                                        search.filters[f.query_key] = (
+                                            search.filters[f.query_key] ?? []
                                         ).filter((v) => v !== value)
-                                        setSearchFilters({ ...searchFilters })
+                                        setSearch({
+                                            ...search,
+                                            filters: { ...search.filters },
+                                        })
                                     }}
                                     menuOpen={activeFilterMenu == f.query_key}
                                     setMenuOpen={(open) =>
@@ -344,38 +336,41 @@ export default function PaginatedList<T extends object>({
                 )}
             </div>
 
-            {itemsWithoutPinned.length > 0 ? (
-                itemsWithoutPinned.map((item) => (
-                    <ListElement
-                        key={item.id}
-                        selected={item.id === selectedItem?.id}
-                        pinned={item.id === pinnedItem?.id}
-                        onClick={() =>
-                            item.id === selectedItem?.id && onSelectItem(item)
-                        }
-                    >
-                        {renderItem(item)}
-                    </ListElement>
-                ))
-            ) : (
-                <div className="flex flex-1 items-center justify-center">
-                    {isPending ? (
-                        <span className="text-gray-400">Loading...</span>
-                    ) : error ? (
-                        <span className="text-red-500">
-                            Error: {error.message}
-                        </span>
-                    ) : (
-                        <span>No results found</span>
-                    )}
-                </div>
-            )}
+            <div className="overflow-auto">
+                {isSuccess && items.length > 0 ? (
+                    itemsWithPinned.map((item) => (
+                        <ListElement
+                            key={item.id}
+                            selected={item.id === selectedItem?.id}
+                            pinned={item.id === pinnedItem?.id}
+                            onClick={() =>
+                                item.id !== selectedItem?.id &&
+                                onSelectItem(item)
+                            }
+                        >
+                            {renderItem(item)}
+                        </ListElement>
+                    ))
+                ) : (
+                    <div className="flex flex-1 items-center justify-center">
+                        {isPending ? (
+                            <span className="text-gray-400">Loading...</span>
+                        ) : error ? (
+                            <span className="text-red-500">
+                                Error: {error.message}
+                            </span>
+                        ) : (
+                            <span>No results found</span>
+                        )}
+                    </div>
+                )}
+            </div>
 
             <div className="mt-auto flex gap-4 border-t-2">
                 <Pagination
-                    page={page}
+                    page={search?.page ?? 0}
                     pages={pages}
-                    onPageChange={setPage}
+                    onPageChange={(page) => setSearch({ ...search, page })}
                     enabled={!isPending}
                     total={data?.count ?? 0}
                 />
@@ -402,7 +397,8 @@ export function ListElement({
             className={classNames(
                 'flex cursor-pointer items-center gap-5 p-4',
                 {
-                    'bg-gray-200': pinned,
+                    'border-b-2 bg-gray-200 border-gray-300': pinned,
+                    'border-b': !pinned,
                     'bg-gray-300 hover:bg-gray-400': pinned && selected,
                     'hover:bg-gray-300': pinned && !selected,
                     'bg-gray-200 hover:bg-gray-300': !pinned && selected,
@@ -431,9 +427,20 @@ function Pagination({
     total,
     onPageChange,
 }: PaginationProps) {
-    const [value, setValue] = useState((page + 1).toString())
+    const [value, setValue] = useState('')
 
     const canChange = pages > 1
+
+    const handleChangeValue = (value: string) => {
+        if (!value || (/^\d+$/.test(value) && value.length < 10))
+            setValue(value)
+    }
+
+    const handleSubmit = () => {
+        const newPage = +value - 1 || page
+        if (0 < newPage && newPage < pages) onPageChange(newPage)
+        else setValue((page + 1).toString())
+    }
 
     useEffect(() => {
         setValue((page + 1).toString())
@@ -458,25 +465,14 @@ function Pagination({
                     className="flex items-center gap-2 px-2"
                     onSubmit={(e) => {
                         e.preventDefault()
-                        onPageChange(+value + 1 || page)
+                        handleSubmit()
                     }}
                 >
                     <input
                         type="text"
                         value={value}
-                        onChange={(e) => {
-                            if (
-                                e.target.value.length === 0 ||
-                                (/^\d+$/.test(e.target.value) &&
-                                    e.target.value.length < 10)
-                            ) {
-                                setValue(e.target.value)
-                            }
-                        }}
-                        onBlur={() => {
-                            if (value.length === 0)
-                                setValue((page + 1).toString())
-                        }}
+                        onChange={(e) => handleChangeValue(e.target.value)}
+                        onBlur={handleSubmit}
                         disabled={!enabled}
                         className="w-[6ch] max-w-min rounded-lg border border-gray-300 px-2 py-0.5 text-center"
                     />

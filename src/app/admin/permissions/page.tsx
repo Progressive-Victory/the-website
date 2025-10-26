@@ -7,7 +7,7 @@ import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
 
 export default function Page() {
-    const event_target = useRef(new EventTarget())
+    const eventTarget = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
     // discard changes without saving
@@ -43,11 +43,10 @@ export default function Page() {
     return (
         <>
             <PaginatedList<IPermission>
-                event_target={event_target.current}
-                api_endpoint="/api/admin/permissions"
-                id_key="_id"
+                eventTarget={eventTarget.current}
+                endpoint="/api/admin/permissions"
                 filters={[]}
-                search_fields={[
+                searchFields={[
                     {
                         id: 'name',
                         name: 'Name',
@@ -73,7 +72,7 @@ export default function Page() {
                         computeTitle={(permission) => permission.name ?? ''}
                         patchEndpoint="/api/admin/permissions"
                         onChangesSaved={() => {
-                            event_target.current.dispatchEvent(
+                            eventTarget.current.dispatchEvent(
                                 new Event('refetch')
                             )
                         }}
