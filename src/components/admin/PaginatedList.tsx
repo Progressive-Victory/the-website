@@ -329,7 +329,7 @@ export default function PaginatedList<T extends object>({
                 )}
             </div>
 
-            <div className="overflow-auto">
+            <ul className="overflow-y-auto">
                 {isSuccess && items.length > 0 ? (
                     itemsWithPinned.map((item) => (
                         <ListElement
@@ -357,7 +357,7 @@ export default function PaginatedList<T extends object>({
                         )}
                     </div>
                 )}
-            </div>
+            </ul>
 
             <div className="mt-auto flex gap-4 border-t-2">
                 <Pagination
