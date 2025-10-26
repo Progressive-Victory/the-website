@@ -61,9 +61,9 @@ export interface IPaginatedSearch {
     page: number
     limit: number
 
-    query?: string
-    field?: string
-    sort?: 'asc' | 'desc'
+    query: string
+    field: string
+    sort: string
 
     filters: Record<string, string[]>
 }
@@ -90,6 +90,9 @@ export default function PaginatedList<T extends object>({
     const [search, setSearch] = useState<IPaginatedSearch>({
         page: 0,
         limit: 25,
+        query: '',
+        field: 'all',
+        sort: '',
         filters: {},
     })
 
@@ -126,14 +129,12 @@ export default function PaginatedList<T extends object>({
     })
 
     useEffect(() => {
-        console.log('Checking success...')
         if (isSuccess && data) {
             setItems(data.data)
         }
     }, [isSuccess, data, setItems])
 
     useEffect(() => {
-        console.log('Refetching...')
         void refetch()
         return () =>
             void queryClient.cancelQueries({
@@ -172,7 +173,7 @@ export default function PaginatedList<T extends object>({
                         id="search_query"
                         className="w-full rounded-lg border border-gray-300 px-3 py-1"
                         placeholder="Search..."
-                        value={search.query ?? ''}
+                        value={search.query}
                         onChange={(e) =>
                             setSearch({ ...search, query: e.target.value })
                         }
@@ -258,7 +259,7 @@ export default function PaginatedList<T extends object>({
                                 </select>
                             </label>
                         </div>
-                        {data && search.field !== 'all' ? (
+                        {data ? (
                             <label
                                 htmlFor="Sort"
                                 className="flex items-center gap-2"
@@ -272,11 +273,7 @@ export default function PaginatedList<T extends object>({
                                     onChange={(e) => {
                                         setSearch({
                                             ...search,
-                                            sort: e.target.value
-                                                ? undefined
-                                                : (e.target.value as
-                                                      | 'asc'
-                                                      | 'desc'),
+                                            sort: e.target.value,
                                         })
                                     }}
                                 >
