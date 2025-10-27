@@ -218,6 +218,7 @@ interface CollectInfoStageProps {
 
 function CollectInfoStage({ initialForm, onSuccess }: CollectInfoStageProps) {
     const [form, setForm] = useState(initialForm)
+    const [phoneNumber, setPhoneNumber] = useState('')
 
     const validName = (name: string) =>
         /^[A-Za-z. \s_-]*$/g.test(name) && name.trim() !== ''
@@ -230,28 +231,40 @@ function CollectInfoStage({ initialForm, onSuccess }: CollectInfoStageProps) {
 
     const zipCodeIsValid = /^\d{5}(?:-\d{4})?$/g.test(form.zipCode)
 
-    const phoneNumber = phone(form.phoneNumber, {
-        country: 'US',
-        strictDetection: true,
-        validateMobilePrefix: true,
-    })
-    const phoneNumberIsValid = phoneNumber.isValid
+    const parsePhone = (number: string) =>
+        phone(number, {
+            country: 'US',
+            strictDetection: true,
+            validateMobilePrefix: true,
+        })
+    const parsedPhone = parsePhone(phoneNumber)
+
+    const setFormattedPhoneNumber = (number: string) => {
+        const { phoneNumber, isValid } = parsePhone(number)
+        const formatted = isValid
+            ? `(${phoneNumber.substring(2, 5)}) ${phoneNumber.substring(5, 8)}-${phoneNumber.substring(8, 12)}`
+            : number
+        setPhoneNumber(formatted)
+    }
 
     const isValid =
         firstNameIsValid &&
         lastNameIsValid &&
         dateOfBirthIsValid &&
         zipCodeIsValid &&
-        phoneNumberIsValid &&
+        parsedPhone.isValid &&
         form.usCitizen &&
         form.privacyPolicy
 
-    useInit(() => {
-        setForm({
-            ...initialForm,
-            phoneNumber: (phoneNumber.phoneNumber ?? '').replace('+1', ''),
-        })
-    })
+    useInit(() => setFormattedPhoneNumber(initialForm.phoneNumber))
+
+    useEffect(() => {
+        if (parsedPhone.isValid)
+            setForm((f) => ({
+                ...f,
+                phoneNumber: parsedPhone.phoneNumber.substring(2),
+            }))
+    }, [parsedPhone])
 
     return (
         <>
@@ -310,14 +323,15 @@ function CollectInfoStage({ initialForm, onSuccess }: CollectInfoStageProps) {
                     />
                 </section>
                 <Field
-                    value={form.phoneNumber}
+                    value={phoneNumber}
                     placeholder="Phone Number"
-                    error={!phoneNumberIsValid}
-                    errorText="Enter a valid 10 digit phone, e.g., 2345556789"
-                    maxLength={10}
+                    error={!parsedPhone.isValid}
+                    errorText="Enter a valid 10-digit phone number"
+                    maxLength={20}
                     onChange={(e) => {
-                        setForm({ ...form, phoneNumber: e.target.value })
+                        setPhoneNumber(e.target.value)
                     }}
+                    onBlur={(e) => setFormattedPhoneNumber(e.target.value)}
                 />
                 <p className={`-mt-0.5 mb-1 text-[12px] text-gray-300`}>
                     <em>
@@ -380,6 +394,7 @@ function CollectInfoStage({ initialForm, onSuccess }: CollectInfoStageProps) {
                 <span className="text-red-500">*</span> = required field
             </div>
             <button
+                type="submit"
                 onClick={() => onSuccess(form)}
                 disabled={!isValid}
                 className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
