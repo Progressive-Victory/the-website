@@ -1,8 +1,9 @@
 'use client'
-import Link from 'next/link'
-import Image from 'next/image'
-import { useSession, signOut } from 'next-auth/react'
+
 import { NavItem } from './types'
+import { useSession, signOut } from 'next-auth/react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { SocialIcon } from 'react-social-icons'
 
 const socials = [
@@ -197,8 +198,8 @@ function DesktopFooter() {
                         <Image
                             src="/images/Logo_White.svg"
                             alt="progressive-victory-icon"
-                            width={250}
-                            height={250}
+                            width={200}
+                            height={200}
                         />
                     </div>
                     <div className="m-6 flex w-full justify-end">
