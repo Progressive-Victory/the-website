@@ -84,15 +84,15 @@ export default function VolunteerPage({
             return 'phone_verify'
         } else if (user?.onboardingStage === OnboardingStage.VERIFIED) {
             return 'joining'
-        } else if (
-            user?.onboardingStage === OnboardingStage.JOINED &&
-            user.firstName &&
-            user.lastName &&
-            user.dateOfBirth &&
-            user.zipCode &&
-            user.phoneNumber
-        ) {
-            return 'complete'
+        // } else if (
+        //     user?.onboardingStage === OnboardingStage.JOINED &&
+        //     user.firstName &&
+        //     user.lastName &&
+        //     user.dateOfBirth &&
+        //     user.zipCode &&
+        //     user.phoneNumber
+        // ) {
+        //     return 'complete'
         }
 
         return 'collect_info'
@@ -313,7 +313,7 @@ function CollectInfoStage({ initialForm, onSuccess }: CollectInfoStageProps) {
                     value={form.phoneNumber}
                     placeholder="Phone Number"
                     error={!phoneNumberIsValid}
-                    errorText="Enter a valid 10 digit phone, e.g., 1234567890"
+                    errorText="Enter a valid 10 digit phone, e.g., 2345678901"
                     maxLength={10}
                     onChange={(e) => {
                         setForm({ ...form, phoneNumber: e.target.value })
