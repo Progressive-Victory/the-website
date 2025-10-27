@@ -84,15 +84,15 @@ export default function VolunteerPage({
             return 'phone_verify'
         } else if (user?.onboardingStage === OnboardingStage.VERIFIED) {
             return 'joining'
-        // } else if (
-        //     user?.onboardingStage === OnboardingStage.JOINED &&
-        //     user.firstName &&
-        //     user.lastName &&
-        //     user.dateOfBirth &&
-        //     user.zipCode &&
-        //     user.phoneNumber
-        // ) {
-        //     return 'complete'
+        } else if (
+            user?.onboardingStage === OnboardingStage.JOINED &&
+            user.firstName &&
+            user.lastName &&
+            user.dateOfBirth &&
+            user.zipCode &&
+            user.phoneNumber
+        ) {
+            return 'complete'
         }
 
         return 'collect_info'
