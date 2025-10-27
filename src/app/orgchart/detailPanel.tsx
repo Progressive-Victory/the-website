@@ -1,11 +1,16 @@
 import { Panel } from '@xyflow/react'
+import { PositionData } from './bubbles/positionBubble'
 
 export default function DetailPanel({
     name,
     desc,
+    leads,
+    members,
 }: {
     name: string
     desc?: string
+    leads?: PositionData[]
+    members?: PositionData[]
 }) {
     return (
         <Panel

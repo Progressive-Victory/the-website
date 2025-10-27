@@ -3,9 +3,11 @@ import TeamBubble from '../bubbles/teamBubble'
 import PositionBubble, { PositionData } from '../bubbles/positionBubble'
 
 type TeamNodeData = Node<{
+    id: number
     name: string
     desc?: string
     leads?: PositionData[]
+    members?: PositionData[]
 }>
 
 const zoomSelector = (s: { transform: number[] }) => s.transform[2] >= 1.2
@@ -21,7 +23,7 @@ export default function TeamNode({ data }: NodeProps<TeamNodeData>) {
     }
 
     return (
-        <div className="flex w-[360px] flex-col items-center">
+        <div key={data.id} className="flex w-[360px] flex-col items-center">
             <Handle
                 type="target"
                 position={Position.Top}

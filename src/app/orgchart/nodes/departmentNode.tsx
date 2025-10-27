@@ -3,8 +3,10 @@ import DepartmentBubble from '../bubbles/departmentBubble'
 import PositionBubble, { PositionData } from '../bubbles/positionBubble'
 
 type DepartmentNodeData = Node<{
+    id: number
     name: string
     leads?: PositionData[]
+    members?: PositionData[]
 }>
 
 const zoomSelector = (s: { transform: number[] }) => s.transform[2] >= 1.2
@@ -22,7 +24,7 @@ export default function DepartmentNode({
     }
 
     return (
-        <div className="flex flex-col items-center">
+        <div key={data.id} className="flex flex-col items-center">
             <Handle
                 type="target"
                 position={Position.Top}

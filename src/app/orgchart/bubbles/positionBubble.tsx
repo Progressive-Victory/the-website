@@ -1,6 +1,6 @@
 export interface PositionData {
     id: string
-    title: string
+    title?: string
     name?: string
     acting?: boolean
     redacted?: boolean
@@ -56,7 +56,9 @@ export default function PositionBubble({ data }: { data: PositionData }) {
             <LeadershipBanner />
             <div className="col-span-9 p-2">
                 <p className="text-sm italic text-amber-300">
-                    {data.title?.toUpperCase()}
+                    {data.title != null
+                        ? data.title?.toUpperCase()
+                        : 'VOLUNTEER'}
                 </p>
                 <Nameplate />
             </div>

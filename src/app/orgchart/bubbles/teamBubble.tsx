@@ -1,3 +1,5 @@
+import DetailPanel from '../detailPanel'
+
 export default function TeamBubble({
     name,
     desc,
@@ -5,6 +7,10 @@ export default function TeamBubble({
     name: string
     desc?: string
 }) {
+    function RenderDetails() {
+        return <DetailPanel name={name} desc={desc} />
+    }
+
     function DescriptionBox() {
         if (desc == null) return null
         return (
@@ -17,7 +23,10 @@ export default function TeamBubble({
     }
 
     return (
-        <div className="w-[360px] rounded-r-2xl border-4 border-amber-300 bg-amber-50 p-2 text-black-pearl-dark">
+        <div
+            className="w-[360px] rounded-r-2xl border-4 border-amber-300 bg-amber-50 p-2 text-black-pearl-dark"
+            onClick={RenderDetails}
+        >
             <p className="text-lg font-extrabold">{name.toUpperCase()}</p>
             {desc == null ? null : <DescriptionBox />}
         </div>

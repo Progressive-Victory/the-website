@@ -3,7 +3,7 @@ import PositionBubble, { PositionData } from '../bubbles/positionBubble'
 
 type PositionNodeData = Node<{
     id: string
-    title: string
+    title?: string
     name?: string
     acting?: boolean
     redacted?: boolean
@@ -20,7 +20,7 @@ export default function PositionNode({ data }: NodeProps<PositionNodeData>) {
         leadership: data.leadership,
     }
     return (
-        <div className="flex flex-col items-center">
+        <div key={data.id} className="flex flex-col items-center">
             <Handle
                 type="target"
                 position={Position.Top}
