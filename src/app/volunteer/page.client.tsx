@@ -313,7 +313,7 @@ function CollectInfoStage({ initialForm, onSuccess }: CollectInfoStageProps) {
                     value={form.phoneNumber}
                     placeholder="Phone Number"
                     error={!phoneNumberIsValid}
-                    errorText="Enter a valid 10 digit phone, e.g., 2345678901"
+                    errorText="Enter a valid 10 digit phone, e.g., 2345556789"
                     maxLength={10}
                     onChange={(e) => {
                         setForm({ ...form, phoneNumber: e.target.value })
