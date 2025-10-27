@@ -7,11 +7,11 @@ export function ClientCalendar({ src }: Readonly<{ src: string }>) {
     const timezoneParameter: string =
         '&ctz=' + encodeURI(Intl.DateTimeFormat().resolvedOptions().timeZone)
     return (
-        <div className="relative flex size-full flex-col items-center gap-y-10 bg-steel-blue p-4">
+        <div className="relative flex size-full flex-col items-center gap-y-10 bg-steel-blue p-8">
             <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
 
-            <div className="relative mx-6 w-full rounded-lg bg-[#f0f4f9] py-4">
-                <p className="text-center text-3xl font-black lg:text-5xl">
+            <div className="relative mx-6 w-full rounded-lg bg-[#f0f4f9] py-8">
+                <p className="text-center text-3xl font-black text-black-pearl-dark lg:text-5xl">
                     Progressive Victory Calendar
                 </p>
                 <Frame
