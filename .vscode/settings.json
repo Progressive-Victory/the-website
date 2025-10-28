@@ -4,6 +4,7 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
+    "eslint.format.enable": true,
     "editor.tabSize": 4,
     "editor.insertSpaces": true,
     "editor.detectIndentation": true

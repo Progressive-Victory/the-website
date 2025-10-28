@@ -1,7 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
-import z from 'zod'
-import mongoose from 'mongoose'
-
+import Permission from '@/models/Permission'
 import { Role } from '@/models/Role'
 import { checkAuth, ResponseCode } from '@/util/auth'
 import dbConnect from '@/util/libmongo'
@@ -10,7 +7,9 @@ import {
     executeAggregationPaginated,
 } from '@/util/mongo-aggregations'
 import { parsePaginationParams } from '@/util/url-parsing'
-import Permission from '@/models/Permission'
+import mongoose from 'mongoose'
+import { NextRequest, NextResponse } from 'next/server'
+import z from 'zod'
 
 export async function GET(req: NextRequest) {
     const response = await checkAuth(['Superadmin'])
@@ -37,28 +36,27 @@ export async function GET(req: NextRequest) {
 
     const ALLOWED_SEARCH_FIELDS = ['name']
 
-    const { page, limit, skip, query, params } = parsePaginationParams(req.url)
+    const { page, limit, skip, query, field, sort, params } =
+        parsePaginationParams(req.url)
 
     const roles = Role.aggregate()
+    const validField = field && ALLOWED_SEARCH_FIELDS.includes(field)
 
     if (query) {
-        const search_field = params.get('search_field')
-
-        const operator =
-            search_field && ALLOWED_SEARCH_FIELDS.includes(search_field)
-                ? {
-                      autocomplete: {
-                          path: search_field,
-                          fuzzy: { maxEdits: 1, maxExpansions: 50 },
-                          query,
-                      },
-                  }
-                : {
-                      text: {
-                          path: ALLOWED_SEARCH_FIELDS,
-                          query,
-                      },
-                  }
+        const operator = validField
+            ? {
+                  autocomplete: {
+                      path: field,
+                      fuzzy: { maxEdits: 1, maxExpansions: 50 },
+                      query,
+                  },
+              }
+            : {
+                  text: {
+                      path: ALLOWED_SEARCH_FIELDS,
+                      query,
+                  },
+              }
 
         // Performs full-text search over the collection across several fields
         roles.search({
@@ -66,6 +64,14 @@ export async function GET(req: NextRequest) {
             sort: { score: { $meta: 'searchScore' } },
             ...operator,
         })
+    } else if (sort === 'asc' || sort === 'desc') {
+        const sortBy = sort === 'asc' ? 1 : -1
+
+        if (validField) {
+            roles.sort({ [field]: sortBy })
+        } else {
+            roles.sort({ name: sortBy })
+        }
     }
 
     roles.lookup({
@@ -77,20 +83,15 @@ export async function GET(req: NextRequest) {
 
     applyMatchFilters(roles, params, ALLOWED_FILTER_PARAMS)
 
-    const { data, count, pages } = await executeAggregationPaginated(
-        Role,
-        roles,
-        {
-            skip,
-            limit,
-        }
-    )
+    const { data, count } = await executeAggregationPaginated(Role, roles, {
+        skip,
+        limit,
+    })
 
     return NextResponse.json({
         page,
         limit,
         count,
-        pages,
         data,
     })
 }
