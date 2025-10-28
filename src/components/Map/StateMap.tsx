@@ -79,7 +79,7 @@ function USMapLayer({
             if (!stateMemberCount || !max) return undefined
 
             const memberCount = stateMemberCount[stateName]
-            if (!memberCount) return getBrandColor('blue', gradientShades[0])
+            if (!memberCount) return getBrandColor('mapBlue', gradientShades[0])
 
             // Determine bin index (0–4) from normalized value
             const normalized = memberCount / max
@@ -89,7 +89,7 @@ function USMapLayer({
             )
 
             const shade = gradientShades[index]
-            return getBrandColor('blue', shade)
+            return getBrandColor('mapBlue', shade)
         },
         [stateMemberCount]
     )
@@ -120,7 +120,7 @@ function USMapLayer({
             <GeoJSON
                 data={data}
                 style={() => {
-                    const strokeColor = getBrandColor('blue', 300)
+                    const strokeColor = getBrandColor('mapBlue', 300)
                     return {
                         weight: 8,
                         opacity: 1,
@@ -143,7 +143,8 @@ function USMapLayer({
                                 ? '#CE3728'
                                 : hoveredState === feature?.properties?.name
                                   ? '#EBAFA9'
-                                  : (baseColor ?? getBrandColor('blue', 100)),
+                                  : (baseColor ??
+                                    getBrandColor('mapBlue', 100)),
                         weight: 2,
                         opacity: 1,
                         color: '#fff',
