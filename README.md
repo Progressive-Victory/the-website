@@ -100,4 +100,4 @@ pnpm run test
 
 ## Deploy on Vercel
 
-Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @asoronow or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.
+Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @somejoops or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.
