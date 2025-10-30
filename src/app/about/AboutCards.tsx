@@ -46,7 +46,7 @@ function AboutCard({
     description: string
 }) {
     return (
-        <div className="z-2 mx-3 rounded-lg bg-black-pearl-dark text-center lg:w-2/3">
+        <div className="z-2 mx-8 rounded-lg bg-black-pearl-dark text-center lg:w-2/3">
             <h1 className="text-4xl mt-6 font-bold text-white">
                 {title} <span className="text-valencia">{emphasis}</span>
             </h1>
