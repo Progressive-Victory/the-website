@@ -1,12 +1,13 @@
 'use client'
+
+import { OPEN_ATTR, OPEN_MAP_URI, US_CENTER } from './constants'
+import { StateDataFeatureCollection, statesData } from './stateData'
+import { zipToLatLong } from './util'
+import { getBrandColor, ShadeIndex } from '@/util/theme'
 import L from 'leaflet'
 import { ReactElement, useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, GeoJSON } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
-import { zipToLatLong } from './util'
-import { StateDataFeatureCollection, statesData } from './stateData'
-import { OPEN_ATTR, OPEN_MAP_URI, US_CENTER } from './constants'
-import { getBrandColor, ShadeIndex } from '@/util/theme'
 
 // Types
 interface MarkerCluster {
@@ -39,7 +40,7 @@ export const USMapLayer = ({
             <GeoJSON
                 data={data}
                 style={() => {
-                    const strokeColor = getBrandColor('blue', 200)
+                    const strokeColor = getBrandColor('mapBlue', 300)
                     return {
                         weight: 8,
                         opacity: 1,
@@ -54,15 +55,15 @@ export const USMapLayer = ({
                 style={() => {
                     // TODO: pull in data from api instead of using random shades
                     const shade = getBrandColor(
-                        'blue',
-                        [500, 400, 300, 200, 100][
+                        'mapBlue',
+                        [700, 600, 500, 400, 300, 200, 100][
                             Math.floor(Math.random() * 5)
                         ] as ShadeIndex
                     )
 
                     const fillColor = isHeatmap
                         ? shade
-                        : getBrandColor('blue', 300)
+                        : getBrandColor('mapBlue', 500)
 
                     return {
                         fillColor,

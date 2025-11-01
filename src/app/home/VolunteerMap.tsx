@@ -1,8 +1,6 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { Link, Message, TiltMessage } from '@/components/common'
+
 import { StateMap } from '@/components/Map'
-import { MapView, StateMapInteractionProps } from '@/components/Map/types'
 import {
     BBOX_AK,
     BBOX_HI,
@@ -10,6 +8,9 @@ import {
     BBOX_US,
     US_STATES,
 } from '@/components/Map/constants'
+import { MapView, StateMapInteractionProps } from '@/components/Map/types'
+import { Link, Message, TiltMessage } from '@/components/common'
+import { useEffect, useState } from 'react'
 
 export function VolunteerMap() {
     /* States */
@@ -48,7 +49,7 @@ export function VolunteerMap() {
     return (
         <div className="relative flex w-full flex-col items-center justify-center gap-[6vw] bg-black-pearl-dark py-10 2xl:grid 2xl:grid-cols-2">
             {/* Text */}
-            <div className="z-10 flex max-w-[750px] flex-col items-center text-center text-white 2xl:order-last">
+            <div className="z-3 flex max-w-[750px] flex-col items-center text-center text-white 2xl:order-last">
                 <h1 className="mb-8 text-4xl font-bold">
                     Thousands of{' '}
                     <span className="text-valencia">Volunteers</span>
@@ -67,7 +68,7 @@ export function VolunteerMap() {
             </div>
 
             {/* Map */}
-            <TiltMessage className="flex justify-center xl:justify-end">
+            <TiltMessage className="px-8 flex justify-center xl:justify-end">
                 <Message
                     className="xl:w-[30vw]"
                     avatar="/images/pv_pride.png"
