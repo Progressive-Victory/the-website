@@ -34,13 +34,12 @@ pnpm install
 
 ### 3. Configure
 
-Next, check the .env.example file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to Brioche on Discord.
+Next, check the .env.example file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to Joops on discord.
 
 ```bash
 # $PROJECT_DIR/.env
 
 # These are the values for the development Discord bot
-# You can use your own Bot or request credentials for PV Bot Dev
 DISCORD_CLIENT_ID="1234"
 DISCORD_CLIENT_SECRET="abcdefg"
 DISCORD_BOT_TOKEN="mx213"
@@ -49,15 +48,17 @@ DISCORD_BOT_TOKEN="mx213"
 NEXTAUTH_SECRET="abcdefg"
 NEXTAUTH_URL="http://localhost:3000"
 
-# The ID of the Discord server the bot is in (either your server or PV Dev Server)
+# The ID of the Discord server the bot is in (for dev purposes would likely be PV Dev Server)
 GUILD_ID="122"
 
 # Unless needed for you work the SMS API information is restricted
 NEUTRINO_USERID="pvuser"
 NEUTRINO_SECRET="123egh"
 
-# You can either use a local MongoDB instance or request a Dev DB user
+# To connect to our dev DB
 MONGODB_URI="mongodb://localhost:27017"
+
+# Does not need to change
 SITE_URL="https://example.com"
 ```
 
@@ -81,7 +82,7 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Tests
+## Tests - Under Construction
 
 Make sure you run the setup steps first:
 
@@ -99,4 +100,4 @@ pnpm run test
 
 ## Deploy on Vercel
 
-Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @asoronow or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.
+Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @somejoops or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.

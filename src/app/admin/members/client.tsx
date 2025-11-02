@@ -1,175 +1,61 @@
 'use client'
 
-import { Form, IFormGroup } from '@/components/admin/Form'
-
 import PaginatedList from '@/components/admin/PaginatedList'
+import { ImageWithFallback } from '@/components/common'
+import {
+    CheckboxField,
+    Form,
+    FormGroup,
+    SelectManyField,
+    TextField,
+} from '@/components/form'
 import { IRole } from '@/models/Role'
 import { IUser } from '@/models/User'
+import { useUser } from '@/util/hooks'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
-
-const FORM_GROUPS: IFormGroup[] = [
-    {
-        title: 'Account Information',
-        fields: [
-            {
-                type: 'text',
-                name: 'Username',
-                key: 'name',
-                required: true,
-            },
-            {
-                type: 'text',
-                name: 'Email',
-                key: 'email',
-                required: true,
-            },
-            {
-                type: 'text',
-                name: 'Discord ID',
-                key: 'discordId',
-                readonly: true,
-            },
-            {
-                type: 'text',
-                name: 'Phone Number',
-                key: 'phoneNumber',
-                required: true,
-            },
-            {
-                type: 'text',
-                name: 'Preferred Name',
-                key: 'preferredName',
-                required: false,
-                deprecated: true,
-            },
-            {
-                type: 'text',
-                name: 'First Name',
-                key: 'firstName',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'Last Name',
-                key: 'lastName',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'Date of Birth',
-                key: 'dateOfBirth',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'Age',
-                key: 'age',
-                required: false,
-                readonly: true,
-            },
-        ],
-    },
-    {
-        title: 'Address',
-        fields: [
-            {
-                type: 'text',
-                name: 'City',
-                key: 'city',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'County',
-                key: 'county',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'State',
-                key: 'state',
-                required: false,
-            },
-            {
-                type: 'text',
-                name: 'Zip Code',
-                key: 'zipCode',
-                required: false,
-            },
-        ],
-    },
-    {
-        title: 'Account Status',
-        fields: [
-            {
-                type: 'checkbox',
-                name: 'Accepted Alerts',
-                key: 'acceptedAlerts',
-                readonly: true,
-            },
-            {
-                type: 'checkbox',
-                name: 'Verified',
-                key: 'verified',
-                readonly: false,
-            },
-            {
-                type: 'text',
-                name: 'Onboarding Stage',
-                key: 'onboardingStage',
-                readonly: true,
-            },
-        ],
-    },
-]
+import { PulseLoader } from 'react-spinners'
 
 export interface PageProps {
     roles: IRole[]
 }
 
 export default function ClientPage({ roles }: PageProps) {
-    const event_target = useRef(new EventTarget())
+    const eventTarget = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
     // discard changes without saving
     const [originalUser, setOriginalUser] = useState<IUser | null>(null)
     // This is the mutable copy we actually update when the user interacts with
     // the form
-    const [user, setUser] = useState<IUser | null>(null)
+    const [selectedUser, setSelectedUser] = useState<IUser | null>(null)
+    const [users, setUsers] = useState<IUser[]>([])
 
-    const beforeElementSelected = () => {
-        if (!deepEqual(user, originalUser)) {
-            return confirm(
+    const loggedInUser = useUser()
+
+    const handleSelectItem = (value: IUser) => {
+        if (value._id === selectedUser?._id) return
+
+        if (!deepEqual(selectedUser, originalUser)) {
+            const proceed = confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
             )
+            if (!proceed) return
         }
 
-        return true
-    }
-
-    const onElementSelected = (value: IUser) => {
-        setUser({ ...value } as IUser)
         // We need to copy to make sure that the value in the list is not
         // modified until we save
+        setSelectedUser({ ...value } as IUser)
         setOriginalUser({ ...value } as IUser)
     }
+
+    const makeItem = (user: IUser) => ({ id: user._id as string, value: user })
 
     return (
         <>
             <PaginatedList<IUser>
-                event_target={event_target.current}
-                api_endpoint="/api/admin/users"
-                before_element_selection={beforeElementSelected}
-                on_element_selected={onElementSelected}
-                id_key="_id"
-                display_key={(u) =>
-                    (u.firstName
-                        ? `${u.firstName} ${u.lastName}`
-                        : u.preferredName) ?? u.email
-                }
-                alternate_display_key="name"
-                image={{ key: 'image', alt: 'user profile picture' }}
+                eventTarget={eventTarget.current}
+                endpoint="/api/admin/users"
                 filters={[
                     {
                         name: 'Role',
@@ -180,7 +66,7 @@ export default function ClientPage({ roles }: PageProps) {
                         options: roles,
                     },
                 ]}
-                search_fields={[
+                searchFields={[
                     {
                         id: 'name',
                         name: 'Name',
@@ -206,31 +92,53 @@ export default function ClientPage({ roles }: PageProps) {
                         name: 'State',
                     },
                 ]}
+                items={users.map(makeItem)}
+                pinnedItem={
+                    loggedInUser.data
+                        ? makeItem(loggedInUser.data)
+                        : { id: '', value: {} as IUser }
+                }
+                selectedItem={selectedUser ? makeItem(selectedUser) : null}
+                onSelectItem={({ value }) => handleSelectItem(value)}
+                setItems={setUsers}
+                renderItem={({ id, value }) =>
+                    id ? (
+                        <>
+                            <ImageWithFallback
+                                src={value.image}
+                                alt="user profile picture"
+                            />
+                            <div className="flex flex-col">
+                                <span className="font-medium text-black">
+                                    {(value.firstName
+                                        ? `${value.firstName} ${value.lastName}`
+                                        : value.preferredName) ?? value.email}
+                                </span>
+                                <span className="text-gray-500">
+                                    {value.name}
+                                </span>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <ImageWithFallback
+                                src=""
+                                alt="user profile picture"
+                                useFallback
+                            />
+                            <PulseLoader size={8} color="#bbb" />
+                        </>
+                    )
+                }
             />
+
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
-                {user && originalUser ? (
-                    // @ts-expect-error shut up
+                {selectedUser && originalUser ? (
                     <Form<IUser>
-                        groups={[
-                            ...FORM_GROUPS,
-                            {
-                                title: 'Permissions',
-                                fields: [
-                                    {
-                                        type: 'select_many',
-                                        name: 'Roles',
-                                        key: 'roles',
-                                        display_key: 'name',
-                                        value_key: '_id',
-                                        options: roles,
-                                    },
-                                ],
-                            },
-                        ]}
                         initialValue={originalUser}
                         setInitialValue={setOriginalUser}
-                        currentValue={user}
-                        setCurrentValue={setUser}
+                        currentValue={selectedUser}
+                        setCurrentValue={setSelectedUser}
                         computeTitle={(user) => {
                             if (user.firstName && user.lastName)
                                 return `${user.firstName} ${user.lastName}`
@@ -240,12 +148,69 @@ export default function ClientPage({ roles }: PageProps) {
                         }}
                         patchEndpoint="/api/admin/users"
                         onChangesSaved={() => {
-                            event_target.current.dispatchEvent(
+                            eventTarget.current.dispatchEvent(
                                 new Event('refetch')
                             )
+                            if (selectedUser._id === loggedInUser.data?._id)
+                                loggedInUser.reload()
                         }}
                         updateHistory
-                    />
+                    >
+                        <FormGroup title="Account Information">
+                            <TextField name="Username" field="name" required />
+                            <TextField name="Email" field="email" required />
+                            <TextField
+                                name="Discord ID"
+                                field="discordId"
+                                readonly
+                            />
+                            <TextField
+                                name="Phone Number"
+                                field="phoneNumber"
+                                required
+                            />
+                            <TextField
+                                name="Preferred Name"
+                                field="preferredName"
+                                deprecated
+                            />
+                            <TextField name="First Name" field="firstName" />
+                            <TextField name="Last Name" field="lastName" />
+                            <TextField
+                                name="Date of Birth"
+                                field="dateOfBirth"
+                            />
+                            <TextField name="Age" field="age" readonly />
+                        </FormGroup>
+                        <FormGroup title="Address">
+                            <TextField name="City" field="city" />
+                            <TextField name="County" field="county" />
+                            <TextField name="State" field="state" />
+                            <TextField name="Zip Code" field="zipCode" />
+                        </FormGroup>
+                        <FormGroup title="Account Status" defaultCollapsed>
+                            <CheckboxField
+                                name="Accepted Alerts"
+                                field="acceptedAlerts"
+                                readonly
+                            />
+                            <CheckboxField name="Verified" field="verified" />
+                            <TextField
+                                name="Onboarding Stage"
+                                field="onboardingStage"
+                                readonly
+                            />
+                        </FormGroup>
+                        <FormGroup title="Permissions">
+                            <SelectManyField
+                                name="Roles"
+                                field="roles"
+                                nameKey="name"
+                                valueKey="_id"
+                                options={roles}
+                            />
+                        </FormGroup>
+                    </Form>
                 ) : (
                     <div className="flex h-full items-center justify-center">
                         No user selected

@@ -1,9 +1,11 @@
 import MultiSelect from '@/components/admin/MultiSelect'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { useDebounce } from '@uidotdev/usehooks'
+import {
+    keepPreviousData,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query'
 import classNames from 'classnames'
-import Image from 'next/image'
-import { FC, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
     FiChevronLeft,
     FiChevronRight,
@@ -13,37 +15,23 @@ import {
 import { IoMdOptions } from 'react-icons/io'
 import { IoClose } from 'react-icons/io5'
 import { IconType } from 'react-icons/lib'
-import { useUser } from '@/util/hooks'
+
+export interface IPaginatedListItem<T> {
+    id: string
+    value: T
+}
 
 export interface PaginatedListProps<T extends object> {
-    event_target?: EventTarget
-    /**
-     * The endpoint that will be used to fetch the data
-     */
-    api_endpoint: string
-
-    /**
-     * Called when an element in the list is selected by the user. The handler can
-     * return false to disallow the selection (like if there are edits in progress
-     * for example)
-     */
-    before_element_selection?: (value: T) => boolean
-
-    /**
-     * Called after an element is selected from the list
-     */
-    on_element_selected: (value: T) => void
-
-    id_key: keyof T
-    display_key: keyof T | ((value: T) => string)
-    alternate_display_key?: keyof T | ((value: T) => string)
-    image?: {
-        key: keyof T
-        alt: string
-    }
-
+    eventTarget?: EventTarget
+    endpoint: string
     filters: Filter[]
-    search_fields?: ({ name: string; id: string } | string)[]
+    searchFields: ({ name: string; id: string } | string)[]
+    items: IPaginatedListItem<T>[]
+    pinnedItem?: IPaginatedListItem<T> | null
+    selectedItem: IPaginatedListItem<T> | null
+    renderItem: (item: IPaginatedListItem<T>) => React.ReactElement
+    onSelectItem: (item: IPaginatedListItem<T>) => void
+    setItems: (items: T[]) => void
 }
 
 export interface Filter {
@@ -69,92 +57,70 @@ export interface Filter {
     options: Record<string, string>[]
 }
 
+export interface IPaginatedSearch {
+    page: number
+    limit: number
+
+    query: string
+    field: string
+    sort: string
+
+    filters: Record<string, string[]>
+}
+
 export interface PaginatedResponse<T> {
     page: number
     limit: number
-    pages: number
     count: number
     data: T[]
 }
 
-export default function PaginatedList<T extends object>(
-    props: PaginatedListProps<T>
-) {
-    const [page, setPage] = useState(0)
-    const [pages, setPages] = useState(1)
-    const [limit, setLimit] = useState(25)
-    const [selected_id, set_selected_id] = useState<string | null>(null)
-
-    const [searchQuery, setSearchQuery] = useState('')
-    const [searchField, setSearchField] = useState<string>('all')
+export default function PaginatedList<T extends object>({
+    eventTarget,
+    endpoint,
+    filters,
+    searchFields,
+    pinnedItem,
+    selectedItem,
+    items,
+    renderItem,
+    onSelectItem,
+    setItems,
+}: PaginatedListProps<T>) {
+    const [search, setSearch] = useState<IPaginatedSearch>({
+        page: 0,
+        limit: 25,
+        query: '',
+        field: 'all',
+        sort: '',
+        filters: {},
+    })
 
     const [filtersOpen, setFiltersOpen] = useState(false)
     const [activeFilterMenu, setActiveFilterMenu] = useState<string | null>(
         null
     )
-    const [searchFilters, setSearchFilters] = useState<
-        Record<string, string[]>
-    >({})
-    const [sortOrder, setSortOrder] = useState('')
 
-    const searchParams = useDebounce(
-        [
-            page,
-            pages,
-            limit,
-            searchQuery,
-            searchField,
-            searchFilters,
-            sortOrder,
-        ],
-        50
-    )
+    const queryClient = useQueryClient()
+    const { isPending, isSuccess, data, error, refetch } = useQuery({
+        queryKey: [endpoint, search],
+        async queryFn({ signal }) {
+            if (!search) return null
 
-    const user = useUser()
-
-    // takes info from PaginatedResponse object and constructs new object with filtered data so that the unordered list is still avialable when filters are cleared
-    const sortedData = (
-        arr: T[],
-        count: number,
-        setting: string,
-        field: string
-    ) => {
-        const obj: PaginatedResponse<T> = {
-            page: page,
-            limit: limit,
-            pages: pages,
-            count: count,
-            data:
-                setting === ''
-                    ? arr
-                    : setting === 'A-Z'
-                      ? arr.sort((a, b) => (a[field] < b[field] ? -1 : 1))
-                      : setting === 'Z-A'
-                        ? arr.sort((a, b) => (a[field] > b[field] ? -1 : 1))
-                        : arr,
-        }
-        return obj
-    }
-
-    const { isPending, isSuccess, error, data, refetch } = useQuery<
-        PaginatedResponse<T>
-    >({
-        queryKey: [props.api_endpoint, ...searchParams],
-        queryFn: async ({ signal }) => {
             const url = new URL(location.href)
-            url.pathname = props.api_endpoint
-            url.searchParams.set('page', page + '')
-            url.searchParams.set('limit', limit + '')
-            if (searchQuery) url.searchParams.set('query', searchQuery)
-            if (searchField !== 'all')
-                url.searchParams.set('search_field', searchField)
+            url.pathname = endpoint
 
-            for (const [key, values] of Object.entries(searchFilters)) {
+            for (const [key, values] of Object.entries(search.filters)) {
                 for (const value of values) {
-                    url.searchParams.append(key, value)
+                    url.searchParams.set(key, value)
                 }
             }
-            console.log(url.search)
+
+            url.searchParams.set('page', search.page.toString())
+            url.searchParams.set('limit', search.limit.toString())
+            if (search.query) url.searchParams.set('query', search.query)
+            if (search.field) url.searchParams.set('field', search.field)
+            if (search.sort) url.searchParams.set('sort', search.sort)
 
             const res = await fetch(url, { signal })
             return (await res.json()) as PaginatedResponse<T>
@@ -162,59 +128,44 @@ export default function PaginatedList<T extends object>(
         placeholderData: keepPreviousData,
     })
 
-    // new list object with filtered 'data: T[]' property to be updated with useEffect function
-    const sortedList = sortedData(
-        // @ts-expect-error shut up
-        data?.data,
-        data?.count,
-        sortOrder,
-        searchField
-    )
-
-    const filteredSortedList = filterOutUser(sortedList, user)
-
     useEffect(() => {
-        if (isSuccess) {
-            setPage(data?.page)
-            setLimit(data?.limit)
-            setPages(data?.pages)
+        if (isSuccess && data) {
+            setItems(data.data)
         }
-    }, [isSuccess, data, sortedList])
-
-    const handleListItemClick = (clicked_id: string) => {
-        const selected = data?.data.find((e) => e[props.id_key] === selected_id)
-        const clicked = data?.data.find((e) => e[props.id_key] === clicked_id)
-
-        if (!clicked || selected === clicked) return
-
-        if (
-            props.before_element_selection &&
-            !props.before_element_selection(clicked)
-        )
-            return
-
-        set_selected_id(clicked_id)
-        props.on_element_selected(clicked)
-    }
+    }, [isSuccess, data, setItems])
 
     useEffect(() => {
-        const { event_target } = props
-        if (!event_target) return
+        void refetch()
+        return () =>
+            void queryClient.cancelQueries({
+                queryKey: ['/api/admin/users', search],
+            })
+    }, [search, refetch, queryClient])
+
+    useEffect(() => {
+        if (!eventTarget) return
 
         function handleSaveChanges() {
             void refetch()
         }
 
-        event_target.addEventListener('refetch', handleSaveChanges)
+        eventTarget.addEventListener('refetch', handleSaveChanges)
 
         return () => {
-            event_target.removeEventListener('refetch', handleSaveChanges)
+            eventTarget.removeEventListener('refetch', handleSaveChanges)
         }
-    }, [props, props.event_target, refetch])
+    }, [eventTarget, refetch])
+
+    const itemsWithPinned = pinnedItem
+        ? [pinnedItem, ...items.filter((item) => item.id !== pinnedItem.id)]
+        : items
+    const pages = data
+        ? Math.ceil((pinnedItem ? data.count - 1 : data.count) / data.limit)
+        : 0
 
     return (
         <div className="flex w-96 flex-col self-stretch border-x-2 border-gray-200 bg-gray-50 2xl:w-[28rem]">
-            <div className="flex flex-col gap-3 border-b-0 p-4">
+            <div className="flex flex-col gap-3 border-b-2 p-4">
                 <div className="flex w-full items-center gap-2">
                     <input
                         type="text"
@@ -222,28 +173,26 @@ export default function PaginatedList<T extends object>(
                         id="search_query"
                         className="w-full rounded-lg border border-gray-300 px-3 py-1"
                         placeholder="Search..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        value={search.query}
+                        onChange={(e) =>
+                            setSearch({ ...search, query: e.target.value })
+                        }
                     />
-                    {props.filters.length > 0 && (
-                        <button
-                            title={
-                                filtersOpen ? 'Hide Filters' : 'Show Filters'
-                            }
-                            onClick={() => setFiltersOpen(!filtersOpen)}
-                        >
-                            {filtersOpen ? (
-                                <IoClose size={20} />
-                            ) : (
-                                <IoMdOptions size={20} />
-                            )}
-                        </button>
-                    )}
+                    <button
+                        title={filtersOpen ? 'Hide Filters' : 'Show Filters'}
+                        onClick={() => setFiltersOpen(!filtersOpen)}
+                    >
+                        {filtersOpen ? (
+                            <IoClose size={20} />
+                        ) : (
+                            <IoMdOptions size={20} />
+                        )}
+                    </button>
                 </div>
                 {filtersOpen && (
                     <>
                         <div className="flex w-full flex-wrap justify-between gap-2">
-                            {props.search_fields && (
+                            {searchFields.length && (
                                 <label
                                     htmlFor="search_field"
                                     className="flex shrink items-center gap-2"
@@ -255,13 +204,16 @@ export default function PaginatedList<T extends object>(
                                         className="rounded-lg border border-gray-300 bg-white p-1"
                                         defaultValue={'all'}
                                         onChange={(e) =>
-                                            setSearchField(e.target.value)
+                                            setSearch({
+                                                ...search,
+                                                field: e.target.value,
+                                            })
                                         }
                                     >
                                         <option value={'all'}>
                                             All (exact only)
                                         </option>
-                                        {props.search_fields.map((sf) => (
+                                        {searchFields.map((sf) => (
                                             <option
                                                 key={
                                                     typeof sf === 'string'
@@ -291,8 +243,13 @@ export default function PaginatedList<T extends object>(
                                     name="limit"
                                     id="limit"
                                     className="rounded-lg border border-gray-300 bg-white p-1"
-                                    defaultValue={limit}
-                                    onChange={(e) => setLimit(+e.target.value)}
+                                    defaultValue={search.limit}
+                                    onChange={(e) =>
+                                        setSearch({
+                                            ...search,
+                                            limit: +e.target.value,
+                                        })
+                                    }
                                 >
                                     <option value={5}>5</option>
                                     <option value={10}>10</option>
@@ -302,7 +259,7 @@ export default function PaginatedList<T extends object>(
                                 </select>
                             </label>
                         </div>
-                        {data && searchField !== 'all' ? (
+                        {data ? (
                             <label
                                 htmlFor="Sort"
                                 className="flex items-center gap-2"
@@ -312,40 +269,52 @@ export default function PaginatedList<T extends object>(
                                     name="sort"
                                     id="sort"
                                     className="rounded-lg border border-gray-300 bg-white p-1"
-                                    value={sortOrder}
+                                    value={search.sort}
                                     onChange={(e) => {
-                                        setSortOrder(e.target.value)
+                                        setSearch({
+                                            ...search,
+                                            sort: e.target.value,
+                                        })
                                     }}
                                 >
                                     <option value={''}>...</option>
-                                    <option value={'A-Z'}>A-Z</option>
-                                    <option value={'Z-A'}>Z-A</option>
+                                    <option value={'asc'}>A-Z</option>
+                                    <option value={'desc'}>Z-A</option>
                                 </select>
                             </label>
                         ) : (
                             <div className="d-none"></div>
                         )}
-                        {props.filters?.map((f) => (
+                        {filters?.map((f) => (
                             <div key={f.name} className="flex flex-wrap gap-2">
                                 <strong className="font-medium">
                                     {f.name}:
                                 </strong>
                                 <MultiSelect
-                                    {...f}
-                                    active={searchFilters[f.query_key] ?? []}
+                                    name={f.name}
+                                    displayKey={f.display_key}
+                                    valueKey={f.value_key}
+                                    options={f.options}
+                                    active={search.filters[f.query_key] ?? []}
                                     addActive={(value) => {
-                                        searchFilters[f.query_key] = [
-                                            ...(searchFilters[f.query_key] ??
+                                        search.filters[f.query_key] = [
+                                            ...(search.filters[f.query_key] ??
                                                 []),
                                             value,
                                         ]
-                                        setSearchFilters({ ...searchFilters })
+                                        setSearch({
+                                            ...search,
+                                            filters: { ...search.filters },
+                                        })
                                     }}
                                     removeActive={(value) => {
-                                        searchFilters[f.query_key] = (
-                                            searchFilters[f.query_key] ?? []
+                                        search.filters[f.query_key] = (
+                                            search.filters[f.query_key] ?? []
                                         ).filter((v) => v !== value)
-                                        setSearchFilters({ ...searchFilters })
+                                        setSearch({
+                                            ...search,
+                                            filters: { ...search.filters },
+                                        })
                                     }}
                                     menuOpen={activeFilterMenu == f.query_key}
                                     setMenuOpen={(open) =>
@@ -360,132 +329,41 @@ export default function PaginatedList<T extends object>(
                 )}
             </div>
 
-            <div className="flex flex-col gap-3 border-b-2 border-gray-300">
-                <div className="overflow-y-auto">
-                    {user?.data ? (
-                        <>
-                            <div
-                                className={classNames(
-                                    'flex cursor-pointer items-center gap-5 bg-gray-200 p-4',
-                                    {
-                                        'bg-gray-300 hover:bg-gray-400':
-                                            selected_id ===
-                                            user?.data[props.id_key as string],
-                                        'hover:bg-gray-300':
-                                            selected_id !==
-                                            user?.data[props.id_key as string],
-                                    }
-                                )}
-                                onClick={() =>
-                                    handleListItemClick(
-                                        user?.data?.[
-                                            props.id_key as string
-                                        ] as string
-                                    )
-                                }
-                            >
-                                {props.image && (
-                                    <ImageWithFallback
-                                        src={
-                                            user?.data[
-                                                props.image.key as string
-                                            ] as string
-                                        }
-                                        alt={props.image.alt}
-                                    />
-                                )}
-
-                                <div className="flex flex-col">
-                                    <span className="font-medium text-black">
-                                        {typeof props.display_key === 'function'
-                                            ? props.display_key(user?.data as T)
-                                            : (user?.data[
-                                                  props.display_key as string
-                                              ] as string)}
-                                    </span>
-                                    {props.alternate_display_key && (
-                                        <span className="text-gray-500">
-                                            {typeof props.alternate_display_key ===
-                                            'function'
-                                                ? props.alternate_display_key(
-                                                      user?.data as T
-                                                  )
-                                                : (user?.data[
-                                                      props.alternate_display_key as string
-                                                  ] as string)}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </>
-                    ) : null}
-                </div>
-            </div>
-
-            {sortedList && sortedList.count > 0 ? (
-                <ul className="overflow-y-auto">
-                    {filteredSortedList.map((e) => (
-                        <li
-                            key={e[props.id_key] as string}
-                            className={classNames(
-                                'flex cursor-pointer items-center gap-5 p-4',
-                                {
-                                    'bg-gray-200 hover:bg-gray-300':
-                                        selected_id === e[props.id_key],
-                                    'hover:bg-gray-200':
-                                        selected_id !== e[props.id_key],
-                                }
-                            )}
+            <ul className="overflow-y-auto">
+                {isSuccess && items.length > 0 ? (
+                    itemsWithPinned.map((item) => (
+                        <ListElement
+                            key={item.id}
+                            selected={item.id === selectedItem?.id}
+                            pinned={item.id === pinnedItem?.id}
                             onClick={() =>
-                                handleListItemClick(e[props.id_key] as string)
+                                item.id !== selectedItem?.id &&
+                                onSelectItem(item)
                             }
                         >
-                            {props.image && (
-                                <ImageWithFallback
-                                    src={e[props.image.key] as string}
-                                    alt={props.image.alt}
-                                />
-                            )}
-
-                            <div className="flex flex-col">
-                                <span className="font-medium text-black">
-                                    {typeof props.display_key === 'function'
-                                        ? props.display_key(e)
-                                        : (e[props.display_key] as string)}
-                                </span>
-                                {props.alternate_display_key && (
-                                    <span className="text-gray-500">
-                                        {typeof props.alternate_display_key ===
-                                        'function'
-                                            ? props.alternate_display_key(e)
-                                            : (e[
-                                                  props.alternate_display_key
-                                              ] as string)}
-                                    </span>
-                                )}
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <div className="flex flex-1 items-center justify-center">
-                    {isPending && (
-                        <span className="text-gray-400">Loading...</span>
-                    )}
-                    {error && (
-                        <span className="text-red-500">
-                            Error: {error.message}
-                        </span>
-                    )}
-                    {data?.count === 0 && <>No results found</>}
-                </div>
-            )}
+                            {renderItem(item)}
+                        </ListElement>
+                    ))
+                ) : (
+                    <div className="flex flex-1 items-center justify-center">
+                        {isPending ? (
+                            <span className="text-gray-400">Loading...</span>
+                        ) : error ? (
+                            <span className="text-red-500">
+                                Error: {error.message}
+                            </span>
+                        ) : (
+                            <span>No results found</span>
+                        )}
+                    </div>
+                )}
+            </ul>
 
             <div className="mt-auto flex gap-4 border-t-2">
                 <Pagination
-                    page={page + 1}
-                    maxPage={pages}
-                    onPageChange={(page) => setPage(page - 1)}
+                    page={search?.page ?? 0}
+                    pages={pages}
+                    onPageChange={(page) => setSearch({ ...search, page })}
                     enabled={!isPending}
                     total={data?.count ?? 0}
                 />
@@ -494,103 +372,138 @@ export default function PaginatedList<T extends object>(
     )
 }
 
-function filterOutUser(sortedList, user) {
-    if (sortedList.data && user) {
-        const filteredSortedList = sortedList?.data.filter(
-            (usr) => usr.discordId !== user?.data.discordId
-        )
-        return filteredSortedList
-    }
-    return sortedList
+export interface ListElementProps {
+    selected: boolean
+    pinned?: boolean
+    children: React.ReactNode
+    onClick: () => void
 }
 
-const Pagination: FC<{
+export function ListElement({
+    selected,
+    pinned,
+    children,
+    onClick,
+}: ListElementProps) {
+    return (
+        <li
+            className={classNames(
+                'flex cursor-pointer items-center gap-5 p-4',
+                {
+                    'border-b-2 bg-gray-200 border-gray-300': pinned,
+                    'border-b': !pinned,
+                    'bg-gray-300 hover:bg-gray-400': pinned && selected,
+                    'hover:bg-gray-300': pinned && !selected,
+                    'bg-gray-200 hover:bg-gray-300': !pinned && selected,
+                    'hover:bg-gray-200': !pinned && !selected,
+                }
+            )}
+            onClick={onClick}
+        >
+            {children}
+        </li>
+    )
+}
+
+interface PaginationProps {
     page: number
-    onPageChange: (page: number) => void
-    maxPage: number
+    pages: number
     enabled: boolean
     total: number
-}> = ({ page, onPageChange, maxPage, enabled, total }) => {
-    const can_change = maxPage > 1
+    onPageChange: (page: number) => void
+}
 
-    const [value, setValue] = useState(page.toString())
+function Pagination({
+    page,
+    pages,
+    enabled,
+    total,
+    onPageChange,
+}: PaginationProps) {
+    const [value, setValue] = useState('')
+
+    const canChange = pages > 1
+
+    const handleChangeValue = (value: string) => {
+        if (!value || (/^\d+$/.test(value) && value.length < 10))
+            setValue(value)
+    }
+
+    const handleSubmit = () => {
+        const newPage = +value - 1 || page
+        if (0 < newPage && newPage < pages) onPageChange(newPage)
+        else setValue((page + 1).toString())
+    }
 
     useEffect(() => {
-        setValue(page.toString())
+        setValue((page + 1).toString())
     }, [page])
 
     return (
         <div className="flex w-full items-center justify-between">
             <div className="mx-auto flex items-center justify-center gap-1 p-4">
                 <PaginationArrow
-                    onClick={() => onPageChange(1)}
+                    onClick={() => onPageChange(0)}
                     icon={FiChevronsLeft}
                     title="First"
-                    enabled={can_change && page > 1}
+                    enabled={canChange && page > 0}
                 />
                 <PaginationArrow
                     onClick={() => onPageChange(page - 1)}
                     icon={FiChevronLeft}
                     title="Previous"
-                    enabled={can_change && page > 1}
+                    enabled={canChange && page > 0}
                 />
                 <form
                     className="flex items-center gap-2 px-2"
                     onSubmit={(e) => {
                         e.preventDefault()
-
-                        const p = +value || page
-                        setValue(p.toString())
-                        onPageChange(p)
+                        handleSubmit()
                     }}
                 >
                     <input
                         type="text"
                         value={value}
-                        onChange={(e) => {
-                            if (
-                                e.target.value.length === 0 ||
-                                (/^\d+$/.test(e.target.value) &&
-                                    e.target.value.length < 10)
-                            ) {
-                                setValue(e.target.value)
-                            }
-                        }}
-                        onBlur={() => {
-                            if (value.length === 0) setValue(page.toString())
-                        }}
+                        onChange={(e) => handleChangeValue(e.target.value)}
+                        onBlur={handleSubmit}
                         disabled={!enabled}
                         className="w-[6ch] max-w-min rounded-lg border border-gray-300 px-2 py-0.5 text-center"
                     />
                     <input type="submit" className="hidden" />
                     <span className="text-gray-600">
-                        of{' '}
-                        <span title={`${total} total results`}>{maxPage}</span>
+                        of <span title={`${total} total results`}>{pages}</span>
                     </span>
                 </form>
                 <PaginationArrow
                     onClick={() => onPageChange(page + 1)}
                     icon={FiChevronRight}
                     title="Next"
-                    enabled={can_change && page < maxPage}
+                    enabled={canChange && page < pages - 1}
                 />
                 <PaginationArrow
-                    onClick={() => onPageChange(maxPage)}
+                    onClick={() => onPageChange(pages - 1)}
                     icon={FiChevronsRight}
                     title="Last"
-                    enabled={can_change && page < maxPage}
+                    enabled={canChange && page < pages - 1}
                 />
             </div>
         </div>
     )
 }
 
-const PaginationArrow: FC<{
+interface PaginationArrowProps {
     onClick: () => void
     icon: IconType
     title: string
     enabled: boolean
-}> = ({ onClick, icon: Icon, title, enabled }) => {
+}
+
+function PaginationArrow({
+    onClick,
+    icon: Icon,
+    title,
+    enabled,
+}: PaginationArrowProps) {
     return (
         <a
             className={classNames(
@@ -606,24 +519,5 @@ const PaginationArrow: FC<{
         >
             <Icon size={20} />
         </a>
-    )
-}
-
-const ImageWithFallback: FC<{ src: string; alt: string }> = ({ src, alt }) => {
-    const [hasErrored, setHasErrored] = useState(false)
-
-    return (
-        <Image
-            src={
-                hasErrored
-                    ? 'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
-                    : src
-            }
-            alt={alt}
-            width={48}
-            height={48}
-            className="aspect-square max-h-[48px] rounded-full"
-            onError={() => setHasErrored(true)}
-        />
     )
 }
