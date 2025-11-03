@@ -1,8 +1,9 @@
 import { Handle, Node, NodeProps, Position } from '@xyflow/react'
-import PositionBubble, { PositionData } from '../bubbles/positionBubble'
+import PositionData from '../types/positionData'
+import PositionBubble from '../bubbles/positionBubble'
 
 type PositionNodeData = Node<{
-    id: string
+    id: number
     title?: string
     name?: string
     acting?: boolean
@@ -19,6 +20,7 @@ export default function PositionNode({ data }: NodeProps<PositionNodeData>) {
         redacted: data.redacted,
         leadership: data.leadership,
     }
+
     return (
         <div key={data.id} className="flex flex-col items-center">
             <Handle

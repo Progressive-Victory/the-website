@@ -12,7 +12,7 @@ export default function OrgChart() {
                     Organization{' '}
                     <span className="text-black-pearl-dark">Chart</span>
                 </p>
-                <div className="h-[84vh] w-[96vw] overflow-auto rounded-lg bg-black-pearl-dark p-2">
+                <div className="h-[75vh] w-[97vw] overflow-auto rounded-lg bg-black-pearl-dark p-2">
                     <OrgChartApp />
                 </div>
             </div>

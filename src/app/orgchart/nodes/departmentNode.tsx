@@ -1,8 +1,9 @@
 import { Handle, Node, NodeProps, Position, useStore } from '@xyflow/react'
 import DepartmentBubble from '../bubbles/departmentBubble'
-import PositionBubble, { PositionData } from '../bubbles/positionBubble'
+import PositionData from '../types/positionData'
+import PositionBubble from '../bubbles/positionBubble'
 
-type DepartmentNodeData = Node<{
+export type DepartmentNodeData = Node<{
     id: number
     name: string
     leads?: PositionData[]
@@ -14,9 +15,9 @@ const zoomSelector = (s: { transform: number[] }) => s.transform[2] >= 1.2
 export default function DepartmentNode({
     data,
 }: NodeProps<DepartmentNodeData>) {
-    const showContent = useStore(zoomSelector)
+    const extraContent = useStore(zoomSelector)
 
-    function DepartmentLeads() {
+    const DepartmentLeads = () => {
         return data.leads?.map(RenderLead)
         function RenderLead(lead: PositionData) {
             return <PositionBubble key={lead.id} data={lead} />
@@ -31,7 +32,7 @@ export default function DepartmentNode({
                 className="border-amber-300 bg-amber-50 opacity-0"
             />
             <DepartmentBubble name={data.name}></DepartmentBubble>
-            {showContent ? <DepartmentLeads /> : null}
+            {extraContent ? <DepartmentLeads /> : null}
             <Handle
                 type="source"
                 position={Position.Bottom}

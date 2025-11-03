@@ -1,14 +1,14 @@
-export interface PositionData {
-    id: string
-    title?: string
-    name?: string
-    acting?: boolean
-    redacted?: boolean
-    leadership?: string
-}
+import PositionData from '../types/positionData'
+import Image from 'next/image'
 
-export default function PositionBubble({ data }: { data: PositionData }) {
-    function LeadershipBanner() {
+export default function PositionBubble({
+    data,
+    mini,
+}: {
+    data: PositionData
+    mini?: boolean
+}) {
+    const LeadershipBanner = () => {
         switch (data.leadership) {
             case 'Junior':
                 return (
@@ -27,18 +27,24 @@ export default function PositionBubble({ data }: { data: PositionData }) {
         }
     }
 
-    function Nameplate() {
+    const Nameplate = () => {
         if (data.redacted) {
             return (
-                <p className={`text-base text-red-600`}>CANDIDATE REDACTED</p>
+                <p className={`${mini ? 'text-sm' : 'text-base'} text-red-600`}>
+                    CANDIDATE REDACTED
+                </p>
             )
         }
         if (data.name == null) {
-            return <p className={`text-base text-red-600`}>UNFILLED</p>
+            return (
+                <p className={`${mini ? 'text-sm' : 'text-base'} text-red-600`}>
+                    UNFILLED
+                </p>
+            )
         }
         if (data.acting) {
             return (
-                <p className={`text-base text-white`}>
+                <p className={`${mini ? 'text-sm' : 'text-base'} text-white`}>
                     {data.name.toUpperCase()}
                     <span className="text-red-600">
                         {' ('}ACTING{')'}
@@ -47,22 +53,52 @@ export default function PositionBubble({ data }: { data: PositionData }) {
             )
         }
         return (
-            <p className={`text-base text-white`}>{data.name.toUpperCase()}</p>
+            <p className={`${mini ? 'text-sm' : 'text-base'} text-white`}>
+                {data.name.toUpperCase()}
+            </p>
+        )
+    }
+
+    const Committees = () => {
+        return (
+            <div
+                className={`col-span-2 grid ${'grid-rows-' + data.committees?.length.toString()}`}
+            >
+                {data.committees?.map((committee) => {
+                    return (
+                        <div
+                            key={committee.name}
+                            className={`flex ${mini ? 'h-[17px]' : 'h-[30px]'} justify-center`}
+                        >
+                            <Image
+                                src={committee.icon}
+                                alt={committee.alt}
+                                width={mini ? 17 : 30}
+                                height={mini ? 17 : 30}
+                            />
+                        </div>
+                    )
+                })}
+            </div>
         )
     }
 
     return (
-        <div className="grid w-[360px] grid-cols-12 overflow-hidden rounded-2xl border-2 border-amber-300 bg-black-pearl-dark font-bold">
+        <div
+            className={`grid ${mini ? 'w-[290px]' : 'w-[360px]'} grid-cols-12 overflow-hidden rounded-2xl border-2 border-amber-300 bg-black-pearl-dark font-bold`}
+        >
             <LeadershipBanner />
             <div className="col-span-9 p-2">
-                <p className="text-sm italic text-amber-300">
+                <p
+                    className={`${mini ? 'text-xs' : 'text-sm'} italic text-amber-300`}
+                >
                     {data.title != null
                         ? data.title?.toUpperCase()
                         : 'VOLUNTEER'}
                 </p>
                 <Nameplate />
             </div>
-            <div className="col-span-2"></div>
+            <Committees />
         </div>
     )
 }
