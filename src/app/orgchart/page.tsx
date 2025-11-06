@@ -3,9 +3,8 @@
 import { MainLayout } from '@/components/layout'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import DepartmentBubble from './department'
-import PositionBubble from './position'
-import TeamBubble from './team'
+import OrgChartApp from './app'
+
 
 export interface PaginatedResponse<T> {
     //This is just a test.
@@ -128,180 +127,49 @@ export default function OrgChart<T extends object>() {
     return (
         <MainLayout>
             {/* Halftone background */}
-            {filteredData && filteredData.length > 0 ? (
-                <div className="z-2 relative m-auto flex min-h-screen w-full flex-col items-center justify-start gap-y-10 pb-16 pt-10 xl:min-h-[unset]">
-                    <p className="w-full text-center text-4xl font-bold text-white">
-                        Organization{' '}
-                        <span className="text-black-pearl-dark">Chart</span>
-                    </p>
-                    <div className="w-full overflow-auto bg-white">
-                        {filteredData?.map((e) => (
-                            <>
-                                {e?.userPositions.map((el) => (
-                                    <>
-                                        <PositionBubble
-                                            key={e?._id}
-                                            title={el?.positionName}
-                                            name={e?.name}
-                                            leadership="Senior"
-                                        />
-                                    </>
-                                ))}
-                            </>
-                        ))}
-
-                        <div className="flex">
-                            <div>
-                                <DepartmentBubble name="Community" />
-                                {
-                                    //Map through team directors
-                                }
-                                <div className="flex">
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                </div>
-                            </div>
-                            <div>
-                                <DepartmentBubble name="Media" />
-                                {
-                                    //Map through team directors
-                                }
-                                <div className="flex">
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                </div>
-                            </div>
-                            <div>
-                                <DepartmentBubble name="Operations" />
-                                {
-                                    //Map through team directors
-                                }
-                                <div className="flex">
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                </div>
-                            </div>
-                            <div>
-                                <DepartmentBubble name="Infrastructure" />
-                                {
-                                    //Map through team directors
-                                }
-                                <div className="flex">
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                </div>
-                            </div>
-                            <div>
-                                <DepartmentBubble name="Organizing" />
-                                {
-                                    //Map through team directors
-                                }
-                                <div className="flex">
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                </div>
-                            </div>
-                            <div>
-                                <DepartmentBubble name="Technology" />
-                                {
-                                    //Map through team directors
-                                }
-                                <div className="flex">
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                    <TeamBubble name="" />
-                                    {
-                                        //Map through team members
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {/*
-                    <p className="w-full text-center text-4xl font-bold text-white">
-                        Organization{' '}
-                        <span className="text-black-pearl-dark">Chart</span>
-                    </p>
-                    <div className="w-full overflow-auto bg-white">
-                        <DepartmentBubble name="Engineering" />
-                        <PositionBubble
-                            title="Deputy Tech Director"
-                            name="Joops"
-                            leadership="Senior"
-                        />
-                        <PositionBubble
-                            title="Website Eng. Team Lead"
-                            committees={['Engineering Committee']}
-                        />
-                        <TeamBubble
-                            name="Welcome Team"
-                            description="Welcome team guarantees that all new members of 
+            {
+                /*
+            <div className="halftone z-1 absolute inset-0 size-full opacity-10" />
+            <div className="z-2 relative m-auto flex min-h-screen w-full flex-col items-center justify-start gap-y-10 pb-16 pt-10 xl:min-h-[unset]">
+                <p className="w-full text-center text-4xl font-bold text-white">
+                    Organization{' '}
+                    <span className="text-black-pearl-dark">Chart</span>
+                </p>
+                <div className="w-full overflow-auto bg-white">
+                    <DepartmentBubble name="Engineering" />
+                    <PositionBubble
+                        title="Deputy Tech Director"
+                        name="Joops"
+                        leadership="Senior"
+                    />
+                    <PositionBubble
+                        title="Website Eng. Team Lead"
+                        committees={['Engineering Committee']}
+                    />
+                    <TeamBubble
+                        name="Welcome Team"
+                        description="Welcome team guarantees that all new members of 
 						PV recieve a friendly face to guide them through the process 
 						of joining the org. They help inform new members of how to 
 						get started in the org and direct them to areas of interest 
 						such as upcoming events, state teams, department teams, and 
 						more."
-                        />
-                    </div>
-                */}
+                    />
                 </div>
-            ) : null}
+            </div>
+            */
+        }
+
+            <div className="halftone z-1 absolute inset-0 size-full opacity-10" />
+            <div className="z-2 relative m-auto flex min-h-screen w-full flex-col items-center justify-start gap-y-10 pb-16 pt-10 xl:min-h-[unset]">
+                <p className="w-full text-center text-4xl font-bold text-white">
+                    Organization{' '}
+                    <span className="text-black-pearl-dark">Chart</span>
+                </p>
+                <div className="h-[84vh] w-[96vw] overflow-auto rounded-lg bg-black-pearl-dark p-2">
+                    <OrgChartApp />
+                </div>
+            </div>
         </MainLayout>
     )
 }
