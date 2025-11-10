@@ -1,4 +1,5 @@
-import React, { useCallback, useState } from 'react'
+/* Next task: refine and implement legend panel */
+import React, { useState, useCallback } from 'react'
 import {
     type Node,
     type Edge,
@@ -19,7 +20,8 @@ import TeamNode, { TeamNodeData } from './nodes/teamNode'
 import OrgChartEdge from './orgchartEdge'
 import '../../../tailwind.config'
 import Committee from './types/committee'
-import DetailPanel from './detailPanel'
+import PositionData from './types/positionData'
+import PositionBubble from './bubbles/positionBubble'
 
 /* A number of committees can be defined up to the number of icons. */
 export const Committees: Committee[] = [
@@ -55,13 +57,13 @@ export const Committees: Committee[] = [
 
 const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
 
-const nWidth = 360
+const nWidth = 500
 const nHeight = 300
 const defaultPos: XYPosition = { x: 0, y: 0 }
 
-const GetElements = (nodes: Node[], edges: Edge[], direction = 'ver') => {
-    const isHorizontal = direction === 'hor'
-    dagreGraph.setGraph({ rankdir: direction, ranksep: 0 })
+const GetElements = (nodes: Node[], edges: Edge[], direction = 'LR') => {
+    const isHorizontal = direction === 'LR'
+    dagreGraph.setGraph({ rankdir: direction, ranksep: 0, nodesep: 25 })
     nodes.forEach((node) => {
         dagreGraph.setNode(node.id, { width: nWidth, height: nHeight })
     })
@@ -85,239 +87,192 @@ const GetElements = (nodes: Node[], edges: Edge[], direction = 'ver') => {
     return { nodes: newNodes, edges }
 }
 
+function CreatePositionNode({
+    id,
+    title,
+    name,
+    acting,
+    redacted,
+    leadership,
+}: {
+    id: number
+    title: string
+    name?: string
+    acting?: boolean
+    redacted?: boolean
+    leadership?: string
+}) {
+    return {
+        id: id.toString(),
+        type: 'pos',
+        position: defaultPos,
+        data: {
+            id: id,
+            title: title,
+            name: name,
+            acting: acting,
+            redacted: redacted,
+            leadership: leadership,
+        },
+    }
+}
+
+function CreateDepartmentNode({
+    id,
+    name,
+    leads,
+    members,
+}: {
+    id: number
+    name: string
+    leads?: PositionData[]
+    members?: PositionData[]
+}) {
+    return {
+        id: id.toString(),
+        type: 'dep',
+        position: defaultPos,
+        data: {
+            id: id,
+            name: name,
+            leads: leads,
+            members: members,
+        },
+    }
+}
+
+function CreateTeamNode({
+    id,
+    name,
+    desc,
+    leads,
+    members,
+}: {
+    id: number
+    name: string
+    desc?: string
+    leads?: PositionData[]
+    members?: PositionData[]
+}) {
+    return {
+        id: id.toString(),
+        type: 'tea',
+        position: defaultPos,
+        data: {
+            id: id,
+            name: name,
+            desc: desc,
+            leads: leads,
+            members: members,
+        },
+    }
+}
+
+function CreateEdge(id: string, source: number, target: number) {
+    return {
+        id: id,
+        source: source.toString(),
+        target: target.toString(),
+        type: 'custom-edge',
+    }
+}
+
 /* Changes to this do not hot refresh on save; must use F5*/
 const initialNodes: Node[] = [
-    {
-        id: 'exec',
-        type: 'pos',
-        data: {
-            id: 0,
-            title: 'Executive Director',
-            name: 'Sam Dryzmala',
-            leadership: 'Senior',
-        },
-        position: defaultPos,
-    },
-    {
-        id: 'depExec',
-        type: 'pos',
-        data: {
-            id: 1,
-            title: 'Deputy Executive Director',
-            name: 'Benjamin Gilbert-Lif',
-            leadership: 'Senior',
-        },
-        position: defaultPos,
-    },
-    {
-        id: 'community',
-        type: 'dep',
-        position: defaultPos,
-        data: {
-            id: 2,
-            name: 'Community Department',
-            leads: [
-                {
-                    id: 3,
-                    title: 'Community Relations Director',
-                    name: 'Auntifa',
-                    leadership: 'Senior',
-                },
-                {
-                    id: 4,
-                    title: 'Community Mananger',
-                    name: 'Jenywlfersn',
-                    leadership: 'Junior',
-                    committees: [Committees[0], Committees[1]],
-                },
-                {
-                    id: 5,
-                    title: 'Community Manager',
-                    leadership: 'Junior',
-                    committees: [Committees[0], Committees[1]],
-                },
-            ],
-        },
-    },
-    {
-        id: 'welcome',
-        type: 'tea',
-        position: defaultPos,
-        data: {
-            id: 6,
-            name: 'Welcome Team',
-            desc: "Welcome team gurantees... I'm not gonna copy all of that.",
-            leads: [
-                {
-                    id: 7,
-                    title: 'Welcome Team Lead',
-                    name: 'Monarch',
-                    leadership: 'Junior',
-                    committees: [Committees[0]],
-                },
-                {
-                    id: 8,
-                    title: 'Welcome Team Lead',
-                    leadership: 'Junior',
-                    committees: [Committees[0]],
-                },
-                {
-                    id: 9,
-                    title: 'Welcome Team Deputy',
-                },
-            ],
-        },
-    },
-    {
-        id: 'writing',
-        type: 'tea',
-        position: defaultPos,
-        data: {
-            id: 10,
-            name: 'Writing Team',
-            desc: 'The writing team...',
-            leads: [
-                {
-                    id: 11,
-                    title: 'Writing Team Lead',
-                    name: 'Dynas',
-                    leadership: 'Junior',
-                    committees: [Committees[0], Committees[1]],
-                },
-                {
-                    id: 12,
-                    title: 'Writing Team Lead',
-                    name: 'AJ',
-                    leadership: 'Junior',
-                    committees: [Committees[0], Committees[1]],
-                },
-                {
-                    id: 13,
-                    title: 'Writing Team Deputy',
-                    name: 'Jam',
-                },
-            ],
-        },
-    },
-    {
-        id: 'this week',
-        type: 'tea',
-        position: defaultPos,
-        data: {
-            id: 14,
-            name: 'This Week at PV Strike Team',
-            desc: 'Manages the weekly publication of the This Week at Progressive Victory newsletter.',
-        },
-    },
-    {
-        id: 'media',
-        type: 'dep',
-        position: defaultPos,
-        data: {
-            id: 15,
-            name: 'Media Department',
-            leads: [
-                {
-                    id: 16,
-                    title: 'Media Director',
-                    name: 'Aussy',
-                    leadership: 'Senior',
-                },
-                {
-                    id: 17,
-                    title: 'Deputy Media Director',
-                    name: 'Leeloo',
-                    leadership: 'Senior',
-                },
-                {
-                    id: 18,
-                    title: 'Deputy Media Director',
-                    leadership: 'Senior',
-                },
-            ],
-        },
-    },
-    {
-        id: 'AV',
-        type: 'tea',
-        position: defaultPos,
-        data: {
-            id: 19,
-            name: 'Audio-Video Team',
-            desc: 'The Audio-Video team...',
-            leads: [
-                {
-                    id: 20,
-                    title: 'Audio-Video Team Lead',
-                    name: 'Vezanmatics',
-                    leadership: 'Junior',
-                    committees: [Committees[1]],
-                },
-                {
-                    id: 21,
-                    title: 'Audio-Video Team Lead',
-                    leadership: 'Junior',
-                    committees: [Committees[1]],
-                },
-                {
-                    id: 22,
-                    title: 'Audio-Video Team Deputy',
-                },
-            ],
-        },
-    },
+    CreatePositionNode({
+        id: 0,
+        title: 'Executive Director',
+        name: 'Sam Dryzmala',
+        leadership: 'Senior',
+    }),
+    CreatePositionNode({
+        id: 1,
+        title: 'Deputy Executive Director',
+        name: 'Benjamin Gilbert-Lif',
+        leadership: 'Senior',
+    }),
+    CreateDepartmentNode({
+        id: 2,
+        name: 'Community Department',
+        leads: [
+            {
+                id: 3,
+                title: 'Community Relations Director',
+                name: 'Auntifa',
+                leadership: 'Senior',
+            },
+            {
+                id: 4,
+                title: 'Community Mananger',
+                name: 'Jenywlfersn',
+                leadership: 'Junior',
+                committees: [Committees[0], Committees[1]],
+            },
+            {
+                id: 5,
+                title: 'Community Manager',
+                leadership: 'Junior',
+                committees: [Committees[0], Committees[1]],
+            },
+        ],
+    }),
+    CreateTeamNode({
+        id: 6,
+        name: 'Welcome Team',
+        desc: "Welcome team gurantees... I'm not gonna copy all of that.",
+        leads: [
+            {
+                id: 7,
+                title: 'Welcome Team Lead',
+                name: 'Monarch',
+                leadership: 'Junior',
+                committees: [Committees[0]],
+            },
+            {
+                id: 8,
+                title: 'Welcome Team Lead',
+                leadership: 'Junior',
+                committees: [Committees[0]],
+            },
+            {
+                id: 9,
+                title: 'Welcome Team Deputy',
+            },
+        ],
+    }),
+    CreateTeamNode({
+        id: 10,
+        name: 'Events Team',
+        desc: "The Events Team... I'm also not gonna copy all of that.",
+        leads: [
+            {
+                id: 11,
+                title: 'Events Team Lead',
+                name: 'BrewMasterCraft',
+                leadership: 'Junior',
+                committees: [Committees[0]],
+            },
+            {
+                id: 12,
+                title: 'Events Team Lead',
+                leadership: 'Junior',
+                committees: [Committees[0]],
+            },
+            {
+                id: 13,
+                title: 'Events Team Deputy',
+                name: 'EM',
+            },
+        ],
+    }),
 ]
 
 /* Changes to this do not hot refresh on save; must use F5*/
 const initialEdges: Edge[] = [
-    {
-        id: 'e1',
-        source: 'exec',
-        target: 'depExec',
-        type: 'custom-edge',
-    },
-    {
-        id: 'e2',
-        source: 'depExec',
-        target: 'community',
-        type: 'custom-edge',
-    },
-    {
-        id: 'e3',
-        source: 'depExec',
-        target: 'media',
-        type: 'custom-edge',
-    },
-    {
-        id: 'e4',
-        source: 'community',
-        target: 'welcome',
-        type: 'custom-edge',
-    },
-    {
-        id: 'e5',
-        source: 'community',
-        target: 'writing',
-        type: 'custom-edge',
-    },
-    {
-        id: 'e6',
-        source: 'writing',
-        target: 'this week',
-        type: 'custom-edge',
-    },
-    {
-        id: 'e7',
-        source: 'media',
-        target: 'AV',
-        type: 'custom-edge',
-    },
-    {
-        id: 'e8',
-        source: 'media',
-        target: 'writing',
-        type: 'custom-edge',
-    },
+    CreateEdge('e0', 0, 1),
+    CreateEdge('e1', 1, 2),
+    CreateEdge('e2', 2, 6),
+    CreateEdge('e3', 2, 10),
 ]
 
 const nodeTypes = {
@@ -336,9 +291,70 @@ const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
 )
 
 export default function OrgChartApp() {
-    const [detailPanel, setDetailPanel] = useState(<DetailPanel />)
+    const DetailPanel = ({
+        name,
+        desc,
+        leads,
+        members,
+    }: {
+        name?: string
+        desc?: string
+        leads?: PositionData[]
+        members?: PositionData[]
+    }) => {
+        const MemberList = () => {
+            if (leads && members) {
+                return leads.concat(members).map(CreateMini)
+            } else if (leads) {
+                return leads.map(CreateMini)
+            } else if (members) {
+                return members.map(CreateMini)
+            } else return null
+            function CreateMini(position: PositionData) {
+                return (
+                    <PositionBubble
+                        key={position.id}
+                        data={position}
+                        mini={true}
+                    />
+                )
+            }
+        }
+
+        return (
+            <Panel
+                className={`${name ? null : 'hidden'} h-[96%] w-[320px] rounded-3xl border-4 border-amber-300 bg-amber-50 p-2 font-extrabold`}
+                position="center-right"
+            >
+                <button
+                    className="mb-1 rounded-xl bg-black-pearl-dark p-1 px-2 text-xl font-bold text-white"
+                    onClick={() => setCurrentDetails(<DetailPanel />)}
+                >
+                    {'< Close'}
+                </button>
+                <p className="border-t-4 border-red-600 text-xl text-black-pearl-dark">
+                    {name}
+                </p>
+                {!desc ? null : (
+                    <div className="max-h-[30%] overflow-y-auto border-t-4 border-red-600">
+                        <p className="py-1 text-sm font-semibold text-black-pearl-dark">
+                            {desc}
+                        </p>
+                    </div>
+                )}
+                {!leads && !members ? null : (
+                    <div className="flex flex-col items-center overflow-auto border-t-4 border-red-600 py-1">
+                        <MemberList />
+                    </div>
+                )}
+            </Panel>
+        )
+    }
+
+    const [currentDetails, setCurrentDetails] = useState(<DetailPanel />)
     const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges)
+    const [horizontal, setHorizontal] = useState(false)
 
     const updateLayout = useCallback(
         (direction: string | undefined) => {
@@ -353,11 +369,33 @@ export default function OrgChartApp() {
         [nodes, edges, setNodes, setEdges]
     )
 
-    // Not using the event anyway
+    const viewportRef = useCallback(
+        (viewport: HTMLDivElement) => {
+            if (!viewport) return
+            const observer = new ResizeObserver(() => {
+                if (
+                    viewport.offsetWidth > viewport.offsetHeight &&
+                    !horizontal
+                ) {
+                    updateLayout('LR')
+                    setHorizontal(true)
+                } else if (
+                    viewport.offsetWidth <= viewport.offsetHeight &&
+                    horizontal
+                ) {
+                    updateLayout('TB')
+                    setHorizontal(false)
+                }
+            })
+            observer.observe(viewport)
+        },
+        [updateLayout, horizontal]
+    )
+
     const handleNodeClick = (event: React.MouseEvent, node: Node) => {
         if (node.type == 'dep') {
             const typedNode = node as DepartmentNodeData
-            setDetailPanel(
+            setCurrentDetails(
                 <DetailPanel
                     name={typedNode.data.name}
                     leads={typedNode.data.leads}
@@ -366,7 +404,7 @@ export default function OrgChartApp() {
             )
         } else if (node.type == 'tea') {
             const typedNode = node as TeamNodeData
-            setDetailPanel(
+            setCurrentDetails(
                 <DetailPanel
                     name={typedNode.data.name}
                     desc={typedNode.data.desc}
@@ -374,11 +412,11 @@ export default function OrgChartApp() {
                     members={typedNode.data.members}
                 />
             )
-        } else setDetailPanel(<DetailPanel />)
+        } else setCurrentDetails(<DetailPanel />)
     }
 
     return (
-        <div className="size-full bg-white">
+        <div className="size-full bg-white" ref={viewportRef}>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -389,23 +427,11 @@ export default function OrgChartApp() {
                 onNodeClick={handleNodeClick}
                 nodesDraggable={false}
                 nodesConnectable={false}
+                autoPanOnNodeFocus={true}
+                maxZoom={1.2}
+                minZoom={0.25}
             >
-                {/* A couple of buttons until we have updates based on viewport resizing*/}
-                <Panel position="top-left">
-                    <button
-                        className="m-2 rounded-lg bg-black-pearl-light p-2 font-bold text-white"
-                        onClick={() => updateLayout('hor')}
-                    >
-                        Horizontal
-                    </button>
-                    <button
-                        className="m-2 rounded-lg bg-black-pearl-light p-2 font-bold text-white"
-                        onClick={() => updateLayout('ver')}
-                    >
-                        Vertical
-                    </button>
-                </Panel>
-                {detailPanel}
+                {currentDetails}
                 <Controls />
             </ReactFlow>
         </div>
