@@ -45,7 +45,7 @@ const state_teams = ['Western', 'Midwest', 'Northeast', 'Southern']
 const senior_roles = ['Top Director']
 
 export default function OrgChart<T extends object>() {
-    const [page, setPage] = useState(0)
+    /*const [page, setPage] = useState(0)
     const [pages, setPages] = useState(1)
     const [limit, setLimit] = useState(25)
 
@@ -69,6 +69,8 @@ export default function OrgChart<T extends object>() {
     const filteredData = data?.data.filter((e) => e.userPositions.length > 0)
     console.log(filteredData)
 
+    console.log(data?.data)
+
     const topDirector = () => {
         const filteredData = data?.data.filter(
             (e) => e.userPositions.length > 0
@@ -90,7 +92,7 @@ export default function OrgChart<T extends object>() {
         }
     }
 
-    topDirector()
+    topDirector()*/
 
     /*
     const DeputyDirectors = () => {
@@ -166,7 +168,7 @@ export default function OrgChart<T extends object>() {
                     Organization{' '}
                     <span className="text-black-pearl-dark">Chart</span>
                 </p>
-                <div className="h-[84vh] w-[96vw] overflow-auto rounded-lg bg-black-pearl-dark p-2">
+                <div className="h-[75vh] w-[97vw] overflow-auto rounded-lg bg-black-pearl-dark p-2">
                     <OrgChartApp />
                 </div>
             </div>

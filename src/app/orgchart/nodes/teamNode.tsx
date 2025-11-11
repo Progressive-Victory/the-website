@@ -1,8 +1,9 @@
 import { Handle, Node, NodeProps, Position, useStore } from '@xyflow/react'
 import TeamBubble from '../bubbles/teamBubble'
-import PositionBubble, { PositionData } from '../bubbles/positionBubble'
+import PositionData from '../types/positionData'
+import PositionBubble from '../bubbles/positionBubble'
 
-type TeamNodeData = Node<{
+export type TeamNodeData = Node<{
     id: number
     name: string
     desc?: string
@@ -13,13 +14,12 @@ type TeamNodeData = Node<{
 const zoomSelector = (s: { transform: number[] }) => s.transform[2] >= 1.2
 
 export default function TeamNode({ data }: NodeProps<TeamNodeData>) {
-    const showContent = useStore(zoomSelector)
+    const extraContent = useStore(zoomSelector)
 
-    function TeamLeads() {
-        return data.leads?.map(RenderLead)
-        function RenderLead(lead: PositionData) {
+    const TeamLeads = () => {
+        return data.leads?.map((lead) => {
             return <PositionBubble key={lead.id} data={lead} />
-        }
+        })
     }
 
     return (
@@ -29,8 +29,8 @@ export default function TeamNode({ data }: NodeProps<TeamNodeData>) {
                 position={Position.Top}
                 className="border-amber-300 bg-amber-50 opacity-0"
             />
-            <TeamBubble name={data.name} desc={data.desc} />
-            {showContent ? <TeamLeads /> : null}
+            <TeamBubble name={data.name} />
+            {extraContent ? <TeamLeads /> : null}
             <Handle
                 type="source"
                 position={Position.Bottom}

@@ -1,4 +1,4 @@
-import { BaseEdge, Edge, EdgeProps, getStraightPath } from '@xyflow/react'
+import { BaseEdge, Edge, EdgeProps, getBezierPath } from '@xyflow/react'
 
 type CustomEdge = Edge<{ value: number }, 'custom'>
 
@@ -9,7 +9,7 @@ export default function OrgChartEdge({
     targetX,
     targetY,
 }: EdgeProps<CustomEdge>) {
-    const [edgePath] = getStraightPath({ sourceX, sourceY, targetX, targetY })
+    const [edgePath] = getBezierPath({ sourceX, sourceY, targetX, targetY })
     return (
         <>
             <BaseEdge

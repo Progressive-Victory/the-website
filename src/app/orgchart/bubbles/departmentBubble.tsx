@@ -4,8 +4,6 @@ export default function DepartmentBubble({ name }: { name: string }) {
             <div>
                 <p className="text-center text-xl font-extrabold text-black-pearl-dark">
                     {name.toUpperCase()}
-                    <br />
-                    DEPARTMENT
                 </p>
             </div>
         </div>
