@@ -1,4 +1,5 @@
 'use client'
+
 import { Map } from '@/components/Map'
 import { Link } from '@/components/common'
 

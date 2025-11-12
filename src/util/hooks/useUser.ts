@@ -19,7 +19,6 @@ interface DataState {
 }
 
 export default function useUser(props?: DataProps): DataState {
-    // States
     const [autoLoad, setAutoLoad] = useState<boolean>(props?.autoLoad ?? true)
     const [data, setData] = useState<IUser | undefined>(undefined)
     const [loading, setLoading] = useState<boolean>(false)
@@ -30,10 +29,10 @@ export default function useUser(props?: DataProps): DataState {
 
         void fetch('/api/user')
             .then(async (response) => {
-                const body = await response.json()
-                setData(body)
+                const body: unknown = await response.json()
+                setData(body as IUser)
             })
-            .catch((err) => setError(err))
+            .catch((err) => setError(err as string))
 
         setLoading(false)
     }
@@ -56,14 +55,7 @@ export default function useUser(props?: DataProps): DataState {
  * @param {string} permission - Name of the permission
  */
 export function hasPermission(user: IUser, permission: string): boolean {
-    console.log(user)
-    let res = false
-
-    for (const r of user.roles) {
-        if (r.permissions?.map((p) => p.name).includes(permission)) {
-            res = true
-        }
-    }
-
-    return res
+    return user.roles.some((r) =>
+        r.permissions?.some((p) => p.name == permission)
+    )
 }

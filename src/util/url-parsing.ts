@@ -41,14 +41,17 @@ export function parsePaginationParams(url: string | URL) {
         max: 100,
     })
     const skip = page * limit
-
     const query = u.searchParams.get('query')
+    const field = u.searchParams.get('field')
+    const sort = u.searchParams.get('sort')
 
     return {
         page,
         limit,
         skip,
         query,
+        field,
+        sort,
         params: u.searchParams,
     }
 }

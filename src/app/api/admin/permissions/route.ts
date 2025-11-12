@@ -1,12 +1,11 @@
-import mongoose from 'mongoose'
-import { NextRequest, NextResponse } from 'next/server'
-import z from 'zod'
-
 import { Permission } from '@/models/Permission'
 import { checkAuth, ResponseCode } from '@/util/auth'
 import dbConnect from '@/util/libmongo'
 import { executeAggregationPaginated } from '@/util/mongo-aggregations'
 import { parsePaginationParams } from '@/util/url-parsing'
+import mongoose from 'mongoose'
+import { NextRequest, NextResponse } from 'next/server'
+import z from 'zod'
 
 export async function GET(req: NextRequest) {
     const response = await checkAuth(['Superadmin'])
@@ -26,28 +25,28 @@ export async function GET(req: NextRequest) {
 
     const ALLOWED_SEARCH_FIELDS = ['name']
 
-    const { page, limit, skip, query, params } = parsePaginationParams(req.url)
+    const { page, limit, skip, query, field, sort } = parsePaginationParams(
+        req.url
+    )
 
     const permissions = Permission.aggregate()
+    const validField = field && ALLOWED_SEARCH_FIELDS.includes(field)
 
     if (query) {
-        const search_field = params.get('search_field')
-
-        const operator =
-            search_field && ALLOWED_SEARCH_FIELDS.includes(search_field)
-                ? {
-                      autocomplete: {
-                          path: search_field,
-                          fuzzy: { maxEdits: 1, maxExpansions: 50 },
-                          query,
-                      },
-                  }
-                : {
-                      text: {
-                          path: ALLOWED_SEARCH_FIELDS,
-                          query,
-                      },
-                  }
+        const operator = validField
+            ? {
+                  autocomplete: {
+                      path: field,
+                      fuzzy: { maxEdits: 1, maxExpansions: 50 },
+                      query,
+                  },
+              }
+            : {
+                  text: {
+                      path: ALLOWED_SEARCH_FIELDS,
+                      query,
+                  },
+              }
 
         // Performs full-text search over the collection across several fields
         permissions.search({
@@ -55,9 +54,17 @@ export async function GET(req: NextRequest) {
             sort: { score: { $meta: 'searchScore' } },
             ...operator,
         })
+    } else if (sort === 'asc' || sort === 'desc') {
+        const sortBy = sort === 'asc' ? 1 : -1
+
+        if (validField) {
+            permissions.sort({ [field]: sortBy })
+        } else {
+            permissions.sort({ name: sortBy })
+        }
     }
 
-    const { data, count, pages } = await executeAggregationPaginated(
+    const { data, count } = await executeAggregationPaginated(
         Permission,
         permissions,
         {
@@ -70,7 +77,6 @@ export async function GET(req: NextRequest) {
         page,
         limit,
         count,
-        pages,
         data,
     })
 }
