@@ -1,8 +1,9 @@
-import { Field, Toggle } from '.'
+import { Field, SupportNote, Toggle } from '.'
+import { dateService } from '@/services'
 import { useInit } from '@/util/hooks'
 import Link from 'next/link'
 import phone from 'phone'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export interface IOnboardingForm {
     firstName: string
@@ -33,9 +34,8 @@ export function CollectInfoStage({
     const firstNameIsValid = validName(form.firstName)
     const lastNameIsValid = validName(form.lastName)
 
-    const age =
-        new Date().getFullYear() - new Date(form.dateOfBirth).getFullYear()
-    const dateOfBirthIsValid = !isNaN(age) && age >= 18 && age < 120
+    const age = dateService.getAge(form.dateOfBirth)
+    const dateOfBirthIsValid = age != null
 
     const zipCodeIsValid = /^\d{5}(?:-\d{4})?$/g.test(form.zipCode)
 
@@ -45,7 +45,7 @@ export function CollectInfoStage({
             strictDetection: true,
             validateMobilePrefix: true,
         })
-    const parsedPhone = parsePhone(phoneNumber)
+    const parsedPhone = useMemo(() => parsePhone(phoneNumber), [phoneNumber])
 
     const setFormattedPhoneNumber = (number: string) => {
         const { phoneNumber, isValid } = parsePhone(number)
@@ -53,6 +53,10 @@ export function CollectInfoStage({
             ? `(${phoneNumber.substring(2, 5)}) ${phoneNumber.substring(5, 8)}-${phoneNumber.substring(8, 12)}`
             : number
         setPhoneNumber(formatted)
+    }
+
+    const handleSubmit = () => {
+        onSuccess(form)
     }
 
     const isValid =
@@ -75,7 +79,7 @@ export function CollectInfoStage({
     }, [parsedPhone])
 
     return (
-        <>
+        <div>
             <header>
                 <p className="mx-auto text-center text-3xl font-bold text-white">
                     Volunteer with PV
@@ -113,7 +117,7 @@ export function CollectInfoStage({
                         value={form.dateOfBirth}
                         placeholder="Date of Birth"
                         error={!dateOfBirthIsValid}
-                        errorText="Must be 18 or older"
+                        errorText="Enter a valid date of birth"
                         maxLength={10}
                         onInput={(e) =>
                             setForm({ ...form, dateOfBirth: e.target.value })
@@ -203,12 +207,14 @@ export function CollectInfoStage({
             </div>
             <button
                 type="submit"
-                onClick={() => onSuccess(form)}
+                onClick={handleSubmit}
                 disabled={!isValid}
                 className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
             >
                 Join Now
             </button>
-        </>
+
+            <SupportNote />
+        </div>
     )
 }

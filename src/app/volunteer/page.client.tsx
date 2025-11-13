@@ -6,12 +6,14 @@ import {
     IOnboardingForm,
     JoiningStage,
     PhoneVerifyStage,
+    UnderageStage,
 } from '.'
 import { MainLayout } from '@/components/layout'
 import { IUser } from '@/models/User'
+import { dateService } from '@/services'
 import { OnboardingStage } from '@/util/stage'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export interface VolunteerPageProps {
     user: IUser | null
@@ -52,11 +54,55 @@ export default function VolunteerPage({
             }
         },
     })
+    const updateUser = updateUserMutation.mutateAsync
+    const updateStage = useCallback(
+        (onboardingStage: OnboardingStage) =>
+            void updateUser({ onboardingStage }),
+        [updateUser]
+    )
 
     const user = userQuery.data
+    const currentStage = user?.onboardingStage ?? OnboardingStage.NOT_STARTED
 
-    const initialStage = useMemo(() => {
-        // Reopen the onboarding form if the user is missing data
+    const handleCollectInfoSuccess = (form: IOnboardingForm) => {
+        const nextStage =
+            (dateService.getAge(form.dateOfBirth) ?? 0 < 18)
+                ? OnboardingStage.UNDERAGE
+                : OnboardingStage.AWAITING_VERIFY
+
+        void updateUserMutation.mutateAsync({
+            firstName: form.firstName,
+            lastName: form.lastName,
+            phoneNumber: form.phoneNumber,
+            zipCode: form.zipCode,
+            acceptedAlerts: form.getAlerts,
+            dateOfBirth: form.dateOfBirth,
+            onboardingStage: nextStage,
+        })
+    }
+
+    const handleAgeUp = () => {
+        updateStage(OnboardingStage.AWAITING_VERIFY)
+    }
+
+    const handlePhoneVerifySuccess = () => {
+        updateStage(OnboardingStage.VERIFIED)
+    }
+
+    const handleJoinSuccess = () => {
+        setIsInServer(true)
+        updateStage(OnboardingStage.JOINED)
+    }
+
+    const handleReturnToStart = () => {
+        updateStage(OnboardingStage.NOT_STARTED)
+    }
+
+    const handleRejoin = () => {
+        updateStage(OnboardingStage.VERIFIED)
+    }
+
+    useEffect(() => {
         if (
             user?.onboardingStage === OnboardingStage.JOINED &&
             (!user.firstName ||
@@ -65,42 +111,9 @@ export default function VolunteerPage({
                 !user.zipCode ||
                 !user.phoneNumber)
         ) {
-            return OnboardingStage.NOT_STARTED
+            updateStage(OnboardingStage.NOT_STARTED)
         }
-
-        return user?.onboardingStage ?? OnboardingStage.NOT_STARTED
-    }, [user])
-    const [currentStage, setCurrentStage] =
-        useState<OnboardingStage>(initialStage)
-
-    const handleCollectInfoSuccess = async (form: IOnboardingForm) => {
-        await updateUserMutation.mutateAsync({
-            firstName: form.firstName,
-            lastName: form.lastName,
-            phoneNumber: form.phoneNumber,
-            zipCode: form.zipCode,
-            acceptedAlerts: form.getAlerts,
-            dateOfBirth: form.dateOfBirth,
-            onboardingStage: OnboardingStage.AWAITING_VERIFY,
-        })
-        setCurrentStage(OnboardingStage.AWAITING_VERIFY)
-    }
-
-    const handlePhoneVerifySuccess = () => {
-        setCurrentStage(OnboardingStage.VERIFIED)
-    }
-
-    const handleJoinSuccess = () => {
-        setIsInServer(true)
-        setCurrentStage(OnboardingStage.JOINED)
-    }
-
-    const handleReturnToStart = async () => {
-        await updateUserMutation.mutateAsync({
-            onboardingStage: OnboardingStage.NOT_STARTED,
-        })
-        setCurrentStage(OnboardingStage.NOT_STARTED)
-    }
+    }, [user, updateStage])
 
     return (
         <MainLayout>
@@ -133,9 +146,14 @@ export default function VolunteerPage({
                                     usCitizen: false,
                                     privacyPolicy: false,
                                 }}
-                                onSuccess={(form) =>
-                                    void handleCollectInfoSuccess(form)
-                                }
+                                onSuccess={handleCollectInfoSuccess}
+                            />
+                        )}
+
+                        {currentStage === OnboardingStage.UNDERAGE && (
+                            <UnderageStage
+                                dateOfBirth={user?.dateOfBirth}
+                                onAgeUp={handleAgeUp}
                             />
                         )}
 
@@ -148,7 +166,7 @@ export default function VolunteerPage({
                                         ? new Date(user?.lastSmsCodeSentAt)
                                         : null
                                 }
-                                goBack={() => void handleReturnToStart()}
+                                goBack={handleReturnToStart}
                                 onSuccess={handlePhoneVerifySuccess}
                             />
                         )}
@@ -160,22 +178,11 @@ export default function VolunteerPage({
                             />
                         )}
 
-                        {currentStage === OnboardingStage.JOINED ? (
+                        {currentStage === OnboardingStage.JOINED && (
                             <CompleteStage
                                 isInServer={isInServer}
-                                onRejoin={() =>
-                                    setCurrentStage(OnboardingStage.VERIFIED)
-                                }
+                                onRejoin={handleRejoin}
                             />
-                        ) : (
-                            <div className="text-center text-xs font-bold">
-                                <p className="text-yellow-200">
-                                    <em>
-                                        If the join form is not working for you,
-                                        please email us at: support@progress.win
-                                    </em>
-                                </p>
-                            </div>
                         )}
                     </form>
                 </div>

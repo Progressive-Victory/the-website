@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 
     if (user.onboardingStage != OnboardingStage.AWAITING_VERIFY) {
         return NextResponse.json(
-            { message: 'Already verified' },
+            { message: 'Stage is not awaiting verify' },
             { status: HTTPStatus.BadRequest }
         )
     }

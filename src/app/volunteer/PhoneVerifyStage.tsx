@@ -1,4 +1,4 @@
-import { Field } from '.'
+import { Field, SupportNote } from '.'
 import { useInit } from '@/util/hooks'
 import { QueryClient, useMutation } from '@tanstack/react-query'
 import classNames from 'classnames'
@@ -97,94 +97,101 @@ export function PhoneVerifyStage({
     })
 
     return (
-        <div className="flex w-full flex-col items-center gap-0 md:min-w-96">
-            <p className="font-white text-center text-lg font-bold text-white">
-                Enter your Verification Code
-            </p>
-            <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
-                We just sent it to your phone 📱
-            </p>
+        <div>
+            <div className="flex w-full flex-col items-center gap-0 md:min-w-96">
+                <p className="font-white text-center text-lg font-bold text-white">
+                    Enter your Verification Code
+                </p>
+                <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
+                    We just sent it to your phone 📱
+                </p>
 
-            <div className="mt-2 flex w-full flex-row justify-center gap-1">
-                <Field
-                    value={securityCode}
-                    placeholder="Security Code"
-                    error={checkCodeMutation.isError}
-                    // Let users input with enter key
-                    onEnter={() => {
+                <div className="mt-2 flex w-full flex-row justify-center gap-1">
+                    <Field
+                        value={securityCode}
+                        placeholder="Security Code"
+                        error={checkCodeMutation.isError}
+                        // Let users input with enter key
+                        onEnter={() => {
+                            if (securityCode.length === 6) {
+                                checkCodeMutation.mutate(securityCode)
+                            }
+                        }}
+                        errorText="Invalid or expired code, try a new one"
+                        maxLength={6}
+                        onChange={(e) => {
+                            const re = /^[0-9\b]+$/
+                            if (
+                                e.target.value === '' ||
+                                re.test(e.target.value)
+                            ) {
+                                setSecurityCode(e.target.value)
+                            }
+
+                            checkCodeMutation.reset()
+                        }}
+                        disabled={false}
+                    >
+                        <button
+                            type="button"
+                            disabled={
+                                codeTimer > 0 || requestCodeMutation.isPending
+                            }
+                            className={classNames(
+                                `flex w-fit items-center whitespace-nowrap rounded-lg bg-steel-blue px-4 py-3 text-center text-sm text-white transition-all duration-100 disabled:cursor-not-allowed [&:not(:disabled)]:hover:scale-[103%]`,
+                                requestCodeMutation.isPending
+                                    ? ''
+                                    : 'hover:bg-valencia disabled:bg-gray-500'
+                            )}
+                            onClick={() => {
+                                // Get a new OTP
+                                requestCodeMutation.mutate(phoneNumber)
+                            }}
+                        >
+                            {requestCodeMutation.isPending ? (
+                                <PulseLoader color="#ffffff" size={8} />
+                            ) : (
+                                <span>
+                                    Resend{' '}
+                                    {codeTimer > 0 && (
+                                        <span
+                                            className="font-mono"
+                                            suppressHydrationWarning
+                                        >
+                                            {codeTimer}
+                                        </span>
+                                    )}
+                                </span>
+                            )}
+                        </button>
+                    </Field>
+                </div>
+
+                <button
+                    type="submit"
+                    onClick={() => {
                         if (securityCode.length === 6) {
                             checkCodeMutation.mutate(securityCode)
                         }
                     }}
-                    errorText="Invalid or expired code, try a new one"
-                    maxLength={6}
-                    onChange={(e) => {
-                        const re = /^[0-9\b]+$/
-                        if (e.target.value === '' || re.test(e.target.value)) {
-                            setSecurityCode(e.target.value)
-                        }
-
-                        checkCodeMutation.reset()
-                    }}
-                    disabled={false}
+                    disabled={
+                        securityCode.length < 6 || checkCodeMutation.isPending
+                    }
+                    className="my-4 w-full rounded-md bg-steel-blue py-2 text-center text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
                 >
-                    <button
-                        type="button"
-                        disabled={
-                            codeTimer > 0 || requestCodeMutation.isPending
-                        }
-                        className={classNames(
-                            `flex w-fit items-center whitespace-nowrap rounded-lg bg-steel-blue px-4 py-3 text-center text-sm text-white transition-all duration-100 disabled:cursor-not-allowed [&:not(:disabled)]:hover:scale-[103%]`,
-                            requestCodeMutation.isPending
-                                ? ''
-                                : 'hover:bg-valencia disabled:bg-gray-500'
-                        )}
-                        onClick={() => {
-                            // Get a new OTP
-                            requestCodeMutation.mutate(phoneNumber)
-                        }}
-                    >
-                        {requestCodeMutation.isPending ? (
-                            <PulseLoader color="#ffffff" size={8} />
-                        ) : (
-                            <span>
-                                Resend{' '}
-                                {codeTimer > 0 && (
-                                    <span
-                                        className="font-mono"
-                                        suppressHydrationWarning
-                                    >
-                                        {codeTimer}
-                                    </span>
-                                )}
-                            </span>
-                        )}
-                    </button>
-                </Field>
+                    Verify
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => void goBack()}
+                    className="mx-auto text-center text-xs text-steel-blue underline hover:text-white"
+                >
+                    I made a mistake!
+                </button>
             </div>
 
-            <button
-                type="submit"
-                onClick={() => {
-                    if (securityCode.length === 6) {
-                        checkCodeMutation.mutate(securityCode)
-                    }
-                }}
-                disabled={
-                    securityCode.length < 6 || checkCodeMutation.isPending
-                }
-                className="my-4 w-full rounded-md bg-steel-blue py-2 text-center text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
-            >
-                Verify
-            </button>
-
-            <button
-                type="button"
-                onClick={() => void goBack()}
-                className="mx-auto text-center text-xs text-steel-blue underline hover:text-white"
-            >
-                I made a mistake!
-            </button>
+            <SupportNote />
         </div>
     )
 }
