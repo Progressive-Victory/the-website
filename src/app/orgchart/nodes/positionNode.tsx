@@ -4,14 +4,18 @@ import PositionBubble from '../bubbles/positionBubble'
 
 type PositionNodeData = Node<{
     id: number
-    title?: string
+    title: string
     name?: string
     acting?: boolean
     redacted?: boolean
     leadership?: string
 }>
 
-export default function PositionNode({ data }: NodeProps<PositionNodeData>) {
+export default function PositionNode({
+    data,
+    targetPosition,
+    sourcePosition,
+}: NodeProps<PositionNodeData>) {
     const properties: PositionData = {
         id: data.id,
         title: data.title,
@@ -22,16 +26,19 @@ export default function PositionNode({ data }: NodeProps<PositionNodeData>) {
     }
 
     return (
-        <div key={data.id} className="flex flex-col items-center">
+        <div
+            key={data.id}
+            className="flex min-h-[300px] flex-col items-center justify-center"
+        >
             <Handle
                 type="target"
-                position={Position.Top}
-                className="border-amber-300 bg-black-pearl-dark opacity-0"
+                position={targetPosition ?? Position.Left}
+                className="border-amber-300 bg-amber-50 opacity-0"
             />
             <PositionBubble data={properties} />
             <Handle
                 type="source"
-                position={Position.Bottom}
+                position={sourcePosition ?? Position.Right}
                 className="border-amber-300 bg-black-pearl-dark opacity-0"
             />
         </div>

@@ -13,7 +13,7 @@ export default function PositionBubble({
             case 'Junior':
                 return (
                     <div
-                        className={`col-span-1 border-r-2 border-amber-300 bg-blue-300`}
+                        className={`col-span-1 border-r-2 border-amber-300 bg-blue-400`}
                     />
                 )
             case 'Senior':
@@ -61,20 +61,18 @@ export default function PositionBubble({
 
     const Committees = () => {
         return (
-            <div
-                className={`col-span-2 grid ${'grid-rows-' + data.committees?.length.toString()}`}
-            >
+            <div className="col-span-1 flex flex-col justify-center">
                 {data.committees?.map((committee) => {
                     return (
                         <div
                             key={committee.name}
-                            className={`flex ${mini ? 'h-[17px]' : 'h-[30px]'} justify-center`}
+                            className={`flex ${mini ? 'h-[17px]' : 'h-[20px]'} justify-center`}
                         >
                             <Image
                                 src={committee.icon}
                                 alt={committee.alt}
-                                width={mini ? 17 : 30}
-                                height={mini ? 17 : 30}
+                                width={mini ? 17 : 20}
+                                height={mini ? 17 : 20}
                             />
                         </div>
                     )
@@ -88,7 +86,9 @@ export default function PositionBubble({
             className={`grid ${mini ? 'w-[290px]' : 'w-[360px]'} grid-cols-12 overflow-hidden rounded-2xl border-2 border-amber-300 bg-black-pearl-dark font-bold`}
         >
             <LeadershipBanner />
-            <div className="col-span-9 p-2">
+            <div
+                className={`${data.committees ? 'col-span-10' : 'col-span-11'} p-2`}
+            >
                 <p
                     className={`${mini ? 'text-xs' : 'text-sm'} italic text-amber-300`}
                 >
@@ -98,7 +98,7 @@ export default function PositionBubble({
                 </p>
                 <Nameplate />
             </div>
-            <Committees />
+            {data.committees ? <Committees /> : null}
         </div>
     )
 }

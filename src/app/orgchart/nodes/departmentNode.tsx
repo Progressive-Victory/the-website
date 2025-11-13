@@ -10,10 +10,12 @@ export type DepartmentNodeData = Node<{
     members?: PositionData[]
 }>
 
-const zoomSelector = (s: { transform: number[] }) => s.transform[2] >= 1.2
+const zoomSelector = (s: { transform: number[] }) => s.transform[2] >= 1.1
 
 export default function DepartmentNode({
     data,
+    sourcePosition,
+    targetPosition,
 }: NodeProps<DepartmentNodeData>) {
     const extraContent = useStore(zoomSelector)
 
@@ -25,18 +27,21 @@ export default function DepartmentNode({
     }
 
     return (
-        <div key={data.id} className="flex flex-col items-center">
+        <div
+            key={data.id}
+            className="flex min-h-[300px] flex-col items-center justify-center"
+        >
             <Handle
                 type="target"
-                position={Position.Top}
+                position={targetPosition ?? Position.Left}
                 className="border-amber-300 bg-amber-50 opacity-0"
             />
             <DepartmentBubble name={data.name}></DepartmentBubble>
             {extraContent ? <DepartmentLeads /> : null}
             <Handle
                 type="source"
-                position={Position.Bottom}
-                className="border-amber-300 bg-amber-50 opacity-0"
+                position={sourcePosition ?? Position.Right}
+                className="border-amber-300 bg-black-pearl-light opacity-0"
             />
         </div>
     )

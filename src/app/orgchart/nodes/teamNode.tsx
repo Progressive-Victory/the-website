@@ -11,9 +11,13 @@ export type TeamNodeData = Node<{
     members?: PositionData[]
 }>
 
-const zoomSelector = (s: { transform: number[] }) => s.transform[2] >= 1.2
+const zoomSelector = (s: { transform: number[] }) => s.transform[2] >= 1.1
 
-export default function TeamNode({ data }: NodeProps<TeamNodeData>) {
+export default function TeamNode({
+    data,
+    targetPosition,
+    sourcePosition,
+}: NodeProps<TeamNodeData>) {
     const extraContent = useStore(zoomSelector)
 
     const TeamLeads = () => {
@@ -23,18 +27,21 @@ export default function TeamNode({ data }: NodeProps<TeamNodeData>) {
     }
 
     return (
-        <div key={data.id} className="flex w-[360px] flex-col items-center">
+        <div
+            key={data.id}
+            className="flex min-h-[300px] w-[360px] flex-col items-center justify-center"
+        >
             <Handle
                 type="target"
-                position={Position.Top}
+                position={targetPosition ?? Position.Left}
                 className="border-amber-300 bg-amber-50 opacity-0"
             />
             <TeamBubble name={data.name} />
             {extraContent ? <TeamLeads /> : null}
             <Handle
                 type="source"
-                position={Position.Bottom}
-                className="border-amber-300 bg-amber-50 opacity-0"
+                position={sourcePosition ?? Position.Right}
+                className="border-amber-300 bg-black-pearl-light opacity-0"
             />
         </div>
     )
