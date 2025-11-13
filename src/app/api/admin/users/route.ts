@@ -55,28 +55,27 @@ export async function GET(req: NextRequest) {
         'state',
     ]
 
-    const { page, limit, skip, query, params } = parsePaginationParams(req.url)
+    const { page, limit, skip, query, field, sort, params } =
+        parsePaginationParams(req.url)
 
     const users = User.aggregate()
+    const validField = field && ALLOWED_SEARCH_FIELDS.includes(field)
 
     if (query) {
-        const search_field = params.get('search_field')
-
-        const operator =
-            search_field && ALLOWED_SEARCH_FIELDS.includes(search_field)
-                ? {
-                      autocomplete: {
-                          path: search_field,
-                          fuzzy: { maxEdits: 1, maxExpansions: 50 },
-                          query,
-                      },
-                  }
-                : {
-                      text: {
-                          path: ALLOWED_SEARCH_FIELDS,
-                          query,
-                      },
-                  }
+        const operator = validField
+            ? {
+                  autocomplete: {
+                      path: field,
+                      fuzzy: { maxEdits: 1, maxExpansions: 50 },
+                      query,
+                  },
+              }
+            : {
+                  text: {
+                      path: ALLOWED_SEARCH_FIELDS,
+                      query,
+                  },
+              }
 
         // Performs full-text search over the collection across several fields
         users.search({
@@ -84,6 +83,14 @@ export async function GET(req: NextRequest) {
             sort: { score: { $meta: 'searchScore' } },
             ...operator,
         })
+    } else if (sort === 'asc' || sort === 'desc') {
+        const sortBy = sort === 'asc' ? 1 : -1
+
+        if (validField) {
+            users.sort({ [field]: sortBy })
+        } else {
+            users.sort({ name: sortBy })
+        }
     }
 
     // Join with roles collection
@@ -104,14 +111,10 @@ export async function GET(req: NextRequest) {
 
     applyMatchFilters(users, params, ALLOWED_FILTER_PARAMS)
 
-    const { data, count, pages } = await executeAggregationPaginated(
-        User,
-        users,
-        {
-            skip,
-            limit,
-        }
-    )
+    const { data, count } = await executeAggregationPaginated(User, users, {
+        skip,
+        limit,
+    })
 
     // TODO: redact fields based on member permissions
 
@@ -119,7 +122,6 @@ export async function GET(req: NextRequest) {
         page,
         limit,
         count,
-        pages,
         data: data.map((u) => ({
             ...u,
         })),

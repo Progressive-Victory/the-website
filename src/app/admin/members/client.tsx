@@ -1,6 +1,7 @@
 'use client'
 
 import PaginatedList from '@/components/admin/PaginatedList'
+import { ImageWithFallback } from '@/components/common'
 import {
     CheckboxField,
     Form,
@@ -11,62 +12,57 @@ import {
 import { DateField, parseTimezonelessDate } from '@/components/form/DateField'
 import { IRole } from '@/models/Role'
 import { IUser } from '@/models/User'
+import { useUser } from '@/util/hooks'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
+import { PulseLoader } from 'react-spinners'
 
 export interface PageProps {
     roles: IRole[]
 }
 
 export default function ClientPage({ roles }: PageProps) {
-    const event_target = useRef(new EventTarget())
+    const eventTarget = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
     // discard changes without saving
     const [originalUser, setOriginalUser] = useState<IUser | null>(null)
     // This is the mutable copy we actually update when the user interacts with
     // the form
-    const [user, setUser] = useState<IUser | null>(null)
+    const [selectedUser, setSelectedUser] = useState<IUser | null>(null)
+    const [users, setUsers] = useState<IUser[]>([])
 
-    const beforeElementSelected = () => {
-        if (!deepEqual(user, originalUser)) {
-            return confirm(
+    const loggedInUser = useUser()
+
+    const handleSelectItem = (value: IUser) => {
+        if (value._id === selectedUser?._id) return
+
+        if (!deepEqual(selectedUser, originalUser)) {
+            const proceed = confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
             )
+            if (!proceed) return
         }
 
-        return true
-    }
-
-    const onElementSelected = (value: IUser) => {
-        setUser({ ...value } as IUser)
         // We need to copy to make sure that the value in the list is not
         // modified until we save
+        setSelectedUser({ ...value } as IUser)
         setOriginalUser({ ...value } as IUser)
     }
 
-    const userAge = user?.dateOfBirth
+    const userAge = selectedUser?.dateOfBirth
         ? new Date(
               Date.now().valueOf() -
-                  parseTimezonelessDate(user.dateOfBirth).valueOf()
+                  parseTimezonelessDate(selectedUser.dateOfBirth).valueOf()
           ).getUTCFullYear() - 1970
         : undefined
+    const makeItem = (user: IUser) => ({ id: user._id as string, value: user })
 
     return (
         <>
             <PaginatedList<IUser>
-                event_target={event_target.current}
-                api_endpoint="/api/admin/users"
-                before_element_selection={beforeElementSelected}
-                on_element_selected={onElementSelected}
-                id_key="_id"
-                display_key={(u) =>
-                    (u.firstName
-                        ? `${u.firstName} ${u.lastName}`
-                        : u.preferredName) ?? u.email
-                }
-                alternate_display_key="name"
-                image={{ key: 'image', alt: 'user profile picture' }}
+                eventTarget={eventTarget.current}
+                endpoint="/api/admin/users"
                 filters={[
                     {
                         name: 'Role',
@@ -77,7 +73,7 @@ export default function ClientPage({ roles }: PageProps) {
                         options: roles,
                     },
                 ]}
-                search_fields={[
+                searchFields={[
                     {
                         id: 'name',
                         name: 'Name',
@@ -103,14 +99,53 @@ export default function ClientPage({ roles }: PageProps) {
                         name: 'State',
                     },
                 ]}
+                items={users.map(makeItem)}
+                pinnedItem={
+                    loggedInUser.data
+                        ? makeItem(loggedInUser.data)
+                        : { id: '', value: {} as IUser }
+                }
+                selectedItem={selectedUser ? makeItem(selectedUser) : null}
+                onSelectItem={({ value }) => handleSelectItem(value)}
+                setItems={setUsers}
+                renderItem={({ id, value }) =>
+                    id ? (
+                        <>
+                            <ImageWithFallback
+                                src={value.image}
+                                alt="user profile picture"
+                            />
+                            <div className="flex flex-col">
+                                <span className="font-medium text-black">
+                                    {(value.firstName
+                                        ? `${value.firstName} ${value.lastName}`
+                                        : value.preferredName) ?? value.email}
+                                </span>
+                                <span className="text-gray-500">
+                                    {value.name}
+                                </span>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <ImageWithFallback
+                                src=""
+                                alt="user profile picture"
+                                useFallback
+                            />
+                            <PulseLoader size={8} color="#bbb" />
+                        </>
+                    )
+                }
             />
+
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
-                {user && originalUser ? (
+                {selectedUser && originalUser ? (
                     <Form<IUser>
                         initialValue={originalUser}
                         setInitialValue={setOriginalUser}
-                        currentValue={user}
-                        setCurrentValue={setUser}
+                        currentValue={selectedUser}
+                        setCurrentValue={setSelectedUser}
                         computeTitle={(user) => {
                             if (user.firstName && user.lastName)
                                 return `${user.firstName} ${user.lastName}`
@@ -120,9 +155,11 @@ export default function ClientPage({ roles }: PageProps) {
                         }}
                         patchEndpoint="/api/admin/users"
                         onChangesSaved={() => {
-                            event_target.current.dispatchEvent(
+                            eventTarget.current.dispatchEvent(
                                 new Event('refetch')
                             )
+                            if (selectedUser._id === loggedInUser.data?._id)
+                                loggedInUser.reload()
                         }}
                         updateHistory
                     >

@@ -12,41 +12,39 @@ export interface PageProps {
 }
 
 export default function ClientPage({ permissions }: PageProps) {
-    const event_target = useRef(new EventTarget())
+    const eventTarget = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
     // discard changes without saving
     const [originalRole, setOriginalRole] = useState<IRole | null>(null)
     // This is the mutable copy we actually update when the user interacts with
     // the form
-    const [role, setRole] = useState<IRole | null>(null)
+    const [selectedRole, setSelectedRole] = useState<IRole | null>(null)
+    const [roles, setRoles] = useState<IRole[]>([])
 
-    const beforeElementSelected = () => {
-        if (!deepEqual(role, originalRole)) {
-            return confirm(
+    const handleSelectItem = (value: IRole) => {
+        if (value._id === selectedRole?._id) return
+
+        if (!deepEqual(selectedRole, originalRole)) {
+            const proceed = confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
             )
+            if (!proceed) return
         }
 
-        return true
-    }
-
-    const onElementSelected = (value: IRole) => {
-        setRole({ ...value } as IRole)
         // We need to copy to make sure that the value in the list is not
         // modified until we save
+        setSelectedRole({ ...value } as IRole)
         setOriginalRole({ ...value } as IRole)
     }
+
+    const makeItem = (role: IRole) => ({ id: role._id as string, value: role })
 
     return (
         <>
             <PaginatedList<IRole>
-                event_target={event_target.current}
-                api_endpoint="/api/admin/roles"
-                before_element_selection={beforeElementSelected}
-                on_element_selected={onElementSelected}
-                id_key="_id"
-                display_key={'name'}
+                eventTarget={eventTarget.current}
+                endpoint="/api/admin/roles"
                 filters={[
                     {
                         name: 'Permission',
@@ -57,24 +55,31 @@ export default function ClientPage({ permissions }: PageProps) {
                         options: permissions,
                     },
                 ]}
-                search_fields={[
+                searchFields={[
                     {
                         id: 'name',
                         name: 'Name',
                     },
                 ]}
+                items={roles.map(makeItem)}
+                selectedItem={selectedRole ? makeItem(selectedRole) : null}
+                onSelectItem={({ value }) => handleSelectItem(value)}
+                setItems={setRoles}
+                renderItem={({ value }) => (
+                    <span className="font-medium text-black">{value.name}</span>
+                )}
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
-                {role && originalRole ? (
+                {selectedRole && originalRole ? (
                     <Form<IRole>
                         initialValue={originalRole}
                         setInitialValue={setOriginalRole}
-                        currentValue={role}
-                        setCurrentValue={setRole}
+                        currentValue={selectedRole}
+                        setCurrentValue={setSelectedRole}
                         computeTitle={(role) => role.name ?? ''}
                         patchEndpoint="/api/admin/roles"
                         onChangesSaved={() => {
-                            event_target.current.dispatchEvent(
+                            eventTarget.current.dispatchEvent(
                                 new Event('refetch')
                             )
                         }}

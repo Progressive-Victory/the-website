@@ -1,13 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { phone } from 'phone'
-import z from 'zod'
-
 import { User } from '@/models/User'
 import { auth } from '@/util/auth'
 import { HTTPStatus } from '@/util/https-status'
 import dbConnect from '@/util/libmongo'
 import { neutrino } from '@/util/neutrino'
 import { OnboardingStage } from '@/util/stage'
+import { NextRequest, NextResponse } from 'next/server'
+import { phone } from 'phone'
+import z from 'zod'
 
 export const dynamic = 'force-dynamic'
 
@@ -121,7 +120,10 @@ export async function POST(req: NextRequest) {
     if ('api-error-msg' in data) {
         console.error('Failed to send SMS code:', data)
         return NextResponse.json(null, {
-            status: HTTPStatus.InternalServerError,
+            status:
+                data['api-error'] == 14
+                    ? HTTPStatus.TooManyRequests
+                    : HTTPStatus.InternalServerError,
         })
     }
 

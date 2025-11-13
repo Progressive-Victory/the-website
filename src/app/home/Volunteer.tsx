@@ -1,7 +1,8 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+
 import { motion } from 'motion/react'
 import Image from 'next/image'
+import { useState, useEffect, useRef } from 'react'
 
 const actions = [
     {
@@ -38,7 +39,7 @@ export function Volunteer() {
     }, [inView])
 
     return (
-        <div className="flex w-full flex-col items-center justify-center bg-black-pearl-light py-12">
+        <div className="px-4 flex w-full flex-col items-center justify-center bg-black-pearl-light py-12">
             <h1 className="pb-10 text-4xl font-bold text-white">
                 What Can <span className="text-valencia">You </span> Do?
             </h1>
