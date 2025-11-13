@@ -1,11 +1,12 @@
 import { ChangeEvent, KeyboardEvent } from 'react'
+
 export function Field({
     type = 'text',
-    value, // Value
-    onChange, // Value setter
-    onInput, // Value setter
-    onBlur, // Value setter
-    placeholder, // Label and placeholder text
+    value,
+    onChange,
+    onInput,
+    onBlur,
+    placeholder,
     disabled,
     error,
     errorText,
@@ -34,7 +35,7 @@ export function Field({
                 {placeholder}
                 {required && <span className="ml-1 text-red-500">*</span>}
             </label>
-            <div className='flex w-full flex-wrap gap-2'>
+            <div className="flex w-full flex-wrap gap-2">
                 <input
                     type={type}
                     value={value}

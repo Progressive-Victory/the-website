@@ -1,2 +1,6 @@
+export * from './CollectInfoStage'
+export * from './CompleteStage'
 export * from './Field'
+export * from './JoiningStage'
+export * from './PhoneVerifyStage'
 export * from './Toggle'
