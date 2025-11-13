@@ -18,8 +18,6 @@ export interface VolunteerPageProps {
     isInSever: boolean
 }
 
-type FormStage = 'collect_info' | 'phone_verify' | 'joining' | 'complete'
-
 export default function VolunteerPage({
     user: initialUser,
     isInSever: initialIsInServer,
@@ -57,29 +55,23 @@ export default function VolunteerPage({
 
     const user = userQuery.data
 
-    const initialStage = useMemo<FormStage>(() => {
-        if (user?.onboardingStage === OnboardingStage.NOT_STARTED) {
-            return 'collect_info'
-        } else if (
-            user?.onboardingStage === OnboardingStage.AWAIT_VERIFICATION
-        ) {
-            return 'phone_verify'
-        } else if (user?.onboardingStage === OnboardingStage.VERIFIED) {
-            return 'joining'
-        } else if (
+    const initialStage = useMemo(() => {
+        // Reopen the onboarding form if the user is missing data
+        if (
             user?.onboardingStage === OnboardingStage.JOINED &&
-            user.firstName &&
-            user.lastName &&
-            user.dateOfBirth &&
-            user.zipCode &&
-            user.phoneNumber
+            (!user.firstName ||
+                !user.lastName ||
+                !user.dateOfBirth ||
+                !user.zipCode ||
+                !user.phoneNumber)
         ) {
-            return 'complete'
+            return OnboardingStage.NOT_STARTED
         }
 
-        return 'collect_info'
+        return user?.onboardingStage ?? OnboardingStage.NOT_STARTED
     }, [user])
-    const [currentStage, setCurrentStage] = useState<FormStage>(initialStage)
+    const [currentStage, setCurrentStage] =
+        useState<OnboardingStage>(initialStage)
 
     const handleCollectInfoSuccess = async (form: IOnboardingForm) => {
         await updateUserMutation.mutateAsync({
@@ -89,25 +81,25 @@ export default function VolunteerPage({
             zipCode: form.zipCode,
             acceptedAlerts: form.getAlerts,
             dateOfBirth: form.dateOfBirth,
-            onboardingStage: OnboardingStage.NOT_STARTED,
+            onboardingStage: OnboardingStage.AWAITING_VERIFY,
         })
-        setCurrentStage('phone_verify')
+        setCurrentStage(OnboardingStage.AWAITING_VERIFY)
     }
 
     const handlePhoneVerifySuccess = () => {
-        setCurrentStage('joining')
+        setCurrentStage(OnboardingStage.VERIFIED)
     }
 
     const handleJoinSuccess = () => {
         setIsInServer(true)
-        setCurrentStage('complete')
+        setCurrentStage(OnboardingStage.JOINED)
     }
 
     const handleReturnToStart = async () => {
         await updateUserMutation.mutateAsync({
             onboardingStage: OnboardingStage.NOT_STARTED,
         })
-        setCurrentStage('collect_info')
+        setCurrentStage(OnboardingStage.NOT_STARTED)
     }
 
     return (
@@ -129,8 +121,7 @@ export default function VolunteerPage({
                         onSubmit={(e) => e.preventDefault()}
                         className="z-0 m-4 flex h-auto flex-col gap-y-4 rounded-lg bg-black-pearl-dark p-4 shadow-md md:m-8 md:p-6"
                     >
-                        {/* User is authenticated and needs to do onboarding */}
-                        {currentStage === 'collect_info' && (
+                        {currentStage === OnboardingStage.NOT_STARTED && (
                             <CollectInfoStage
                                 initialForm={{
                                     firstName: user?.firstName ?? '',
@@ -148,8 +139,7 @@ export default function VolunteerPage({
                             />
                         )}
 
-                        {/* Phone verification state presentation */}
-                        {currentStage === 'phone_verify' && (
+                        {currentStage === OnboardingStage.AWAITING_VERIFY && (
                             <PhoneVerifyStage
                                 queryClient={queryClient}
                                 phoneNumber={user?.phoneNumber ?? ''}
@@ -163,18 +153,19 @@ export default function VolunteerPage({
                             />
                         )}
 
-                        {/* Onboarding done need to join them to server now*/}
-                        {currentStage === 'joining' && (
+                        {currentStage === OnboardingStage.VERIFIED && (
                             <JoiningStage
                                 queryClient={queryClient}
                                 onSuccess={handleJoinSuccess}
                             />
                         )}
 
-                        {currentStage === 'complete' ? (
+                        {currentStage === OnboardingStage.JOINED ? (
                             <CompleteStage
                                 isInServer={isInServer}
-                                onRejoin={() => setCurrentStage('joining')}
+                                onRejoin={() =>
+                                    setCurrentStage(OnboardingStage.VERIFIED)
+                                }
                             />
                         ) : (
                             <div className="text-center text-xs font-bold">
