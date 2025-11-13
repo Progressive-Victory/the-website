@@ -305,7 +305,7 @@ function CollectInfoStage({ initialForm, onSuccess }: CollectInfoStageProps) {
                         value={form.dateOfBirth}
                         placeholder="Date of Birth"
                         error={!dateOfBirthIsValid}
-                        errorText="Must be 16 or older"
+                        errorText="Must be 18 or older"
                         maxLength={10}
                         onInput={(e) =>
                             setForm({ ...form, dateOfBirth: e.target.value })
