@@ -14,11 +14,18 @@ class DateService {
     }
 
     getAge(dateOfBirth: string) {
-        const dob = new Date(dateOfBirth).getTime()
-        const current = this.now().getTime()
-        const delta = current - dob
-        if (isNaN(delta) || delta < 0) return null
-        return new Date(delta).getFullYear() - 1970
+        const dob = new Date(dateOfBirth)
+        const current = this.now()
+
+        if (!this.isValid(dateOfBirth) || dob > current) return null
+
+        const base = current.getUTCFullYear() - dob.getUTCFullYear()
+        const lessOne =
+            current.getUTCMonth() < dob.getUTCMonth() ||
+            (current.getUTCMonth() == dob.getUTCMonth() &&
+                current.getUTCDate() < dob.getUTCDate())
+
+        return base + (lessOne ? -1 : 0)
     }
 }
 
