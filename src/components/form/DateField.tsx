@@ -1,10 +1,7 @@
 import { FormField, IBaseFormField } from '.'
+import { dateService } from '@/services'
 import classNames from 'classnames'
 import { FormEvent } from 'react'
-
-export function parseTimezonelessDate(date: string) {
-    return new Date(date + ' GMT')
-}
 
 export function DateField({
     name,
@@ -15,26 +12,20 @@ export function DateField({
     dynamic,
 }: IBaseFormField) {
     const value = (dynamic?.value as string) ?? ''
-    const dateValue = parseTimezonelessDate(value) // Makes sure the date uses UTC
+    const iso = dateService.toISODateString(value)
 
-    const isValid = (text: string) => {
-        const textInvalid = isNaN(new Date(text).valueOf())
-        if (textInvalid) {
-            console.error(`Invalid date string parsed: ${text}`)
+    const format = () => {
+        if (iso) {
+            const [year, month, day] = iso.split('-')
+            return `${month}/${day}/${year}`
         }
-        return !required || !textInvalid
+        return value
     }
 
     const handleInput = (event: FormEvent<HTMLInputElement>) => {
-        const newValue = (event.target as HTMLTextAreaElement).value
-        const newDate = parseTimezonelessDate(newValue)
-        const formattedDate = `${(newDate.getUTCMonth() + 1).toString().padStart(2, '0')}/${newDate.getUTCDate().toString().padStart(2, '0')}/${newDate.getFullYear()}`
-        dynamic?.onUpdate?.(
-            field,
-            formattedDate,
-            formattedDate.trim(),
-            isValid(formattedDate)
-        )
+        const formatted = (event.target as HTMLTextAreaElement).value
+        const normalized = dateService.toISODateString(formatted)
+        dynamic?.onUpdate?.(field, normalized, normalized, normalized != null)
     }
 
     return (
@@ -45,7 +36,7 @@ export function DateField({
             deprecated={deprecated}
         >
             {readonly || dynamic?.disabled ? (
-                <div className="col-span-2 w-full">{value}</div>
+                <div className="col-span-2 w-full">{format()}</div>
             ) : (
                 <input
                     type="date"
@@ -53,11 +44,11 @@ export function DateField({
                     id={field}
                     disabled={dynamic?.loading}
                     required={required}
-                    value={dateValue.toISOString().split('T')[0]}
+                    value={iso ?? ''}
                     onInput={handleInput}
                     className={classNames(
                         'col-span-2 w-full max-w-96 rounded-lg border border-gray-300 px-3 py-0.5',
-                        !isValid(value) && 'border-red-300'
+                        !iso && 'border-red-300'
                     )}
                 />
             )}

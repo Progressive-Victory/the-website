@@ -13,6 +13,58 @@ describe('dateService', () => {
         })
     })
 
+    describe('isValid', () => {
+        it('should return true if the date is parsable', () => {
+            const date = '2005-06-20'
+
+            const result = dateService.isValid(date)
+
+            expect(result).toBe(true)
+        })
+
+        it('should return true if the date is parsable in other formats', () => {
+            const date = '6/20/2005'
+
+            const result = dateService.isValid(date)
+
+            expect(result).toBe(true)
+        })
+
+        it('should return false if the date is invalid', () => {
+            const date = '06a20a05'
+
+            const result = dateService.isValid(date)
+
+            expect(result).toBe(false)
+        })
+
+        it('should return false if the date is empty', () => {
+            const date = ''
+
+            const result = dateService.isValid(date)
+
+            expect(result).toBe(false)
+        })
+    })
+
+    describe('toISODateString', () => {
+        it('should return null if the date is invalid', () => {
+            const date = '06a20a05'
+
+            const result = dateService.toISODateString(date)
+
+            expect(result).toBeNull()
+        })
+
+        it('should return yyyy-mm-dd if the date is valid', () => {
+            const date = '6/20/05'
+
+            const result = dateService.toISODateString(date)
+
+            expect(result).toBe('2005-06-20')
+        })
+    })
+
     describe('getAge', () => {
         const now = new Date('2025-01-01')
 

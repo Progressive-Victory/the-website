@@ -9,9 +9,10 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/form'
-import { DateField, parseTimezonelessDate } from '@/components/form/DateField'
+import { DateField } from '@/components/form/DateField'
 import { IRole } from '@/models/Role'
 import { IUser } from '@/models/User'
+import { dateService } from '@/services'
 import { useUser } from '@/util/hooks'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
@@ -50,12 +51,7 @@ export default function ClientPage({ roles }: PageProps) {
         setOriginalUser({ ...value } as IUser)
     }
 
-    const userAge = selectedUser?.dateOfBirth
-        ? new Date(
-              Date.now().valueOf() -
-                  parseTimezonelessDate(selectedUser.dateOfBirth).valueOf()
-          ).getUTCFullYear() - 1970
-        : undefined
+    const userAge = dateService.getAge(selectedUser?.dateOfBirth ?? '')
     const makeItem = (user: IUser) => ({ id: user._id as string, value: user })
 
     return (
