@@ -25,13 +25,9 @@ export default async function Page() {
 
     return (
         <VolunteerPage
-            user={JSON.parse(
-                JSON.stringify(
-                    user.toObject({
-                        flattenObjectIds: true,
-                    })
-                )
-            )}
+            user={user.toObject({
+                flattenObjectIds: true,
+            })}
             isInSever={isInServer}
         />
     )
