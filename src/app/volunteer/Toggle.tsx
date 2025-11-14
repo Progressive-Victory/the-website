@@ -1,10 +1,11 @@
-import { ReactElement } from 'react'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
+import { ReactElement } from 'react'
+
 export function Toggle({
     name,
-    value, // Value
-    onChange, // Value setter
-    placeholder, // Label and placeholder text
+    value,
+    onChange,
+    placeholder,
     tooltip,
     required = false,
 }: {
