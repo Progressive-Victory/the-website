@@ -16,7 +16,7 @@ export interface FormGroupProps {
             field: string,
             value: unknown,
             patchValue: unknown,
-            valid: boolean
+            vvalid: boolean
         ) => void
     }
 }

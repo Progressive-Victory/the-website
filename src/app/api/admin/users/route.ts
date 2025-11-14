@@ -124,8 +124,24 @@ export async function GET(req: NextRequest) {
         count,
         data: data.map((u) => ({
             ...u,
+            age: calculate_age(u.dateOfBirth ?? null),
         })),
     })
+}
+
+function calculate_age(date: string | null) {
+    if (!date) return null
+
+    const today = new Date()
+    const birthDate = new Date(date)
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const m = today.getMonth() - birthDate.getMonth()
+
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--
+    }
+
+    return age
 }
 
 // missing fields are readonly and cannot be changed through the API
