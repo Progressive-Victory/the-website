@@ -1,7 +1,9 @@
 'use client'
-import { useState } from 'react'
-import { motion, useTransform, useSpring } from 'motion/react'
+
 import { Link, Message } from '@/components/common'
+import { motion, useTransform, useSpring } from 'motion/react'
+import { useState } from 'react'
+
 const avatarImage = '/images/PV_Pride_Logo.png'
 
 export function Hero() {
@@ -87,9 +89,8 @@ export function Hero() {
                         avatarRounded={false}
                         username="Progressive Victory"
                         nameColor="red"
-                        text="Progressive Victory is proud to support progressive candidates! 💙
-            We need more bold Democrats with track records of proven results leading the charge 💪"
-                        image="/images/ben.jpg"
+                        text="It's all fun and games w PV members at the Katie Wilson Watch Party tonight in Seattle! Congradulations to @wilsonformayer and all the volunteers who spent months working to help her win!"
+                        image="/images/PVKatieWilsonWatchParty.jpeg"
                     />
                 </TiltMessage>
 
@@ -105,7 +106,7 @@ export function Hero() {
                         avatarRounded={false}
                         username="Progressive Victory"
                         nameColor="red"
-                        text="Built by the internet, for the internet! — Progressive Victory is a new kind of political community turning the tides of elections across the country."
+                        text="Built by the internet, for America. Progressive Victory is a new kind of political institution: seamlessly marrying the electoral impact and volunteer power of traditional progressive organizations with the culture and community of digital third places."
                     />
                 </TiltMessage>
 
@@ -216,4 +217,3 @@ function TiltMessage({
         </motion.div>
     )
 }
-
