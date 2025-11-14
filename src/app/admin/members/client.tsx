@@ -9,8 +9,10 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/form'
+import { DateField } from '@/components/form/DateField'
 import { IRole } from '@/models/Role'
 import { IUser } from '@/models/User'
+import { dateService } from '@/services'
 import { useUser } from '@/util/hooks'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
@@ -49,6 +51,7 @@ export default function ClientPage({ roles }: PageProps) {
         setOriginalUser({ ...value } as IUser)
     }
 
+    const userAge = dateService.getAge(selectedUser?.dateOfBirth ?? '')
     const makeItem = (user: IUser) => ({ id: user._id as string, value: user })
 
     return (
@@ -176,11 +179,16 @@ export default function ClientPage({ roles }: PageProps) {
                             />
                             <TextField name="First Name" field="firstName" />
                             <TextField name="Last Name" field="lastName" />
-                            <TextField
+                            <DateField
                                 name="Date of Birth"
                                 field="dateOfBirth"
                             />
-                            <TextField name="Age" field="age" readonly />
+                            <TextField
+                                name="Age"
+                                field="age"
+                                readonly
+                                dynamic={{ value: userAge }}
+                            />
                         </FormGroup>
                         <FormGroup title="Address">
                             <TextField name="City" field="city" />
