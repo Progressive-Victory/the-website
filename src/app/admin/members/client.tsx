@@ -9,7 +9,6 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/form'
-import { DateField, parseTimezonelessDate } from '@/components/form/DateField'
 import { IRole } from '@/models/Role'
 import { IUser } from '@/models/User'
 import { useUser } from '@/util/hooks'
@@ -50,12 +49,6 @@ export default function ClientPage({ roles }: PageProps) {
         setOriginalUser({ ...value } as IUser)
     }
 
-    const userAge = selectedUser?.dateOfBirth
-        ? new Date(
-              Date.now().valueOf() -
-                  parseTimezonelessDate(selectedUser.dateOfBirth).valueOf()
-          ).getUTCFullYear() - 1970
-        : undefined
     const makeItem = (user: IUser) => ({ id: user._id as string, value: user })
 
     return (
@@ -183,16 +176,11 @@ export default function ClientPage({ roles }: PageProps) {
                             />
                             <TextField name="First Name" field="firstName" />
                             <TextField name="Last Name" field="lastName" />
-                            <DateField
+                            <TextField
                                 name="Date of Birth"
                                 field="dateOfBirth"
                             />
-                            <TextField
-                                name="Age"
-                                field="age"
-                                readonly
-                                dynamic={{ value: userAge }}
-                            />
+                            <TextField name="Age" field="age" readonly />
                         </FormGroup>
                         <FormGroup title="Address">
                             <TextField name="City" field="city" />
