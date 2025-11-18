@@ -9,10 +9,7 @@ export function ClientCalendar({ src }: Readonly<{ src: string }>) {
 
     // Get client timezone and encode it to use in the URL
     const timezoneParameter: string =
-        '&ctz=' +
-        (hydrated
-            ? encodeURI(Intl.DateTimeFormat().resolvedOptions().timeZone)
-            : 'UTC')
+        '&ctz=' + encodeURI(Intl.DateTimeFormat().resolvedOptions().timeZone)
 
     return (
         <div className="relative flex size-full flex-col items-center gap-y-10 bg-steel-blue p-8">
