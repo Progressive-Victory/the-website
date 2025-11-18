@@ -1,11 +1,14 @@
 'use client'
 
 import { Frame } from '@/app/events/Frame'
+import { useDebounce } from '@uidotdev/usehooks';
 
 export function ClientCalendar({ src }: Readonly<{ src: string }>) {
     // Get client timezone and encode it to use in the URL
-    const timezoneParameter: string =
-        '&ctz=' + encodeURI(Intl.DateTimeFormat().resolvedOptions().timeZone)
+    const timezoneParameter: string = useDebounce(
+        '&ctz=' + encodeURI(Intl.DateTimeFormat().resolvedOptions().timeZone),
+        50
+    );
     return (
         <div className="relative flex size-full flex-col items-center gap-y-10 bg-steel-blue p-8">
             <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
