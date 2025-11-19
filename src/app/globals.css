@@ -2,13 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
+html {
+    min-height: 100dvh;
+    position: relative;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: none;
+}
+body {
+    min-height: 100dvh;
+    overflow: auto;
+    position: relative;
+}
+
+/* html,
 body {
     min-height: 100dvh;
     max-height: 100dvh;
-    height: 100dvh;
     overscroll-behavior: none;
-}
+    -webkit-overflow-scrolling: none;
+} */
 
 .perspective-container {
     perspective: 1000px;

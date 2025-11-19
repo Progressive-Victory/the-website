@@ -12,7 +12,7 @@ export default async function Layout({
 
     return (
         <ProtectedPage requiredRoles={['Superadmin']}>
-            <div className="relative flex size-full min-h-screen flex-col">
+            <div className="relative flex size-full flex-col">
                 <Header />
                 <div className="flex flex-1 bg-gray-50">
                     <AdminNav stats={stats} />
