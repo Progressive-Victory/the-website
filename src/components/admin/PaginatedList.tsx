@@ -164,7 +164,7 @@ export default function PaginatedList<T extends object>({
         : 0
 
     return (
-        <div className="flex w-96 flex-col self-stretch border-x-2 border-gray-200 bg-gray-50 2xl:w-[28rem]">
+        <div className="flex w-96 flex-col self-stretch overscroll-none border-x-2 border-gray-200 bg-gray-50 2xl:w-[28rem]">
             <div className="flex flex-col gap-3 border-b-2 p-4">
                 <div className="flex w-full items-center gap-2">
                     <input
