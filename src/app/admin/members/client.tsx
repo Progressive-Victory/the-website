@@ -56,6 +56,10 @@ export default function ClientPage({ roles }: PageProps) {
 
     return (
         <>
+            <meta
+                name="viewport"
+                content="width=device-width, initial-scale=1.0, user-scalable=no"
+            />
             <PaginatedList<IUser>
                 eventTarget={eventTarget.current}
                 endpoint="/api/admin/users"
@@ -135,7 +139,7 @@ export default function ClientPage({ roles }: PageProps) {
                 }
             />
 
-            <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto">
                 {selectedUser && originalUser ? (
                     <Form<IUser>
                         initialValue={originalUser}
