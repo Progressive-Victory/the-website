@@ -1,6 +1,7 @@
 import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
+import storybook from 'eslint-plugin-storybook'
 import tailwind from 'eslint-plugin-tailwindcss'
 import { defineConfig } from 'eslint/config'
 import globals from 'globals'
@@ -13,18 +14,19 @@ const compat = new FlatCompat({
 
 export default defineConfig([
     {
-        files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-        plugins: { js },
-        extends: ['js/recommended'],
+        ignores: ['!.storybook'],
     },
     {
         files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+        plugins: { js },
+        extends: ['js/recommended'],
         languageOptions: { globals: { ...globals.browser, ...globals.node } },
     },
     tseslint.configs.recommendedTypeChecked,
     tseslint.configs.stylisticTypeChecked,
     ...compat.extends('next/core-web-vitals', 'next/typescript'),
     ...tailwind.configs['flat/recommended'],
+    ...storybook.configs['flat/recommended'],
     {
         languageOptions: {
             parserOptions: {
