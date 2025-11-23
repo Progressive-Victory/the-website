@@ -1,5 +1,5 @@
 import { SupportNote } from '.'
-import { useInit } from '@/util/hooks'
+import { useInit } from '@/hooks'
 import { ArrowPathIcon } from '@heroicons/react/24/solid'
 import { QueryClient, useMutation } from '@tanstack/react-query'
 import { signOut } from 'next-auth/react'

@@ -10,10 +10,10 @@ import {
     TextField,
 } from '@/components/form'
 import { DateField } from '@/components/form/DateField'
+import { useUser } from '@/hooks'
 import { IRole } from '@/models/Role'
 import { IUser } from '@/models/User'
 import { dateService } from '@/services'
-import { useUser } from '@/util/hooks'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
 import { PulseLoader } from 'react-spinners'

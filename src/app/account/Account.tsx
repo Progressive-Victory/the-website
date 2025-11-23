@@ -1,10 +1,11 @@
 'use client'
-import { useEffect, useMemo } from 'react'
+
+import { MainLayout } from '@/components/layout'
+import { hasPermission, useUser } from '@/hooks'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { MainLayout } from '@/components/layout'
-import { hasPermission, useUser } from '@/util/hooks'
+import { useEffect, useMemo } from 'react'
 
 export function Account() {
     const { data: session } = useSession()

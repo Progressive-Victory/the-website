@@ -1,7 +1,7 @@
 'use client'
 
 import { Frame } from '@/app/events/Frame'
-import { useHydration } from '@/util/hooks'
+import { useHydration } from '@/hooks'
 import { Suspense } from 'react'
 
 export function ClientCalendar({ src }: Readonly<{ src: string }>) {

@@ -1,5 +1,5 @@
 import { Field, SupportNote } from '.'
-import { useInit } from '@/util/hooks'
+import { useInit } from '@/hooks'
 import { QueryClient, useMutation } from '@tanstack/react-query'
 import classNames from 'classnames'
 import { useEffect, useState } from 'react'
