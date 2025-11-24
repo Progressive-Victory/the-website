@@ -57,13 +57,13 @@ export const Committees: Committee[] = [
 
 const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
 
-const nWidth = 500
+const nWidth = 360
 const nHeight = 300
 const defaultPos: XYPosition = { x: 0, y: 0 }
 
-const GetElements = (nodes: Node[], edges: Edge[], direction = 'LR') => {
+const GetElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
     const isHorizontal = direction === 'LR'
-    dagreGraph.setGraph({ rankdir: direction, ranksep: 0, nodesep: 25 })
+    dagreGraph.setGraph({ rankdir: direction, ranksep: 50, nodesep: 25 })
     nodes.forEach((node) => {
         dagreGraph.setNode(node.id, { width: nWidth, height: nHeight })
     })
@@ -94,6 +94,7 @@ function CreatePositionNode({
     acting,
     redacted,
     leadership,
+    committees,
 }: {
     id: number
     title: string
@@ -101,6 +102,7 @@ function CreatePositionNode({
     acting?: boolean
     redacted?: boolean
     leadership?: string
+    committees?: Committee[]
 }) {
     return {
         id: id.toString(),
@@ -113,6 +115,7 @@ function CreatePositionNode({
             acting: acting,
             redacted: redacted,
             leadership: leadership,
+            committees: committees,
         },
     }
 }
@@ -291,6 +294,46 @@ const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
 )
 
 export default function OrgChartApp() {
+    const [legendEnabled, toggleLegend] = useState(false)
+
+    function LegendPanel() {
+        return (
+            <Panel position="top-left">
+                {!legendEnabled ? null : (
+                    <div className="mb-2 rounded-xl border-4 border-amber-300 bg-amber-50 p-2 text-xs font-bold text-black-pearl-dark">
+                        <div className="mb-2 flex">
+                            <div className="size-4 border-2 border-amber-300 bg-blue-400"></div>
+                            <p className="ml-2">{'JUNIOR LEADERSHIP'}</p>
+                        </div>
+                        <div className="mb-2 flex">
+                            <div className="size-4 border-2 border-amber-300 bg-red-600"></div>
+                            <p className="ml-2">{'SENIOR LEADERSHIP'}</p>
+                        </div>
+                        <PositionBubble
+                            data={{
+                                id: -1,
+                                title: 'Position Name',
+                                name: 'Holder Name',
+                                leadership: 'Senior',
+                                committees: [Committees[0]],
+                            }}
+                            mini={true}
+                        />
+                        <p className="mt-2">
+                            {'SHAPES INDICATE TEAM/COMMITTEE GROUPING'}
+                        </p>
+                    </div>
+                )}
+                <button
+                    className="rounded-xl border-4 border-amber-300 bg-amber-50 p-1 font-black text-black-pearl-dark"
+                    onClick={() => toggleLegend(!legendEnabled)}
+                >
+                    {legendEnabled ? 'HIDE LEGEND' : 'SHOW LEGEND'}
+                </button>
+            </Panel>
+        )
+    }
+
     const DetailPanel = ({
         name,
         desc,
@@ -354,7 +397,7 @@ export default function OrgChartApp() {
     const [currentDetails, setCurrentDetails] = useState(<DetailPanel />)
     const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges)
-    const [horizontal, setHorizontal] = useState(false)
+    /*const [horizontal, setHorizontal] = useState(false)*/
 
     const updateLayout = useCallback(
         (direction: string | undefined) => {
@@ -369,7 +412,7 @@ export default function OrgChartApp() {
         [nodes, edges, setNodes, setEdges]
     )
 
-    const viewportRef = useCallback(
+    /*const viewportRef = useCallback(
         (viewport: HTMLDivElement) => {
             if (!viewport) return
             const observer = new ResizeObserver(() => {
@@ -377,8 +420,8 @@ export default function OrgChartApp() {
                     viewport.offsetWidth > viewport.offsetHeight &&
                     !horizontal
                 ) {
-                    updateLayout('LR')
-                    setHorizontal(true)
+                    updateLayout('TB')
+                    setHorizontal(false)
                 } else if (
                     viewport.offsetWidth <= viewport.offsetHeight &&
                     horizontal
@@ -390,7 +433,7 @@ export default function OrgChartApp() {
             observer.observe(viewport)
         },
         [updateLayout, horizontal]
-    )
+    )*/
 
     const handleNodeClick = (event: React.MouseEvent, node: Node) => {
         if (node.type == 'dep') {
@@ -416,7 +459,7 @@ export default function OrgChartApp() {
     }
 
     return (
-        <div className="size-full bg-white" ref={viewportRef}>
+        <div className="size-full bg-white" /*ref={viewportRef}*/>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -431,6 +474,7 @@ export default function OrgChartApp() {
                 maxZoom={1.2}
                 minZoom={0.25}
             >
+                <LegendPanel />
                 {currentDetails}
                 <Controls />
             </ReactFlow>

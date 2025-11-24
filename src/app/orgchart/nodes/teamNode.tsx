@@ -29,7 +29,7 @@ export default function TeamNode({
     return (
         <div
             key={data.id}
-            className="flex min-h-[300px] w-[360px] flex-col items-center justify-center"
+            className="flex w-[360px] flex-col items-center justify-center"
         >
             <Handle
                 type="target"
