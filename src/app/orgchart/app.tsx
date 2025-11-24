@@ -56,6 +56,154 @@ export const Committees: Committee[] = [
     },
 ]
 
+/*
+const test = [
+    {
+        id: 0,
+        title: 'Executive Director',
+        name: 'Sam Dryzmala',
+        leadership: 'Senior'
+    },
+    {
+        id: 1,
+        title: 'Deputy Executive Director',
+        name: 'Benjamin Gilbert-Lif',
+        leadership: 'Senior',
+    },
+    {
+        id: 2,
+        title: 'Community Relations Director',
+        name: 'Auntifa',
+        leadership: 'Senior',
+        department: "Community",
+        team: null,
+        committees: []
+    },
+    {
+        id: 3,
+        title: 'Community Mananger',
+        name: 'Jenywlfersn',
+        leadership: 'Junior',
+        department: "Community",
+        team: null
+        committees: [Committees[0], Committees[1]],
+    },
+    {
+        id: 4,
+        title: 'Community Manager',
+        name: "?"
+        leadership: 'Junior',
+        department: "Community",
+        team: null
+        committees: [Committees[0], Committees[1]],
+    },
+    {
+        id: 5,
+        title: 'Welcome Team Lead',
+        name: 'Monarch',
+        department: "?",
+        team: "Welcome"
+        leadership: 'Junior',
+        committees: [Committees[0]],
+    },
+    {
+        id: 6,
+        title: 'Welcome Team Lead',
+        name: "?"
+        leadership: 'Junior',
+        department: "?",
+        team: "Welcome"
+        committees: [Committees[0]],
+    },
+
+    {
+        id: 7,
+        name: "?",
+        title: 'Welcome Team Deputy',
+        leadership: "?",
+        departmnet: "?",
+        team: "Welcome"
+        committees: []
+    },
+    {
+        id: 8,
+        title: 'Events Team Lead',
+        name: 'BrewMasterCraft',
+        leadership: 'Junior',
+        department: "?",
+        team: "Events",
+        committees: [Committees[0]],
+    },
+    {
+        id: 9,
+        title: 'Events Team Lead',
+        name: "?",
+        leadership: 'Junior',
+        department: "?",
+        team: "Events",
+        committees: [Committees[0]],
+    },
+    {
+        id: 10,
+        title: 'Events Team Deputy',
+        name: "?"
+        leadership: "?",
+        department: "?",
+        team: "Events"
+        name: 'EM',
+    }
+]
+*/
+
+//GOAL - Figure out how to translate the nodes into the initialNodes that exist.
+
+/*
+function test(){
+    const initialNodes: Nodes[] = []
+
+    //find Executive Director and add to initialNodes - createPositionNode()
+    //find Deputy Director and add to initialNodes - createPositionNode()
+
+    //Department names - Community, Media, Operations, Infrastructure, Organizing, Technology
+    
+    //loop through all department names
+    //CreateDepartmentNode({id: ##, name: "Department Name", leads: []})
+
+    //Teams by shapes (?) - Community Team, Media Team, Engineering Committee, State Organizing Committee
+
+    //loop through all team names
+    //CreateTeamNode({id: ###, name: "Team Name", desc: "Description", leads: []})
+
+
+    //Find the proper edges
+
+    //Teams - 
+    // 
+    // - Community - Welcome, Events, Moderation, Writing, 
+    // - Media - Writing, Audio-Video, Design
+    // - Operations - Fundraising, Documentation
+    // - Infrastructure - Documentation, Research
+    // - Organizing - Recruitment, Mobilization
+        - Coalitions - Western, Midwest, Northwestern, Southern
+    // - Engineering - Discord, Database, Website
+
+    //create Department Nodes
+    // - Determine which documents belong by
+        - title
+        - leadership 
+        - department
+        - team 
+        - committee
+
+    //Need to figure out some way to take parent, child, and sibling positions into account
+    //Maybe look at the department leads and what children they have
+
+    //create Team Nodes
+
+}
+
+*/
+
 const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
 
 const nWidth = 500
