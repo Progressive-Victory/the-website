@@ -1,4 +1,5 @@
-import { Field, SupportNote } from '.'
+import { Field } from './Field'
+import { SupportNote } from './SupportNote'
 import { useInit } from '@/hooks'
 import { QueryClient, useMutation } from '@tanstack/react-query'
 import classNames from 'classnames'

@@ -155,7 +155,7 @@ export default function ClientPage({ roles }: PageProps) {
                                 new Event('refetch')
                             )
                             if (selectedUser._id === loggedInUser.data?._id)
-                                loggedInUser.reload()
+                                void loggedInUser.refetch()
                         }}
                         updateHistory
                     >

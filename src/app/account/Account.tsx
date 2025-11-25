@@ -12,7 +12,7 @@ export function Account() {
     const user = useUser()
 
     const AdminPanelButton = useMemo(() => {
-        if (user.data && !user.error && !user.loading) {
+        if (user.data && !user.error && !user.isLoading) {
             if (hasPermission(user.data, 'Admin Panel Access')) {
                 return (
                     <Link href="/admin">

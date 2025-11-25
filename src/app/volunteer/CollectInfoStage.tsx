@@ -1,4 +1,6 @@
-import { Field, SupportNote, Toggle } from '.'
+import { Field } from './Field'
+import { SupportNote } from './SupportNote'
+import { Toggle } from './Toggle'
 import { useInit } from '@/hooks'
 import { dateService } from '@/services'
 import Link from 'next/link'

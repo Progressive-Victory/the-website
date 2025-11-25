@@ -1,4 +1,4 @@
-import { FormGroupProps } from '.'
+import { FormGroupProps } from './FormGroup'
 import { IDocumentUpdate } from '@/models/DocumentUpdate'
 import { IUser } from '@/models/User'
 import { useMutation, useQuery } from '@tanstack/react-query'

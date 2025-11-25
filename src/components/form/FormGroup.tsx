@@ -1,4 +1,4 @@
-import { IBaseFormField } from '.'
+import { IBaseFormField } from './FormField'
 import { CollapsableSection } from '@/components/common'
 import React from 'react'
 

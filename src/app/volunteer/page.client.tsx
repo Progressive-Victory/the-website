@@ -1,13 +1,10 @@
 'use client'
 
-import {
-    CollectInfoStage,
-    CompleteStage,
-    IOnboardingForm,
-    JoiningStage,
-    PhoneVerifyStage,
-    UnderageStage,
-} from '.'
+import { CollectInfoStage, IOnboardingForm } from './CollectInfoStage'
+import { CompleteStage } from './CompleteStage'
+import { JoiningStage } from './JoiningStage'
+import { PhoneVerifyStage } from './PhoneVerifyStage'
+import { UnderageStage } from './UnderageStage'
 import { MainLayout } from '@/components/layout'
 import { IUser } from '@/models/User'
 import { dateService } from '@/services'

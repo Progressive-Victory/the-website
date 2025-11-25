@@ -1,5 +1,5 @@
-import { FormField, IBaseFormField } from '.'
 import MultiSelect from '../admin/MultiSelect'
+import { FormField, IBaseFormField } from './FormField'
 import { useState } from 'react'
 
 export interface SelectManyFieldProps extends IBaseFormField {

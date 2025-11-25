@@ -1,4 +1,4 @@
-import { FormField, IBaseFormField } from '.'
+import { FormField, IBaseFormField } from './FormField'
 import { dateService } from '@/services'
 import classNames from 'classnames'
 import { FormEvent } from 'react'

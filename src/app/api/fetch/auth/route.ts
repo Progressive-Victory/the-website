@@ -1,10 +1,8 @@
-import { FetchRequest } from '@/models'
-import { checkAuth, ResponseCode } from '@/util/auth'
+import { AuthRequest } from '@/models'
+import { auth, checkAuth, ResponseCode } from '@/util/auth'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const POST = async (req: NextRequest) => {
-    const apiReq = (await req.json()) as FetchRequest
-
     const response = await checkAuth()
 
     switch (response) {
@@ -20,18 +18,23 @@ export const POST = async (req: NextRequest) => {
             throw Error('Unidentified response code.')
     }
 
-    const res = await fetch(
-        new URL(apiReq.url, process.env.PV_WEBSITE_API_URL),
-        {
-            method: apiReq.method,
-            headers: {
-                ...apiReq.headers,
-                'Content-Type': 'application/json',
-            },
-            body: apiReq.body ? JSON.stringify(apiReq.body) : undefined,
-            signal: req.signal,
-        }
-    )
+    const session = await auth()
+
+    if (!session?.accessToken)
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const body: AuthRequest = {
+        discordToken: session.accessToken,
+    }
+
+    const res = await fetch(new URL('/auth', process.env.PV_WEBSITE_API_URL), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+        signal: req.signal,
+    })
 
     return NextResponse.json(await res.json())
 }

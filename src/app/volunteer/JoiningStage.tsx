@@ -1,4 +1,4 @@
-import { SupportNote } from '.'
+import { SupportNote } from './SupportNote'
 import { useInit } from '@/hooks'
 import { ArrowPathIcon } from '@heroicons/react/24/solid'
 import { QueryClient, useMutation } from '@tanstack/react-query'
