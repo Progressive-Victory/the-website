@@ -56,8 +56,8 @@ export const Committees: Committee[] = [
     },
 ]
 
-/*
-const test = [
+
+const testNodes: Node[] = [
     {
         id: 0,
         title: 'Executive Director',
@@ -85,16 +85,16 @@ const test = [
         name: 'Jenywlfersn',
         leadership: 'Junior',
         department: "Community",
-        team: null
+        team: null,
         committees: [Committees[0], Committees[1]],
     },
     {
         id: 4,
         title: 'Community Manager',
-        name: "?"
+        name: "?",
         leadership: 'Junior',
         department: "Community",
-        team: null
+        team: null,
         committees: [Committees[0], Committees[1]],
     },
     {
@@ -102,17 +102,17 @@ const test = [
         title: 'Welcome Team Lead',
         name: 'Monarch',
         department: "?",
-        team: "Welcome"
+        team: "Welcome",
         leadership: 'Junior',
         committees: [Committees[0]],
     },
     {
         id: 6,
         title: 'Welcome Team Lead',
-        name: "?"
+        name: "?",
         leadership: 'Junior',
         department: "?",
-        team: "Welcome"
+        team: "Welcome",
         committees: [Committees[0]],
     },
 
@@ -121,8 +121,8 @@ const test = [
         name: "?",
         title: 'Welcome Team Deputy',
         leadership: "?",
-        departmnet: "?",
-        team: "Welcome"
+        department: "?",
+        team: "Welcome",
         committees: []
     },
     {
@@ -146,34 +146,120 @@ const test = [
     {
         id: 10,
         title: 'Events Team Deputy',
-        name: "?"
+        name: "?",
         leadership: "?",
         department: "?",
-        team: "Events"
+        team: "Events",
         name: 'EM',
     }
 ]
-*/
+
 
 //GOAL - Figure out how to translate the nodes into the initialNodes that exist.
 
+const departments = [
+    {depName: "Community", teams: ["Welcome", "Events", "Moderation", "Writing"]}, 
+    {depName: "Media", teams: ["Writing", "Audio-Video", "Design"]}, 
+    {depName: "Operations", teams: ["Fundraising", "Documentation"]}, 
+    {depName: "Infrastructure", teams: ["Documentation", "Research"]}, 
+    {depName: "Organizing", teams: ["Recruitment", "Mobilization"]}, 
+    {depName: "Technology", teams: ["Discord", "Database", "Website"]}
+]
+
+const initialTestNodes: Node[] = []
+const initialTestEdges: Node[] = []
+
+function GetNodes(){
+
+    let id = testNodes.length;
+
+    const execDir = testNodes.find(e => e?.title === "Executive Director")
+    const depExecDir = testNodes.find(e => e?.title === "Deputy Executive Director")
+
+    initialTestNodes.push(CreatePositionNode(execDir))
+    initialTestNodes.push(CreatePositionNode(depExecDir))
+
+    let departmentId = 0
+    let teamId = 0
+    let edgeId = 0
+
+    departments.forEach(dep => {
+        const depLeads = testNodes.filter(d => ((d.depName === dep.depName) && (!d.team)))
+        id++
+        departmentId = id
+        initialTestNodes.push(CreateDepartmentNode({departmentId, name: dep.depName, leads: depLeads}))
+
+        dep?.teams.forEach(team => {
+            const teamLeads = testNodes.filter(t => (t.teams === team))
+            id++
+            teamId = id
+
+            initialTestNodes.push(CreateTeamNode({id: teamId, name: team, desc: "Description", leads: teamLeads}))
+            //initial edges
+            
+            initialTestEdges.push(CreateEdge(`e${edgeId}`, departmentId, teamId))
+            
+        })
+        edgeId++
+    })
+
+} 
+
 /*
 function test(){
-    const initialNodes: Nodes[] = []
+    const initialTestNodes: Nodes[] = []
 
-    //find Executive Director and add to initialNodes - createPositionNode()
-    //find Deputy Director and add to initialNodes - createPositionNode()
+    let id = testNodes.length;
+
+    const initialEdges = [];
+
+    const execDir = testNodes.find(e => e.title === "Executive Director")
+    const depExecDir = testNodes.find(e => e.title === "Deputy Executive Director")
+
+    initialTestNodes.push(CreatePositionNode(execDir))
+    initialTestNodes.push(CreatePositionNode(depExecDir))
+
+
+    //find Executive Director and add to initialNodes - CreatePositionNode()
+    //find Deputy Director and add to initialNodes - CreatePositionNode()
 
     //Department names - Community, Media, Operations, Infrastructure, Organizing, Technology
     
     //loop through all department names
     //CreateDepartmentNode({id: ##, name: "Department Name", leads: []})
 
+    let departmentId = 0
+    let teamId = 0
+
+    departments.forEach(dep => {
+      //const test = initialTestNodes.filter(e => (e.department === "" && e.team !== "")) 
+      id++; 
+      department = id
+      //initialTestNodes.push(CreateDepartmentNode{id, name: department, leads: test})
+        teams.forEach(teams => {
+            const test = initialTestNodes.filter(e => (e.teams === "" && e.department === ""));
+            id++; 
+            teamId = id
+        //initialTestNodes.push(CreateTeamNode{id, name: team, desc: "Description", leads: test})
+        })
+        initialEdges.push(CreateEdge(`e${t}`, departmentId, teamId))
+        const initialEdges: Edge[] = [
+            CreateEdge('e0', 0, 1),
+            CreateEdge('e1', 1, 2),
+            CreateEdge('e2', 2, 6),
+            CreateEdge('e3', 2, 10),
+        ]
+    })
+
     //Teams by shapes (?) - Community Team, Media Team, Engineering Committee, State Organizing Committee
 
     //loop through all team names
     //CreateTeamNode({id: ###, name: "Team Name", desc: "Description", leads: []})
-
+    teams.forEach(teams => {
+        const test = initialTestNodes.filter(e => (e.teams === ""));
+        id++; 
+      //initialTestNodes.push(CreateTeamNode{id: ###, name: team, desc: "Description", leads: test})
+    })
 
     //Find the proper edges
 
@@ -325,6 +411,9 @@ function CreateEdge(id: string, source: number, target: number) {
         type: 'custom-edge',
     }
 }
+
+//GetNodes(initialTestNodes, initialTestEdges)
+
 
 /* Changes to this do not hot refresh on save; must use F5*/
 const initialNodes: Node[] = [
