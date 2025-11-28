@@ -4,6 +4,8 @@ import { PlusIcon, MinusIcon } from '@heroicons/react/24/solid'
 import type React from 'react'
 import { useState, useRef, useEffect } from 'react'
 
+//If anyone removes the style comments I swear to god!
+
 type TitleAlign = 'left' | 'center' | 'right'
 type BodyType = 'text' | 'dropdown'
 
@@ -65,8 +67,9 @@ export function InfoSection({
         bodyContent = (
             <div
                 style={{
+                    //style for dropdown bodyType
                     paddingTop: '1.5rem',
-                    paddingBottom: '1.5rem',
+                    paddingBottom: '0.2rem',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '1rem',
@@ -91,6 +94,7 @@ export function InfoSection({
         bodyContent = (
             <div
                 style={{
+                    //style for text bodyType - also default
                     whiteSpace: 'pre-line',
                     paddingTop: '0.5rem',
                     paddingBottom: '0rem',
@@ -106,6 +110,7 @@ export function InfoSection({
     return (
         <section
             style={{
+                //style for background container
                 margin: '1.5rem',
                 borderRadius: '0.5rem',
                 backgroundColor: '#09223a',
@@ -117,6 +122,7 @@ export function InfoSection({
         >
             <p
                 style={{
+                    //style for title
                     marginTop: 0.5,
                     marginRight: 0,
                     marginLeft: 0,
@@ -182,22 +188,26 @@ function DropdownQuestion({
             type="button"
             onClick={onToggle}
             style={{
+                //style for dropdown question container button???
                 position: 'relative',
-                marginInline: '2rem',
+                marginInline: '0rem',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '1rem',
+                gap: '0rem',
                 borderRadius: '0.375rem',
                 backgroundColor: '#ffffff',
-                padding: '1rem',
+                paddingTop: '1rem',
+                paddingBottom: '0.85rem',
+                paddingInline: '1rem', //make 1
                 border: 'none',
                 cursor: 'pointer',
             }}
         >
             <div
                 style={{
-                    marginTop: '1.25rem',
+                    //style for dropdown title question container
+                    marginTop: '0rem',
                     display: 'flex',
                     width: '100%',
                     flexDirection: 'row',
@@ -208,8 +218,9 @@ function DropdownQuestion({
             >
                 <h2
                     style={{
+                        //style for dropdown title question
                         textAlign: 'left',
-                        fontSize: '1.5rem',
+                        fontSize: '1.125rem',
                         fontWeight: 700,
                         margin: 0,
                         color: '#000000',
@@ -228,6 +239,7 @@ function DropdownQuestion({
 
             <div
                 style={{
+                    //style for something???
                     width: '100%',
                     height,
                     transition: 'height 0.2s ease',
@@ -237,12 +249,14 @@ function DropdownQuestion({
                 <div
                     ref={contentRef}
                     style={{
-                        paddingBottom: '1rem',
-                        paddingRight: '2.5rem',
+                        //style for dropdown answer
+                        paddingTop: '0.2rem',
+                        paddingRight: '3rem',
                         pointerEvents: 'auto',
                         userSelect: 'text',
                         textAlign: 'justify',
-                        fontSize: '1.125rem',
+                        fontWeight: 500,
+                        fontSize: '0.8rem',
                         color: '#09223a',
                     }}
                 >
@@ -265,9 +279,11 @@ export function ContentPageFrame({ children, heading }: ContentPageFrameProps) {
                 {heading && (
                     <div
                         style={{
+                            //style for page header
                             width: '100%',
                             textAlign: 'center',
-                            marginBottom: '2rem',
+                            marginTop: '1.5rem',
+                            marginBottom: '1.2rem',
                         }}
                     >
                         {heading}
@@ -288,19 +304,25 @@ export function ContentPageFrame({ children, heading }: ContentPageFrameProps) {
                     min-height: 100vh;
                     text-align: justify;
                     letter-spacing: 0.025em;
-                    padding-block: 2rem;
-                    padding-inline: 1.5rem;
+                    padding-block: 1rem;
                     max-width: 100%;
                 }
 
                 @media (min-width: 768px) {
                     .pageWrapper {
-                        padding-block: 4rem;
-                        padding-inline: 4rem;
+                        padding-block: 1rem;
+                        padding-inline: 2rem;
                     }
                 }
 
                 @media (min-width: 1024px) {
+                    .pageWrapper {
+                        max-width: 80%;
+                        padding-block: 3rem;
+                        padding-inline: 4rem;
+                    }
+                }
+                @media (min-width: 1280px) {
                     .pageWrapper {
                         max-width: 80%;
                         padding-block: 3rem;
