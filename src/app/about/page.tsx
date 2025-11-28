@@ -1,7 +1,7 @@
-import { Metadata } from 'next'
+import { AboutContent } from './AboutContent'
+import { HalftoneBackground } from '@/components/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
-import FAQ from './FAQ'
-import AboutCards from './AboutCards'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
     title: 'PV - About',
@@ -15,29 +15,20 @@ export const metadata: Metadata = {
     },
 }
 
-/**
- * The About page.
- *
- * This page explains the purpose and goals of Progressive Victory, and how it
- * works.
- *
- * The page is divided into sections, each explaining a different aspect of
- * Progressive Victory. The sections are: Our Community, How it Works, and
- * Values.
- *
- * @returns The About page.
- */
 export default function About() {
     return (
         <MainLayout>
-            {/* Halftone background */}
-            <div className="halftone z-1 absolute inset-0 size-full opacity-10" />
-
-            <div className="z-2 relative m-auto flex min-h-screen w-full flex-col items-center justify-start gap-y-10 pb-16 pt-10 xl:min-h-[unset]">
-                <AboutCards />
-                <FAQ />
+            <div
+                style={{
+                    position: 'relative',
+                    width: '100%',
+                    minHeight: '100vh',
+                    overflow: 'hidden',
+                }}
+            >
+                <HalftoneBackground />
+                <AboutContent />
             </div>
         </MainLayout>
     )
 }
-
