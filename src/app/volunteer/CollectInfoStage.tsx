@@ -61,7 +61,7 @@ export function CollectInfoStage({
     }
 
     const checkZip = useCallback(async (code: string) => {
-        const result = await fetch('/api/onboarding/zip', {
+        const result = await fetch('/api/onboarding/zip/validate', {
             method: 'POST',
             body: JSON.stringify({
                 code: code,
@@ -74,7 +74,6 @@ export function CollectInfoStage({
     const handleSubmit = async () => {
         const isValidZip = await checkZip(form.zipCode)
         setZipCodeError(!isValidZip)
-        console.log(`zipIsValid: ${isValidZip}`)
         if (!isValidZip) return
         onSuccess(form)
     }

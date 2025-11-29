@@ -1,8 +1,8 @@
-import mongoose, { Document, Model, Schema } from 'mongoose'
-import { IRole, Role } from './Role'
-import { OnboardingStage } from '@/util/stage'
-import { Location } from '@/models/Location'
 import DocumentUpdate, { IDocumentUpdate } from './DocumentUpdate'
+import { IRole, Role } from './Role'
+import { Location } from '@/models/Location'
+import { OnboardingStage } from '@/util/stage'
+import mongoose, { Document, Model, Schema } from 'mongoose'
 
 // Here is a user document
 // It defines the structure of the user and provides a POJO for interacting with user data
@@ -63,22 +63,6 @@ const schema = new Schema<IUser>({
     updateHistory: [
         { type: Schema.Types.ObjectId, ref: DocumentUpdate, required: false },
     ],
-})
-
-schema.post('save', (doc: Document<IUser>, next) => {
-    setTimeout(() => {
-        const usr: IUser = doc as IUser
-        if (usr.zipCode && !(usr.state && usr.county && usr.city)) {
-            void Location.findOne({ zip: usr.zipCode }).then((usrLoc) => {
-                if (!usrLoc) return
-                usr.city = usrLoc.primary_city
-                usr.county = usrLoc.county
-                usr.state = usrLoc.state
-                void usr.save()
-            })
-        }
-        next()
-    }, 10)
 })
 
 // Finally the model itself is exported, we use the cache if it exists
