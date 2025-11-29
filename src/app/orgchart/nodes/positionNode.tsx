@@ -1,6 +1,7 @@
 import { Handle, Node, NodeProps, Position } from '@xyflow/react'
 import PositionData from '../types/positionData'
 import PositionBubble from '../bubbles/positionBubble'
+import Committee from '../types/committee'
 
 type PositionNodeData = Node<{
     id: number
@@ -9,6 +10,7 @@ type PositionNodeData = Node<{
     acting?: boolean
     redacted?: boolean
     leadership?: string
+    committees?: Committee[]
 }>
 
 export default function PositionNode({
@@ -23,12 +25,13 @@ export default function PositionNode({
         acting: data.acting,
         redacted: data.redacted,
         leadership: data.leadership,
+        committees: data.committees,
     }
 
     return (
         <div
             key={data.id}
-            className="flex min-h-[300px] flex-col items-center justify-center"
+            className="flex flex-col items-center justify-center"
         >
             <Handle
                 type="target"

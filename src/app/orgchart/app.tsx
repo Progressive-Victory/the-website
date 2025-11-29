@@ -101,7 +101,7 @@ const testNodes: Node[] = [
         id: 5,
         title: 'Welcome Team Lead',
         name: 'Monarch',
-        department: "?",
+        department: "Community",
         team: "Welcome",
         leadership: 'Junior',
         committees: [Committees[0]],
@@ -111,7 +111,7 @@ const testNodes: Node[] = [
         title: 'Welcome Team Lead',
         name: "?",
         leadership: 'Junior',
-        department: "?",
+        department: "Community",
         team: "Welcome",
         committees: [Committees[0]],
     },
@@ -121,7 +121,7 @@ const testNodes: Node[] = [
         name: "?",
         title: 'Welcome Team Deputy',
         leadership: "?",
-        department: "?",
+        department: "Community",
         team: "Welcome",
         committees: []
     },
@@ -130,7 +130,7 @@ const testNodes: Node[] = [
         title: 'Events Team Lead',
         name: 'BrewMasterCraft',
         leadership: 'Junior',
-        department: "?",
+        department: "Community",
         team: "Events",
         committees: [Committees[0]],
     },
@@ -139,7 +139,7 @@ const testNodes: Node[] = [
         title: 'Events Team Lead',
         name: "?",
         leadership: 'Junior',
-        department: "?",
+        department: "Community",
         team: "Events",
         committees: [Committees[0]],
     },
@@ -148,7 +148,7 @@ const testNodes: Node[] = [
         title: 'Events Team Deputy',
         name: "?",
         leadership: "?",
-        department: "?",
+        department: "Community",
         team: "Events",
         name: 'EM',
     }
@@ -157,19 +157,23 @@ const testNodes: Node[] = [
 
 //GOAL - Figure out how to translate the nodes into the initialNodes that exist.
 
-const departments = [
+/*const departments = [
     {depName: "Community", teams: ["Welcome", "Events", "Moderation", "Writing"]}, 
     {depName: "Media", teams: ["Writing", "Audio-Video", "Design"]}, 
     {depName: "Operations", teams: ["Fundraising", "Documentation"]}, 
     {depName: "Infrastructure", teams: ["Documentation", "Research"]}, 
     {depName: "Organizing", teams: ["Recruitment", "Mobilization"]}, 
     {depName: "Technology", teams: ["Discord", "Database", "Website"]}
+]*/
+
+const departments = [
+    {depName: "Community", teams: ["Welcome", "Events"]}
 ]
 
-const initialTestNodes: Node[] = []
-const initialTestEdges: Node[] = []
-
 function GetNodes(){
+
+    const initialTestNodes: Node[] = []
+    const initialTestEdges: Edge[] = []
 
     let id = testNodes.length;
 
@@ -183,14 +187,18 @@ function GetNodes(){
     let teamId = 0
     let edgeId = 0
 
+    initialTestEdges.push(CreateEdge(`e${edgeId}`, 0, 1))
+    edgeId++
+    //initialTestEdges.push(CreateEdge(`e${edgeId}`, 0, 1))
+
     departments.forEach(dep => {
-        const depLeads = testNodes.filter(d => ((d.depName === dep.depName) && (!d.team)))
+        const depLeads = testNodes.filter(d => ((d.department == dep.depName) && (!d.team)))
         id++
         departmentId = id
-        initialTestNodes.push(CreateDepartmentNode({departmentId, name: dep.depName, leads: depLeads}))
+        initialTestNodes.push(CreateDepartmentNode({id: departmentId, name: dep.depName, leads: depLeads}))
 
         dep?.teams.forEach(team => {
-            const teamLeads = testNodes.filter(t => (t.teams === team))
+            const teamLeads = testNodes.filter(t => (t.team === team))
             id++
             teamId = id
 
@@ -199,106 +207,26 @@ function GetNodes(){
             
             initialTestEdges.push(CreateEdge(`e${edgeId}`, departmentId, teamId))
             
+            edgeId++
         })
-        edgeId++
     })
 
+    console.log(initialTestNodes)
+    console.log(initialTestEdges)
+
+    return { initialTestNodes, initialTestEdges }
 } 
 
-/*
-function test(){
-    const initialTestNodes: Nodes[] = []
-
-    let id = testNodes.length;
-
-    const initialEdges = [];
-
-    const execDir = testNodes.find(e => e.title === "Executive Director")
-    const depExecDir = testNodes.find(e => e.title === "Deputy Executive Director")
-
-    initialTestNodes.push(CreatePositionNode(execDir))
-    initialTestNodes.push(CreatePositionNode(depExecDir))
-
-
-    //find Executive Director and add to initialNodes - CreatePositionNode()
-    //find Deputy Director and add to initialNodes - CreatePositionNode()
-
-    //Department names - Community, Media, Operations, Infrastructure, Organizing, Technology
-    
-    //loop through all department names
-    //CreateDepartmentNode({id: ##, name: "Department Name", leads: []})
-
-    let departmentId = 0
-    let teamId = 0
-
-    departments.forEach(dep => {
-      //const test = initialTestNodes.filter(e => (e.department === "" && e.team !== "")) 
-      id++; 
-      department = id
-      //initialTestNodes.push(CreateDepartmentNode{id, name: department, leads: test})
-        teams.forEach(teams => {
-            const test = initialTestNodes.filter(e => (e.teams === "" && e.department === ""));
-            id++; 
-            teamId = id
-        //initialTestNodes.push(CreateTeamNode{id, name: team, desc: "Description", leads: test})
-        })
-        initialEdges.push(CreateEdge(`e${t}`, departmentId, teamId))
-        const initialEdges: Edge[] = [
-            CreateEdge('e0', 0, 1),
-            CreateEdge('e1', 1, 2),
-            CreateEdge('e2', 2, 6),
-            CreateEdge('e3', 2, 10),
-        ]
-    })
-
-    //Teams by shapes (?) - Community Team, Media Team, Engineering Committee, State Organizing Committee
-
-    //loop through all team names
-    //CreateTeamNode({id: ###, name: "Team Name", desc: "Description", leads: []})
-    teams.forEach(teams => {
-        const test = initialTestNodes.filter(e => (e.teams === ""));
-        id++; 
-      //initialTestNodes.push(CreateTeamNode{id: ###, name: team, desc: "Description", leads: test})
-    })
-
-    //Find the proper edges
-
-    //Teams - 
-    // 
-    // - Community - Welcome, Events, Moderation, Writing, 
-    // - Media - Writing, Audio-Video, Design
-    // - Operations - Fundraising, Documentation
-    // - Infrastructure - Documentation, Research
-    // - Organizing - Recruitment, Mobilization
-        - Coalitions - Western, Midwest, Northwestern, Southern
-    // - Engineering - Discord, Database, Website
-
-    //create Department Nodes
-    // - Determine which documents belong by
-        - title
-        - leadership 
-        - department
-        - team 
-        - committee
-
-    //Need to figure out some way to take parent, child, and sibling positions into account
-    //Maybe look at the department leads and what children they have
-
-    //create Team Nodes
-
-}
-
-*/
 
 const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
 
-const nWidth = 500
+const nWidth = 360
 const nHeight = 300
 const defaultPos: XYPosition = { x: 0, y: 0 }
 
-const GetElements = (nodes: Node[], edges: Edge[], direction = 'LR') => {
+const GetElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
     const isHorizontal = direction === 'LR'
-    dagreGraph.setGraph({ rankdir: direction, ranksep: 0, nodesep: 25 })
+    dagreGraph.setGraph({ rankdir: direction, ranksep: 50, nodesep: 25 })
     nodes.forEach((node) => {
         dagreGraph.setNode(node.id, { width: nWidth, height: nHeight })
     })
@@ -329,6 +257,7 @@ function CreatePositionNode({
     acting,
     redacted,
     leadership,
+    committees,
 }: {
     id: number
     title: string
@@ -336,6 +265,7 @@ function CreatePositionNode({
     acting?: boolean
     redacted?: boolean
     leadership?: string
+    committees?: Committee[]
 }) {
     return {
         id: id.toString(),
@@ -348,6 +278,7 @@ function CreatePositionNode({
             acting: acting,
             redacted: redacted,
             leadership: leadership,
+            committees: committees,
         },
     }
 }
@@ -413,6 +344,12 @@ function CreateEdge(id: string, source: number, target: number) {
 }
 
 //GetNodes(initialTestNodes, initialTestEdges)
+//GetNodes()
+
+const { initialTestNodes, initialTestEdges } = GetNodes()
+
+console.log("initialTestEdges")
+console.log(initialTestEdges)
 
 
 /* Changes to this do not hot refresh on save; must use F5*/
@@ -523,12 +460,64 @@ const edgeTypes = {
     'custom-edge': OrgChartEdge,
 }
 
-const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
+
+/*console.log("initialNodes")
+console.log(initialNodes)*/
+
+console.log("initialTestNodes")
+console.log(initialTestNodes)
+
+
+/*const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
     initialNodes,
     initialEdges
+)*/
+const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
+    initialTestNodes,
+    initialTestEdges
 )
 
 export default function OrgChartApp() {
+    const [legendEnabled, toggleLegend] = useState(false)
+
+    function LegendPanel() {
+        return (
+            <Panel position="top-left">
+                {!legendEnabled ? null : (
+                    <div className="mb-2 rounded-xl border-4 border-amber-300 bg-amber-50 p-2 text-xs font-bold text-black-pearl-dark">
+                        <div className="mb-2 flex">
+                            <div className="size-4 border-2 border-amber-300 bg-blue-400"></div>
+                            <p className="ml-2">{'JUNIOR LEADERSHIP'}</p>
+                        </div>
+                        <div className="mb-2 flex">
+                            <div className="size-4 border-2 border-amber-300 bg-red-600"></div>
+                            <p className="ml-2">{'SENIOR LEADERSHIP'}</p>
+                        </div>
+                        <PositionBubble
+                            data={{
+                                id: -1,
+                                title: 'Position Name',
+                                name: 'Holder Name',
+                                leadership: 'Senior',
+                                committees: [Committees[0]],
+                            }}
+                            mini={true}
+                        />
+                        <p className="mt-2">
+                            {'SHAPES INDICATE TEAM/COMMITTEE GROUPING'}
+                        </p>
+                    </div>
+                )}
+                <button
+                    className="rounded-xl border-4 border-amber-300 bg-amber-50 p-1 font-black text-black-pearl-dark"
+                    onClick={() => toggleLegend(!legendEnabled)}
+                >
+                    {legendEnabled ? 'HIDE LEGEND' : 'SHOW LEGEND'}
+                </button>
+            </Panel>
+        )
+    }
+
     const DetailPanel = ({
         name,
         desc,
@@ -592,7 +581,7 @@ export default function OrgChartApp() {
     const [currentDetails, setCurrentDetails] = useState(<DetailPanel />)
     const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges)
-    const [horizontal, setHorizontal] = useState(false)
+    /*const [horizontal, setHorizontal] = useState(false)*/
 
     const updateLayout = useCallback(
         (direction: string | undefined) => {
@@ -607,7 +596,7 @@ export default function OrgChartApp() {
         [nodes, edges, setNodes, setEdges]
     )
 
-    const viewportRef = useCallback(
+    /*const viewportRef = useCallback(
         (viewport: HTMLDivElement) => {
             if (!viewport) return
             const observer = new ResizeObserver(() => {
@@ -615,8 +604,8 @@ export default function OrgChartApp() {
                     viewport.offsetWidth > viewport.offsetHeight &&
                     !horizontal
                 ) {
-                    updateLayout('LR')
-                    setHorizontal(true)
+                    updateLayout('TB')
+                    setHorizontal(false)
                 } else if (
                     viewport.offsetWidth <= viewport.offsetHeight &&
                     horizontal
@@ -628,7 +617,7 @@ export default function OrgChartApp() {
             observer.observe(viewport)
         },
         [updateLayout, horizontal]
-    )
+    )*/
 
     const handleNodeClick = (event: React.MouseEvent, node: Node) => {
         if (node.type == 'dep') {
@@ -654,7 +643,7 @@ export default function OrgChartApp() {
     }
 
     return (
-        <div className="size-full bg-white" ref={viewportRef}>
+        <div className="size-full bg-white" /*ref={viewportRef}*/>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -669,6 +658,7 @@ export default function OrgChartApp() {
                 maxZoom={1.2}
                 minZoom={0.25}
             >
+                <LegendPanel />
                 {currentDetails}
                 <Controls />
             </ReactFlow>

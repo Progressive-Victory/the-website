@@ -29,7 +29,7 @@ export default function DepartmentNode({
     return (
         <div
             key={data.id}
-            className="flex min-h-[300px] flex-col items-center justify-center"
+            className="flex flex-col items-center justify-center"
         >
             <Handle
                 type="target"
