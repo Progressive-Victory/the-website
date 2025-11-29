@@ -37,7 +37,7 @@ pnpm install
 Next, check the .env.example file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to Joops on discord.
 
 ```bash
-# $PROJECT_DIR/.env
+# $PROJECT_DIR/.env.local
 
 # These are the values for the development Discord bot
 DISCORD_CLIENT_ID="1234"
