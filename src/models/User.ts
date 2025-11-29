@@ -1,6 +1,5 @@
 import DocumentUpdate, { IDocumentUpdate } from './DocumentUpdate'
 import { IRole, Role } from './Role'
-import { Location } from '@/models/Location'
 import { OnboardingStage } from '@/util/stage'
 import mongoose, { Document, Model, Schema } from 'mongoose'
 

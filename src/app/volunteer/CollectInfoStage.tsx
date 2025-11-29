@@ -60,18 +60,18 @@ export function CollectInfoStage({
         setPhoneNumber(formatted)
     }
 
-    const checkZip = useCallback(async (code: string) => {
+    const checkZip = useCallback(async (code: string): Promise<boolean> => {
         const result = await fetch('/api/onboarding/zip/validate', {
             method: 'POST',
             body: JSON.stringify({
-                code: code,
+                code,
             }),
         })
-        const { isValidZip } = await result.json()
+        const { isValidZip }: { isValidZip: boolean } = await result.json()
         return isValidZip
     }, [])
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (): Promise<void> => {
         const isValidZip = await checkZip(form.zipCode)
         setZipCodeError(!isValidZip)
         if (!isValidZip) return
@@ -226,7 +226,7 @@ export function CollectInfoStage({
             </div>
             <button
                 type="submit"
-                onClick={handleSubmit}
+                onClick={void handleSubmit}
                 disabled={!isValid}
                 className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
             >

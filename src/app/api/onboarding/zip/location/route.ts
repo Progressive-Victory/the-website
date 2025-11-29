@@ -1,7 +1,6 @@
 import Location from '@/models/Location'
 import dbConnect from '@/util/libmongo'
 import { NextRequest, NextResponse } from 'next/server'
-import z from 'zod'
 
 export async function GET(req: NextRequest) {
     const u = typeof req.url === 'string' ? new URL(req.url) : req.url
