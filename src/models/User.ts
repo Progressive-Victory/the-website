@@ -1,11 +1,15 @@
 import DocumentUpdate, { IDocumentUpdate } from './DocumentUpdate'
 import { IRole, Role } from './Role'
+import { Location } from '@/models/Location'
 import { OnboardingStage } from '@/util/stage'
 import mongoose, { Document, Model, Schema } from 'mongoose'
 
 // Here is a user document
 // It defines the structure of the user and provides a POJO for interacting with user data
 export interface IUser extends Document {
+    completed_intake?: Date
+    created_at?: Date
+    joined_server?: Date
     name: string
     email: string
     image: string
@@ -31,6 +35,9 @@ export interface IUser extends Document {
 
 // We then create a schema for the user document, tells Mongoose how the document should be structured
 const schema = new Schema<IUser>({
+    completed_intake: { type: Schema.Types.Date, required: false },
+    joined_server: { typed: Schema.Types.Date, required: false },
+    created_at: { type: Schema.Types.Date, required: false },
     name: { type: String, required: true },
     email: { type: String, required: true },
     image: { type: String, required: true },
