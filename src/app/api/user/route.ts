@@ -84,6 +84,9 @@ export async function PATCH(req: NextRequest) {
     user.lastName = data.lastName ?? user.lastName
     user.dateOfBirth = data.dateOfBirth ?? user.dateOfBirth
     user.zipCode = data.zipCode ?? user.zipCode
+    user.city = data.city ?? user.city
+    user.county = data.county ?? user.county
+    user.state = data.state ?? user.state
     user.phoneNumber = data.phoneNumber ?? user.phoneNumber
     user.acceptedAlerts = data.acceptedAlerts ?? user.acceptedAlerts
     user.onboardingStage = data.onboardingStage ?? user.onboardingStage
