@@ -1,6 +1,5 @@
 import DocumentUpdate, { IDocumentUpdate } from './DocumentUpdate'
 import { IRole, Role } from './Role'
-import { Location } from '@/models/Location'
 import { OnboardingStage } from '@/util/stage'
 import mongoose, { Document, Model, Schema } from 'mongoose'
 
@@ -35,9 +34,6 @@ export interface IUser extends Document {
 
 // We then create a schema for the user document, tells Mongoose how the document should be structured
 const schema = new Schema<IUser>({
-    completed_intake: { type: Schema.Types.Date, required: false },
-    joined_server: { typed: Schema.Types.Date, required: false },
-    created_at: { type: Schema.Types.Date, required: false },
     name: { type: String, required: true },
     email: { type: String, required: true },
     image: { type: String, required: true },
@@ -51,6 +47,9 @@ const schema = new Schema<IUser>({
     phoneNumber: { type: String, required: false },
     acceptedAlerts: { type: Boolean, required: false, default: false },
     lastSmsCodeSent: { type: String, required: false, default: null },
+    completed_intake: { type: Schema.Types.Date, required: false },
+    joined_server: { type: Schema.Types.Date, required: false },
+    created_at: { type: Schema.Types.Date, required: false },
     lastSmsCodeSentAt: {
         type: Schema.Types.Date,
         required: false,

@@ -226,7 +226,9 @@ export function CollectInfoStage({
             </div>
             <button
                 type="submit"
-                onClick={void handleSubmit}
+                onClick={() => {
+                    void handleSubmit()
+                }}
                 disabled={!isValid}
                 className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
             >

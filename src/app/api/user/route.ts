@@ -78,7 +78,7 @@ export async function PATCH(req: NextRequest) {
         default:
             throw Error('Unidentified response code.')
     }
-
+    //hey wait shouldn't fields like onboarding stage and completion dates not be editable in a user accessable endpoint?
     const data = (await req.json()) as Partial<IUser>
     user.firstName = data.firstName ?? user.firstName
     user.lastName = data.lastName ?? user.lastName
@@ -87,6 +87,9 @@ export async function PATCH(req: NextRequest) {
     user.city = data.city ?? user.city
     user.county = data.county ?? user.county
     user.state = data.state ?? user.state
+    user.created_at = data.created_at ?? user.created_at
+    user.completed_intake = data.completed_intake ?? user.completed_intake
+    user.joined_server = data.joined_server ?? user.joined_server
     user.phoneNumber = data.phoneNumber ?? user.phoneNumber
     user.acceptedAlerts = data.acceptedAlerts ?? user.acceptedAlerts
     user.onboardingStage = data.onboardingStage ?? user.onboardingStage
