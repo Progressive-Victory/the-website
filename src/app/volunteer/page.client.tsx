@@ -106,19 +106,19 @@ export default function VolunteerPage({
         (onboardingStage: OnboardingStage) => {
             let obj: {
                 onboardingStage: OnboardingStage
-                created_at?: Date
-                completed_intake?: Date
-                joined_server?: Date
+                createdAt?: Date
+                completedIntake?: Date
+                joinedServer?: Date
             } = { onboardingStage }
             switch (onboardingStage) {
                 case OnboardingStage.NOT_STARTED:
-                    obj = { ...obj, created_at: new Date() }
+                    obj = { ...obj, createdAt: new Date() }
                     break
                 case OnboardingStage.AWAITING_VERIFY:
-                    obj = { ...obj, completed_intake: new Date() }
+                    obj = { ...obj, completedIntake: new Date() }
                     break
                 case OnboardingStage.JOINED:
-                    obj = { ...obj, joined_server: new Date() }
+                    obj = { ...obj, joinedServer: new Date() }
                     break
             }
 

@@ -87,9 +87,9 @@ export async function PATCH(req: NextRequest) {
     user.city = data.city ?? user.city
     user.county = data.county ?? user.county
     user.state = data.state ?? user.state
-    user.created_at = data.created_at ?? user.created_at
-    user.completed_intake = data.completed_intake ?? user.completed_intake
-    user.joined_server = data.joined_server ?? user.joined_server
+    user.createdAt = data.createdAt ?? user.createdAt
+    user.completedIntake = data.completedIntake ?? user.completedIntake
+    user.joinedServer = data.joinedServer ?? user.joinedServer
     user.phoneNumber = data.phoneNumber ?? user.phoneNumber
     user.acceptedAlerts = data.acceptedAlerts ?? user.acceptedAlerts
     user.onboardingStage = data.onboardingStage ?? user.onboardingStage

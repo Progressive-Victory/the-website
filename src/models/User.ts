@@ -6,9 +6,9 @@ import mongoose, { Document, Model, Schema } from 'mongoose'
 // Here is a user document
 // It defines the structure of the user and provides a POJO for interacting with user data
 export interface IUser extends Document {
-    completed_intake?: Date
-    created_at?: Date
-    joined_server?: Date
+    completedIntake?: Date
+    createdAt?: Date
+    joinedServer?: Date
     name: string
     email: string
     image: string
@@ -47,9 +47,9 @@ const schema = new Schema<IUser>({
     phoneNumber: { type: String, required: false },
     acceptedAlerts: { type: Boolean, required: false, default: false },
     lastSmsCodeSent: { type: String, required: false, default: null },
-    completed_intake: { type: Schema.Types.Date, required: false },
-    joined_server: { type: Schema.Types.Date, required: false },
-    created_at: { type: Schema.Types.Date, required: false },
+    completedIntake: { type: Schema.Types.Date, required: false },
+    joinedServer: { type: Schema.Types.Date, required: false },
+    createdAt: { type: Schema.Types.Date, required: false },
     lastSmsCodeSentAt: {
         type: Schema.Types.Date,
         required: false,
