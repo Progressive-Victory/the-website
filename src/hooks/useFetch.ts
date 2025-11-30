@@ -1,4 +1,5 @@
 import { FetchError, FetchRequest } from '@/models'
+import z from 'zod'
 
 interface ApiError {
     error: string
@@ -6,6 +7,7 @@ interface ApiError {
 }
 
 export function useFetch() {
+    //TODO: Put this into session instead
     async function refreshToken() {
         const res = await fetch('/api/fetch/auth', { method: 'POST' })
 
@@ -29,6 +31,7 @@ export function useFetch() {
         method: string,
         url: string,
         body: object | null,
+        schema: z.ZodObject | null,
         signal?: AbortSignal
     ) {
         const req: FetchRequest = {
@@ -63,11 +66,18 @@ export function useFetch() {
             } as FetchError
         }
 
-        return (await res.json()) as R
+        const data = (await res.json()) as unknown
+
+        if (!schema) return data as R
+        return z.parse(schema, data) as R
     }
 
-    async function onGet<R>(url: string, signal?: AbortSignal) {
-        return await onFetch<R>('GET', url, null, signal)
+    async function onGet<R>(
+        url: string,
+        schema: z.ZodObject,
+        signal?: AbortSignal
+    ) {
+        return await onFetch<R>('GET', url, null, schema, signal)
     }
 
     async function onPut(
@@ -75,27 +85,29 @@ export function useFetch() {
         body: object | null,
         signal?: AbortSignal
     ) {
-        await onFetch<void>('PUT', url, body, signal)
+        await onFetch('PUT', url, body, null, signal)
     }
 
     async function onPost<R = void>(
         url: string,
         body: object | null,
+        schema: z.ZodObject | null,
         signal?: AbortSignal
     ) {
-        return await onFetch<R>('POST', url, body, signal)
+        return await onFetch<R>('POST', url, body, schema, signal)
     }
 
     async function onPatch<R = void>(
         url: string,
         body: object | null,
+        schema: z.ZodObject | null,
         signal?: AbortSignal
     ) {
-        return await onFetch<R>('PATCH', url, body, signal)
+        return await onFetch<R>('PATCH', url, body, schema, signal)
     }
 
     async function onDelete(url: string, signal?: AbortSignal) {
-        await onFetch('DELETE', url, null, signal)
+        await onFetch('DELETE', url, null, null, signal)
     }
 
     return { onFetch, onGet, onPut, onPost, onPatch, onDelete }

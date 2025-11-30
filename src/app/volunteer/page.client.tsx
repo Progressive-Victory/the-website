@@ -6,60 +6,25 @@ import { JoiningStage } from './JoiningStage'
 import { PhoneVerifyStage } from './PhoneVerifyStage'
 import { UnderageStage } from './UnderageStage'
 import { MainLayout } from '@/components/layout'
-import { IUser } from '@/models/User'
+import { useDiscordMember, useUser } from '@/hooks'
 import { dateService } from '@/services'
 import { OnboardingStage } from '@/util/stage'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useEffect } from 'react'
 
-export interface VolunteerPageProps {
-    user: IUser | null
-    isInSever: boolean
-}
-
-export default function VolunteerPage({
-    user: initialUser,
-    isInSever: initialIsInServer,
-}: VolunteerPageProps) {
+export default function VolunteerPage() {
     const queryClient = useQueryClient()
 
-    const [isInServer, setIsInServer] = useState(initialIsInServer)
+    const user = useUser()
+    const discordUser = useDiscordMember()
 
-    const userQuery = useQuery({
-        queryKey: ['user'],
-        async queryFn() {
-            initialUser = null
-
-            const response = await fetch('/api/user')
-            return (await response.json()) as IUser
-        },
-        initialData: initialUser,
-    })
-
-    const updateUserMutation = useMutation({
-        mutationFn: async (obj: Partial<IUser>) => {
-            const resp = await fetch('/api/user', {
-                method: 'PATCH',
-                body: JSON.stringify(obj),
-            })
-
-            if (resp.status === 200) {
-                const data = (await resp.json()) as IUser
-                queryClient.setQueryData(['user'], () => data)
-            } else {
-                throw new Error()
-            }
-        },
-    })
-    const updateUser = updateUserMutation.mutateAsync
     const updateStage = useCallback(
         (onboardingStage: OnboardingStage) =>
-            void updateUser({ onboardingStage }),
-        [updateUser]
+            void user.onUpdate({ onboardingStage }),
+        [user]
     )
 
-    const user = userQuery.data
-    const currentStage = user?.onboardingStage ?? OnboardingStage.NOT_STARTED
+    const currentStage = user.data?.onboardingStage
 
     const handleCollectInfoSuccess = (form: IOnboardingForm) => {
         const nextStage =
@@ -67,7 +32,7 @@ export default function VolunteerPage({
                 ? OnboardingStage.UNDERAGE
                 : OnboardingStage.AWAITING_VERIFY
 
-        void updateUserMutation.mutateAsync({
+        user.onUpdate({
             firstName: form.firstName,
             lastName: form.lastName,
             phoneNumber: form.phoneNumber,
@@ -87,7 +52,6 @@ export default function VolunteerPage({
     }
 
     const handleJoinSuccess = () => {
-        setIsInServer(true)
         updateStage(OnboardingStage.JOINED)
     }
 
@@ -101,16 +65,17 @@ export default function VolunteerPage({
 
     useEffect(() => {
         if (
-            user?.onboardingStage === OnboardingStage.JOINED &&
-            (!user.firstName ||
-                !user.lastName ||
-                !user.dateOfBirth ||
-                !user.zipCode ||
-                !user.phoneNumber)
+            !isLoading &&
+            onboardingStage === OnboardingStage.JOINED &&
+            (!user.data.firstName ||
+                !user.data.lastName ||
+                !user.data.dateOfBirth ||
+                !user.data.zipCode ||
+                !user.data.phoneNumber)
         ) {
             updateStage(OnboardingStage.NOT_STARTED)
         }
-    }, [user, updateStage])
+    }, [user.data, updateStage])
 
     return (
         <MainLayout>
@@ -134,12 +99,13 @@ export default function VolunteerPage({
                         {currentStage === OnboardingStage.NOT_STARTED && (
                             <CollectInfoStage
                                 initialForm={{
-                                    firstName: user?.firstName ?? '',
-                                    lastName: user?.lastName ?? '',
-                                    dateOfBirth: user?.dateOfBirth ?? '',
-                                    zipCode: user?.zipCode ?? '',
-                                    phoneNumber: user?.phoneNumber ?? '',
-                                    getAlerts: user?.acceptedAlerts ?? false,
+                                    firstName: user.data?.firstName ?? '',
+                                    lastName: user.data?.lastName ?? '',
+                                    dateOfBirth: user.data?.dateOfBirth ?? '',
+                                    zipCode: user.data?.zipCode ?? '',
+                                    phoneNumber: user.data?.phoneNumber ?? '',
+                                    getAlerts:
+                                        user.data?.acceptedAlerts ?? false,
                                     usCitizen: false,
                                     privacyPolicy: false,
                                 }}
@@ -157,10 +123,10 @@ export default function VolunteerPage({
                         {currentStage === OnboardingStage.AWAITING_VERIFY && (
                             <PhoneVerifyStage
                                 queryClient={queryClient}
-                                phoneNumber={user?.phoneNumber ?? ''}
+                                phoneNumber={user.data?.phoneNumber ?? ''}
                                 lastSmsCodeSentAt={
-                                    user?.lastSmsCodeSentAt
-                                        ? new Date(user?.lastSmsCodeSentAt)
+                                    user.data?.lastSmsCodeSentAt
+                                        ? new Date(user.data?.lastSmsCodeSentAt)
                                         : null
                                 }
                                 goBack={handleReturnToStart}

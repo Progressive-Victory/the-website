@@ -1,3 +1,4 @@
+export * from './useDiscordMember'
 export * from './useFetch'
 export * from './useHydration'
 export * from './useInit'

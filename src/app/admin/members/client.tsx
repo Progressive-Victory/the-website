@@ -98,7 +98,7 @@ export default function ClientPage({ roles }: PageProps) {
                 items={users.map(makeItem)}
                 pinnedItem={
                     loggedInUser.data
-                        ? makeItem(loggedInUser.data)
+                        ? makeItem(loggedInUser.data as unknown as IUser)
                         : { id: '', value: {} as IUser }
                 }
                 selectedItem={selectedUser ? makeItem(selectedUser) : null}
@@ -154,8 +154,8 @@ export default function ClientPage({ roles }: PageProps) {
                             eventTarget.current.dispatchEvent(
                                 new Event('refetch')
                             )
-                            if (selectedUser._id === loggedInUser.data?._id)
-                                void loggedInUser.refetch()
+                            if (selectedUser._id === loggedInUser.data?.id)
+                                void loggedInUser.onFetch()
                         }}
                         updateHistory
                     >
