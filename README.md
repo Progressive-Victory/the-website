@@ -72,12 +72,24 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. Upon saving your work the server automatically (hot) reloads with your changes.
 
+## Deploy on Vercel
+
+Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @somejoops, a deputy, or assistant, or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.
+
+## Working with MongoDB
+
+We utilize MongoDB Atlas, their cloud service, so you can work on a dev instance of our database without having to spin up a local instance of Mongo.
+
+For some development tasks you may need direct access to this. If so, contact a director, deputy, or assistant to be granted access to the development instance.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+- [Mongoose Documentation](https://mongoosejs.com/docs/typescript.html) - learn more about Mongoose, a library we use to query MongoDB
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
@@ -96,7 +108,3 @@ npx playwright install --with-deps
 ```
 pnpm run test
 ```
-
-## Deploy on Vercel
-
-Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @somejoops or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.
