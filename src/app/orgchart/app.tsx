@@ -24,6 +24,11 @@ import Committee from './types/committee'
 import PositionData from './types/positionData'
 import PositionBubble from './bubbles/positionBubble'
 
+export interface PaginatedResponse<T> {
+    //This is just a test.
+    data: T[]
+}
+
 /* A number of committees can be defined up to the number of icons. */
 export const Committees: Committee[] = [
     {
@@ -155,66 +160,69 @@ const testNodes: Node[] = [
 ]
 
 
-//GOAL - Figure out how to translate the nodes into the initialNodes that exist.
-
-/*const departments = [
+const departments = [
     {depName: "Community", teams: ["Welcome", "Events", "Moderation", "Writing"]}, 
     {depName: "Media", teams: ["Writing", "Audio-Video", "Design"]}, 
     {depName: "Operations", teams: ["Fundraising", "Documentation"]}, 
     {depName: "Infrastructure", teams: ["Documentation", "Research"]}, 
-    {depName: "Organizing", teams: ["Recruitment", "Mobilization"]}, 
+    {depName: "Organizing", teams: ["Recruitment", "Mobilization"], coalitions: ["Western", "Midwest", "Northwestern", "Southern"]},
     {depName: "Technology", teams: ["Discord", "Database", "Website"]}
-]*/
-
-const departments = [
-    {depName: "Community", teams: ["Welcome", "Events"]}
 ]
 
-function GetNodes(){
+/*const departments = [
+    {depName: "Community", teams: ["Welcome", "Events"]}
+]*/
 
-    const initialTestNodes: Node[] = []
-    const initialTestEdges: Edge[] = []
+function BuildGraphNodes(){
+
+    const nodes: Node[] = []
+    const edges: Edge[] = []
 
     let id = testNodes.length;
 
     const execDir = testNodes.find(e => e?.title === "Executive Director")
     const depExecDir = testNodes.find(e => e?.title === "Deputy Executive Director")
 
-    initialTestNodes.push(CreatePositionNode(execDir))
-    initialTestNodes.push(CreatePositionNode(depExecDir))
+    nodes.push(CreatePositionNode(execDir))
+    nodes.push(CreatePositionNode(depExecDir))
 
     let departmentId = 0
     let teamId = 0
     let edgeId = 0
 
-    initialTestEdges.push(CreateEdge(`e${edgeId}`, 0, 1))
+    edges.push(CreateEdge(`e${edgeId}`, 0, 1))
     edgeId++
-    //initialTestEdges.push(CreateEdge(`e${edgeId}`, 0, 1))
+
 
     departments.forEach(dep => {
         const depLeads = testNodes.filter(d => ((d.department == dep.depName) && (!d.team)))
         id++
         departmentId = id
-        initialTestNodes.push(CreateDepartmentNode({id: departmentId, name: dep.depName, leads: depLeads}))
+        nodes.push(CreateDepartmentNode({id: departmentId, name: dep.depName, leads: depLeads}))
+
+        edges.push(CreateEdge(`e${edgeId}`, 1, departmentId))
+        edgeId++
+
+        //Find a way to add the name from the user document into each object.
 
         dep?.teams.forEach(team => {
             const teamLeads = testNodes.filter(t => (t.team === team))
             id++
             teamId = id
 
-            initialTestNodes.push(CreateTeamNode({id: teamId, name: team, desc: "Description", leads: teamLeads}))
+            nodes.push(CreateTeamNode({id: teamId, name: team, desc: "Description", leads: teamLeads}))
             //initial edges
             
-            initialTestEdges.push(CreateEdge(`e${edgeId}`, departmentId, teamId))
+            edges.push(CreateEdge(`e${edgeId}`, departmentId, teamId))
             
             edgeId++
         })
     })
 
-    console.log(initialTestNodes)
-    console.log(initialTestEdges)
+    console.log(nodes)
+    console.log(edges)
 
-    return { initialTestNodes, initialTestEdges }
+    return { initialTestNodes: nodes, initialTestEdges: edges }
 } 
 
 
@@ -343,10 +351,10 @@ function CreateEdge(id: string, source: number, target: number) {
     }
 }
 
-//GetNodes(initialTestNodes, initialTestEdges)
-//GetNodes()
+//BuildGraphNodes(initialTestNodes, initialTestEdges)
+//BuildGraphNodes()
 
-const { initialTestNodes, initialTestEdges } = GetNodes()
+const { initialTestNodes, initialTestEdges } = BuildGraphNodes()
 
 console.log("initialTestEdges")
 console.log(initialTestEdges)
@@ -477,8 +485,28 @@ const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
     initialTestEdges
 )
 
-export default function OrgChartApp() {
+export default function OrgChartApp<T extends Object>() {
     const [legendEnabled, toggleLegend] = useState(false)
+    const [page, setPage] = useState(0)
+    const [limit, setLimit] = useState(50)
+    
+    const { data } = useQuery<PaginatedResponse<T>>({
+        queryKey: ['users'],
+        queryFn: async ({ signal }) => {
+            const url = new URL(location.href)
+            url.pathname = 'api/admin/users'
+    
+            url.searchParams.set('page', page + '')
+            url.searchParams.set('limit', limit + '')
+    
+            const res = await fetch(url, { signal })
+            return (await res.json()) as PaginatedResponse<T>
+        },
+        placeholderData: keepPreviousData,
+    })
+
+    const filteredData = data?.data.filter((e) => e.userPositions.length > 0)
+    console.log(filteredData)
 
     function LegendPanel() {
         return (
