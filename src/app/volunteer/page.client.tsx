@@ -65,42 +65,6 @@ export default function VolunteerPage({
             }
         },
     })
-    const syncVan = useCallback(
-        async (obj: {
-            firstName: string
-            lastName: string
-            phoneNumber: string
-            zipCode: string
-            dateOfBirth: string
-            email: string
-        }) => {
-            const res = await fetch(
-                `api/onboarding/zip/location?zipcode=${obj.zipCode}`
-            )
-            const { city, state } = await res.json()
-            //get email through user
-            //feed it to van
-            const resp = await fetch(
-                `${process.env.VAN_API_URI}/people/findOrCreate`,
-                {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        firstName: obj.firstName,
-                        lastName: obj.lastName,
-                        dateOfBirth: obj.dateOfBirth,
-                        city,
-                        stateOrProvince: state,
-                        zipOrPostalCode: obj.zipCode,
-                        phoneNumber: obj.phoneNumber,
-                        email: obj.email,
-                    }),
-                }
-            )
-
-            if (!resp.ok) throw Error('Van Sync Failed')
-        },
-        []
-    )
     const updateUser = updateUserMutation.mutateAsync
     const updateStage = useCallback(
         (onboardingStage: OnboardingStage) => {
@@ -138,14 +102,6 @@ export default function VolunteerPage({
 
         //hook into van here
         if (!user) throw Error("Couldn't identify user")
-        void syncVan({
-            firstName: form.firstName,
-            lastName: form.lastName,
-            phoneNumber: form.phoneNumber,
-            zipCode: form.zipCode,
-            dateOfBirth: form.dateOfBirth,
-            email: user?.email,
-        })
 
         void updateUserMutation.mutateAsync({
             firstName: form.firstName,
