@@ -19,14 +19,7 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
     return (
         <MainLayout>
-            <div
-                style={{
-                    position: 'relative',
-                    width: '100%',
-                    minHeight: '100vh',
-                    overflow: 'hidden',
-                }}
-            >
+            <div className="container">
                 <HalftoneBackground />
                 <PrivacyContent />
             </div>

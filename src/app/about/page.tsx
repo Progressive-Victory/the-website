@@ -1,4 +1,5 @@
 import { AboutContent } from './AboutContent'
+import styles from '@/app/styles/components/ContentSections.module.css'
 import { HalftoneBackground } from '@/components/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import type { Metadata } from 'next'
@@ -18,14 +19,7 @@ export const metadata: Metadata = {
 export default function About() {
     return (
         <MainLayout>
-            <div
-                style={{
-                    position: 'relative',
-                    width: '100%',
-                    minHeight: '100vh',
-                    overflow: 'hidden',
-                }}
-            >
+            <div className={styles.container}>
                 <HalftoneBackground />
                 <AboutContent />
             </div>

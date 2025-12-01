@@ -1,5 +1,6 @@
 'use client'
 
+import styles from '@/app/styles/pages/PrivacyPage.module.css'
 import { ContentPageFrame, InfoSection } from '@/components/ContentSections'
 import type React from 'react'
 
@@ -128,13 +129,7 @@ export function PrivacyContent() {
                     We may use your Personal Information for various purposes
                     including to:
                 </p>
-                <ul
-                    style={{
-                        listStyleType: 'disc',
-                        paddingInline: '1.25rem',
-                        paddingTop: '1.25rem',
-                    }}
-                >
+                <ul className={styles.bulletList}>
                     <li>
                         Connect you to Progressive Victory PAC programs, events
                         and activities, and obtain and confirm RSVP’s to events
@@ -185,13 +180,7 @@ export function PrivacyContent() {
                     Though we make every effort to preserve your privacy, we may
                     share Personal information as follows:
                 </p>
-                <ul
-                    style={{
-                        listStyleType: 'disc',
-                        paddingInline: '1.25rem',
-                        paddingTop: '1.25rem',
-                    }}
-                >
+                <ul className={styles.bulletList}>
                     <li>
                         When we have a good-faith belief that release is
                         appropriate to comply with the law (for example, a
@@ -268,7 +257,7 @@ export function PrivacyContent() {
                     by visiting the
                     <a
                         href="http://www.networkadvertising.org/choices/"
-                        style={{ textDecoration: 'underline' }}
+                        className={styles.inlineLink}
                     >
                         {' Network Advertising Initiative '}
                     </a>
@@ -319,9 +308,9 @@ export function PrivacyContent() {
                     Progressive Victory PAC at
                     <a
                         href="mailto:hello@progressivevictory.win"
-                        style={{ textDecoration: 'underline' }}
+                        className={styles.inlineLink}
                     >
-                        {'\thello@progressivevictory.win'}
+                        {' hello@progressivevictory.win'}
                     </a>
                     .
                 </p>

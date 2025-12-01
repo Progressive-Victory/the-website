@@ -1,23 +1,16 @@
 'use client'
 
 import FAQ from './FAQ'
+import aboutStyles from '@/app/styles/pages/AboutContent.module.css'
 import { ContentPageFrame, InfoSection } from '@/components/ContentSections'
 
 export function AboutContent() {
     return (
         <ContentPageFrame
             heading={
-                <p
-                    style={{
-                        width: '100%',
-                        textAlign: 'center',
-                        fontSize: '2.25rem',
-                        fontWeight: 700,
-                        color: 'white',
-                    }}
-                >
+                <p className={aboutStyles.aboutHeading}>
                     About{' '}
-                    <span style={{ color: '#09223a' }}>
+                    <span className={aboutStyles.aboutHeadingHighlight}>
                         Progressive Victory
                     </span>
                 </p>

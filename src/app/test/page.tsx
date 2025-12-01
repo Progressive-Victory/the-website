@@ -1,27 +1,26 @@
-'use client'
-import { MainLayout } from "@/components/layout";
-import { useEffect, useState } from "react";
+import TestContent from './TestContent'
+import { HalftoneBackground } from '@/components/HalftoneBackground'
+import { MainLayout } from '@/components/layout'
+import type { Metadata } from 'next'
 
-export default function Test() {
-  const [stateCount, setStateCount] = useState<Record<string, number> | null>(null)
+export const metadata: Metadata = {
+    title: 'PV - Button Playground',
+    description: 'Test buttons.',
+    openGraph: {
+        title: 'PV - Button Playground',
+        url: 'https://www.progressivevictory.win/',
+        siteName: 'Progressressive Victory',
+        images: [
+            { url: 'https://www.progressivevictory.win/images/banner.png' },
+        ],
+    },
+}
 
-  useEffect(() => {
-    void (async () => {
-      const res = await fetch('/api/map/count')
-      setStateCount(await res.json())
-    })
-  }, [])
-
-  return (
-    <MainLayout>
-      {stateCount ? Object.keys(stateCount).filter(x => isNaN(+x)).map(state => (
-        <div key={state}>
-          <span>{state}: </span>
-          <span>{stateCount[state]}</span>
-        </div>
-      )) :
-        <p>loading</p>
-      }
-    </MainLayout>
-  )
+export default function Page() {
+    return (
+        <MainLayout>
+            <HalftoneBackground opacity={0.1} />
+            <TestContent />
+        </MainLayout>
+    )
 }
