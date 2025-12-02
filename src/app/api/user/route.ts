@@ -1,6 +1,7 @@
 import { User, IUser } from '@/models/User'
 import { auth, checkAuth, ResponseCode } from '@/util/auth'
 import dbConnect from '@/util/libmongo'
+import { OnboardingStage } from '@/util/stage'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -78,6 +79,9 @@ export async function PATCH(req: NextRequest) {
         default:
             throw Error('Unidentified response code.')
     }
+
+    const onboardingInit = user.onboardingStage
+
     //hey wait shouldn't fields like onboarding stage and completion dates not be editable in a user accessable endpoint?
     const data = (await req.json()) as Partial<IUser>
     user.firstName = data.firstName ?? user.firstName
@@ -87,12 +91,17 @@ export async function PATCH(req: NextRequest) {
     user.city = data.city ?? user.city
     user.county = data.county ?? user.county
     user.state = data.state ?? user.state
-    user.createdAt = data.createdAt ?? user.createdAt
-    user.completedIntake = data.completedIntake ?? user.completedIntake
-    user.joinedServer = data.joinedServer ?? user.joinedServer
     user.phoneNumber = data.phoneNumber ?? user.phoneNumber
     user.acceptedAlerts = data.acceptedAlerts ?? user.acceptedAlerts
     user.onboardingStage = data.onboardingStage ?? user.onboardingStage
+
+    if (
+        (user.onboardingStage === OnboardingStage.AWAITING_VERIFY &&
+            onboardingInit === OnboardingStage.NOT_STARTED) ||
+        (user.onboardingStage === OnboardingStage.UNDERAGE &&
+            onboardingInit === OnboardingStage.NOT_STARTED)
+    )
+        user.completedIntake = new Date()
 
     await dbConnect()
     await user.save()

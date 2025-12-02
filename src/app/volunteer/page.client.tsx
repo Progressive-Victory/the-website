@@ -67,27 +67,8 @@ export default function VolunteerPage({
     })
     const updateUser = updateUserMutation.mutateAsync
     const updateStage = useCallback(
-        (onboardingStage: OnboardingStage) => {
-            let obj: {
-                onboardingStage: OnboardingStage
-                createdAt?: Date
-                completedIntake?: Date
-                joinedServer?: Date
-            } = { onboardingStage }
-            switch (onboardingStage) {
-                case OnboardingStage.NOT_STARTED:
-                    obj = { ...obj, createdAt: new Date() }
-                    break
-                case OnboardingStage.AWAITING_VERIFY:
-                    obj = { ...obj, completedIntake: new Date() }
-                    break
-                case OnboardingStage.JOINED:
-                    obj = { ...obj, joinedServer: new Date() }
-                    break
-            }
-
-            void updateUser(obj)
-        },
+        (onboardingStage: OnboardingStage) =>
+            void updateUser({ onboardingStage }),
         [updateUser]
     )
 
