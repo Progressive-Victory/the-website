@@ -97,18 +97,6 @@ export default function ClientPage({ roles }: PageProps) {
                         id: 'state',
                         name: 'State',
                     },
-                    {
-                        id: 'createdAt',
-                        name: 'Date Created',
-                    },
-                    {
-                        id: 'completedIntake',
-                        name: 'Date Intake Done',
-                    },
-                    {
-                        id: 'joinedServer',
-                        name: 'Date Joined Server',
-                    },
                 ]}
                 items={users.map(makeItem)}
                 pinnedItem={

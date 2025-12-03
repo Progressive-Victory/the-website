@@ -3,5 +3,4 @@ import useUser from './useUser'
 
 export { useUser, useInit }
 
-export * from './useHydration'
 export * from './useUser'

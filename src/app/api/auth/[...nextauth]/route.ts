@@ -1,3 +1,4 @@
+ 
 import { handlers } from '@/util/auth'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -42,9 +43,6 @@ export const POST = async (req: NextRequest) => {
             // their browser
             return NextResponse.json(
                 {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
                     url: body_url,
                 },
                 res

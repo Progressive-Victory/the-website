@@ -78,9 +78,6 @@ importers:
       phone:
         specifier: ^3.1.66
         version: 3.1.66
-      postal-code-validator:
-        specifier: ^1.0.3
-        version: 1.0.3
       react:
         specifier: ^19.1.0
         version: 19.1.0
@@ -3359,10 +3356,6 @@ packages:
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
-
-  postal-code-validator@1.0.3:
-    resolution: {integrity: sha512-VLobU8B6gSHvDZ7uxu4rk+y4RzGpbi7Q8N8noSRkqkUfa5hAJNZuSJXP4isGi5XyAloOgp92n2Uwe4/7HCxbJQ==}
-    engines: {node: '>=14.0.0'}
 
   postcss-import@15.1.0:
     resolution: {integrity: sha512-hpr+J05B2FVYUAXHeK1YyI267J/dDDhMU6B6civm8hSY1jYJnBXxzKDKDswzJmtLHryrjhnDjqqp/49t8FALew==}
@@ -7774,8 +7767,6 @@ snapshots:
       fsevents: 2.3.2
 
   possible-typed-array-names@1.1.0: {}
-
-  postal-code-validator@1.0.3: {}
 
   postcss-import@15.1.0(postcss@8.5.4):
     dependencies:

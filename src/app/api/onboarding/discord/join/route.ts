@@ -1,3 +1,6 @@
+import { RESTJSONErrorCodes } from 'discord-api-types/v10'
+import { NextResponse } from 'next/server'
+
 import { User } from '@/models/User'
 import { auth } from '@/util/auth'
 import { isEmailVerified, joinMember } from '@/util/discord'
@@ -5,8 +8,6 @@ import { HTTPStatus } from '@/util/https-status'
 import dbConnect from '@/util/libmongo'
 import { OnboardingStage } from '@/util/stage'
 import { DiscordAPIError } from '@discordjs/rest'
-import { RESTJSONErrorCodes } from 'discord-api-types/v10'
-import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -80,7 +81,6 @@ export async function POST() {
             user.onboardingStage === OnboardingStage.VERIFIED
         ) {
             user.onboardingStage = OnboardingStage.JOINED
-            user.joinedServer = new Date()
             await user?.save()
         }
 
