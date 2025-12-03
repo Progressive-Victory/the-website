@@ -35,10 +35,6 @@ const calendarMap = new Map<string, string>([
         'cd79f48ade35423e0a232cfcf146e619d06ae8143c04fae93278788bcdc19b1d@group.calendar.google.com',
         '9802b3',
     ], // PV Special Events
-    [
-        "608d4bc58407b8e270745ee2226a288e646d430011ca71622954acbb67b9a2c5@group.calendar.google.com",
-        "fc035e"
-    ]
 ])
 export default function Events() {
     const calendarUri = new URL('https://calendar.google.com/calendar/embed')

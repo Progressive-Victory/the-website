@@ -94,18 +94,6 @@ export default function ClientPage({ roles }: PageProps) {
                         id: 'state',
                         name: 'State',
                     },
-                    {
-                        id: 'createdAt',
-                        name: 'Date Created',
-                    },
-                    {
-                        id: 'completedIntake',
-                        name: 'Date Intake Done',
-                    },
-                    {
-                        id: 'joinedServer',
-                        name: 'Date Joined Server',
-                    },
                 ]}
                 items={users.map(makeItem)}
                 pinnedItem={
@@ -218,21 +206,6 @@ export default function ClientPage({ roles }: PageProps) {
                             <TextField
                                 name="Onboarding Stage"
                                 field="onboardingStage"
-                                readonly
-                            />
-                            <TextField
-                                name="Date Created"
-                                field="createdAt"
-                                readonly
-                            />
-                            <TextField
-                                name="Date Intake Done"
-                                field="completedIntake"
-                                readonly
-                            />
-                            <TextField
-                                name="Date Server Joined"
-                                field="joinedServer"
                                 readonly
                             />
                         </FormGroup>
