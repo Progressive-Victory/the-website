@@ -53,6 +53,9 @@ export async function GET(req: NextRequest) {
         'preferredName',
         'phoneNumber',
         'state',
+        'createdAt',
+        'completedIntake',
+        'joinedServer',
     ]
 
     const { page, limit, skip, query, field, sort, params } =

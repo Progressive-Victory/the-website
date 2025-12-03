@@ -108,6 +108,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                         }),
                         discordId: eprofile.id,
                         discordUserAvatar: eprofile.avatar,
+                        createdAt: new Date(),
                     })
                     await newUser.save()
                 }
