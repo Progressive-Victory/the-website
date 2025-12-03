@@ -3,7 +3,8 @@ import { dateService } from '@/services'
 import { useInit } from '@/util/hooks'
 import Link from 'next/link'
 import phone from 'phone'
-import { useEffect, useMemo, useState } from 'react'
+import { Country, isValidCountryPostalCode } from 'postal-code-validator'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export interface IOnboardingForm {
     firstName: string
@@ -37,7 +38,11 @@ export function CollectInfoStage({
     const age = dateService.getAge(form.dateOfBirth)
     const dateOfBirthIsValid = age != null
 
-    const zipCodeIsValid = /^\d{5}(?:-\d{4})?$/g.test(form.zipCode)
+    const zipCodeIsValid = isValidCountryPostalCode(
+        form.zipCode,
+        Country.UnitedStatesOfAmerica
+    )
+    const [zipCodeError, setZipCodeError] = useState(false)
 
     const parsePhone = (number: string) =>
         phone(number, {
@@ -55,7 +60,21 @@ export function CollectInfoStage({
         setPhoneNumber(formatted)
     }
 
-    const handleSubmit = () => {
+    const checkZip = useCallback(async (code: string): Promise<boolean> => {
+        const result = await fetch('/api/onboarding/zip/validate', {
+            method: 'POST',
+            body: JSON.stringify({
+                code,
+            }),
+        })
+        const { isValidZip }: { isValidZip: boolean } = await result.json()
+        return isValidZip
+    }, [])
+
+    const handleSubmit = async (): Promise<void> => {
+        const isValidZip = await checkZip(form.zipCode)
+        setZipCodeError(!isValidZip)
+        if (!isValidZip) return
         onSuccess(form)
     }
 
@@ -207,14 +226,23 @@ export function CollectInfoStage({
             </div>
             <button
                 type="submit"
-                onClick={handleSubmit}
+                onClick={() => {
+                    void handleSubmit()
+                }}
                 disabled={!isValid}
                 className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
             >
                 Join Now
             </button>
-
             <SupportNote />
+            {zipCodeError ? (
+                <p className="text-red-600">
+                    The zip code entered is invalid. Please enter a real zip
+                    code.
+                </p>
+            ) : (
+                <></>
+            )}
         </div>
     )
 }

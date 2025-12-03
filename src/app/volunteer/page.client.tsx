@@ -41,6 +41,17 @@ export default function VolunteerPage({
 
     const updateUserMutation = useMutation({
         mutationFn: async (obj: Partial<IUser>) => {
+            if (obj.zipCode) {
+                const res = await fetch(
+                    `/api/onboarding/zip/location?zipcode=${obj.zipCode}`
+                )
+                const { city, county, state } = await res.json()
+                obj.city = city
+                obj.county = county
+                obj.state = state
+            }
+
+            console.log(obj)
             const resp = await fetch('/api/user', {
                 method: 'PATCH',
                 body: JSON.stringify(obj),
@@ -69,6 +80,9 @@ export default function VolunteerPage({
             (dateService.getAge(form.dateOfBirth) ?? 0 < 18)
                 ? OnboardingStage.UNDERAGE
                 : OnboardingStage.AWAITING_VERIFY
+
+        //hook into van here
+        if (!user) throw Error("Couldn't identify user")
 
         void updateUserMutation.mutateAsync({
             firstName: form.firstName,
