@@ -52,6 +52,9 @@ export default function ClientPage({ roles }: PageProps) {
     }
 
     const userAge = dateService.getAge(selectedUser?.dateOfBirth ?? '')
+    const fCreatedDate = selectedUser?.createdAt
+        ? dateService.formatDate(selectedUser.createdAt)
+        : ''
     const makeItem = (user: IUser) => ({ id: user._id as string, value: user })
 
     return (
@@ -201,6 +204,12 @@ export default function ClientPage({ roles }: PageProps) {
                                 readonly
                                 dynamic={{ value: userAge }}
                             />
+                            <TextField
+                                name="Date Created"
+                                field="createdAt"
+                                readonly
+                                dynamic={{ value: fCreatedDate }}
+                            />
                         </FormGroup>
                         <FormGroup title="Address">
                             <TextField name="City" field="city" />
@@ -218,11 +227,6 @@ export default function ClientPage({ roles }: PageProps) {
                             <TextField
                                 name="Onboarding Stage"
                                 field="onboardingStage"
-                                readonly
-                            />
-                            <TextField
-                                name="Date Created"
-                                field="createdAt"
                                 readonly
                             />
                             <TextField
