@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
         {
-            isValidZip: isValidZip,
+            isValidZip,
         },
         {
             status: 200,
