@@ -1,6 +1,6 @@
 'use client'
 
-import { InfoSection } from '@/components/ContentSections'
+import { ContentSection } from '@/components/ContentSections'
 
 const questions = [
     {
@@ -23,7 +23,7 @@ const questions = [
 
 export default function FAQ() {
     return (
-        <InfoSection
+        <ContentSection
             title="Frequently Asked Questions?"
             highlight="Asked"
             titleAlign="center"

@@ -23,7 +23,7 @@ interface InfoSectionProps {
     children?: React.ReactNode
 }
 
-export function InfoSection({
+export function ContentSection({
     title,
     highlight,
     highlightColor,

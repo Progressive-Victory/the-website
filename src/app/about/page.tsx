@@ -1,7 +1,7 @@
 import FAQ from './FAQ'
 import styles from '@/app/styles/components/ContentSections.module.css'
 import aboutStyles from '@/app/styles/pages/AboutContent.module.css'
-import { ContentPageFrame, InfoSection } from '@/components/ContentSections'
+import { ContentPageFrame, ContentSection } from '@/components/ContentSections'
 import { HalftoneBackground } from '@/components/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import type { Metadata } from 'next'
@@ -30,7 +30,7 @@ export function AboutContent() {
                 </p>
             }
         >
-            <InfoSection
+            <ContentSection
                 title="Our Mission"
                 highlight="Mission"
                 titleAlign="center"
@@ -43,9 +43,9 @@ Dedicated to pushing the Democratic Party to the left, we partner with left-alig
                       
 Progressive Victory embraces queer & neurodivergent, new-to-activism volunteers of all backgrounds, ethnicities, and abilities. Over the long term, we aim to mainstream the online, progressive power block burgeoning within the Democratic Party and prove that it, and us, are too big to ignore.`}
                 </p>
-            </InfoSection>
+            </ContentSection>
 
-            <InfoSection
+            <ContentSection
                 title="Our Community"
                 highlight="Community"
                 titleAlign="center"
@@ -57,7 +57,7 @@ Progressive Victory embraces queer & neurodivergent, new-to-activism volunteers 
                     
 Progressive Victory is constantly growing, with new members joining every day. The community is built upon the values of equity and inclusion, with a zero tolerance policy for hate. All members are from the United States, above the age of 18, and asked to sign on to our rules & values before gaining access to the community.`}
                 </p>
-            </InfoSection>
+            </ContentSection>
 
             <FAQ />
         </ContentPageFrame>

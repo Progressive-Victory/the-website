@@ -1,5 +1,5 @@
 import styles from '@/app/styles/pages/PrivacyPage.module.css'
-import { ContentPageFrame, InfoSection } from '@/components/ContentSections'
+import { ContentPageFrame, ContentSection } from '@/components/ContentSections'
 import { HalftoneBackground } from '@/components/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import type { Metadata } from 'next'
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export function PrivacyContent() {
     return (
         <ContentPageFrame>
-            <InfoSection title="PRIVACY POLICY">
+            <ContentSection title="PRIVACY POLICY">
                 <p>
                     Progressive Victory PAC has created this Privacy Policy
                     (“Policy”) to explain how we collect, use and disclose
@@ -43,9 +43,9 @@ export function PrivacyContent() {
                     By using or accessing the Sites, you accept the Policy and
                     its terms and conditions in effect at that time.
                 </p>
-            </InfoSection>
+            </ContentSection>
 
-            <InfoSection title="DEFINITION OF PERSONAL INFORMATION">
+            <ContentSection title="DEFINITION OF PERSONAL INFORMATION">
                 <p>
                     “Personal Information” is information about a particular
                     individual that specifically identifies that individual, or
@@ -57,9 +57,9 @@ export function PrivacyContent() {
                     not restrict Progressive Victory PAC’s collection and use of
                     aggregate information.
                 </p>
-            </InfoSection>
+            </ContentSection>
 
-            <InfoSection title="COLLECTION OF PERSONAL INFORMATION">
+            <ContentSection title="COLLECTION OF PERSONAL INFORMATION">
                 <p>
                     We collect Personal Information that you provide to us when
                     you register, send us an email, sign up to receive email or
@@ -125,9 +125,9 @@ export function PrivacyContent() {
                     collected to Personal Information. Third-party vendors may
                     also collect aggregate log data independently from us.
                 </p>
-            </InfoSection>
+            </ContentSection>
 
-            <InfoSection title="COLLECTION FROM OTHER SOURCES">
+            <ContentSection title="COLLECTION FROM OTHER SOURCES">
                 <p>
                     This Policy also applies to Personal Information that we may
                     obtain from third-party vendors such as search engines or
@@ -136,9 +136,9 @@ export function PrivacyContent() {
                     encourage you to read the privacy policies and review the
                     practices of all websites you visit.
                 </p>
-            </InfoSection>
+            </ContentSection>
 
-            <InfoSection title="HOW WE USE YOUR PERSONAL INFORMATION">
+            <ContentSection title="HOW WE USE YOUR PERSONAL INFORMATION">
                 <p>
                     We may use your Personal Information for various purposes
                     including to:
@@ -187,9 +187,9 @@ export function PrivacyContent() {
                     </li>
                     <li>Contact you if required by Federal election laws.</li>
                 </ul>
-            </InfoSection>
+            </ContentSection>
 
-            <InfoSection title="HOW WE SHARE YOUR PERSONAL INFORMATION">
+            <ContentSection title="HOW WE SHARE YOUR PERSONAL INFORMATION">
                 <p>
                     Though we make every effort to preserve your privacy, we may
                     share Personal information as follows:
@@ -224,9 +224,9 @@ export function PrivacyContent() {
                     </li>
                     <li>With your consent.</li>
                 </ul>
-            </InfoSection>
+            </ContentSection>
 
-            <InfoSection title="HOW WE PROTECT THE INFORMATION YOU PROVIDE">
+            <ContentSection title="HOW WE PROTECT THE INFORMATION YOU PROVIDE">
                 <p>
                     Progressive Victory PAC uses reasonable industry-standard
                     security measures to protect against the loss, misuse,
@@ -246,18 +246,18 @@ export function PrivacyContent() {
                     protocol. Our servers are located in a locked, secure
                     environment.
                 </p>
-            </InfoSection>
+            </ContentSection>
 
-            <InfoSection title="PETITIONS">
+            <ContentSection title="PETITIONS">
                 <p>
                     Any petitions that you have signed online, and any comments
                     therewith, constitute public information that we may provide
                     to local, state, or national political leaders and the
                     press.
                 </p>
-            </InfoSection>
+            </ContentSection>
 
-            <InfoSection title="ADVERTISING AND ANALYTICS SERVICES">
+            <ContentSection title="ADVERTISING AND ANALYTICS SERVICES">
                 <p>
                     We may communicate with third-party vendors, including
                     Google, and place online advertising, which will be shown on
@@ -285,9 +285,9 @@ export function PrivacyContent() {
                     mailings, so that we can tell which mailings appeal most to
                     our supporters.
                 </p>
-            </InfoSection>
+            </ContentSection>
 
-            <InfoSection title="CALIFORNIA RESIDENTS">
+            <ContentSection title="CALIFORNIA RESIDENTS">
                 <p>
                     Some browsers have incorporated “Do Not Track” features.
                     Most of these features, when turned on, send a signal or
@@ -305,18 +305,18 @@ export function PrivacyContent() {
                     standards, implementations and solutions, and therefore the
                     Sites may or may not respond to those signals.
                 </p>
-            </InfoSection>
+            </ContentSection>
 
-            <InfoSection title="HOW TO UNSUBSCRIBE OR OPT OUT">
+            <ContentSection title="HOW TO UNSUBSCRIBE OR OPT OUT">
                 <p>
                     People who subscribe to email lists via the Sites will
                     receive periodic updates from us. You may opt out of
                     receiving future information via email by using the
                     unsubscribe procedure specified on the email message.
                 </p>
-            </InfoSection>
+            </ContentSection>
 
-            <InfoSection title="HOW TO CONTACT US">
+            <ContentSection title="HOW TO CONTACT US">
                 <p>
                     Questions regarding this Privacy Policy should be emailed to
                     Progressive Victory PAC at
@@ -328,7 +328,7 @@ export function PrivacyContent() {
                     </a>
                     .
                 </p>
-            </InfoSection>
+            </ContentSection>
         </ContentPageFrame>
     )
 }

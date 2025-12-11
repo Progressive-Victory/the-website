@@ -1,5 +1,5 @@
 import notFoundStyles from '@/app/styles/pages/NotFoundPage.module.css'
-import { ContentPageFrame, InfoSection } from '@/components/ContentSections'
+import { ContentPageFrame, ContentSection } from '@/components/ContentSections'
 import { HalftoneBackground } from '@/components/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import type { Metadata } from 'next'
@@ -34,7 +34,7 @@ export default function NotFound() {
                     </p>
                 }
             >
-                <InfoSection
+                <ContentSection
                     title="Error 404"
                     titleAlign="left"
                     highlight="404"
@@ -47,7 +47,7 @@ export default function NotFound() {
                         Please check the address or use the navigation above to
                         get back on track.
                     </p>
-                </InfoSection>
+                </ContentSection>
             </ContentPageFrame>
         </MainLayout>
     )
