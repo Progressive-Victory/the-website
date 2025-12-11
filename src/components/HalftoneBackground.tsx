@@ -4,6 +4,7 @@ interface HalftoneBackgroundProps {
     opacity?: number
 }
 
+// Halftone effect breaks if not using inline CSS or Tailwind, if you can figure it fix for normal CSS be my guest.
 export function HalftoneBackground({ opacity = 0.1 }: HalftoneBackgroundProps) {
     return (
         <div
