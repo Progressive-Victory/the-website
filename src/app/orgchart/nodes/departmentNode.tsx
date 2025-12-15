@@ -2,6 +2,7 @@ import { Handle, Node, NodeProps, Position, useStore } from '@xyflow/react'
 import DepartmentBubble from '../bubbles/departmentBubble'
 import PositionData from '../types/positionData'
 import PositionBubble from '../bubbles/positionBubble'
+import { motion } from 'motion/react'
 
 export type DepartmentNodeData = Node<{
     id: number
@@ -37,7 +38,24 @@ export default function DepartmentNode({
                 className="border-amber-300 bg-amber-50 opacity-0"
             />
             <DepartmentBubble name={data.name}></DepartmentBubble>
-            {extraContent ? <DepartmentLeads /> : null}
+            <motion.div
+                className="overflow-hidden"
+                style={{
+                    willChange: 'max-height',
+                }}
+                initial={{
+                    maxHeight: `${extraContent ? '240' : '0'}px`,
+                }}
+                animate={{
+                    maxHeight: `${extraContent ? '240' : '0'}px`,
+                    transition: {
+                        type: 'tween',
+                        duration: 0.5,
+                    },
+                }}
+            >
+                <DepartmentLeads />
+            </motion.div>
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}

@@ -2,6 +2,7 @@ import { Handle, Node, NodeProps, Position, useStore } from '@xyflow/react'
 import TeamBubble from '../bubbles/teamBubble'
 import PositionData from '../types/positionData'
 import PositionBubble from '../bubbles/positionBubble'
+import { motion } from 'motion/react'
 
 export type TeamNodeData = Node<{
     id: number
@@ -37,7 +38,20 @@ export default function TeamNode({
                 className="border-amber-300 bg-amber-50 opacity-0"
             />
             <TeamBubble name={data.name} />
-            {extraContent ? <TeamLeads /> : null}
+            <motion.div
+                className="overflow-hidden"
+                style={{
+                    willChange: 'max-height',
+                }}
+                initial={{
+                    maxHeight: `${extraContent ? '240' : '0'}px`,
+                }}
+                animate={{
+                    maxHeight: `${extraContent ? '240' : '0'}px`,
+                }}
+            >
+                <TeamLeads />
+            </motion.div>
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}
