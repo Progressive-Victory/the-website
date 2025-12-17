@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     },
 }
 
-export function PrivacyContent() {
+function PrivacyContent() {
     return (
         <ContentPageFrame>
             <ContentSection title="PRIVACY POLICY">
