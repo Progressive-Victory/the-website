@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: 'PV - 404',
         url: 'https://www.progressivevictory.win/',
-        siteName: 'Progressressive Victory',
+        siteName: 'Progressive Victory',
         images: [
             { url: 'https://www.progressivevictory.win/images/banner.png' },
         ],
