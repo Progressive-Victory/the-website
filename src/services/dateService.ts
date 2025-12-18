@@ -13,6 +13,11 @@ class DateService {
             : null
     }
 
+    formatDate(date: Date) {
+        date = typeof date !== typeof Date ? new Date(date) : date
+        return `${date.getUTCMonth()}/${date.getUTCDate()}/${date.getFullYear()} ${date.getUTCHours() === 0 ? 12 : date.getUTCHours() % 12}:${date.getUTCMinutes()} ${date.getUTCHours() > 12 ? 'PM' : 'AM'}`
+    }
+
     getAge(dateOfBirth: string) {
         const dob = new Date(dateOfBirth)
         const current = this.now()

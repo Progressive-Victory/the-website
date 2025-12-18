@@ -1,11 +1,10 @@
-import { OAuth2Routes, OAuth2Scopes } from 'discord-api-types/v10'
-import NextAuth, { Profile } from 'next-auth'
-import Discord from 'next-auth/providers/discord'
-
+import { getGuildAvatar } from './discord'
 import { IRole } from '@/models/Role'
 import { IUser, User } from '@/models/User'
 import dbConnect from '@/util/libmongo'
-import { getUserAvatarURL } from './discord'
+import { OAuth2Routes, OAuth2Scopes } from 'discord-api-types/v10'
+import NextAuth, { Profile } from 'next-auth'
+import Discord from 'next-auth/providers/discord'
 
 export enum PermissionName {
     ADMIN_PANEL_ACCESS = 'Admin Panel Access',
@@ -50,7 +49,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     }
                 )
 
-                const image = await getUserAvatarURL(profile.id, profile.avatar)
+                const image = await getGuildAvatar(profile.id, profile.avatar)
 
                 return {
                     id: profile.id,
@@ -103,13 +102,13 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                         name: eprofile.username,
                         email: profile.email,
                         // Using long form here to adjust size of image
-                        image: await getUserAvatarURL(
-                            eprofile.id,
-                            eprofile.avatar,
-                            { forceStatic: true, size: 512 }
-                        ),
+                        image: await getGuildAvatar(eprofile.id, {
+                            forceStatic: true,
+                            size: 512,
+                        }),
                         discordId: eprofile.id,
                         discordUserAvatar: eprofile.avatar,
+                        createdAt: new Date(),
                     })
                     await newUser.save()
                 }
