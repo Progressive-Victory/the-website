@@ -197,7 +197,7 @@ export default function PaginatedList<T extends object>({
                                     htmlFor="search_field"
                                     className="flex shrink items-center gap-2"
                                 >
-                                    <span className="font-medium">Field:</span>
+                                    <span className="font-medium">Filter:</span>
                                     <select
                                         name="search_field"
                                         id="search_field"
@@ -277,9 +277,8 @@ export default function PaginatedList<T extends object>({
                                         })
                                     }}
                                 >
-                                    <option value={''}>...</option>
-                                    <option value={'asc'}>A-Z</option>
-                                    <option value={'desc'}>Z-A</option>
+                                    <option value={'asc'}>Ascending</option>
+                                    <option value={'desc'}>Descending</option>
                                 </select>
                             </label>
                         ) : (

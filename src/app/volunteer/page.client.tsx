@@ -81,6 +81,9 @@ export default function VolunteerPage({
                 ? OnboardingStage.UNDERAGE
                 : OnboardingStage.AWAITING_VERIFY
 
+        //hook into van here
+        if (!user) throw Error("Couldn't identify user")
+
         void updateUserMutation.mutateAsync({
             firstName: form.firstName,
             lastName: form.lastName,
