@@ -69,24 +69,42 @@ function USMapLayer({
 }: StateMapInteractionProps & {
     data: StateDataFeatureCollection
 }) {
-    const max = useMemo(() => {
-        if (!stateMemberCount) return undefined
-        return Math.max(...Object.values(stateMemberCount))
-    }, [stateMemberCount])
+    // USED FOR OLD LOGIC BELOW
+    // const max = useMemo(() => {
+    //     if (!stateMemberCount) return undefined
+    //     return Math.max(...Object.values(stateMemberCount))
+    // }, [stateMemberCount])
 
     const getFillColor = useCallback(
         (stateName: string) => {
-            if (!stateMemberCount || !max) return undefined
+            if (!stateMemberCount) return undefined
 
             const memberCount = stateMemberCount[stateName]
             if (!memberCount) return getBrandColor('mapBlue', gradientShades[0])
 
-            // Determine bin index (0–4) from normalized value
-            const normalized = memberCount / max
-            const index = Math.min(
-                gradientShades.length - 1,
-                Math.floor(normalized * gradientShades.length)
-            )
+            // OLD LOGIC FOR DETERMINING STATE COLOR DYNAMICALLY
+            // // Determine bin index (0–4) from normalized value
+            // const normalized = memberCount / max
+            // const index = Math.min(
+            //     gradientShades.length - 1,
+            //     Math.floor(normalized * gradientShades.length)
+            // )
+
+            // Custom buckets for member count colors - requested quick fix
+            let index = 0
+            if (memberCount > 600) {
+                index = 6
+            } else if (memberCount > 400) {
+                index = 5
+            } else if (memberCount > 150) {
+                index = 4
+            } else if (memberCount > 80) {
+                index = 3
+            } else if (memberCount > 40) {
+                index = 2
+            } else if (memberCount > 20) {
+                index = 1
+            }
 
             const shade = gradientShades[index]
             return getBrandColor('mapBlue', shade)
