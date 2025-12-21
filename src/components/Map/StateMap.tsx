@@ -96,13 +96,13 @@ function USMapLayer({
                 index = 6
             } else if (memberCount > 400) {
                 index = 5
-            } else if (memberCount > 150) {
+            } else if (memberCount > 280) {
                 index = 4
-            } else if (memberCount > 80) {
+            } else if (memberCount > 140) {
                 index = 3
-            } else if (memberCount > 40) {
+            } else if (memberCount > 80) {
                 index = 2
-            } else if (memberCount > 20) {
+            } else if (memberCount > 40) {
                 index = 1
             }
 
