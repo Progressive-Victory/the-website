@@ -92,17 +92,17 @@ function USMapLayer({
 
             // Custom buckets for member count colors - requested quick fix
             let index = 0
-            if (memberCount > 600) {
+            if (memberCount > 500) {
                 index = 6
-            } else if (memberCount > 400) {
+            } else if (memberCount > 340) {
                 index = 5
-            } else if (memberCount > 280) {
+            } else if (memberCount > 220) {
                 index = 4
-            } else if (memberCount > 140) {
+            } else if (memberCount > 110) {
                 index = 3
-            } else if (memberCount > 80) {
-                index = 2
             } else if (memberCount > 40) {
+                index = 2
+            } else if (memberCount > 20) {
                 index = 1
             }
 

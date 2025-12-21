@@ -38,10 +38,10 @@ export const offBrandGrey = {
 export const mapBlue = {
     //was previous just labled blue
     700: '#09223A', //prev: didn't exist
-    600: '#1b4568', //prev: didn't exist
+    600: '#1B4568', //prev: didn't exist
     500: '#2986CC', //prev: 10233A
-    400: '#549ED6', //prev: 1D4668
-    300: '#9FC8E0', //prev: 2B84B9
+    400: '#549FD0', //prev: 1D4668
+    300: '#9FC9E8', //prev: 2B84B9
     200: '#D4E7F5', //prev: 9FC8E0
     100: '#D6E4E8', //prev: D6E4E8
     DEFAULT: '#09223A', //prev: 10233A
