@@ -14,10 +14,10 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/app/login/LoginPage', () => ({
-    LoginPage: (props: { redirect: string | null }) => {
+    LoginPage: ({ redirect }: { redirect: string | null }) => {
         return (
             <div>
-                <p>{props.redirect}</p>
+                <p>{redirect}</p>
             </div>
         )
     },
