@@ -1,7 +1,7 @@
 'use client'
 
 import { NavItem } from './types'
-import styles from '@/app/styles/pages/Header.module.css'
+import styles from '@/app/styles/components/header.module.css'
 import { ModularButton } from '@/components/common/ButtonComponent'
 import { AnimatePresence, motion } from 'motion/react'
 import { useSession } from 'next-auth/react'
