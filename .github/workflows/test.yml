@@ -1,4 +1,4 @@
-name: Test with jest
+name: Test with vitest
 
 on:
     push:
