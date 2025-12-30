@@ -1,5 +1,6 @@
 import DocumentUpdate, { IDocumentUpdate } from './DocumentUpdate'
 import { IRole, Role } from './Role'
+import { Location } from '@/models/Location'
 import { OnboardingStage } from '@/util/stage'
 import mongoose, { Document, Model, Schema } from 'mongoose'
 
@@ -29,6 +30,8 @@ export interface IUser extends Document {
     firstName?: string
     lastName?: string
     dateOfBirth?: string
+    pronounOne?: string
+    pronounTwo?: string
     updateHistory?: IDocumentUpdate[]
 }
 
@@ -65,6 +68,8 @@ const schema = new Schema<IUser>({
     firstName: { type: String, required: false, default: null },
     lastName: { type: String, required: false, default: null },
     dateOfBirth: { type: String, required: false, default: null },
+    pronounOne: { type: String, required: false, default: null },
+    pronounTwo: { type: String, required: false, default: null },
     updateHistory: [
         { type: Schema.Types.ObjectId, ref: DocumentUpdate, required: false },
     ],

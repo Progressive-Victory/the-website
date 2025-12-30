@@ -6,12 +6,20 @@ import phone from 'phone'
 import { Country, isValidCountryPostalCode } from 'postal-code-validator'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+const VALID_PRONOUNS = ['He', 'Him', 'She', 'Her', 'They', 'Them', 'All']
+
+const VALID_PRONOUNS_SET = new Set<string>(
+    VALID_PRONOUNS.map((p) => p.toLowerCase())
+)
+
 export interface IOnboardingForm {
     firstName: string
     lastName: string
     dateOfBirth: string
     zipCode: string
     phoneNumber: string
+    pronounOne: string
+    pronounTwo: string
 
     getAlerts: boolean
     usCitizen: boolean
@@ -43,6 +51,15 @@ export function CollectInfoStage({
         Country.UnitedStatesOfAmerica
     )
     const [zipCodeError, setZipCodeError] = useState(false)
+
+    const pronounIsValid = (pronoun: string): boolean => {
+        if (!pronoun || pronoun.trim() === '') return false
+        const normalized = pronoun.trim().toLowerCase()
+        return VALID_PRONOUNS_SET.has(normalized)
+    }
+
+    const pronounOneIsValid = pronounIsValid(form.pronounOne)
+    const pronounTwoIsValid = pronounIsValid(form.pronounTwo)
 
     const parsePhone = (number: string) =>
         phone(number, {
@@ -84,6 +101,8 @@ export function CollectInfoStage({
         dateOfBirthIsValid &&
         zipCodeIsValid &&
         parsedPhone.isValid &&
+        pronounOneIsValid &&
+        pronounTwoIsValid &&
         form.usCitizen &&
         form.privacyPolicy
 
@@ -153,6 +172,72 @@ export function CollectInfoStage({
                         }
                     />
                 </section>
+                <section className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                    <div className="flex w-full flex-col items-start justify-center">
+                        <label className="mb-[3px] inline-block text-sm text-gray-300">
+                            Pronoun One
+                            <span className="ml-1 text-red-500">*</span>
+                        </label>
+                        <select
+                            value={form.pronounOne}
+                            onChange={(e) =>
+                                setForm({ ...form, pronounOne: e.target.value })
+                            }
+                            className={`w-full grow rounded-md bg-white px-4 py-2 ring-steel-blue ${
+                                !pronounOneIsValid && form.pronounOne !== ''
+                                    ? 'border-2 border-red-500'
+                                    : ''
+                            }`}
+                            required
+                        >
+                            <option value="">Select...</option>
+                            {VALID_PRONOUNS.map((pronoun) => (
+                                <option key={pronoun} value={pronoun}>
+                                    {pronoun}
+                                </option>
+                            ))}
+                        </select>
+                        {!pronounOneIsValid && form.pronounOne !== '' && (
+                            <div className="my-1 h-4 text-left text-xs text-red-500">
+                                Please select a valid pronoun
+                            </div>
+                        )}
+                    </div>
+                    <p className="mx-auto text-center text-2xl font-bold text-white">
+                        /
+                    </p>
+                    <div className="flex w-full flex-col items-start justify-center">
+                        <label className="mb-[3px] inline-block text-sm text-gray-300">
+                            Pronoun Two
+                            <span className="ml-1 text-red-500">*</span>
+                        </label>
+                        <select
+                            value={form.pronounTwo}
+                            onChange={(e) =>
+                                setForm({ ...form, pronounTwo: e.target.value })
+                            }
+                            className={`w-full grow rounded-md bg-white px-4 py-2 ring-steel-blue ${
+                                !pronounTwoIsValid && form.pronounTwo !== ''
+                                    ? 'border-2 border-red-500'
+                                    : ''
+                            }`}
+                            required
+                        >
+                            <option value="">Select...</option>
+                            {VALID_PRONOUNS.map((pronoun) => (
+                                <option key={pronoun} value={pronoun}>
+                                    {pronoun}
+                                </option>
+                            ))}
+                        </select>
+                        {!pronounTwoIsValid && form.pronounTwo !== '' && (
+                            <div className="my-1 h-4 text-left text-xs text-red-500">
+                                Please select a valid pronoun
+                            </div>
+                        )}
+                    </div>
+                </section>
+
                 <Field
                     value={phoneNumber}
                     placeholder="Phone Number"

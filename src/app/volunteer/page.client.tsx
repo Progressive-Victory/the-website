@@ -156,6 +156,8 @@ export default function VolunteerPage({
                                     dateOfBirth: user?.dateOfBirth ?? '',
                                     zipCode: user?.zipCode ?? '',
                                     phoneNumber: user?.phoneNumber ?? '',
+                                    pronounOne: '',
+                                    pronounTwo: '',
                                     getAlerts: user?.acceptedAlerts ?? false,
                                     usCitizen: false,
                                     privacyPolicy: false,

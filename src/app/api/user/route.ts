@@ -5,6 +5,11 @@ import { OnboardingStage } from '@/util/stage'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
+
+// Development mode: bypass OAuth and use a mock user
+const DEV_MODE = process.env.NODE_ENV === 'development'
+const DEV_DISCORD_ID = 'dev-user-12345'
+
 /**
  * Create a new user.
  *
@@ -27,7 +32,11 @@ async function retrieveUser() {
     const session = await auth()
     await dbConnect()
 
-    const user = await User.findOne({ discordId: session?.discordId })
+    // In dev mode without session, use dev user
+    const discordId =
+        DEV_MODE && !session?.discordId ? DEV_DISCORD_ID : session?.discordId
+
+    const user = await User.findOne({ discordId })
         .populate({
             path: 'roles',
             populate: {
@@ -39,45 +48,82 @@ async function retrieveUser() {
 }
 
 export async function GET() {
-    //check to make sure user is logged in
-    const response = await checkAuth()
+    // In dev mode, bypass auth check
+    if (!DEV_MODE) {
+        //check to make sure user is logged in
+        const response = await checkAuth()
 
-    //serve response based on the outcome of the auth check
-    switch (response) {
-        case ResponseCode.Successful:
-            break
-        case ResponseCode.Exception:
-            return NextResponse.json({ error: 'Bad request' }, { status: 400 })
-        case ResponseCode.NoSession:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        case ResponseCode.InsufficientAccess:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        default:
-            throw Error('Unidentified response code.')
+        //serve response based on the outcome of the auth check
+        switch (response) {
+            case ResponseCode.Successful:
+                break
+            case ResponseCode.Exception:
+                return NextResponse.json(
+                    { error: 'Bad request' },
+                    { status: 400 }
+                )
+            case ResponseCode.NoSession:
+                return NextResponse.json(
+                    { error: 'Unauthorized' },
+                    { status: 401 }
+                )
+            case ResponseCode.InsufficientAccess:
+                return NextResponse.json(
+                    { error: 'Unauthorized' },
+                    { status: 401 }
+                )
+            default:
+                throw Error('Unidentified response code.')
+        }
     }
 
     const usr: IUser = (await retrieveUser()) as IUser
+    if (!usr) {
+        return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
     return NextResponse.json(sanitizeUser(usr))
 }
 
 export async function PATCH(req: NextRequest) {
-    //check to make sure user is logged in
-    const response = await checkAuth()
     let user: IUser
 
-    //serve response based on the outcome of the auth check
-    switch (response) {
-        case ResponseCode.Successful:
-            user = (await retrieveUser()) as IUser
-            break
-        case ResponseCode.Exception:
-            return NextResponse.json({ error: 'Bad request' }, { status: 400 })
-        case ResponseCode.NoSession:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        case ResponseCode.InsufficientAccess:
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        default:
-            throw Error('Unidentified response code.')
+    // In dev mode, bypass auth check
+    if (!DEV_MODE) {
+        //check to make sure user is logged in
+        const response = await checkAuth()
+
+        //serve response based on the outcome of the auth check
+        switch (response) {
+            case ResponseCode.Successful:
+                user = (await retrieveUser()) as IUser
+                break
+            case ResponseCode.Exception:
+                return NextResponse.json(
+                    { error: 'Bad request' },
+                    { status: 400 }
+                )
+            case ResponseCode.NoSession:
+                return NextResponse.json(
+                    { error: 'Unauthorized' },
+                    { status: 401 }
+                )
+            case ResponseCode.InsufficientAccess:
+                return NextResponse.json(
+                    { error: 'Unauthorized' },
+                    { status: 401 }
+                )
+            default:
+                throw Error('Unidentified response code.')
+        }
+    } else {
+        // Dev mode: get user without auth
+        user = (await retrieveUser()) as IUser
+        if (!user) {
+            return NextResponse.json(
+                { error: 'User not found' },
+                { status: 404 }
+            )
+        }
     }
 
     const onboardingInit = user.onboardingStage
