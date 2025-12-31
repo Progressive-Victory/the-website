@@ -149,14 +149,14 @@ function TiltMessage({
 }) {
     const [isHovered, setIsHovered] = useState(false)
     const [canTilt, setCanTilt] = useState(false)
-    const [touched, setTouched] = useState(false)
     const [elementPosition, setElementPosition] = useState({
         left: 0,
         top: 0,
         width: 0,
         height: 0,
     })
-    const { mousePosition, handleMouseMove } = useMousePosition()
+    const { mousePosition, handleMouseMove: handlePointerMove } =
+        useMousePosition()
 
     // tilt
     const tiltX = useSpring(0, { stiffness: 300, damping: 50 })
@@ -165,8 +165,8 @@ function TiltMessage({
     const rotateX = useTransform(tiltY, [-1, 1], [-10, 10])
     const rotateY = useTransform(tiltX, [-1, 1], [-10, 10])
 
-    const handleMouseEnter = (e: React.MouseEvent) => {
-        if (!touched) {
+    const handlePointerEnter = (e: React.PointerEvent) => {
+        if (e.pointerType == 'mouse') {
             setIsHovered(true)
             const rect = e.currentTarget.getBoundingClientRect()
             setElementPosition({
@@ -183,15 +183,6 @@ function TiltMessage({
         setCanTilt(false)
         tiltX.set(0)
         tiltY.set(0)
-    }
-
-    const handleTouchStart = () => {
-        setTouched(true)
-        stopHoverAnimations()
-    }
-
-    const handleTouchEnd = () => {
-        setTouched(false)
     }
 
     // tilt when rotation is done
@@ -221,14 +212,11 @@ function TiltMessage({
             onAnimationComplete={() => {
                 if (isHovered) setCanTilt(true) // tilt after rotation
             }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={stopHoverAnimations}
-            onMouseMove={handleMouseMove}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
+            onPointerEnter={handlePointerEnter}
+            onPointerLeave={stopHoverAnimations}
+            onPointerMove={handlePointerMove}
         >
             {children}
         </motion.div>
     )
 }
-
