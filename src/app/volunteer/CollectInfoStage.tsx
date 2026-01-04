@@ -1,5 +1,5 @@
 import { Field, SupportNote, Toggle } from '.'
-import DropDown from './DropDown'
+import PronounSelection from './PronounSelection'
 import { dateService } from '@/services'
 import { useInit } from '@/util/hooks'
 import Link from 'next/link'
@@ -109,13 +109,7 @@ export function CollectInfoStage({
                 </p>
             </header>
             <section className="flex flex-col gap-2 ">
-                <section className="flex flex-col gap-2 sm:flex-row">
-                    <DropDown
-                        title="Pronouns"
-                        options={['he/him', 'she/her']}
-                        required
-                    />
-                </section>
+                <PronounSelection />
                 <section className="flex flex-col gap-2 sm:flex-row">
                     <Field
                         value={form.firstName}
