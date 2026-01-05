@@ -1,0 +1,9 @@
+.bulletList {
+    list-style-type: disc;
+    padding-inline: 1.25rem;
+    padding-top: 1.25rem;
+}
+
+.inlineLink {
+    text-decoration: underline;
+}

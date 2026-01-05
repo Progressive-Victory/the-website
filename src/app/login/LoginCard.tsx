@@ -1,4 +1,5 @@
 'use client'
+
 import { SignInAuthorizationParams, SignInOptions } from 'next-auth/react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'

@@ -1,12 +1,13 @@
 'use client'
-import { useState } from 'react'
-import NextLink from 'next/link'
-import Image from 'next/image'
-import { useSession } from 'next-auth/react'
-import { AnimatePresence, motion } from 'motion/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid'
+
 import { NavItem } from './types'
 import { Link } from '@/components/common'
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid'
+import { AnimatePresence, motion } from 'motion/react'
+import { useSession } from 'next-auth/react'
+import Image from 'next/image'
+import NextLink from 'next/link'
+import { useState } from 'react'
 
 // Tailwind class combos
 const tw_hover = `transition duration-300 ease-in-out`

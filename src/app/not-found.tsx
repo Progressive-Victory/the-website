@@ -1,8 +1,8 @@
+import notFoundStyles from '@/app/styles/pages/NotFoundPage.module.css'
+import { ContentPageFrame, ContentSection } from '@/components/ContentSections'
+import { HalftoneBackground } from '@/components/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
-import { Metadata } from 'next'
-
-const infoBlockClassName =
-    'my-6 rounded-lg bg-black-pearl-dark pt-6 pb-8 px-8 text-white'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
     title: 'PV - 404',
@@ -17,23 +17,38 @@ export const metadata: Metadata = {
     },
 }
 
-function InfoHeader({ title }: { title: string }) {
-    return <p className="mb-4 text-left text-3xl font-black">{title}</p>
-}
-
-export default function notFound() {
+export default function NotFound() {
     return (
         <MainLayout>
-            <div className="halftone z-1inset-0 absolute size-full opacity-10" />
-            <div className="z-2 min-h-auto relative m-auto flex size-auto flex-col p-10 text-justify tracking-wide lg:max-w-[80%]">
-                <div className={infoBlockClassName}>
-                    <InfoHeader title="Error 404" />
-                    <p>
-                        This page does not exist! We appologize for the
-                        inconvience.
+            <HalftoneBackground opacity={0.1} />
+
+            <ContentPageFrame
+                heading={
+                    <p className={notFoundStyles.notFoundHeading}>
+                        Oops!{' '}
+                        <span
+                            className={notFoundStyles.notFoundHeadingHighlight}
+                        >
+                            Page Not Found
+                        </span>
                     </p>
-                </div>
-            </div>
+                }
+            >
+                <ContentSection
+                    title="Error 404"
+                    titleAlign="left"
+                    highlight="404"
+                    highlightColor="#CE3728"
+                >
+                    <p className={notFoundStyles.notFoundBody}>
+                        This page does not exist. It may have been moved,
+                        deleted, or the URL might be incorrect.
+                        {'\n\n'}
+                        Please check the address or use the navigation above to
+                        get back on track.
+                    </p>
+                </ContentSection>
+            </ContentPageFrame>
         </MainLayout>
     )
 }
