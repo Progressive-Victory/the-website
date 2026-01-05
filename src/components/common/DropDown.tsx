@@ -1,11 +1,13 @@
 const DropDown = ({
     label,
     options,
+    defaultOption,
     updateState,
     required,
 }: {
     label?: string
     options: string[]
+    defaultOption?: string
     updateState?: (selectedOption: string) => void
     required?: boolean
 }) => {
@@ -18,7 +20,7 @@ const DropDown = ({
                 </label>
             )}
             <select
-                defaultValue={''}
+                defaultValue={defaultOption}
                 onChange={(e) => {
                     if (updateState) {
                         updateState(e.target.value)

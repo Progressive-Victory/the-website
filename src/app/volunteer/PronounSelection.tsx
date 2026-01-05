@@ -8,12 +8,11 @@ interface pronounConfiguration {
 
 const PronounSelection = ({
     setSelectedPronouns,
-    setSelectedSubjectPronoun,
-    setSelectedObjectPronoun,
 }: {
-    setSelectedPronouns: (selectedPronouns: string) => void
-    setSelectedSubjectPronoun: (selectedSubjectPronoun: string) => void
-    setSelectedObjectPronoun: (selectedObjectPronoun: string) => void
+    setSelectedPronouns: (
+        selectedSubjectPronoun: string | null,
+        selectedObjectPronoun: string | null
+    ) => void
 }) => {
     const otherPronounOption = 'other'
     const noPreferencePronounConfiguration = {
@@ -66,9 +65,10 @@ const PronounSelection = ({
                         setSelectedPronounOption(selectedOption)
 
                         if (selectedOption == otherPronounOption) {
-                            setSelectedPronouns('they/them')
+                            setSelectedPronouns('they', 'them')
                         } else {
-                            setSelectedPronouns('they/them')
+                            const [subject, object] = selectedOption.split('/')
+                            setSelectedPronouns(subject, object)
                         }
                     }}
                     required
@@ -80,8 +80,11 @@ const PronounSelection = ({
                         <DropDown
                             options={subjectPronouns}
                             required
-                            updateState={(selectedOption: string) => {
-                                setSelectedSubjectPronoun(selectedOption)
+                            updateState={(selectedSubjectPronoun: string) => {
+                                setSelectedPronouns(
+                                    selectedSubjectPronoun,
+                                    null
+                                )
                             }}
                         />
                         <label className="mb-[3px] inline-block text-lg text-gray-300">
@@ -89,9 +92,10 @@ const PronounSelection = ({
                         </label>
                         <DropDown
                             options={objectPronouns}
+                            defaultOption="them"
                             required
-                            updateState={(selectedOption: string) => {
-                                setSelectedObjectPronoun(selectedOption)
+                            updateState={(selectedObjectPronoun: string) => {
+                                setSelectedPronouns(null, selectedObjectPronoun)
                             }}
                         />
                     </section>

@@ -114,28 +114,18 @@ export function CollectInfoStage({
             </header>
             <section className="flex flex-col gap-2 ">
                 <PronounSelection
-                    setSelectedPronouns={(selectedPronouns: string) => {
-                        const [subject, object] = selectedPronouns.split('/')
-                        setForm({
-                            ...form,
-                            subjectPronoun: subject,
-                            objectPronoun: object,
-                        })
-                    }}
-                    setSelectedSubjectPronoun={(
-                        selectedSubjectPronoun: string
+                    setSelectedPronouns={(
+                        selectedSubjectPronoun: string | null,
+                        selectedObjectPronoun: string | null
                     ) => {
                         setForm({
                             ...form,
-                            subjectPronoun: selectedSubjectPronoun,
-                        })
-                    }}
-                    setSelectedObjectPronoun={(
-                        selectedObjectPronoun: string
-                    ) => {
-                        setForm({
-                            ...form,
-                            objectPronoun: selectedObjectPronoun,
+                            ...(selectedSubjectPronoun && {
+                                subjectPronoun: selectedSubjectPronoun,
+                            }),
+                            ...(selectedObjectPronoun && {
+                                objectPronoun: selectedObjectPronoun,
+                            }),
                         })
                     }}
                 />
