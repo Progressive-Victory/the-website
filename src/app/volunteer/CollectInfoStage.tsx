@@ -8,6 +8,8 @@ import { Country, isValidCountryPostalCode } from 'postal-code-validator'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export interface IOnboardingForm {
+    subjectPronoun: string
+    objectPronoun: string
     firstName: string
     lastName: string
     dateOfBirth: string
@@ -98,6 +100,8 @@ export function CollectInfoStage({
             }))
     }, [parsedPhone])
 
+    console.log(form)
+
     return (
         <div>
             <header>
@@ -109,7 +113,33 @@ export function CollectInfoStage({
                 </p>
             </header>
             <section className="flex flex-col gap-2 ">
-                <PronounSelection />
+                <PronounSelection
+                    setSelectedPronouns={(selectedPronouns: string) => {
+                        const [subject, object] = selectedPronouns.split('/')
+                        setForm({
+                            ...form,
+                            subjectPronoun: subject,
+                            objectPronoun: object,
+                        })
+                    }}
+                    setSelectedSubjectPronoun={(
+                        selectedSubjectPronoun: string
+                    ) => {
+                        setForm({
+                            ...form,
+                            subjectPronoun: selectedSubjectPronoun,
+                        })
+                    }}
+                    setSelectedObjectPronoun={(
+                        selectedObjectPronoun: string
+                    ) => {
+                        setForm({
+                            ...form,
+                            objectPronoun: selectedObjectPronoun,
+                        })
+                    }}
+                />
+
                 <section className="flex flex-col gap-2 sm:flex-row">
                     <Field
                         value={form.firstName}

@@ -26,6 +26,8 @@ export interface IUser extends Document {
     verified: boolean
     onboardingStage: OnboardingStage
     roles: IRole[]
+    subjectPronoun?: string
+    objectPronoun?: string
     firstName?: string
     lastName?: string
     dateOfBirth?: string

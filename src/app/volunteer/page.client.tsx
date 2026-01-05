@@ -151,6 +151,10 @@ export default function VolunteerPage({
                         {currentStage === OnboardingStage.NOT_STARTED && (
                             <CollectInfoStage
                                 initialForm={{
+                                    subjectPronoun:
+                                        user?.subjectPronoun ?? 'they',
+                                    objectPronoun:
+                                        user?.objectPronoun ?? 'them',
                                     firstName: user?.firstName ?? '',
                                     lastName: user?.lastName ?? '',
                                     dateOfBirth: user?.dateOfBirth ?? '',
