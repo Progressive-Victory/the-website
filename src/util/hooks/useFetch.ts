@@ -1,4 +1,4 @@
-import { AuthRequest, FetchError, FetchRequest } from '@/models/models'
+import { AuthRequest, FetchError } from '@/models/models'
 import { useSession } from 'next-auth/react'
 import z from 'zod'
 
@@ -65,8 +65,10 @@ export function useFetch() {
 
         let res = await fetch(fullUrl, options)
         if (res.status === 401) {
-            options.headers!['Authorization'] =
-                `Bearer ${await refreshToken(signal)}`
+            options.headers = {
+                ...options.headers,
+                Authorization: `Bearer ${await refreshToken(signal)}`,
+            }
             res = await fetch(fullUrl, options)
         }
 
