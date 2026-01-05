@@ -154,7 +154,6 @@ function TiltMessage({
 }) {
     const [isHovered, setIsHovered] = useState(false)
     const [canTilt, setCanTilt] = useState(false)
-    const [touched, setTouched] = useState(false)
     const [elementPosition, setElementPosition] = useState({
         left: 0,
         top: 0,
@@ -171,32 +170,21 @@ function TiltMessage({
     const rotateY = useTransform(tiltX, [-1, 1], [-10, 10])
 
     const handleMouseEnter = (e: React.MouseEvent) => {
-        if (!touched) {
-            setIsHovered(true)
-            const rect = e.currentTarget.getBoundingClientRect()
-            setElementPosition({
-                left: rect.left,
-                top: rect.top,
-                width: rect.width,
-                height: rect.height,
-            })
-        }
+        setIsHovered(true)
+        const rect = e.currentTarget.getBoundingClientRect()
+        setElementPosition({
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+        })
     }
 
-    const stopHoverAnimations = () => {
+    const handleMouseLeave = () => {
         setIsHovered(false)
         setCanTilt(false)
         tiltX.set(0)
         tiltY.set(0)
-    }
-
-    const handleTouchStart = () => {
-        setTouched(true)
-        stopHoverAnimations()
-    }
-
-    const handleTouchEnd = () => {
-        setTouched(false)
     }
 
     // tilt when rotation is done
@@ -221,22 +209,18 @@ function TiltMessage({
             animate={{
                 rotateZ: isHovered ? -2.5 : 0,
                 scale: isHovered ? 1.02 : 1,
-                padding: isHovered ? '2% 2% 2% 2%' : 0,
-                margin: isHovered ? '-2% -2% -2% -2%' : 0,
+                padding: isHovered ? '7% 7% 7% 7%' : 0,
+                margin: isHovered ? '-7% -7% -7% -7%' : 0,
             }}
             transition={{ duration: 0.2 }}
             onAnimationComplete={() => {
                 if (isHovered) setCanTilt(true) // tilt after rotation
             }}
             onMouseEnter={handleMouseEnter}
-            onMouseLeave={stopHoverAnimations}
+            onMouseLeave={handleMouseLeave}
             onMouseMove={handleMouseMove}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
         >
             {children}
         </motion.div>
     )
-    
 }
-
