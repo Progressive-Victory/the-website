@@ -110,7 +110,7 @@ pnpm run test
 
 ### Website Pages That Reference Models:
 
-- \\src\\app\\api\\onboarding\\zip\\validate\\route
+- \\src\\app\\api\\onboarding\\zip\\validate\\route -- sH3ll: working on now
 - \\src\\app\\api\\onboarding\\zip\\location\\route
 - \\src\\app\\api\\admin\\users\\route
 - \\src\\app\\admin\\roles\\route
