@@ -1,9 +1,12 @@
+// ContentSections.tsx
 'use client'
 
 import styles from '@/app/styles/components/ContentSections.module.css'
 import { DropdownQuestion } from '@/components/DropdownQuestion'
 import type React from 'react'
 import { useState } from 'react'
+
+// ContentSections.tsx
 
 type TitleAlign = 'left' | 'center' | 'right'
 type BodyType = 'text' | 'dropdown'

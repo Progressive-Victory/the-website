@@ -1,60 +1,67 @@
-.header-logoSmall {
-    display: flex;
-}
-
-.header-logoLarge {
-    display: none;
-}
-
-.header-centerNav {
-    display: none;
-}
-
-.header-rightActions {
-    display: none;
-}
-
-.header-menuButton {
-    display: flex;
-}
-
-@media (min-width: 1024px) {
-    .header-logoSmall {
-        display: none;
-    }
-
-    .header-logoLarge {
-        display: flex;
-    }
-}
-
-@media (min-width: 1280px) {
-    .header-centerNav {
-        display: flex;
-    }
-
-    .header-rightActions {
-        display: flex;
-    }
-
-    .header-menuButton {
-        display: none;
-    }
-}
-
+/* header.module.css */
 .headerRoot {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 60;
+
+    width: 100%;
+    height: 86px;
+
     display: flex;
-    flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    height: 100px;
-    width: 100%;
-    background-color: #09223a;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    gap: 14px;
+
+    padding: 12px 16px;
+
+    /* PV glass header */
+    background: rgba(9, 34, 58, 0.9);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    isolation: isolate;
+}
+
+.headerRoot::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    pointer-events: none;
+    opacity: 0.95;
+    background:
+        radial-gradient(
+            circle at 10% 20%,
+            rgba(206, 55, 40, 0.18),
+            transparent 60%
+        ),
+        radial-gradient(
+            circle at 90% 30%,
+            rgba(41, 134, 204, 0.16),
+            transparent 60%
+        );
+}
+
+.headerLeft {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logoLink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    outline: none;
+}
+
+.logoLink:focus-visible {
+    box-shadow: 0 0 0 4px rgba(206, 55, 40, 0.22);
 }
 
 .headerLogoSmall {
@@ -67,7 +74,149 @@
     align-items: center;
 }
 
+.headerCenterNav {
+    position: relative;
+    z-index: 1;
+
+    display: none;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+}
+
+.headerRightActions {
+    position: relative;
+    z-index: 1;
+
+    display: none;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+
+    min-width: 300px;
+}
+
+/* Burger */
+.headerMenuButton {
+    position: relative;
+    z-index: 1;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 44px;
+    height: 44px;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.headerMenuButton:hover {
+}
+
+.headerMenuButton:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(206, 55, 40, 0.22);
+}
+
+.headerMenuIconWrapper {
+    display: inline-flex;
+    width: 1.75rem;
+    height: 1.75rem;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.headerMenuIconLine {
+    position: absolute;
+    width: 1.75rem;
+    height: 0.18rem;
+    border-radius: 999px;
+    background: currentColor;
+    transform-origin: center;
+}
+
+/* Backdrop */
+.navBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+
+    background: rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Drawer */
+.navDrawer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 86px;
+    z-index: 50;
+
+    padding: 14px 16px 18px 16px;
+
+    background: rgba(9, 34, 58, 0.92);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.32);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    isolation: isolate;
+}
+
+.navDrawer::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    pointer-events: none;
+    opacity: 0.9;
+    background:
+        radial-gradient(
+            circle at 20% 10%,
+            rgba(206, 55, 40, 0.18),
+            transparent 55%
+        ),
+        radial-gradient(
+            circle at 90% 40%,
+            rgba(41, 134, 204, 0.14),
+            transparent 55%
+        );
+}
+
+.navDrawerInner {
+    position: relative;
+    z-index: 1;
+
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    padding: 8px 0 16px 0;
+}
+
+.navDrawerItem {
+    width: 100%;
+}
+
+/* Breakpoints */
 @media (min-width: 1024px) {
+    .headerRoot {
+        padding: 12px 22px;
+        height: 92px;
+    }
+
     .headerLogoSmall {
         display: none;
     }
@@ -75,45 +224,6 @@
     .headerLogoLarge {
         display: flex;
     }
-}
-
-.headerCenterNav {
-    display: none;
-    width: 100%;
-    justify-content: center;
-    column-gap: 3rem;
-}
-
-.headerRightActions {
-    display: none;
-    width: 300px;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    column-gap: 1rem;
-}
-
-.headerMenuButton {
-    display: flex;
-    margin-left: 0.75rem;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9999px;
-}
-
-.headerMenuIconWrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.headerMenuIcon {
-    width: 2rem;
-    height: 2rem;
 }
 
 @media (min-width: 1280px) {
@@ -128,37 +238,4 @@
     .headerMenuButton {
         display: none;
     }
-}
-
-.navBackdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 40;               
-  background: rgba(0,0,0,0.35);
-  
-  backdrop-filter: blur(2px);
-}
-
-.navDrawer {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 6rem;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    row-gap: 1rem;
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
-    padding-top: 1rem;
-    padding-bottom: 4rem;
-    border-bottom-left-radius: 0.5rem;
-    border-bottom-right-radius: 0.5rem;
-    background-color: #09223a;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.35);
-}
-
-.navDrawerItem {
-    width: 100%;
 }

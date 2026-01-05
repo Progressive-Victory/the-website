@@ -14,6 +14,7 @@ const navitems: NavItem[] = [
     { name: 'About', href: '/about' },
     { name: 'Volunteer', href: '/volunteer' },
     { name: 'Events', href: '/events' },
+    { name: 'Endorsements', href: '/endorsements' },
     { name: 'Merch', href: 'https://progressivevictory.myshopify.com/' },
     {
         name: 'Contact',

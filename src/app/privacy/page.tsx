@@ -3,7 +3,6 @@ import { ContentPageFrame, ContentSection } from '@/components/ContentSections'
 import { HalftoneBackground } from '@/components/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import type { Metadata } from 'next'
-import type React from 'react'
 
 export const metadata: Metadata = {
     title: 'PV - Privacy',
@@ -336,9 +335,11 @@ function PrivacyContent() {
 export default function PrivacyPage() {
     return (
         <MainLayout>
-            <div className="container">
-                <HalftoneBackground />
-                <PrivacyContent />
+            <div className={styles.page}>
+                <HalftoneBackground opacity={0.08} />
+                <div className={styles.contentLayer}>
+                    <PrivacyContent />
+                </div>
             </div>
         </MainLayout>
     )
