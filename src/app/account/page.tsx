@@ -1,7 +1,7 @@
-import { Account } from './Account'
-import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
-import { MainLayout } from '@/components/layout/MainLayout'
+import STUB_GET_USER from './stubGetUser'
+import { auth } from '@/util/auth'
 import { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
     title: 'PV - Account',
@@ -15,11 +15,19 @@ export const metadata: Metadata = {
     },
 }
 
-export default function AccountPage() {
-    return (
-        <MainLayout>
-            <HalftoneBackground />
-            <Account />
-        </MainLayout>
-    )
+export default async function AccountPage() {
+    const session = await auth()
+
+    if (!session) {
+        redirect('/login?redirect=/account')
+    }
+
+    const userData = STUB_GET_USER()
+    if (!userData) {
+        // I'm assuming this means that the user hasn't completed onboarding, so redirect them to volunteer page
+        // Is this assumption correct?
+        redirect('/volunteer')
+    }
+
+    return <div></div>
 }
