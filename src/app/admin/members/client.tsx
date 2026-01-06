@@ -13,7 +13,7 @@ import { DateField } from '@/components/form/DateField'
 import { IMongoRole } from '@/models/MongoRole'
 import { IMongoUser } from '@/models/MongoUser'
 import { dateService } from '@/services'
-import { useUser } from '@/util/hooks'
+import { useCurrentUser } from '@/util/hooks'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
@@ -33,7 +33,7 @@ export default function ClientPage({ roles }: PageProps) {
     const [selectedUser, setSelectedUser] = useState<IMongoUser | null>(null)
     const [users, setUsers] = useState<IMongoUser[]>([])
 
-    const loggedInUser = useUser()
+    const loggedInUser = useCurrentUser()
 
     const handleSelectItem = (value: IMongoUser) => {
         if (value._id === selectedUser?._id) return
