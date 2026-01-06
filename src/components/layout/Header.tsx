@@ -46,27 +46,9 @@ export function Header() {
 
     return (
         <>
-            <header
-                className={styles.headerRoot}
-                style={{
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 60,
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '14px 18px',
-                    gap: '14px',
-                    backgroundColor: 'rgba(9, 34, 58, 0.98)',
-                    color: '#FFFFFF',
-                    borderBottom: '1px solid rgba(255,255,255,0.08)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                }}
-            >
+            <header className={styles.headerRoot}>
                 <div className={styles.headerLogoSmall}>
-                    <NextLink href="/">
+                    <NextLink href="/" className={styles.logoLink}>
                         <Image
                             src="/images/Logo_White.svg"
                             alt="progressive-victory-logo"
@@ -77,7 +59,7 @@ export function Header() {
                 </div>
 
                 <div className={styles.headerLogoLarge}>
-                    <NextLink href="/">
+                    <NextLink href="/" className={styles.logoLink}>
                         <Image
                             src="/images/LogoFull.webp"
                             alt="progressive-victory-logo"
@@ -152,14 +134,7 @@ export function Header() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2, ease: 'easeOut' }}
-                        style={{
-                            position: 'fixed',
-                            inset: 0,
-                            zIndex: 30,
-                            backdropFilter: 'blur(10px)',
-                            WebkitBackdropFilter: 'blur(10px)',
-                            backgroundColor: 'rgba(0, 0, 0, 0.18)',
-                        }}
+                        className={styles.navBackdrop}
                         onClick={() => setIsOpen(false)}
                     />
                 )}
@@ -235,56 +210,36 @@ function HamburgerIcon({ isOpen }: { isOpen: boolean }) {
             aria-hidden="true"
             initial={false}
             animate={isOpen ? 'open' : 'closed'}
-            style={{
-                display: 'inline-flex',
-                width: '1.75rem',
-                height: '1.75rem',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
-            }}
         >
             <motion.span
                 variants={hamburgerLineVariantsTop}
-                className={styles.headerMenuIcon}
-                style={hamburgerLineBaseStyle}
+                className={styles.headerMenuIconLine}
             />
             <motion.span
                 variants={hamburgerLineVariantsMiddle}
-                className={styles.headerMenuIcon}
-                style={hamburgerLineBaseStyle}
+                className={styles.headerMenuIconLine}
             />
             <motion.span
                 variants={hamburgerLineVariantsBottom}
-                className={styles.headerMenuIcon}
-                style={hamburgerLineBaseStyle}
+                className={styles.headerMenuIconLine}
             />
         </motion.span>
     )
 }
 
-const hamburgerLineBaseStyle: React.CSSProperties = {
-    position: 'absolute',
-    width: '1.75rem',
-    height: '0.18rem',
-    borderRadius: '999px',
-    background: 'currentColor',
-    transformOrigin: 'center',
-}
-
 const hamburgerLineVariantsTop = {
-    closed: { y: -7, rotate: 0, opacity: 1 },
-    open: { y: 0, rotate: 45, opacity: 1 },
+    closed: { y: -7 as const, rotate: 0 as const, opacity: 1 as const },
+    open: { y: 0 as const, rotate: 45 as const, opacity: 1 as const },
 } as const
 
 const hamburgerLineVariantsMiddle = {
-    closed: { y: 0, opacity: 1, scaleX: 1 },
-    open: { y: 0, opacity: 0, scaleX: 0.6 },
+    closed: { y: 0 as const, opacity: 1 as const, scaleX: 1 as const },
+    open: { y: 0 as const, opacity: 0 as const, scaleX: 0.6 as const },
 } as const
 
 const hamburgerLineVariantsBottom = {
-    closed: { y: 7, rotate: 0, opacity: 1 },
-    open: { y: 0, rotate: -45, opacity: 1 },
+    closed: { y: 7 as const, rotate: 0 as const, opacity: 1 as const },
+    open: { y: 0 as const, rotate: -45 as const, opacity: 1 as const },
 } as const
 
 const containerVariants = {
@@ -354,24 +309,20 @@ function NavDrawer(props: { isOpen: boolean; children: React.ReactNode[] }) {
                     exit="hidden"
                     variants={containerVariants}
                     className={styles.navDrawer}
-                    style={{
-                        position: 'fixed',
-                        zIndex: 50,
-                        paddingTop: '32px',
-                        backgroundColor: 'rgba(9, 34, 58, 0.88)',
-                        borderBottom: '1px solid rgba(255,255,255,0.10)',
-                    }}
                 >
-                    {children.map((child, i) => (
-                        <motion.div
-                            key={i}
-                            variants={itemVariants}
-                            animate="visible"
-                            exit="exit"
-                        >
-                            {child}
-                        </motion.div>
-                    ))}
+                    <div className={styles.navDrawerInner}>
+                        {children.map((child, i) => (
+                            <motion.div
+                                key={i}
+                                variants={itemVariants}
+                                animate="visible"
+                                exit="exit"
+                                className={styles.navDrawerItem}
+                            >
+                                {child}
+                            </motion.div>
+                        ))}
+                    </div>
                 </motion.nav>
             )}
         </AnimatePresence>

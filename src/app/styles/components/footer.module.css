@@ -61,10 +61,13 @@
     background: rgba(255, 255, 255, 0.06);
 
     color: rgba(255, 255, 255, 0.92);
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: 0.02em;
     text-decoration: none;
     cursor: pointer;
+
+    /* keep labels on one line */
+    white-space: nowrap;
 
     transition:
         background 0.18s ease,
@@ -99,16 +102,19 @@
     justify-content: center;
 
     height: 44px;
-    padding: 0 16px;
+    padding: 0 26px;
+    margin-left: 12px;
 
     border-radius: 999px;
     background: rgba(206, 55, 40, 0.92);
     border: 1px solid rgba(206, 55, 40, 0.55);
 
     color: rgba(255, 255, 255, 0.96);
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: 0.02em;
     text-decoration: none;
+
+    white-space: nowrap;
 
     transition:
         filter 0.18s ease,
@@ -173,7 +179,11 @@
 /* Rules (soft) */
 .rule {
     height: 2px;
-    width: 100%;
+
+    /* ✅ lines shrink instead of buttons scrolling */
+    flex: 1 1 auto;
+    min-width: 0;
+
     opacity: 0.25;
     background: linear-gradient(
         90deg,
@@ -187,12 +197,11 @@
 .mobileOnly {
     display: flex;
     justify-content: center;
-    padding: 18px 16px;
+    padding: 18px 20px;
 }
 
 .mobileStack {
     width: 100%;
-    max-width: 560px;
 
     display: flex;
     flex-direction: column;
@@ -259,10 +268,9 @@
 
 .desktopFrame {
     width: 100%;
-    max-width: 1200px;
     margin: 0 auto;
 
-    padding: 22px 24px;
+    padding: 42px 30px;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -273,15 +281,25 @@
     display: flex;
     align-items: center;
     gap: 14px;
+
+    /* ✅ allow the rule to shrink properly */
+    min-width: 0;
 }
 
+/* ✅ buttons stay one line, never scroll; rule shrinks */
 .desktopTopNav,
 .desktopBottomNav {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex-wrap: wrap;
+
+    flex: 0 0 auto; /* nav does not consume the rule space */
+    flex-wrap: nowrap;
+    white-space: nowrap;
     justify-content: flex-end;
+
+    overflow: hidden; /* ✅ no scrolling */
+    min-width: 0;
 }
 
 .desktopMidRow {
@@ -291,26 +309,23 @@
     align-items: center;
 }
 
-.desktopLogoWrap {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 10px 14px;
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(0, 0, 0, 0.18);
-}
-
 .desktopSocialCluster {
     display: flex;
     justify-content: flex-end;
+
+    /* ✅ allow hover lift to render */
+    overflow: visible;
 }
 
 .desktopSocialRow {
     display: flex;
     align-items: center;
     gap: 10px;
+
+    flex-wrap: nowrap;
+
+    /* ✅ allow hover lift to render */
+    overflow: visible;
 }
 
 /* breakpoint: desktop on */

@@ -93,8 +93,6 @@
     align-items: center;
     justify-content: flex-end;
     gap: 10px;
-
-    min-width: 300px;
 }
 
 /* Burger */

@@ -44,7 +44,7 @@ export function DropdownQuestion({
     const iconStyle: React.CSSProperties = {
         width: '100%',
         height: '100%',
-        color: '#09223a',
+        color: '#ce3728',
     }
 
     return (

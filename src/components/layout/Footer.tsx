@@ -19,6 +19,7 @@ const navitems: NavItem[] = [
     { name: 'About', href: '/about' },
     { name: 'Volunteer', href: '/volunteer' },
     { name: 'Events', href: '/events' },
+    { name: 'Endorsements', href: '/endorsements' },
     { name: 'Merch', href: 'https://progressivevictory.myshopify.com/' },
 ]
 
@@ -173,8 +174,8 @@ function DesktopFooter() {
                         <Image
                             src="/images/Logo_White.svg"
                             alt="Progressive Victory"
-                            width={170}
-                            height={170}
+                            width={74}
+                            height={74}
                         />
                     </div>
 

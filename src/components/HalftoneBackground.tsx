@@ -1,45 +1,23 @@
+import styles from '@/app/styles/components/halftone.module.css'
 import type React from 'react'
 
 interface HalftoneBackgroundProps {
     opacity?: number
 }
 
-// Halftone effect breaks if not using inline CSS or Tailwind, if you can figure it fix for normal CSS be my guest.
 export function HalftoneBackground({ opacity = 0.1 }: HalftoneBackgroundProps) {
+    const alpha = Math.min(1, Math.max(0, opacity))
+
     return (
         <div
-            style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                bottom: 0,
-                width: '100%',
-                height: '100%',
-                zIndex: 0,
-                pointerEvents: 'none',
-
-                backgroundColor: 'black',
-                filter: 'contrast(55)',
-                opacity,
-            }}
+            className={styles.halftoneBackground}
+            style={
+                {
+                    ['--halftone-opacity' as never]: String(alpha),
+                } as React.CSSProperties
+            }
         >
-            <div
-                style={{
-                    position: 'absolute',
-                    inset: 0,
-
-                    backgroundImage:
-                        'radial-gradient(circle at center, white 10%, transparent 96%)',
-                    backgroundSize: '0.45rem 0.45rem',
-                    backgroundRepeat: 'round',
-                    backgroundPosition: 'center',
-
-                    WebkitMaskImage:
-                        'linear-gradient(45deg, transparent 5%, rgb(255,255,255) 10%, rgba(255,255,255,0.5) 96%)',
-                    maskImage:
-                        'linear-gradient(45deg, transparent 5%, rgb(255,255,255) 10%, rgba(255,255,255,0.5) 96%)',
-                }}
-            />
+            <div className={styles.halftoneDots} />
         </div>
     )
 }
