@@ -30,7 +30,7 @@ export default async function Login({
 
     if (session) {
         redirect(redirect_uri)
+    } else {
+        return <LoginPage redirect={redirect_uri} />
     }
-
-    return <LoginPage redirect={redirect_uri} />
 }

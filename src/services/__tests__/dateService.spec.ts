@@ -1,4 +1,5 @@
 import { dateService } from '@/services'
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
 
 describe('dateService', () => {
     describe('now', () => {
@@ -69,11 +70,11 @@ describe('dateService', () => {
         const now = new Date('2025-01-01')
 
         beforeAll(() => {
-            jest.spyOn(dateService, 'now').mockReturnValue(now)
+            vi.spyOn(dateService, 'now').mockReturnValue(now)
         })
 
         afterAll(() => {
-            jest.clearAllMocks()
+            vi.clearAllMocks()
         })
 
         it('should return the number of years between input and now', () => {
