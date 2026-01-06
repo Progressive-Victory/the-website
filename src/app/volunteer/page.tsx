@@ -1,5 +1,5 @@
 import VolunteerPage from '@/app/volunteer/page.client'
-import User from '@/models/User'
+import MongoUser from '@/models/MongoUser'
 import { auth } from '@/util/auth'
 import { isUserAGuildMember } from '@/util/discord'
 import dbConnect from '@/util/libmongo'
@@ -13,7 +13,7 @@ export default async function Page() {
     }
 
     await dbConnect()
-    const user = await User.findOne({
+    const user = await MongoUser.findOne({
         discordId: session.discordId,
     })
 

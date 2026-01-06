@@ -1,6 +1,6 @@
 import { getGuildAvatar } from './discord'
-import { IRole } from '@/models/Role'
-import { IUser, User } from '@/models/User'
+import { IMongoRole } from '@/models/MongoRole'
+import { IMongoUser, MongoUser } from '@/models/MongoUser'
 import dbConnect from '@/util/libmongo'
 import { OAuth2Routes, OAuth2Scopes } from 'discord-api-types/v10'
 import NextAuth, { Profile } from 'next-auth'
@@ -40,7 +40,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
             async profile(profile) {
                 // Executed async. No reason to wait on this update before sending a response down.
-                void User.findOneAndUpdate(
+                void MongoUser.findOneAndUpdate(
                     {
                         discordId: profile.id,
                     },
@@ -93,12 +93,12 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                 // Database connection
                 await dbConnect()
 
-                const existingUser = await User.findOne({
+                const existingUser = await MongoUser.findOne({
                     discordId: eprofile.id,
                 })
                 if (!existingUser) {
                     // Create new user
-                    const newUser = new User({
+                    const newUser = new MongoUser({
                         name: eprofile.username,
                         email: profile.email,
                         // Using long form here to adjust size of image
@@ -128,9 +128,9 @@ export const enum ResponseCode {
 
 // Role checking utility function
 // takes an array of strings, each matching the name field of a given roles
-const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
+const hasRequiredRoles = (user: IMongoUser, requiredRoles: string[] = []) => {
     const userRoles = user.roles
-    const roleStrs = userRoles.map((role: IRole) => role.name)
+    const roleStrs = userRoles.map((role: IMongoRole) => role.name)
     if (!user?.roles || !Array.isArray(user.roles)) return false
     return requiredRoles.every((role) => roleStrs.includes(role))
 }
@@ -155,7 +155,7 @@ export async function checkAuth(roles?: string[]): Promise<ResponseCode> {
 
     // query database for the user object with a discordId corresponding to
     // the one stored in the session object
-    const user: IUser | null = await User.findOne({
+    const user: IMongoUser | null = await MongoUser.findOne({
         discordId: session.discordId,
     })
         .populate({
@@ -198,7 +198,7 @@ export async function checkAuthPermissions(
 
     await dbConnect()
 
-    const user = await User.findOne({
+    const user = await MongoUser.findOne({
         discordId: session.discordId,
     })
         .select({
