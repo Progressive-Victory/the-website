@@ -62,7 +62,7 @@ SITE_URL="https://example.com"
 
 ### 4. Run
 
-Finally, run the development server
+Finally, run the development server..
 
 ```sh
 pnpm dev

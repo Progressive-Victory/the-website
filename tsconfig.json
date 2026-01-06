@@ -33,7 +33,8 @@
         ".next/types/**/*.ts",
         "types/next-auth.d.ts",
         "**/*.mjs",
-        "**/*.js"
+        "**/*.js",
+        "vitest.config.mts"
     ],
     "exclude": ["node_modules"]
 }
