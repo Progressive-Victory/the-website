@@ -79,7 +79,7 @@ const schema = new Schema<IMongoUser>({
 // Finally the model itself is exported, we use the cache if it exists
 export const MongoUser: Model<IMongoUser> =
     (mongoose.models as Record<string, Model<IMongoUser>>).User ||
-    mongoose.model<IMongoUser>('MongoUser', schema)
+    mongoose.model<IMongoUser>('User', schema)
 
 // Default export
 export default MongoUser

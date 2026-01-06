@@ -52,15 +52,6 @@ export enum ShippingStatus {
     SHIPPED = 'shipped',
 }
 
-export enum OnboardingStage {
-    NOT_STARTED = 'not_started',
-    AWAITING_VERIFY = 'awaiting_verify',
-    VERIFIED = 'verified',
-    UNDERAGE = 'underage',
-    JOINED = 'joined',
-}
-export const zOnboardingStage = z.enum(OnboardingStage)
-
 export const zDocumentUpdate = z.object({
     id: z.string(),
     collectionName: z.string(),
@@ -73,72 +64,27 @@ export const zDocumentUpdate = z.object({
 })
 export type DocumentUpdate = z.infer<typeof zDocumentUpdate>
 
+export const zLocation = z.object({
+	zip: z.int(),
+	city: z.string(),
+	county: z.string(),
+	state: z.string(),
+});
+
+export type Location = z.infer<typeof zLocation>;
+
 export const zPermission = z.object({
-    id: z.string(),
+    id: z.number(),
     name: z.string(),
 })
 export type Permission = z.infer<typeof zPermission>
 
 export const zRole = z.object({
-    id: z.string(),
+    id: z.number(),
     name: z.string(),
     permissions: z.array(zPermission).nullable(),
 })
 export type Role = z.infer<typeof zRole>
-
-export const zUser = z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string(),
-    firstName: z.string().nullable(),
-    lastName: z.string().nullable(),
-    preferredName: z.string().nullable(),
-    dateOfBirth: z.coerce.date().nullable(),
-
-    image: z.string(),
-    discordId: z.string(),
-    discordUserAvatar: z.string().nullable(),
-
-    zipCode: z.string().nullable(),
-    state: z.string().nullable(),
-    county: z.string().nullable(),
-    city: z.string().nullable(),
-
-    phoneNumber: z.string().nullable(),
-    lastSmsCodeSent: z.string().nullable(),
-    lastSmsCodeSentAt: z.coerce.date().nullable(),
-    acceptedAlerts: z.boolean().nullable(),
-
-    verified: z.boolean(),
-    onboardingStage: zOnboardingStage,
-
-    roles: z.array(zRole).nullable(),
-
-    updateHistory: z.array(zDocumentUpdate).nullable(),
-})
-export type User = z.infer<typeof zUser>
-
-export interface UpdateUserRequest {
-    name?: string
-    email?: string
-    firstName?: string
-    lastName?: string
-    preferredName?: string | null
-    dateOfBirth?: string
-
-    zipCode?: string
-    state?: string
-    county?: string
-    city?: string
-
-    phoneNumber?: string
-    acceptedAlerts?: boolean
-
-    verified?: boolean
-    onboardingStage?: OnboardingStage
-
-    roles?: string[]
-}
 
 export const zDiscordUser = z.object({
     id: z.string(),

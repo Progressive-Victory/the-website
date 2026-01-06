@@ -15,6 +15,6 @@ const roleSchema = new Schema<IMongoRole>({
 
 export const MongoRole: Model<IMongoRole> =
     (mongoose.models as Record<string, Model<IMongoRole>>).Role ||
-    mongoose.model<IMongoRole>('MongoRole', roleSchema)
+    mongoose.model<IMongoRole>('Role', roleSchema)
 
 export default MongoRole

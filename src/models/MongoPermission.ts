@@ -10,6 +10,6 @@ const permissionSchema = new Schema<IMongoPermission>({
 
 export const MongoPermission: Model<IMongoPermission> =
     (mongoose.models as Record<string, Model<IMongoPermission>>).Permission ||
-    mongoose.model<IMongoPermission>('MongoPermission', permissionSchema)
+    mongoose.model<IMongoPermission>('Permission', permissionSchema)
 
 export default MongoPermission
