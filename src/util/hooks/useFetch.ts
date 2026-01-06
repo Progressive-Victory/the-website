@@ -18,12 +18,14 @@ export function useFetch() {
 
         if (!session.data?.accessToken) return ''
 
-        const body: AuthRequest = { discordToken: session.data?.accessToken }
+        const body: AuthRequest = {
+            discordToken: `Bearer ${session.data?.accessToken}`,
+        }
 
         const res = await fetch(new URL('/auth', session.data?.apiUrl), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ body }),
+            body: JSON.stringify(body),
             signal,
         })
 

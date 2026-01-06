@@ -38,6 +38,6 @@ const schema = new Schema<IMongoDocumentUpdate>(
 export const MongoDocumentUpdate: Model<IMongoDocumentUpdate> =
     (mongoose.models as Record<string, Model<IMongoDocumentUpdate>>)
         .DocumentUpdate ||
-    mongoose.model<IMongoDocumentUpdate>('MongoDocumentUpdate', schema)
+    mongoose.model<IMongoDocumentUpdate>('DocumentUpdate', schema)
 
 export default MongoDocumentUpdate
