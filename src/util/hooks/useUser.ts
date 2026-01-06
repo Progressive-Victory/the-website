@@ -1,4 +1,4 @@
-import { IUser } from '@/models/User'
+import { IMongoUser } from '@/models/MongoUser'
 import { DependencyList, useEffect, useState } from 'react'
 
 /**
@@ -12,7 +12,7 @@ interface DataProps {
 }
 
 interface DataState {
-    data: IUser | undefined
+    data: IMongoUser | undefined
     loading: boolean
     error: string
     reload: () => void
@@ -20,7 +20,7 @@ interface DataState {
 
 export default function useUser(props?: DataProps): DataState {
     const [autoLoad, setAutoLoad] = useState<boolean>(props?.autoLoad ?? true)
-    const [data, setData] = useState<IUser | undefined>(undefined)
+    const [data, setData] = useState<IMongoUser | undefined>(undefined)
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<string>('')
 
@@ -30,7 +30,7 @@ export default function useUser(props?: DataProps): DataState {
         void fetch('/api/user')
             .then(async (response) => {
                 const body: unknown = await response.json()
-                setData(body as IUser)
+                setData(body as IMongoUser)
             })
             .catch((err) => setError(err as string))
 
@@ -54,7 +54,7 @@ export default function useUser(props?: DataProps): DataState {
  * @param {IUser} user - `data` from the `useUser` hook
  * @param {string} permission - Name of the permission
  */
-export function hasPermission(user: IUser, permission: string): boolean {
+export function hasPermission(user: IMongoUser, permission: string): boolean {
     return user.roles.some((r) =>
         r.permissions?.some((p) => p.name == permission)
     )

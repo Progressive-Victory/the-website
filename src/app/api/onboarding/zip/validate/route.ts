@@ -1,4 +1,4 @@
-import Location from '@/models/Location'
+import MongoLocation from '@/models/MongoLocation'
 import dbConnect from '@/util/libmongo'
 import { NextRequest, NextResponse } from 'next/server'
 import z from 'zod'
@@ -28,7 +28,8 @@ export async function POST(req: NextRequest) {
 
     await dbConnect()
 
-    const isValidZip = (await Location.findOne({ zip: code }).exec()) !== null
+    const isValidZip =
+        (await MongoLocation.findOne({ zip: code }).exec()) !== null
 
     console.log(`isValidZip: ${isValidZip}`)
 

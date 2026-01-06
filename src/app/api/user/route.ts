@@ -1,4 +1,4 @@
-import { User, IUser } from '@/models/User'
+import { MongoUser, IMongoUser } from '@/models/MongoUser'
 import { auth, checkAuth, ResponseCode } from '@/util/auth'
 import dbConnect from '@/util/libmongo'
 import { OnboardingStage } from '@/util/stage'
@@ -27,7 +27,7 @@ async function retrieveUser() {
     const session = await auth()
     await dbConnect()
 
-    const user = await User.findOne({ discordId: session?.discordId })
+    const user = await MongoUser.findOne({ discordId: session?.discordId })
         .populate({
             path: 'roles',
             populate: {
@@ -56,19 +56,19 @@ export async function GET() {
             throw Error('Unidentified response code.')
     }
 
-    const usr: IUser = (await retrieveUser()) as IUser
+    const usr: IMongoUser = (await retrieveUser()) as IMongoUser
     return NextResponse.json(sanitizeUser(usr))
 }
 
 export async function PATCH(req: NextRequest) {
     //check to make sure user is logged in
     const response = await checkAuth()
-    let user: IUser
+    let user: IMongoUser
 
     //serve response based on the outcome of the auth check
     switch (response) {
         case ResponseCode.Successful:
-            user = (await retrieveUser()) as IUser
+            user = (await retrieveUser()) as IMongoUser
             break
         case ResponseCode.Exception:
             return NextResponse.json({ error: 'Bad request' }, { status: 400 })
@@ -83,7 +83,7 @@ export async function PATCH(req: NextRequest) {
     const onboardingInit = user.onboardingStage
 
     //hey wait shouldn't fields like onboarding stage and completion dates not be editable in a user accessable endpoint?
-    const data = (await req.json()) as Partial<IUser>
+    const data = (await req.json()) as Partial<IMongoUser>
     user.firstName = data.firstName ?? user.firstName
     user.lastName = data.lastName ?? user.lastName
     user.dateOfBirth = data.dateOfBirth ?? user.dateOfBirth
@@ -113,7 +113,7 @@ export async function PATCH(req: NextRequest) {
  * Removes server-only fields from user objects before they are sent to the
  * client
  */
-function sanitizeUser(user: IUser) {
+function sanitizeUser(user: IMongoUser) {
     delete user.lastSmsCodeSent
-    return user.toObject() as IUser
+    return user.toObject() as IMongoUser
 }

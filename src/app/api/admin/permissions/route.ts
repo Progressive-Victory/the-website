@@ -1,4 +1,4 @@
-import { Permission } from '@/models/Permission'
+import { MongoPermission } from '@/models/MongoPermission'
 import { checkAuth, ResponseCode } from '@/util/auth'
 import dbConnect from '@/util/libmongo'
 import { executeAggregationPaginated } from '@/util/mongo-aggregations'
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
         req.url
     )
 
-    const permissions = Permission.aggregate()
+    const permissions = MongoPermission.aggregate()
     const validField = field && ALLOWED_SEARCH_FIELDS.includes(field)
 
     if (query) {
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
     }
 
     const { data, count } = await executeAggregationPaginated(
-        Permission,
+        MongoPermission,
         permissions,
         {
             skip,
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
     await dbConnect()
 
     try {
-        const permission = await Permission.create({
+        const permission = await MongoPermission.create({
             name,
         })
 
@@ -193,7 +193,7 @@ export async function PATCH(req: NextRequest) {
     await dbConnect()
 
     try {
-        const permission = await Permission.findById(id)
+        const permission = await MongoPermission.findById(id)
         if (!permission) {
             return NextResponse.json(
                 {
@@ -273,7 +273,7 @@ export async function DELETE(req: NextRequest) {
 
     await dbConnect()
 
-    const permission = await Permission.findByIdAndDelete(id)
+    const permission = await MongoPermission.findByIdAndDelete(id)
 
     if (!permission) {
         return NextResponse.json(

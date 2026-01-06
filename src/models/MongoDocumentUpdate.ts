@@ -1,6 +1,6 @@
 import mongoose, { Document, Model, ObjectId, Schema, Date } from 'mongoose'
 
-export interface IDocumentUpdate extends Document {
+export interface IMongoDocumentUpdate extends Document {
     // The collection that the updated document was from
     collection_name: string
     // The _id of the document which was updated
@@ -17,7 +17,7 @@ export interface IDocumentUpdate extends Document {
     updated_by: ObjectId | null
 }
 
-const schema = new Schema<IDocumentUpdate>(
+const schema = new Schema<IMongoDocumentUpdate>(
     {
         collection_name: { type: String, required: true },
         document_id: { type: Schema.Types.ObjectId, required: true },
@@ -35,9 +35,9 @@ const schema = new Schema<IDocumentUpdate>(
     }
 )
 
-export const DocumentUpdate: Model<IDocumentUpdate> =
-    (mongoose.models as Record<string, Model<IDocumentUpdate>>)
+export const MongoDocumentUpdate: Model<IMongoDocumentUpdate> =
+    (mongoose.models as Record<string, Model<IMongoDocumentUpdate>>)
         .DocumentUpdate ||
-    mongoose.model<IDocumentUpdate>('DocumentUpdate', schema)
+    mongoose.model<IMongoDocumentUpdate>('MongoDocumentUpdate', schema)
 
-export default DocumentUpdate
+export default MongoDocumentUpdate

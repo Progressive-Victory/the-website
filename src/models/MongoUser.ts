@@ -1,11 +1,13 @@
-import DocumentUpdate, { IDocumentUpdate } from './DocumentUpdate'
-import { IRole, Role } from './Role'
+import MongoDocumentUpdate, {
+    IMongoDocumentUpdate,
+} from './MongoDocumentUpdate'
+import { IMongoRole, MongoRole } from './MongoRole'
 import { OnboardingStage } from '@/util/stage'
 import mongoose, { Document, Model, Schema } from 'mongoose'
 
 // Here is a user document
 // It defines the structure of the user and provides a POJO for interacting with user data
-export interface IUser extends Document {
+export interface IMongoUser extends Document {
     completedIntake?: Date
     createdAt?: Date
     joinedServer?: Date
@@ -25,15 +27,15 @@ export interface IUser extends Document {
     lastSmsCodeSentAt?: Date
     verified: boolean
     onboardingStage: OnboardingStage
-    roles: IRole[]
+    roles: IMongoRole[]
     firstName?: string
     lastName?: string
     dateOfBirth?: string
-    updateHistory?: IDocumentUpdate[]
+    updateHistory?: IMongoDocumentUpdate[]
 }
 
 // We then create a schema for the user document, tells Mongoose how the document should be structured
-const schema = new Schema<IUser>({
+const schema = new Schema<IMongoUser>({
     name: { type: String, required: true },
     email: { type: String, required: true },
     image: { type: String, required: true },
@@ -61,19 +63,23 @@ const schema = new Schema<IUser>({
         enum: OnboardingStage,
         default: OnboardingStage.NOT_STARTED,
     },
-    roles: [{ type: Schema.Types.ObjectId, ref: Role }],
+    roles: [{ type: Schema.Types.ObjectId, ref: MongoRole }],
     firstName: { type: String, required: false, default: null },
     lastName: { type: String, required: false, default: null },
     dateOfBirth: { type: String, required: false, default: null },
     updateHistory: [
-        { type: Schema.Types.ObjectId, ref: DocumentUpdate, required: false },
+        {
+            type: Schema.Types.ObjectId,
+            ref: MongoDocumentUpdate,
+            required: false,
+        },
     ],
 })
 
 // Finally the model itself is exported, we use the cache if it exists
-export const User: Model<IUser> =
-    (mongoose.models as Record<string, Model<IUser>>).User ||
-    mongoose.model<IUser>('User', schema)
+export const MongoUser: Model<IMongoUser> =
+    (mongoose.models as Record<string, Model<IMongoUser>>).User ||
+    mongoose.model<IMongoUser>('MongoUser', schema)
 
 // Default export
-export default User
+export default MongoUser

@@ -1,5 +1,5 @@
-import Permission from '@/models/Permission'
-import { Role } from '@/models/Role'
+import MongoPermission from '@/models/MongoPermission'
+import { MongoRole } from '@/models/MongoRole'
 import { checkAuth, ResponseCode } from '@/util/auth'
 import dbConnect from '@/util/libmongo'
 import {
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     const { page, limit, skip, query, field, sort, params } =
         parsePaginationParams(req.url)
 
-    const roles = Role.aggregate()
+    const roles = MongoRole.aggregate()
     const validField = field && ALLOWED_SEARCH_FIELDS.includes(field)
 
     if (query) {
@@ -83,10 +83,14 @@ export async function GET(req: NextRequest) {
 
     applyMatchFilters(roles, params, ALLOWED_FILTER_PARAMS)
 
-    const { data, count } = await executeAggregationPaginated(Role, roles, {
-        skip,
-        limit,
-    })
+    const { data, count } = await executeAggregationPaginated(
+        MongoRole,
+        roles,
+        {
+            skip,
+            limit,
+        }
+    )
 
     return NextResponse.json({
         page,
@@ -149,7 +153,7 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        const found = await Permission.countDocuments({
+        const found = await MongoPermission.countDocuments({
             _id: {
                 $in: permissions,
             },
@@ -165,7 +169,7 @@ export async function POST(req: NextRequest) {
             )
         }
 
-        const role = await Role.create({
+        const role = await MongoRole.create({
             name,
             permissions,
         })
@@ -239,7 +243,7 @@ export async function PATCH(req: NextRequest) {
 
     await dbConnect()
 
-    const role = await Role.findById(id)
+    const role = await MongoRole.findById(id)
     if (!role) {
         return NextResponse.json(
             {
@@ -264,7 +268,7 @@ export async function PATCH(req: NextRequest) {
                 }
             }
 
-            const found = await Permission.countDocuments({
+            const found = await MongoPermission.countDocuments({
                 _id: {
                     $in: rest.permissions,
                 },
@@ -356,7 +360,7 @@ export async function DELETE(req: NextRequest) {
 
     await dbConnect()
 
-    const role = await Role.findByIdAndDelete(id)
+    const role = await MongoRole.findByIdAndDelete(id)
 
     if (!role) {
         return NextResponse.json(

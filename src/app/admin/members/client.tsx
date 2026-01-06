@@ -10,8 +10,8 @@ import {
     TextField,
 } from '@/components/form'
 import { DateField } from '@/components/form/DateField'
-import { IRole } from '@/models/Role'
-import { IUser } from '@/models/User'
+import { IMongoRole } from '@/models/MongoRole'
+import { IMongoUser } from '@/models/MongoUser'
 import { dateService } from '@/services'
 import { useUser } from '@/util/hooks'
 import deepEqual from 'deep-equal'
@@ -19,7 +19,7 @@ import { useRef, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
 export interface PageProps {
-    roles: IRole[]
+    roles: IMongoRole[]
 }
 
 export default function ClientPage({ roles }: PageProps) {
@@ -27,15 +27,15 @@ export default function ClientPage({ roles }: PageProps) {
 
     // We save the original value we got from the API so that we can easily
     // discard changes without saving
-    const [originalUser, setOriginalUser] = useState<IUser | null>(null)
+    const [originalUser, setOriginalUser] = useState<IMongoUser | null>(null)
     // This is the mutable copy we actually update when the user interacts with
     // the form
-    const [selectedUser, setSelectedUser] = useState<IUser | null>(null)
-    const [users, setUsers] = useState<IUser[]>([])
+    const [selectedUser, setSelectedUser] = useState<IMongoUser | null>(null)
+    const [users, setUsers] = useState<IMongoUser[]>([])
 
     const loggedInUser = useUser()
 
-    const handleSelectItem = (value: IUser) => {
+    const handleSelectItem = (value: IMongoUser) => {
         if (value._id === selectedUser?._id) return
 
         if (!deepEqual(selectedUser, originalUser)) {
@@ -47,19 +47,22 @@ export default function ClientPage({ roles }: PageProps) {
 
         // We need to copy to make sure that the value in the list is not
         // modified until we save
-        setSelectedUser({ ...value } as IUser)
-        setOriginalUser({ ...value } as IUser)
+        setSelectedUser({ ...value } as IMongoUser)
+        setOriginalUser({ ...value } as IMongoUser)
     }
 
     const userAge = dateService.getAge(selectedUser?.dateOfBirth ?? '')
     const fCreatedDate = selectedUser?.createdAt
         ? dateService.formatDate(selectedUser.createdAt)
         : ''
-    const makeItem = (user: IUser) => ({ id: user._id as string, value: user })
+    const makeItem = (user: IMongoUser) => ({
+        id: user._id as string,
+        value: user,
+    })
 
     return (
         <>
-            <PaginatedList<IUser>
+            <PaginatedList<IMongoUser>
                 eventTarget={eventTarget.current}
                 endpoint="/api/admin/users"
                 filters={[
@@ -114,7 +117,7 @@ export default function ClientPage({ roles }: PageProps) {
                 pinnedItem={
                     loggedInUser.data
                         ? makeItem(loggedInUser.data)
-                        : { id: '', value: {} as IUser }
+                        : { id: '', value: {} as IMongoUser }
                 }
                 selectedItem={selectedUser ? makeItem(selectedUser) : null}
                 onSelectItem={({ value }) => handleSelectItem(value)}
@@ -152,7 +155,7 @@ export default function ClientPage({ roles }: PageProps) {
 
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {selectedUser && originalUser ? (
-                    <Form<IUser>
+                    <Form<IMongoUser>
                         initialValue={originalUser}
                         setInitialValue={setOriginalUser}
                         currentValue={selectedUser}
