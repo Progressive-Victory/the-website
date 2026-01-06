@@ -15,8 +15,6 @@ export const POST = async (req: NextRequest) => {
             // Pull the original URL out
             const body_url = new URL((await res.json()).url)
 
-            console.log('previous state:', body_url.searchParams.get('state'))
-
             // Boomerang will redirect back to whatever the state.redirect_uri is set to
             body_url.searchParams.set(
                 'state',
