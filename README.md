@@ -107,3 +107,27 @@ npx playwright install --with-deps
 ```
 pnpm run test
 ```
+
+### Website Pages That Reference Models:
+
+- \\src\\app\\api\\onboarding\\zip\\validate\\route
+- \\src\\app\\api\\onboarding\\zip\\location\\route
+- \\src\\app\\api\\admin\\users\\route
+- \\src\\app\\admin\\roles\\route
+- \\src\\app\\api\\admin\\permissions\\route
+- \\src\\app\\api\\admin\\roles\\route
+- \\src\\app\\admin\\members\\page
+- \\src\\app\\api\\admin\\roles\\route
+- \\src\\app\\api\\admin\\users\\route
+- \\src\\app\\api\\admin\\users\\\[id\]\\route
+- \\src\\app\\api\\admin\\users\\route
+- \\src\\app\\api\\map\\count\\route
+- \\src\\app\\api\\map\\users-count\\route
+- \\src\\app\\api\\onboarding\\discord\\join\\route
+- \\src\\app\\api\\onboarding\\discord\\status\\route
+- \\src\\app\\api\\onboarding\\sms\\check\\route
+- \\src\\app\\api\\onboarding\\sms\\send\\route
+- \\src\\app\\api\\user
+- \\src\\app\\volunteer
+- \\src\\util\\auth
+- \\src\\util\\stats

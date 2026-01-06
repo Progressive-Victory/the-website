@@ -73,6 +73,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         session({ session, token }) {
             session.discordId = token.discordId as string
             session.accessToken = token.accessToken as string
+            session.apiUrl = process.env.PV_WEBSITE_API_URL ?? ''
             return session
         },
         async jwt({ token, account, profile }) {
@@ -86,7 +87,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
             if (account && profile) {
                 // First time OAuth sign-in: Store OAuth data in the token
-                console.log(account.access_token)
                 token.accessToken = account.access_token
                 token.discordId = eprofile.id
 
