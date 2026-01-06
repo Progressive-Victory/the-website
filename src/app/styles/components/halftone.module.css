@@ -7,12 +7,10 @@
     height: 100%;
     z-index: 0;
     pointer-events: none;
+    opacity: 0.05;
 
     background-color: black;
     filter: contrast(55);
-
-    /* default + driven by CSS var */
-    opacity: var(--halftone-opacity, 0.1);
 }
 
 .halftoneDots {
