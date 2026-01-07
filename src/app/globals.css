@@ -4,7 +4,9 @@
 
 html,
 body {
+    position: sticky;
     min-height: 100vh;
+    background-color: #09223a;
 }
 
 .perspective-container {
