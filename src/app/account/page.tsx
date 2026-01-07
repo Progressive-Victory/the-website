@@ -1,5 +1,5 @@
-import { Metadata } from 'next'
 import { Account } from './Account'
+import { Metadata } from 'next'
 
 export const metadata: Metadata = {
     title: 'PV - Account',
@@ -13,6 +13,9 @@ export const metadata: Metadata = {
     },
 }
 export default function AccountPage() {
-    return <Account />
+    return (
+        <>
+            <Account />
+        </>
+    )
 }
-
