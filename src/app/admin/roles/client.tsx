@@ -69,7 +69,7 @@ export default function ClientPage({ permissions }: PageProps) {
                     <span className="font-medium text-black">{value.name}</span>
                 )}
             />
-            <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
+            <div className="h-[calc(100dvh-100px)] flex-1 overflow-y-auto">
                 {selectedRole && originalRole ? (
                     <Form<IRole>
                         initialValue={originalRole}
