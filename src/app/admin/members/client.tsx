@@ -211,7 +211,7 @@ export default function ClientPage() {
                 }
             />
 
-            <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
+            <div className="h-[calc(100dvh-100px)] flex-1 overflow-y-auto">
                 {selectedUser && originalUser ? (
                     <Form<IUser>
                         zodSchema={zUser}
