@@ -1,11 +1,28 @@
-import { Header } from './Header'
 import { Footer } from './Footer'
+import { Header } from './Header'
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="relative flex size-full min-h-screen flex-col">
+        <div
+            style={{
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '100dvh', // ALWAYS USE dvh instead of vh or you will glitch viewport in safari on iOS/iPADOS
+                width: '100%',
+            }}
+        >
             <Header />
-            <div className="relative flex flex-1 flex-col bg-steel-blue">
+
+            <div
+                style={{
+                    position: 'relative',
+                    display: 'flex',
+                    flex: 1,
+                    flexDirection: 'column',
+                    backgroundColor: '#4483C7', // Steel Blue
+                }}
+            >
                 {children}
             </div>
             <Footer />

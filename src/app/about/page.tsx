@@ -1,9 +1,11 @@
 import FAQ from './FAQ'
-import styles from '@/app/styles/components/ContentSections.module.css'
-import aboutStyles from '@/app/styles/pages/AboutContent.module.css'
-import { ContentPageFrame, ContentSection } from '@/components/ContentSections'
-import { HalftoneBackground } from '@/components/HalftoneBackground'
-import { MainLayout } from '@/components/layout'
+import styles from '@/app/about/about.module.css'
+import {
+    ContentPageFrame,
+    ContentSection,
+} from '@/components/content_sections/ContentSections'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
+import { MainLayout } from '@/components/layout/MainLayout'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -22,9 +24,9 @@ function AboutContent() {
     return (
         <ContentPageFrame
             heading={
-                <p className={aboutStyles.aboutHeading}>
+                <p className={styles.aboutHeading}>
                     About{' '}
-                    <span className={aboutStyles.aboutHeadingHighlight}>
+                    <span className={styles.aboutHeadingHighlight}>
                         Progressive Victory
                     </span>
                 </p>
@@ -67,10 +69,8 @@ Progressive Victory is constantly growing, with new members joining every day. T
 export default function About() {
     return (
         <MainLayout>
-            <div className={styles.container}>
-                <HalftoneBackground />
-                <AboutContent />
-            </div>
+            <HalftoneBackground />
+            <AboutContent />
         </MainLayout>
     )
 }

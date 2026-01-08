@@ -110,8 +110,8 @@
     margin: 0 auto;
     display: flex;
     flex-direction: column;
+    align-items: center;
     width: 100%;
-    min-height: 100vh;
     text-align: justify;
     letter-spacing: 0.025em;
     padding-block: 1rem;

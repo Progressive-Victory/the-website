@@ -1,6 +1,7 @@
 'use client'
 
 import { Link, Message } from '@/components/common'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { motion, useTransform, useSpring } from 'motion/react'
 import { useState } from 'react'
 
@@ -9,8 +10,7 @@ const avatarImage = '/images/PV_Pride_Logo.png'
 export function Hero() {
     return (
         <div className="relative flex w-full flex-col items-center justify-start py-20">
-            {/* Background */}
-            <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
+            <HalftoneBackground />
             <div
                 className="z-1 absolute left-0 top-0 size-full lg:w-1/2 lg:-translate-x-1/2"
                 style={{
