@@ -1,4 +1,6 @@
 import { Account } from './Account'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
+import { MainLayout } from '@/components/layout'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -12,10 +14,12 @@ export const metadata: Metadata = {
         images: [{ url: `https://${process.env.SITE_URL}/images/banner.png` }],
     },
 }
+
 export default function AccountPage() {
     return (
-        <>
+        <MainLayout>
+            <HalftoneBackground />
             <Account />
-        </>
+        </MainLayout>
     )
 }

@@ -1,5 +1,6 @@
-import { Metadata } from 'next'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
+import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
@@ -31,9 +32,7 @@ export default function About() {
 
     return (
         <MainLayout>
-            {/* Halftone background */}
-            <div className="halftone z-1 absolute inset-0 size-full opacity-10" />
-
+            <HalftoneBackground />
             <div className="z-2 relative m-auto flex min-h-screen w-full flex-col items-center justify-start gap-y-10 pb-16 pt-10 xl:min-h-[unset]">
                 Redirecting you to form...
             </div>
