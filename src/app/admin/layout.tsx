@@ -16,7 +16,7 @@ export default async function Layout({
                 <Header />
                 <div className="flex flex-1 bg-gray-50">
                     <AdminNav stats={stats} />
-                    <div className="flex h-[calc(100vh-100px)] flex-1">
+                    <div className="flex h-[calc(100dvh-100px)] flex-1">
                         {children}
                     </div>
                 </div>
