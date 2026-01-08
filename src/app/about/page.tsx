@@ -1,5 +1,5 @@
 import FAQ from './FAQ'
-import styles from '@/app/about/AboutPage.module.css'
+import styles from '@/app/about/about.module.css'
 import {
     ContentPageFrame,
     ContentSection,

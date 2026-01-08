@@ -1,4 +1,4 @@
-import styles from '@/app/privacy/PrivacyPage.module.css'
+import styles from '@/app/privacy/privacy.module.css'
 import {
     ContentPageFrame,
     ContentSection,

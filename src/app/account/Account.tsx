@@ -1,6 +1,6 @@
 'use client'
 
-import styles from '@/app/account/AccountPage.module.css'
+import styles from '@/app/account/account.module.css'
 import {
     ContentPageFrame,
     ContentSection,
