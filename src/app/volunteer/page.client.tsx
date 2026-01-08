@@ -9,7 +9,7 @@ import {
     UnderageStage,
 } from '.'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
-import { MainLayout } from '@/components/layout'
+import { MainLayout } from '@/components/layout/MainLayout'
 import { IUser } from '@/models/User'
 import { dateService } from '@/services'
 import { OnboardingStage } from '@/util/stage'

@@ -1,5 +1,5 @@
 import { Hero, MemberBanner, Volunteer, VolunteerMap } from '@/app/home'
-import { MainLayout } from '@/components/layout'
+import { MainLayout } from '@/components/layout/MainLayout'
 
 // HomePage
 export default function Home() {

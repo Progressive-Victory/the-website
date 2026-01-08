@@ -1,5 +1,5 @@
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
-import { MainLayout } from '@/components/layout'
+import { MainLayout } from '@/components/layout/MainLayout'
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 

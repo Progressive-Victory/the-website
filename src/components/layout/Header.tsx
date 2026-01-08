@@ -1,6 +1,6 @@
 'use client'
 
-import { NavItem } from '../types'
+import { NavItem } from './types'
 import { Link } from '@/components/common'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid'
 import { AnimatePresence, motion } from 'motion/react'

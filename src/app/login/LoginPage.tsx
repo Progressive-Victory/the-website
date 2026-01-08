@@ -2,7 +2,7 @@
 
 import { LoginCard } from '@/app/login/LoginCard'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
-import { MainLayout } from '@/components/layout'
+import { MainLayout } from '@/components/layout/MainLayout'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
