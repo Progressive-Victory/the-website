@@ -1,0 +1,70 @@
+.pageRoot {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.controlsRow {
+    min-width: 270px;
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+.primaryButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    font-weight: 700;
+    color: #fff;
+    background: #ce3728;
+    transition:
+        background-color 200ms ease,
+        color 200ms ease;
+}
+
+.primaryButton:hover {
+    background: #fff;
+    color: #09223a;
+}
+
+.primaryButton:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.85);
+    outline-offset: 3px;
+}
+
+.adminLink {
+    text-decoration: none;
+}
+
+.notice {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+
+    font-size: 0.75rem;
+    color: #fff;
+
+    background: #09223a;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+.noticeIcon {
+    width: 16px;
+    height: 16px;
+    border-radius: 9999px;
+    background: #fff;
+    color: #2986cc;
+}
