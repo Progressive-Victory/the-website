@@ -1,0 +1,206 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    background-color: white;
+
+    padding: 3rem 1rem; 
+    gap: 6rem; 
+}
+
+@media (min-width: 1024px) {
+    .container {
+        flex-direction: row;
+    }
+}
+
+.mapWrapper {
+    width: 100%;
+    height: 450px;
+}
+
+@media (min-width: 1024px) {
+    .mapWrapper {
+        width: 750px;
+    }
+}
+
+.textSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 1rem;
+    padding: 0 1rem;
+    text-align: center;
+}
+
+@media (min-width: 640px) {
+    .textSection {
+        width: 50%;
+    }
+}
+
+.heading {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #09223a;
+    line-height: 1.2;
+}
+
+.highlight {
+    color: #ce3728;
+}
+
+.description {
+    font-size: 1.125rem; 
+    color: black;
+}
+
+@media (min-width: 1024px) {
+    .description {
+        width: 50%;
+    }
+}
+
+.cta {
+    background-color: #ce3728;
+}
+
+.container {
+    position: relative;
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6vw;
+    background: #09223a;
+    padding: 2.5rem 0; 
+}
+
+@media (min-width: 1024px) {
+    .container {
+            flex-direction: row-reverse;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.textBlock {
+    z-index: 3;
+    display: flex;
+    max-width: 750px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: white;
+}
+
+@media (min-width: 1536px) {
+    .textBlock {
+        order: 999; 
+    }
+}
+
+.title {
+    margin-bottom: 2rem; 
+    font-size: 2.25rem; 
+    line-height: 2.5rem;
+    font-weight: 700;
+}
+
+.titleAccent {
+    color: #ce3728;
+}
+
+.subtitle {
+    margin-bottom: 2rem; 
+    padding: 0 1rem; 
+    font-size: 1.125rem; 
+    line-height: 1.75rem;
+    font-weight: 500; 
+}
+
+@media (min-width: 768px) {
+    .subtitle {
+        padding: 0 6rem; 
+    }
+}
+
+.ctaLink {
+    width: fit-content;
+    justify-self: center;
+    background: #ce3728;
+}
+
+.tiltMessage {
+    padding: 0 2rem; 
+    display: flex;
+    justify-content: center;
+}
+
+@media (min-width: 1280px) {
+    .tiltMessage {
+        justify-content: flex-end; 
+    }
+}
+
+.message {
+    
+}
+
+@media (min-width: 1280px) {
+    .message {
+        width: 30vw;
+    }
+}
+
+.botLeftText {
+    font-weight: 500; 
+}
+
+.mapShell {
+    position: relative;
+    min-width: 350px;
+    max-width: 750px;
+    border-radius: 0.375rem; 
+    border: 1px solid rgba(255, 255, 255, 0.2); 
+}
+
+.mainMapAspect {
+    aspect-ratio: 16 / 9; 
+}
+
+@media (min-width: 768px) {
+    .mainMapAspect {
+        aspect-ratio: 5 / 3; 
+    }
+}
+
+.extraMaps {
+    pointer-events: none;
+    position: relative;
+    bottom: 0;
+    left: 0;
+    margin: 0.25rem; 
+    display: flex;
+    width: 60%; 
+    align-items: flex-end;
+    gap: 0.25rem; 
+}
+
+@media (min-width: 640px) {
+    .extraMaps {
+        position: absolute; 
+        width: 40%; 
+    }
+}
+
+.extraMapItem {
+    position: relative;
+    width: 100%;
+}

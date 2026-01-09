@@ -17,28 +17,28 @@ export const metadata: Metadata = {
 const calendarMap = new Map<string, string>([
     [
         'Nzc0NDI1MWUxMjQwZTQxNWUzNWE0NDAzMDE0OGZjM2VmODQwMmI4MmMzNDI4OTliNWFhNDUwM2M1M2ExNTJiYkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t',
-        'b09e00',
-    ], // State Team Meetings
+        'ba7525',
+    ], // State Team Meetings was #b09e00
     [
         'MDE1MWIxYWUyN2MwMDFkOTEyMjYzNDk3MjBkZDQ4NmViNmMzN2E4YzY0OTgwN2FkNjhkMGFhZTI4ODE3ZDdjMUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t',
-        '009949',
-    ], // Dept Team Meetings
+        '0099e1',
+    ], // Dept Team Meetings was #009949
     [
         'Y2Q3OWY0OGFkZTM1NDIzZTBhMjMyY2ZjZjE0NmU2MTlkMDZhZTgxNDNjMDRmYWU5MzI3ODc4OGJjZGMxOWIxZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t',
-        'ba7525',
-    ], // Special Events
+        '9802b3',
+    ], // Special Events was #ba7525
     [
         'NjA4ZDRiYzU4NDA3YjhlMjcwNzQ1ZWUyMjI2YTI4OGU2NDZkNDMwMDExY2E3MTYyMjk1NGFjYmI2N2I5YTJjNUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t',
-        '0099e1',
-    ], // Staff Meetings
+        'fc035e',
+    ], // Staff Meetings was #0099e1
     [
         'MjdkMDQxOTM4ZDk1ZTU0OWU1MjlkY2ZhNDZmMTk4OWMxZmRlMzZjOWFjZDMxZDA3ODI5ODcyZWYwOGU0OTYxZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t',
-        '9802b3',
-    ], // State Meetings
+        'b09e00',
+    ], // State Meetings was #9802b3
     [
         'Y185NDhjMzI5OWU3OTQ2N2M3MjBkNWQzMTY0YjEzOGU4OGRiM2FjNTFiNmUxMmM0ZTc2ZjAzZjY0NThjMTA2OGYzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20',
-        'fc035e',
-    ], // Volunteeer Initiatives
+        '009949',
+    ], // Volunteeer Initiatives was #fc035e
 ])
 export default function Events() {
     const calendarUri = new URL('https://calendar.google.com/calendar/embed')

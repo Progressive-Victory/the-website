@@ -1,0 +1,50 @@
+.container {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+
+    padding: 2rem;
+    background-color: #4483C7;
+}
+
+.card {
+    position: relative;
+    width: 100%;
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
+
+    border-radius: 0.75rem;
+    background-color: #f0f4f9;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.title {
+    text-align: center;
+    font-weight: 900;
+    color: #09223a;
+
+    font-size: 1.875rem; 
+    line-height: 2.25rem;
+}
+
+@media (min-width: 1024px) {
+    .title {
+        font-size: 3rem; 
+        line-height: 1;
+    }
+}
+
+.frame {
+    display: block;
+    margin: 1rem auto 0 auto;
+
+    width: 95%;
+    height: 800px;
+    background-color: #f0f4f9;
+}

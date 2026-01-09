@@ -1,0 +1,31 @@
+.detailsPane {
+    height: calc(100dvh - 100px);
+    flex: 1;
+    overflow-y: auto;
+}
+
+.userMeta {
+    display: flex;
+    flex-direction: column;
+}
+
+.userName {
+    font-weight: 500;
+    color: #000;
+}
+
+.userUsername {
+    color: #6b7280;
+}
+
+.emptyState {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+}

@@ -5,7 +5,15 @@ import { MainLayout } from '@/components/layout/MainLayout'
 export default function Home() {
     return (
         <MainLayout>
-            <div className="flex flex-col items-center overflow-x-hidden">
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    overflowX: 'hidden',
+                    width: '100%',
+                }}
+            >
                 <Hero />
                 <Volunteer />
                 <VolunteerMap />
