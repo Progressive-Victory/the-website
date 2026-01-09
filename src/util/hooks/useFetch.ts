@@ -14,6 +14,9 @@ export function useFetch() {
 
     //TODO: Put this into session instead
     async function refreshToken(signal?: AbortSignal) {
+        const { apiBaseUrl } = (await (
+            await fetch('/api/settings')
+        ).json()) as { apiBaseUrl: string }
         localStorage.removeItem(pvSessionKey)
 
         if (!session.data?.accessToken) return ''
@@ -22,7 +25,7 @@ export function useFetch() {
             discordToken: `Bearer ${session.data?.accessToken}`,
         }
 
-        const res = await fetch(new URL('/auth', session.data?.apiUrl), {
+        const res = await fetch(new URL('/auth', apiBaseUrl), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
@@ -51,7 +54,10 @@ export function useFetch() {
         schema: z.ZodObject | null,
         signal?: AbortSignal
     ) {
-        const fullUrl = new URL(url, session.data?.apiUrl)
+        const { apiBaseUrl } = (await (
+            await fetch('/api/settings')
+        ).json()) as { apiBaseUrl: string }
+        const fullUrl = new URL(url, apiBaseUrl)
         const options: RequestInit = {
             method,
             headers: {

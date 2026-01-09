@@ -29,21 +29,20 @@ export function VolunteerMap() {
     useEffect(() => {
         void (async () => {
             const statesCount: Record<string, number> = {}
-            const smc = await onGet<IMapMemberCountResponse>(
+            const { data } = await onGet<IMapMemberCountResponse>(
                 '/map/member-count-by-state',
                 zMapMemberCountResponse
             )
-            console.log(smc)
-            Object.entries(smc).forEach(([k, v]) => {
-                const state = US_STATES.find((s) => s.code === k)?.name
+            let total = 0
+            Object.entries(data).forEach(([k, v]) => {
+                const state = US_STATES.find(
+                    (s) => s.code.toLowerCase() === k
+                )?.name
                 if (typeof state === 'string') {
                     statesCount[state] = typeof v === 'number' ? v : 0
+                    total += statesCount[state]
                 }
             })
-
-            const total = (await (
-                await fetch('/api/map/users-count')
-            ).json()) as number
 
             setStateMemberCount(statesCount)
             setTotalMemberCount(total)
