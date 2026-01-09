@@ -5,7 +5,7 @@ import { hasPermission, useUser } from '@/util/hooks'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
 export function Account() {
     const { data: session } = useSession()
@@ -26,11 +26,6 @@ export function Account() {
 
         return undefined
     }, [user])
-
-    useEffect(() => {
-        // Check if the user is already on the server
-        void fetch('/api/onboarding/discord/status')
-    }, [])
 
     if (!session) {
         return null
