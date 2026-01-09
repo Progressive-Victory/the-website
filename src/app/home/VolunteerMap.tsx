@@ -10,6 +10,11 @@ import {
 } from '@/components/Map/constants'
 import { MapView, StateMapInteractionProps } from '@/components/Map/types'
 import { Link, Message, TiltMessage } from '@/components/common'
+import {
+    IMapMemberCountResponse,
+    zMapMemberCountResponse,
+} from '@/contracts/responses'
+import { useFetch } from '@/util/hooks'
 import { useEffect, useState } from 'react'
 
 export function VolunteerMap() {
@@ -19,13 +24,16 @@ export function VolunteerMap() {
     const [totalMemberCount, setTotalMemberCount] = useState<number>(0)
     const [stateMemberCount, setStateMemberCount] =
         useState<Record<string, number>>()
+    const { onGet } = useFetch()
 
     useEffect(() => {
         void (async () => {
             const statesCount: Record<string, number> = {}
-            const smc = (await (
-                await fetch('/api/map/count')
-            ).json()) as Record<string, number>
+            const smc = await onGet<IMapMemberCountResponse>(
+                '/map/member-count-by-state',
+                zMapMemberCountResponse
+            )
+            console.log(smc)
             Object.entries(smc).forEach(([k, v]) => {
                 const state = US_STATES.find((s) => s.code === k)?.name
                 if (typeof state === 'string') {
@@ -68,7 +76,7 @@ export function VolunteerMap() {
             </div>
 
             {/* Map */}
-            <TiltMessage className="px-8 flex justify-center xl:justify-end">
+            <TiltMessage className="flex justify-center px-8 xl:justify-end">
                 <Message
                     className="xl:w-[30vw]"
                     avatar="/images/pv_pride.png"
