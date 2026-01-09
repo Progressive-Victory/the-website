@@ -1,6 +1,8 @@
-import DocumentUpdate, { IDocumentUpdate } from '@/models/DocumentUpdate'
-import Role from '@/models/Role'
-import { IUser, User } from '@/models/User'
+import MongoDocumentUpdate, {
+    IMongoDocumentUpdate,
+} from '@/models/MongoDocumentUpdate'
+import MongoRole from '@/models/MongoRole'
+import { IMongoUser, MongoUser } from '@/models/MongoUser'
 import {
     auth,
     checkAuth,
@@ -61,7 +63,7 @@ export async function GET(req: NextRequest) {
     const { page, limit, skip, query, field, sort, params } =
         parsePaginationParams(req.url)
 
-    const users = User.aggregate()
+    const users = MongoUser.aggregate()
     const validField = field && ALLOWED_SEARCH_FIELDS.includes(field)
 
     if (query) {
@@ -114,10 +116,14 @@ export async function GET(req: NextRequest) {
 
     applyMatchFilters(users, params, ALLOWED_FILTER_PARAMS)
 
-    const { data, count } = await executeAggregationPaginated(User, users, {
-        skip,
-        limit,
-    })
+    const { data, count } = await executeAggregationPaginated(
+        MongoUser,
+        users,
+        {
+            skip,
+            limit,
+        }
+    )
 
     // TODO: redact fields based on member permissions
 
@@ -168,12 +174,12 @@ export async function PATCH(req: NextRequest) {
             throw Error('Unidentified response code.')
     }
 
-    let acting_user: IUser | null = null
+    let acting_user: IMongoUser | null = null
 
     const session = await auth()
 
     if (session?.discordId) {
-        acting_user = await User.findOne({
+        acting_user = await MongoUser.findOne({
             discordId: session.discordId,
         })
     }
@@ -205,7 +211,7 @@ export async function PATCH(req: NextRequest) {
 
     await dbConnect()
 
-    const user = await User.findById(id)
+    const user = await MongoUser.findById(id)
     if (!user) {
         return NextResponse.json(
             {
@@ -216,7 +222,7 @@ export async function PATCH(req: NextRequest) {
         )
     }
 
-    const updates: IDocumentUpdate[] = []
+    const updates: IMongoDocumentUpdate[] = []
 
     try {
         if (rest.roles) {
@@ -232,7 +238,7 @@ export async function PATCH(req: NextRequest) {
                 }
             }
 
-            const found = await Role.countDocuments({
+            const found = await MongoRole.countDocuments({
                 _id: {
                     $in: rest.roles,
                 },
@@ -252,7 +258,7 @@ export async function PATCH(req: NextRequest) {
         for (const key in rest) {
             if (rest[key] !== undefined && !deepEqual(rest[key], user[key])) {
                 updates.push({
-                    collection_name: User.collection.name,
+                    collection_name: MongoUser.collection.name,
                     document_id: user.id,
                     field_name: key,
                     previous_value: user[key],
@@ -276,7 +282,7 @@ export async function PATCH(req: NextRequest) {
             update.new_value = user[update.field_name]
         })
 
-        const document_updates = await DocumentUpdate.create(updates)
+        const document_updates = await MongoDocumentUpdate.create(updates)
 
         user.updateHistory = [
             ...(user.updateHistory ?? []),

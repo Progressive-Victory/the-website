@@ -1,6 +1,6 @@
 import { FormGroupProps } from '.'
-import { IDocumentUpdate } from '@/models/DocumentUpdate'
-import { IUser } from '@/models/User'
+import { IMongoDocumentUpdate } from '@/models/MongoDocumentUpdate'
+import { IMongoUser } from '@/models/MongoUser'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import deepEqual from 'deep-equal'
 import { Document } from 'mongoose'
@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 
 export interface FormProps<
-    T extends Document & { updateHistory?: IDocumentUpdate[] },
+    T extends Document & { updateHistory?: IMongoDocumentUpdate[] },
 > {
     initialValue: T
     setInitialValue: (value: T) => void
@@ -24,11 +24,11 @@ export interface FormProps<
         | React.ReactElement<FormGroupProps>[]
 }
 
-const getHistoryUpdatedAt = (update: Partial<IDocumentUpdate>) =>
+const getHistoryUpdatedAt = (update: Partial<IMongoDocumentUpdate>) =>
     new Date(update.updated_at as unknown as string)
 
 export function Form<
-    T extends Document & { updateHistory?: IDocumentUpdate[] },
+    T extends Document & { updateHistory?: IMongoDocumentUpdate[] },
 >({
     initialValue,
     setInitialValue,
@@ -205,8 +205,8 @@ export function Form<
     )
 }
 
-function UpdateHistoryEntry(update: Partial<IDocumentUpdate>) {
-    const { isPending, data } = useQuery<IUser | null>({
+function UpdateHistoryEntry(update: Partial<IMongoDocumentUpdate>) {
+    const { isPending, data } = useQuery<IMongoUser | null>({
         queryKey: ['admin', 'users', update.updated_by],
         async queryFn() {
             if (!update.updated_by) return null
@@ -215,7 +215,7 @@ function UpdateHistoryEntry(update: Partial<IDocumentUpdate>) {
                 `/api/admin/users/${update.updated_by as unknown as string}`
             )
 
-            return (await res.json()) as IUser
+            return (await res.json()) as IMongoUser
         },
     })
 

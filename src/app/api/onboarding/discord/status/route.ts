@@ -1,13 +1,12 @@
-import { RESTJSONErrorCodes } from 'discord-api-types/v10'
-import { NextResponse } from 'next/server'
-
-import { User } from '@/models/User'
+import { MongoUser } from '@/models/MongoUser'
 import { auth } from '@/util/auth'
 import { getMember } from '@/util/discord'
 import { HTTPStatus } from '@/util/https-status'
 import dbConnect from '@/util/libmongo'
 import { OnboardingStage } from '@/util/stage'
 import { DiscordAPIError } from '@discordjs/rest'
+import { RESTJSONErrorCodes } from 'discord-api-types/v10'
+import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,7 +23,7 @@ export async function GET() {
 
     await dbConnect()
 
-    const user = await User.findOne({ discordId: session?.discordId })
+    const user = await MongoUser.findOne({ discordId: session?.discordId })
     if (!user) {
         console.error(`Failed to load user with valid session:`, session)
         return new NextResponse(null, {
