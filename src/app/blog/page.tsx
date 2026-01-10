@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
+import styles from './blog.module.css'
 import { BlogCard, BlogHeader, getPosts } from '@/app/blog'
 import { MainLayout } from '@/components/layout/MainLayout'
 
@@ -19,10 +20,11 @@ export default async function Home() {
     return (
         <MainLayout>
             <BlogHeader />
-            <div className="bg-[#D4E6F5] p-10">
-                <h2 className="p-10 text-center text-4xl font-bold">Posts</h2>
-                <h2 className="p-10 text-center text-4xl font-bold">Posts</h2>
-                <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+
+            <div className={styles.page}>
+                <h2 className={styles.title}>Posts</h2>
+
+                <div className={styles.grid}>
                     {posts.map((post: Post) => (
                         <BlogCard
                             key={post.node.id}

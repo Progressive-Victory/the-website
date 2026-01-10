@@ -1,5 +1,6 @@
 'use client'
 
+import styles from './permissions.module.css'
 import PaginatedList from '@/components/admin/PaginatedList'
 import { Form, FormGroup, TextField } from '@/components/form'
 import { IPermission } from '@/models/Permission'
@@ -59,10 +60,11 @@ export default function Page() {
                 onSelectItem={({ value }) => handleSelectItem(value)}
                 setItems={setPermissions}
                 renderItem={({ value }) => (
-                    <span className="font-medium text-black">{value.name}</span>
+                    <span className={styles.listItemText}>{value.name}</span>
                 )}
             />
-            <div className="h-[calc(100dvh-100px)] flex-1 overflow-y-auto">
+
+            <div className={styles.detailPane}>
                 {selectedPermission && originalPermission ? (
                     <Form<IPermission>
                         initialValue={originalPermission}
@@ -82,7 +84,7 @@ export default function Page() {
                         </FormGroup>
                     </Form>
                 ) : (
-                    <div className="flex h-full items-center justify-center">
+                    <div className={styles.emptyState}>
                         No permission selected
                     </div>
                 )}

@@ -1,5 +1,6 @@
 'use client'
 
+import styles from './members.module.css'
 import PaginatedList from '@/components/admin/PaginatedList'
 import { ImageWithFallback } from '@/components/common'
 import {
@@ -73,42 +74,15 @@ export default function ClientPage({ roles }: PageProps) {
                     },
                 ]}
                 searchFields={[
-                    {
-                        id: 'name',
-                        name: 'Name',
-                    },
-                    {
-                        id: 'email',
-                        name: 'Email',
-                    },
-                    {
-                        id: 'firstName',
-                        name: 'First Name',
-                    },
-                    {
-                        id: 'lastName',
-                        name: 'Last Name',
-                    },
-                    {
-                        id: 'preferredName',
-                        name: 'Preferred Name',
-                    },
-                    {
-                        id: 'state',
-                        name: 'State',
-                    },
-                    {
-                        id: 'createdAt',
-                        name: 'Date Created',
-                    },
-                    {
-                        id: 'completedIntake',
-                        name: 'Date Intake Done',
-                    },
-                    {
-                        id: 'joinedServer',
-                        name: 'Date Joined Server',
-                    },
+                    { id: 'name', name: 'Name' },
+                    { id: 'email', name: 'Email' },
+                    { id: 'firstName', name: 'First Name' },
+                    { id: 'lastName', name: 'Last Name' },
+                    { id: 'preferredName', name: 'Preferred Name' },
+                    { id: 'state', name: 'State' },
+                    { id: 'createdAt', name: 'Date Created' },
+                    { id: 'completedIntake', name: 'Date Intake Done' },
+                    { id: 'joinedServer', name: 'Date Joined Server' },
                 ]}
                 items={users.map(makeItem)}
                 pinnedItem={
@@ -126,13 +100,13 @@ export default function ClientPage({ roles }: PageProps) {
                                 src={value.image}
                                 alt="user profile picture"
                             />
-                            <div className="flex flex-col">
-                                <span className="font-medium text-black">
+                            <div className={styles.userMeta}>
+                                <span className={styles.userName}>
                                     {(value.firstName
                                         ? `${value.firstName} ${value.lastName}`
                                         : value.preferredName) ?? value.email}
                                 </span>
-                                <span className="text-gray-500">
+                                <span className={styles.userUsername}>
                                     {value.name}
                                 </span>
                             </div>
@@ -144,13 +118,15 @@ export default function ClientPage({ roles }: PageProps) {
                                 alt="user profile picture"
                                 useFallback
                             />
-                            <PulseLoader size={8} color="#bbb" />
+                            <div className={styles.loading}>
+                                <PulseLoader size={8} color="#bbb" />
+                            </div>
                         </>
                     )
                 }
             />
 
-            <div className="h-[calc(100dvh-100px)] flex-1 overflow-y-auto">
+            <div className={styles.detailsPane}>
                 {selectedUser && originalUser ? (
                     <Form<IUser>
                         initialValue={originalUser}
@@ -211,12 +187,14 @@ export default function ClientPage({ roles }: PageProps) {
                                 dynamic={{ value: fCreatedDate }}
                             />
                         </FormGroup>
+
                         <FormGroup title="Address">
                             <TextField name="City" field="city" />
                             <TextField name="County" field="county" />
                             <TextField name="State" field="state" />
                             <TextField name="Zip Code" field="zipCode" />
                         </FormGroup>
+
                         <FormGroup title="Account Status" defaultCollapsed>
                             <CheckboxField
                                 name="Accepted Alerts"
@@ -240,6 +218,7 @@ export default function ClientPage({ roles }: PageProps) {
                                 readonly
                             />
                         </FormGroup>
+
                         <FormGroup title="Permissions">
                             <SelectManyField
                                 name="Roles"
@@ -251,9 +230,7 @@ export default function ClientPage({ roles }: PageProps) {
                         </FormGroup>
                     </Form>
                 ) : (
-                    <div className="flex h-full items-center justify-center">
-                        No user selected
-                    </div>
+                    <div className={styles.emptyState}>No user selected</div>
                 )}
             </div>
         </>

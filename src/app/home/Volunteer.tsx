@@ -1,5 +1,6 @@
 'use client'
 
+import styles from './volunteer.module.css'
 import { motion } from 'motion/react'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
@@ -39,11 +40,12 @@ export function Volunteer() {
     }, [inView])
 
     return (
-        <div className="px-4 flex w-full flex-col items-center justify-center bg-black-pearl-light py-12">
-            <h1 className="pb-10 text-4xl font-bold text-white">
-                What Can <span className="text-valencia">You </span> Do?
+        <div className={styles.container}>
+            <h1 className={styles.title}>
+                What Can <span className={styles.highlight}>You </span> Do?
             </h1>
-            <div className="flex flex-col items-center justify-center gap-10 px-[2vw] xl:flex-row 2xl:px-[8vw]">
+
+            <div className={styles.cardsWrapper}>
                 {visible &&
                     actions.map((action, index) => (
                         <Card
@@ -55,6 +57,7 @@ export function Volunteer() {
                         />
                     ))}
             </div>
+
             <div ref={divRef} />
         </div>
     )
@@ -73,21 +76,20 @@ function Card({
 }) {
     return (
         <motion.div
-            initial={{ x: 100, opacity: 0 }} // Start position: off-screen to the right
-            animate={{ x: 0, opacity: 1 }} // End position: visible and on-screen
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
             transition={{
                 duration: 1.0,
                 delay,
                 ease: 'backInOut',
             }}
-            className="truncate-text relative flex h-fit w-full flex-row items-center justify-start rounded-lg bg-white py-8 pl-6 md:h-[250px]"
+            className={styles.card}
         >
             <Image src={image} alt={title} width={86} height={86} />
-            <div className="flex flex-col gap-1 px-6">
-                <h1 className="text-xl font-bold text-black-pearl-dark">
-                    {title}
-                </h1>
-                <p className="text-md">{description}</p>
+
+            <div className={styles.cardContent}>
+                <h1 className={styles.cardTitle}>{title}</h1>
+                <p className={styles.cardDescription}>{description}</p>
             </div>
         </motion.div>
     )
