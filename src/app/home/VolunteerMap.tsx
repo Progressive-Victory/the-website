@@ -13,7 +13,7 @@ import { Link, Message, TiltMessage } from '@/components/common'
 import {
     IMapMemberCountResponse,
     zMapMemberCountResponse,
-} from '@/contracts/responses'
+} from '@/models/models'
 import { useFetch } from '@/util/hooks'
 import { useEffect, useState } from 'react'
 
