@@ -65,13 +65,13 @@ export const zDocumentUpdate = z.object({
 export type DocumentUpdate = z.infer<typeof zDocumentUpdate>
 
 export const zLocation = z.object({
-	zip: z.int(),
-	city: z.string(),
-	county: z.string(),
-	state: z.string(),
-});
+    zip: z.int(),
+    city: z.string(),
+    county: z.string(),
+    state: z.string(),
+})
 
-export type Location = z.infer<typeof zLocation>;
+export type Location = z.infer<typeof zLocation>
 
 export const zPermission = z.object({
     id: z.number(),
@@ -111,3 +111,9 @@ export const zDiscordMember = z.object({
     timeoutUntil: z.coerce.date().nullable(),
 })
 export type DiscordMember = z.infer<typeof zDiscordMember>
+
+export const zMapMemberCountResponse = z.object({
+    data: z.record(z.string(), z.coerce.number()),
+})
+
+export type IMapMemberCountResponse = z.infer<typeof zMapMemberCountResponse>

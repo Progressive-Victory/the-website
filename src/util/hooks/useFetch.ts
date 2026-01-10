@@ -52,12 +52,18 @@ export function useFetch() {
         url: string,
         body: object | null,
         schema: z.ZodObject | null,
+        query?: [string, string][],
         signal?: AbortSignal
     ) {
         const { apiBaseUrl } = (await (
             await fetch('/api/settings')
         ).json()) as { apiBaseUrl: string }
         const fullUrl = new URL(url, apiBaseUrl)
+        if (query)
+            query.forEach((entry) => {
+                fullUrl.searchParams.append(entry[0], entry[1])
+            })
+        console.log(fullUrl.toString())
         const options: RequestInit = {
             method,
             headers: {
@@ -98,9 +104,10 @@ export function useFetch() {
     async function onGet<R>(
         url: string,
         schema: z.ZodObject,
+        query?: [string, string][],
         signal?: AbortSignal
     ) {
-        return await onFetch<R>('GET', url, null, schema, signal)
+        return await onFetch<R>('GET', url, null, schema, query, signal)
     }
 
     async function onPut(
@@ -108,7 +115,7 @@ export function useFetch() {
         body: object | null,
         signal?: AbortSignal
     ) {
-        await onFetch('PUT', url, body, null, signal)
+        await onFetch('PUT', url, body, null, undefined, signal)
     }
 
     async function onPost<R = void>(
@@ -117,7 +124,7 @@ export function useFetch() {
         schema: z.ZodObject | null,
         signal?: AbortSignal
     ) {
-        return await onFetch<R>('POST', url, body, schema, signal)
+        return await onFetch<R>('POST', url, body, schema, undefined, signal)
     }
 
     async function onPatch<R = void>(
@@ -126,11 +133,11 @@ export function useFetch() {
         schema: z.ZodObject | null,
         signal?: AbortSignal
     ) {
-        return await onFetch<R>('PATCH', url, body, schema, signal)
+        return await onFetch<R>('PATCH', url, body, schema, undefined, signal)
     }
 
     async function onDelete(url: string, signal?: AbortSignal) {
-        await onFetch('DELETE', url, null, null, signal)
+        await onFetch('DELETE', url, null, null, undefined, signal)
     }
 
     return { onFetch, onGet, onPut, onPost, onPatch, onDelete }

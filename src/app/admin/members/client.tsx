@@ -10,8 +10,8 @@ import {
     TextField,
 } from '@/components/form'
 import { DateField } from '@/components/form/DateField'
-import { IMongoRole } from '@/models/MongoRole'
-import { IMongoUser } from '@/models/MongoUser'
+import { Role } from '@/models/models'
+import { User } from '@/models/users'
 import { dateService } from '@/services'
 import { useCurrentUser } from '@/util/hooks'
 import deepEqual from 'deep-equal'
@@ -19,7 +19,7 @@ import { useRef, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
 export interface PageProps {
-    roles: IMongoRole[]
+    roles: Role[]
 }
 
 export default function ClientPage({ roles }: PageProps) {
@@ -27,16 +27,16 @@ export default function ClientPage({ roles }: PageProps) {
 
     // We save the original value we got from the API so that we can easily
     // discard changes without saving
-    const [originalUser, setOriginalUser] = useState<IMongoUser | null>(null)
+    const [originalUser, setOriginalUser] = useState<User | null>(null)
     // This is the mutable copy we actually update when the user interacts with
     // the form
-    const [selectedUser, setSelectedUser] = useState<IMongoUser | null>(null)
-    const [users, setUsers] = useState<IMongoUser[]>([])
+    const [selectedUser, setSelectedUser] = useState<User | null>(null)
+    const [users, setUsers] = useState<User[]>([])
 
     const loggedInUser = useCurrentUser()
 
-    const handleSelectItem = (value: IMongoUser) => {
-        if (value._id === selectedUser?._id) return
+    const handleSelectItem = (value: User) => {
+        if (value.id === selectedUser?.id) return
 
         if (!deepEqual(selectedUser, originalUser)) {
             const proceed = confirm(
@@ -47,22 +47,22 @@ export default function ClientPage({ roles }: PageProps) {
 
         // We need to copy to make sure that the value in the list is not
         // modified until we save
-        setSelectedUser({ ...value } as IMongoUser)
-        setOriginalUser({ ...value } as IMongoUser)
+        setSelectedUser({ ...value } as User)
+        setOriginalUser({ ...value } as User)
     }
 
-    const userAge = dateService.getAge(selectedUser?.dateOfBirth ?? '')
-    const fCreatedDate = selectedUser?.createdAt
-        ? dateService.formatDate(selectedUser.createdAt)
+    const userAge = dateService.getAge(selectedUser?.birthdate ?? '') // needs refactoring
+    const fCreatedDate = selectedUser?.createdAtUtc
+        ? dateService.formatDate(selectedUser.createdAtUtc)
         : ''
-    const makeItem = (user: IMongoUser) => ({
-        id: user._id as string,
+    const makeItem = (user: User) => ({
+        id: user.id.toString(),
         value: user,
     })
 
     return (
         <>
-            <PaginatedList<IMongoUser>
+            <PaginatedList<User>
                 eventTarget={eventTarget.current}
                 endpoint="/api/admin/users"
                 filters={[
@@ -117,7 +117,7 @@ export default function ClientPage({ roles }: PageProps) {
                 pinnedItem={
                     loggedInUser.data
                         ? makeItem(loggedInUser.data)
-                        : { id: '', value: {} as IMongoUser }
+                        : { id: '', value: {} as User }
                 }
                 selectedItem={selectedUser ? makeItem(selectedUser) : null}
                 onSelectItem={({ value }) => handleSelectItem(value)}
@@ -126,7 +126,7 @@ export default function ClientPage({ roles }: PageProps) {
                     id ? (
                         <>
                             <ImageWithFallback
-                                src={value.image}
+                                src={value.image} // need to figure out alternative for this
                                 alt="user profile picture"
                             />
                             <div className="flex flex-col">
@@ -136,7 +136,7 @@ export default function ClientPage({ roles }: PageProps) {
                                         : value.preferredName) ?? value.email}
                                 </span>
                                 <span className="text-gray-500">
-                                    {value.name}
+                                    {value.name /*need alternative for this*/}
                                 </span>
                             </div>
                         </>
@@ -155,7 +155,7 @@ export default function ClientPage({ roles }: PageProps) {
 
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {selectedUser && originalUser ? (
-                    <Form<IMongoUser>
+                    <Form<User> //need history figured out for this
                         initialValue={originalUser}
                         setInitialValue={setOriginalUser}
                         currentValue={selectedUser}
@@ -164,7 +164,7 @@ export default function ClientPage({ roles }: PageProps) {
                             if (user.firstName && user.lastName)
                                 return `${user.firstName} ${user.lastName}`
                             if (user.preferredName) return user.preferredName
-                            if (user.name) return user.name
+                            if (user.name) return user.name // need alternative here
                             return ''
                         }}
                         patchEndpoint="/api/admin/users"
@@ -172,7 +172,7 @@ export default function ClientPage({ roles }: PageProps) {
                             eventTarget.current.dispatchEvent(
                                 new Event('refetch')
                             )
-                            if (selectedUser._id === loggedInUser.data?._id)
+                            if (selectedUser.id === loggedInUser.data?.id)
                                 loggedInUser.reload()
                         }}
                         updateHistory

@@ -1,4 +1,5 @@
 import MultiSelect from '@/components/admin/MultiSelect'
+import { useFetch } from '@/util/hooks'
 import {
     keepPreviousData,
     useQuery,
@@ -15,6 +16,7 @@ import {
 import { IoMdOptions } from 'react-icons/io'
 import { IoClose } from 'react-icons/io5'
 import { IconType } from 'react-icons/lib'
+import z from 'zod'
 
 export interface IPaginatedListItem<T> {
     id: string
@@ -57,23 +59,32 @@ export interface Filter {
     options: Record<string, string>[]
 }
 
-export interface IPaginatedSearch {
-    page: number
-    limit: number
+export const zPaginatedSearch = z.object({
+    page: z.coerce.number(),
+    limit: z.coerce.number(),
 
-    query: string
-    field: string
-    sort: string
+    query: z.string(),
+    field: z.string(),
+    sort: z.string(),
 
-    filters: Record<string, string[]>
-}
+    filters: z.record(z.string(), z.array(z.string())),
+})
 
-export interface PaginatedResponse<T> {
-    page: number
-    limit: number
-    count: number
-    data: T[]
-}
+export type IPaginatedSearch = z.infer<typeof zPaginatedSearch>
+
+export const zPaginatedResponse = <T extends z.ZodType>(dataType: T) =>
+    z.object({
+        page: z.coerce.number(),
+        limit: z.coerce.number(),
+        count: z.coerce.number(),
+        data: z.array(dataType),
+    })
+
+type PaginatedResponseType<T extends z.ZodType> = ReturnType<
+    typeof zPaginatedResponse<T>
+>
+
+export type IPaginatedResponse<T> = z.infer<PaginatedResponseType<z.ZodType<T>>>
 
 export default function PaginatedList<T extends object>({
     eventTarget,
@@ -101,6 +112,8 @@ export default function PaginatedList<T extends object>({
         null
     )
 
+    const { onGet } = useFetch()
+
     const queryClient = useQueryClient()
     const { isPending, isSuccess, data, error, refetch } = useQuery({
         queryKey: [endpoint, search],
@@ -122,8 +135,13 @@ export default function PaginatedList<T extends object>({
             if (search.field) url.searchParams.set('field', search.field)
             if (search.sort) url.searchParams.set('sort', search.sort)
 
-            const res = await fetch(url, { signal })
-            return (await res.json()) as PaginatedResponse<T>
+            const res = await onGet<IPaginatedResponse<T>>(
+                url.pathname,
+                zPaginatedResponse(z.unknown()),
+                url.searchParams.entries().toArray(),
+                signal
+            )
+            return res
         },
         placeholderData: keepPreviousData,
     })
@@ -138,7 +156,8 @@ export default function PaginatedList<T extends object>({
         void refetch()
         return () =>
             void queryClient.cancelQueries({
-                queryKey: ['/api/admin/users', search],
+                //change this route to api route
+                queryKey: ['/users', search],
             })
     }, [search, refetch, queryClient])
 

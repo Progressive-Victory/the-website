@@ -15,7 +15,7 @@ export function useCurrentUser(): DataState {
     const { isPending, data, error, refetch } = useQuery({
         queryKey: ['/users/current'],
         queryFn({ signal }) {
-            return onGet<User>('/users/current', zUser, signal)
+            return onGet<User>('/users/current', zUser, undefined, signal)
         },
         placeholderData: keepPreviousData,
     })
