@@ -1,5 +1,5 @@
 import { getPost } from '../util'
-import styles from './blog.module.css'
+import styles from '@/app/blog/blog.module.css'
 import { MainLayout } from '@/components/layout/MainLayout'
 
 export default async function Page({
