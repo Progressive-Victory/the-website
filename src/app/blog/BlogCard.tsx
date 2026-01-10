@@ -1,3 +1,4 @@
+import styles from './blog.module.css'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -24,24 +25,31 @@ export function BlogCard({
             day: 'numeric',
         })
     }
+
     return (
-        <Link
-            className="relative rounded-xl shadow-md"
-            href={`/blog/${encodeURIComponent(id)}`}
-        >
-            <div className="relative w-full overflow-hidden rounded-xl before:absolute before:inset-x-0 before:z-[1] before:size-full before:bg-gradient-to-t before:from-neutral-900/[.9]">
-                <Image src={image} alt="test" width={650} height={650} />
+        <Link href={`/blog/${encodeURIComponent(id)}`} className={styles.card}>
+            <div className={styles.imageWrapper}>
+                <Image
+                    src={image}
+                    alt={title}
+                    width={650}
+                    height={650}
+                    className={styles.image}
+                />
             </div>
-            <div className="absolute inset-x-0 bottom-0 z-[1]">
-                <div className="flex h-full flex-col rounded-b-xl bg-white/90 p-4 sm:p-6">
-                    <h3 className="text-lg">{title}</h3>
+
+            <div className={styles.contentOverlay}>
+                <div className={styles.content}>
+                    <h3 className={styles.title}>{title}</h3>
+
                     <div
-                        className="line-clamp-2 text-gray-500"
+                        className={styles.description}
                         dangerouslySetInnerHTML={{
                             __html: description,
                         }}
                     />
-                    <p className="text-sm">{formatDate(date)}</p>
+
+                    <p className={styles.date}>{formatDate(date)}</p>
                 </div>
             </div>
         </Link>

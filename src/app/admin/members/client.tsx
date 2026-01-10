@@ -1,5 +1,6 @@
 'use client'
 
+import styles from './members.module.css'
 import PaginatedList from '@/components/admin/PaginatedList'
 import { ImageWithFallback } from '@/components/common'
 import {
@@ -133,42 +134,15 @@ export default function ClientPage() {
                     },
                 ]}
                 searchFields={[
-                    {
-                        id: 'name',
-                        name: 'Name',
-                    },
-                    {
-                        id: 'email',
-                        name: 'Email',
-                    },
-                    {
-                        id: 'firstName',
-                        name: 'First Name',
-                    },
-                    {
-                        id: 'lastName',
-                        name: 'Last Name',
-                    },
-                    {
-                        id: 'preferredName',
-                        name: 'Preferred Name',
-                    },
-                    {
-                        id: 'state',
-                        name: 'State',
-                    },
-                    {
-                        id: 'createdAt',
-                        name: 'Date Created',
-                    },
-                    {
-                        id: 'completedIntake',
-                        name: 'Date Intake Done',
-                    },
-                    {
-                        id: 'joinedServer',
-                        name: 'Date Joined Server',
-                    },
+                    { id: 'name', name: 'Name' },
+                    { id: 'email', name: 'Email' },
+                    { id: 'firstName', name: 'First Name' },
+                    { id: 'lastName', name: 'Last Name' },
+                    { id: 'preferredName', name: 'Preferred Name' },
+                    { id: 'state', name: 'State' },
+                    { id: 'createdAt', name: 'Date Created' },
+                    { id: 'completedIntake', name: 'Date Intake Done' },
+                    { id: 'joinedServer', name: 'Date Joined Server' },
                 ]}
                 items={users.map(makeItem)}
                 pinnedItem={
@@ -187,8 +161,8 @@ export default function ClientPage() {
                                 src={`https://cdn.discordapp.com/avatars/${value.discordUsers?.[0].id}/${value.discordUsers?.[0].image ?? ''}`} // need to figure out alternative for this
                                 alt="user profile picture"
                             />
-                            <div className="flex flex-col">
-                                <span className="font-medium text-black">
+                            <div className={styles.userMeta}>
+                                <span className={styles.userName}>
                                     {(value.firstName
                                         ? `${value.firstName} ${value.lastName}`
                                         : value.preferredName) ?? value.email}
@@ -205,13 +179,15 @@ export default function ClientPage() {
                                 alt="user profile picture"
                                 useFallback
                             />
-                            <PulseLoader size={8} color="#bbb" />
+                            <div className={styles.loading}>
+                                <PulseLoader size={8} color="#bbb" />
+                            </div>
                         </>
                     )
                 }
             />
 
-            <div className="h-[calc(100dvh-100px)] flex-1 overflow-y-auto">
+            <div className={styles.detailsPane}>
                 {selectedUser && originalUser ? (
                     <Form<IUser>
                         zodSchema={zUser}
@@ -274,12 +250,14 @@ export default function ClientPage() {
                                 dynamic={{ value: fCreatedDate }}
                             />
                         </FormGroup>
+
                         <FormGroup title="Address">
                             <TextField name="City" field="city" />
                             <TextField name="County" field="county" />
                             <TextField name="State" field="state" />
                             <TextField name="Zip Code" field="zip" />
                         </FormGroup>
+
                         <FormGroup title="Account Status" defaultCollapsed>
                             <CheckboxField
                                 name="Accepted Alerts"
@@ -303,6 +281,7 @@ export default function ClientPage() {
                                 readonly
                             />
                         </FormGroup>
+
                         <FormGroup title="Permissions">
                             <SelectManyField
                                 name="Roles"
@@ -314,9 +293,7 @@ export default function ClientPage() {
                         </FormGroup>
                     </Form>
                 ) : (
-                    <div className="flex h-full items-center justify-center">
-                        No user selected
-                    </div>
+                    <div className={styles.emptyState}>No user selected</div>
                 )}
             </div>
         </>
