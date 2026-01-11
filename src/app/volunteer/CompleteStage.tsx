@@ -1,3 +1,4 @@
+import styles from './volunteer.module.css'
 import { CakeIcon, TrophyIcon } from '@heroicons/react/24/solid'
 
 export interface CompleteStageProps {
@@ -7,30 +8,27 @@ export interface CompleteStageProps {
 
 export function CompleteStage({ isInServer, onRejoin }: CompleteStageProps) {
     return (
-        <div className="flex min-h-[200px] flex-col items-center justify-center p-4">
+        <div className={styles.container}>
             {!isInServer ? (
                 <>
-                    <TrophyIcon className="size-12 text-steel-blue" />
-                    <p className="mt-6 text-center text-lg font-bold text-white">
+                    <TrophyIcon className={styles.icon} />
+                    <p className={styles.title}>
                         Looks like you&apos;re no longer in the server!
                     </p>
-                    <p className="my-2 text-center text-sm text-white">
+                    <p className={styles.subtitle}>
                         Click the button below to rejoin.
                     </p>
-                    <button
-                        onClick={onRejoin}
-                        className="mt-2 rounded-full bg-valencia px-4 py-2 font-bold text-white hover:bg-red-900"
-                    >
+                    <button onClick={onRejoin} className={styles.rejoinButton}>
                         Rejoin
                     </button>
                 </>
             ) : (
                 <>
-                    <CakeIcon className="size-12 text-steel-blue" />
-                    <p className="mt-6 text-center text-lg font-bold text-white">
+                    <CakeIcon className={styles.icon} />
+                    <p className={styles.title}>
                         Congrats, you are in the server!
                     </p>
-                    <p className="mt-6 text-center text-sm text-white">
+                    <p className={styles.subtitle}>
                         Check your Discord client to start participating in the
                         community.
                     </p>

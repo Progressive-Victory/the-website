@@ -1,4 +1,5 @@
 import { Field, SupportNote, Toggle } from '.'
+import styles from './volunteer.module.css'
 import { dateService } from '@/services'
 import { useInit } from '@/util/hooks'
 import Link from 'next/link'
@@ -55,7 +56,10 @@ export function CollectInfoStage({
     const setFormattedPhoneNumber = (number: string) => {
         const { phoneNumber, isValid } = parsePhone(number)
         const formatted = isValid
-            ? `(${phoneNumber.substring(2, 5)}) ${phoneNumber.substring(5, 8)}-${phoneNumber.substring(8, 12)}`
+            ? `(${phoneNumber.substring(2, 5)}) ${phoneNumber.substring(
+                  5,
+                  8
+              )}-${phoneNumber.substring(8, 12)}`
             : number
         setPhoneNumber(formatted)
     }
@@ -98,17 +102,16 @@ export function CollectInfoStage({
     }, [parsedPhone])
 
     return (
-        <div>
-            <header>
-                <p className="mx-auto text-center text-3xl font-bold text-white">
-                    Volunteer with PV
-                </p>
-                <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
+        <div className={styles.root}>
+            <header className={styles.header}>
+                <p className={styles.title}>Volunteer with PV</p>
+                <p className={styles.subtitle}>
                     Join us on Discord and make a difference ✨
                 </p>
             </header>
-            <section className="flex flex-col gap-2 ">
-                <section className="flex flex-col gap-2 sm:flex-row">
+
+            <section className={styles.formSection}>
+                <section className={styles.row}>
                     <Field
                         value={form.firstName}
                         placeholder="First Name"
@@ -130,7 +133,8 @@ export function CollectInfoStage({
                         }
                     />
                 </section>
-                <section className="flex flex-col gap-2 sm:flex-row">
+
+                <section className={styles.row}>
                     <Field
                         type="date"
                         value={form.dateOfBirth}
@@ -153,25 +157,26 @@ export function CollectInfoStage({
                         }
                     />
                 </section>
+
                 <Field
                     value={phoneNumber}
                     placeholder="Phone Number"
                     error={!parsedPhone.isValid}
                     errorText="Enter a valid 10-digit phone number"
                     maxLength={20}
-                    onChange={(e) => {
-                        setPhoneNumber(e.target.value)
-                    }}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
                     onBlur={(e) => setFormattedPhoneNumber(e.target.value)}
                 />
-                <p className={`-mt-0.5 mb-1 text-[12px] text-gray-300`}>
+
+                <p className={styles.phoneHelp}>
                     <em>
                         US numbers only. Message and data rates may apply. Must
                         be SMS reachable.
                     </em>
                 </p>
             </section>
-            <section className="flex flex-col gap-2">
+
+            <section className={styles.togglesSection}>
                 <Toggle
                     name="subscribe-alerts"
                     value={form.getAlerts}
@@ -186,9 +191,9 @@ export function CollectInfoStage({
                     value={form.usCitizen}
                     placeholder={
                         <span>
-                            <span className="text-red-500">*</span> I swear that
-                            I am a resident (or citizen living abroad) of the
-                            United States of America
+                            <span className={styles.requiredStar}>*</span> I
+                            swear that I am a resident (or citizen living
+                            abroad) of the United States of America
                         </span>
                     }
                     tooltip="Only US residents and citizens may participate in Progressive Victory"
@@ -202,13 +207,13 @@ export function CollectInfoStage({
                     value={form.privacyPolicy}
                     placeholder={
                         <span>
-                            <span className="text-red-500">*</span> I agree to
-                            the{' '}
+                            <span className={styles.requiredStar}>*</span> I
+                            agree to the{' '}
                             <Link
                                 href="/privacy"
                                 target="_blank"
                                 referrerPolicy="no-referrer"
-                                className="text-steel-blue underline"
+                                className={styles.privacyLink}
                             >
                                 Privacy Policy
                             </Link>
@@ -221,22 +226,24 @@ export function CollectInfoStage({
                     required
                 />
             </section>
-            <div className="w-full px-1 text-left text-xs text-white">
-                <span className="text-red-500">*</span> = required field
+
+            <div className={styles.requiredNote}>
+                <span className={styles.requiredStar}>*</span> = required field
             </div>
+
             <button
                 type="submit"
-                onClick={() => {
-                    void handleSubmit()
-                }}
+                onClick={() => void handleSubmit()}
                 disabled={!isValid}
-                className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
+                className={styles.submitButton}
             >
                 Join Now
             </button>
+
             <SupportNote />
+
             {zipCodeError ? (
-                <p className="text-red-600">
+                <p className={styles.zipError}>
                     The zip code entered is invalid. Please enter a real zip
                     code.
                 </p>

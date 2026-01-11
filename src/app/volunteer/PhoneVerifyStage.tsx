@@ -1,4 +1,5 @@
 import { Field, SupportNote } from '.'
+import styles from './volunteer.module.css'
 import { useInit } from '@/util/hooks'
 import { QueryClient, useMutation } from '@tanstack/react-query'
 import classNames from 'classnames'
@@ -53,9 +54,7 @@ export function PhoneVerifyStage({
         mutationFn: async (code: string) => {
             const resp = await fetch('/api/onboarding/sms/check', {
                 method: 'POST',
-                body: JSON.stringify({
-                    code,
-                }),
+                body: JSON.stringify({ code }),
             })
 
             if (resp.status === 200) {
@@ -98,20 +97,19 @@ export function PhoneVerifyStage({
 
     return (
         <div>
-            <div className="flex w-full flex-col items-center gap-0 md:min-w-96">
-                <p className="font-white text-center text-lg font-bold text-white">
+            <div className={styles.verifyContainer}>
+                <p className={styles.verifyTitle}>
                     Enter your Verification Code
                 </p>
-                <p className="mx-2 mb-2 text-center text-lg font-medium text-white">
+                <p className={styles.verifySubtitle}>
                     We just sent it to your phone 📱
                 </p>
 
-                <div className="mt-2 flex w-full flex-row justify-center gap-1">
+                <div className={styles.fieldRow}>
                     <Field
                         value={securityCode}
                         placeholder="Security Code"
                         error={checkCodeMutation.isError}
-                        // Let users input with enter key
                         onEnter={() => {
                             if (securityCode.length === 6) {
                                 checkCodeMutation.mutate(securityCode)
@@ -138,13 +136,12 @@ export function PhoneVerifyStage({
                                 codeTimer > 0 || requestCodeMutation.isPending
                             }
                             className={classNames(
-                                `flex w-fit items-center whitespace-nowrap rounded-lg bg-steel-blue px-4 py-3 text-center text-sm text-white transition-all duration-100 disabled:cursor-not-allowed [&:not(:disabled)]:hover:scale-[103%]`,
+                                styles.resendButton,
                                 requestCodeMutation.isPending
-                                    ? ''
-                                    : 'hover:bg-valencia disabled:bg-gray-500'
+                                    ? styles.resendButtonPending
+                                    : styles.resendButtonReady
                             )}
                             onClick={() => {
-                                // Get a new OTP
                                 requestCodeMutation.mutate(phoneNumber)
                             }}
                         >
@@ -155,7 +152,7 @@ export function PhoneVerifyStage({
                                     Resend{' '}
                                     {codeTimer > 0 && (
                                         <span
-                                            className="font-mono"
+                                            className={styles.timerMono}
                                             suppressHydrationWarning
                                         >
                                             {codeTimer}
@@ -177,7 +174,7 @@ export function PhoneVerifyStage({
                     disabled={
                         securityCode.length < 6 || checkCodeMutation.isPending
                     }
-                    className="my-4 w-full rounded-md bg-steel-blue py-2 text-center text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
+                    className={styles.verifyButton}
                 >
                     Verify
                 </button>
@@ -185,7 +182,7 @@ export function PhoneVerifyStage({
                 <button
                     type="button"
                     onClick={() => void goBack()}
-                    className="mx-auto text-center text-xs text-steel-blue underline hover:text-white"
+                    className={styles.goBackButton}
                 >
                     I made a mistake!
                 </button>

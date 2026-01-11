@@ -8,6 +8,7 @@ import {
     PhoneVerifyStage,
     UnderageStage,
 } from '.'
+import styles from './volunteer.module.css'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { IUser } from '@/models/User'
@@ -132,9 +133,9 @@ export default function VolunteerPage({
 
     return (
         <MainLayout>
-            <div className="relative flex min-h-screen flex-col items-center justify-center">
+            <div className={styles.page}>
                 <div
-                    className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
+                    className={styles.heroImage}
                     style={{
                         backgroundImage: "url('/images/blend_test.png')",
                         backgroundSize: 'cover',
@@ -144,10 +145,10 @@ export default function VolunteerPage({
                     }}
                 />
                 <HalftoneBackground />
-                <div className="flex w-full justify-center">
+                <div className={styles.formRow}>
                     <form
                         onSubmit={(e) => e.preventDefault()}
-                        className="z-0 m-4 flex h-auto flex-col gap-y-4 rounded-lg bg-black-pearl-dark p-4 shadow-md md:m-8 md:p-6"
+                        className={styles.formCard}
                     >
                         {currentStage === OnboardingStage.NOT_STARTED && (
                             <CollectInfoStage
