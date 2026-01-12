@@ -1,4 +1,4 @@
-import Location from '@/models/Location'
+import MongoLocation from '@/models/MongoLocation'
 import dbConnect from '@/util/libmongo'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
     await dbConnect()
 
-    const res = await Location.findOne({ zip: zip }).exec()
+    const res = await MongoLocation.findOne({ zip: zip }).exec()
     return NextResponse.json(
         {
             city: res?.primary_city,

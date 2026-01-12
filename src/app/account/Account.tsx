@@ -9,11 +9,11 @@ import { hasPermission, useUser } from '@/util/hooks'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
 export function Account() {
     const { data: session } = useSession()
-    const user = useUser()
+    const user = useCurrentUser()
 
     const canAccessAdminPanel = useMemo(() => {
         if (!user.data || user.error || user.loading) return false

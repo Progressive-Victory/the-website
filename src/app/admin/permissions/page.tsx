@@ -3,7 +3,7 @@
 import styles from './permissions.module.css'
 import PaginatedList from '@/components/admin/PaginatedList'
 import { Form, FormGroup, TextField } from '@/components/form'
-import { IPermission } from '@/models/Permission'
+import { IMongoPermission } from '@/models/MongoPermission'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
 
@@ -13,14 +13,14 @@ export default function Page() {
     // We save the original value we got from the API so that we can easily
     // discard changes without saving
     const [originalPermission, setOriginalPermission] =
-        useState<IPermission | null>(null)
+        useState<IMongoPermission | null>(null)
     // This is the mutable copy we actually update when the user interacts with
     // the form
     const [selectedPermission, setSelectedPermission] =
-        useState<IPermission | null>(null)
-    const [permissions, setPermissions] = useState<IPermission[]>([])
+        useState<IMongoPermission | null>(null)
+    const [permissions, setPermissions] = useState<IMongoPermission[]>([])
 
-    const handleSelectItem = (value: IPermission) => {
+    const handleSelectItem = (value: IMongoPermission) => {
         if (value._id === selectedPermission?._id) return
 
         if (!deepEqual(selectedPermission, originalPermission)) {
@@ -32,18 +32,18 @@ export default function Page() {
 
         // We need to copy to make sure that the value in the list is not
         // modified until we save
-        setSelectedPermission({ ...value } as IPermission)
-        setOriginalPermission({ ...value } as IPermission)
+        setSelectedPermission({ ...value } as IMongoPermission)
+        setOriginalPermission({ ...value } as IMongoPermission)
     }
 
-    const makeItem = (permission: IPermission) => ({
+    const makeItem = (permission: IMongoPermission) => ({
         id: permission._id as string,
         value: permission,
     })
 
     return (
         <>
-            <PaginatedList<IPermission>
+            <PaginatedList<IMongoPermission>
                 eventTarget={eventTarget.current}
                 endpoint="/api/admin/permissions"
                 filters={[]}
@@ -66,7 +66,7 @@ export default function Page() {
 
             <div className={styles.detailPane}>
                 {selectedPermission && originalPermission ? (
-                    <Form<IPermission>
+                    <Form<IMongoPermission>
                         initialValue={originalPermission}
                         setInitialValue={setOriginalPermission}
                         currentValue={selectedPermission}

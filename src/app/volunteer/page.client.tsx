@@ -8,16 +8,18 @@ import {
     PhoneVerifyStage,
     UnderageStage,
 } from '.'
+
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { IUser } from '@/models/User'
+import { IMongoUser } from '@/models/MongoUser'
 import { dateService } from '@/services'
 import { OnboardingStage } from '@/util/stage'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 
 export interface VolunteerPageProps {
-    user: IUser | null
+    user: IMongoUser | null
     isInSever: boolean
 }
 
@@ -35,13 +37,13 @@ export default function VolunteerPage({
             initialUser = null
 
             const response = await fetch('/api/user')
-            return (await response.json()) as IUser
+            return (await response.json()) as IMongoUser
         },
         initialData: initialUser,
     })
 
     const updateUserMutation = useMutation({
-        mutationFn: async (obj: Partial<IUser>) => {
+        mutationFn: async (obj: Partial<IMongoUser>) => {
             if (obj.zipCode) {
                 const res = await fetch(
                     `/api/onboarding/zip/location?zipcode=${obj.zipCode}`
@@ -59,7 +61,7 @@ export default function VolunteerPage({
             })
 
             if (resp.status === 200) {
-                const data = (await resp.json()) as IUser
+                const data = (await resp.json()) as IMongoUser
                 queryClient.setQueryData(['user'], () => data)
             } else {
                 throw new Error()

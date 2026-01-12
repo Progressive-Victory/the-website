@@ -11,6 +11,11 @@ import {
 } from '@/components/Map/constants'
 import { MapView, StateMapInteractionProps } from '@/components/Map/types'
 import { Link, Message, TiltMessage } from '@/components/common'
+import {
+    IMapMemberCountResponse,
+    zMapMemberCountResponse,
+} from '@/contracts/responses'
+import { useFetch } from '@/util/hooks'
 import { useEffect, useState } from 'react'
 
 export function VolunteerMap() {
@@ -20,23 +25,25 @@ export function VolunteerMap() {
     const [totalMemberCount, setTotalMemberCount] = useState<number>(0)
     const [stateMemberCount, setStateMemberCount] =
         useState<Record<string, number>>()
+    const { onGet } = useFetch()
 
     useEffect(() => {
         void (async () => {
             const statesCount: Record<string, number> = {}
-            const smc = (await (
-                await fetch('/api/map/count')
-            ).json()) as Record<string, number>
-            Object.entries(smc).forEach(([k, v]) => {
-                const state = US_STATES.find((s) => s.code === k)?.name
+            const { data } = await onGet<IMapMemberCountResponse>(
+                '/map/member-count-by-state',
+                zMapMemberCountResponse
+            )
+            let total = 0
+            Object.entries(data).forEach(([k, v]) => {
+                const state = US_STATES.find(
+                    (s) => s.code.toLowerCase() === k
+                )?.name
                 if (typeof state === 'string') {
                     statesCount[state] = typeof v === 'number' ? v : 0
+                    total += statesCount[state]
                 }
             })
-
-            const total = (await (
-                await fetch('/api/map/users-count')
-            ).json()) as number
 
             setStateMemberCount(statesCount)
             setTotalMemberCount(total)

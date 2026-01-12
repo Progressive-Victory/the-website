@@ -1,4 +1,4 @@
-import { User } from '@/models/User'
+import { MongoUser } from '@/models/MongoUser'
 import { auth } from '@/util/auth'
 import { isEmailVerified, joinMember } from '@/util/discord'
 import { HTTPStatus } from '@/util/https-status'
@@ -24,7 +24,7 @@ export async function POST() {
 
     await dbConnect()
 
-    const user = await User.findOne({ discordId: session.discordId })
+    const user = await MongoUser.findOne({ discordId: session.discordId })
 
     if (!user) {
         console.error(`Failed to load user with valid session:`, session)

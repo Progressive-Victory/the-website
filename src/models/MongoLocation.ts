@@ -1,6 +1,6 @@
 import mongoose, { Document, Model, Schema } from 'mongoose'
 
-export interface ILocation extends Document {
+export interface IMongoLocation extends Document {
     zip: string
     type: string
     decommissioned: number
@@ -18,7 +18,7 @@ export interface ILocation extends Document {
     irs_estimated_population: number
 }
 
-const locationSchema = new Schema<ILocation>({
+const locationSchema = new Schema<IMongoLocation>({
     zip: { type: String, required: true, unique: true },
     type: { type: String, required: true },
     decommissioned: { type: Number, required: true },
@@ -38,8 +38,8 @@ const locationSchema = new Schema<ILocation>({
 
 const modelName = 'Location'
 
-export const Location: Model<ILocation> =
-    (mongoose.models as Record<string, Model<ILocation>>).Location ||
-    mongoose.model<ILocation>(modelName, locationSchema)
+export const MongoLocation: Model<IMongoLocation> =
+    (mongoose.models as Record<string, Model<IMongoLocation>>).Location ||
+    mongoose.model<IMongoLocation>(modelName, locationSchema)
 
-export default Location
+export default MongoLocation

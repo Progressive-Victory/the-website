@@ -1,8 +1,7 @@
+import MongoUser from '@/models/MongoUser'
+import { checkAuthPermissions, PermissionName, ResponseCode } from '@/util/auth'
 import mongoose from 'mongoose'
 import { NextRequest, NextResponse } from 'next/server'
-
-import User from '@/models/User'
-import { checkAuthPermissions, PermissionName, ResponseCode } from '@/util/auth'
 
 export async function GET(
     _req: NextRequest,
@@ -37,7 +36,7 @@ export async function GET(
         )
     }
 
-    const user = await User.findById(id)
+    const user = await MongoUser.findById(id)
         .populate([
             {
                 path: 'roles',
