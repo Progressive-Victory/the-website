@@ -1,67 +1,46 @@
 'use client'
 
-import styles from '@/app/account/account.module.css'
-import {
-    ContentPageFrame,
-    ContentSection,
-} from '@/components/content_sections/ContentSections'
-import { hasPermission, useCurrentUser, useFetch } from '@/util/hooks'
-import { InformationCircleIcon } from '@heroicons/react/24/solid'
-import { useSession, signOut } from 'next-auth/react'
-import Link from 'next/link'
-import { useMemo } from 'react'
+import { MainLayout } from '@/components/layout'
 
-export function Account() {
-    const { data: session } = useSession()
-    const { onSignOut } = useFetch()
-    const user = useCurrentUser()
+interface AccountProps {
+    firstName: string
+    lastName: string
+    state: string
+    city: string
+    zip: number
+    addressLine1: string
+    addressLine2: string
+    emailAddress: string
+    phoneNumber: string
+}
 
-    const canAccessAdminPanel = useMemo(() => {
-        return user.data
-            ? hasPermission(user.data, 'Admin Panel Access')
-            : false
-    }, [user.data])
-
-    const handleSignOut = () => {
-        onSignOut()
-        void signOut({ callbackUrl: '/' })
-    }
-
-    if (!session) return null
-
+// What is the name field on the user?
+const Account = ({
+    firstName,
+    lastName,
+    city,
+    state,
+    zip,
+    addressLine1,
+    addressLine2,
+    emailAddress,
+    phoneNumber,
+}: AccountProps) => {
     return (
-        <div className={styles.pageRoot}>
-            <ContentPageFrame>
-                <ContentSection
-                    title="Account Controls"
-                    titleAlign="center"
-                    highlight="Controls"
-                    highlightColor="#CE3728"
-                >
-                    <div className={styles.controlsRow}>
-                        <button
-                            type="button"
-                            onClick={handleSignOut}
-                            className={styles.primaryButton}
-                        >
-                            Sign Out
-                        </button>
-
-                        {canAccessAdminPanel && (
-                            <Link href="/admin" className={styles.adminLink}>
-                                <span className={styles.primaryButton}>
-                                    Admin Panel
-                                </span>
-                            </Link>
-                        )}
-                    </div>
-                </ContentSection>
-
-                <div className={styles.notice}>
-                    <InformationCircleIcon className={styles.noticeIcon} />
-                    <span>Pardon our dust while we work on this page</span>
-                </div>
-            </ContentPageFrame>
-        </div>
+        <MainLayout>
+            <div>
+                <p>{firstName}</p>
+                <p>{lastName}</p>
+                <p>{city}</p>
+                <p>{state}</p>
+                <p>{zip}</p>
+                <p>{addressLine1}</p>
+                <p>{addressLine2}</p>
+                <p>{emailAddress}</p>
+                <p>{phoneNumber}</p>
+            </div>
+        </MainLayout>
     )
 }
+
+export default Account

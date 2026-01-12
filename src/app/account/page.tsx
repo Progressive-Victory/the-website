@@ -1,3 +1,4 @@
+import Account from './Account'
 import STUB_GET_USER from './stubGetUser'
 import { auth } from '@/util/auth'
 import { Metadata } from 'next'
@@ -29,5 +30,5 @@ export default async function AccountPage() {
         redirect('/volunteer')
     }
 
-    return <div></div>
+    return <Account {...userData}></Account>
 }
