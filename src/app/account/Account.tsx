@@ -5,11 +5,11 @@ import {
     ContentPageFrame,
     ContentSection,
 } from '@/components/content_sections/ContentSections'
-import { hasPermission, useUser } from '@/util/hooks'
+import { hasPermission, useCurrentUser } from '@/util/hooks'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
 export function Account() {
     const { data: session } = useSession()
