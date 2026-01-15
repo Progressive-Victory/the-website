@@ -10,32 +10,41 @@ import {
     TextField,
 } from '@/components/form'
 import { DateField } from '@/components/form/DateField'
-import { Role } from '@/models/models'
-import { User } from '@/models/users'
+import { zUser, IUser, IRole, zRole } from '@/models'
 import { dateService } from '@/services'
-import { useCurrentUser } from '@/util/hooks'
+import { useCurrentUser, useFetch } from '@/util/hooks'
 import deepEqual from 'deep-equal'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
+import z from 'zod'
 
-export interface PageProps {
-    roles: Role[]
-}
-
-export default function ClientPage({ roles }: PageProps) {
+export default function ClientPage() {
+    const [roles, setRoles] = useState<IRole[] | null>(null)
     const eventTarget = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
     // discard changes without saving
-    const [originalUser, setOriginalUser] = useState<User | null>(null)
+    const [originalUser, setOriginalUser] = useState<IUser | null>(null)
     // This is the mutable copy we actually update when the user interacts with
     // the form
-    const [selectedUser, setSelectedUser] = useState<User | null>(null)
-    const [users, setUsers] = useState<User[]>([])
+    const [selectedUser, setSelectedUser] = useState<IUser | null>(null)
+    const [users, setUsers] = useState<IUser[]>([])
+    const { onGet } = useFetch()
 
     const loggedInUser = useCurrentUser()
 
-    const handleSelectItem = (value: User) => {
+    useEffect(() => {
+        onGet<IRole[]>('/roles/all', z.array(zRole))
+            .then((res) => {
+                setRoles(res)
+            })
+            .catch((err) => {
+                console.error(err)
+            })
+    }, [])
+
+    const handleSelectItem = (value: IUser) => {
+        console.log('handling select item')
         if (value.id === selectedUser?.id) return
 
         if (!deepEqual(selectedUser, originalUser)) {
@@ -45,26 +54,48 @@ export default function ClientPage({ roles }: PageProps) {
             if (!proceed) return
         }
 
-        // We need to copy to make sure that the value in the list is not
-        // modified until we save
-        setSelectedUser({ ...value } as User)
-        setOriginalUser({ ...value } as User)
+        setOriginalUser({ ...value })
+        setSelectedUser({ ...value })
     }
 
-    const userAge = dateService.getAge(selectedUser?.birthdate ?? '') // needs refactoring
+    const userAge = dateService.getAge(selectedUser?.birthdate ?? new Date())
     const fCreatedDate = selectedUser?.createdAtUtc
         ? dateService.formatDate(selectedUser.createdAtUtc)
         : ''
-    const makeItem = (user: User) => ({
+    const makeItem = (user: IUser) => ({
         id: user.id.toString(),
         value: user,
     })
 
+    /*function flattenZodType(dataType: ZodObject) {
+        function traverseObj(
+            obj: object
+        ): { name: string; fieldType: ZodSchema }[] {
+            const res: { name: string; fieldType: ZodSchema }[] = []
+            Object.entries(obj).forEach(([key, value]) => {
+                console.log(key)
+                if (value.def.innerType) {
+                    console.log('Inner Type: ' + value.def.innerType.def.type)
+                    if (value.def.innerType.def.type === 'object') {
+                        res.concat(traverseObj(value.def.innerType.def.shape))
+                    } else {
+                        res.push({ name: key, fieldType: value.shape })
+                    }
+                } else {
+                    res.push({ name: key, fieldType: value.shape })
+                }
+            })
+            return res
+        }
+        const shape = dataType.shape
+        return traverseObj(shape)
+    }*/
     return (
         <>
-            <PaginatedList<User>
+            <PaginatedList<IUser>
+                zodSchema={zUser}
                 eventTarget={eventTarget.current}
-                endpoint="/api/admin/users"
+                endpoint="/users"
                 filters={[
                     {
                         name: 'Role',
@@ -117,7 +148,7 @@ export default function ClientPage({ roles }: PageProps) {
                 pinnedItem={
                     loggedInUser.data
                         ? makeItem(loggedInUser.data)
-                        : { id: '', value: {} as User }
+                        : { id: '', value: {} as IUser }
                 }
                 selectedItem={selectedUser ? makeItem(selectedUser) : null}
                 onSelectItem={({ value }) => handleSelectItem(value)}
@@ -126,7 +157,8 @@ export default function ClientPage({ roles }: PageProps) {
                     id ? (
                         <>
                             <ImageWithFallback
-                                src={value.image} // need to figure out alternative for this
+                                useFallback={!value.discordUsers?.[0].image}
+                                src={`https://cdn.discordapp.com/avatars/${value.discordUsers?.[0].id}/${value.discordUsers?.[0].image ?? ''}`} // need to figure out alternative for this
                                 alt="user profile picture"
                             />
                             <div className="flex flex-col">
@@ -136,7 +168,7 @@ export default function ClientPage({ roles }: PageProps) {
                                         : value.preferredName) ?? value.email}
                                 </span>
                                 <span className="text-gray-500">
-                                    {value.name /*need alternative for this*/}
+                                    {value.discordUsers?.[0].username}
                                 </span>
                             </div>
                         </>
@@ -155,7 +187,8 @@ export default function ClientPage({ roles }: PageProps) {
 
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {selectedUser && originalUser ? (
-                    <Form<User> //need history figured out for this
+                    <Form<IUser> //need history figured out for this
+                        zodSchema={zUser}
                         initialValue={originalUser}
                         setInitialValue={setOriginalUser}
                         currentValue={selectedUser}
@@ -164,10 +197,11 @@ export default function ClientPage({ roles }: PageProps) {
                             if (user.firstName && user.lastName)
                                 return `${user.firstName} ${user.lastName}`
                             if (user.preferredName) return user.preferredName
-                            if (user.name) return user.name // need alternative here
+                            if (user.discordUsers?.[0].username)
+                                return user.discordUsers[0].username // need alternative here
                             return ''
                         }}
-                        patchEndpoint="/api/admin/users"
+                        patchEndpoint={`/users/${selectedUser.id}`}
                         onChangesSaved={() => {
                             eventTarget.current.dispatchEvent(
                                 new Event('refetch')
@@ -178,16 +212,19 @@ export default function ClientPage({ roles }: PageProps) {
                         updateHistory
                     >
                         <FormGroup title="Account Information">
-                            <TextField name="Username" field="name" required />
-                            <TextField name="Email" field="email" required />
                             <TextField
-                                name="Discord ID"
-                                field="discordId"
-                                readonly
+                                name="Username"
+                                field="username"
+                                required
                             />
                             <TextField
+                                name="Discord Id"
+                                field="discordUsersId"
+                            />
+                            <TextField name="Email" field="email" required />
+                            <TextField
                                 name="Phone Number"
-                                field="phoneNumber"
+                                field="phone"
                                 required
                             />
                             <TextField
@@ -197,10 +234,7 @@ export default function ClientPage({ roles }: PageProps) {
                             />
                             <TextField name="First Name" field="firstName" />
                             <TextField name="Last Name" field="lastName" />
-                            <DateField
-                                name="Date of Birth"
-                                field="dateOfBirth"
-                            />
+                            <DateField name="Date of Birth" field="birthdate" />
                             <TextField
                                 name="Age"
                                 field="age"
@@ -209,7 +243,7 @@ export default function ClientPage({ roles }: PageProps) {
                             />
                             <TextField
                                 name="Date Created"
-                                field="createdAt"
+                                field="createdAtUtc"
                                 readonly
                                 dynamic={{ value: fCreatedDate }}
                             />
@@ -218,7 +252,7 @@ export default function ClientPage({ roles }: PageProps) {
                             <TextField name="City" field="city" />
                             <TextField name="County" field="county" />
                             <TextField name="State" field="state" />
-                            <TextField name="Zip Code" field="zipCode" />
+                            <TextField name="Zip Code" field="zip" />
                         </FormGroup>
                         <FormGroup title="Account Status" defaultCollapsed>
                             <CheckboxField
@@ -234,12 +268,12 @@ export default function ClientPage({ roles }: PageProps) {
                             />
                             <TextField
                                 name="Date Intake Done"
-                                field="completedIntake"
+                                field="completedIntakeUtc"
                                 readonly
                             />
                             <TextField
                                 name="Date Server Joined"
-                                field="joinedServer"
+                                field="joinedServerUtc"
                                 readonly
                             />
                         </FormGroup>
@@ -248,8 +282,8 @@ export default function ClientPage({ roles }: PageProps) {
                                 name="Roles"
                                 field="roles"
                                 nameKey="name"
-                                valueKey="_id"
-                                options={roles}
+                                valueKey="id"
+                                options={roles ?? ['loading']}
                             />
                         </FormGroup>
                     </Form>

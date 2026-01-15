@@ -18,17 +18,16 @@ class DateService {
         return `${date.getUTCMonth()}/${date.getUTCDate()}/${date.getFullYear()} ${date.getUTCHours() === 0 ? 12 : date.getUTCHours() % 12}:${date.getUTCMinutes()} ${date.getUTCHours() > 12 ? 'PM' : 'AM'}`
     }
 
-    getAge(dateOfBirth: string) {
-        const dob = new Date(dateOfBirth)
+    getAge(dateOfBirth: Date) {
         const current = this.now()
 
-        if (!this.isValid(dateOfBirth) || dob > current) return null
+        if (dateOfBirth > current) return null
 
-        const base = current.getUTCFullYear() - dob.getUTCFullYear()
+        const base = current.getUTCFullYear() - dateOfBirth.getUTCFullYear()
         const lessOne =
-            current.getUTCMonth() < dob.getUTCMonth() ||
-            (current.getUTCMonth() == dob.getUTCMonth() &&
-                current.getUTCDate() < dob.getUTCDate())
+            current.getUTCMonth() < dateOfBirth.getUTCMonth() ||
+            (current.getUTCMonth() == dateOfBirth.getUTCMonth() &&
+                current.getUTCDate() < dateOfBirth.getUTCDate())
 
         return base + (lessOne ? -1 : 0)
     }

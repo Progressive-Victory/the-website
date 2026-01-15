@@ -51,7 +51,7 @@ export function useFetch() {
         method: string,
         url: string,
         body: object | null,
-        schema: z.ZodObject | null,
+        schema: z.ZodObject | z.ZodArray | null,
         query?: [string, string][],
         signal?: AbortSignal
     ) {
@@ -103,7 +103,7 @@ export function useFetch() {
 
     async function onGet<R>(
         url: string,
-        schema: z.ZodObject,
+        schema: z.ZodObject | z.ZodArray,
         query?: [string, string][],
         signal?: AbortSignal
     ) {
@@ -121,7 +121,7 @@ export function useFetch() {
     async function onPost<R = void>(
         url: string,
         body: object | null,
-        schema: z.ZodObject | null,
+        schema: z.ZodObject | z.ZodArray | null,
         signal?: AbortSignal
     ) {
         return await onFetch<R>('POST', url, body, schema, undefined, signal)
@@ -130,7 +130,7 @@ export function useFetch() {
     async function onPatch<R = void>(
         url: string,
         body: object | null,
-        schema: z.ZodObject | null,
+        schema: z.ZodObject | z.ZodArray | null,
         signal?: AbortSignal
     ) {
         return await onFetch<R>('PATCH', url, body, schema, undefined, signal)

@@ -1,9 +1,9 @@
 import { useFetch } from './useFetch'
-import { User, zUser } from '@/models/users'
+import { IUser, zUser } from '@/models'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 interface DataState {
-    data: User | undefined
+    data: IUser | undefined
     loading: boolean
     error: string | null
     reload: () => void
@@ -15,12 +15,12 @@ export function useCurrentUser(): DataState {
     const { isPending, data, error, refetch } = useQuery({
         queryKey: ['/users/current'],
         queryFn({ signal }) {
-            return onGet<User>('/users/current', zUser, undefined, signal)
+            return onGet<IUser>('/users/current', zUser, undefined, signal)
         },
         placeholderData: keepPreviousData,
     })
 
-    console.log(data, isPending, error)
+    //.log(data, isPending, error)
 
     return {
         data,
@@ -30,7 +30,7 @@ export function useCurrentUser(): DataState {
     }
 }
 
-export function hasPermission(user: User, permission: string): boolean {
+export function hasPermission(user: IUser, permission: string): boolean {
     return (
         user.roles?.some((r) =>
             r.permissions?.some((p) => p.name == permission)
