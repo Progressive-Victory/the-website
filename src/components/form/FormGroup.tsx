@@ -31,23 +31,27 @@ export function FormGroup({
 
     // This populates each field with parent form information such as edit mode, values,
     // and update handling, which would otherwise be identical across fields.
-    const hydratedFields = fields.map((field) => ({
-        ...field,
-        props: {
-            ...field.props,
-            dynamic: {
-                ...field.props.dynamic,
-                value:
-                    field.props.dynamic?.value ??
-                    (dynamic?.value as Record<string, unknown>)?.[
-                        field.props.field
-                    ],
-                disabled: field.props.dynamic?.disabled ?? dynamic?.disabled,
-                loading: field.props.dynamic?.loading ?? dynamic?.loading,
-                onUpdate: field.props.dynamic?.onUpdate ?? dynamic?.onUpdate,
+    const hydratedFields = fields.map((field) => {
+        return {
+            ...field,
+            props: {
+                ...field.props,
+                dynamic: {
+                    ...field.props.dynamic,
+                    value:
+                        field.props.dynamic?.value ??
+                        (dynamic?.value as Record<string, unknown>)?.[
+                            field.props.field
+                        ],
+                    disabled:
+                        field.props.dynamic?.disabled ?? dynamic?.disabled,
+                    loading: field.props.dynamic?.loading ?? dynamic?.loading,
+                    onUpdate:
+                        field.props.dynamic?.onUpdate ?? dynamic?.onUpdate,
+                },
             },
-        },
-    }))
+        }
+    })
 
     return (
         <CollapsableSection title={title} initialOpenState={!defaultCollapsed}>

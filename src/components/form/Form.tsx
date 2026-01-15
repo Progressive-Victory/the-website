@@ -1,15 +1,15 @@
 import { FormGroupProps } from '.'
-import { IMongoDocumentUpdate } from '@/models/MongoDocumentUpdate'
-import { IMongoUser } from '@/models/MongoUser'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { UpdateHistory, zUpdateHistory } from '@/models/models'
+import { zUser } from '@/models/users'
+import { useFetch } from '@/util/hooks'
+import { useMutation } from '@tanstack/react-query'
 import deepEqual from 'deep-equal'
-import { Document } from 'mongoose'
 import { useEffect, useState } from 'react'
 import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
+import z from 'zod'
 
-export interface FormProps<
-    T extends Document & { updateHistory?: IMongoDocumentUpdate[] },
-> {
+export interface FormProps<T> {
+    zodSchema: z.ZodObject
     initialValue: T
     setInitialValue: (value: T) => void
     currentValue: T
@@ -24,12 +24,49 @@ export interface FormProps<
         | React.ReactElement<FormGroupProps>[]
 }
 
-const getHistoryUpdatedAt = (update: Partial<IMongoDocumentUpdate>) =>
-    new Date(update.updated_at as unknown as string)
+function capitalizeFirst(str: string) {
+    return str[0].toUpperCase() + str.substring(1)
+}
 
-export function Form<
-    T extends Document & { updateHistory?: IMongoDocumentUpdate[] },
->({
+function flatten(obj: object): Record<string, unknown> {
+    console.log('flattening')
+    const res = Object.entries(obj).reduce(
+        (map, current) => {
+            const key = current[0]
+            let value = current[1]
+            //console.log(map, key, value, typeof value)
+            if (Array.isArray(value) && value.length > 0) value = value[0]
+            if (value && typeof value === 'object') {
+                const res = flatten(value)
+                const transformedVals = Object.entries(res).reduce(
+                    (mapTr, currentTr) => {
+                        //console.log(currentTr)
+                        const [keyTr, valueTr] = currentTr
+                        if (Object.keys(map).includes(keyTr)) {
+                            //console.log(key + capitalizeFirst(keyTr))
+                            mapTr[key + capitalizeFirst(keyTr)] = valueTr
+                        } else mapTr[keyTr] = valueTr
+                        return mapTr
+                    },
+                    {} as Record<string, unknown>
+                )
+                console.log('transformed vals', transformedVals)
+                return { ...map, ...transformedVals }
+            }
+            map[key] = value
+            return map
+        },
+        {} as Record<string, unknown>
+    )
+    console.log(res)
+    return res
+}
+
+/*const getHistoryUpdatedAt = (update: Partial<IMongoDocumentUpdate>) =>
+    new Date(update.updated_at as unknown as string)*/
+
+export function Form<T extends { id: number }>({
+    zodSchema,
     initialValue,
     setInitialValue,
     currentValue,
@@ -43,22 +80,21 @@ export function Form<
     const [patchMap, setPatchMap] = useState<Record<string, unknown>>({})
     const [invalidMap, setInvalidMap] = useState<Record<string, boolean>>({})
     const [editMode, setEditMode] = useState(false)
+    const { onGet, onPatch } = useFetch()
+
+    const [updateHistoryList, setUpdateHistoryList] =
+        useState<UpdateHistory<T>[]>()
 
     const invalid = Object.values(invalidMap).length > 0
     const equal = Object.values(patchMap).length == 0
 
     const mutation = useMutation<T, Error, unknown>({
-        mutationKey: [patchEndpoint, currentValue._id],
+        mutationKey: [patchEndpoint, currentValue.id],
         async mutationFn(payload) {
-            const res = await fetch(patchEndpoint, {
-                headers: {
-                    'content-type': 'application/json',
-                },
-                method: 'PATCH',
-                body: JSON.stringify(payload),
-            })
+            if (!payload) throw Error('no payload defined')
+            const res = await onPatch<T>(patchEndpoint, payload, zodSchema)
 
-            return (await res.json()) as T
+            return res
         },
         onSuccess(data) {
             setInitialValue({ ...data })
@@ -73,10 +109,20 @@ export function Form<
         },
     })
 
+    useEffect(() => {
+        onGet<UpdateHistory<T>[]>(
+            `/users/${initialValue.id}/update-history`,
+            z.array(zUpdateHistory(zUser))
+        )
+            .then((res) => setUpdateHistoryList(res))
+            .catch((err) => console.error(err))
+    }, [initialValue, onGet])
+
     const saveChanges = async () => {
+        //this is where history updates should log
         await mutation.mutateAsync({
             ...patchMap,
-            id: currentValue._id,
+            id: currentValue.id,
         })
         setEditMode(false)
     }
@@ -96,7 +142,7 @@ export function Form<
         patchValue: unknown,
         valid: boolean
     ) => {
-        const prev = (initialValue as Record<string, unknown>)[field]
+        const prev = flatten(initialValue)[field]
         const hasField = (map: unknown) =>
             Object.prototype.hasOwnProperty.call(map, field)
 
@@ -129,7 +175,7 @@ export function Form<
             ...group.props,
             dynamic: {
                 ...group.props.dynamic,
-                value: group.props.dynamic?.value ?? currentValue,
+                value: group.props.dynamic?.value ?? flatten(currentValue),
                 disabled: group.props.dynamic?.disabled ?? !editMode,
                 loading: group.props.dynamic?.loading ?? mutation.isPending,
                 onUpdate: group.props.dynamic?.onUpdate ?? handleUpdate,
@@ -179,25 +225,19 @@ export function Form<
             </header>
             {hydratedGroups}
             {updateHistory &&
-                initialValue.updateHistory &&
-                initialValue.updateHistory.length > 0 && (
+                updateHistoryList &&
+                updateHistoryList.length > 0 && (
                     <section>
                         <h2 className="my-4 text-xl font-semibold">
                             Update History
                         </h2>
                         <div className="grid grid-cols-3 gap-2 gap-x-4">
-                            {initialValue.updateHistory
-                                .sort(
-                                    (a, b) =>
-                                        getHistoryUpdatedAt(b).getTime() -
-                                        getHistoryUpdatedAt(a).getTime()
-                                )
-                                .map((update, updateIndex) => (
-                                    <UpdateHistoryEntry
-                                        key={updateIndex}
-                                        {...update}
-                                    />
-                                ))}
+                            {updateHistoryList.map((update, updateIndex) => (
+                                <UpdateHistoryEntry
+                                    key={updateIndex}
+                                    {...update}
+                                />
+                            ))}
                         </div>
                     </section>
                 )}
@@ -205,62 +245,31 @@ export function Form<
     )
 }
 
-function UpdateHistoryEntry(update: Partial<IMongoDocumentUpdate>) {
-    const { isPending, data } = useQuery<IMongoUser | null>({
-        queryKey: ['admin', 'users', update.updated_by],
-        async queryFn() {
-            if (!update.updated_by) return null
-
-            const res = await fetch(
-                `/api/admin/users/${update.updated_by as unknown as string}`
-            )
-
-            return (await res.json()) as IMongoUser
-        },
-    })
-
-    const format = (v: unknown) => {
-        if (Array.isArray(v))
-            return `[${v.map((e) => JSON.stringify(e)).join(', ')}]`
-        return JSON.stringify(v)
-    }
-
+function UpdateHistoryEntry<T extends { id: number }>(
+    update: UpdateHistory<T>
+) {
     return (
         <div className="contents">
-            <div className="pl-6 font-medium">
-                {getHistoryUpdatedAt(update).toLocaleString()}
+            <div>
+                <span>Update Type: {update.type}</span>
+                <span>Updated At: {update.whenUpdatedUtc.toDateString()}</span>
+                <span>Updater Id: {update.whoUpdatedId}</span>
             </div>
             <div>
-                <code className="font-mono">{update.field_name}</code>{' '}
-                <span className="text-gray-600">changed from</span>{' '}
-                <code className="wrap-break-word font-mono">
-                    {format(update.previous_value)}
-                </code>{' '}
-                <span className="text-gray-600">to</span>{' '}
-                <code className="wrap-break-word font-mono">
-                    {format(update.new_value)}
-                </code>{' '}
-            </div>
-            <div>
-                <span className="text-gray-600">by</span>{' '}
-                {isPending ? (
-                    <span className="text-gray-600">&lt;pending&gt;</span>
-                ) : (
-                    <>
-                        <code className="font-mono">
-                            {data?.name ?? 'deleted user'}
-                        </code>
-                        {data?._id && (
-                            <>
-                                (
-                                <code className="font-mono">
-                                    {(data?._id as string) ?? 'deleted user'}
-                                </code>
-                                )
-                            </>
-                        )}
-                    </>
-                )}
+                {Object.entries(update).map((value, index) => {
+                    const keys = Object.keys(update)
+                    if (
+                        !['type', 'whoUpdatedId', 'whoUpdatedUtc'].includes(
+                            keys[index]
+                        )
+                    ) {
+                        return (
+                            <span key={value.toString()}>
+                                {keys[index]}: {value.toString()}
+                            </span>
+                        )
+                    }
+                })}
             </div>
         </div>
     )

@@ -24,6 +24,7 @@ export interface IPaginatedListItem<T> {
 }
 
 export interface PaginatedListProps<T extends object> {
+    zodSchema: z.ZodObject
     eventTarget?: EventTarget
     endpoint: string
     filters: Filter[]
@@ -87,6 +88,7 @@ type PaginatedResponseType<T extends z.ZodType> = ReturnType<
 export type IPaginatedResponse<T> = z.infer<PaginatedResponseType<z.ZodType<T>>>
 
 export default function PaginatedList<T extends object>({
+    zodSchema,
     eventTarget,
     endpoint,
     filters,
@@ -137,10 +139,11 @@ export default function PaginatedList<T extends object>({
 
             const res = await onGet<IPaginatedResponse<T>>(
                 url.pathname,
-                zPaginatedResponse(z.unknown()),
+                zPaginatedResponse(zodSchema),
                 url.searchParams.entries().toArray(),
                 signal
             )
+
             return res
         },
         placeholderData: keepPreviousData,

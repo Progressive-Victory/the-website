@@ -1,4 +1,5 @@
-import { zLocation, zRole } from './models'
+import { zLocation } from './locations'
+import { zRole } from './roles'
 import z from 'zod'
 
 export enum OnboardingStage {
@@ -17,6 +18,14 @@ export enum UserStatus {
 
 export const zUserStatus = z.enum(UserStatus)
 
+export const zDiscordUser = z.object({
+    id: z.string(),
+    username: z.string(),
+    image: z.string(),
+})
+
+export type IDiscordUser = z.infer<typeof zDiscordUser>
+
 export const zUser = z.object({
     id: z.int(),
     email: z.string().nullable(),
@@ -30,7 +39,7 @@ export const zUser = z.object({
     acceptedAlerts: z.boolean(),
     verified: z.boolean(),
     onboardingStage: zOnboardingStage,
-    lastSmsCode: z.string().nullable(),
+    lastSmsCode: z.int().nullable(),
     lastSmsCodeSendTimeUtc: z.coerce.date().nullable(),
     status: zUserStatus,
 
@@ -38,9 +47,10 @@ export const zUser = z.object({
     completedIntakeUtc: z.coerce.date().nullable(),
     aliases: z.array(z.string()).optional(),
     roles: z.array(zRole).optional(),
+    discordUsers: z.array(zDiscordUser).optional(),
 })
 
-export type User = z.infer<typeof zUser>
+export type IUser = z.infer<typeof zUser>
 
 export interface UpdateUserRequest {
     name?: string

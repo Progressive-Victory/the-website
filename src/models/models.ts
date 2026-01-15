@@ -1,4 +1,6 @@
+import { zDiscordUser } from './users'
 import z from 'zod'
+import { $ZodShape } from 'zod/v4/core'
 
 export interface FetchRequest {
     method: string
@@ -40,6 +42,7 @@ export const zPaginatedResponse = (schema: z.ZodType) =>
         count: z.number(),
         data: z.array(schema),
     })
+
 export interface PaginatedResponse<T> {
     page: number
     limit: number
@@ -62,41 +65,21 @@ export const zDocumentUpdate = z.object({
     updatedAt: z.coerce.date(),
     updatedBy: z.string().nullable(),
 })
+
 export type DocumentUpdate = z.infer<typeof zDocumentUpdate>
 
-export const zLocation = z.object({
-    zip: z.int(),
-    city: z.string(),
-    county: z.string(),
-    state: z.string(),
-})
-
-export type Location = z.infer<typeof zLocation>
-
-export const zPermission = z.object({
-    id: z.number(),
-    name: z.string(),
-})
-export type Permission = z.infer<typeof zPermission>
-
-export const zRole = z.object({
-    id: z.number(),
-    name: z.string(),
-    permissions: z.array(zPermission).nullable(),
-})
-export type Role = z.infer<typeof zRole>
-
-export const zDiscordUser = z.object({
+/*export const zDiscordUser = z.object({
     id: z.string(),
     username: z.string(),
-    discriminator: z.string(),
-    globalName: z.string().nullable(),
-    avatar: z.string().nullable(),
-    bot: z.boolean(),
-    locale: z.string().nullable(),
-    verified: z.boolean(),
-})
-export type DiscordUser = z.infer<typeof zDiscordUser>
+    discriminator: z.string().optional(),
+    globalName: z.string().nullable().optional(),
+    image: z.string().nullable(),
+    bot: z.boolean().optional(),
+    locale: z.string().nullable().optional(),
+    verified: z.boolean().optional(),
+})*/
+
+//export type DiscordUser = z.infer<typeof zDiscordUser>
 
 export const zDiscordMember = z.object({
     user: zDiscordUser.nullable(),
@@ -110,6 +93,7 @@ export const zDiscordMember = z.object({
     pending: z.boolean(),
     timeoutUntil: z.coerce.date().nullable(),
 })
+
 export type DiscordMember = z.infer<typeof zDiscordMember>
 
 export const zMapMemberCountResponse = z.object({
@@ -117,3 +101,24 @@ export const zMapMemberCountResponse = z.object({
 })
 
 export type IMapMemberCountResponse = z.infer<typeof zMapMemberCountResponse>
+
+export enum UpdateHistoryType {
+    Inserted = 'I',
+    Updated = 'U',
+    Merged = 'M',
+    Deleted = 'D',
+}
+
+export const zUpdateHistoryType = z.enum(UpdateHistoryType)
+
+const zUpdateHistoryBase = z.object({
+    type: zUpdateHistoryType,
+    whoUpdatedId: z.int(),
+    whenUpdatedUtc: z.date(),
+})
+
+export const zUpdateHistory = <Shape extends $ZodShape>(
+    zData: z.ZodObject<Shape>
+) => zUpdateHistoryBase.extend(zData.shape)
+
+export type UpdateHistory<T> = z.infer<typeof zUpdateHistoryBase> & T
