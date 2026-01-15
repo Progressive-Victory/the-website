@@ -1,41 +1,14 @@
 'use client'
 
 import { NavItem } from './types'
-import { Link } from '@/components/common'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid'
+import { ModularButton } from '@/components/common/ButtonComponent'
+import styles from '@/components/layout/header.module.css'
 import { AnimatePresence, motion } from 'motion/react'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import NextLink from 'next/link'
-import { useState } from 'react'
-
-// Tailwind class combos
-const tw_hover = `transition duration-300 ease-in-out`
-const tw_icon = `w-8 h-8 text-white group-hover:text-valencia ${tw_hover}`
-const button_hover = `hover:bg-valencia ${tw_hover}`
-
-const navitems: NavItem[] = [
-    {
-        name: 'About',
-        href: '/about',
-    },
-    {
-        name: 'Volunteer',
-        href: '/volunteer',
-    },
-    {
-        name: 'Events',
-        href: '/events',
-    },
-    {
-        name: 'Merch',
-        href: 'https://progressivevictory.myshopify.com/',
-    },
-    {
-        name: 'Contact',
-        href: 'https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform',
-    },
-]
+import type React from 'react'
+import { useEffect, useState } from 'react'
 
 /**
  * A navigation header for the Progressive Victory website.
@@ -50,24 +23,148 @@ const navitems: NavItem[] = [
  * entire screen.
  *
  */
+
+const navitems: NavItem[] = [
+    {
+        name: 'About',
+        href: '/about',
+        children: [
+            { name: 'Mission', href: '/about' },
+            { name: 'Community', href: '/about' },
+            { name: 'Creators', href: '/about' },
+            { name: 'Staff', href: '/about' },
+            { name: 'Halls Of Victory', href: '/about' },
+        ],
+    },
+    {
+        name: 'Join',
+        href: '/volunteer',
+        children: [
+            { name: 'Initatives', href: '/volunteer' },
+            { name: 'State Organizing Program', href: '/volunteer' },
+            { name: 'Community', href: '/volunteer' },
+        ],
+    },
+    {
+        name: 'Events',
+        href: '/events',
+        children: [
+            { name: 'Calender', href: '/events' },
+            { name: 'Meet Ups', href: '/events' },
+            { name: 'Phonebanking/Canvassing', href: '/events' },
+            { name: 'Gaming', href: '/events' },
+        ],
+    },
+    {
+        name: 'Endorsements',
+        href: '/endorsements',
+        children: [
+            { name: '2022', href: '/about' },
+            { name: '2023', href: '/about' },
+            { name: '2024', href: '/about' },
+            { name: '2025', href: '/about' },
+            { name: '2026', href: '/about' },
+            { name: 'Halls Of Victory', href: '/about' },
+        ],
+    },
+    {
+        name: 'More...',
+        href: '/home',
+        children: [
+            {
+                name: 'Contact',
+                href: 'https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform',
+            },
+            {
+                name: 'Merch',
+                href: 'https://progressivevictory.myshopify.com/',
+            },
+            {
+                name: 'Join',
+                href: '/volunteer',
+            },
+        ],
+    },
+]
+
 export function Header() {
     const [isOpen, setIsOpen] = useState(false)
+
+    const [activeSubnav, setActiveSubnav] = useState<NavItem | null>(null)
     const { data: session } = useSession()
+    const avatarSrc = session?.user?.image ?? ''
+
+    useEffect(() => {
+        if (!isOpen) return
+
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setIsOpen(false)
+        }
+
+        document.addEventListener('keydown', onKeyDown)
+        const prevOverflow = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+
+        return () => {
+            document.removeEventListener('keydown', onKeyDown)
+            document.body.style.overflow = prevOverflow
+        }
+    }, [isOpen])
+
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setActiveSubnav(null)
+        }
+        document.addEventListener('keydown', onKeyDown)
+        return () => document.removeEventListener('keydown', onKeyDown)
+    }, [])
+
+    const openSubnav = (item: NavItem) => {
+        if (!item.children || item.children.length === 0) {
+            setActiveSubnav(null)
+            return
+        }
+
+        if (typeof window !== 'undefined' && window.innerWidth < 1280) return
+
+        setActiveSubnav(item)
+    }
+
+    const closeSubnav = () => setActiveSubnav(null)
 
     return (
         <>
-            <div className="sticky top-0 z-20 flex h-[100px] w-full flex-row items-center justify-between bg-black-pearl-dark px-6">
-                <div className="flex lg:hidden">
+            <header
+                className={styles.headerRoot}
+                style={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 60,
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '14px 18px',
+                    gap: '14px',
+                    backgroundColor: 'rgba(9, 34, 58, 0.98)',
+                    color: '#FFFFFF',
+                    borderBottom: '1px solid rgba(255,255,255,0.08)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                }}
+            >
+                <div className={styles.headerLogoSmall}>
                     <NextLink href="/">
                         <Image
                             src="/images/Logo_White.svg"
                             alt="progressive-victory-logo"
-                            width={70}
+                            width={62.25}
                             height={78}
                         />
                     </NextLink>
                 </div>
-                <div className="hidden lg:flex">
+
+                <div className={styles.headerLogoLarge}>
                     <NextLink href="/">
                         <Image
                             src="/images/LogoFull.webp"
@@ -77,98 +174,257 @@ export function Header() {
                         />
                     </NextLink>
                 </div>
-                <div className="hidden w-full justify-center gap-x-12 xl:flex">
-                    {navitems.map((item) => (
-                        <Link key={item.name} href={item.href}>
-                            {item.name}
-                        </Link>
-                    ))}
-                </div>
-                <div className="flex w-[300px] flex-row items-center justify-center gap-x-4">
-                    <Link
-                        href="https://secure.actblue.com/donate/pvwebsite"
-                        className="hidden bg-valencia xl:block"
-                    >
-                        Donate
-                    </Link>
+
+                <nav
+                    className={styles.headerCenterNav}
+                    aria-label="Primary navigation"
+                >
+                    {navitems.map((item) => {
+                        const hasChildren = !!item.children?.length
+                        const isActive = activeSubnav?.name === item.name
+                        const shouldDim = !!activeSubnav && !isActive
+
+                        const wrapperClassName = [
+                            styles.desktopNavItemWrapper,
+                            isActive ? styles.navItemActive : '',
+                            shouldDim ? styles.navItemDimmed : '',
+                        ]
+                            .filter(Boolean)
+                            .join(' ')
+
+                        return (
+                            <div
+                                key={item.name}
+                                className={wrapperClassName}
+                                onMouseEnter={() => openSubnav(item)}
+                                onFocus={() => openSubnav(item)}
+                            >
+                                <ModularButton
+                                    label={item.name}
+                                    buttonType="nav"
+                                    href={item.href}
+                                />
+
+                                {hasChildren ? (
+                                    <span className={styles.srOnly}>
+                                        {isActive
+                                            ? 'Submenu expanded'
+                                            : 'Has submenu'}
+                                    </span>
+                                ) : null}
+                            </div>
+                        )
+                    })}
+                </nav>
+
+                <div className={styles.headerRightActions}>
+                    <ModularButton label="Donate" buttonType="donate" />
+
                     {!session ? (
-                        <Link
+                        <ModularButton
+                            label="Log In"
+                            buttonType="login"
                             href="/login"
-                            className="hidden text-nowrap bg-steel-blue xl:block"
-                        >
-                            Log In
-                        </Link>
+                        />
                     ) : (
-                        <NextLink
+                        <ModularButton
+                            label="Account"
+                            buttonType="account"
                             href="/account"
-                            className={`hidden rounded-full bg-white p-1 hover:scale-105 xl:block ${button_hover}`}
-                        >
-                            <Image
-                                src={session.user!.image ?? ''}
-                                className="rounded-full"
-                                alt="User Image"
-                                width={44}
-                                height={44}
-                            />
-                        </NextLink>
+                            avatarSrc={avatarSrc}
+                            avatarAlt="User avatar"
+                        />
                     )}
                 </div>
 
-                <button
-                    className="group xl:hidden"
-                    onClick={() => setIsOpen(!isOpen)}
+                <motion.button
+                    type="button"
+                    className={styles.headerMenuButton}
+                    onClick={() => setIsOpen((prev) => !prev)}
+                    initial={false}
+                    animate={isOpen ? 'open' : 'closed'}
+                    whileHover="hover"
+                    whileTap="tap"
+                    variants={menuButtonVariants}
+                    transition={{ type: 'spring', stiffness: 520, damping: 32 }}
+                    aria-label={
+                        isOpen
+                            ? 'Close navigation menu'
+                            : 'Open navigation menu'
+                    }
+                    aria-expanded={isOpen}
+                    aria-controls="site-nav-drawer"
                 >
-                    {isOpen ? (
-                        <XMarkIcon className={tw_icon} />
-                    ) : (
-                        <Bars3Icon className={tw_icon} />
-                    )}
-                </button>
-            </div>
+                    <HamburgerIcon isOpen={isOpen} />
+                </motion.button>
+            </header>
+            <AnimatePresence>
+                {activeSubnav?.children?.length ? (
+                    <motion.div
+                        key="desktop-subnav"
+                        className={styles.desktopSubnavRoot}
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        onMouseLeave={closeSubnav}
+                    >
+                        <div className={styles.desktopSubnavInner}>
+                            {activeSubnav.children.map((child) => (
+                                <ModularButton
+                                    key={child.name}
+                                    label={child.name}
+                                    buttonType="nav"
+                                    href={child.href}
+                                />
+                            ))}
+                        </div>
+                    </motion.div>
+                ) : null}
+            </AnimatePresence>
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        key="nav-backdrop"
+                        aria-hidden="true"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        style={{
+                            position: 'fixed',
+                            inset: 0,
+                            zIndex: 30,
+                            backdropFilter: 'blur(10px)',
+                            WebkitBackdropFilter: 'blur(10px)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.18)',
+                        }}
+                        onClick={() => setIsOpen(false)}
+                    />
+                )}
+            </AnimatePresence>
 
             <NavDrawer isOpen={isOpen}>
                 {navitems
                     .map(({ href, name }) => (
-                        <Link href={href} key={name} className="w-full py-4">
-                            {name}
-                        </Link>
+                        <ModularButton
+                            key={name}
+                            label={name}
+                            buttonType="nav"
+                            href={href}
+                            buttonVariant="long"
+                        />
                     ))
                     .concat(
-                        <Link
-                            href="https://secure.actblue.com/donate/pvwebsite"
-                            className="w-full bg-valencia py-4 text-center"
-                        >
-                            Donate
-                        </Link>
+                        <ModularButton
+                            key="donate-mobile"
+                            label="Donate"
+                            buttonType="donate"
+                            buttonVariant="long"
+                        />
                     )
                     .concat(
                         !session ? (
-                            <Link
+                            <ModularButton
+                                label="Log In"
+                                buttonType="login"
+                                buttonVariant="long"
                                 href="/login"
-                                className="w-full bg-steel-blue py-4"
-                            >
-                                Log In
-                            </Link>
+                                key="login-mobile"
+                            />
                         ) : (
-                            <Link
+                            <ModularButton
+                                label="Account"
+                                buttonType="account"
+                                buttonVariant="long"
                                 href="/account"
-                                className="w-full bg-steel-blue"
-                            >
-                                <Image
-                                    src={session.user?.image ?? ''}
-                                    width={44}
-                                    height={44}
-                                    className="mr-4 rounded-full border-2 border-white"
-                                    alt="User Image"
-                                />
-                                Account
-                            </Link>
+                                avatarSrc={avatarSrc}
+                                avatarAlt="User avatar"
+                                key="account-mobile"
+                            />
                         )
                     )}
             </NavDrawer>
         </>
     )
 }
+
+const menuButtonVariants = {
+    closed: {
+        scale: 1,
+        color: '#FFFFFF',
+    },
+    open: {
+        scale: 1,
+        color: '#FFFFFF',
+    },
+    hover: {
+        scale: 1.07,
+        color: '#CE3728',
+    },
+    tap: {
+        scale: 0.94,
+    },
+} as const
+
+function HamburgerIcon({ isOpen }: { isOpen: boolean }) {
+    return (
+        <motion.span
+            className={styles.headerMenuIconWrapper}
+            aria-hidden="true"
+            initial={false}
+            animate={isOpen ? 'open' : 'closed'}
+            style={{
+                display: 'inline-flex',
+                width: '1.75rem',
+                height: '1.75rem',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+            }}
+        >
+            <motion.span
+                variants={hamburgerLineVariantsTop}
+                className={styles.headerMenuIcon}
+                style={hamburgerLineBaseStyle}
+            />
+            <motion.span
+                variants={hamburgerLineVariantsMiddle}
+                className={styles.headerMenuIcon}
+                style={hamburgerLineBaseStyle}
+            />
+            <motion.span
+                variants={hamburgerLineVariantsBottom}
+                className={styles.headerMenuIcon}
+                style={hamburgerLineBaseStyle}
+            />
+        </motion.span>
+    )
+}
+
+const hamburgerLineBaseStyle: React.CSSProperties = {
+    position: 'absolute',
+    width: '1.75rem',
+    height: '0.18rem',
+    borderRadius: '999px',
+    background: 'currentColor',
+    transformOrigin: 'center',
+}
+
+const hamburgerLineVariantsTop = {
+    closed: { y: -7, rotate: 0, opacity: 1 },
+    open: { y: 0, rotate: 45, opacity: 1 },
+} as const
+
+const hamburgerLineVariantsMiddle = {
+    closed: { y: 0, opacity: 1, scaleX: 1 },
+    open: { y: 0, opacity: 0, scaleX: 0.6 },
+} as const
+
+const hamburgerLineVariantsBottom = {
+    closed: { y: 7, rotate: 0, opacity: 1 },
+    open: { y: 0, rotate: -45, opacity: 1 },
+} as const
 
 const containerVariants = {
     hidden: {
@@ -192,41 +448,70 @@ const containerVariants = {
 }
 
 const itemVariants = {
-    hidden: { y: '-200%', opacity: 0 },
+    hidden: {
+        y: -14,
+        scale: 0.985,
+    },
     visible: {
         y: 0,
         opacity: 1,
+        scale: 1,
+        filter: 'blur(0px)',
         transition: {
             ease: 'easeInOut',
             type: 'spring',
             stiffness: 300,
-            damping: 20,
+            damping: 5,
+            mass: 0.55,
+        },
+    },
+    exit: {
+        y: -8,
+        opacity: 0,
+        scale: 0.99,
+        filter: 'blur(6px)',
+        transition: {
+            duration: 0.16,
+            ease: [0.4, 0, 0.2, 1],
         },
     },
 }
 
 function NavDrawer(props: { isOpen: boolean; children: React.ReactNode[] }) {
+    const { isOpen, children } = props
+    const shouldRender = isOpen
+
     return (
         <AnimatePresence>
-            {props.isOpen && (
-                <motion.div
+            {shouldRender && (
+                <motion.nav
                     key="nav-drawer"
+                    id="site-nav-drawer"
+                    aria-label="Mobile navigation"
                     initial="hidden"
                     animate="visible"
                     exit="hidden"
                     variants={containerVariants}
-                    className={`fixed inset-x-0 top-24 z-10 flex w-full flex-col gap-y-4 rounded-b-lg bg-black-pearl-dark px-10 pb-16 pt-4 drop-shadow-xl xl:hidden`}
+                    className={styles.navDrawer}
+                    style={{
+                        position: 'fixed',
+                        zIndex: 50,
+                        paddingTop: '32px',
+                        backgroundColor: 'rgba(9, 34, 58, 0.88)',
+                        borderBottom: '1px solid rgba(255,255,255,0.10)',
+                    }}
                 >
-                    {props.children.map((child, i) => (
+                    {children.map((child, i) => (
                         <motion.div
                             key={i}
-                            className="w-full"
                             variants={itemVariants}
+                            animate="visible"
+                            exit="exit"
                         >
                             {child}
                         </motion.div>
                     ))}
-                </motion.div>
+                </motion.nav>
             )}
         </AnimatePresence>
     )
