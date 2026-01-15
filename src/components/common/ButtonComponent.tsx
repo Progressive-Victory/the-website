@@ -4,9 +4,21 @@ import styles from '@/components/common/button.module.css'
 import Image from 'next/image'
 import type React from 'react'
 
-type ButtonStyleKey = 'primary' | 'secondary' | 'plain' | 'prominent'
+type ButtonStyleKey =
+    | 'primary'
+    | 'secondary'
+    | 'plain'
+    | 'prominent'
+    | 'minimal'
 type ButtonFunctionKey = 'alert' | 'link'
-type ButtonType = 'custom' | 'alert' | 'nav' | 'login' | 'donate' | 'account'
+type ButtonType =
+    | 'custom'
+    | 'alert'
+    | 'nav'
+    | 'subnav'
+    | 'login'
+    | 'donate'
+    | 'account'
 type ButtonVariant = 'default' | 'long'
 
 const buttonTypeConfig: Record<
@@ -35,6 +47,10 @@ const buttonTypeConfig: Record<
         style: 'plain',
         func: 'link',
     },
+    subnav: {
+        style: 'minimal',
+        func: 'link',
+    },
     login: {
         style: 'primary',
         func: 'link',
@@ -61,6 +77,8 @@ interface CommonButtonProps {
 
     avatarSrc?: string
     avatarAlt?: string
+
+    showChevron?: boolean
 }
 
 type AlertButtonProps = CommonButtonProps & {
@@ -70,6 +88,11 @@ type AlertButtonProps = CommonButtonProps & {
 
 type NavButtonProps = CommonButtonProps & {
     buttonType: 'nav'
+    href: string
+}
+
+type SubNavButtonProps = CommonButtonProps & {
+    buttonType: 'subnav'
     href: string
 }
 
@@ -94,6 +117,7 @@ type CustomButtonProps = CommonButtonProps & {
 export type ModularButtonProps =
     | AlertButtonProps
     | NavButtonProps
+    | SubNavButtonProps
     | LoginButtonProps
     | DonateButtonProps
     | AccountButtonProps
@@ -131,7 +155,10 @@ export function ModularButton(props: ModularButtonProps) {
         `You clicked "${label}"`
 
     const isAccount = buttonType === 'account'
+    const isNav = buttonType === 'nav'
     const isLongVariant = buttonVariant === 'long'
+    const showNavChevron =
+        isNav && (isLongVariant || props.showChevron === true)
     const isAccountCompact = isAccount && !isLongVariant
     const hasAvatar = typeof avatarSrc === 'string' && avatarSrc.length > 0
 
@@ -143,7 +170,15 @@ export function ModularButton(props: ModularButtonProps) {
         ? styles.longVariant
         : styles.defaultVariant
 
-    const className = [styles.buttonBase, styleClass, variantClass]
+    const navClass = showNavChevron ? styles.navButton : ''
+    const longNavClass = showNavChevron ? styles.longNavButton : ''
+    const className = [
+        styles.buttonBase,
+        styleClass,
+        variantClass,
+        navClass,
+        longNavClass,
+    ]
         .filter(Boolean)
         .join(' ')
 
@@ -158,34 +193,42 @@ export function ModularButton(props: ModularButtonProps) {
         }
     }
 
-    return (
-        <button type="button" onClick={handleClick} className={className}>
-            {isAccount && hasAvatar ? (
-                isLongVariant ? (
-                    <span className={styles.accountContent}>
-                        <Image
-                            src={avatarSrc}
-                            alt={avatarAlt ?? 'Account avatar'}
-                            width={40}
-                            height={40}
-                            className={styles.accountAvatar}
-                            style={{ objectFit: 'cover' }}
-                        />
-                        <span>{label}</span>
-                    </span>
-                ) : (
+    const content =
+        isAccount && hasAvatar ? (
+            isLongVariant ? (
+                <span className={styles.accountContent}>
                     <Image
                         src={avatarSrc}
                         alt={avatarAlt ?? 'Account avatar'}
-                        width={52}
-                        height={52}
-                        className={styles.accountAvatarSolo}
+                        width={40}
+                        height={40}
+                        className={styles.accountAvatar}
                         style={{ objectFit: 'cover' }}
                     />
-                )
+                    <span>{label}</span>
+                </span>
             ) : (
-                label
-            )}
+                <Image
+                    src={avatarSrc}
+                    alt={avatarAlt ?? 'Account avatar'}
+                    width={52}
+                    height={52}
+                    className={styles.accountAvatarSolo}
+                    style={{ objectFit: 'cover' }}
+                />
+            )
+        ) : (
+            <span className={styles.buttonContent}>
+                <span className={styles.buttonLabel}>{label}</span>
+                {showNavChevron ? (
+                    <span className={styles.navAffordance} aria-hidden="true" />
+                ) : null}
+            </span>
+        )
+
+    return (
+        <button type="button" onClick={handleClick} className={className}>
+            {content}
         </button>
     )
 }

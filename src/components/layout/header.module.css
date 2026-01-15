@@ -248,3 +248,38 @@
     opacity: 1;
     transform: translateY(-2px);
 }
+
+.desktopSubnavGrid {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    display: grid;
+    gap: 18px;
+
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    align-items: start;
+}
+
+.subnavColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.subnavColumnTitle {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.92);
+    padding: 0 10px;
+}
+
+.subnavColumnItems {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.subnavColumnItems :global(button) {
+    justify-content: flex-start;
+    width: 100%;
+}

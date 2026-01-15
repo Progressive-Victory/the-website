@@ -28,69 +28,115 @@ const navitems: NavItem[] = [
     {
         name: 'About',
         href: '/about',
-        children: [
-            { name: 'Mission', href: '/about' },
-            { name: 'Community', href: '/about' },
-            { name: 'Creators', href: '/about' },
-            { name: 'Staff', href: '/about' },
-            { name: 'Halls Of Victory', href: '/about' },
-        ],
+        subnav: {
+            columns: [
+                {
+                    title: 'Learn',
+                    items: [
+                        { name: 'Mission', href: '/about' },
+                        { name: 'Community', href: '/about' },
+                        { name: 'Creators', href: '/about' },
+                    ],
+                },
+                {
+                    title: 'Organization',
+                    items: [
+                        { name: 'Staff', href: '/about' },
+                        { name: 'Halls Of Victory', href: '/about' },
+                    ],
+                },
+            ],
+        },
     },
     {
         name: 'Join',
         href: '/volunteer',
-        children: [
-            { name: 'Initatives', href: '/volunteer' },
-            { name: 'State Organizing Program', href: '/volunteer' },
-            { name: 'Community', href: '/volunteer' },
-        ],
+        subnav: {
+            columns: [
+                {
+                    title: 'Get involved',
+                    items: [
+                        { name: 'Initiatives', href: '/volunteer' },
+                        {
+                            name: 'State Organizing Program',
+                            href: '/volunteer',
+                        },
+                        { name: 'Community', href: '/volunteer' },
+                    ],
+                },
+            ],
+        },
     },
     {
         name: 'Events',
         href: '/events',
-        children: [
-            { name: 'Calender', href: '/events' },
-            { name: 'Meet Ups', href: '/events' },
-            { name: 'Phonebanking/Canvassing', href: '/events' },
-            { name: 'Gaming', href: '/events' },
-        ],
+        subnav: {
+            columns: [
+                {
+                    title: 'Browse',
+                    items: [
+                        { name: 'Calendar', href: '/events' },
+                        { name: 'Meet Ups', href: '/events' },
+                        { name: 'Phonebanking/Canvassing', href: '/events' },
+                        { name: 'Gaming', href: '/events' },
+                    ],
+                },
+            ],
+        },
     },
     {
         name: 'Endorsements',
         href: '/endorsements',
-        children: [
-            { name: '2022', href: '/about' },
-            { name: '2023', href: '/about' },
-            { name: '2024', href: '/about' },
-            { name: '2025', href: '/about' },
-            { name: '2026', href: '/about' },
-            { name: 'Halls Of Victory', href: '/about' },
-        ],
+        subnav: {
+            columns: [
+                {
+                    title: 'By year',
+                    items: [
+                        { name: '2022', href: '/endorsements?year=2022' },
+                        { name: '2023', href: '/endorsements?year=2023' },
+                        { name: '2024', href: '/endorsements?year=2024' },
+                        { name: '2025', href: '/endorsements?year=2025' },
+                        { name: '2026', href: '/endorsements?year=2026' },
+                    ],
+                },
+                {
+                    title: 'Highlights',
+                    items: [{ name: 'Hall of Victory', href: '/endorsements' }],
+                },
+            ],
+        },
     },
     {
-        name: 'More...',
+        name: 'More',
         href: '/home',
-        children: [
-            {
-                name: 'Contact',
-                href: 'https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform',
-            },
-            {
-                name: 'Merch',
-                href: 'https://progressivevictory.myshopify.com/',
-            },
-            {
-                name: 'Join',
-                href: '/volunteer',
-            },
-        ],
+        subnav: {
+            columns: [
+                {
+                    title: 'Links',
+                    items: [
+                        {
+                            name: 'Contact',
+                            href: 'https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform',
+                        },
+                        {
+                            name: 'Merch',
+                            href: 'https://progressivevictory.myshopify.com/',
+                        },
+                    ],
+                },
+                {
+                    title: 'Join',
+                    items: [{ name: 'Volunteer', href: '/volunteer' }],
+                },
+            ],
+        },
     },
 ]
 
 export function Header() {
     const [isOpen, setIsOpen] = useState(false)
-
     const [activeSubnav, setActiveSubnav] = useState<NavItem | null>(null)
+
     const { data: session } = useSession()
     const avatarSrc = session?.user?.image ?? ''
 
@@ -119,8 +165,35 @@ export function Header() {
         return () => document.removeEventListener('keydown', onKeyDown)
     }, [])
 
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const desktopMQ = window.matchMedia('(min-width: 1280px)')
+
+        const syncToBreakpoint = () => {
+            if (desktopMQ.matches) {
+                setIsOpen(false)
+            } else {
+                setActiveSubnav(null)
+            }
+        }
+
+        syncToBreakpoint()
+
+        const onChange = () => syncToBreakpoint()
+
+        if (typeof desktopMQ.addEventListener === 'function') {
+            desktopMQ.addEventListener('change', onChange)
+            return () => desktopMQ.removeEventListener('change', onChange)
+        } else {
+            desktopMQ.addListener(onChange)
+            return () => desktopMQ.removeListener(onChange)
+        }
+    }, [])
+
     const openSubnav = (item: NavItem) => {
-        if (!item.children || item.children.length === 0) {
+        const hasColumns = !!item.subnav?.columns?.length
+        if (!hasColumns) {
             setActiveSubnav(null)
             return
         }
@@ -180,7 +253,7 @@ export function Header() {
                     aria-label="Primary navigation"
                 >
                     {navitems.map((item) => {
-                        const hasChildren = !!item.children?.length
+                        const hasChildren = !!item.subnav?.columns?.length
                         const isActive = activeSubnav?.name === item.name
                         const shouldDim = !!activeSubnav && !isActive
 
@@ -203,6 +276,7 @@ export function Header() {
                                     label={item.name}
                                     buttonType="nav"
                                     href={item.href}
+                                    showChevron={item.name === 'More'}
                                 />
 
                                 {hasChildren ? (
@@ -258,8 +332,9 @@ export function Header() {
                     <HamburgerIcon isOpen={isOpen} />
                 </motion.button>
             </header>
+
             <AnimatePresence>
-                {activeSubnav?.children?.length ? (
+                {activeSubnav?.subnav?.columns?.length ? (
                     <motion.div
                         key="desktop-subnav"
                         className={styles.desktopSubnavRoot}
@@ -269,19 +344,34 @@ export function Header() {
                         transition={{ duration: 0.16, ease: 'easeOut' }}
                         onMouseLeave={closeSubnav}
                     >
-                        <div className={styles.desktopSubnavInner}>
-                            {activeSubnav.children.map((child) => (
-                                <ModularButton
-                                    key={child.name}
-                                    label={child.name}
-                                    buttonType="nav"
-                                    href={child.href}
-                                />
+                        <div className={styles.desktopSubnavGrid}>
+                            {activeSubnav.subnav.columns.map((col) => (
+                                <div
+                                    key={col.title}
+                                    className={styles.subnavColumn}
+                                >
+                                    <div className={styles.subnavColumnTitle}>
+                                        {col.title}
+                                    </div>
+
+                                    <div className={styles.subnavColumnItems}>
+                                        {col.items.map((child) => (
+                                            <ModularButton
+                                                key={child.name}
+                                                label={child.name}
+                                                buttonType="subnav"
+                                                href={child.href}
+                                                buttonVariant="default"
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     </motion.div>
                 ) : null}
             </AnimatePresence>
+
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
