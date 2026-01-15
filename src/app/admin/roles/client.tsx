@@ -2,28 +2,44 @@
 
 import PaginatedList from '@/components/admin/PaginatedList'
 import { Form, FormGroup, SelectManyField, TextField } from '@/components/form'
-import { IMongoPermission } from '@/models/MongoPermission'
-import { IMongoRole } from '@/models/MongoRole'
+import { IPermission, IRole, zPermission, zRole } from '@/models'
+import { useFetch } from '@/util/hooks'
 import deepEqual from 'deep-equal'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import z from 'zod'
 
-export interface PageProps {
-    permissions: IMongoPermission[]
-}
-
-export default function ClientPage({ permissions }: PageProps) {
+export default function ClientPage() {
     const eventTarget = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
     // discard changes without saving
-    const [originalRole, setOriginalRole] = useState<IMongoRole | null>(null)
+    const [originalRole, setOriginalRole] = useState<IRole | null>(null)
     // This is the mutable copy we actually update when the user interacts with
     // the form
-    const [selectedRole, setSelectedRole] = useState<IMongoRole | null>(null)
-    const [roles, setRoles] = useState<IMongoRole[]>([])
+    const [selectedRole, setSelectedRole] = useState<IRole | null>(null)
+    const [roles, setRoles] = useState<IRole[]>([])
+    const [permissions, setPermissions] = useState<IPermission[]>([])
+    const { onGet } = useFetch()
 
-    const handleSelectItem = (value: IMongoRole) => {
-        if (value._id === selectedRole?._id) return
+    useEffect(() => {
+        const fetchPermList = async (): Promise<IPermission[]> => {
+            return onGet<IPermission[]>(
+                '/permissions/all',
+                z.array(zPermission)
+            )
+        }
+
+        fetchPermList()
+            .then((res) => {
+                setPermissions(res)
+            })
+            .catch((err) => {
+                console.error(err)
+            })
+    }, [])
+
+    const handleSelectItem = (value: IRole) => {
+        if (value.id === selectedRole?.id) return
 
         if (!deepEqual(selectedRole, originalRole)) {
             const proceed = confirm(
@@ -34,20 +50,21 @@ export default function ClientPage({ permissions }: PageProps) {
 
         // We need to copy to make sure that the value in the list is not
         // modified until we save
-        setSelectedRole({ ...value } as IMongoRole)
-        setOriginalRole({ ...value } as IMongoRole)
+        setSelectedRole({ ...value } as IRole)
+        setOriginalRole({ ...value } as IRole)
     }
 
-    const makeItem = (role: IMongoRole) => ({
-        id: role._id as string,
+    const makeItem = (role: IRole) => ({
+        id: role.id.toString(),
         value: role,
     })
 
     return (
         <>
-            <PaginatedList<IMongoRole>
+            <PaginatedList<IRole>
+                zodSchema={zRole}
                 eventTarget={eventTarget.current}
-                endpoint="/api/admin/roles"
+                endpoint="/roles"
                 filters={[
                     {
                         name: 'Permission',
@@ -74,13 +91,14 @@ export default function ClientPage({ permissions }: PageProps) {
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {selectedRole && originalRole ? (
-                    <Form<IMongoRole>
+                    <Form<IRole>
+                        zodSchema={zRole}
                         initialValue={originalRole}
                         setInitialValue={setOriginalRole}
                         currentValue={selectedRole}
                         setCurrentValue={setSelectedRole}
                         computeTitle={(role) => role.name ?? ''}
-                        patchEndpoint="/api/admin/roles"
+                        patchEndpoint={`/roles/${selectedRole.id}`}
                         onChangesSaved={() => {
                             eventTarget.current.dispatchEvent(
                                 new Event('refetch')
@@ -93,7 +111,7 @@ export default function ClientPage({ permissions }: PageProps) {
                                 name="Permissions"
                                 field="permissions"
                                 nameKey="name"
-                                valueKey="_id"
+                                valueKey="id"
                                 options={permissions}
                             />
                         </FormGroup>
