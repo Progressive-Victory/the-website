@@ -2,7 +2,7 @@
 
 import PaginatedList from '@/components/admin/PaginatedList'
 import { Form, FormGroup, TextField } from '@/components/form'
-import { IMongoPermission } from '@/models/MongoPermission'
+import { IPermission, zPermission } from '@/models'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
 
@@ -12,15 +12,15 @@ export default function Page() {
     // We save the original value we got from the API so that we can easily
     // discard changes without saving
     const [originalPermission, setOriginalPermission] =
-        useState<IMongoPermission | null>(null)
+        useState<IPermission | null>(null)
     // This is the mutable copy we actually update when the user interacts with
     // the form
     const [selectedPermission, setSelectedPermission] =
-        useState<IMongoPermission | null>(null)
-    const [permissions, setPermissions] = useState<IMongoPermission[]>([])
+        useState<IPermission | null>(null)
+    const [permissions, setPermissions] = useState<IPermission[]>([])
 
-    const handleSelectItem = (value: IMongoPermission) => {
-        if (value._id === selectedPermission?._id) return
+    const handleSelectItem = (value: IPermission) => {
+        if (value.id === selectedPermission?.id) return
 
         if (!deepEqual(selectedPermission, originalPermission)) {
             const proceed = confirm(
@@ -31,20 +31,21 @@ export default function Page() {
 
         // We need to copy to make sure that the value in the list is not
         // modified until we save
-        setSelectedPermission({ ...value } as IMongoPermission)
-        setOriginalPermission({ ...value } as IMongoPermission)
+        setSelectedPermission({ ...value } as IPermission)
+        setOriginalPermission({ ...value } as IPermission)
     }
 
-    const makeItem = (permission: IMongoPermission) => ({
-        id: permission._id as string,
+    const makeItem = (permission: IPermission) => ({
+        id: permission.id.toString(),
         value: permission,
     })
 
     return (
         <>
-            <PaginatedList<IMongoPermission>
+            <PaginatedList<IPermission>
+                zodSchema={zPermission}
                 eventTarget={eventTarget.current}
-                endpoint="/api/admin/permissions"
+                endpoint="/permissions"
                 filters={[]}
                 searchFields={[
                     {
@@ -64,13 +65,14 @@ export default function Page() {
             />
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {selectedPermission && originalPermission ? (
-                    <Form<IMongoPermission>
+                    <Form<IPermission>
+                        zodSchema={zPermission}
                         initialValue={originalPermission}
                         setInitialValue={setOriginalPermission}
                         currentValue={selectedPermission}
                         setCurrentValue={setSelectedPermission}
                         computeTitle={(permission) => permission.name ?? ''}
-                        patchEndpoint="/api/admin/permissions"
+                        patchEndpoint={`/permissions/${selectedPermission.id}`}
                         onChangesSaved={() => {
                             eventTarget.current.dispatchEvent(
                                 new Event('refetch')
