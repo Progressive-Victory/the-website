@@ -18,15 +18,13 @@ import {
 } from '@/models'
 import { useCurrentUser, useFetch } from '@/util/hooks'
 import { OnboardingStage } from '@/util/stage'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
 export default function VolunteerPage() {
     const session = useSession()
-    const { onGet, onPut } = useFetch()
-
-    const queryClient = useQueryClient()
+    const { onGet, onPost, onPut } = useFetch()
 
     const [currentStage, setCurrentStage] = useState(
         OnboardingStage.NOT_STARTED
@@ -53,7 +51,7 @@ export default function VolunteerPage() {
                 `/users/${user.data?.id}/onboardingStages/collectInfo`,
                 obj
             )
-            user.reload()
+            await user.onRefetch()
         },
     })
 
@@ -61,7 +59,19 @@ export default function VolunteerPage() {
         mutationFn: async () => {
             if (!user.data) return
             await onPut(`/users/${user.data?.id}/onboardingStages/ageUp`, null)
-            user.reload()
+            await user.onRefetch()
+        },
+    })
+
+    const sendSmsCodeMutation = useMutation({
+        mutationFn: async () => {
+            if (!user.data) return
+            await onPost(
+                `/users/${user.data?.id}/onboardingStages/sendVerificationCode`,
+                null,
+                null
+            )
+            await user.onRefetch()
         },
     })
 
@@ -69,7 +79,7 @@ export default function VolunteerPage() {
         mutationFn: async (obj: UserOnboardingVerifyRequest) => {
             if (!user.data) return
             await onPut(`/users/${user.data?.id}/onboardingStages/verify`, obj)
-            user.reload()
+            await Promise.all([user.onRefetch(), isInServerResult.refetch()])
         },
     })
 
@@ -77,7 +87,7 @@ export default function VolunteerPage() {
         mutationFn: async (obj: UserOnboardingJoinRequest) => {
             if (!user.data) return
             await onPut(`/users/${user.data?.id}/onboardingStages/join`, obj)
-            user.reload()
+            await user.onRefetch()
         },
     })
 
@@ -92,12 +102,8 @@ export default function VolunteerPage() {
         })
     }
 
-    const handleAgeUp = () => {
-        ageUpMutation.mutate()
-    }
-
-    const handlePhoneVerifySuccess = () => {
-        verifyMutation.mutate({ code: 0 })
+    const handleVerifySmsCode = (code: number) => {
+        verifyMutation.mutate({ code })
     }
 
     const handleJoin = () => {
@@ -128,6 +134,8 @@ export default function VolunteerPage() {
     }, [user.data?.onboardingStage])
 
     if (!user.data) return <MainLayout />
+    if (currentStage == OnboardingStage.JOINED && !isInServerResult.isLoading)
+        return <MainLayout />
 
     return (
         <MainLayout>
@@ -166,33 +174,34 @@ export default function VolunteerPage() {
                                     privacyPolicy: false,
                                 }}
                                 isPending={collectInfoMutation.isPending}
-                                onSuccess={handleCollectInfoSuccess}
+                                onSubmit={handleCollectInfoSuccess}
                             />
                         )}
 
                         {currentStage === OnboardingStage.UNDERAGE && (
                             <UnderageStage
                                 isPending={ageUpMutation.isPending}
-                                onAgeUp={handleAgeUp}
+                                onAgeUp={ageUpMutation.mutate}
                             />
                         )}
 
                         {currentStage === OnboardingStage.AWAITING_VERIFY && (
                             <PhoneVerifyStage
-                                queryClient={queryClient}
-                                phoneNumber={user.data?.phone ?? ''}
-                                lastSmsCodeSentAt={
+                                lastSmsCodeSendTimeUtc={
                                     user.data?.lastSmsCodeSendTimeUtc
                                 }
-                                isPending={verifyMutation.isPending}
-                                goBack={handleReturnToStart}
-                                onSuccess={handlePhoneVerifySuccess}
+                                requestIsPending={sendSmsCodeMutation.isPending}
+                                requestError={sendSmsCodeMutation.error}
+                                verifyIsPending={verifyMutation.isPending}
+                                verifyError={verifyMutation.error}
+                                onReturn={handleReturnToStart}
+                                onRequest={sendSmsCodeMutation.mutate}
+                                onVerify={handleVerifySmsCode}
+                                onCancelVerify={verifyMutation.reset}
                             />
                         )}
 
-                        {(currentStage === OnboardingStage.VERIFIED ||
-                            (currentStage === OnboardingStage.JOINED &&
-                                isInServerResult.isLoading)) && (
+                        {currentStage === OnboardingStage.VERIFIED && (
                             <JoiningStage
                                 isPending={
                                     joinMutation.isPending ||
@@ -203,16 +212,13 @@ export default function VolunteerPage() {
                             />
                         )}
 
-                        {currentStage === OnboardingStage.JOINED &&
-                            isInServerResult.data && (
-                                <CompleteStage
-                                    isInServer={
-                                        isInServerResult.data?.isInServer
-                                    }
-                                    isPending={joinMutation.isPending}
-                                    onRejoin={handleJoin}
-                                />
-                            )}
+                        {currentStage === OnboardingStage.JOINED && (
+                            <CompleteStage
+                                isInServer={isInServerResult.data!.isInServer}
+                                isPending={joinMutation.isPending}
+                                onRejoin={handleJoin}
+                            />
+                        )}
                     </form>
                 </div>
             </div>

@@ -1,101 +1,62 @@
 import { Field, SupportNote } from '.'
 import { useInit } from '@/util/hooks'
-import { QueryClient, useMutation } from '@tanstack/react-query'
 import classNames from 'classnames'
-import { useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
 export interface PhoneVerifyProps {
-    queryClient: QueryClient
-    phoneNumber: string
-    lastSmsCodeSentAt: Date | null
-    isPending: boolean
-    goBack: () => void
-    onSuccess: () => void
+    lastSmsCodeSendTimeUtc: Date | null
+    requestIsPending: boolean
+    requestError: Error | null
+    verifyIsPending: boolean
+    verifyError: Error | null
+    onReturn: () => void
+    onRequest: () => void
+    onVerify: (code: number) => void
+    onCancelVerify: () => void
 }
 
 export function PhoneVerifyStage({
-    queryClient,
-    phoneNumber,
-    lastSmsCodeSentAt,
-    isPending,
-    goBack,
-    onSuccess,
+    lastSmsCodeSendTimeUtc,
+    requestIsPending,
+    requestError,
+    verifyIsPending,
+    verifyError,
+    onReturn,
+    onRequest,
+    onVerify,
+    onCancelVerify,
 }: PhoneVerifyProps) {
     const [securityCode, setSecurityCode] = useState('')
-    const [codeSentAt, setCodeSentAt] = useState(lastSmsCodeSentAt)
-    const [codeTimer, setCodeTimer] = useState(
-        codeSentAt ? calculateSecondsRemaining(codeSentAt) : 0
-    )
 
-    const requestCodeMutation = useMutation({
-        mutationFn: async (phone: string) => {
-            if (codeTimer > 0) return
+    function calculateSecondsRemaining(sentAt: Date | null) {
+        if (!sentAt) return 0
 
-            const resp = await fetch('/api/onboarding/sms/send', {
-                method: 'POST',
-                body: JSON.stringify({ number: phone }),
-            })
-
-            if (resp.ok) {
-                await queryClient.invalidateQueries({ queryKey: ['user'] })
-                return
-            }
-
-            if (resp.status === 429) {
-                alert('Too many requests received. Please try again later.')
-            } else {
-                alert('Failed to send code! Please try again later.')
-            }
-            throw new Error()
-        },
-    })
-
-    const checkCodeMutation = useMutation({
-        mutationFn: async (code: string) => {
-            const resp = await fetch('/api/onboarding/sms/check', {
-                method: 'POST',
-                body: JSON.stringify({
-                    code,
-                }),
-            })
-
-            if (resp.status === 200) {
-                onSuccess()
-            } else {
-                throw new Error()
-            }
-        },
-    })
-
-    function calculateSecondsRemaining(sentAt: Date) {
         const elapsed = Date.now() - sentAt.getTime()
         const remaining = 1000 * 60 - elapsed
         return Math.floor(remaining / 1000)
     }
 
-    useEffect(() => {
-        if (requestCodeMutation.isSuccess) {
-            setCodeSentAt(new Date())
+    const codeTimer = calculateSecondsRemaining(lastSmsCodeSendTimeUtc)
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        if (!value || !isNaN(+value)) {
+            setSecurityCode(value)
+            onCancelVerify()
         }
-    }, [requestCodeMutation.isSuccess])
+    }
+
+    const handleVerify = () => {
+        if (securityCode.length === 6) onVerify(+securityCode)
+    }
 
     useEffect(() => {
-        if (!codeSentAt) return
-
-        const interval = setInterval(() => {
-            setCodeTimer(calculateSecondsRemaining(codeSentAt))
-        }, 100)
-
-        return () => {
-            clearInterval(interval)
-        }
-    }, [codeSentAt])
+        if (requestError) alert(requestError)
+    }, [requestError])
 
     useInit(() => {
-        setTimeout(() => {
-            requestCodeMutation.mutate(phoneNumber)
-        }, 200)
+        onRequest()
     })
 
     return (
@@ -112,45 +73,24 @@ export function PhoneVerifyStage({
                     <Field
                         value={securityCode}
                         placeholder="Security Code"
-                        error={checkCodeMutation.isError}
-                        // Let users input with enter key
-                        onEnter={() => {
-                            if (securityCode.length === 6) {
-                                checkCodeMutation.mutate(securityCode)
-                            }
-                        }}
-                        errorText="Invalid or expired code, try a new one"
+                        error={verifyError != null}
+                        errorText={verifyError?.message}
                         maxLength={6}
-                        onChange={(e) => {
-                            const re = /^[0-9\b]+$/
-                            if (
-                                e.target.value === '' ||
-                                re.test(e.target.value)
-                            ) {
-                                setSecurityCode(e.target.value)
-                            }
-
-                            checkCodeMutation.reset()
-                        }}
+                        onChange={handleChange}
                         disabled={false}
                     >
                         <button
                             type="button"
-                            disabled={
-                                codeTimer > 0 || requestCodeMutation.isPending
-                            }
+                            disabled={codeTimer > 0 || requestIsPending}
                             className={classNames(
                                 `flex w-fit items-center whitespace-nowrap rounded-lg bg-steel-blue px-4 py-3 text-center text-sm text-white transition-all duration-100 disabled:cursor-not-allowed [&:not(:disabled)]:hover:scale-[103%]`,
-                                requestCodeMutation.isPending
+                                requestIsPending
                                     ? ''
                                     : 'hover:bg-valencia disabled:bg-gray-500'
                             )}
-                            onClick={() => {
-                                // Get a new OTP
-                                requestCodeMutation.mutate(phoneNumber)
-                            }}
+                            onClick={onRequest}
                         >
-                            {requestCodeMutation.isPending ? (
+                            {requestIsPending ? (
                                 <PulseLoader color="#ffffff" size={8} />
                             ) : (
                                 <span>
@@ -171,16 +111,8 @@ export function PhoneVerifyStage({
 
                 <button
                     type="submit"
-                    onClick={() => {
-                        if (securityCode.length === 6) {
-                            checkCodeMutation.mutate(securityCode)
-                        }
-                    }}
-                    disabled={
-                        securityCode.length < 6 ||
-                        checkCodeMutation.isPending ||
-                        isPending
-                    }
+                    onClick={handleVerify}
+                    disabled={securityCode.length < 6 || verifyIsPending}
                     className="my-4 w-full rounded-md bg-steel-blue py-2 text-center text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
                 >
                     Verify
@@ -188,8 +120,8 @@ export function PhoneVerifyStage({
 
                 <button
                     type="button"
-                    disabled={isPending}
-                    onClick={() => void goBack()}
+                    disabled={verifyIsPending}
+                    onClick={onReturn}
                     className="mx-auto text-center text-xs text-steel-blue underline hover:text-white"
                 >
                     I made a mistake!
