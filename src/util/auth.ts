@@ -1,14 +1,46 @@
 import { getGuildAvatar } from './discord'
-import { IMongoRole } from '@/models/MongoRole'
-import { IMongoUser, MongoUser } from '@/models/MongoUser'
-import dbConnect from '@/util/libmongo'
+import { IRole, IUser, zUser } from '@/models'
 import { OAuth2Routes, OAuth2Scopes } from 'discord-api-types/v10'
 import NextAuth, { Profile } from 'next-auth'
 import Discord from 'next-auth/providers/discord'
+import z from 'zod'
 
 export enum PermissionName {
     ADMIN_PANEL_ACCESS = 'Admin Panel Access',
     VIEW_MEMBER_DATA = 'View Member Data',
+}
+
+function extractAvatarHash(url: string) {
+    const split = url.split('/')
+    const hashRaw = split[split.length - 1]
+    const hashSplit = hashRaw.split('.')
+    const hash = hashSplit[hashSplit.length - 1]
+    return hash
+}
+
+async function serverAuth(token: string): Promise<string | undefined> {
+    console.log('Bot ' + token)
+
+    await fetch(`${process.env.PV_WEBSITE_API_URL}/auth`, {
+        //process.env.API_HOST_ADDR
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            discordToken: 'Bot ' + token,
+        }),
+    })
+        .then(async (res) => {
+            console.log(res)
+            if (!res.ok) throw Error("Can't fucking connect to API dawg")
+            const { accessToken } = await res.json()
+            return accessToken
+        })
+        .catch((err) => {
+            console.error(err)
+        })
+    return undefined
 }
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
@@ -39,15 +71,31 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             redirectProxyUrl: process.env.BOOMERANG_URI,
 
             async profile(profile) {
-                // Executed async. No reason to wait on this update before sending a response down.
-                void MongoUser.findOneAndUpdate(
-                    {
-                        discordId: profile.id,
-                    },
-                    {
-                        discordUserAvatar: profile.avatar,
-                    }
+                // needs a path
+                // Executed async. No reason to wait on this update before sending a response down.                if (!process.env.PV_WEBSITE_API_KEY)
+
+                if (!process.env.PV_WEBSITE_API_KEY)
+                    throw Error('set PV_WEBSITE_API_KEY in env vars')
+                const serverToken = await serverAuth(
+                    process.env.PV_WEBSITE_API_KEY
                 )
+
+                if (!serverToken)
+                    throw Error('Failed to generate jwt for server.')
+
+                fetch(
+                    `${process.env.PV_WEBSITE_API_URL}/discordUsers/${profile.id}/avatar`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            Authorization: serverToken,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            discordImage: extractAvatarHash(profile.avatar),
+                        }),
+                    }
+                ).catch((err) => console.error(err))
 
                 const image = await getGuildAvatar(profile.id, profile.avatar)
 
@@ -90,28 +138,60 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                 token.accessToken = account.access_token
                 token.discordId = eprofile.id
 
-                // Database connection
-                await dbConnect()
+                if (!process.env.PV_WEBSITE_API_KEY)
+                    throw Error('set PV_WEBSITE_API_KEY in env vars')
+                const serverToken = await serverAuth(
+                    process.env.PV_WEBSITE_API_KEY
+                )
 
-                const existingUser = await MongoUser.findOne({
-                    discordId: eprofile.id,
-                })
-                if (!existingUser) {
-                    // Create new user
-                    const newUser = new MongoUser({
-                        name: eprofile.username,
-                        email: profile.email,
-                        // Using long form here to adjust size of image
-                        image: await getGuildAvatar(eprofile.id, {
-                            forceStatic: true,
-                            size: 512,
-                        }),
-                        discordId: eprofile.id,
-                        discordUserAvatar: eprofile.avatar,
-                        createdAt: new Date(),
+                if (!serverToken)
+                    throw Error('Failed to generate jwt for server.')
+
+                fetch(
+                    `${process.env.PV_WEBSITE_API_URL}/discordUsers/${eprofile.id}/user`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            Authorization: serverToken,
+                        },
+                    }
+                )
+                    .then(async (res) => {
+                        if (res.status === 404) {
+                            const usr = await fetch(
+                                `${process.env.PV_WEBSITE_API_URL}/users`,
+                                {
+                                    method: 'POST',
+                                    headers: {
+                                        Authorization: serverToken,
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        email: profile.email,
+                                    }),
+                                }
+                            )
+                            await fetch(
+                                `${process.env.PV_WEBSITE_API_URL}/discordUsers`,
+                                {
+                                    method: 'POST',
+                                    headers: {
+                                        Authorization: serverToken,
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        discordId: eprofile.id,
+                                        discordUsername: eprofile.username,
+                                        discordImage: extractAvatarHash(
+                                            eprofile.avatar
+                                        ),
+                                        userId: (await usr.json()).id as number,
+                                    }),
+                                }
+                            )
+                        }
                     })
-                    await newUser.save()
-                }
+                    .catch(console.error)
             }
 
             return token
@@ -128,11 +208,11 @@ export const enum ResponseCode {
 
 // Role checking utility function
 // takes an array of strings, each matching the name field of a given roles
-const hasRequiredRoles = (user: IMongoUser, requiredRoles: string[] = []) => {
+const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
     const userRoles = user.roles
-    const roleStrs = userRoles.map((role: IMongoRole) => role.name)
+    const roleStrs = userRoles?.map((role: IRole) => role.name)
     if (!user?.roles || !Array.isArray(user.roles)) return false
-    return requiredRoles.every((role) => roleStrs.includes(role))
+    return requiredRoles.every((role) => roleStrs?.includes(role))
 }
 
 // utility function for checking the current session against an array of roles
@@ -150,21 +230,24 @@ export async function checkAuth(roles?: string[]): Promise<ResponseCode> {
     //if there are no required roles, then all auth requirements have been met.
     if (!roles) return ResponseCode.Successful
 
-    // Connect to database
-    await dbConnect()
-
     // query database for the user object with a discordId corresponding to
     // the one stored in the session object
-    const user: IMongoUser | null = await MongoUser.findOne({
-        discordId: session.discordId,
-    })
-        .populate({
-            path: 'roles',
-            populate: {
-                path: 'permissions',
+    if (!process.env.PV_WEBSITE_API_KEY)
+        throw Error('set PV_WEBSITE_API_KEY in env vars')
+    const serverToken = await serverAuth(process.env.PV_WEBSITE_API_KEY)
+
+    if (!serverToken) throw Error('Failed to generate jwt for server.')
+
+    const res = await fetch(
+        `${process.env.PV_WEBSITE_API_URL}/discordUsers/${session.discordId}/user`,
+        {
+            headers: {
+                Authorization: serverToken,
             },
-        })
-        .exec()
+        }
+    )
+
+    const user = z.parse(zUser, await res.json())
 
     //  if either the currently logged in user cant be found in the database
     // for some reason or the user has no roles at all return an exception code.
@@ -196,21 +279,22 @@ export async function checkAuthPermissions(
         return ResponseCode.Successful
     }
 
-    await dbConnect()
+    if (!process.env.PV_WEBSITE_API_KEY)
+        throw Error('set PV_WEBSITE_API_KEY in env vars')
+    const serverToken = await serverAuth(process.env.PV_WEBSITE_API_KEY)
 
-    const user = await MongoUser.findOne({
-        discordId: session.discordId,
-    })
-        .select({
-            roles: 1,
-        })
-        .populate({
-            path: 'roles',
-            populate: {
-                path: 'permissions',
+    if (!serverToken) throw Error('Failed to generate jwt for server.')
+
+    const res = await fetch(
+        `${process.env.PV_WEBSITE_API_URL}/discordUsers/${session.discordId}/user`,
+        {
+            headers: {
+                Authorization: serverToken,
             },
-        })
-        .exec()
+        }
+    )
+
+    const user = z.parse(zUser, await res.json())
 
     if (!user) {
         // This shouldn't happen except in the case of a database error.
@@ -219,8 +303,8 @@ export async function checkAuthPermissions(
 
     // Organize permissions from all user roles into a set for easy lookup
     const userPerms = new Set<string>()
-    user.roles.forEach((role) => {
-        role.permissions.forEach((perm) => {
+    user.roles?.forEach((role) => {
+        role.permissions?.forEach((perm) => {
             userPerms.add(perm.name)
         })
     })

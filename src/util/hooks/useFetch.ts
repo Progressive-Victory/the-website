@@ -63,7 +63,6 @@ export function useFetch() {
             query.forEach((entry) => {
                 fullUrl.searchParams.append(entry[0], entry[1])
             })
-        console.log(fullUrl.toString())
         const options: RequestInit = {
             method,
             headers: {
