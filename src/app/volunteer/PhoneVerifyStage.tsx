@@ -9,6 +9,7 @@ export interface PhoneVerifyProps {
     queryClient: QueryClient
     phoneNumber: string
     lastSmsCodeSentAt: Date | null
+    isPending: boolean
     goBack: () => void
     onSuccess: () => void
 }
@@ -17,6 +18,7 @@ export function PhoneVerifyStage({
     queryClient,
     phoneNumber,
     lastSmsCodeSentAt,
+    isPending,
     goBack,
     onSuccess,
 }: PhoneVerifyProps) {
@@ -175,7 +177,9 @@ export function PhoneVerifyStage({
                         }
                     }}
                     disabled={
-                        securityCode.length < 6 || checkCodeMutation.isPending
+                        securityCode.length < 6 ||
+                        checkCodeMutation.isPending ||
+                        isPending
                     }
                     className="my-4 w-full rounded-md bg-steel-blue py-2 text-center text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
                 >
@@ -184,6 +188,7 @@ export function PhoneVerifyStage({
 
                 <button
                     type="button"
+                    disabled={isPending}
                     onClick={() => void goBack()}
                     className="mx-auto text-center text-xs text-steel-blue underline hover:text-white"
                 >

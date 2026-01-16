@@ -73,3 +73,32 @@ export interface UpdateUserRequest {
 
     roles?: string[]
 }
+
+export const zUserOnboardingCollectInfoRequest = z.object({
+    firstName: z.string(),
+    lastName: z.string(),
+    phoneNumber: z.string(),
+    zipCode: z.number(),
+    dateOfBirth: z.coerce.date(),
+    acceptedAlerts: z.boolean(),
+})
+
+export type UserOnboardingCollectInfoRequest = z.infer<
+    typeof zUserOnboardingCollectInfoRequest
+>
+
+export const zUserOnboardingJoinRequest = z.object({
+    discordUserId: z.string(),
+})
+
+export type UserOnboardingJoinRequest = z.infer<
+    typeof zUserOnboardingJoinRequest
+>
+
+export const zUserOnboardingVerifyRequest = z.object({
+    code: z.number(),
+})
+
+export type UserOnboardingVerifyRequest = z.infer<
+    typeof zUserOnboardingVerifyRequest
+>

@@ -1,5 +1,6 @@
 import { AuthRequest, FetchError } from '@/models/models'
 import { useSession } from 'next-auth/react'
+import { useState } from 'react'
 import z from 'zod'
 
 interface ApiError {
@@ -7,16 +8,31 @@ interface ApiError {
     message: string
 }
 
+interface QueryOptions {
+    query?: [string, string][]
+    signal?: AbortSignal
+}
+
 const pvSessionKey = 'pv-session'
 
 export function useFetch() {
     const session = useSession()
 
+    const [apiBaseUrl, setApiBaseUrl] = useState('')
+
+    async function getBaseUrl(signal?: AbortSignal) {
+        if (apiBaseUrl) return apiBaseUrl
+
+        const res = await fetch('/api/settings', { signal })
+        const { apiBaseUrl: baseUrl } = (await res.json()) as {
+            apiBaseUrl: string
+        }
+        setApiBaseUrl(baseUrl)
+        return baseUrl
+    }
+
     //TODO: Put this into session instead
     async function refreshToken(signal?: AbortSignal) {
-        const { apiBaseUrl } = (await (
-            await fetch('/api/settings')
-        ).json()) as { apiBaseUrl: string }
         localStorage.removeItem(pvSessionKey)
 
         if (!session.data?.accessToken) return ''
@@ -25,7 +41,8 @@ export function useFetch() {
             discordToken: `Bearer ${session.data?.accessToken}`,
         }
 
-        const res = await fetch(new URL('/auth', apiBaseUrl), {
+        const baseUrl = await getBaseUrl(signal)
+        const res = await fetch(new URL('/auth', baseUrl), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
@@ -52,37 +69,35 @@ export function useFetch() {
         url: string,
         body: object | null,
         schema: z.ZodObject | z.ZodArray | null,
-        query?: [string, string][],
-        signal?: AbortSignal
+        options?: QueryOptions
     ) {
-        const { apiBaseUrl } = (await (
-            await fetch('/api/settings')
-        ).json()) as { apiBaseUrl: string }
-        const fullUrl = new URL(url, apiBaseUrl)
-        if (query)
-            query.forEach((entry) => {
-                fullUrl.searchParams.append(entry[0], entry[1])
-            })
-        const options: RequestInit = {
+        const baseUrl = await getBaseUrl(options?.signal)
+
+        const fullUrl = new URL(url, baseUrl)
+        options?.query?.forEach((entry) => {
+            fullUrl.searchParams.append(entry[0], entry[1])
+        })
+
+        const req: RequestInit = {
             method,
             headers: {
-                Authorization: `Bearer ${await getToken(signal)}`,
+                Authorization: `Bearer ${await getToken(options?.signal)}`,
             },
-            signal,
+            signal: options?.signal,
         }
 
         if (body != null && method != 'GET') {
-            options.body = JSON.stringify(body)
-            options.headers!['Content-Type'] = 'application/json'
+            req.body = JSON.stringify(body)
+            req.headers!['Content-Type'] = 'application/json'
         }
 
-        let res = await fetch(fullUrl, options)
+        let res = await fetch(fullUrl, req)
         if (res.status === 401) {
-            options.headers = {
-                ...options.headers,
-                Authorization: `Bearer ${await refreshToken(signal)}`,
+            req.headers = {
+                ...req.headers,
+                Authorization: `Bearer ${await refreshToken(options?.signal)}`,
             }
-            res = await fetch(fullUrl, options)
+            res = await fetch(fullUrl, req)
         }
 
         if (!res.ok) {
@@ -103,40 +118,39 @@ export function useFetch() {
     async function onGet<R>(
         url: string,
         schema: z.ZodObject | z.ZodArray,
-        query?: [string, string][],
-        signal?: AbortSignal
+        options?: QueryOptions
     ) {
-        return await onFetch<R>('GET', url, null, schema, query, signal)
+        return await onFetch<R>('GET', url, null, schema, options)
     }
 
     async function onPut(
         url: string,
         body: object | null,
-        signal?: AbortSignal
+        options?: QueryOptions
     ) {
-        await onFetch('PUT', url, body, null, undefined, signal)
+        await onFetch('PUT', url, body, null, options)
     }
 
     async function onPost<R = void>(
         url: string,
         body: object | null,
         schema: z.ZodObject | z.ZodArray | null,
-        signal?: AbortSignal
+        options?: QueryOptions
     ) {
-        return await onFetch<R>('POST', url, body, schema, undefined, signal)
+        return await onFetch<R>('POST', url, body, schema, options)
     }
 
     async function onPatch<R = void>(
         url: string,
         body: object | null,
         schema: z.ZodObject | z.ZodArray | null,
-        signal?: AbortSignal
+        options?: QueryOptions
     ) {
-        return await onFetch<R>('PATCH', url, body, schema, undefined, signal)
+        return await onFetch<R>('PATCH', url, body, schema, options)
     }
 
-    async function onDelete(url: string, signal?: AbortSignal) {
-        await onFetch('DELETE', url, null, null, undefined, signal)
+    async function onDelete(url: string, options?: QueryOptions) {
+        await onFetch('DELETE', url, null, null, options)
     }
 
     return { onFetch, onGet, onPut, onPost, onPatch, onDelete }

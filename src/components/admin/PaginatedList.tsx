@@ -140,8 +140,7 @@ export default function PaginatedList<T extends object>({
             const res = await onGet<IPaginatedResponse<T>>(
                 url.pathname,
                 zPaginatedResponse(zodSchema),
-                url.searchParams.entries().toArray(),
-                signal
+                { query: url.searchParams.entries().toArray(), signal }
             )
 
             return res

@@ -1,8 +1,5 @@
 import VolunteerPage from '@/app/volunteer/page.client'
-import MongoUser from '@/models/MongoUser'
 import { auth } from '@/util/auth'
-import { isUserAGuildMember } from '@/util/discord'
-import dbConnect from '@/util/libmongo'
 import { redirect } from 'next/navigation'
 
 export default async function Page() {
@@ -12,23 +9,5 @@ export default async function Page() {
         redirect('/login?redirect=/volunteer')
     }
 
-    await dbConnect()
-    const user = await MongoUser.findOne({
-        discordId: session.discordId,
-    })
-
-    if (!user) {
-        throw new Error('well this is awkward')
-    }
-
-    const isInServer = await isUserAGuildMember(user.discordId)
-
-    return (
-        <VolunteerPage
-            user={user.toObject({
-                flattenObjectIds: true,
-            })}
-            isInSever={isInServer}
-        />
-    )
+    return <VolunteerPage />
 }
