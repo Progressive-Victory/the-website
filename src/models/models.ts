@@ -1,6 +1,5 @@
 import { zDiscordUser } from '@/contracts/data'
 import z from 'zod'
-import { $ZodShape } from 'zod/v4/core'
 
 export interface FetchRequest {
     method: string
@@ -82,24 +81,3 @@ export const zDiscordMember = z.object({
 })
 
 export type DiscordMember = z.infer<typeof zDiscordMember>
-
-export enum UpdateHistoryType {
-    Inserted = 'I',
-    Updated = 'U',
-    Merged = 'M',
-    Deleted = 'D',
-}
-
-export const zUpdateHistoryType = z.enum(UpdateHistoryType)
-
-const zUpdateHistoryBase = z.object({
-    type: zUpdateHistoryType,
-    whoUpdatedId: z.int(),
-    whenUpdatedUtc: z.coerce.date(),
-})
-
-export const zUpdateHistory = <Shape extends $ZodShape>(
-    zData: z.ZodObject<Shape>
-) => zUpdateHistoryBase.extend(zData.shape)
-
-export type UpdateHistory<T> = z.infer<typeof zUpdateHistoryBase> & T

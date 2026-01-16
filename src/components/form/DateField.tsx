@@ -1,7 +1,7 @@
 import { FormField, IBaseFormField } from '.'
 import { dateService } from '@/services'
 import classNames from 'classnames'
-import { FormEvent } from 'react'
+import { FormEvent, useState } from 'react'
 
 export function DateField({
     name,
@@ -11,21 +11,25 @@ export function DateField({
     deprecated = false,
     dynamic,
 }: IBaseFormField) {
-    const value = (dynamic?.value as string) ?? ''
-    const iso = dateService.toISODateString(value)
+    const initialValue = dynamic?.value as Date | undefined
 
-    const format = () => {
-        if (iso) {
-            const [year, month, day] = iso.split('-')
+    const [value, setValue] = useState(initialValue?.toISOString() ?? '')
+
+    const format = (date: string) => {
+        if (date) {
+            const [year, month, day] = date.split('-')
             return `${month}/${day}/${year}`
         }
-        return value
+        return date
     }
 
     const handleInput = (event: FormEvent<HTMLInputElement>) => {
         const formatted = (event.target as HTMLTextAreaElement).value
-        const normalized = dateService.toISODateString(formatted)
-        dynamic?.onUpdate?.(field, normalized, normalized, normalized != null)
+        setValue(formatted)
+
+        const isValid = dateService.isValid(formatted)
+        const date = isValid ? new Date(formatted) : null
+        dynamic?.onUpdate?.(field, date, date, isValid)
     }
 
     return (
@@ -36,7 +40,7 @@ export function DateField({
             deprecated={deprecated}
         >
             {readonly || dynamic?.disabled ? (
-                <div className="col-span-2 w-full">{format()}</div>
+                <div className="col-span-2 w-full">{format(value)}</div>
             ) : (
                 <input
                     type="date"
@@ -44,11 +48,11 @@ export function DateField({
                     id={field}
                     disabled={dynamic?.loading}
                     required={required}
-                    value={iso ?? ''}
+                    value={value}
                     onInput={handleInput}
                     className={classNames(
                         'col-span-2 w-full max-w-96 rounded-lg border border-gray-300 px-3 py-0.5',
-                        !iso && 'border-red-300'
+                        value && 'border-red-300'
                     )}
                 />
             )}

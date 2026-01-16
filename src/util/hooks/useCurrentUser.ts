@@ -34,7 +34,6 @@ export function useCurrentUser(): DataState {
 }
 
 export function hasPermission(user: IUser, permission: string): boolean {
-    console.log(user.roles, permission)
     return (
         user.roles?.some((r) =>
             r.permissions?.some((p) => p.name == permission)
