@@ -122,12 +122,11 @@ export const ClientMap = ({
     useEffect(() => {
         const fetcher = async () => {
             if (!zipCodes) return
-            const newList = []
+            const newList = [] as { lat: string; lon: string }[]
             for (const zipcode of zipCodes) {
                 const data = await zipToLatLong(zipcode)
                 if (data) newList.push(data)
             }
-            console.log(newList)
             setMarkerList(newList)
         }
         if (isMarker) void fetcher()
