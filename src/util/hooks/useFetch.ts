@@ -13,6 +13,8 @@ interface QueryOptions {
     signal?: AbortSignal
 }
 
+type ZodSchema = z.ZodObject | z.ZodArray | z.ZodRecord;
+
 const pvSessionKey = 'pv-session'
 
 export function useFetch() {
@@ -68,7 +70,7 @@ export function useFetch() {
         method: string,
         url: string,
         body: object | null,
-        schema: z.ZodObject | z.ZodArray | null,
+        schema: ZodSchema | null,
         options?: QueryOptions
     ) {
         const baseUrl = await getBaseUrl(options?.signal)
@@ -117,7 +119,7 @@ export function useFetch() {
 
     async function onGet<R>(
         url: string,
-        schema: z.ZodObject | z.ZodArray,
+        schema: ZodSchema,
         options?: QueryOptions
     ) {
         return await onFetch<R>('GET', url, null, schema, options)
@@ -134,7 +136,7 @@ export function useFetch() {
     async function onPost<R = void>(
         url: string,
         body: object | null,
-        schema: z.ZodObject | z.ZodArray | null,
+        schema: ZodSchema | null,
         options?: QueryOptions
     ) {
         return await onFetch<R>('POST', url, body, schema, options)
@@ -143,7 +145,7 @@ export function useFetch() {
     async function onPatch<R = void>(
         url: string,
         body: object | null,
-        schema: z.ZodObject | z.ZodArray | null,
+        schema: ZodSchema | null,
         options?: QueryOptions
     ) {
         return await onFetch<R>('PATCH', url, body, schema, options)

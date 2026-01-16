@@ -10,7 +10,7 @@ import {
     TextField,
 } from '@/components/form'
 import { DateField } from '@/components/form/DateField'
-import { zUser, IUser, IRole, zRole } from '@/models'
+import { IRole, IUser, zRole, zUser } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useCurrentUser, useFetch } from '@/util/hooks'
 import deepEqual from 'deep-equal'
@@ -41,7 +41,7 @@ export default function ClientPage() {
             .catch((err) => {
                 console.error(err)
             })
-    }, [])
+    }, [onGet])
 
     const handleSelectItem = (value: IUser) => {
         console.log('handling select item')

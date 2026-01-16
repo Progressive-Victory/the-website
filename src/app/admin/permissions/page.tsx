@@ -2,7 +2,7 @@
 
 import PaginatedList from '@/components/admin/PaginatedList'
 import { Form, FormGroup, TextField } from '@/components/form'
-import { IPermission, zPermission } from '@/models'
+import { IPermission, zPermission } from '@/contracts/data'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
 

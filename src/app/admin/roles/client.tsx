@@ -2,7 +2,7 @@
 
 import PaginatedList from '@/components/admin/PaginatedList'
 import { Form, FormGroup, SelectManyField, TextField } from '@/components/form'
-import { IPermission, IRole, zPermission, zRole } from '@/models'
+import { IPermission, IRole, zPermission, zRole } from '@/contracts/data'
 import { useFetch } from '@/util/hooks'
 import deepEqual from 'deep-equal'
 import { useEffect, useRef, useState } from 'react'
@@ -36,7 +36,7 @@ export default function ClientPage() {
             .catch((err) => {
                 console.error(err)
             })
-    }, [])
+    }, [onGet])
 
     const handleSelectItem = (value: IRole) => {
         if (value.id === selectedRole?.id) return

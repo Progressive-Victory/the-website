@@ -9,15 +9,17 @@ import {
     UnderageStage,
 } from '.'
 import { MainLayout } from '@/components/layout'
+import { OnboardingStage } from '@/contracts/data'
 import {
-    DiscordUserIsInServerResponse,
     UserOnboardingCollectInfoRequest,
     UserOnboardingJoinRequest,
     UserOnboardingVerifyRequest,
+} from '@/contracts/requests'
+import {
+    DiscordUserIsInServerResponse,
     zDiscordUserIsInServerResponse,
-} from '@/models'
+} from '@/contracts/responses'
 import { useCurrentUser, useFetch } from '@/util/hooks'
-import { OnboardingStage } from '@/util/stage'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'

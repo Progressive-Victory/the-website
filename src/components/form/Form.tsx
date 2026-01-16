@@ -1,6 +1,6 @@
 import { FormGroupProps } from '.'
+import { zUser } from '@/contracts/data'
 import { UpdateHistory, zUpdateHistory } from '@/models/models'
-import { zUser } from '@/models/users'
 import { useFetch } from '@/util/hooks'
 import { useMutation } from '@tanstack/react-query'
 import deepEqual from 'deep-equal'
