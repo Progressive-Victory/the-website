@@ -1,6 +1,7 @@
 import { Field, SupportNote, Toggle } from '.'
+import { zLocation, Location } from '@/models'
 import { dateService } from '@/services'
-import { useInit } from '@/util/hooks'
+import { useFetch, useInit } from '@/util/hooks'
 import Link from 'next/link'
 import phone from 'phone'
 import { Country, isValidCountryPostalCode } from 'postal-code-validator'
@@ -27,6 +28,8 @@ export function CollectInfoStage({
     initialForm,
     onSuccess,
 }: CollectInfoStageProps) {
+    const { onGet } = useFetch()
+
     const [form, setForm] = useState(initialForm)
     const [phoneNumber, setPhoneNumber] = useState('')
 
@@ -60,16 +63,17 @@ export function CollectInfoStage({
         setPhoneNumber(formatted)
     }
 
-    const checkZip = useCallback(async (code: string): Promise<boolean> => {
-        const result = await fetch('/api/onboarding/zip/validate', {
-            method: 'POST',
-            body: JSON.stringify({
-                code,
-            }),
-        })
-        const { isValidZip }: { isValidZip: boolean } = await result.json()
-        return isValidZip
-    }, [])
+    const checkZip = useCallback(
+        async (code: string): Promise<boolean> => {
+            try {
+                await onGet<Location>(`/locations/${code}`, zLocation)
+                return true
+            } catch {
+                return false
+            }
+        },
+        [onGet]
+    )
 
     const handleSubmit = async (): Promise<void> => {
         const isValidZip = await checkZip(form.zipCode)
