@@ -22,13 +22,13 @@ export interface IOnboardingForm {
 export interface CollectInfoStageProps {
     initialForm: IOnboardingForm
     isPending: boolean
-    onSuccess: (form: IOnboardingForm) => void
+    onSubmit: (form: IOnboardingForm) => void
 }
 
 export function CollectInfoStage({
     initialForm,
     isPending,
-    onSuccess,
+    onSubmit,
 }: CollectInfoStageProps) {
     const { onGet } = useFetch()
 
@@ -81,7 +81,7 @@ export function CollectInfoStage({
         const isValidZip = await checkZip(form.zipCode)
         setZipCodeError(!isValidZip)
         if (!isValidZip) return
-        onSuccess(form)
+        onSubmit(form)
     }
 
     const isValid =

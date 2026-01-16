@@ -207,7 +207,7 @@ export default function ClientPage() {
                                 new Event('refetch')
                             )
                             if (selectedUser.id === loggedInUser.data?.id)
-                                loggedInUser.reload()
+                                void loggedInUser.onRefetch()
                         }}
                         updateHistory
                     >
