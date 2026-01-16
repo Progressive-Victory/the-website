@@ -145,6 +145,12 @@
     transform: rotate(45deg);
 }
 
+.noChevronRotate:hover .navAffordance,
+.noChevronRotate:focus-visible .navAffordance {
+    opacity: 0.85;
+    transform: rotate(-45deg); 
+}
+
 .navItemActive .navAffordance {
     opacity: 1;
     transform: rotate(45deg);
@@ -193,4 +199,9 @@
 
 .accountCompact:hover .accountAvatarSolo {
     border-color: #ce3728;
+}
+
+.activeNavItem .navAffordance {
+    opacity: 1;
+    transform: rotate(45deg);
 }

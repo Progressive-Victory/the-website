@@ -1,7 +1,8 @@
 'use client'
 
 import { NavItem } from './types'
-import { ModularButton } from '@/components/common/ButtonComponent'
+import { ModularButton } from '@/components/common/buttons/ModularButton'
+import buttonStyles from '@/components/common/buttons/button.module.css'
 import styles from '@/components/layout/header.module.css'
 import { AnimatePresence, motion } from 'motion/react'
 import { useSession } from 'next-auth/react'
@@ -277,6 +278,11 @@ export function Header() {
                                     buttonType="nav"
                                     href={item.href}
                                     showChevron={item.name === 'More'}
+                                    className={
+                                        isActive
+                                            ? buttonStyles.activeNavItem
+                                            : undefined
+                                    }
                                 />
 
                                 {hasChildren ? (
@@ -400,7 +406,7 @@ export function Header() {
                         <ModularButton
                             key={name}
                             label={name}
-                            buttonType="nav"
+                            buttonType="mobileNav"
                             href={href}
                             buttonVariant="long"
                         />
