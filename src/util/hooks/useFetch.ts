@@ -1,6 +1,6 @@
 import { AuthRequest, FetchError } from '@/models/models'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
-import { useState } from 'react'
 import z from 'zod'
 
 interface ApiError {
@@ -9,7 +9,7 @@ interface ApiError {
 }
 
 interface QueryOptions {
-    query?: Record<string, string>
+    query?: Record<string, string | number | boolean>
     signal?: AbortSignal
 }
 
@@ -20,44 +20,47 @@ const pvSessionKey = 'pv-session'
 export function useFetch() {
     const session = useSession()
 
-    const [apiBaseUrl, setApiBaseUrl] = useState('')
+    const settingsQuery = useQuery({
+        queryKey: ['/api/settings'],
+        async queryFn({ signal }) {
+            const res = await fetch('/api/settings', { signal })
+            return (await res.json()) as {
+                apiBaseUrl: string
+            }
+        },
+        staleTime: Infinity,
+        placeholderData: keepPreviousData,
+    })
 
-    async function getBaseUrl(signal?: AbortSignal) {
-        if (apiBaseUrl) return apiBaseUrl
+    const apiBaseUrl = settingsQuery.data?.apiBaseUrl
 
-        const res = await fetch('/api/settings', { signal })
-        const { apiBaseUrl: baseUrl } = (await res.json()) as {
-            apiBaseUrl: string
-        }
-        setApiBaseUrl(baseUrl)
-        return baseUrl
-    }
+    const authMutation = useMutation({
+        mutationKey: ['/auth'],
+        async mutationFn(signal?: AbortSignal) {
+            const body: AuthRequest = {
+                discordToken: `Bearer ${session.data?.accessToken}`,
+            }
 
-    //TODO: Put this into session instead
+            const res = await fetch(new URL('/auth', apiBaseUrl), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+                signal,
+            })
+
+            const data = (await res.json()) as { accessToken: string }
+            return data.accessToken
+        },
+    })
+
     async function refreshToken(signal?: AbortSignal) {
         localStorage.removeItem(pvSessionKey)
 
-        if (!session.data?.accessToken) return ''
+        await authMutation.mutateAsync(signal)
+        const accessToken = authMutation.data
 
-        const body: AuthRequest = {
-            discordToken: `Bearer ${session.data?.accessToken}`,
-        }
-
-        const baseUrl = await getBaseUrl(signal)
-        const res = await fetch(new URL('/auth', baseUrl), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-            signal,
-        })
-
-        if (res.ok) {
-            const data = (await res.json()) as { accessToken: string }
-            localStorage.setItem(pvSessionKey, data.accessToken)
-            return data.accessToken
-        }
-
-        return ''
+        if (accessToken) localStorage.setItem(pvSessionKey, accessToken)
+        return accessToken
     }
 
     async function getToken(signal?: AbortSignal) {
@@ -73,11 +76,9 @@ export function useFetch() {
         schema: ZodSchema | null,
         options?: QueryOptions
     ) {
-        const baseUrl = await getBaseUrl(options?.signal)
-
-        const fullUrl = new URL(url, baseUrl)
+        const fullUrl = new URL(url, apiBaseUrl)
         Object.entries(options?.query ?? {}).forEach(([key, value]) => {
-            fullUrl.searchParams.set(key, value)
+            fullUrl.searchParams.set(key, value.toString())
         })
 
         const req: RequestInit = {

@@ -53,15 +53,17 @@ export default function ClientPage() {
                 const query = async (page: number) => {
                     const thisLimit = Math.min(limit, count - page * limit)
 
-                    const response = await onGet<
-                        IPaginatedResponse<IRole>
-                    >('/roles', z.array(zRole), {
-                        query: {
-                            limit: thisLimit.toString(),
-                            page: page.toString(),
-                        },
-                        signal,
-                    })
+                    const response = await onGet<IPaginatedResponse<IRole>>(
+                        '/roles',
+                        z.array(zRole),
+                        {
+                            query: {
+                                limit: thisLimit.toString(),
+                                page: page.toString(),
+                            },
+                            signal,
+                        }
+                    )
 
                     return response.data
                 }
@@ -79,8 +81,18 @@ export default function ClientPage() {
     })
     const roles = getRolesQuery.data ?? []
 
+    const selectedUserQuery = useQuery({
+        queryKey: [`/users/${selectedUser?.id}`],
+        async queryFn({ signal }) {
+            return await onGet<IUser>(`/users/${selectedUser?.id}`, zUser, {
+                query: { includeDiscordUsers: true, includeHistory: true },
+                signal,
+            })
+        },
+        placeholderData: keepPreviousData,
+    })
+
     const handleSelectItem = (value: IUser) => {
-        console.log('handling select item')
         if (value.id === selectedUser?.id) return
 
         if (!deepEqual(selectedUser, originalUser)) {
@@ -103,29 +115,6 @@ export default function ClientPage() {
         value: user,
     })
 
-    /*function flattenZodType(dataType: ZodObject) {
-        function traverseObj(
-            obj: object
-        ): { name: string; fieldType: ZodSchema }[] {
-            const res: { name: string; fieldType: ZodSchema }[] = []
-            Object.entries(obj).forEach(([key, value]) => {
-                console.log(key)
-                if (value.def.innerType) {
-                    console.log('Inner Type: ' + value.def.innerType.def.type)
-                    if (value.def.innerType.def.type === 'object') {
-                        res.concat(traverseObj(value.def.innerType.def.shape))
-                    } else {
-                        res.push({ name: key, fieldType: value.shape })
-                    }
-                } else {
-                    res.push({ name: key, fieldType: value.shape })
-                }
-            })
-            return res
-        }
-        const shape = dataType.shape
-        return traverseObj(shape)
-    }*/
     return (
         <>
             <PaginatedList<IUser>
@@ -224,7 +213,7 @@ export default function ClientPage() {
 
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {selectedUser && originalUser ? (
-                    <Form<IUser> //need history figured out for this
+                    <Form<IUser>
                         zodSchema={zUser}
                         initialValue={originalUser}
                         setInitialValue={setOriginalUser}
@@ -246,7 +235,7 @@ export default function ClientPage() {
                             if (selectedUser.id === loggedInUser.data?.id)
                                 void loggedInUser.onRefetch()
                         }}
-                        updateHistory
+                        updateHistory={selectedUserQuery.data?.history}
                     >
                         <FormGroup title="Account Information">
                             <TextField
