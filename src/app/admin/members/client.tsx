@@ -11,15 +11,16 @@ import {
 } from '@/components/form'
 import { DateField } from '@/components/form/DateField'
 import { IRole, IUser, zRole, zUser } from '@/contracts/data'
+import { IPaginatedResponse } from '@/contracts/responses'
 import { dateService } from '@/services'
 import { useCurrentUser, useFetch } from '@/util/hooks'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import deepEqual from 'deep-equal'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 import z from 'zod'
 
 export default function ClientPage() {
-    const [roles, setRoles] = useState<IRole[] | null>(null)
     const eventTarget = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
@@ -33,15 +34,50 @@ export default function ClientPage() {
 
     const loggedInUser = useCurrentUser()
 
-    useEffect(() => {
-        onGet<IRole[]>('/roles/all', z.array(zRole))
-            .then((res) => {
-                setRoles(res)
+    const getRolesQuery = useQuery({
+        queryKey: ['/roles'],
+        async queryFn({ signal }) {
+            const limit = 50
+
+            const { data: roles, count } = await onGet<
+                IPaginatedResponse<IRole>
+            >('/roles', z.array(zRole), {
+                query: { limit: limit.toString() },
+                signal,
             })
-            .catch((err) => {
-                console.error(err)
-            })
-    }, [onGet])
+
+            const pages = Math.ceil(count / limit)
+
+            const queries: Promise<IRole[]>[] = []
+            for (let page = 1; page < pages; page++) {
+                const query = async (page: number) => {
+                    const thisLimit = Math.min(limit, count - page * limit)
+
+                    const response = await onGet<
+                        IPaginatedResponse<IRole>
+                    >('/roles', z.array(zRole), {
+                        query: {
+                            limit: thisLimit.toString(),
+                            page: page.toString(),
+                        },
+                        signal,
+                    })
+
+                    return response.data
+                }
+
+                queries.push(query(page))
+            }
+
+            roles.push(
+                ...(await Promise.all(queries)).flatMap((perms) => perms)
+            )
+
+            return roles
+        },
+        placeholderData: keepPreviousData,
+    })
+    const roles = getRolesQuery.data ?? []
 
     const handleSelectItem = (value: IUser) => {
         console.log('handling select item')

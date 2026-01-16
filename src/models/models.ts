@@ -95,7 +95,7 @@ export const zUpdateHistoryType = z.enum(UpdateHistoryType)
 const zUpdateHistoryBase = z.object({
     type: zUpdateHistoryType,
     whoUpdatedId: z.int(),
-    whenUpdatedUtc: z.date(),
+    whenUpdatedUtc: z.coerce.date(),
 })
 
 export const zUpdateHistory = <Shape extends $ZodShape>(

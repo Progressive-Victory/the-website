@@ -1,4 +1,5 @@
 import MultiSelect from '@/components/admin/MultiSelect'
+import { IPaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -73,20 +74,6 @@ export const zPaginatedSearch = z.object({
 
 export type IPaginatedSearch = z.infer<typeof zPaginatedSearch>
 
-export const zPaginatedResponse = <T extends z.ZodType>(dataType: T) =>
-    z.object({
-        page: z.coerce.number(),
-        limit: z.coerce.number(),
-        count: z.coerce.number(),
-        data: z.array(dataType),
-    })
-
-type PaginatedResponseType<T extends z.ZodType> = ReturnType<
-    typeof zPaginatedResponse<T>
->
-
-export type IPaginatedResponse<T> = z.infer<PaginatedResponseType<z.ZodType<T>>>
-
 export default function PaginatedList<T extends object>({
     zodSchema,
     eventTarget,
@@ -125,22 +112,21 @@ export default function PaginatedList<T extends object>({
             const url = new URL(location.href)
             url.pathname = endpoint
 
+            const params = {} as Record<string, string>
             for (const [key, values] of Object.entries(search.filters)) {
-                for (const value of values) {
-                    url.searchParams.set(key, value)
-                }
+                params[key] = values.join(',')
             }
 
-            url.searchParams.set('page', search.page.toString())
-            url.searchParams.set('limit', search.limit.toString())
-            if (search.query) url.searchParams.set('query', search.query)
-            if (search.field) url.searchParams.set('field', search.field)
-            if (search.sort) url.searchParams.set('sort', search.sort)
+            params.page = search.page.toString()
+            params.limit = search.limit.toString()
+            if (search.query) params.query = search.query
+            if (search.field) params.field = search.field
+            if (search.sort) params.sort = search.sort
 
             const res = await onGet<IPaginatedResponse<T>>(
                 url.pathname,
                 zPaginatedResponse(zodSchema),
-                { query: url.searchParams.entries().toArray(), signal }
+                { query: params, signal }
             )
 
             return res

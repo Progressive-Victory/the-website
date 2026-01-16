@@ -9,11 +9,11 @@ interface ApiError {
 }
 
 interface QueryOptions {
-    query?: [string, string][]
+    query?: Record<string, string>
     signal?: AbortSignal
 }
 
-type ZodSchema = z.ZodObject | z.ZodArray | z.ZodRecord;
+type ZodSchema = z.ZodObject | z.ZodArray | z.ZodRecord
 
 const pvSessionKey = 'pv-session'
 
@@ -76,8 +76,8 @@ export function useFetch() {
         const baseUrl = await getBaseUrl(options?.signal)
 
         const fullUrl = new URL(url, baseUrl)
-        options?.query?.forEach((entry) => {
-            fullUrl.searchParams.append(entry[0], entry[1])
+        Object.entries(options?.query ?? {}).forEach(([key, value]) => {
+            fullUrl.searchParams.set(key, value)
         })
 
         const req: RequestInit = {
