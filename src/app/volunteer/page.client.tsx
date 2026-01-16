@@ -20,7 +20,7 @@ import {
     zDiscordUserIsInServerResponse,
 } from '@/contracts/responses'
 import { useCurrentUser, useFetch } from '@/util/hooks'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
@@ -44,6 +44,7 @@ export default function VolunteerPage() {
                 { signal }
             )
         },
+        placeholderData: keepPreviousData,
     })
 
     const collectInfoMutation = useMutation({

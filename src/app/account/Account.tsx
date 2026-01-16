@@ -11,6 +11,8 @@ export function Account() {
     const { data: session } = useSession()
     const user = useCurrentUser()
 
+    console.log(user)
+
     const AdminPanelButton = useMemo(() => {
         if (user.data) {
             if (hasPermission(user.data, 'Admin Panel Access')) {
@@ -25,7 +27,7 @@ export function Account() {
         }
 
         return undefined
-    }, [user])
+    }, [user.data])
 
     if (!session) return null
 
