@@ -7,4 +7,4 @@ export const zLocation = z.object({
     state: z.string(),
 })
 
-export type ILocation = z.infer<typeof zLocation>
+export type Location = z.infer<typeof zLocation>
