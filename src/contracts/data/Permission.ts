@@ -1,7 +1,7 @@
 import z from 'zod'
 
 export const zPermission = z.object({
-    id: z.number(),
+    id: z.int(),
     name: z.string(),
 })
 

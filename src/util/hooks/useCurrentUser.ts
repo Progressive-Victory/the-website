@@ -1,5 +1,5 @@
 import { useFetch } from './useFetch'
-import { IUser, zUser } from '@/models'
+import { IRole, IUser, zUser } from '@/contracts/data'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 interface DataState {

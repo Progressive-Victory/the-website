@@ -1,7 +1,7 @@
+import { OnboardingStage } from '@/contracts/data'
 import { MongoUser, IMongoUser } from '@/models/MongoUser'
 import { auth, checkAuth, ResponseCode } from '@/util/auth'
 import dbConnect from '@/util/libmongo'
-import { OnboardingStage } from '@/util/stage'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'

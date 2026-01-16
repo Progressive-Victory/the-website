@@ -77,7 +77,7 @@ describe('dateService', () => {
         })
 
         it('should return the number of years between input and now', () => {
-            const dateOfBirth = '2000-03-20'
+            const dateOfBirth = new Date('2000-03-20')
 
             const result = dateService.getAge(dateOfBirth)
 
@@ -85,7 +85,7 @@ describe('dateService', () => {
         })
 
         it('should return the correct value prior to 1970', () => {
-            const dateOfBirth = '1965-10-05'
+            const dateOfBirth = new Date('1965-10-05')
 
             const result = dateService.getAge(dateOfBirth)
 
@@ -93,7 +93,7 @@ describe('dateService', () => {
         })
 
         it('should return one if exactly one year has passed', () => {
-            const dateOfBirth = '2024-01-01'
+            const dateOfBirth = new Date('2024-01-01')
 
             const result = dateService.getAge(dateOfBirth)
 
@@ -101,7 +101,7 @@ describe('dateService', () => {
         })
 
         it('should return zero if just under one year has passed', () => {
-            const dateOfBirth = '2024-01-02'
+            const dateOfBirth = new Date('2024-01-02')
 
             const result = dateService.getAge(dateOfBirth)
 
@@ -109,7 +109,7 @@ describe('dateService', () => {
         })
 
         it('should return null if input is invalid', () => {
-            const dateOfBirth = '2024a01a02'
+            const dateOfBirth = new Date('2024a01a02')
 
             const result = dateService.getAge(dateOfBirth)
 
@@ -117,7 +117,7 @@ describe('dateService', () => {
         })
 
         it('should return null if input is in the future', () => {
-            const dateOfBirth = '2025-01-02'
+            const dateOfBirth = new Date('2025-01-02')
 
             const result = dateService.getAge(dateOfBirth)
 

@@ -13,7 +13,7 @@ import { Link, Message, TiltMessage } from '@/components/common'
 import {
     IMapMemberCountResponse,
     zMapMemberCountResponse,
-} from '@/models/models'
+} from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
 import { useEffect, useState } from 'react'
 
@@ -47,7 +47,7 @@ export function VolunteerMap() {
             setStateMemberCount(statesCount)
             setTotalMemberCount(total)
         })()
-    }, [])
+    }, [onGet])
 
     function onFeatureClick(state: string | null) {
         setSelectedState((prev) => (prev === state ? null : state))

@@ -2,7 +2,7 @@ import MongoDocumentUpdate, {
     IMongoDocumentUpdate,
 } from './MongoDocumentUpdate'
 import { IMongoRole, MongoRole } from './MongoRole'
-import { OnboardingStage } from '@/util/stage'
+import { OnboardingStage } from '@/contracts/data'
 import mongoose, { Document, Model, Schema } from 'mongoose'
 
 // Here is a user document
