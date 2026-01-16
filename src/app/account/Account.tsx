@@ -1,11 +1,15 @@
 'use client'
 
+import StateSelector from './StateSelector'
 import { MainLayout } from '@/components/layout'
 import Image from 'next/image'
+import { useState } from 'react'
 
-interface AccountProps {
+interface MutableFields {
     firstName: string
     lastName: string
+    preferredName: string
+    dateOfBirth: Date
     state: string
     city: string
     zip: number
@@ -15,10 +19,18 @@ interface AccountProps {
     phoneNumber: string
 }
 
-// What is the name field on the user?
+interface InitialAccountInformation extends MutableFields {
+    discordUsername: string
+    discordId: string
+}
+
 const Account = ({
+    discordUsername,
+    discordId,
     firstName,
     lastName,
+    preferredName,
+    dateOfBirth,
     city,
     state,
     zip,
@@ -26,7 +38,24 @@ const Account = ({
     addressLine2,
     emailAddress,
     phoneNumber,
-}: AccountProps) => {
+}: InitialAccountInformation) => {
+    const [formIsUpdated, setFormIsUpdated] = useState<boolean>(false)
+    const [updatedForm, setUpdatedForm] = useState<MutableFields>({
+        firstName,
+        lastName,
+        preferredName,
+        dateOfBirth,
+        city,
+        state,
+        zip,
+        addressLine1,
+        addressLine2,
+        emailAddress,
+        phoneNumber,
+    })
+
+    console.log(updatedForm)
+
     return (
         <MainLayout>
             <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
@@ -56,42 +85,113 @@ const Account = ({
                         <div className="flex flex-col gap-y-2">
                             <div className="flex flex-row justify-between">
                                 <p>Username:</p>
-                                <input></input>
+                                <input
+                                    defaultValue={discordUsername}
+                                    disabled
+                                    className={'rounded-md ring-steel-blue'}
+                                ></input>
                             </div>
-                            {
-                                //<div className="flex flex-col gap-y-2">
-                                //    <p>Username:</p>
-                                //    <p>Email:</p>
-                                //    <p>Discord ID:</p>
-                                //    <p>First Name:</p>
-                                //    <p>Last Name:</p>
-                                //    <p>Preferred Name:</p>
-                                //    <p>Email:</p>
-                                //    <p>Phone Number:</p>
-                                //    <p>Date Of Birth:</p>
-                                //    <p>State:</p>
-                                //    <p>City:</p>
-                                //    <p>Zip Code:</p>
-                                //    <p>Address Line 1:</p>
-                                //    <p>Address Line 2:</p>
-                                //</div>
-                                //<div className="flex flex-col gap-y-2">
-                                //    <input></input>
-                                //    <input></input>
-                                //    <input></input>
-                                //    <input></input>
-                                //    <input></input>
-                                //    <input></input>
-                                //    <input></input>
-                                //    <input></input>
-                                //    <input></input>
-                                //    <input></input>
-                                //    <input></input>
-                                //    <input></input>
-                                //    <input></input>
-                                //    <input></input>
-                                //</div>
-                            }
+                            <div className="flex flex-row justify-between ">
+                                <p>Discord ID:</p>
+                                <input
+                                    defaultValue={discordId}
+                                    disabled
+                                    className={'rounded-md ring-steel-blue'}
+                                ></input>
+                            </div>
+                            <div className="flex flex-row justify-between ">
+                                <p>First Name:</p>
+                                <input
+                                    defaultValue={firstName}
+                                    className={'rounded-md ring-steel-blue'}
+                                    onChange={(e) => {
+                                        setFormIsUpdated(true)
+                                        setUpdatedForm({
+                                            ...updatedForm,
+                                            firstName: e.target.value,
+                                        })
+                                    }}
+                                ></input>
+                            </div>
+                            <div className="flex flex-row justify-between ">
+                                <p>Last Name:</p>
+                                <input
+                                    defaultValue={lastName}
+                                    className={'rounded-md ring-steel-blue'}
+                                    onChange={(e) => {
+                                        setFormIsUpdated(true)
+                                        setUpdatedForm({
+                                            ...updatedForm,
+                                            firstName: e.target.value,
+                                        })
+                                    }}
+                                ></input>
+                            </div>
+                            <div className="flex flex-row justify-between ">
+                                <p>Preferred Name:</p>
+                                <input
+                                    defaultValue={preferredName}
+                                    className={'rounded-md ring-steel-blue'}
+                                ></input>
+                            </div>
+                            <div className="flex flex-row justify-between ">
+                                <p>Email:</p>
+                                <input
+                                    type="email"
+                                    defaultValue={emailAddress}
+                                    className={'rounded-md ring-steel-blue'}
+                                ></input>
+                            </div>
+                            <div className="flex flex-row justify-between ">
+                                <p>Phone Number:</p>
+                                <input
+                                    type="tel"
+                                    defaultValue={phoneNumber}
+                                    className={'rounded-md ring-steel-blue'}
+                                ></input>
+                            </div>
+                            <div className="flex flex-row justify-between ">
+                                <p>Date Of Birth:</p>
+                                <input
+                                    type="date"
+                                    defaultValue={
+                                        dateOfBirth.toISOString().split('T')[0]
+                                    }
+                                    className={'rounded-md ring-steel-blue'}
+                                ></input>
+                            </div>
+                            <div className="flex flex-row justify-between ">
+                                <p>State:</p>
+                                <StateSelector initialValue={state} />
+                            </div>
+                            <div className="flex flex-row justify-between ">
+                                <p>city:</p>
+                                <input
+                                    defaultValue={city}
+                                    className={'rounded-md ring-steel-blue'}
+                                ></input>
+                            </div>
+                            <div className="flex flex-row justify-between ">
+                                <p>ZIP Code:</p>
+                                <input
+                                    defaultValue={zip}
+                                    className={'rounded-md ring-steel-blue'}
+                                ></input>
+                            </div>
+                            <div className="flex flex-row justify-between ">
+                                <p>Address Line 1:</p>
+                                <input
+                                    defaultValue={addressLine1}
+                                    className={'rounded-md ring-steel-blue'}
+                                ></input>
+                            </div>
+                            <div className="flex flex-row justify-between ">
+                                <p>Address Line 2:</p>
+                                <input
+                                    defaultValue={addressLine2}
+                                    className={'rounded-md ring-steel-blue'}
+                                ></input>
+                            </div>
                         </div>
                     </form>
                     <div className="flex flex-col justify-center">
@@ -107,17 +207,6 @@ const Account = ({
                         />
                     </div>
                 </div>
-            </div>
-            <div>
-                <p>{firstName}</p>
-                <p>{lastName}</p>
-                <p>{city}</p>
-                <p>{state}</p>
-                <p>{zip}</p>
-                <p>{addressLine1}</p>
-                <p>{addressLine2}</p>
-                <p>{emailAddress}</p>
-                <p>{phoneNumber}</p>
             </div>
         </MainLayout>
     )

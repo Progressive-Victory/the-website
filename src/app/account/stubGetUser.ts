@@ -1,6 +1,10 @@
 interface StubUserData {
+    discordUsername: string
+    discordId: string
     firstName: string
     lastName: string
+    preferredName: string
+    dateOfBirth: Date
     city: string
     state: string
     zip: number
@@ -12,8 +16,12 @@ interface StubUserData {
 
 const STUB_GET_USER: () => StubUserData | null = () => {
     return {
+        discordUsername: 'discordUsername',
+        discordId: 'discordId',
         firstName: 'Eric',
         lastName: 'Oseid',
+        preferredName: 'Rumplestiltskin',
+        dateOfBirth: new Date('1994/11/27'),
         city: 'Seattle',
         state: 'WA',
         zip: 98102,
