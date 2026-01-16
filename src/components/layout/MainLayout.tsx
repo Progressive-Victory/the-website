@@ -1,7 +1,7 @@
-import { Header } from './Header'
 import { Footer } from './Footer'
+import { Header } from './Header'
 
-export function MainLayout({ children }: { children: React.ReactNode }) {
+export function MainLayout({ children }: { children?: React.ReactNode }) {
     return (
         <div className="relative flex size-full min-h-screen flex-col">
             <Header />

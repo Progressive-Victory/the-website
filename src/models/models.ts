@@ -1,6 +1,5 @@
-import { zDiscordUser } from './users'
+import { zDiscordUser } from '@/contracts/data'
 import z from 'zod'
-import { $ZodShape } from 'zod/v4/core'
 
 export interface FetchRequest {
     method: string
@@ -68,19 +67,6 @@ export const zDocumentUpdate = z.object({
 
 export type DocumentUpdate = z.infer<typeof zDocumentUpdate>
 
-/*export const zDiscordUser = z.object({
-    id: z.string(),
-    username: z.string(),
-    discriminator: z.string().optional(),
-    globalName: z.string().nullable().optional(),
-    image: z.string().nullable(),
-    bot: z.boolean().optional(),
-    locale: z.string().nullable().optional(),
-    verified: z.boolean().optional(),
-})*/
-
-//export type DiscordUser = z.infer<typeof zDiscordUser>
-
 export const zDiscordMember = z.object({
     user: zDiscordUser.nullable(),
     nickname: z.string().nullable(),
@@ -95,30 +81,3 @@ export const zDiscordMember = z.object({
 })
 
 export type DiscordMember = z.infer<typeof zDiscordMember>
-
-export const zMapMemberCountResponse = z.object({
-    data: z.record(z.string(), z.coerce.number()),
-})
-
-export type IMapMemberCountResponse = z.infer<typeof zMapMemberCountResponse>
-
-export enum UpdateHistoryType {
-    Inserted = 'I',
-    Updated = 'U',
-    Merged = 'M',
-    Deleted = 'D',
-}
-
-export const zUpdateHistoryType = z.enum(UpdateHistoryType)
-
-const zUpdateHistoryBase = z.object({
-    type: zUpdateHistoryType,
-    whoUpdatedId: z.int(),
-    whenUpdatedUtc: z.date(),
-})
-
-export const zUpdateHistory = <Shape extends $ZodShape>(
-    zData: z.ZodObject<Shape>
-) => zUpdateHistoryBase.extend(zData.shape)
-
-export type UpdateHistory<T> = z.infer<typeof zUpdateHistoryBase> & T

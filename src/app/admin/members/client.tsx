@@ -10,16 +10,17 @@ import {
     TextField,
 } from '@/components/form'
 import { DateField } from '@/components/form/DateField'
-import { zUser, IUser, IRole, zRole } from '@/models'
+import { IRole, IUser, zRole, zUser } from '@/contracts/data'
+import { IPaginatedResponse } from '@/contracts/responses'
 import { dateService } from '@/services'
 import { useCurrentUser, useFetch } from '@/util/hooks'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import deepEqual from 'deep-equal'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 import z from 'zod'
 
 export default function ClientPage() {
-    const [roles, setRoles] = useState<IRole[] | null>(null)
     const eventTarget = useRef(new EventTarget())
 
     // We save the original value we got from the API so that we can easily
@@ -33,18 +34,65 @@ export default function ClientPage() {
 
     const loggedInUser = useCurrentUser()
 
-    useEffect(() => {
-        onGet<IRole[]>('/roles/all', z.array(zRole))
-            .then((res) => {
-                setRoles(res)
+    const getRolesQuery = useQuery({
+        queryKey: ['/roles'],
+        async queryFn({ signal }) {
+            const limit = 50
+
+            const { data: roles, count } = await onGet<
+                IPaginatedResponse<IRole>
+            >('/roles', z.array(zRole), {
+                query: { limit: limit.toString() },
+                signal,
             })
-            .catch((err) => {
-                console.error(err)
+
+            const pages = Math.ceil(count / limit)
+
+            const queries: Promise<IRole[]>[] = []
+            for (let page = 1; page < pages; page++) {
+                const query = async (page: number) => {
+                    const thisLimit = Math.min(limit, count - page * limit)
+
+                    const response = await onGet<IPaginatedResponse<IRole>>(
+                        '/roles',
+                        z.array(zRole),
+                        {
+                            query: {
+                                limit: thisLimit.toString(),
+                                page: page.toString(),
+                            },
+                            signal,
+                        }
+                    )
+
+                    return response.data
+                }
+
+                queries.push(query(page))
+            }
+
+            roles.push(
+                ...(await Promise.all(queries)).flatMap((perms) => perms)
+            )
+
+            return roles
+        },
+        placeholderData: keepPreviousData,
+    })
+    const roles = getRolesQuery.data ?? []
+
+    const selectedUserQuery = useQuery({
+        queryKey: [`/users/${selectedUser?.id}`],
+        async queryFn({ signal }) {
+            return await onGet<IUser>(`/users/${selectedUser?.id}`, zUser, {
+                query: { includeDiscordUsers: true, includeHistory: true },
+                signal,
             })
-    }, [])
+        },
+        placeholderData: keepPreviousData,
+    })
 
     const handleSelectItem = (value: IUser) => {
-        console.log('handling select item')
         if (value.id === selectedUser?.id) return
 
         if (!deepEqual(selectedUser, originalUser)) {
@@ -67,29 +115,6 @@ export default function ClientPage() {
         value: user,
     })
 
-    /*function flattenZodType(dataType: ZodObject) {
-        function traverseObj(
-            obj: object
-        ): { name: string; fieldType: ZodSchema }[] {
-            const res: { name: string; fieldType: ZodSchema }[] = []
-            Object.entries(obj).forEach(([key, value]) => {
-                console.log(key)
-                if (value.def.innerType) {
-                    console.log('Inner Type: ' + value.def.innerType.def.type)
-                    if (value.def.innerType.def.type === 'object') {
-                        res.concat(traverseObj(value.def.innerType.def.shape))
-                    } else {
-                        res.push({ name: key, fieldType: value.shape })
-                    }
-                } else {
-                    res.push({ name: key, fieldType: value.shape })
-                }
-            })
-            return res
-        }
-        const shape = dataType.shape
-        return traverseObj(shape)
-    }*/
     return (
         <>
             <PaginatedList<IUser>
@@ -102,8 +127,9 @@ export default function ClientPage() {
                         query_key: 'roles',
                         display_key: 'name',
                         value_key: 'name',
-                        // @ts-expect-error shut up
-                        options: roles,
+                        options: (roles ?? []).map((role) => ({
+                            name: role.name,
+                        })),
                     },
                 ]}
                 searchFields={[
@@ -187,7 +213,7 @@ export default function ClientPage() {
 
             <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
                 {selectedUser && originalUser ? (
-                    <Form<IUser> //need history figured out for this
+                    <Form<IUser>
                         zodSchema={zUser}
                         initialValue={originalUser}
                         setInitialValue={setOriginalUser}
@@ -207,9 +233,9 @@ export default function ClientPage() {
                                 new Event('refetch')
                             )
                             if (selectedUser.id === loggedInUser.data?.id)
-                                loggedInUser.reload()
+                                void loggedInUser.onRefetch()
                         }}
-                        updateHistory
+                        updateHistory={selectedUserQuery.data?.history}
                     >
                         <FormGroup title="Account Information">
                             <TextField

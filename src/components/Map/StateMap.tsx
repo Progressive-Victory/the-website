@@ -120,16 +120,24 @@ function USMapLayer({
             })
         }
         return newObj
-    }, [stateMemberCount])
+    }, [stateMemberCount, getFillColor])
 
     function onEachFeature(
         f: Feature<Geometry, { name: string }>,
         layer: L.Layer
     ) {
         layer.on({
-            mouseover: (e) => onFeatureHover(e.target.feature.properties.name),
+            mouseover: (e) =>
+                onFeatureHover(
+                    (e.target as { feature: { properties: { name: string } } })
+                        .feature.properties.name
+                ),
             mouseout: () => onFeatureHover(null),
-            click: (e) => onFeatureClick(e.target.feature.properties.name),
+            click: (e) =>
+                onFeatureClick(
+                    (e.target as { feature: { properties: { name: string } } })
+                        .feature.properties.name
+                ),
         })
     }
 
@@ -152,14 +160,19 @@ function USMapLayer({
                 data={data}
                 onEachFeature={onEachFeature}
                 style={(feature) => {
-                    const baseColor =
-                        baseStateColors?.[feature?.properties?.name]
+                    const properties = feature?.properties as
+                        | { name: string }
+                        | undefined
+
+                    const baseColor = properties?.name
+                        ? baseStateColors?.[properties.name]
+                        : undefined
 
                     return {
                         fillColor:
-                            selectedState === feature?.properties?.name
+                            selectedState === properties?.name
                                 ? '#CE3728'
-                                : hoveredState === feature?.properties?.name
+                                : hoveredState === properties?.name
                                   ? '#EBAFA9'
                                   : (baseColor ??
                                     getBrandColor('mapBlue', 100)),

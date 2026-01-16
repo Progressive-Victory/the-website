@@ -1,5 +1,8 @@
+import z from 'zod'
+
 // State management enum for join flow
 export enum OnboardingStage {
+    // The user has logged in but hasn't begun onboarding yet
     NOT_STARTED = 'not_started',
 
     // Onboarding form has been submitted, but no SMS code has been entered.
@@ -14,3 +17,5 @@ export enum OnboardingStage {
     // The user has joined the server successfully.
     JOINED = 'joined',
 }
+
+export const zOnboardingStage = z.enum(OnboardingStage)

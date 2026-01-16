@@ -2,10 +2,12 @@
 
 import PaginatedList from '@/components/admin/PaginatedList'
 import { Form, FormGroup, SelectManyField, TextField } from '@/components/form'
-import { IPermission, IRole, zPermission, zRole } from '@/models'
+import { IPermission, IRole, zPermission, zRole } from '@/contracts/data'
+import { IPaginatedResponse } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import deepEqual from 'deep-equal'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import z from 'zod'
 
 export default function ClientPage() {
@@ -18,25 +20,52 @@ export default function ClientPage() {
     // the form
     const [selectedRole, setSelectedRole] = useState<IRole | null>(null)
     const [roles, setRoles] = useState<IRole[]>([])
-    const [permissions, setPermissions] = useState<IPermission[]>([])
     const { onGet } = useFetch()
 
-    useEffect(() => {
-        const fetchPermList = async (): Promise<IPermission[]> => {
-            return onGet<IPermission[]>(
-                '/permissions/all',
-                z.array(zPermission)
-            )
-        }
+    const getPermissionsQuery = useQuery({
+        queryKey: ['/permissions'],
+        async queryFn({ signal }) {
+            const limit = 50
 
-        fetchPermList()
-            .then((res) => {
-                setPermissions(res)
+            const { data: permissions, count } = await onGet<
+                IPaginatedResponse<IPermission>
+            >('/permissions', z.array(zPermission), {
+                query: { limit: limit.toString() },
+                signal,
             })
-            .catch((err) => {
-                console.error(err)
-            })
-    }, [])
+
+            const pages = Math.ceil(count / limit)
+
+            const queries: Promise<IPermission[]>[] = []
+            for (let page = 1; page < pages; page++) {
+                const query = async (page: number) => {
+                    const thisLimit = Math.min(limit, count - page * limit)
+
+                    const response = await onGet<
+                        IPaginatedResponse<IPermission>
+                    >('/permissions', z.array(zPermission), {
+                        query: {
+                            limit: thisLimit.toString(),
+                            page: page.toString(),
+                        },
+                        signal,
+                    })
+
+                    return response.data
+                }
+
+                queries.push(query(page))
+            }
+
+            permissions.push(
+                ...(await Promise.all(queries)).flatMap((perms) => perms)
+            )
+
+            return permissions
+        },
+        placeholderData: keepPreviousData,
+    })
+    const permissions = getPermissionsQuery.data ?? []
 
     const handleSelectItem = (value: IRole) => {
         if (value.id === selectedRole?.id) return
@@ -71,8 +100,9 @@ export default function ClientPage() {
                         query_key: 'permissions',
                         display_key: 'name',
                         value_key: 'name',
-                        // @ts-expect-error shut up
-                        options: permissions,
+                        options: (permissions ?? []).map((permission) => ({
+                            name: permission.name,
+                        })),
                     },
                 ]}
                 searchFields={[

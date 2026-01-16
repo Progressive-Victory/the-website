@@ -1,7 +1,4 @@
-import useInit from './useInit'
-
-export { useInit }
-
+export * from './useCurrentUser'
 export * from './useFetch'
 export * from './useHydration'
-export * from './useCurrentUser'
+export * from './useInit'

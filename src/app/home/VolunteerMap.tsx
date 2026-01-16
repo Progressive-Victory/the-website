@@ -13,41 +13,43 @@ import { Link, Message, TiltMessage } from '@/components/common'
 import {
     IMapMemberCountResponse,
     zMapMemberCountResponse,
-} from '@/models/models'
+} from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
-import { useEffect, useState } from 'react'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 
 export function VolunteerMap() {
-    /* States */
     const [hoveredState, setHoveredState] = useState<string | null>(null)
     const [selectedState, setSelectedState] = useState<string | null>(null)
-    const [totalMemberCount, setTotalMemberCount] = useState<number>(0)
-    const [stateMemberCount, setStateMemberCount] =
-        useState<Record<string, number>>()
     const { onGet } = useFetch()
 
-    useEffect(() => {
-        void (async () => {
-            const statesCount: Record<string, number> = {}
-            const { data } = await onGet<IMapMemberCountResponse>(
-                '/map/member-count-by-state',
-                zMapMemberCountResponse
+    const memberCountQuery = useQuery({
+        queryKey: ['/map/memberCounts'],
+        async queryFn({ signal }) {
+            const data = await onGet<IMapMemberCountResponse>(
+                '/map/memberCounts',
+                zMapMemberCountResponse,
+                { signal }
             )
-            let total = 0
-            Object.entries(data).forEach(([k, v]) => {
-                const state = US_STATES.find(
-                    (s) => s.code.toLowerCase() === k
-                )?.name
-                if (typeof state === 'string') {
-                    statesCount[state] = typeof v === 'number' ? v : 0
-                    total += statesCount[state]
-                }
-            })
 
-            setStateMemberCount(statesCount)
-            setTotalMemberCount(total)
-        })()
-    }, [])
+            const stateCountMap = data.states.reduce(
+                (map, state) => {
+                    const name = US_STATES.find(
+                        (s) => s.code.toLowerCase() === state.code
+                    )?.name
+                    if (name) map[name] = state.count
+                    return map
+                },
+                {} as Record<string, number>
+            )
+
+            return { total: data.total, stateCountMap }
+        },
+        placeholderData: keepPreviousData,
+    })
+
+    const stateMemberCounts = memberCountQuery.data?.stateCountMap
+    const totalMemberCount = memberCountQuery.data?.total
 
     function onFeatureClick(state: string | null) {
         setSelectedState((prev) => (prev === state ? null : state))
@@ -89,13 +91,13 @@ export function VolunteerMap() {
                     botLeftContent={
                         <p className="font-medium">
                             {selectedState
-                                ? `Members in ${selectedState}: ${stateMemberCount?.[selectedState]}`
+                                ? `Members in ${selectedState}: ${stateMemberCounts?.[selectedState]}`
                                 : `Total Members: ${totalMemberCount}`}
                         </p>
                     }
                 >
                     <CombinedMap
-                        stateMemberCount={stateMemberCount}
+                        stateMemberCount={stateMemberCounts}
                         onFeatureClick={onFeatureClick}
                         onFeatureHover={setHoveredState}
                         hoveredState={hoveredState}

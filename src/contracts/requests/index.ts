@@ -1,1 +1,5 @@
 export * from './CreateUserRequest'
+export * from './UpdateUserRequest'
+export * from './UserOnboardingCollectInfoRequest'
+export * from './UserOnboardingJoinRequest'
+export * from './UserOnboardingVerifyRequest'

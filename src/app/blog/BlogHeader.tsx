@@ -1,5 +1,5 @@
-import React from 'react'
 import { Logo } from '@/components/common'
+import React from 'react'
 
 export function BlogHeader() {
     function DoubleTextEffect(

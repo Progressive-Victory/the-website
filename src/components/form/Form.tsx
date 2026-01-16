@@ -1,6 +1,5 @@
 import { FormGroupProps } from '.'
-import { UpdateHistory, zUpdateHistory } from '@/models/models'
-import { zUser } from '@/models/users'
+import { UpdateHistory } from '@/contracts/data'
 import { useFetch } from '@/util/hooks'
 import { useMutation } from '@tanstack/react-query'
 import deepEqual from 'deep-equal'
@@ -18,7 +17,7 @@ export interface FormProps<T> {
     patchEndpoint: string
     postEndpoint?: string
     onChangesSaved?: (value: T) => void
-    updateHistory?: boolean
+    updateHistory?: UpdateHistory<T>[]
     children?:
         | React.ReactElement<FormGroupProps>
         | React.ReactElement<FormGroupProps>[]
@@ -29,28 +28,23 @@ function capitalizeFirst(str: string) {
 }
 
 function flatten(obj: object): Record<string, unknown> {
-    console.log('flattening')
     const res = Object.entries(obj).reduce(
         (map, current) => {
             const key = current[0]
-            let value = current[1]
-            //console.log(map, key, value, typeof value)
+            let value = current[1] as unknown
             if (Array.isArray(value) && value.length > 0) value = value[0]
             if (value && typeof value === 'object') {
                 const res = flatten(value)
                 const transformedVals = Object.entries(res).reduce(
                     (mapTr, currentTr) => {
-                        //console.log(currentTr)
                         const [keyTr, valueTr] = currentTr
                         if (Object.keys(map).includes(keyTr)) {
-                            //console.log(key + capitalizeFirst(keyTr))
                             mapTr[key + capitalizeFirst(keyTr)] = valueTr
                         } else mapTr[keyTr] = valueTr
                         return mapTr
                     },
                     {} as Record<string, unknown>
                 )
-                console.log('transformed vals', transformedVals)
                 return { ...map, ...transformedVals }
             }
             map[key] = value
@@ -58,12 +52,8 @@ function flatten(obj: object): Record<string, unknown> {
         },
         {} as Record<string, unknown>
     )
-    console.log(res)
     return res
 }
-
-/*const getHistoryUpdatedAt = (update: Partial<IMongoDocumentUpdate>) =>
-    new Date(update.updated_at as unknown as string)*/
 
 export function Form<T extends { id: number }>({
     zodSchema,
@@ -80,10 +70,7 @@ export function Form<T extends { id: number }>({
     const [patchMap, setPatchMap] = useState<Record<string, unknown>>({})
     const [invalidMap, setInvalidMap] = useState<Record<string, boolean>>({})
     const [editMode, setEditMode] = useState(false)
-    const { onGet, onPatch } = useFetch()
-
-    const [updateHistoryList, setUpdateHistoryList] =
-        useState<UpdateHistory<T>[]>()
+    const { onPatch } = useFetch()
 
     const invalid = Object.values(invalidMap).length > 0
     const equal = Object.values(patchMap).length == 0
@@ -108,15 +95,6 @@ export function Form<T extends { id: number }>({
             alert(`Error: ${e?.message ?? e}`)
         },
     })
-
-    useEffect(() => {
-        onGet<UpdateHistory<T>[]>(
-            `/users/${initialValue.id}/update-history`,
-            z.array(zUpdateHistory(zUser))
-        )
-            .then((res) => setUpdateHistoryList(res))
-            .catch((err) => console.error(err))
-    }, [initialValue, onGet])
 
     const saveChanges = async () => {
         //this is where history updates should log
@@ -224,52 +202,47 @@ export function Form<T extends { id: number }>({
                 </div>
             </header>
             {hydratedGroups}
-            {updateHistory &&
-                updateHistoryList &&
-                updateHistoryList.length > 0 && (
-                    <section>
-                        <h2 className="my-4 text-xl font-semibold">
-                            Update History
-                        </h2>
-                        <div className="grid grid-cols-3 gap-2 gap-x-4">
-                            {updateHistoryList.map((update, updateIndex) => (
-                                <UpdateHistoryEntry
-                                    key={updateIndex}
-                                    {...update}
-                                />
-                            ))}
-                        </div>
-                    </section>
-                )}
+            {updateHistory && (
+                <section>
+                    <h2 className="my-4 text-xl font-semibold">
+                        Update History
+                    </h2>
+                    <div className="grid grid-cols-3 gap-2 gap-x-4">
+                        {updateHistory.map((update, updateIndex) => (
+                            <UpdateHistoryEntry key={updateIndex} {...update} />
+                        ))}
+                    </div>
+                </section>
+            )}
         </form>
     )
 }
 
-function UpdateHistoryEntry<T extends { id: number }>(
-    update: UpdateHistory<T>
-) {
+function UpdateHistoryEntry<T>(update: UpdateHistory<T>) {
+    const {
+        historyId,
+        historyType,
+        historyWhenUpdatedUtc,
+        historyWhoUpdatedId,
+        ...fields
+    } = update
+
     return (
-        <div className="contents">
+        <div className="contents" key={historyId}>
             <div>
-                <span>Update Type: {update.type}</span>
-                <span>Updated At: {update.whenUpdatedUtc.toDateString()}</span>
-                <span>Updater Id: {update.whoUpdatedId}</span>
+                <span>Update Type: {historyType}</span>
+                <span>Updated At: {historyWhenUpdatedUtc.toDateString()}</span>
+                <span>Updater Id: {historyWhoUpdatedId}</span>
             </div>
             <div>
-                {Object.entries(update).map((value, index) => {
-                    const keys = Object.keys(update)
-                    if (
-                        !['type', 'whoUpdatedId', 'whoUpdatedUtc'].includes(
-                            keys[index]
-                        )
-                    ) {
-                        return (
-                            <span key={value.toString()}>
-                                {keys[index]}: {value.toString()}
-                            </span>
-                        )
-                    }
-                })}
+                {Object.entries(fields).map(([key, value]) => (
+                    <span key={key}>
+                        {key}:{' '}
+                        {(
+                            value as string | number | boolean | null
+                        )?.toString()}
+                    </span>
+                ))}
             </div>
         </div>
     )

@@ -25,7 +25,7 @@ export function Account() {
         }
 
         return undefined
-    }, [user])
+    }, [user.data])
 
     if (!session) return null
 
