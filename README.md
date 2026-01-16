@@ -1,3 +1,5 @@
+# The Progressive Victory Website
+
 ## Getting Started with Development
 
 Welcome to the PV Frontpage Redux repo! This is the source code of our website. Before contributing to the codebase you **MUST** read the following information. If you're a fullstack Next.js pro you can quickly skim this.
@@ -22,13 +24,13 @@ Check out a new branch from `main` before you begin working on any new feature. 
 
 The easiest way to install pnpm is via npm after installing Node.js. Otherwise visit the linked page above to install it on your machine.
 
-```
+```sh
 npm install -g pnpm@latest-10
 ```
 
 First, install the dependencies,
 
-```
+```sh
 pnpm install
 ```
 
@@ -51,10 +53,6 @@ NEXTAUTH_URL="http://localhost:3000"
 # The ID of the Discord server the bot is in (for dev purposes would likely be PV Dev Server)
 GUILD_ID="122"
 
-# Unless needed for you work the SMS API information is restricted
-NEUTRINO_USERID="pvuser"
-NEUTRINO_SECRET="123egh"
-
 # To connect to our dev DB
 MONGODB_URI="mongodb://localhost:27017"
 
@@ -66,7 +64,7 @@ SITE_URL="https://example.com"
 
 Finally, run the development server
 
-```
+```sh
 pnpm dev
 ```
 
@@ -104,30 +102,14 @@ npx playwright install --with-deps
 
 ### Run tests
 
-```
+```sh
 pnpm run test
 ```
 
-### Website Pages That Reference Models:
+### Website Pages That Reference Models
 
-- \\src\\app\\api\\onboarding\\zip\\validate\\route -- sH3ll: working on now
-- \\src\\app\\api\\onboarding\\zip\\location\\route
-- \\src\\app\\api\\admin\\users\\route
 - \\src\\app\\admin\\roles\\route
-- \\src\\app\\api\\admin\\permissions\\route
-- \\src\\app\\api\\admin\\roles\\route
 - \\src\\app\\admin\\members\\page
-- \\src\\app\\api\\admin\\roles\\route
-- \\src\\app\\api\\admin\\users\\route
-- \\src\\app\\api\\admin\\users\\\[id\]\\route
-- \\src\\app\\api\\admin\\users\\route
-- \\src\\app\\api\\map\\count\\route
-- \\src\\app\\api\\map\\users-count\\route
-- \\src\\app\\api\\onboarding\\discord\\join\\route
-- \\src\\app\\api\\onboarding\\discord\\status\\route
-- \\src\\app\\api\\onboarding\\sms\\check\\route
-- \\src\\app\\api\\onboarding\\sms\\send\\route
 - \\src\\app\\api\\user
-- \\src\\app\\volunteer
 - \\src\\util\\auth
 - \\src\\util\\stats
