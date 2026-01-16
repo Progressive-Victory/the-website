@@ -1,7 +1,7 @@
 'use client'
 
 import StateSelector from './StateSelector'
-import { MainLayout } from '@/components/layout'
+import { MainLayout } from '@/components/layout/MainLayout'
 import Image from 'next/image'
 import { useState } from 'react'
 
