@@ -1,5 +1,5 @@
 import { getGuildAvatar } from './discord'
-import { IRole, IUser, zUser } from '@/models'
+import { IRole, IUser, zUser } from '@/contracts/data'
 import { OAuth2Routes, OAuth2Scopes } from 'discord-api-types/v10'
 import NextAuth, { Profile } from 'next-auth'
 import Discord from 'next-auth/providers/discord'
@@ -97,7 +97,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     }
                 ).catch((err) => console.error(err))
 
-                const image = await getGuildAvatar(profile.id, profile.avatar)
+                const image = await getGuildAvatar(profile.id)
 
                 return {
                     id: profile.id,

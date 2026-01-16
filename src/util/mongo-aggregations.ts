@@ -1,5 +1,5 @@
 import dbConnect from '@/util/libmongo'
-import { Aggregate, Model } from 'mongoose'
+import { Aggregate, Model, PipelineStage } from 'mongoose'
 
 export interface Filter {
     /**
@@ -43,18 +43,19 @@ export async function executeAggregationPaginated<T>(
 ) {
     await dbConnect()
 
-    const count_results = await model
-        // @ts-expect-error no thanks
-        .aggregate(aggregation._pipeline)
+    const count_results = (await model
+        .aggregate(
+            (aggregation as unknown as { _pipeline: PipelineStage[] })._pipeline
+        )
         .count('count')
-        .exec()
+        .exec()) as { count?: number }[]
 
-    const count = (count_results[0]?.count ?? 0) as number
+    const count = count_results[0]?.count ?? 0
 
-    const data = await aggregation
+    const data = (await aggregation
         .skip(options.skip)
         .limit(options.limit)
-        .exec() as T[]
+        .exec()) as T[]
 
     return {
         data,

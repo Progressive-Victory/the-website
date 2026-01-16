@@ -125,7 +125,6 @@ export const ClientMap = ({
             const newList = []
             for (const zipcode of zipCodes) {
                 const data = await zipToLatLong(zipcode)
-                // @ts-expect-error shut up
                 if (data) newList.push(data)
             }
             console.log(newList)

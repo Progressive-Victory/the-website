@@ -102,8 +102,9 @@ export default function ClientPage() {
                         query_key: 'roles',
                         display_key: 'name',
                         value_key: 'name',
-                        // @ts-expect-error shut up
-                        options: roles,
+                        options: (roles ?? []).map((role) => ({
+                            name: role.name,
+                        })),
                     },
                 ]}
                 searchFields={[
