@@ -71,8 +71,9 @@ export default function ClientPage() {
                         query_key: 'permissions',
                         display_key: 'name',
                         value_key: 'name',
-                        // @ts-expect-error shut up
-                        options: permissions,
+                        options: (permissions ?? []).map((permission) => ({
+                            name: permission.name,
+                        })),
                     },
                 ]}
                 searchFields={[

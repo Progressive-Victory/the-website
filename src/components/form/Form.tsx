@@ -33,7 +33,7 @@ function flatten(obj: object): Record<string, unknown> {
     const res = Object.entries(obj).reduce(
         (map, current) => {
             const key = current[0]
-            let value = current[1]
+            let value = current[1] as unknown
             //console.log(map, key, value, typeof value)
             if (Array.isArray(value) && value.length > 0) value = value[0]
             if (value && typeof value === 'object') {

@@ -4,7 +4,7 @@ import { IMongoUser, MongoUser } from '@/models/MongoUser'
 import dbConnect from '@/util/libmongo'
 import { OAuth2Routes, OAuth2Scopes } from 'discord-api-types/v10'
 import NextAuth, { Profile } from 'next-auth'
-import Discord from 'next-auth/providers/discord'
+import Discord, { DiscordProfile } from 'next-auth/providers/discord'
 
 export enum PermissionName {
     ADMIN_PANEL_ACCESS = 'Admin Panel Access',
@@ -38,7 +38,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
             redirectProxyUrl: process.env.BOOMERANG_URI,
 
-            async profile(profile) {
+            async profile(profile: DiscordProfile) {
                 // Executed async. No reason to wait on this update before sending a response down.
                 void MongoUser.findOneAndUpdate(
                     {
@@ -49,7 +49,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     }
                 )
 
-                const image = await getGuildAvatar(profile.id, profile.avatar)
+                const image = await getGuildAvatar(profile.id)
 
                 return {
                     id: profile.id,
