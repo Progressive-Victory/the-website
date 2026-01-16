@@ -21,11 +21,13 @@ export interface IOnboardingForm {
 
 export interface CollectInfoStageProps {
     initialForm: IOnboardingForm
+    isPending: boolean
     onSuccess: (form: IOnboardingForm) => void
 }
 
 export function CollectInfoStage({
     initialForm,
+    isPending,
     onSuccess,
 }: CollectInfoStageProps) {
     const { onGet } = useFetch()
@@ -38,7 +40,7 @@ export function CollectInfoStage({
     const firstNameIsValid = validName(form.firstName)
     const lastNameIsValid = validName(form.lastName)
 
-    const age = dateService.getAge(form.dateOfBirth)
+    const age = dateService.getAge(new Date(form.dateOfBirth))
     const dateOfBirthIsValid = age != null
 
     const zipCodeIsValid = isValidCountryPostalCode(
@@ -233,7 +235,7 @@ export function CollectInfoStage({
                 onClick={() => {
                     void handleSubmit()
                 }}
-                disabled={!isValid}
+                disabled={!isValid || isPending}
                 className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
             >
                 Join Now

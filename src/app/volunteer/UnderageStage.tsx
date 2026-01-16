@@ -1,18 +1,11 @@
-import { dateService } from '@/services'
-import { useInit } from '@/util/hooks'
 import { CalendarIcon } from '@heroicons/react/24/solid'
 
 export interface UnderageStageProps {
-    dateOfBirth: string | undefined
+    isPending: boolean
     onAgeUp: () => void
 }
 
-export function UnderageStage({ dateOfBirth, onAgeUp }: UnderageStageProps) {
-    useInit(() => {
-        const age = dateService.getAge(dateOfBirth ?? '') ?? 0
-        if (age >= 18) onAgeUp()
-    })
-
+export function UnderageStage({ isPending, onAgeUp }: UnderageStageProps) {
     return (
         <div className="flex min-h-[200px] max-w-[40vw] flex-col items-center justify-center p-4">
             <CalendarIcon className="size-12 text-steel-blue" />
@@ -20,6 +13,9 @@ export function UnderageStage({ dateOfBirth, onAgeUp }: UnderageStageProps) {
                 Sorry! You have to be 18 years old or older to volunteer with
                 Progressive Victory.
             </p>
+            <button disabled={isPending} onClick={onAgeUp}>
+                Check again
+            </button>
         </div>
     )
 }
