@@ -9,7 +9,7 @@ export interface CollapsibleSectionProps {
     initialOpenState?: boolean
 }
 
-export function CollapsableSection({
+export function CollapsibleSection({
     children,
     title,
     initialOpenState,

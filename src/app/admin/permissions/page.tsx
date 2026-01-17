@@ -2,38 +2,57 @@
 
 import styles from './permissions.module.css'
 import PaginatedList from '@/components/admin/PaginatedList'
-import { Form, FormGroup, TextField } from '@/components/form'
+import { Form, FormGroup, FormState, TextField } from '@/components/form2'
 import { IPermission, zPermission } from '@/contracts/data'
-import deepEqual from 'deep-equal'
+import { IUpdatePermissionRequest } from '@/contracts/requests'
+import { useFetch } from '@/util/hooks'
+import { useMutation } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 
 export default function Page() {
     const eventTarget = useRef(new EventTarget())
+    const { onPatch } = useFetch()
 
-    // We save the original value we got from the API so that we can easily
-    // discard changes without saving
-    const [originalPermission, setOriginalPermission] =
-        useState<IPermission | null>(null)
-    // This is the mutable copy we actually update when the user interacts with
-    // the form
+    const [permissions, setPermissions] = useState<IPermission[]>([])
     const [selectedPermission, setSelectedPermission] =
         useState<IPermission | null>(null)
-    const [permissions, setPermissions] = useState<IPermission[]>([])
+
+    const [formState, setFormState] = useState<FormState<IPermission> | null>(
+        null
+    )
+
+    const updateMutation = useMutation({
+        async mutationFn({
+            id,
+            request,
+        }: {
+            id: number
+            request: IUpdatePermissionRequest
+        }) {
+            await onPatch(`/permissions/${id}`, request, null)
+            eventTarget.current.dispatchEvent(new Event('refetch'))
+        },
+    })
 
     const handleSelectItem = (value: IPermission) => {
         if (value.id === selectedPermission?.id) return
 
-        if (!deepEqual(selectedPermission, originalPermission)) {
+        if (formState?.dirty) {
             const proceed = confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
             )
             if (!proceed) return
         }
 
-        // We need to copy to make sure that the value in the list is not
-        // modified until we save
-        setSelectedPermission({ ...value } as IPermission)
-        setOriginalPermission({ ...value } as IPermission)
+        setSelectedPermission(value)
+    }
+
+    const handleSave = (permission: IPermission) => {
+        setSelectedPermission(permission)
+        updateMutation.mutate({
+            id: permission.id,
+            request: { name: permission.name },
+        })
     }
 
     const makeItem = (permission: IPermission) => ({
@@ -66,23 +85,17 @@ export default function Page() {
             />
 
             <div className={styles.detailPane}>
-                {selectedPermission && originalPermission ? (
+                {selectedPermission ? (
                     <Form<IPermission>
-                        zodSchema={zPermission}
-                        initialValue={originalPermission}
-                        setInitialValue={setOriginalPermission}
-                        currentValue={selectedPermission}
-                        setCurrentValue={setSelectedPermission}
-                        computeTitle={(permission) => permission.name ?? ''}
-                        patchEndpoint={`/permissions/${selectedPermission.id}`}
-                        onChangesSaved={() => {
-                            eventTarget.current.dispatchEvent(
-                                new Event('refetch')
-                            )
-                        }}
+                        key={selectedPermission.id}
+                        form={selectedPermission}
+                        title={selectedPermission.name}
+                        saving={updateMutation.isPending}
+                        onUpdate={setFormState}
+                        onSave={handleSave}
                     >
                         <FormGroup title="Details">
-                            <TextField name="Name" field="name" required />
+                            <TextField label="Name" field="name" required />
                         </FormGroup>
                     </Form>
                 ) : (
