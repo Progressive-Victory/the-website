@@ -1,4 +1,4 @@
-import { REST } from "@discordjs/rest"
+import { REST } from '@discordjs/rest'
 
 const discordToken = process.env.DISCORD_BOT_TOKEN
 

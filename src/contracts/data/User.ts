@@ -42,4 +42,4 @@ export const zUser = zBaseUser.extend({
     history: z.array(zUpdateHistory(zBaseUser)).optional(),
 })
 
-export type IUser = z.infer<typeof zUser>
+export type User = z.infer<typeof zUser>

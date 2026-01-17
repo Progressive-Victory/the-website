@@ -23,8 +23,8 @@ export function Account() {
     }, [user.data])
 
     const handleSignOut = () => {
-        onSignOut();
-        void signOut({callbackUrl: '/'})
+        onSignOut()
+        void signOut({ callbackUrl: '/' })
     }
 
     if (!session) return null

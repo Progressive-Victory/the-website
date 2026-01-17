@@ -7,4 +7,4 @@ export const zDiscordUser = z.object({
     userId: z.number().optional(),
 })
 
-export type IDiscordUser = z.infer<typeof zDiscordUser>
+export type DiscordUser = z.infer<typeof zDiscordUser>

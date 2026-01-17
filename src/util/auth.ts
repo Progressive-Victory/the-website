@@ -1,5 +1,5 @@
 import { getGuildAvatar } from './discord'
-import { IRole, IUser, zUser } from '@/contracts/data'
+import { Role, User, zUser } from '@/contracts/data'
 import { OAuth2Routes, OAuth2Scopes } from 'discord-api-types/v10'
 import NextAuth, { Profile } from 'next-auth'
 import Discord, { DiscordProfile } from 'next-auth/providers/discord'
@@ -188,7 +188,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                                     discordImage: extractAvatarHash(
                                         eprofile.avatar
                                     ),
-                                    userId: ((await usr.json()) as IUser).id,
+                                    userId: ((await usr.json()) as User).id,
                                 }),
                             }
                         )
@@ -212,9 +212,9 @@ export const enum ResponseCode {
 
 // Role checking utility function
 // takes an array of strings, each matching the name field of a given roles
-const hasRequiredRoles = (user: IUser, requiredRoles: string[] = []) => {
+const hasRequiredRoles = (user: User, requiredRoles: string[] = []) => {
     const userRoles = user.roles
-    const roleStrs = userRoles?.map((role: IRole) => role.name)
+    const roleStrs = userRoles?.map((role: Role) => role.name)
     if (!user?.roles || !Array.isArray(user.roles)) return false
     return requiredRoles.every((role) => roleStrs?.includes(role))
 }

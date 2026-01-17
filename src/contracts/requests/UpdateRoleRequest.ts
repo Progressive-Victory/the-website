@@ -5,4 +5,4 @@ export const zUpdateRoleRequest = z.object({
     permissionIds: z.array(z.int()).optional(),
 })
 
-export type IUpdateRoleRequest = z.infer<typeof zUpdateRoleRequest>
+export type UpdateRoleRequest = z.infer<typeof zUpdateRoleRequest>

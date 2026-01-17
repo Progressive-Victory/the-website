@@ -3,8 +3,8 @@
 import styles from './page.module.css'
 import PaginatedList from '@/components/admin/PaginatedList'
 import { Form, FormGroup, FormState, TextField } from '@/components/form'
-import { IPermission, zPermission } from '@/contracts/data'
-import { IUpdatePermissionRequest } from '@/contracts/requests'
+import { Permission, zPermission } from '@/contracts/data'
+import { UpdatePermissionRequest } from '@/contracts/requests'
 import { useFetch } from '@/util/hooks'
 import { useMutation } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
@@ -13,11 +13,11 @@ export default function Page() {
     const eventTarget = useRef(new EventTarget())
     const { onPatch } = useFetch()
 
-    const [permissions, setPermissions] = useState<IPermission[]>([])
+    const [permissions, setPermissions] = useState<Permission[]>([])
     const [selectedPermission, setSelectedPermission] =
-        useState<IPermission | null>(null)
+        useState<Permission | null>(null)
 
-    const [formState, setFormState] = useState<FormState<IPermission> | null>(
+    const [formState, setFormState] = useState<FormState<Permission> | null>(
         null
     )
 
@@ -27,14 +27,14 @@ export default function Page() {
             request,
         }: {
             id: number
-            request: IUpdatePermissionRequest
+            request: UpdatePermissionRequest
         }) {
             await onPatch(`/permissions/${id}`, request, null)
             eventTarget.current.dispatchEvent(new Event('refetch'))
         },
     })
 
-    const handleSelectItem = (value: IPermission) => {
+    const handleSelectItem = (value: Permission) => {
         if (value.id === selectedPermission?.id) return
 
         if (formState?.dirty) {
@@ -47,7 +47,7 @@ export default function Page() {
         setSelectedPermission(value)
     }
 
-    const handleSave = (permission: IPermission) => {
+    const handleSave = (permission: Permission) => {
         setSelectedPermission(permission)
         updateMutation.mutate({
             id: permission.id,
@@ -55,14 +55,14 @@ export default function Page() {
         })
     }
 
-    const makeItem = (permission: IPermission) => ({
+    const makeItem = (permission: Permission) => ({
         id: permission.id.toString(),
         value: permission,
     })
 
     return (
         <>
-            <PaginatedList<IPermission>
+            <PaginatedList<Permission>
                 zodSchema={zPermission}
                 eventTarget={eventTarget.current}
                 endpoint="/permissions"
@@ -86,7 +86,7 @@ export default function Page() {
 
             <div className={styles.detailPane}>
                 {selectedPermission ? (
-                    <Form<IPermission>
+                    <Form<Permission>
                         key={selectedPermission.id}
                         form={selectedPermission}
                         title={selectedPermission.name}

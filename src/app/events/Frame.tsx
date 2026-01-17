@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect } from 'react'
 
 export const Frame: React.FC<{

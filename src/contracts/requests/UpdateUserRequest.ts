@@ -32,4 +32,4 @@ export const zUpdateUserRequest = z
     })
     .strict()
 
-export type IUpdateUserRequest = z.infer<typeof zUpdateUserRequest>
+export type UpdateUserRequest = z.infer<typeof zUpdateUserRequest>

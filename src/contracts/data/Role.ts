@@ -7,4 +7,4 @@ export const zRole = z.object({
     permissions: z.array(zPermission).optional(),
 })
 
-export type IRole = z.infer<typeof zRole>
+export type Role = z.infer<typeof zRole>

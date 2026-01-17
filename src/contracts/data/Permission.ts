@@ -5,4 +5,4 @@ export const zPermission = z.object({
     name: z.string(),
 })
 
-export type IPermission = z.infer<typeof zPermission>
+export type Permission = z.infer<typeof zPermission>

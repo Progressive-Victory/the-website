@@ -12,9 +12,9 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/form'
-import { IRole, IUser, zRole, zUser } from '@/contracts/data'
-import { IUpdateUserRequest } from '@/contracts/requests'
-import { IPaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
+import { Role, User, zRole, zUser } from '@/contracts/data'
+import { UpdateUserRequest } from '@/contracts/requests'
+import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { dateService } from '@/services'
 import { useCurrentUser, useFetch } from '@/util/hooks'
 import {
@@ -32,9 +32,9 @@ export default function Page() {
     const queryClient = useQueryClient()
     const { ready, onGet, onPatch } = useFetch()
 
-    const [users, setUsers] = useState<IUser[]>([])
-    const [selectedUser, setSelectedUser] = useState<IUser | null>(null)
-    const [formState, setFormState] = useState<FormState<IUser> | null>(null)
+    const [users, setUsers] = useState<User[]>([])
+    const [selectedUser, setSelectedUser] = useState<User | null>(null)
+    const [formState, setFormState] = useState<FormState<User> | null>(null)
 
     const loggedInUser = useCurrentUser()
 
@@ -42,7 +42,7 @@ export default function Page() {
         const limit = 50
 
         const getPage = async (page: number, limit: number) =>
-            await onGet<IPaginatedResponse<IRole>>(
+            await onGet<PaginatedResponse<Role>>(
                 '/roles',
                 zPaginatedResponse(zRole),
                 { query: { page, limit } }
@@ -54,7 +54,7 @@ export default function Page() {
             const count = result?.count ?? 0
             const pageCount = Math.ceil(count / limit)
 
-            const pageQueries: Promise<IRole[]>[] = []
+            const pageQueries: Promise<Role[]>[] = []
             for (let page = 1; page < pageCount; page++) {
                 const query = async (page: number) => {
                     const currLimit = Math.min(limit, count - page * limit)
@@ -94,7 +94,7 @@ export default function Page() {
         queryKey: [`/users/${selectedUser?.id}`],
         queryFn: selectedUser
             ? async () => {
-                  const user = await onGet<IUser>(
+                  const user = await onGet<User>(
                       `/users/${selectedUser?.id}`,
                       zUser,
                       {
@@ -116,13 +116,13 @@ export default function Page() {
             request,
         }: {
             id: number
-            request: IUpdateUserRequest
+            request: UpdateUserRequest
         }) {
             await onPatch(`/users/${id}`, request, null)
         },
     })
 
-    const handleSelectItem = (value: IUser) => {
+    const handleSelectItem = (value: User) => {
         if (value.id === selectedUser?.id) return
 
         if (formState?.dirty) {
@@ -135,7 +135,7 @@ export default function Page() {
         setSelectedUser(value)
     }
 
-    const handleSave = (user: IUser) => {
+    const handleSave = (user: User) => {
         eventTarget.current.dispatchEvent(new Event('refetch'))
         setSelectedUser(user)
         updateMutation.mutate({
@@ -153,12 +153,12 @@ export default function Page() {
         })
     }
 
-    const makeItem = (user: IUser) => ({
+    const makeItem = (user: User) => ({
         id: user.id.toString(),
         value: user,
     })
 
-    const makeTitle = (user: IUser) => {
+    const makeTitle = (user: User) => {
         if (user.firstName && user.lastName)
             return `${user.firstName} ${user.lastName}`
         if (user.firstName) return user.firstName
@@ -179,7 +179,7 @@ export default function Page() {
 
     return (
         <>
-            <PaginatedList<IUser>
+            <PaginatedList<User>
                 zodSchema={zUser}
                 eventTarget={eventTarget.current}
                 endpoint="/users"
@@ -209,7 +209,7 @@ export default function Page() {
                 pinnedItem={
                     loggedInUser.data
                         ? makeItem(loggedInUser.data)
-                        : { id: '', value: {} as IUser }
+                        : { id: '', value: {} as User }
                 }
                 selectedItem={selectedUser ? makeItem(selectedUser) : null}
                 onSelectItem={({ value }) => handleSelectItem(value)}
@@ -248,7 +248,7 @@ export default function Page() {
 
             <div className={styles.detailsPane}>
                 {selectedUser ? (
-                    <Form<IUser>
+                    <Form<User>
                         form={selectedUser}
                         title={makeTitle(selectedUser)}
                         saving={updateMutation.isPending}
@@ -256,14 +256,14 @@ export default function Page() {
                         onSave={handleSave}
                     >
                         <FormGroup title="Account Information">
-                            <TextField<IUser>
+                            <TextField<User>
                                 label="Username"
                                 getter={(form) =>
                                     form.discordUsers?.[0]?.username
                                 }
                                 readonly
                             />
-                            <TextField<IUser>
+                            <TextField<User>
                                 label="Discord Id"
                                 getter={(form) => form.discordUsers?.[0]?.id}
                                 readonly
@@ -281,7 +281,7 @@ export default function Page() {
                             />
                             <TextField label="First Name" field="firstName" />
                             <TextField label="Last Name" field="lastName" />
-                            <DateField<IUser>
+                            <DateField<User>
                                 label="Date of Birth"
                                 getter={(form) =>
                                     new Date(
@@ -296,7 +296,7 @@ export default function Page() {
                                     dateStyle: 'medium',
                                 }}
                             />
-                            <TextField<IUser>
+                            <TextField<User>
                                 label="Age"
                                 readonly
                                 getter={(form) =>
@@ -312,7 +312,7 @@ export default function Page() {
                                 field="createdAtUtc"
                                 readonly
                             />
-                            <SelectManyField<IUser>
+                            <SelectManyField<User>
                                 label="Aliases"
                                 field="aliases"
                                 options={(selectedUser.aliases ?? []).map(
@@ -326,7 +326,7 @@ export default function Page() {
                         </FormGroup>
 
                         <FormGroup title="Address">
-                            <TextField<IUser>
+                            <TextField<User>
                                 label="Zip Code"
                                 getter={(form) =>
                                     form.location?.zip?.toString()
@@ -346,17 +346,17 @@ export default function Page() {
                                             : null,
                                 })}
                             />
-                            <TextField<IUser>
+                            <TextField<User>
                                 label="City"
                                 getter={(form) => form.location?.city}
                                 readonly
                             />
-                            <TextField<IUser>
+                            <TextField<User>
                                 label="County"
                                 getter={(form) => form.location?.county}
                                 readonly
                             />
-                            <TextField<IUser>
+                            <TextField<User>
                                 label="State"
                                 getter={(form) => form.location?.state}
                                 readonly
@@ -392,7 +392,7 @@ export default function Page() {
                         </FormGroup>
 
                         <FormGroup title="Roles">
-                            <SelectManyField<IUser>
+                            <SelectManyField<User>
                                 label="Roles"
                                 options={roleOptions}
                                 getter={(form) =>
