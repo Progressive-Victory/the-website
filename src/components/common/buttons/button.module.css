@@ -3,8 +3,8 @@
     align-items: center;
     justify-content: center;
 
-    border: none;
     border-radius: 9999px;
+    border: none;
     cursor: pointer;
 
     text-align: center;
@@ -17,44 +17,60 @@
     flex-shrink: 0;
 }
 
-.prominent,
-.primary,
-.secondary,
-.plain {
+.prominent {
+    background-color: #ce3728;
+    color: #ffffff;
     padding-inline: 1rem;
     padding-block: 0.5rem;
     font-size: 1.25rem;
     font-weight: 600;
-}
-
-.prominent,
-.primary,
-.secondary {
     min-height: 2.75rem;
 }
-
-.plain {
-    min-height: 2.25rem;
-}
-
-.prominent {
-    background-color: #ce3728;
-    color: #ffffff;
+.prominent:hover {
+    background-color: #ffffff;
+    color: #ce3728;
 }
 
 .primary {
     background-color: #2986cc;
     color: #ffffff;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}
+.primary:hover {
+    background-color: #ffffff;
+    color: #ce3728;
 }
 
 .secondary {
     background-color: #1b4568;
     color: #ffffff;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}
+.secondary:hover {
+    background-color: #ffffff;
+    color: #ce3728;
 }
 
 .plain {
     background-color: transparent;
     color: #ffffff;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    min-height: 2.25rem;
+}
+.plain:hover {
+    background-color: #ffffff;
+    color: #ce3728;
 }
 
 .minimal {
@@ -66,11 +82,6 @@
     font-weight: 600;
     min-height: 2.75rem;
 }
-
-.prominent:hover,
-.primary:hover,
-.secondary:hover,
-.plain:hover,
 .minimal:hover {
     background-color: #ffffff;
     color: #ce3728;
@@ -136,6 +147,11 @@
     transform: rotate(-45deg);
 }
 
+.navItemActive .navAffordance {
+    opacity: 1;
+    transform: rotate(45deg);
+}
+
 .activeNavItem .navAffordance {
     opacity: 1;
     transform: rotate(45deg);
@@ -147,16 +163,12 @@
     column-gap: 0.75rem;
 }
 
-.accountAvatar,
-.accountAvatarSolo {
-    border-radius: 9999px;
-    object-fit: cover;
-}
-
 .accountAvatar {
     width: 44px;
     height: 44px;
+    border-radius: 9999px;
     border: 2px solid #ffffff;
+    object-fit: cover;
 }
 
 .accountCompact {
@@ -174,6 +186,8 @@
 .accountAvatarSolo {
     width: 52px;
     height: 52px;
+    border-radius: 9999px;
+    object-fit: cover;
     display: block;
 
     border: 4px solid #ffffff;
@@ -186,19 +200,6 @@
 
 .accountCompact:hover .accountAvatarSolo {
     border-color: #ce3728;
-}
-
-.chevronOnlyButton:hover {
-    background-color: rgba(255, 255, 255, 0.14);
-}
-
-.chevronOnlyButton:active {
-    transform: scale(0.98);
-}
-
-.chevronOnlyButton .navAffordance {
-    opacity: 0.9;
-    transform: rotate(45deg);
 }
 
 .embeddedChevron {
@@ -219,4 +220,30 @@
 
 .embeddedChevron:hover .navAffordance {
     opacity: 1;
+}
+
+.mobileRowContent {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.mobileRowLabel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+}
+
+.mobileRowLabelText {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mobileRowRightSpacer {
+    width: 5rem;
+    height: 3rem;
+    flex-shrink: 0;
 }

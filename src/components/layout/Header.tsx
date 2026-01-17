@@ -29,10 +29,29 @@ const navitems: NavItem[] = [
     {
         name: 'About',
         href: '/about',
+        subnav: {
+            columns: [
+                {
+                    title: 'Learn',
+                    items: [
+                        { name: 'Mission', href: '/about' },
+                        { name: 'Community', href: '/about' },
+                    ],
+                },
+            ],
+        },
     },
     {
-        name: 'Join',
+        name: 'Volunteer',
         href: '/volunteer',
+        subnav: {
+            columns: [
+                {
+                    title: 'Get Involved',
+                    items: [{ name: 'Join', href: '/volunteer' }],
+                },
+            ],
+        },
     },
     {
         name: 'Events',
@@ -43,30 +62,11 @@ const navitems: NavItem[] = [
                     title: 'Browse',
                     items: [
                         { name: 'Calendar', href: '/events' },
-                        { name: 'Phonebanking/Canvassing', href: '/events' },
+                        {
+                            name: 'Phonebanking/Canvassing',
+                            href: 'https://www.mobilize.us/progressivevictory/',
+                        },
                     ],
-                },
-            ],
-        },
-    },
-    {
-        name: 'Endorsements',
-        href: '/endorsements',
-        subnav: {
-            columns: [
-                {
-                    title: 'By year',
-                    items: [
-                        { name: '2022', href: '/endorsements?year=2022' },
-                        { name: '2023', href: '/endorsements?year=2023' },
-                        { name: '2024', href: '/endorsements?year=2024' },
-                        { name: '2025', href: '/endorsements?year=2025' },
-                        { name: '2026', href: '/endorsements?year=2026' },
-                    ],
-                },
-                {
-                    title: 'Highlights',
-                    items: [{ name: 'Hall of Victory', href: '/endorsements' }],
                 },
             ],
         },
@@ -77,15 +77,15 @@ const navitems: NavItem[] = [
         subnav: {
             columns: [
                 {
-                    title: 'Links',
+                    title: 'Resources',
                     items: [
-                        {
-                            name: 'Contact',
-                            href: 'https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform',
-                        },
                         {
                             name: 'Merch',
                             href: 'https://progressivevictory.myshopify.com/',
+                        },
+                        {
+                            name: 'Contact',
+                            href: 'https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform',
                         },
                     ],
                 },

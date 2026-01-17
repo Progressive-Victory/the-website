@@ -1,24 +1,29 @@
 import type { ButtonStyleKey, ButtonVariant } from './types'
 import styles from '@/components/common/buttons/button.module.css'
 
-export function buildButtonClassName(opts: {
+export function buildButtonClassName(args: {
     styleKey: ButtonStyleKey
     buttonVariant: ButtonVariant
     showNavChevron: boolean
     isAccountCompact: boolean
 }) {
-    const { styleKey, buttonVariant, showNavChevron, isAccountCompact } = opts
+    const { styleKey, buttonVariant, showNavChevron, isAccountCompact } = args
 
-    const styleClass = isAccountCompact
-        ? styles.accountCompact
-        : styles[styleKey]
     const variantClass =
-        buttonVariant === 'long' ? styles.longVariant : styles.defaultVariant
+        buttonVariant === 'long'
+            ? styles.longVariant
+            : buttonVariant === 'mobile'
+              ? styles.wideVariant
+              : styles.defaultVariant
 
-    const navClass = showNavChevron ? styles.navButton : ''
-    const longNavClass = showNavChevron ? styles.longNavButton : ''
-
-    return [styles.buttonBase, styleClass, variantClass, navClass, longNavClass]
+    return [
+        styles.buttonBase,
+        styles[styleKey],
+        variantClass,
+        showNavChevron ? styles.navButton : '',
+        buttonVariant === 'long' && showNavChevron ? styles.longNavButton : '',
+        isAccountCompact ? styles.accountCompact : '',
+    ]
         .filter(Boolean)
         .join(' ')
 }

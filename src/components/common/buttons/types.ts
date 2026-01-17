@@ -4,7 +4,7 @@ export type ButtonStyleKey =
     | 'plain'
     | 'prominent'
     | 'minimal'
-export type ButtonVariant = 'default' | 'long'
+export type ButtonVariant = 'default' | 'long' | 'mobile'
 
 export interface BaseVisualProps {
     label: string
