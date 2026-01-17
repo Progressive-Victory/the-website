@@ -1,5 +1,5 @@
 import { IBaseFormField } from '.'
-import { CollapsableSection } from '@/components/common'
+import { CollapsibleSection } from '@/components/common'
 import React from 'react'
 
 export interface FormGroupProps {
@@ -54,10 +54,10 @@ export function FormGroup({
     })
 
     return (
-        <CollapsableSection title={title} initialOpenState={!defaultCollapsed}>
+        <CollapsibleSection title={title} initialOpenState={!defaultCollapsed}>
             <div className="grid grid-cols-3 gap-2 gap-x-4">
                 {hydratedFields}
             </div>
-        </CollapsableSection>
+        </CollapsibleSection>
     )
 }

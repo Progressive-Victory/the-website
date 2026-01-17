@@ -1,3 +1,4 @@
+export * from './UpdatePermissionRequest'
 export * from './UpdateUserRequest'
 export * from './UserOnboardingCollectInfoRequest'
 export * from './UserOnboardingJoinRequest'
