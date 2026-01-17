@@ -2,7 +2,7 @@ import { getGuildAvatar } from './discord'
 import { IRole, IUser, zUser } from '@/contracts/data'
 import { OAuth2Routes, OAuth2Scopes } from 'discord-api-types/v10'
 import NextAuth, { Profile } from 'next-auth'
-import Discord from 'next-auth/providers/discord'
+import Discord, { DiscordProfile } from 'next-auth/providers/discord'
 import z from 'zod'
 
 export enum PermissionName {
@@ -19,10 +19,7 @@ function extractAvatarHash(url: string) {
 }
 
 async function serverAuth(token: string): Promise<string> {
-    console.log('Bot ' + token)
-
-    const res = await fetch(`${process.env.PV_WEBSITE_API_URL}/auth`, {
-        //process.env.API_HOST_ADDR
+    const res = await fetch(new URL('/auth', process.env.PV_WEBSITE_API_URL), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -31,10 +28,10 @@ async function serverAuth(token: string): Promise<string> {
             discordToken: 'Bot ' + token,
         }),
     })
-    console.log(res)
+
     if (!res.ok) throw Error("Can't fucking connect to API dawg")
-    const { accessToken } = await res.json()
-    console.log(accessToken)
+    const { accessToken } = (await res.json()) as { accessToken: string }
+
     if (!accessToken) throw Error('Failed to generate server jwt')
     return accessToken
 }
@@ -66,10 +63,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
             redirectProxyUrl: process.env.BOOMERANG_URI,
 
-            async profile(profile) {
-                // needs a path
-                // Executed async. No reason to wait on this update before sending a response down.                if (!process.env.PV_WEBSITE_API_KEY)
-
+            async profile(profile: DiscordProfile) {
                 if (!process.env.PV_WEBSITE_API_KEY)
                     throw Error('set PV_WEBSITE_API_KEY in env vars')
                 const serverToken = await serverAuth(
@@ -79,19 +73,27 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                 if (!serverToken)
                     throw Error('Failed to generate jwt for server.')
 
-                fetch(
-                    `${process.env.PV_WEBSITE_API_URL}/discordUsers/${profile.id}/avatar`,
-                    {
-                        method: 'PATCH',
-                        headers: {
-                            Authorization: serverToken,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            discordImage: extractAvatarHash(profile.avatar),
-                        }),
+                if (profile.avatar) {
+                    try {
+                        await fetch(
+                            `${process.env.PV_WEBSITE_API_URL}/discordUsers/${profile.id}/avatar`,
+                            {
+                                method: 'PATCH',
+                                headers: {
+                                    Authorization: serverToken,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    discordImage: profile.avatar
+                                        ? extractAvatarHash(profile.avatar)
+                                        : '',
+                                }),
+                            }
+                        )
+                    } catch (e) {
+                        console.error(e)
                     }
-                ).catch((err) => console.error(err))
+                }
 
                 const image = await getGuildAvatar(profile.id)
 
@@ -99,7 +101,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     id: profile.id,
                     name: profile.username,
                     email: profile.email,
-                    // Using long form here to adjust size of image
                     image,
                 }
             },
@@ -130,7 +131,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             const eprofile = profile as EProfile
 
             if (account && profile) {
-                // First time OAuth sign-in: Store OAuth data in the token
                 token.accessToken = account.access_token
                 token.discordId = eprofile.id
 
@@ -143,51 +143,59 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                 if (!serverToken)
                     throw Error('Failed to generate jwt for server.')
 
-                fetch(
-                    `${process.env.PV_WEBSITE_API_URL}/discordUsers/${eprofile.id}/user`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            Authorization: serverToken,
-                        },
-                    }
-                )
-                    .then(async (res) => {
-                        if (res.status === 404) {
-                            const usr = await fetch(
-                                `${process.env.PV_WEBSITE_API_URL}/users`,
-                                {
-                                    method: 'POST',
-                                    headers: {
-                                        Authorization: `Bearer ${serverToken}`,
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        email: profile.email,
-                                    }),
-                                }
-                            )
-                            await fetch(
-                                `${process.env.PV_WEBSITE_API_URL}/discordUsers`,
-                                {
-                                    method: 'POST',
-                                    headers: {
-                                        Authorization: `Bearer ${serverToken}`,
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        discordId: eprofile.id,
-                                        discordUsername: eprofile.username,
-                                        discordImage: extractAvatarHash(
-                                            eprofile.avatar
-                                        ),
-                                        userId: (await usr.json()).id as number,
-                                    }),
-                                }
-                            )
+                try {
+                    const res = await fetch(
+                        new URL(
+                            `/discordUsers/${eprofile.id}/user`,
+                            process.env.PV_WEBSITE_API_URL
+                        ),
+                        {
+                            method: 'GET',
+                            headers: {
+                                Authorization: serverToken,
+                            },
                         }
-                    })
-                    .catch(console.error)
+                    )
+
+                    if (res.status === 404) {
+                        const usr = await fetch(
+                            new URL(`/users`, process.env.PV_WEBSITE_API_URL),
+                            {
+                                method: 'POST',
+                                headers: {
+                                    Authorization: `Bearer ${serverToken}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    email: profile.email,
+                                }),
+                            }
+                        )
+                        await fetch(
+                            new URL(
+                                `/discordUsers`,
+                                process.env.PV_WEBSITE_API_URL
+                            ),
+                            {
+                                method: 'POST',
+                                headers: {
+                                    Authorization: `Bearer ${serverToken}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    discordId: eprofile.id,
+                                    discordUsername: eprofile.username,
+                                    discordImage: extractAvatarHash(
+                                        eprofile.avatar
+                                    ),
+                                    userId: ((await usr.json()) as IUser).id,
+                                }),
+                            }
+                        )
+                    }
+                } catch (e) {
+                    console.log(e)
+                }
             }
 
             return token
@@ -233,7 +241,10 @@ export async function checkAuth(roles?: string[]): Promise<ResponseCode> {
     const serverToken = await serverAuth(process.env.PV_WEBSITE_API_KEY)
 
     const res = await fetch(
-        `${process.env.PV_WEBSITE_API_URL}/discordUsers/${session.discordId}/user`,
+        new URL(
+            `/discordUsers/${session.discordId}/user`,
+            process.env.PV_WEBSITE_API_URL
+        ),
         {
             method: 'GET',
             headers: {
@@ -242,16 +253,13 @@ export async function checkAuth(roles?: string[]): Promise<ResponseCode> {
         }
     )
 
-    console.log(res)
-    const data = await res.json()
-
-    console.log(data)
-
-    const user = z.parse(zUser, data)
+    const data = (await res.json()) as unknown
 
     //  if either the currently logged in user cant be found in the database
     // for some reason or the user has no roles at all return an exception code.
-    if (!user || !(roles.length > 0)) return ResponseCode.Exception
+    if (!res.ok || !(roles.length > 0)) return ResponseCode.Exception
+
+    const user = z.parse(zUser, data)
 
     //if the user has any of the required roles, return a successful response code.
     if (hasRequiredRoles(user, roles)) return ResponseCode.Successful
@@ -286,7 +294,10 @@ export async function checkAuthPermissions(
     if (!serverToken) throw Error('Failed to generate jwt for server.')
 
     const res = await fetch(
-        `${process.env.PV_WEBSITE_API_URL}/discordUsers/${session.discordId}/user`,
+        new URL(
+            `/discordUsers/${session.discordId}/user`,
+            process.env.PV_WEBSITE_API_URL
+        ),
         {
             headers: {
                 Authorization: serverToken,
