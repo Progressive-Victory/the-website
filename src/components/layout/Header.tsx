@@ -1,6 +1,7 @@
 'use client'
 
 import { NavItem } from './types'
+import { BaseButton } from '@/components/common/buttons/Button'
 import { ModularButton } from '@/components/common/buttons/ModularButton'
 import buttonStyles from '@/components/common/buttons/button.module.css'
 import styles from '@/components/layout/header.module.css'
@@ -22,51 +23,16 @@ import { useEffect, useState } from 'react'
  * toggles the display of the menu when clicked. When the menu is displayed on
  * small screens, it is rendered as a vertical list of links that covers the
  * entire screen.
- *
  */
 
 const navitems: NavItem[] = [
     {
         name: 'About',
         href: '/about',
-        subnav: {
-            columns: [
-                {
-                    title: 'Learn',
-                    items: [
-                        { name: 'Mission', href: '/about' },
-                        { name: 'Community', href: '/about' },
-                        { name: 'Creators', href: '/about' },
-                    ],
-                },
-                {
-                    title: 'Organization',
-                    items: [
-                        { name: 'Staff', href: '/about' },
-                        { name: 'Halls Of Victory', href: '/about' },
-                    ],
-                },
-            ],
-        },
     },
     {
         name: 'Join',
         href: '/volunteer',
-        subnav: {
-            columns: [
-                {
-                    title: 'Get involved',
-                    items: [
-                        { name: 'Initiatives', href: '/volunteer' },
-                        {
-                            name: 'State Organizing Program',
-                            href: '/volunteer',
-                        },
-                        { name: 'Community', href: '/volunteer' },
-                    ],
-                },
-            ],
-        },
     },
     {
         name: 'Events',
@@ -77,9 +43,7 @@ const navitems: NavItem[] = [
                     title: 'Browse',
                     items: [
                         { name: 'Calendar', href: '/events' },
-                        { name: 'Meet Ups', href: '/events' },
                         { name: 'Phonebanking/Canvassing', href: '/events' },
-                        { name: 'Gaming', href: '/events' },
                     ],
                 },
             ],
@@ -134,9 +98,449 @@ const navitems: NavItem[] = [
     },
 ]
 
+const PANEL_TRANSITION = {
+    type: 'tween',
+    duration: 0.18,
+    ease: [0.22, 1, 0.36, 1],
+} as const
+
+const menuButtonVariants = {
+    closed: { scale: 1, color: '#FFFFFF' },
+    open: { scale: 1, color: '#FFFFFF' },
+    hover: { scale: 1.07, color: '#CE3728' },
+    tap: { scale: 0.94 },
+} as const
+
+const hamburgerLineBaseStyle: React.CSSProperties = {
+    position: 'absolute',
+    width: '1.75rem',
+    height: '0.18rem',
+    borderRadius: '999px',
+    background: 'currentColor',
+    transformOrigin: 'center',
+}
+
+const hamburgerLineVariantsTop = {
+    closed: { y: -7, rotate: 0, opacity: 1 },
+    open: { y: 0, rotate: 45, opacity: 1 },
+} as const
+
+const hamburgerLineVariantsMiddle = {
+    closed: { y: 0, opacity: 1, scaleX: 1 },
+    open: { y: 0, opacity: 0, scaleX: 0.6 },
+} as const
+
+const hamburgerLineVariantsBottom = {
+    closed: { y: 7, rotate: 0, opacity: 1 },
+    open: { y: 0, rotate: -45, opacity: 1 },
+} as const
+
+const itemVariants = {
+    hidden: { y: -14, scale: 0.985 },
+    visible: {
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        filter: 'blur(0px)',
+        transition: {
+            ease: 'easeInOut',
+            type: 'spring',
+            stiffness: 300,
+            damping: 5,
+            mass: 0.55,
+        },
+    },
+    exit: {
+        y: -8,
+        opacity: 0,
+        scale: 0.99,
+        filter: 'blur(6px)',
+        transition: { duration: 0.16, ease: [0.4, 0, 0.2, 1] },
+    },
+} as const
+
+const drawerTransition = {
+    type: 'tween',
+    duration: 0.2,
+    ease: [0.4, 0, 0.2, 1],
+} as const
+
+function HamburgerIcon({ isOpen }: { isOpen: boolean }) {
+    return (
+        <motion.span
+            className={styles.headerMenuIconWrapper}
+            aria-hidden="true"
+            initial={false}
+            animate={isOpen ? 'open' : 'closed'}
+            style={{
+                display: 'inline-flex',
+                width: '1.75rem',
+                height: '1.75rem',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+            }}
+        >
+            <motion.span
+                variants={hamburgerLineVariantsTop}
+                className={styles.headerMenuIcon}
+                style={hamburgerLineBaseStyle}
+            />
+            <motion.span
+                variants={hamburgerLineVariantsMiddle}
+                className={styles.headerMenuIcon}
+                style={hamburgerLineBaseStyle}
+            />
+            <motion.span
+                variants={hamburgerLineVariantsBottom}
+                className={styles.headerMenuIcon}
+                style={hamburgerLineBaseStyle}
+            />
+        </motion.span>
+    )
+}
+
+function MobileBackButton(props: { onClick: () => void }) {
+    return (
+        <button
+            type="button"
+            className={styles.mobileBackButton}
+            onClick={props.onClick}
+            aria-label="Back to main menu"
+        >
+            <span className={styles.mobileBackIcon} aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path
+                        d="M15 18l-6-6 6-6"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                </svg>
+            </span>
+            <span className={styles.mobileBackText}>Back</span>
+        </button>
+    )
+}
+
+function NavDrawer(props: {
+    isOpen: boolean
+    navitems: NavItem[]
+    mobileSubnavItem: NavItem | null
+    setMobileSubnavItem: (item: NavItem | null) => void
+    session: unknown
+    avatarSrc: string
+}) {
+    const {
+        isOpen,
+        navitems,
+        mobileSubnavItem,
+        setMobileSubnavItem,
+        session,
+        avatarSrc,
+    } = props
+
+    const showSubnav = mobileSubnavItem !== null
+
+    return (
+        <AnimatePresence>
+            {isOpen ? (
+                <motion.nav
+                    key="nav-drawer"
+                    id="site-nav-drawer"
+                    aria-label="Mobile navigation"
+                    initial={{ y: '-100%' }}
+                    animate={{ y: '-2%' }}
+                    exit={{ y: '-100%' }}
+                    transition={drawerTransition}
+                    className={styles.navDrawer}
+                    style={{
+                        position: 'fixed',
+                        zIndex: 50,
+                        paddingTop: '32px',
+                        backgroundColor: 'rgba(9, 34, 58, 0.88)',
+                        borderBottom: '1px solid rgba(255,255,255,0.10)',
+                        overflow: 'hidden',
+                    }}
+                >
+                    <div style={{ position: 'relative' }}>
+                        <AnimatePresence mode="wait" initial={false}>
+                            {!showSubnav ? (
+                                <motion.div
+                                    key="mobile-panel-main"
+                                    className={styles.mobilePanel}
+                                    initial={{ x: '8%', opacity: 0 }}
+                                    animate={{ x: '0%', opacity: 1 }}
+                                    exit={{ x: '-8%', opacity: 0 }}
+                                    transition={PANEL_TRANSITION}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            rowGap: '1rem',
+                                        }}
+                                    >
+                                        {navitems.map((item) => {
+                                            const hasChildren =
+                                                !!item.subnav?.columns?.length
+
+                                            return (
+                                                <motion.div
+                                                    key={item.name}
+                                                    variants={itemVariants}
+                                                    animate="visible"
+                                                    exit="exit"
+                                                >
+                                                    <BaseButton
+                                                        label={item.name}
+                                                        styleKey="plain"
+                                                        buttonVariant="long"
+                                                        showChevron={
+                                                            hasChildren
+                                                        }
+                                                        rotateChevronOnHover={
+                                                            false
+                                                        }
+                                                        className={
+                                                            buttonStyles.noChevronRotate
+                                                        }
+                                                        action={{
+                                                            buttonFunction:
+                                                                'link',
+                                                            href: item.href,
+                                                        }}
+                                                        renderContent={({
+                                                            showNavChevron,
+                                                        }) => (
+                                                            <span
+                                                                className={
+                                                                    buttonStyles.buttonContent
+                                                                }
+                                                            >
+                                                                <span
+                                                                    className={
+                                                                        buttonStyles.buttonLabel
+                                                                    }
+                                                                >
+                                                                    {item.name}
+                                                                </span>
+
+                                                                {showNavChevron ? (
+                                                                    <span
+                                                                        className={
+                                                                            buttonStyles.embeddedChevron
+                                                                        }
+                                                                        role="button"
+                                                                        tabIndex={
+                                                                            0
+                                                                        }
+                                                                        aria-label={`Open ${item.name} submenu`}
+                                                                        onPointerDown={(
+                                                                            e
+                                                                        ) => {
+                                                                            e.preventDefault()
+                                                                            e.stopPropagation()
+                                                                        }}
+                                                                        onClick={(
+                                                                            e
+                                                                        ) => {
+                                                                            e.preventDefault()
+                                                                            e.stopPropagation()
+                                                                            setMobileSubnavItem(
+                                                                                item
+                                                                            )
+                                                                        }}
+                                                                        onKeyDown={(
+                                                                            e
+                                                                        ) => {
+                                                                            if (
+                                                                                e.key ===
+                                                                                    'Enter' ||
+                                                                                e.key ===
+                                                                                    ' '
+                                                                            ) {
+                                                                                e.preventDefault()
+                                                                                e.stopPropagation()
+                                                                                setMobileSubnavItem(
+                                                                                    item
+                                                                                )
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <span
+                                                                            className={
+                                                                                buttonStyles.navAffordance
+                                                                            }
+                                                                            aria-hidden="true"
+                                                                        />
+                                                                    </span>
+                                                                ) : null}
+                                                            </span>
+                                                        )}
+                                                    />
+                                                </motion.div>
+                                            )
+                                        })}
+
+                                        <motion.div
+                                            variants={itemVariants}
+                                            animate="visible"
+                                            exit="exit"
+                                        >
+                                            <ModularButton
+                                                label="Donate"
+                                                buttonType="donate"
+                                                buttonVariant="long"
+                                            />
+                                        </motion.div>
+
+                                        {!session ? (
+                                            <motion.div
+                                                variants={itemVariants}
+                                                animate="visible"
+                                                exit="exit"
+                                            >
+                                                <ModularButton
+                                                    label="Log In"
+                                                    buttonType="login"
+                                                    buttonVariant="long"
+                                                    href="/login"
+                                                />
+                                            </motion.div>
+                                        ) : (
+                                            <motion.div
+                                                variants={itemVariants}
+                                                animate="visible"
+                                                exit="exit"
+                                            >
+                                                <ModularButton
+                                                    label="Account"
+                                                    buttonType="account"
+                                                    buttonVariant="long"
+                                                    href="/account"
+                                                    avatarSrc={avatarSrc}
+                                                    avatarAlt="User avatar"
+                                                />
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="mobile-panel-subnav"
+                                    className={styles.mobilePanel}
+                                    initial={{ x: '8%', opacity: 0 }}
+                                    animate={{ x: '0%', opacity: 1 }}
+                                    exit={{ x: '8%', opacity: 0 }}
+                                    transition={PANEL_TRANSITION}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            rowGap: '1rem',
+                                        }}
+                                    >
+                                        <div
+                                            className={
+                                                styles.mobileSubnavTopBar
+                                            }
+                                        >
+                                            <MobileBackButton
+                                                onClick={() =>
+                                                    setMobileSubnavItem(null)
+                                                }
+                                            />
+                                            <div
+                                                className={
+                                                    styles.mobileSubnavTitle
+                                                }
+                                            >
+                                                {mobileSubnavItem?.name ?? ''}
+                                            </div>
+                                        </div>
+
+                                        {mobileSubnavItem?.subnav?.columns?.map(
+                                            (col) => (
+                                                <div
+                                                    key={col.title}
+                                                    style={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        rowGap: '0.5rem',
+                                                    }}
+                                                >
+                                                    <div
+                                                        style={{
+                                                            padding: '0 10px',
+                                                            fontWeight: 600,
+                                                            letterSpacing:
+                                                                '0.02em',
+                                                            color: 'rgba(255,255,255,0.82)',
+                                                        }}
+                                                    >
+                                                        {col.title}
+                                                    </div>
+
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            flexDirection:
+                                                                'column',
+                                                            rowGap: '0.75rem',
+                                                        }}
+                                                    >
+                                                        {col.items.map(
+                                                            (child) => (
+                                                                <motion.div
+                                                                    key={
+                                                                        child.name
+                                                                    }
+                                                                    variants={
+                                                                        itemVariants
+                                                                    }
+                                                                    animate="visible"
+                                                                    exit="exit"
+                                                                >
+                                                                    <ModularButton
+                                                                        label={
+                                                                            child.name
+                                                                        }
+                                                                        buttonType="subnav"
+                                                                        href={
+                                                                            child.href
+                                                                        }
+                                                                        buttonVariant="long"
+                                                                        showChevron={
+                                                                            false
+                                                                        }
+                                                                    />
+                                                                </motion.div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </motion.nav>
+            ) : null}
+        </AnimatePresence>
+    )
+}
+
 export function Header() {
     const [isOpen, setIsOpen] = useState(false)
     const [activeSubnav, setActiveSubnav] = useState<NavItem | null>(null)
+    const [mobileSubnavItem, setMobileSubnavItem] = useState<NavItem | null>(
+        null
+    )
 
     const { data: session } = useSession()
     const avatarSrc = session?.user?.image ?? ''
@@ -165,6 +569,10 @@ export function Header() {
         document.addEventListener('keydown', onKeyDown)
         return () => document.removeEventListener('keydown', onKeyDown)
     }, [])
+
+    useEffect(() => {
+        if (!isOpen) setMobileSubnavItem(null)
+    }, [isOpen])
 
     useEffect(() => {
         if (typeof window === 'undefined') return
@@ -198,9 +606,7 @@ export function Header() {
             setActiveSubnav(null)
             return
         }
-
         if (typeof window !== 'undefined' && window.innerWidth < 1280) return
-
         setActiveSubnav(item)
     }
 
@@ -400,215 +806,14 @@ export function Header() {
                 )}
             </AnimatePresence>
 
-            <NavDrawer isOpen={isOpen}>
-                {navitems
-                    .map(({ href, name }) => (
-                        <ModularButton
-                            key={name}
-                            label={name}
-                            buttonType="mobileNav"
-                            href={href}
-                            buttonVariant="long"
-                        />
-                    ))
-                    .concat(
-                        <ModularButton
-                            key="donate-mobile"
-                            label="Donate"
-                            buttonType="donate"
-                            buttonVariant="long"
-                        />
-                    )
-                    .concat(
-                        !session ? (
-                            <ModularButton
-                                label="Log In"
-                                buttonType="login"
-                                buttonVariant="long"
-                                href="/login"
-                                key="login-mobile"
-                            />
-                        ) : (
-                            <ModularButton
-                                label="Account"
-                                buttonType="account"
-                                buttonVariant="long"
-                                href="/account"
-                                avatarSrc={avatarSrc}
-                                avatarAlt="User avatar"
-                                key="account-mobile"
-                            />
-                        )
-                    )}
-            </NavDrawer>
+            <NavDrawer
+                isOpen={isOpen}
+                navitems={navitems}
+                mobileSubnavItem={mobileSubnavItem}
+                setMobileSubnavItem={setMobileSubnavItem}
+                session={session}
+                avatarSrc={avatarSrc}
+            />
         </>
-    )
-}
-
-const menuButtonVariants = {
-    closed: {
-        scale: 1,
-        color: '#FFFFFF',
-    },
-    open: {
-        scale: 1,
-        color: '#FFFFFF',
-    },
-    hover: {
-        scale: 1.07,
-        color: '#CE3728',
-    },
-    tap: {
-        scale: 0.94,
-    },
-} as const
-
-function HamburgerIcon({ isOpen }: { isOpen: boolean }) {
-    return (
-        <motion.span
-            className={styles.headerMenuIconWrapper}
-            aria-hidden="true"
-            initial={false}
-            animate={isOpen ? 'open' : 'closed'}
-            style={{
-                display: 'inline-flex',
-                width: '1.75rem',
-                height: '1.75rem',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
-            }}
-        >
-            <motion.span
-                variants={hamburgerLineVariantsTop}
-                className={styles.headerMenuIcon}
-                style={hamburgerLineBaseStyle}
-            />
-            <motion.span
-                variants={hamburgerLineVariantsMiddle}
-                className={styles.headerMenuIcon}
-                style={hamburgerLineBaseStyle}
-            />
-            <motion.span
-                variants={hamburgerLineVariantsBottom}
-                className={styles.headerMenuIcon}
-                style={hamburgerLineBaseStyle}
-            />
-        </motion.span>
-    )
-}
-
-const hamburgerLineBaseStyle: React.CSSProperties = {
-    position: 'absolute',
-    width: '1.75rem',
-    height: '0.18rem',
-    borderRadius: '999px',
-    background: 'currentColor',
-    transformOrigin: 'center',
-}
-
-const hamburgerLineVariantsTop = {
-    closed: { y: -7, rotate: 0, opacity: 1 },
-    open: { y: 0, rotate: 45, opacity: 1 },
-} as const
-
-const hamburgerLineVariantsMiddle = {
-    closed: { y: 0, opacity: 1, scaleX: 1 },
-    open: { y: 0, opacity: 0, scaleX: 0.6 },
-} as const
-
-const hamburgerLineVariantsBottom = {
-    closed: { y: 7, rotate: 0, opacity: 1 },
-    open: { y: 0, rotate: -45, opacity: 1 },
-} as const
-
-const containerVariants = {
-    hidden: {
-        y: '-100%',
-        transition: {
-            type: 'tween',
-            ease: 'easeInOut',
-            duration: 0.2,
-        },
-    },
-    visible: {
-        y: '-2%',
-        transition: {
-            ease: 'easeInOut',
-            type: 'spring',
-            stiffness: 250,
-            damping: 25,
-            staggerChildren: 0.05,
-        },
-    },
-}
-
-const itemVariants = {
-    hidden: {
-        y: -14,
-        scale: 0.985,
-    },
-    visible: {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        filter: 'blur(0px)',
-        transition: {
-            ease: 'easeInOut',
-            type: 'spring',
-            stiffness: 300,
-            damping: 5,
-            mass: 0.55,
-        },
-    },
-    exit: {
-        y: -8,
-        opacity: 0,
-        scale: 0.99,
-        filter: 'blur(6px)',
-        transition: {
-            duration: 0.16,
-            ease: [0.4, 0, 0.2, 1],
-        },
-    },
-}
-
-function NavDrawer(props: { isOpen: boolean; children: React.ReactNode[] }) {
-    const { isOpen, children } = props
-    const shouldRender = isOpen
-
-    return (
-        <AnimatePresence>
-            {shouldRender && (
-                <motion.nav
-                    key="nav-drawer"
-                    id="site-nav-drawer"
-                    aria-label="Mobile navigation"
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                    variants={containerVariants}
-                    className={styles.navDrawer}
-                    style={{
-                        position: 'fixed',
-                        zIndex: 50,
-                        paddingTop: '32px',
-                        backgroundColor: 'rgba(9, 34, 58, 0.88)',
-                        borderBottom: '1px solid rgba(255,255,255,0.10)',
-                    }}
-                >
-                    {children.map((child, i) => (
-                        <motion.div
-                            key={i}
-                            variants={itemVariants}
-                            animate="visible"
-                            exit="exit"
-                        >
-                            {child}
-                        </motion.div>
-                    ))}
-                </motion.nav>
-            )}
-        </AnimatePresence>
     )
 }
