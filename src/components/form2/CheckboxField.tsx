@@ -3,10 +3,13 @@ import styles from './FormField.module.css'
 import cx from 'classnames'
 import { ChangeEvent } from 'react'
 
-export function CheckboxField<T>(props: FormFieldProps<T, boolean>) {
+export function CheckboxField<T>(
+    props: FormFieldProps<T, boolean | null | undefined>
+) {
     props.getter ??= getGetter(props)
     props.setter ??= getSetter(props)
-    props.validator ??= (field: boolean) => !props.required || field
+    props.validator ??= (field: boolean | null | undefined) =>
+        !props.required || !!field
 
     const readonly = !!props.readonly || !props.dynamic?.editing
     const disabled = !!props.disabled || !!props.dynamic?.saving

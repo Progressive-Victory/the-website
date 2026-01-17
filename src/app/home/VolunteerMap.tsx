@@ -16,36 +16,38 @@ import {
     zMapMemberCountResponse,
 } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 export function VolunteerMap() {
     const [hoveredState, setHoveredState] = useState<string | null>(null)
     const [selectedState, setSelectedState] = useState<string | null>(null)
-    const { onGet } = useFetch()
+    const { ready, onGet } = useFetch()
 
     const memberCountQuery = useQuery({
         queryKey: ['/map/memberCounts'],
-        async queryFn({ signal }) {
-            const data = await onGet<IMapMemberCountResponse>(
-                '/map/memberCounts',
-                zMapMemberCountResponse,
-                { signal }
-            )
+        queryFn: ready
+            ? async ({ signal }) => {
+                  const data = await onGet<IMapMemberCountResponse>(
+                      '/map/memberCounts',
+                      zMapMemberCountResponse,
+                      { signal }
+                  )
 
-            const stateCountMap = data.states.reduce(
-                (map, state) => {
-                    const name = US_STATES.find(
-                        (s) => s.code.toLowerCase() === state.code
-                    )?.name
-                    if (name) map[name] = state.count
-                    return map
-                },
-                {} as Record<string, number>
-            )
+                  const stateCountMap = data.states.reduce(
+                      (map, state) => {
+                          const name = US_STATES.find(
+                              (s) => s.code.toLowerCase() === state.code
+                          )?.name
+                          if (name) map[name] = state.count
+                          return map
+                      },
+                      {} as Record<string, number>
+                  )
 
-            return { total: data.total, stateCountMap }
-        },
+                  return { total: data.total, stateCountMap }
+              }
+            : skipToken,
         placeholderData: keepPreviousData,
     })
 

@@ -5,106 +5,180 @@ import PaginatedList from '@/components/admin/PaginatedList'
 import { ImageWithFallback } from '@/components/common'
 import {
     CheckboxField,
+    DateField,
     Form,
     FormGroup,
+    FormState,
     SelectManyField,
     TextField,
-} from '@/components/form'
-import { DateField } from '@/components/form/DateField'
+} from '@/components/form2'
 import { IRole, IUser, zRole, zUser } from '@/contracts/data'
+import { IUpdateUserRequest } from '@/contracts/requests'
 import { IPaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { dateService } from '@/services'
 import { useCurrentUser, useFetch } from '@/util/hooks'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import deepEqual from 'deep-equal'
-import { useRef, useState } from 'react'
+import {
+    keepPreviousData,
+    skipToken,
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
 export default function Page() {
     const eventTarget = useRef(new EventTarget())
+    const queryClient = useQueryClient()
+    const { ready, onGet, onPatch } = useFetch()
 
-    // We save the original value we got from the API so that we can easily
-    // discard changes without saving
-    const [originalUser, setOriginalUser] = useState<IUser | null>(null)
-    // This is the mutable copy we actually update when the user interacts with
-    // the form
-    const [selectedUser, setSelectedUser] = useState<IUser | null>(null)
     const [users, setUsers] = useState<IUser[]>([])
-    const { onGet } = useFetch()
+    const [selectedUser, setSelectedUser] = useState<IUser | null>(null)
+    const [formState, setFormState] = useState<FormState<IUser> | null>(null)
 
     const loggedInUser = useCurrentUser()
 
     const getRolesQuery = useQuery({
         queryKey: ['/roles'],
-        async queryFn({ signal }) {
-            const limit = 50
+        queryFn: ready
+            ? async () => {
+                  const limit = 50
 
-            const getPage = async (page: number, limit: number) =>
-                await onGet<IPaginatedResponse<IRole>>(
-                    '/roles',
-                    zPaginatedResponse(zRole),
-                    { query: { page, limit }, signal }
-                )
+                  const getPage = async (page: number, limit: number) =>
+                      await onGet<IPaginatedResponse<IRole>>(
+                          '/roles',
+                          zPaginatedResponse(zRole),
+                          { query: { page, limit } }
+                      )
 
-            try {
-                const { data: roles, count } = await getPage(0, limit)
-                const pageCount = Math.ceil(count / limit)
+                  try {
+                      const result = await getPage(0, limit)
+                      const page0 = result?.data ?? []
+                      const count = result?.count ?? 0
+                      const pageCount = Math.ceil(count / limit)
 
-                const pageQueries: Promise<IRole[]>[] = []
-                for (let page = 1; page < pageCount; page++) {
-                    const query = async (page: number) => {
-                        const currLimit = Math.min(limit, count - page * limit)
-                        const { data } = await getPage(page, currLimit)
-                        return data
-                    }
+                      const pageQueries: Promise<IRole[]>[] = []
+                      for (let page = 1; page < pageCount; page++) {
+                          const query = async (page: number) => {
+                              const currLimit = Math.min(
+                                  limit,
+                                  count - page * limit
+                              )
+                              const result = await getPage(page, currLimit)
+                              return result?.data ?? []
+                          }
 
-                    pageQueries.push(query(page))
-                }
+                          pageQueries.push(query(page))
+                      }
 
-                const pages = await Promise.all(pageQueries)
+                      const pages = await Promise.all(pageQueries)
 
-                return [roles, ...pages].flatMap((perms) => perms)
-            } catch (e) {
-                console.log(e)
-                throw e
-            }
-        },
+                      return [page0, ...pages].flatMap((perms) => perms)
+                  } catch (e) {
+                      console.error(e)
+                      throw e
+                  }
+              }
+            : skipToken,
         placeholderData: keepPreviousData,
     })
-    const roles = getRolesQuery.data ?? []
 
-    const selectedUserQuery = useQuery({
+    const roles = getRolesQuery.data ?? []
+    const roleOptions = useMemo(
+        () =>
+            (getRolesQuery.data ?? []).map((role) => ({
+                value: role.id,
+                label: role.name,
+            })),
+        [getRolesQuery.data]
+    )
+
+    useQuery({
         queryKey: [`/users/${selectedUser?.id}`],
-        async queryFn({ signal }) {
-            return await onGet<IUser>(`/users/${selectedUser?.id}`, zUser, {
-                query: { includeDiscordUsers: true, includeHistory: true },
-                signal,
-            })
-        },
+        queryFn: selectedUser
+            ? async () => {
+                  const user = await onGet<IUser>(
+                      `/users/${selectedUser?.id}`,
+                      zUser,
+                      {
+                          query: {
+                              includeDiscordUsers: true,
+                              includeHistory: true,
+                          },
+                      }
+                  )
+                  setSelectedUser(user)
+              }
+            : skipToken,
         placeholderData: keepPreviousData,
+    })
+
+    const updateMutation = useMutation({
+        async mutationFn({
+            id,
+            request,
+        }: {
+            id: number
+            request: IUpdateUserRequest
+        }) {
+            await onPatch(`/users/${id}`, request, null)
+            eventTarget.current.dispatchEvent(new Event('refetch'))
+        },
     })
 
     const handleSelectItem = (value: IUser) => {
         if (value.id === selectedUser?.id) return
 
-        if (!deepEqual(selectedUser, originalUser)) {
+        if (formState?.dirty) {
             const proceed = confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
             )
             if (!proceed) return
         }
 
-        setOriginalUser({ ...value })
-        setSelectedUser({ ...value })
+        setSelectedUser(value)
     }
 
-    const userAge = dateService.getAge(selectedUser?.birthdate ?? new Date())
-    const fCreatedDate = selectedUser?.createdAtUtc
-        ? dateService.formatDate(selectedUser.createdAtUtc)
-        : ''
+    const handleSave = (user: IUser) => {
+        setSelectedUser(user)
+        updateMutation.mutate({
+            id: user.id,
+            request: {
+                email: user.email ?? undefined,
+                phone: user.phone ?? undefined,
+                preferredName: user.preferredName ?? undefined,
+                firstName: user.firstName ?? undefined,
+                lastName: user.lastName ?? undefined,
+                birthdate: user.birthdate ?? undefined,
+                zipCode: user.location?.zip,
+                roles: user.roles?.map((role) => role.id),
+            },
+        })
+    }
+
     const makeItem = (user: IUser) => ({
         id: user.id.toString(),
         value: user,
+    })
+
+    const makeTitle = (user: IUser) => {
+        if (user.firstName && user.lastName)
+            return `${user.firstName} ${user.lastName}`
+        if (user.preferredName) return user.preferredName
+        if (user.discordUsers?.[0].username)
+            return user.discordUsers[0].username
+        return user.email ?? ''
+    }
+
+    useEffect(() => {
+        return () => {
+            void queryClient.cancelQueries({
+                queryKey: [`/roles`],
+            })
+            void queryClient.cancelQueries({
+                queryKey: [`/users/${selectedUser?.id}`],
+            })
+        }
     })
 
     return (
@@ -179,107 +253,155 @@ export default function Page() {
             />
 
             <div className={styles.detailsPane}>
-                {selectedUser && originalUser ? (
+                {selectedUser ? (
                     <Form<IUser>
-                        zodSchema={zUser}
-                        initialValue={originalUser}
-                        setInitialValue={setOriginalUser}
-                        currentValue={selectedUser}
-                        setCurrentValue={setSelectedUser}
-                        computeTitle={(user) => {
-                            if (user.firstName && user.lastName)
-                                return `${user.firstName} ${user.lastName}`
-                            if (user.preferredName) return user.preferredName
-                            if (user.discordUsers?.[0].username)
-                                return user.discordUsers[0].username // need alternative here
-                            return ''
-                        }}
-                        patchEndpoint={`/users/${selectedUser.id}`}
-                        onChangesSaved={() => {
-                            eventTarget.current.dispatchEvent(
-                                new Event('refetch')
-                            )
-                            if (selectedUser.id === loggedInUser.data?.id)
-                                void loggedInUser.onRefetch()
-                        }}
-                        updateHistory={selectedUserQuery.data?.history}
+                        form={selectedUser}
+                        title={makeTitle(selectedUser)}
+                        saving={updateMutation.isPending}
+                        onUpdate={setFormState}
+                        onSave={handleSave}
                     >
                         <FormGroup title="Account Information">
-                            <TextField
-                                name="Username"
-                                field="username"
-                                required
+                            <TextField<IUser>
+                                label="Username"
+                                getter={(form) =>
+                                    form.discordUsers?.[0]?.username
+                                }
+                                readonly
                             />
-                            <TextField
-                                name="Discord Id"
-                                field="discordUsersId"
+                            <TextField<IUser>
+                                label="Discord Id"
+                                getter={(form) => form.discordUsers?.[0]?.id}
+                                readonly
                             />
-                            <TextField name="Email" field="email" required />
+                            <TextField label="Email" field="email" required />
                             <TextField
-                                name="Phone Number"
+                                label="Phone Number"
                                 field="phone"
                                 required
                             />
                             <TextField
-                                name="Preferred Name"
+                                label="Preferred Name"
                                 field="preferredName"
                                 deprecated
                             />
-                            <TextField name="First Name" field="firstName" />
-                            <TextField name="Last Name" field="lastName" />
-                            <DateField name="Date of Birth" field="birthdate" />
-                            <TextField
-                                name="Age"
-                                field="age"
-                                readonly
-                                dynamic={{ value: userAge }}
+                            <TextField label="First Name" field="firstName" />
+                            <TextField label="Last Name" field="lastName" />
+                            <DateField
+                                label="Date of Birth"
+                                field="birthdate"
                             />
-                            <TextField
-                                name="Date Created"
+                            <TextField<IUser>
+                                label="Age"
+                                readonly
+                                getter={(form) =>
+                                    form.birthdate
+                                        ? dateService
+                                              .getAge(form.birthdate)
+                                              ?.toString()
+                                        : null
+                                }
+                            />
+                            <DateField
+                                label="Date Created"
                                 field="createdAtUtc"
                                 readonly
-                                dynamic={{ value: fCreatedDate }}
+                            />
+                            <SelectManyField<IUser>
+                                label="Aliases"
+                                field="aliases"
+                                options={(selectedUser.aliases ?? []).map(
+                                    (alias) => ({
+                                        value: alias,
+                                        label: alias,
+                                    })
+                                )}
+                                readonly
                             />
                         </FormGroup>
 
                         <FormGroup title="Address">
-                            <TextField name="City" field="city" />
-                            <TextField name="County" field="county" />
-                            <TextField name="State" field="state" />
-                            <TextField name="Zip Code" field="zip" />
+                            <TextField<IUser>
+                                label="Zip Code"
+                                getter={(form) =>
+                                    form.location?.zip?.toString()
+                                }
+                                setter={(form, field) => ({
+                                    ...form,
+                                    location:
+                                        field != null
+                                            ? {
+                                                  ...(form.location ?? {
+                                                      city: '',
+                                                      county: '',
+                                                      state: '',
+                                                  }),
+                                                  zip: +field,
+                                              }
+                                            : null,
+                                })}
+                            />
+                            <TextField<IUser>
+                                label="City"
+                                getter={(form) => form.location?.city}
+                                readonly
+                            />
+                            <TextField<IUser>
+                                label="County"
+                                getter={(form) => form.location?.county}
+                                readonly
+                            />
+                            <TextField<IUser>
+                                label="State"
+                                getter={(form) => form.location?.state}
+                                readonly
+                            />
                         </FormGroup>
 
                         <FormGroup title="Account Status" defaultCollapsed>
                             <CheckboxField
-                                name="Accepted Alerts"
+                                label="Accepted Alerts"
                                 field="acceptedAlerts"
                                 readonly
                             />
-                            <CheckboxField name="Verified" field="verified" />
+                            <CheckboxField
+                                label="Verified"
+                                field="verified"
+                                readonly
+                            />
                             <TextField
-                                name="Onboarding Stage"
+                                label="Onboarding Stage"
                                 field="onboardingStage"
                                 readonly
                             />
-                            <TextField
-                                name="Date Intake Done"
+                            <DateField
+                                label="Date Intake Done"
                                 field="completedIntakeUtc"
                                 readonly
                             />
-                            <TextField
-                                name="Date Server Joined"
-                                field="joinedServerUtc"
+                            <DateField
+                                label="Date Server Joined"
+                                field="joinedAtUtc"
                                 readonly
                             />
                         </FormGroup>
 
-                        <FormGroup title="Permissions">
-                            <SelectManyField
-                                name="Roles"
-                                field="roles"
-                                nameKey="name"
-                                valueKey="id"
-                                options={roles ?? ['loading']}
+                        <FormGroup title="Roles">
+                            <SelectManyField<IUser>
+                                label="Roles"
+                                options={roleOptions}
+                                getter={(form) =>
+                                    (form.roles ?? []).map((role) => role.id)
+                                }
+                                setter={(form, field) => ({
+                                    ...form,
+                                    roles:
+                                        field != null
+                                            ? roles.filter((role) =>
+                                                  field.includes(role.id)
+                                              )
+                                            : form.roles,
+                                })}
                             />
                         </FormGroup>
                     </Form>

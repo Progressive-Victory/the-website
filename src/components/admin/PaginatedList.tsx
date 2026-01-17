@@ -3,6 +3,7 @@ import { IPaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
 import {
     keepPreviousData,
+    skipToken,
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
@@ -101,36 +102,38 @@ export default function PaginatedList<T extends object>({
         null
     )
 
-    const { onGet } = useFetch()
+    const { ready, onGet } = useFetch()
 
     const queryClient = useQueryClient()
     const { isPending, isSuccess, data, error, refetch } = useQuery({
         queryKey: [endpoint, search],
-        async queryFn({ signal }) {
-            if (!search) return null
+        queryFn: ready
+            ? async ({ signal }) => {
+                  if (!search) return null
 
-            const url = new URL(location.href)
-            url.pathname = endpoint
+                  const url = new URL(location.href)
+                  url.pathname = endpoint
 
-            const params = {} as Record<string, string>
-            for (const [key, values] of Object.entries(search.filters)) {
-                params[key] = values.join(',')
-            }
+                  const params = {} as Record<string, string>
+                  for (const [key, values] of Object.entries(search.filters)) {
+                      params[key] = values.join(',')
+                  }
 
-            params.page = search.page.toString()
-            params.limit = search.limit.toString()
-            if (search.query) params.query = search.query
-            if (search.field) params.field = search.field
-            if (search.sort) params.sort = search.sort
+                  params.page = search.page.toString()
+                  params.limit = search.limit.toString()
+                  if (search.query) params.query = search.query
+                  if (search.field) params.field = search.field
+                  if (search.sort) params.sort = search.sort
 
-            const res = await onGet<IPaginatedResponse<T>>(
-                url.pathname,
-                zPaginatedResponse(zodSchema),
-                { query: params, signal }
-            )
+                  const res = await onGet<IPaginatedResponse<T>>(
+                      url.pathname,
+                      zPaginatedResponse(zodSchema),
+                      { query: params, signal }
+                  )
 
-            return res
-        },
+                  return res
+              }
+            : skipToken,
         placeholderData: keepPreviousData,
     })
 
@@ -141,13 +144,13 @@ export default function PaginatedList<T extends object>({
     }, [isSuccess, data, setItems])
 
     useEffect(() => {
-        void refetch()
+        if (ready) void refetch()
         return () =>
             void queryClient.cancelQueries({
                 //change this route to api route
                 queryKey: ['/users', search],
             })
-    }, [search, refetch, queryClient])
+    }, [ready, search, refetch, queryClient])
 
     useEffect(() => {
         if (!eventTarget) return

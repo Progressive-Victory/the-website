@@ -13,53 +13,62 @@ import { IPermission, IRole, zPermission, zRole } from '@/contracts/data'
 import { IUpdateRoleRequest } from '@/contracts/requests'
 import { IPaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
+import {
+    keepPreviousData,
+    skipToken,
+    useMutation,
+    useQuery,
+} from '@tanstack/react-query'
 import { useMemo, useRef, useState } from 'react'
 
 export default function Page() {
     const eventTarget = useRef(new EventTarget())
-    const { onGet, onPatch } = useFetch()
+    const { ready, onGet, onPatch } = useFetch()
 
     const [roles, setRoles] = useState<IRole[]>([])
     const [selectedRole, setSelectedRole] = useState<IRole | null>(null)
-
     const [formState, setFormState] = useState<FormState<IRole> | null>(null)
 
     const getPermissionsQuery = useQuery({
         queryKey: ['/permissions'],
-        async queryFn({ signal }) {
-            const limit = 50
+        queryFn: ready
+            ? async () => {
+                  const limit = 50
 
-            const getPage = async (page: number, limit: number) =>
-                await onGet<IPaginatedResponse<IPermission>>(
-                    '/permissions',
-                    zPaginatedResponse(zPermission),
-                    { query: { page, limit }, signal }
-                )
+                  const getPage = async (page: number, limit: number) =>
+                      await onGet<IPaginatedResponse<IPermission>>(
+                          '/permissions',
+                          zPaginatedResponse(zPermission),
+                          { query: { page, limit } }
+                      )
 
-            try {
-                const { data: permissions, count } = await getPage(0, limit)
-                const pageCount = Math.ceil(count / limit)
+                  try {
+                      const { data: page0, count } = await getPage(0, limit)
+                      const pageCount = Math.ceil(count / limit)
 
-                const pageQueries: Promise<IPermission[]>[] = []
-                for (let page = 1; page < pageCount; page++) {
-                    const query = async (page: number) => {
-                        const currLimit = Math.min(limit, count - page * limit)
-                        const { data } = await getPage(page, currLimit)
-                        return data
-                    }
+                      const pageQueries: Promise<IPermission[]>[] = []
+                      for (let page = 1; page < pageCount; page++) {
+                          const query = async (page: number) => {
+                              const currLimit = Math.min(
+                                  limit,
+                                  count - page * limit
+                              )
+                              const { data } = await getPage(page, currLimit)
+                              return data
+                          }
 
-                    pageQueries.push(query(page))
-                }
+                          pageQueries.push(query(page))
+                      }
 
-                const pages = await Promise.all(pageQueries)
+                      const pages = await Promise.all(pageQueries)
 
-                return [permissions, ...pages].flatMap((perms) => perms)
-            } catch (e) {
-                console.log(e)
-                throw e
-            }
-        },
+                      return [page0, ...pages].flatMap((perms) => perms)
+                  } catch (e) {
+                      console.error(e)
+                      throw e
+                  }
+              }
+            : skipToken,
         placeholderData: keepPreviousData,
     })
 
@@ -165,6 +174,7 @@ export default function Page() {
                             <TextField label="Name" field="name" required />
                             <SelectManyField<IRole>
                                 label="Permissions"
+                                options={permissionOptions}
                                 getter={(form) =>
                                     (form.permissions ?? []).map(
                                         (permission) => permission.id
@@ -172,12 +182,13 @@ export default function Page() {
                                 }
                                 setter={(form, field) => ({
                                     ...form,
-                                    permissions: permissions.filter(
-                                        (permission) =>
-                                            field.includes(permission.id)
-                                    ),
+                                    permissions:
+                                        field != null
+                                            ? permissions.filter((permission) =>
+                                                  field.includes(permission.id)
+                                              )
+                                            : form.permissions,
                                 })}
-                                options={permissionOptions}
                             />
                         </FormGroup>
                     </Form>

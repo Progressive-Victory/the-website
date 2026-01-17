@@ -8,6 +8,7 @@ import {
     PhoneVerifyStage,
     UnderageStage,
 } from '.'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import { OnboardingStage } from '@/contracts/data'
 import {
@@ -20,14 +21,18 @@ import {
     zDiscordUserIsInServerResponse,
 } from '@/contracts/responses'
 import { useCurrentUser, useFetch } from '@/util/hooks'
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
+import {
+    keepPreviousData,
+    skipToken,
+    useMutation,
+    useQuery,
+} from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
-import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 
 export default function VolunteerPage() {
     const session = useSession()
-    const { onGet, onPost, onPut } = useFetch()
+    const { ready, onGet, onPost, onPut } = useFetch()
 
     const [currentStage, setCurrentStage] = useState(
         OnboardingStage.NOT_STARTED
@@ -38,13 +43,15 @@ export default function VolunteerPage() {
 
     const isInServerResult = useQuery({
         queryKey: [`/discordUsers/${discordUserId}/isInServer`],
-        async queryFn({ signal }) {
-            return await onGet<DiscordUserIsInServerResponse>(
-                `/discordUsers/${discordUserId}/isInServer`,
-                zDiscordUserIsInServerResponse,
-                { signal }
-            )
-        },
+        queryFn: ready
+            ? async ({ signal }) => {
+                  return await onGet<DiscordUserIsInServerResponse>(
+                      `/discordUsers/${discordUserId}/isInServer`,
+                      zDiscordUserIsInServerResponse,
+                      { signal }
+                  )
+              }
+            : skipToken,
         placeholderData: keepPreviousData,
     })
 
@@ -99,10 +106,10 @@ export default function VolunteerPage() {
         collectInfoMutation.mutate({
             firstName: form.firstName,
             lastName: form.lastName,
-            phoneNumber: form.phoneNumber,
+            phone: form.phoneNumber,
             zipCode: +form.zipCode,
             acceptedAlerts: form.getAlerts,
-            dateOfBirth: new Date(form.dateOfBirth),
+            birthdate: new Date(form.dateOfBirth),
         })
     }
 
