@@ -77,10 +77,10 @@ const Account = ({
                 </header>
                 <div className="flex flex-row justify-between">
                     <div className="flex grow flex-col">
-                        <p className="text-3xl font-bold text-black">
+                        <p className="text-3xl font-bold text-black md:p-6">
                             {discordUsername}
                         </p>
-                        <div className="z-0 m-4 flex h-auto w-full max-w-[550px] flex-col justify-start gap-y-4 rounded-lg bg-slate-100 p-4 shadow-md md:m-8 md:p-6">
+                        <div className="flex max-w-[550px] flex-col justify-start gap-y-4 rounded-lg bg-slate-100 p-4 shadow-md md:m-8 md:mt-0 md:p-6">
                             <header>
                                 <p className="text-l mx-auto text-left font-bold text-black">
                                     Account Information
