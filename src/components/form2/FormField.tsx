@@ -44,7 +44,7 @@ export const getSetter = <T, F>(props: FormFieldProps<T, F>) => {
     const key = props.field
     if (key) return (form: T, field: F) => ({ ...form, [key]: field }) as T
 
-    return undefined
+    return (form: T) => form
 }
 
 export function FormField<T, F>(props: FormFieldProps<T, F>) {

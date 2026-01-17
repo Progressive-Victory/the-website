@@ -8,14 +8,14 @@ export const zUpdateUserRequest = z
         firstName: z.string().optional(),
         lastName: z.string().optional(),
         preferredName: z.string().optional().nullable(),
-        dateOfBirth: z.coerce.date().optional(),
+        birthdate: z.coerce.date().optional(),
 
         zipCode: z.coerce.number().optional(),
         state: z.string().optional(),
         county: z.string().optional(),
         city: z.string().optional(),
 
-        phoneNumber: z.string().optional(),
+        phone: z.string().optional(),
 
         verified: z.coerce.boolean().optional(),
         acceptedAlerts: z.coerce.boolean().optional(),

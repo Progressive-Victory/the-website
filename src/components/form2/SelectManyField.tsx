@@ -3,15 +3,15 @@ import styles from './FormField.module.css'
 import { MultiSelect, MultiSelectOption } from '@/components/common'
 
 export interface SelectManyFieldProps<T>
-    extends FormFieldProps<T, (string | number)[]> {
+    extends FormFieldProps<T, (string | number)[] | null | undefined> {
     options: MultiSelectOption[]
 }
 
 export function SelectManyField<T>(props: SelectManyFieldProps<T>) {
     props.getter ??= getGetter(props)
     props.setter ??= getSetter(props)
-    props.validator ??= (field: (string | number)[]) =>
-        !props.required || field.length > 0
+    props.validator ??= (field: (string | number)[] | null | undefined) =>
+        !props.required || !!field?.length
 
     const readonly = !!props.readonly || !props.dynamic?.editing
     const disabled = !!props.disabled || !!props.dynamic?.saving

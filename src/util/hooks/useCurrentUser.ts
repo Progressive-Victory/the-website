@@ -1,6 +1,6 @@
 import { useFetch } from './useFetch'
 import { IUser, zUser } from '@/contracts/data'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 
 interface DataState {
     data: IUser | undefined
@@ -10,13 +10,17 @@ interface DataState {
 }
 
 export function useCurrentUser(): DataState {
-    const { onGet } = useFetch()
+    const { ready, onGet } = useFetch()
 
     const user = useQuery({
         queryKey: ['/users/current'],
-        queryFn({ signal }) {
-            return onGet<IUser>('/users/current', zUser, { signal })
-        },
+        queryFn: ready
+            ? async () => {
+                  return onGet<IUser>('/users/current', zUser, {
+                      query: { includeDiscordUsers: true },
+                  })
+              }
+            : skipToken,
         placeholderData: keepPreviousData,
     })
 

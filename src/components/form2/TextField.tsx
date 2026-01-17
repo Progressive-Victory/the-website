@@ -3,10 +3,13 @@ import styles from './FormField.module.css'
 import cx from 'classnames'
 import { ChangeEvent } from 'react'
 
-export function TextField<T>(props: FormFieldProps<T, string>) {
+export function TextField<T>(
+    props: FormFieldProps<T, string | null | undefined>
+) {
     props.getter ??= getGetter(props)
     props.setter ??= getSetter(props)
-    props.validator ??= (field: string) => !props.required || !!field.trim()
+    props.validator ??= (field: string | null | undefined) =>
+        !props.required || !!field?.trim()
 
     const readonly = !!props.readonly || !props.dynamic?.editing
     const disabled = !!props.disabled || !!props.dynamic?.saving

@@ -12,7 +12,7 @@ export interface CollapsibleSectionProps {
 export function CollapsibleSection({
     children,
     title,
-    initialOpenState,
+    initialOpenState = true,
 }: CollapsibleSectionProps) {
     const [isOpen, setIsOpen] = useState(initialOpenState)
 

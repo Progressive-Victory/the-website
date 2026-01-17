@@ -42,7 +42,9 @@ export function useFetch() {
         placeholderData: keepPreviousData,
     })
 
+    // TODO: Put this into global state and delay until it's loaded
     const apiBaseUrl = settingsQuery.data?.apiBaseUrl
+    const ready = !!apiBaseUrl
 
     const authMutation = useMutation({
         mutationKey: ['/auth'],
@@ -105,6 +107,7 @@ export function useFetch() {
         }
 
         let res = await fetch(fullUrl, req)
+
         if (res.status === 401) {
             req.headers = {
                 ...req.headers,
@@ -166,5 +169,5 @@ export function useFetch() {
         await onFetch('DELETE', url, null, null, options)
     }
 
-    return { onFetch, onGet, onPut, onPost, onPatch, onDelete }
+    return { ready, onFetch, onGet, onPut, onPost, onPatch, onDelete }
 }
