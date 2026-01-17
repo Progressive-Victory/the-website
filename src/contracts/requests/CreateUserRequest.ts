@@ -1,4 +1,4 @@
-import { zOnboardingStage } from '@/models/users'
+import { zOnboardingStage } from '@/contracts/data/OnboardingStage'
 import z from 'zod'
 
 export const zCreateUserRequest = z.object({

@@ -18,10 +18,10 @@ function extractAvatarHash(url: string) {
     return hash
 }
 
-async function serverAuth(token: string): Promise<string | undefined> {
+async function serverAuth(token: string): Promise<string> {
     console.log('Bot ' + token)
 
-    await fetch(`${process.env.PV_WEBSITE_API_URL}/auth`, {
+    const res = await fetch(`${process.env.PV_WEBSITE_API_URL}/auth`, {
         //process.env.API_HOST_ADDR
         method: 'POST',
         headers: {
@@ -31,16 +31,12 @@ async function serverAuth(token: string): Promise<string | undefined> {
             discordToken: 'Bot ' + token,
         }),
     })
-        .then(async (res) => {
-            console.log(res)
-            if (!res.ok) throw Error("Can't fucking connect to API dawg")
-            const { accessToken } = await res.json()
-            return accessToken
-        })
-        .catch((err) => {
-            console.error(err)
-        })
-    return undefined
+    console.log(res)
+    if (!res.ok) throw Error("Can't fucking connect to API dawg")
+    const { accessToken } = await res.json()
+    console.log(accessToken)
+    if (!accessToken) throw Error('Failed to generate server jwt')
+    return accessToken
 }
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
@@ -163,7 +159,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                                 {
                                     method: 'POST',
                                     headers: {
-                                        Authorization: serverToken,
+                                        Authorization: `Bearer ${serverToken}`,
                                         'Content-Type': 'application/json',
                                     },
                                     body: JSON.stringify({
@@ -176,7 +172,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                                 {
                                     method: 'POST',
                                     headers: {
-                                        Authorization: serverToken,
+                                        Authorization: `Bearer ${serverToken}`,
                                         'Content-Type': 'application/json',
                                     },
                                     body: JSON.stringify({
@@ -236,18 +232,22 @@ export async function checkAuth(roles?: string[]): Promise<ResponseCode> {
         throw Error('set PV_WEBSITE_API_KEY in env vars')
     const serverToken = await serverAuth(process.env.PV_WEBSITE_API_KEY)
 
-    if (!serverToken) throw Error('Failed to generate jwt for server.')
-
     const res = await fetch(
         `${process.env.PV_WEBSITE_API_URL}/discordUsers/${session.discordId}/user`,
         {
+            method: 'GET',
             headers: {
-                Authorization: serverToken,
+                Authorization: `Bearer ${serverToken}`,
             },
         }
     )
 
-    const user = z.parse(zUser, await res.json())
+    console.log(res)
+    const data = await res.json()
+
+    console.log(data)
+
+    const user = z.parse(zUser, data)
 
     //  if either the currently logged in user cant be found in the database
     // for some reason or the user has no roles at all return an exception code.
