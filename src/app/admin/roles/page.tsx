@@ -15,7 +15,6 @@ import { IPaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { useMemo, useRef, useState } from 'react'
-import z from 'zod'
 
 export default function Page() {
     const eventTarget = useRef(new EventTarget())
@@ -31,38 +30,31 @@ export default function Page() {
         async queryFn({ signal }) {
             const limit = 50
 
-            try {
-                const { data: permissions, count } = await onGet<
-                    IPaginatedResponse<IPermission>
-                >('/permissions', zPaginatedResponse(zPermission), {
-                    query: { limit: limit.toString() },
-                    signal,
-                })
-                const pages = Math.ceil(count / limit)
+            const getPage = async (page: number, limit: number) =>
+                await onGet<IPaginatedResponse<IPermission>>(
+                    '/permissions',
+                    zPaginatedResponse(zPermission),
+                    { query: { page, limit }, signal }
+                )
 
-                const queries: Promise<IPermission[]>[] = []
-                for (let page = 1; page < pages; page++) {
+            try {
+                const { data: permissions, count } = await getPage(0, limit)
+                const pageCount = Math.ceil(count / limit)
+
+                const pageQueries: Promise<IPermission[]>[] = []
+                for (let page = 1; page < pageCount; page++) {
                     const query = async (page: number) => {
-                        const thisLimit = Math.min(limit, count - page * limit)
-                        const response = await onGet<
-                            IPaginatedResponse<IPermission>
-                        >('/permissions', z.array(zPermission), {
-                            query: {
-                                limit: thisLimit.toString(),
-                                page: page.toString(),
-                            },
-                            signal,
-                        })
-                        return response.data
+                        const currLimit = Math.min(limit, count - page * limit)
+                        const { data } = await getPage(page, currLimit)
+                        return data
                     }
 
-                    queries.push(query(page))
+                    pageQueries.push(query(page))
                 }
-                const queries_1 = await Promise.all([
-                    Promise.resolve(permissions),
-                    ...queries,
-                ])
-                return queries_1.flatMap((perms) => perms)
+
+                const pages = await Promise.all(pageQueries)
+
+                return [permissions, ...pages].flatMap((perms) => perms)
             } catch (e) {
                 console.log(e)
                 throw e
@@ -72,7 +64,6 @@ export default function Page() {
     })
 
     const permissions = getPermissionsQuery.data ?? []
-    console.log(permissions)
     const permissionOptions = useMemo(
         () =>
             (getPermissionsQuery.data ?? []).map((permission) => ({
