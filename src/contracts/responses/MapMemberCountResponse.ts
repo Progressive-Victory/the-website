@@ -5,4 +5,4 @@ export const zMapMemberCountResponse = z.object({
     total: z.int(),
 })
 
-export type IMapMemberCountResponse = z.infer<typeof zMapMemberCountResponse>
+export type MapMemberCountResponse = z.infer<typeof zMapMemberCountResponse>

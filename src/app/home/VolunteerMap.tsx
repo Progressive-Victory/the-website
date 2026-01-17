@@ -12,7 +12,7 @@ import {
 import { MapView, StateMapInteractionProps } from '@/components/Map/types'
 import { Link, Message, TiltMessage } from '@/components/common'
 import {
-    IMapMemberCountResponse,
+    MapMemberCountResponse,
     zMapMemberCountResponse,
 } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
@@ -28,7 +28,7 @@ export function VolunteerMap() {
         queryKey: ['/map/memberCounts'],
         queryFn: ready
             ? async ({ signal }) => {
-                  const data = await onGet<IMapMemberCountResponse>(
+                  const data = await onGet<MapMemberCountResponse>(
                       '/map/memberCounts',
                       zMapMemberCountResponse,
                       { signal }

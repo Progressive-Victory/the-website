@@ -9,9 +9,9 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/form'
-import { IPermission, IRole, zPermission, zRole } from '@/contracts/data'
-import { IUpdateRoleRequest } from '@/contracts/requests'
-import { IPaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
+import { Permission, Role, zPermission, zRole } from '@/contracts/data'
+import { UpdateRoleRequest } from '@/contracts/requests'
+import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -25,9 +25,9 @@ export default function Page() {
     const eventTarget = useRef(new EventTarget())
     const { ready, onGet, onPatch } = useFetch()
 
-    const [roles, setRoles] = useState<IRole[]>([])
-    const [selectedRole, setSelectedRole] = useState<IRole | null>(null)
-    const [formState, setFormState] = useState<FormState<IRole> | null>(null)
+    const [roles, setRoles] = useState<Role[]>([])
+    const [selectedRole, setSelectedRole] = useState<Role | null>(null)
+    const [formState, setFormState] = useState<FormState<Role> | null>(null)
 
     const getPermissionsQuery = useQuery({
         queryKey: ['/permissions'],
@@ -36,7 +36,7 @@ export default function Page() {
                   const limit = 50
 
                   const getPage = async (page: number, limit: number) =>
-                      await onGet<IPaginatedResponse<IPermission>>(
+                      await onGet<PaginatedResponse<Permission>>(
                           '/permissions',
                           zPaginatedResponse(zPermission),
                           { query: { page, limit } }
@@ -46,7 +46,7 @@ export default function Page() {
                       const { data: page0, count } = await getPage(0, limit)
                       const pageCount = Math.ceil(count / limit)
 
-                      const pageQueries: Promise<IPermission[]>[] = []
+                      const pageQueries: Promise<Permission[]>[] = []
                       for (let page = 1; page < pageCount; page++) {
                           const query = async (page: number) => {
                               const currLimit = Math.min(
@@ -88,14 +88,14 @@ export default function Page() {
             request,
         }: {
             id: number
-            request: IUpdateRoleRequest
+            request: UpdateRoleRequest
         }) {
             await onPatch(`/roles/${id}`, request, null)
             eventTarget.current.dispatchEvent(new Event('refetch'))
         },
     })
 
-    const handleSelectItem = (value: IRole) => {
+    const handleSelectItem = (value: Role) => {
         if (value.id === selectedRole?.id) return
 
         if (formState?.dirty) {
@@ -108,7 +108,7 @@ export default function Page() {
         setSelectedRole(value)
     }
 
-    const handleSave = (role: IRole) => {
+    const handleSave = (role: Role) => {
         setSelectedRole(role)
         updateMutation.mutate({
             id: role.id,
@@ -121,14 +121,14 @@ export default function Page() {
         })
     }
 
-    const makeItem = (role: IRole) => ({
+    const makeItem = (role: Role) => ({
         id: role.id.toString(),
         value: role,
     })
 
     return (
         <>
-            <PaginatedList<IRole>
+            <PaginatedList<Role>
                 zodSchema={zRole}
                 eventTarget={eventTarget.current}
                 endpoint="/roles"
@@ -162,7 +162,7 @@ export default function Page() {
 
             <div className={styles.rightPane}>
                 {selectedRole ? (
-                    <Form<IRole>
+                    <Form<Role>
                         key={selectedRole.id}
                         form={selectedRole}
                         title={selectedRole.name}
@@ -172,7 +172,7 @@ export default function Page() {
                     >
                         <FormGroup title="Details">
                             <TextField label="Name" field="name" required />
-                            <SelectManyField<IRole>
+                            <SelectManyField<Role>
                                 label="Permissions"
                                 options={permissionOptions}
                                 getter={(form) =>

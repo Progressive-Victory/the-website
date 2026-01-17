@@ -1,5 +1,5 @@
 import MultiSelect from '@/components/admin/MultiSelect'
-import { IPaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
+import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -125,7 +125,7 @@ export default function PaginatedList<T extends object>({
                   if (search.field) params.field = search.field
                   if (search.sort) params.sort = search.sort
 
-                  const res = await onGet<IPaginatedResponse<T>>(
+                  const res = await onGet<PaginatedResponse<T>>(
                       url.pathname,
                       zPaginatedResponse(zodSchema),
                       { query: params, signal }
