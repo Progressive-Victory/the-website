@@ -24,4 +24,4 @@ export const zCreateUserRequest = z.object({
     roles: z.array(z.coerce.number()).nullable(),
 })
 
-export type ICreateUserRequest = z.infer<typeof zCreateUserRequest>
+export type CreateUserRequest = z.infer<typeof zCreateUserRequest>
