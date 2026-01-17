@@ -1,58 +1,48 @@
-import { FormField, IBaseFormField } from '.'
-import { dateService } from '@/services'
-import classNames from 'classnames'
-import { FormEvent, useState } from 'react'
+import { FormField, FormFieldProps, getGetter, getSetter } from './FormField'
+import styles from './FormField.module.css'
+import cx from 'classnames'
+import { ChangeEvent, useEffect, useState } from 'react'
 
-export function DateField({
-    name,
-    field,
-    required = false,
-    readonly = false,
-    deprecated = false,
-    dynamic,
-}: IBaseFormField) {
-    const initialValue = dynamic?.value as Date | undefined
+export function DateField<T>(
+    props: FormFieldProps<T, Date | null | undefined>
+) {
+    props.getter ??= getGetter(props)
+    props.setter ??= getSetter(props)
+    props.validator ??= (field: Date | null | undefined) =>
+        (!props.required || field != null) && !isNaN(field?.valueOf() ?? 0)
 
-    const [value, setValue] = useState(initialValue?.toISOString() ?? '')
+    const readonly = !!props.readonly || !props.dynamic?.editing
+    const disabled = !!props.disabled || !!props.dynamic?.saving
+    const value = props?.getter?.(props.dynamic!.form)
 
-    const format = (date: string) => {
-        if (date) {
-            const [year, month, day] = date.split('-')
-            return `${month}/${day}/${year}`
-        }
-        return date
+    const [dateText, setDateText] = useState('')
+
+    const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.target.value
+        setDateText(newValue)
+        props.dynamic?.onChange?.(props, new Date(newValue))
     }
 
-    const handleInput = (event: FormEvent<HTMLInputElement>) => {
-        const formatted = (event.target as HTMLTextAreaElement).value
-        setValue(formatted)
-
-        const isValid = dateService.isValid(formatted)
-        const date = isValid ? new Date(formatted) : null
-        dynamic?.onUpdate?.(field, date, date, isValid)
-    }
+    useEffect(() => {
+        if (!readonly) setDateText(value?.toISOString() ?? '')
+    }, [readonly, value])
 
     return (
-        <FormField
-            name={name}
-            field={field}
-            required={required}
-            deprecated={deprecated}
-        >
-            {readonly || dynamic?.disabled ? (
-                <div className="col-span-2 w-full">{format(value)}</div>
+        <FormField {...props}>
+            {readonly ? (
+                <div className={styles.readonly}>{value?.toDateString()}</div>
             ) : (
                 <input
                     type="date"
-                    name={name}
-                    id={field}
-                    disabled={dynamic?.loading}
-                    required={required}
-                    value={value}
+                    id={props?.id}
+                    name={props.label}
+                    disabled={disabled}
+                    required={props.required}
+                    value={dateText}
                     onInput={handleInput}
-                    className={classNames(
-                        'col-span-2 w-full max-w-96 rounded-lg border border-gray-300 px-3 py-0.5',
-                        value && 'border-red-300'
+                    className={cx(
+                        styles.textField,
+                        !props.validator(value) && styles.invalid
                     )}
                 />
             )}
