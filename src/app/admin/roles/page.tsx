@@ -8,7 +8,7 @@ import {
     FormState,
     SelectManyField,
     TextField,
-} from '@/components/form2'
+} from '@/components/form'
 import { IPermission, IRole, zPermission, zRole } from '@/contracts/data'
 import { IUpdateRoleRequest } from '@/contracts/requests'
 import { IPaginatedResponse, zPaginatedResponse } from '@/contracts/responses'

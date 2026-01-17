@@ -11,7 +11,7 @@ import {
     FormState,
     SelectManyField,
     TextField,
-} from '@/components/form2'
+} from '@/components/form'
 import { IRole, IUser, zRole, zUser } from '@/contracts/data'
 import { IUpdateUserRequest } from '@/contracts/requests'
 import { IPaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
