@@ -38,48 +38,45 @@ export default function Page() {
 
     const loggedInUser = useCurrentUser()
 
+    const getRoles = async () => {
+        const limit = 50
+
+        const getPage = async (page: number, limit: number) =>
+            await onGet<IPaginatedResponse<IRole>>(
+                '/roles',
+                zPaginatedResponse(zRole),
+                { query: { page, limit } }
+            )
+
+        try {
+            const result = await getPage(0, limit)
+            const page0 = result?.data ?? []
+            const count = result?.count ?? 0
+            const pageCount = Math.ceil(count / limit)
+
+            const pageQueries: Promise<IRole[]>[] = []
+            for (let page = 1; page < pageCount; page++) {
+                const query = async (page: number) => {
+                    const currLimit = Math.min(limit, count - page * limit)
+                    const result = await getPage(page, currLimit)
+                    return result?.data ?? []
+                }
+
+                pageQueries.push(query(page))
+            }
+
+            const pages = await Promise.all(pageQueries)
+
+            return [page0, ...pages].flatMap((perms) => perms)
+        } catch (e) {
+            console.error(e)
+            throw e
+        }
+    }
+
     const getRolesQuery = useQuery({
         queryKey: ['/roles'],
-        queryFn: ready
-            ? async () => {
-                  const limit = 50
-
-                  const getPage = async (page: number, limit: number) =>
-                      await onGet<IPaginatedResponse<IRole>>(
-                          '/roles',
-                          zPaginatedResponse(zRole),
-                          { query: { page, limit } }
-                      )
-
-                  try {
-                      const result = await getPage(0, limit)
-                      const page0 = result?.data ?? []
-                      const count = result?.count ?? 0
-                      const pageCount = Math.ceil(count / limit)
-
-                      const pageQueries: Promise<IRole[]>[] = []
-                      for (let page = 1; page < pageCount; page++) {
-                          const query = async (page: number) => {
-                              const currLimit = Math.min(
-                                  limit,
-                                  count - page * limit
-                              )
-                              const result = await getPage(page, currLimit)
-                              return result?.data ?? []
-                          }
-
-                          pageQueries.push(query(page))
-                      }
-
-                      const pages = await Promise.all(pageQueries)
-
-                      return [page0, ...pages].flatMap((perms) => perms)
-                  } catch (e) {
-                      console.error(e)
-                      throw e
-                  }
-              }
-            : skipToken,
+        queryFn: ready ? getRoles : skipToken,
         placeholderData: keepPreviousData,
     })
 
@@ -122,7 +119,6 @@ export default function Page() {
             request: IUpdateUserRequest
         }) {
             await onPatch(`/users/${id}`, request, null)
-            eventTarget.current.dispatchEvent(new Event('refetch'))
         },
     })
 
@@ -140,6 +136,7 @@ export default function Page() {
     }
 
     const handleSave = (user: IUser) => {
+        eventTarget.current.dispatchEvent(new Event('refetch'))
         setSelectedUser(user)
         updateMutation.mutate({
             id: user.id,
@@ -164,9 +161,8 @@ export default function Page() {
     const makeTitle = (user: IUser) => {
         if (user.firstName && user.lastName)
             return `${user.firstName} ${user.lastName}`
+        if (user.firstName) return user.firstName
         if (user.preferredName) return user.preferredName
-        if (user.discordUsers?.[0].username)
-            return user.discordUsers[0].username
         return user.email ?? ''
     }
 
@@ -228,9 +224,7 @@ export default function Page() {
                             />
                             <div className={styles.userMeta}>
                                 <span className={styles.userName}>
-                                    {(value.firstName
-                                        ? `${value.firstName} ${value.lastName}`
-                                        : value.preferredName) ?? value.email}
+                                    {makeTitle(value)}
                                 </span>
                                 <span className={styles.userUsername}>
                                     {value.discordUsers?.[0].username}
@@ -287,17 +281,28 @@ export default function Page() {
                             />
                             <TextField label="First Name" field="firstName" />
                             <TextField label="Last Name" field="lastName" />
-                            <DateField
+                            <DateField<IUser>
                                 label="Date of Birth"
+                                getter={(form) =>
+                                    new Date(
+                                        dateService.toISODateString(
+                                            form.birthdate
+                                        ) ?? ''
+                                    )
+                                }
                                 field="birthdate"
+                                format={{
+                                    timeZone: 'UTC',
+                                    dateStyle: 'medium',
+                                }}
                             />
                             <TextField<IUser>
                                 label="Age"
                                 readonly
                                 getter={(form) =>
-                                    form.birthdate
+                                    dateService.isValid(form.birthdate)
                                         ? dateService
-                                              .getAge(form.birthdate)
+                                              .getAge(form.birthdate!)
                                               ?.toString()
                                         : null
                                 }

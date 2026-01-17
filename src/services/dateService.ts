@@ -3,13 +3,13 @@ class DateService {
         return new Date()
     }
 
-    isValid(date: string) {
-        return !isNaN(new Date(date).getTime())
+    isValid(date: Date | string | null | undefined) {
+        return date && !isNaN(new Date(date).valueOf())
     }
 
-    toISODateString(date: string) {
+    toISODateString(date: Date | string | null | undefined) {
         return this.isValid(date)
-            ? new Date(date).toISOString().split('T')[0]
+            ? new Date(date!).toISOString().split('T')[0]
             : null
     }
 
