@@ -2,26 +2,23 @@
 
 import styles from './page.module.css'
 import PaginatedList from '@/components/admin/PaginatedList'
-import { Form, FormGroup, SelectManyField, TextField } from '@/components/form'
+import { Form, FormGroup, FormState, TextField } from '@/components/form2'
 import { IPermission, IRole, zPermission, zRole } from '@/contracts/data'
+import { IUpdateRoleRequest } from '@/contracts/requests'
 import { IPaginatedResponse } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import deepEqual from 'deep-equal'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import z from 'zod'
 
 export default function Page() {
     const eventTarget = useRef(new EventTarget())
+    const { onGet, onPatch } = useFetch()
 
-    // We save the original value we got from the API so that we can easily
-    // discard changes without saving
-    const [originalRole, setOriginalRole] = useState<IRole | null>(null)
-    // This is the mutable copy we actually update when the user interacts with
-    // the form
-    const [selectedRole, setSelectedRole] = useState<IRole | null>(null)
     const [roles, setRoles] = useState<IRole[]>([])
-    const { onGet } = useFetch()
+    const [selectedRole, setSelectedRole] = useState<IRole | null>(null)
+
+    const [formState, setFormState] = useState<FormState<IRole> | null>(null)
 
     const getPermissionsQuery = useQuery({
         queryKey: ['/permissions'],
@@ -68,20 +65,43 @@ export default function Page() {
     })
     const permissions = getPermissionsQuery.data ?? []
 
+    const updateMutation = useMutation({
+        async mutationFn({
+            id,
+            request,
+        }: {
+            id: number
+            request: IUpdateRoleRequest
+        }) {
+            await onPatch(`/roles/${id}`, request, null)
+            eventTarget.current.dispatchEvent(new Event('refetch'))
+        },
+    })
+
     const handleSelectItem = (value: IRole) => {
         if (value.id === selectedRole?.id) return
 
-        if (!deepEqual(selectedRole, originalRole)) {
+        if (formState?.dirty) {
             const proceed = confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
             )
             if (!proceed) return
         }
 
-        // We need to copy to make sure that the value in the list is not
-        // modified until we save
-        setSelectedRole({ ...value } as IRole)
-        setOriginalRole({ ...value } as IRole)
+        setSelectedRole(value)
+    }
+
+    const handleSave = (role: IRole) => {
+        setSelectedRole(role)
+        updateMutation.mutate({
+            id: role.id,
+            request: {
+                name: role.name,
+                permissionIds: role.permissions?.map(
+                    (permission) => permission.id
+                ),
+            },
+        })
     }
 
     const makeItem = (role: IRole) => ({
@@ -124,30 +144,24 @@ export default function Page() {
             />
 
             <div className={styles.rightPane}>
-                {selectedRole && originalRole ? (
+                {selectedRole ? (
                     <Form<IRole>
-                        zodSchema={zRole}
-                        initialValue={originalRole}
-                        setInitialValue={setOriginalRole}
-                        currentValue={selectedRole}
-                        setCurrentValue={setSelectedRole}
-                        computeTitle={(role) => role.name ?? ''}
-                        patchEndpoint={`/roles/${selectedRole.id}`}
-                        onChangesSaved={() => {
-                            eventTarget.current.dispatchEvent(
-                                new Event('refetch')
-                            )
-                        }}
+                        key={selectedRole.id}
+                        form={selectedRole}
+                        title={selectedRole.name}
+                        saving={updateMutation.isPending}
+                        onUpdate={setFormState}
+                        onSave={handleSave}
                     >
                         <FormGroup title="Details">
-                            <TextField name="Name" field="name" required />
-                            <SelectManyField
-                                name="Permissions"
+                            <TextField label="Name" field="name" required />
+                            {/* <SelectManyField
+                                label="Permissions"
                                 field="permissions"
                                 nameKey="name"
                                 valueKey="id"
                                 options={permissions}
-                            />
+                            /> */}
                         </FormGroup>
                     </Form>
                 ) : (
