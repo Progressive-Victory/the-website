@@ -23,6 +23,7 @@ import { useCurrentUser, useFetch } from '@/util/hooks'
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 
 export default function VolunteerPage() {
     const session = useSession()
@@ -142,8 +143,7 @@ export default function VolunteerPage() {
 
     return (
         <MainLayout>
-            <div className="relative flex min-h-screen flex-col items-center justify-center bg-steel-blue">
-                <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
+            <div className="relative flex min-h-screen flex-col items-center justify-center">
                 <div
                     className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
                     style={{
@@ -154,6 +154,7 @@ export default function VolunteerPage() {
                         transform: 'scaleX(-1)',
                     }}
                 />
+                <HalftoneBackground />
                 <div className="flex w-full justify-center">
                     <form
                         onSubmit={(e) => e.preventDefault()}

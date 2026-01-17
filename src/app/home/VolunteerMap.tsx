@@ -1,5 +1,6 @@
 'use client'
 
+import styles from './map.module.css'
 import { StateMap } from '@/components/Map'
 import {
     BBOX_AK,
@@ -56,30 +57,26 @@ export function VolunteerMap() {
     }
 
     return (
-        <div className="relative flex w-full flex-col items-center justify-center gap-[6vw] bg-black-pearl-dark py-10 2xl:grid 2xl:grid-cols-2">
-            {/* Text */}
-            <div className="z-3 flex max-w-[750px] flex-col items-center text-center text-white 2xl:order-last">
-                <h1 className="mb-8 text-4xl font-bold">
+        <div className={styles.container}>
+            <div className={styles.textBlock}>
+                <h1 className={styles.title}>
                     Thousands of{' '}
-                    <span className="text-valencia">Volunteers</span>
+                    <span className={styles.titleAccent}>Volunteers</span>
                     <br /> Across the US
                 </h1>
-                <p className="mb-8 px-4 text-lg font-[500] md:px-24">
+                <p className={styles.subtitle}>
                     The PV community is constantly growing. Every new voice adds
                     to the movement!
                 </p>
-                <Link
-                    href={'/volunteer'}
-                    className="w-fit justify-self-center bg-valencia"
-                >
+
+                <Link href={'/volunteer'} className={styles.ctaLink}>
                     Get Involved
                 </Link>
             </div>
 
-            {/* Map */}
-            <TiltMessage className="flex justify-center px-8 xl:justify-end">
+            <TiltMessage className={styles.tiltMessage}>
                 <Message
-                    className="xl:w-[30vw]"
+                    className={styles.message}
                     avatar="/images/pv_pride.png"
                     avatarRounded={false}
                     nameColor="red"
@@ -89,7 +86,7 @@ export function VolunteerMap() {
                     }
                     botDivider={true}
                     botLeftContent={
-                        <p className="font-medium">
+                        <p className={styles.botLeftText}>
                             {selectedState
                                 ? `Members in ${selectedState}: ${stateMemberCounts?.[selectedState]}`
                                 : `Total Members: ${totalMemberCount}`}
@@ -139,8 +136,8 @@ function CombinedMap(props: StateMapInteractionProps) {
     }
 
     return (
-        <div className="relative min-w-[350px] max-w-[750px] rounded-md border">
-            <div className="aspect-video md:aspect-[5/3]">
+        <div className={styles.mapShell}>
+            <div className={styles.mainMapAspect}>
                 <StateMap
                     mapView={{ bounds: BBOX_US }}
                     stateMemberCount={props.stateMemberCount}
@@ -151,12 +148,11 @@ function CombinedMap(props: StateMapInteractionProps) {
                 />
             </div>
 
-            <div className="pointer-events-none relative bottom-0 left-0 m-1 flex w-3/5 items-end gap-1 sm:absolute sm:w-2/5">
+            <div className={styles.extraMaps}>
                 {Object.entries(extraMaps).map(([, map], i) => (
                     <div
                         key={i}
-                        // className={`relative w-full rounded-md border`}
-                        className={`relative w-full`}
+                        className={styles.extraMapItem}
                         style={{
                             aspectRatio: map.w / map.h,
                             maxWidth: map.w,

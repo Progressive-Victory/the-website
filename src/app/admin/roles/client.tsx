@@ -1,5 +1,6 @@
 'use client'
 
+import styles from './roles.module.css'
 import PaginatedList from '@/components/admin/PaginatedList'
 import { Form, FormGroup, SelectManyField, TextField } from '@/components/form'
 import { IPermission, IRole, zPermission, zRole } from '@/contracts/data'
@@ -116,10 +117,13 @@ export default function ClientPage() {
                 onSelectItem={({ value }) => handleSelectItem(value)}
                 setItems={setRoles}
                 renderItem={({ value }) => (
-                    <span className="font-medium text-black">{value.name}</span>
+                    <span className={styles.roleListItemName}>
+                        {value.name}
+                    </span>
                 )}
             />
-            <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
+
+            <div className={styles.rightPane}>
                 {selectedRole && originalRole ? (
                     <Form<IRole>
                         zodSchema={zRole}
@@ -147,9 +151,7 @@ export default function ClientPage() {
                         </FormGroup>
                     </Form>
                 ) : (
-                    <div className="flex h-full items-center justify-center">
-                        No role selected
-                    </div>
+                    <div className={styles.emptyState}>No role selected</div>
                 )}
             </div>
         </>

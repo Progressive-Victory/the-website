@@ -1,6 +1,7 @@
+import styles from './admin.module.css'
 import ProtectedPage from '@/components/ProtectedPage'
 import AdminNav from '@/components/admin/AdminNav'
-import { Header } from '@/components/layout'
+import { Header } from '@/components/layout/Header'
 import { get_collection_stats } from '@/util/stats'
 
 export default async function Layout({
@@ -12,13 +13,13 @@ export default async function Layout({
 
     return (
         <ProtectedPage requiredRoles={['Superadmin']}>
-            <div className="relative flex size-full min-h-screen flex-col">
+            <div className={styles.root}>
                 <Header />
-                <div className="flex flex-1 bg-gray-50">
+
+                <div className={styles.main}>
                     <AdminNav stats={stats} />
-                    <div className="flex h-[calc(100vh-100px)] flex-1">
-                        {children}
-                    </div>
+
+                    <div className={styles.content}>{children}</div>
                 </div>
             </div>
         </ProtectedPage>

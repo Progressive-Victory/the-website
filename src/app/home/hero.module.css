@@ -1,0 +1,126 @@
+.hero {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 5rem 0;
+}
+
+.blendPanel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+
+    background-size: cover;
+    background-position: right;
+    mix-blend-mode: lighten;
+    pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+    .blendPanel {
+        width: 50%;
+        transform: translateX(-50%);
+    }
+}
+
+.content {
+    position: relative;
+    left: 0;
+    top: 0;
+    z-index: 2;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 0 1rem;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .content {
+        width: 66.6667%;
+    }
+}
+
+.title {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.titleEmphasis {
+    color: #09223a;
+}
+
+.subtitle {
+    margin: 2rem 0;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.cta {
+    background: #ce3728;
+}
+
+.messages {
+    margin-top: 5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 0 1rem;
+}
+
+.messageCard {
+    max-width: 36rem;
+}
+
+@media (min-width: 1280px) {
+    .messageCard {
+        width: 30vw;
+    }
+}
+
+.orderLastXlFirst {
+    order: 9999;
+}
+
+@media (min-width: 1280px) {
+    .orderLastXlFirst {
+        order: -9999;
+    }
+}
+
+.orderFirstXlLast {
+    order: -9999;
+}
+
+@media (min-width: 1280px) {
+    .orderFirstXlLast {
+        order: 9999;
+    }
+}
+
+.messageMid {
+    height: fit-content;
+}
+
+@media (min-width: 1024px) {
+    .messageMid {
+        margin-top: 6rem;
+    }
+}
+
+.tilt {
+    /* empty don't touch this Joops */
+}

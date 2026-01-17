@@ -1,6 +1,10 @@
 'use client'
 
-import { MainLayout } from '@/components/layout'
+import styles from '@/app/account/account.module.css'
+import {
+    ContentPageFrame,
+    ContentSection,
+} from '@/components/content_sections/ContentSections'
 import { hasPermission, useCurrentUser } from '@/util/hooks'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import { useSession, signOut } from 'next-auth/react'
@@ -11,49 +15,47 @@ export function Account() {
     const { data: session } = useSession()
     const user = useCurrentUser()
 
-    const AdminPanelButton = useMemo(() => {
-        if (user.data) {
-            if (hasPermission(user.data, 'Admin Panel Access')) {
-                return (
-                    <Link href="/admin">
-                        <button className="rounded-full bg-valencia px-4 py-2 font-bold text-white transition duration-300 ease-in-out hover:bg-white hover:text-black-pearl-dark">
-                            Admin Panel
-                        </button>
-                    </Link>
-                )
-            }
-        }
-
-        return undefined
+    const canAccessAdminPanel = useMemo(() => {
+        return user.data
+            ? hasPermission(user.data, 'Admin Panel Access')
+            : false
     }, [user.data])
 
     if (!session) return null
 
     return (
-        <MainLayout>
-            <div className="relative flex size-full min-h-screen flex-1 flex-col items-center bg-steel-blue xl:min-h-[unset]">
-                <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
-
-                <div className="z-2 relative mt-20 flex w-[300px] flex-col rounded-lg bg-black-pearl-dark p-4">
-                    <p className="mb-4 text-lg font-bold text-white">
-                        Account Controls
-                    </p>
-                    <div className="flex flex-row items-center justify-between">
+        <div className={styles.pageRoot}>
+            <ContentPageFrame>
+                <ContentSection
+                    title="Account Controls"
+                    titleAlign="center"
+                    highlight="Controls"
+                    highlightColor="#CE3728"
+                >
+                    <div className={styles.controlsRow}>
                         <button
+                            type="button"
                             onClick={() => void signOut({ callbackUrl: '/' })}
-                            className="rounded-full bg-valencia px-4 py-2 font-bold text-white transition duration-300 ease-in-out hover:bg-white hover:text-black-pearl-dark"
+                            className={styles.primaryButton}
                         >
                             Sign Out
                         </button>
 
-                        {AdminPanelButton && AdminPanelButton}
+                        {canAccessAdminPanel && (
+                            <Link href="/admin" className={styles.adminLink}>
+                                <span className={styles.primaryButton}>
+                                    Admin Panel
+                                </span>
+                            </Link>
+                        )}
                     </div>
+                </ContentSection>
+
+                <div className={styles.notice}>
+                    <InformationCircleIcon className={styles.noticeIcon} />
+                    <span>Pardon our dust while we work on this page</span>
                 </div>
-                <div className="z-2 relative mt-4 flex flex-row rounded-lg bg-black-pearl-dark p-4 text-xs text-white shadow-lg">
-                    <InformationCircleIcon className="mr-1 size-4 rounded-full bg-white text-steel-blue" />
-                    Pardon our dust while we work on this page
-                </div>
-            </div>
-        </MainLayout>
+            </ContentPageFrame>
+        </div>
     )
 }

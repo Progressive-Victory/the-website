@@ -1,9 +1,3 @@
-import { Footer } from "./Footer";
-import { Header } from "./Header";
-import { MainLayout } from "./MainLayout";
-
-export {
-  Footer,
-  Header,
-  MainLayout
-}
+export * from './Footer'
+export * from './Header'
+export * from './MainLayout'

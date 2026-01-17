@@ -1,6 +1,8 @@
 'use client'
+
 import { LoginCard } from '@/app/login/LoginCard'
-import { MainLayout } from '@/components/layout'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
+import { MainLayout } from '@/components/layout/MainLayout'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
@@ -18,7 +20,7 @@ export function LoginPage({ redirect }: { redirect: string | null }) {
                     mixBlendMode: 'lighten',
                 }}
             />
-            <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
+            <HalftoneBackground />
 
             <div className="z-2 relative flex h-screen w-full flex-col items-center justify-center px-2">
                 <Suspense>
