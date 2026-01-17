@@ -1,5 +1,6 @@
 export * from './CreateUserRequest'
 export * from './UpdatePermissionRequest'
+export * from './UpdateRoleRequest'
 export * from './UpdateUserRequest'
 export * from './UserOnboardingCollectInfoRequest'
 export * from './UserOnboardingJoinRequest'
