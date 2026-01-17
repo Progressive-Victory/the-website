@@ -1,3 +1,4 @@
+export * from './AuthRequest'
 export * from './CreateUserRequest'
 export * from './UpdatePermissionRequest'
 export * from './UpdateRoleRequest'

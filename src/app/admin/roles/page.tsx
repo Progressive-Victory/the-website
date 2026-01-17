@@ -2,13 +2,19 @@
 
 import styles from './page.module.css'
 import PaginatedList from '@/components/admin/PaginatedList'
-import { Form, FormGroup, FormState, TextField } from '@/components/form2'
+import {
+    Form,
+    FormGroup,
+    FormState,
+    SelectManyField,
+    TextField,
+} from '@/components/form2'
 import { IPermission, IRole, zPermission, zRole } from '@/contracts/data'
 import { IUpdateRoleRequest } from '@/contracts/requests'
-import { IPaginatedResponse } from '@/contracts/responses'
+import { IPaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import z from 'zod'
 
 export default function Page() {
@@ -25,45 +31,56 @@ export default function Page() {
         async queryFn({ signal }) {
             const limit = 50
 
-            const { data: permissions, count } = await onGet<
-                IPaginatedResponse<IPermission>
-            >('/permissions', z.array(zPermission), {
-                query: { limit: limit.toString() },
-                signal,
-            })
+            try {
+                const { data: permissions, count } = await onGet<
+                    IPaginatedResponse<IPermission>
+                >('/permissions', zPaginatedResponse(zPermission), {
+                    query: { limit: limit.toString() },
+                    signal,
+                })
+                const pages = Math.ceil(count / limit)
 
-            const pages = Math.ceil(count / limit)
+                const queries: Promise<IPermission[]>[] = []
+                for (let page = 1; page < pages; page++) {
+                    const query = async (page: number) => {
+                        const thisLimit = Math.min(limit, count - page * limit)
+                        const response = await onGet<
+                            IPaginatedResponse<IPermission>
+                        >('/permissions', z.array(zPermission), {
+                            query: {
+                                limit: thisLimit.toString(),
+                                page: page.toString(),
+                            },
+                            signal,
+                        })
+                        return response.data
+                    }
 
-            const queries: Promise<IPermission[]>[] = []
-            for (let page = 1; page < pages; page++) {
-                const query = async (page: number) => {
-                    const thisLimit = Math.min(limit, count - page * limit)
-
-                    const response = await onGet<
-                        IPaginatedResponse<IPermission>
-                    >('/permissions', z.array(zPermission), {
-                        query: {
-                            limit: thisLimit.toString(),
-                            page: page.toString(),
-                        },
-                        signal,
-                    })
-
-                    return response.data
+                    queries.push(query(page))
                 }
-
-                queries.push(query(page))
+                const queries_1 = await Promise.all([
+                    Promise.resolve(permissions),
+                    ...queries,
+                ])
+                return queries_1.flatMap((perms) => perms)
+            } catch (e) {
+                console.log(e)
+                throw e
             }
-
-            permissions.push(
-                ...(await Promise.all(queries)).flatMap((perms) => perms)
-            )
-
-            return permissions
         },
         placeholderData: keepPreviousData,
     })
+
     const permissions = getPermissionsQuery.data ?? []
+    console.log(permissions)
+    const permissionOptions = useMemo(
+        () =>
+            (getPermissionsQuery.data ?? []).map((permission) => ({
+                value: permission.id,
+                label: permission.name,
+            })),
+        [getPermissionsQuery.data]
+    )
 
     const updateMutation = useMutation({
         async mutationFn({
@@ -155,13 +172,22 @@ export default function Page() {
                     >
                         <FormGroup title="Details">
                             <TextField label="Name" field="name" required />
-                            {/* <SelectManyField
+                            <SelectManyField<IRole>
                                 label="Permissions"
-                                field="permissions"
-                                nameKey="name"
-                                valueKey="id"
-                                options={permissions}
-                            /> */}
+                                getter={(form) =>
+                                    (form.permissions ?? []).map(
+                                        (permission) => permission.id
+                                    )
+                                }
+                                setter={(form, field) => ({
+                                    ...form,
+                                    permissions: permissions.filter(
+                                        (permission) =>
+                                            field.includes(permission.id)
+                                    ),
+                                })}
+                                options={permissionOptions}
+                            />
                         </FormGroup>
                     </Form>
                 ) : (

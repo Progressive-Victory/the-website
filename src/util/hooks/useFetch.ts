@@ -1,4 +1,5 @@
-import { AuthRequest, FetchError } from '@/models/models'
+import { AuthRequest } from '@/contracts/requests'
+import { AuthResponse } from '@/contracts/responses'
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import z from 'zod'
@@ -16,6 +17,15 @@ interface QueryOptions {
 type ZodSchema = z.ZodObject | z.ZodArray | z.ZodRecord
 
 const pvSessionKey = 'pv-session'
+
+export class FetchError extends Error {
+    status: number
+
+    constructor(message: string, status: number) {
+        super(message)
+        this.status = status
+    }
+}
 
 export function useFetch() {
     const session = useSession()
@@ -48,7 +58,7 @@ export function useFetch() {
                 signal,
             })
 
-            const data = (await res.json()) as { accessToken: string }
+            const data = (await res.json()) as AuthResponse
             return data.accessToken
         },
     })
