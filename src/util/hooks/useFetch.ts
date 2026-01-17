@@ -81,6 +81,10 @@ export function useFetch() {
         )
     }
 
+    const onSignOut = () => {
+        localStorage.removeItem(pvSessionKey)
+    }
+
     async function onFetch<R = void>(
         method: string,
         url: string,
@@ -169,5 +173,14 @@ export function useFetch() {
         await onFetch('DELETE', url, null, null, options)
     }
 
-    return { ready, onFetch, onGet, onPut, onPost, onPatch, onDelete }
+    return {
+        ready,
+        onSignOut,
+        onFetch,
+        onGet,
+        onPut,
+        onPost,
+        onPatch,
+        onDelete,
+    }
 }
