@@ -1,6 +1,17 @@
-const StateSelector = ({ initialValue }: { initialValue: string }) => {
+const StateSelector = ({
+    initialValue,
+    onUpdate,
+}: {
+    initialValue: string
+    onUpdate: (selectedState: string) => void
+}) => {
     return (
-        <select defaultValue={initialValue}>
+        <select
+            defaultValue={initialValue}
+            onChange={(e) => {
+                onUpdate(e.target.value)
+            }}
+        >
             <option value="AL">Alabama</option>
             <option value="AK">Alaska</option>
             <option value="AZ">Arizona</option>
