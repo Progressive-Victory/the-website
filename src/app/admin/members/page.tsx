@@ -12,14 +12,13 @@ import {
 } from '@/components/form'
 import { DateField } from '@/components/form/DateField'
 import { IRole, IUser, zRole, zUser } from '@/contracts/data'
-import { IPaginatedResponse } from '@/contracts/responses'
+import { IPaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { dateService } from '@/services'
 import { useCurrentUser, useFetch } from '@/util/hooks'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
-import z from 'zod'
 
 export default function Page() {
     const eventTarget = useRef(new EventTarget())
@@ -40,43 +39,35 @@ export default function Page() {
         async queryFn({ signal }) {
             const limit = 50
 
-            const { data: roles, count } = await onGet<
-                IPaginatedResponse<IRole>
-            >('/roles', z.array(zRole), {
-                query: { limit: limit.toString() },
-                signal,
-            })
+            const getPage = async (page: number, limit: number) =>
+                await onGet<IPaginatedResponse<IRole>>(
+                    '/roles',
+                    zPaginatedResponse(zRole),
+                    { query: { page, limit }, signal }
+                )
 
-            const pages = Math.ceil(count / limit)
+            try {
+                const { data: roles, count } = await getPage(0, limit)
+                const pageCount = Math.ceil(count / limit)
 
-            const queries: Promise<IRole[]>[] = []
-            for (let page = 1; page < pages; page++) {
-                const query = async (page: number) => {
-                    const thisLimit = Math.min(limit, count - page * limit)
+                const pageQueries: Promise<IRole[]>[] = []
+                for (let page = 1; page < pageCount; page++) {
+                    const query = async (page: number) => {
+                        const currLimit = Math.min(limit, count - page * limit)
+                        const { data } = await getPage(page, currLimit)
+                        return data
+                    }
 
-                    const response = await onGet<IPaginatedResponse<IRole>>(
-                        '/roles',
-                        z.array(zRole),
-                        {
-                            query: {
-                                limit: thisLimit.toString(),
-                                page: page.toString(),
-                            },
-                            signal,
-                        }
-                    )
-
-                    return response.data
+                    pageQueries.push(query(page))
                 }
 
-                queries.push(query(page))
+                const pages = await Promise.all(pageQueries)
+
+                return [roles, ...pages].flatMap((perms) => perms)
+            } catch (e) {
+                console.log(e)
+                throw e
             }
-
-            roles.push(
-                ...(await Promise.all(queries)).flatMap((perms) => perms)
-            )
-
-            return roles
         },
         placeholderData: keepPreviousData,
     })

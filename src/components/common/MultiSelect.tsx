@@ -39,10 +39,10 @@ export function MultiSelect({
         [options]
     )
 
-    const availableMap = useMemo(() => {
+    const available = useMemo(() => {
         const availableMap = new Map(optionMap.entries())
         for (const value of selected) availableMap.delete(value)
-        return availableMap
+        return availableMap.entries().toArray()
     }, [optionMap, selected])
 
     const handleToggleMenu = () => {
@@ -70,12 +70,12 @@ export function MultiSelect({
                     disabled={disabled || readonly}
                     onClick={() => handleRemove(value)}
                 >
-                    {optionMap[value]}
+                    {optionMap.get(value)}
                 </button>
             ))}
             {!selected.length && readonly && <span>None</span>}
 
-            {availableMap.size && (
+            {available.length > 0 && (
                 <div className={styles.menuBase}>
                     {!readonly && (
                         <button
@@ -90,7 +90,7 @@ export function MultiSelect({
                     )}
                     {menuOpen && (
                         <div ref={menuRef} className={styles.menu}>
-                            {availableMap.entries().map(([value, label]) => (
+                            {available.map(([value, label]) => (
                                 <button
                                     key={value}
                                     className={styles.addButton}
