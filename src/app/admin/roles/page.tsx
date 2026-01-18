@@ -14,6 +14,7 @@ import { UpdateRoleRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
+    keepPreviousData,
     skipToken,
     useMutation,
     useQuery,
@@ -23,7 +24,7 @@ import { useMemo, useState } from 'react'
 
 export default function Page() {
     const queryClient = useQueryClient()
-    const { onGet, onPatch } = useFetch()
+    const { ready, onGet, onPatch } = useFetch()
 
     const [selectedId, setSelectedId] = useState<number | null>(null)
     const [formState, setFormState] = useState<FormState<Role> | null>(null)
@@ -32,7 +33,7 @@ export default function Page() {
         query: searchQuery,
         search,
         onSearch,
-    } = usePaginatedSearch<Permission>('/roles', zRole)
+    } = usePaginatedSearch<Role>('/roles', zRole)
 
     const { query: permissionsQuery } = usePaginatedSearch<Permission>(
         '/permissions',
@@ -53,9 +54,10 @@ export default function Page() {
     const roleQuery = useQuery({
         queryKey: [`/roles/${selectedId}`],
         queryFn:
-            selectedId != null
+            ready && selectedId != null
                 ? () => onGet<Role>(`/roles/${selectedId}`, zRole)
                 : skipToken,
+        placeholderData: keepPreviousData,
     })
 
     const updateMutation = useMutation<
@@ -149,14 +151,14 @@ export default function Page() {
         <>
             <PaginatedList
                 search={search}
-                count={searchQuery.data?.count ?? null}
+                count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}
                 error={searchQuery.error}
                 filters={[
                     {
                         value: 'permissionIds',
                         label: 'Permissions',
-                        options: (permissions ?? []).map((permission) => ({
+                        options: permissions.map((permission) => ({
                             value: permission.id,
                             label: permission.name,
                         })),

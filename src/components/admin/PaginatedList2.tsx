@@ -27,7 +27,7 @@ export interface FieldOption {
 export interface PaginatedListProps {
     search: SearchRequest
 
-    count: number | null
+    count: number | undefined
     isPending: boolean
     error: Error | null
 
@@ -213,16 +213,21 @@ interface FieldSelectProps {
 function FieldSelect({ field, options, onSelect }: FieldSelectProps) {
     if (!options.length) return null
 
+    const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value
+        onSelect(value == 'all' ? undefined : value)
+    }
+
     return (
         <label htmlFor="field" className={styles.select}>
             <span>Filter:</span>
             <select
                 name="field"
                 id="field"
-                defaultValue={field}
-                onChange={(e) => onSelect(e.target.value)}
+                defaultValue={field ?? 'all'}
+                onChange={handleChange}
             >
-                <option>All</option>
+                <option value={'all'}>All</option>
                 {options.map((option) => (
                     <option key={option.value} value={option.value}>
                         {option.label}
@@ -264,18 +269,21 @@ interface SortSelectProps {
 }
 
 function SortSelect({ sort, onSelect }: SortSelectProps) {
+    const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value as SortDirection | 'none'
+        onSelect(value == 'none' ? undefined : value)
+    }
+
     return (
         <label htmlFor="sort" className={styles.select}>
             <span>Sort:</span>
             <select
                 name="sort"
                 id="sort"
-                defaultValue={sort}
-                onChange={(e) =>
-                    onSelect(e.target.value as SortDirection | undefined)
-                }
+                defaultValue={sort ?? 'none'}
+                onChange={handleChange}
             >
-                <option>None</option>
+                <option value="none">None</option>
                 <option value={SortDirection.ASC}>Ascending</option>
                 <option value={SortDirection.DESC}>Descending</option>
             </select>
@@ -343,14 +351,21 @@ function PageSelect({
     }
 
     const handleSubmit = () => {
-        const newPage = +value - 1 || page
+        const newPage = +value - 1
         if (0 <= newPage && newPage <= maxPage) onChange(newPage)
         else setValue((page + 1).toString())
     }
 
+    console.log(page)
+
     useEffect(() => {
         setValue((page + 1).toString())
     }, [page])
+
+    useEffect(() => {
+        if (page < 0) onChange(0)
+        else if (page > maxPage) onChange(maxPage)
+    }, [page, maxPage, onChange])
 
     return (
         <div className={styles.pageSelect}>
