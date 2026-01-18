@@ -66,7 +66,8 @@ export default function Page() {
         { id: number; role: Role; request: UpdateRoleRequest },
         Role
     >({
-        mutationFn: ({ id, request }) => onPatch(`/roles/${id}`, request, null),
+        mutationFn: ({ id, request }) =>
+            onPatch<Role>(`/roles/${id}`, request, zRole),
         // When the mutation begins, optimistically update the cache to use the new state
         onMutate: ({ id, role }) => {
             const prev: Role | undefined = queryClient.getQueryData([

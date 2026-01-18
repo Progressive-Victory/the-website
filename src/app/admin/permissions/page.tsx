@@ -38,7 +38,7 @@ export default function Page() {
         Permission
     >({
         mutationFn: ({ id, request }) =>
-            onPatch(`/permissions/${id}`, request, null),
+            onPatch<Permission>(`/permissions/${id}`, request, zPermission),
         onMutate: ({ id, permission }) => {
             const prev = searchQuery.data?.data?.find((prev) => prev.id == id)
             setSelectedPermission(permission)

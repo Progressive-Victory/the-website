@@ -22,8 +22,8 @@ const zBaseUser = z.object({
     birthdate: z.coerce.date().nullable(),
     location: zLocation.nullable(),
 
-    acceptedAlerts: z.coerce.boolean(),
-    verified: z.coerce.boolean(),
+    acceptedAlerts: z.boolean(),
+    verified: z.boolean(),
     onboardingStage: zOnboardingStage,
     lastSmsCode: z.number().nullable(),
     lastSmsCodeSendTimeUtc: z.coerce.date().nullable(),
