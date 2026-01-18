@@ -2,7 +2,7 @@ import styles from './PaginatedList.module.css'
 import { MultiSelect, MultiSelectOption } from '@/components/common'
 import { SearchRequest, SortDirection } from '@/contracts/requests'
 import cx from 'classnames'
-import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
+import { ChangeEvent, ReactNode, useEffect, useState } from 'react'
 import {
     FiChevronLeft,
     FiChevronRight,
@@ -34,7 +34,8 @@ export interface PaginatedListProps {
     fields?: FieldOption[]
     filters?: FilterOption[]
 
-    children?: ReactElement<ListElementProps>[]
+    pinnedContent?: ReactNode
+    children?: ReactNode
 
     onSearch: (search: SearchRequest) => void
 }
@@ -46,6 +47,7 @@ export function PaginatedList({
     error,
     fields,
     filters,
+    pinnedContent,
     children,
     onSearch,
 }: PaginatedListProps) {
@@ -116,7 +118,7 @@ export function PaginatedList({
                 )}
             </div>
 
-            {!count && (
+            {count == null && (
                 <div className={styles.listStatus}>
                     {isPending ? (
                         <span color="#9ca3af">Loading...</span>
@@ -128,28 +130,34 @@ export function PaginatedList({
                 </div>
             )}
 
-            <ul className={styles.elementList}>{children}</ul>
-
             {count != null && (
-                <div className={styles.pageSelectContainer}>
-                    <PageSelect
-                        page={page ?? 0}
-                        pageSize={limit}
-                        count={count}
-                        disabled={isPending}
-                        onChange={handleChangePage}
-                    />
-                </div>
+                <>
+                    {pinnedContent && (
+                        <div className={styles.pinned}>{pinnedContent}</div>
+                    )}
+
+                    <ul className={styles.elementList}>{children}</ul>
+
+                    <div className={styles.pageSelectContainer}>
+                        <PageSelect
+                            page={page ?? 0}
+                            pageSize={limit}
+                            count={count}
+                            disabled={isPending}
+                            onChange={handleChangePage}
+                        />
+                    </div>
+                </>
             )}
         </div>
     )
 }
 
 export interface ListElementProps {
-    selected: boolean
+    selected?: boolean
     className?: string
-    children: React.ReactNode
-    onClick: () => void
+    children?: React.ReactNode
+    onClick?: () => void
 }
 
 export function ListElement({
