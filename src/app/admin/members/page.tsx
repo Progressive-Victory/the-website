@@ -12,13 +12,20 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/form'
-import { Role, User, UserProfile, zRole, zUser, zUserProfile } from '@/contracts/data'
+import {
+    Role,
+    User,
+    UserProfile,
+    zRole,
+    zUser,
+    zUserProfile,
+} from '@/contracts/data'
 import { UpdateUserRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { dateService } from '@/services'
 import {
     FetchError,
-    // useCurrentUser,
+    useCurrentUser,
     useFetch,
     usePaginatedSearch,
 } from '@/util/hooks'
@@ -30,8 +37,7 @@ import {
     useQueryClient,
 } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
-
-// import { PulseLoader } from 'react-spinners'
+import { PulseLoader } from 'react-spinners'
 
 export default function Page() {
     const queryClient = useQueryClient()
@@ -40,7 +46,7 @@ export default function Page() {
     const [selectedId, setSelectedId] = useState<number | null>(null)
     const [formState, setFormState] = useState<FormState<User> | null>(null)
 
-    // const loggedInUser = useCurrentUser()
+    const loggedInUser = useCurrentUser()
 
     const {
         query: searchQuery,
@@ -139,8 +145,8 @@ export default function Page() {
             ]),
     })
 
-    const handleSelectItem = (value: UserProfile) => {
-        if (value.id === selectedId) return
+    const handleSelectItem = (value: UserProfile | User) => {
+        if (value?.id === selectedId) return
 
         if (formState?.dirty) {
             const proceed = confirm(
@@ -175,6 +181,28 @@ export default function Page() {
         if (user.firstName) return user.firstName
         if (user.preferredName) return user.preferredName
         return user.email ?? ''
+    }
+
+    const renderItem = (item: User | UserProfile) => {
+        return (
+            <ListElement
+                key={item.id}
+                selected={selectedId == item.id}
+                onClick={() => handleSelectItem(item)}
+            >
+                <ImageWithFallback
+                    useFallback={!item.discordUsers?.[0].image}
+                    src={`https://cdn.discordapp.com/avatars/${item.discordUsers?.[0].id}/${item.discordUsers?.[0].image ?? ''}`} // need to figure out alternative for this
+                    alt="user profile picture"
+                />
+                <div className={styles.userMeta}>
+                    <span className={styles.userName}>{makeTitle(item)}</span>
+                    <span className={styles.userUsername}>
+                        {item.discordUsers?.[0].username}
+                    </span>
+                </div>
+            </ListElement>
+        )
     }
 
     return (
@@ -219,37 +247,27 @@ export default function Page() {
                         })),
                     },
                 ]}
-                onSearch={onSearch}
-            >
-                {searchQuery.data?.data?.map((item) => (
-                    <ListElement
-                        key={item.id}
-                        selected={selectedId == item.id}
-                        onClick={() => handleSelectItem(item)}
-                    >
-                        <ImageWithFallback
-                            useFallback={!item.discordUsers?.[0].image}
-                            src={`https://cdn.discordapp.com/avatars/${item.discordUsers?.[0].id}/${item.discordUsers?.[0].image ?? ''}`} // need to figure out alternative for this
-                            alt="user profile picture"
-                        />
-                        <div className={styles.userMeta}>
-                            <span className={styles.userName}>
-                                {makeTitle(item)}
-                            </span>
-                            <span className={styles.userUsername}>
-                                {item.discordUsers?.[0].username}
-                            </span>
-                        </div>
-                        {/* <ImageWithFallback
+                pinnedContent={
+                    loggedInUser.data ? (
+                        renderItem(loggedInUser.data)
+                    ) : (
+                        <ul>
+                            <ListElement>
+                                <ImageWithFallback
                                     src=""
                                     alt="user profile picture"
                                     useFallback
                                 />
                                 <div className={styles.loading}>
                                     <PulseLoader size={8} color="#bbb" />
-                                </div> */}
-                    </ListElement>
-                ))}
+                                </div>
+                            </ListElement>
+                        </ul>
+                    )
+                }
+                onSearch={onSearch}
+            >
+                {searchQuery.data?.data?.map((item) => renderItem(item))}
             </PaginatedList>
 
             <div className={styles.detailsPane}>
@@ -267,9 +285,11 @@ export default function Page() {
                     >
                         <FormGroup title="Account Information">
                             <TextField<User>
-                                label="Username"
+                                label="Usernames"
                                 getter={(form) =>
-                                    form.discordUsers?.[0]?.username
+                                    (form.discordUsers ?? [])
+                                        ?.map(({ username }) => username)
+                                        .join(', ')
                                 }
                                 readonly
                             />
