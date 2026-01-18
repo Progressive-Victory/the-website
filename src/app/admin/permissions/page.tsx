@@ -5,12 +5,13 @@ import { ListElement, PaginatedList } from '@/components/admin/PaginatedList2'
 import { Form, FormGroup, FormState, TextField } from '@/components/form'
 import { Permission, zPermission } from '@/contracts/data'
 import { UpdatePermissionRequest } from '@/contracts/requests'
-import { useFetch, usePaginatedSearch } from '@/util/hooks'
-import { useMutation } from '@tanstack/react-query'
-import { useRef, useState } from 'react'
+import { PaginatedResponse } from '@/contracts/responses'
+import { FetchError, useFetch, usePaginatedSearch } from '@/util/hooks'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 
 export default function Page() {
-    const eventTarget = useRef(new EventTarget())
+    const queryClient = useQueryClient()
     const { onPatch } = useFetch()
 
     const [selectedPermission, setSelectedPermission] =
@@ -26,17 +27,59 @@ export default function Page() {
         onSearch,
     } = usePaginatedSearch<Permission>('/permissions', zPermission)
 
-    const updateMutation = useMutation({
-        async mutationFn({
-            id,
-            request,
-        }: {
+    const updateMutation = useMutation<
+        Permission,
+        FetchError,
+        {
             id: number
+            permission: Permission
             request: UpdatePermissionRequest
-        }) {
-            await onPatch(`/permissions/${id}`, request, null)
-            eventTarget.current.dispatchEvent(new Event('refetch'))
         },
+        Permission
+    >({
+        mutationFn: ({ id, request }) =>
+            onPatch(`/permissions/${id}`, request, null),
+        onMutate: ({ id, permission }) => {
+            const prev = searchQuery.data?.data?.find((prev) => prev.id == id)
+            setSelectedPermission(permission)
+            queryClient.setQueryData(
+                ['/permissions', search],
+                (res: PaginatedResponse<Permission>) => ({
+                    ...res,
+                    data: res.data.map((prev) =>
+                        prev.id == permission.id ? permission : prev
+                    ),
+                })
+            )
+            return prev
+        },
+        onError: (error, _variables, prev) => {
+            console.error(error)
+            setSelectedPermission(prev ?? null)
+            queryClient.setQueryData(
+                [`/permissions`, search],
+                (res: PaginatedResponse<Permission>) => ({
+                    ...res,
+                    data: res.data.map((permission) =>
+                        permission.id == prev?.id ? prev : permission
+                    ),
+                })
+            )
+        },
+        onSuccess: (data) => {
+            setSelectedPermission(data)
+            queryClient.setQueryData(
+                [`/permissions`, search],
+                (res: PaginatedResponse<Permission>) => ({
+                    ...res,
+                    data: res.data.map((permission) =>
+                        permission.id == data.id ? data : permission
+                    ),
+                })
+            )
+        },
+        onSettled: () =>
+            queryClient.invalidateQueries({ queryKey: ['/roles', search] }),
     })
 
     const handleSelectItem = (value: Permission) => {
@@ -53,9 +96,9 @@ export default function Page() {
     }
 
     const handleSave = (permission: Permission) => {
-        setSelectedPermission(permission)
         updateMutation.mutate({
             id: permission.id,
+            permission,
             request: { name: permission.name },
         })
     }
