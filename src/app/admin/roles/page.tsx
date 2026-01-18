@@ -11,12 +11,18 @@ import {
 } from '@/components/form'
 import { Permission, Role, zPermission, zRole } from '@/contracts/data'
 import { UpdateRoleRequest } from '@/contracts/requests'
-import { useFetch, usePaginatedSearch } from '@/util/hooks'
-import { skipToken, useMutation, useQuery } from '@tanstack/react-query'
-import { useMemo, useRef, useState } from 'react'
+import { PaginatedResponse } from '@/contracts/responses'
+import { FetchError, useFetch, usePaginatedSearch } from '@/util/hooks'
+import {
+    skipToken,
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query'
+import { useMemo, useState } from 'react'
 
 export default function Page() {
-    const eventTarget = useRef(new EventTarget())
+    const queryClient = useQueryClient()
     const { onGet, onPatch } = useFetch()
 
     const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -52,17 +58,65 @@ export default function Page() {
                 : skipToken,
     })
 
-    const updateMutation = useMutation({
-        async mutationFn({
-            id,
-            request,
-        }: {
-            id: number
-            request: UpdateRoleRequest
-        }) {
-            await onPatch(`/roles/${id}`, request, null)
-            eventTarget.current.dispatchEvent(new Event('refetch'))
+    const updateMutation = useMutation<
+        Role,
+        FetchError,
+        { id: number; role: Role; request: UpdateRoleRequest },
+        Role
+    >({
+        mutationFn: ({ id, request }) => onPatch(`/roles/${id}`, request, null),
+        // When the mutation begins, optimistically update the cache to use the new state
+        onMutate: ({ id, role }) => {
+            const prev: Role | undefined = queryClient.getQueryData([
+                `/roles/${id}`,
+            ])
+            queryClient.setQueryData([`/roles/${id}`], role)
+            queryClient.setQueryData(
+                ['/roles', search],
+                (res: PaginatedResponse<Role>) => ({
+                    ...res,
+                    data: res.data.map((prev) =>
+                        prev.id == role.id ? role : prev
+                    ),
+                })
+            )
+            return prev
         },
+        // If an error occurs, rollback to the previous state
+        onError: (error, { id }, prev) => {
+            console.error(error)
+            queryClient.setQueryData([`/roles/${id}`], prev)
+            queryClient.setQueryData(
+                [`/roles`, search],
+                (res: PaginatedResponse<Role>) => ({
+                    ...res,
+                    data: res.data.map((role) =>
+                        role.id == prev?.id ? prev : role
+                    ),
+                })
+            )
+        },
+        // On success, update the cache to the returned value in case there are any discrepancies
+        onSuccess: (data, { id }) => {
+            queryClient.setQueryData([`/roles/${id}`], data)
+            queryClient.setQueryData(
+                [`/roles`, search],
+                (res: PaginatedResponse<Role>) => ({
+                    ...res,
+                    data: res.data.map((role) =>
+                        role.id == data.id ? data : role
+                    ),
+                })
+            )
+        },
+        // After either success or failure, invalidate the caches to refresh from the server
+        onSettled: (_data, _error, { id }) =>
+            Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['/roles', search] }),
+                queryClient.invalidateQueries({
+                    queryKey: [`/roles/${id}`],
+                }),
+            ]),
     })
 
     const handleSelectItem = (value: Role) => {
@@ -79,10 +133,9 @@ export default function Page() {
     }
 
     const handleSave = (role: Role) => {
-        // TODO: Optimistic save
-        void roleQuery.refetch()
         updateMutation.mutate({
             id: role.id,
+            role,
             request: {
                 name: role.name,
                 permissionIds: role.permissions?.map(
