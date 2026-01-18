@@ -16,7 +16,8 @@ export interface FormState<T> {
 export interface FormProps<T> {
     form: T
     title: string
-    saving: boolean
+    isInvalid?: boolean
+    saving?: boolean
 
     children?:
         | ReactElement<FormGroupProps<T>>
@@ -29,19 +30,20 @@ export interface FormProps<T> {
 export function Form<T>({
     form: initialForm,
     title,
-    saving,
+    isInvalid = false,
+    saving = false,
     children = [],
     onUpdate,
     onSave,
 }: FormProps<T>) {
     const [editForm, setEditForm] = useState<T | null>(null)
-    const [dirtyMap, setDirtyMap] = useState(new Map<string, unknown>())
+    const [dirtyMap, setDirtyMap] = useState(new Set<string>())
     const [invalidMap, setInvalidMap] = useState(new Set<string>())
 
     const form = editForm ?? initialForm
     const editing = editForm != null
     const dirty = dirtyMap.size > 0
-    const invalid = invalidMap.size > 0
+    const invalid = isInvalid || invalidMap.size > 0
 
     const handleEdit = () => {
         setEditForm(initialForm)
@@ -50,38 +52,40 @@ export function Form<T>({
     const handleSave = () => {
         if (editForm) onSave(editForm)
         setEditForm(null)
-        setDirtyMap(new Map<string, unknown>())
+        setDirtyMap(new Set<string>())
         setInvalidMap(new Set<string>())
     }
 
     const handleCancel = () => {
         setEditForm(null)
-        setDirtyMap(new Map<string, unknown>())
+        setDirtyMap(new Set<string>())
         setInvalidMap(new Set<string>())
     }
 
     const handleChange = (props: FormFieldProps<T>, field: unknown) => {
-        if (props.getter) {
-            const init = props.getter(initialForm)
-            const clean = (!init && !field) || deepEqual(init, field)
-            setDirtyMap((prev) => {
-                if (clean) prev.delete(props.id ?? '')
-                else prev.set(props.id ?? '', field)
-                return prev
-            })
-        }
+        if (!props.setter || !props.getter) return
+
+        const currForm = props.setter(form, field)
+        setEditForm(currForm)
+
+        const init = props.getter(initialForm)
+        const curr = props.getter(currForm)
+
+        const clean = (!init && !curr) || deepEqual(init, curr)
+        setDirtyMap((prev) => {
+            if (clean) prev.delete(props.id ?? '')
+            else prev.add(props.id ?? '')
+            return prev
+        })
 
         if (props.validator) {
-            const valid = props.validator(field)
+            const valid = props.validator(curr)
             setInvalidMap((prev) => {
                 if (valid) prev.delete(props.id ?? '')
                 else prev.add(props.id ?? '')
                 return prev
             })
         }
-
-        const setter = props.setter
-        if (setter) setEditForm((prev) => (prev ? setter(prev, field) : null))
     }
 
     const groups = Array.isArray(children) ? children : [children]

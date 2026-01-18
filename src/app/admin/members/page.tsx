@@ -86,12 +86,23 @@ export default function Page() {
         placeholderData: keepPreviousData,
     })
 
-    const formZip = formState?.form?.location?.zip
+    const formZip = formState?.editing
+        ? formState?.form?.location?.zip
+        : userQuery.data?.location?.zip
     const locationQuery = useQuery({
         queryKey: [`/locations/${formZip}`],
         queryFn:
             ready && formZip != null
-                ? () => onGet<Location>(`/locations/${formZip}`, zLocation)
+                ? async () => {
+                      try {
+                          return await onGet<Location>(
+                              `/locations/${formZip}`,
+                              zLocation
+                          )
+                      } catch {
+                          return null
+                      }
+                  }
                 : skipToken,
         placeholderData: keepPreviousData,
     })
@@ -302,6 +313,10 @@ export default function Page() {
                         form={userQuery.data}
                         title={makeTitle(userQuery.data)}
                         saving={updateMutation.isPending}
+                        isInvalid={
+                            !!formState?.form?.location?.zip &&
+                            locationQuery.data == null
+                        }
                         onUpdate={setFormState}
                         onSave={handleSave}
                     >
@@ -383,7 +398,12 @@ export default function Page() {
                             <TextField<User>
                                 label="Zip Code"
                                 getter={(form) =>
-                                    form.location?.zip?.toString()
+                                    form.location?.zip
+                                        ? form.location?.zip
+                                              .toString()
+                                              .padStart(5, '0')
+                                              .slice(-5)
+                                        : null
                                 }
                                 setter={(form, field) => ({
                                     ...form,
@@ -394,24 +414,39 @@ export default function Page() {
                                                   county: '',
                                                   state: '',
                                               }),
-                                              zip: +field,
+                                              zip: +field
+                                                  .replace(/[^\d]/, '')
+                                                  .padStart(5, '0')
+                                                  .slice(-5),
                                           }
                                         : null,
                                 })}
                             />
                             <TextField<User>
                                 label="City"
-                                getter={() => locationQuery.data?.city}
+                                getter={(form) =>
+                                    form.location?.zip
+                                        ? locationQuery.data?.city
+                                        : null
+                                }
                                 readonly
                             />
                             <TextField<User>
                                 label="County"
-                                getter={() => locationQuery.data?.county}
+                                getter={(form) =>
+                                    form.location?.zip
+                                        ? locationQuery.data?.county
+                                        : null
+                                }
                                 readonly
                             />
                             <TextField<User>
                                 label="State"
-                                getter={() => locationQuery.data?.state}
+                                getter={(form) =>
+                                    form.location?.zip
+                                        ? locationQuery.data?.state
+                                        : null
+                                }
                                 readonly
                             />
                         </FormGroup>
