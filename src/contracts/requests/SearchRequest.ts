@@ -7,7 +7,7 @@ export enum SortDirection {
 
 export const zSearchRequest = z.object({
     page: z.int().optional(),
-    limit: z.int().optional(),
+    limit: z.int(),
     field: z.string().optional(),
     query: z.string().optional(),
     sort: z.enum(SortDirection).optional(),

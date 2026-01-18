@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
-import PaginatedList from '@/components/admin/PaginatedList'
+import { ListElement, PaginatedList } from '@/components/admin/PaginatedList2'
 import {
     Form,
     FormGroup,
@@ -11,75 +11,37 @@ import {
 } from '@/components/form'
 import { Permission, Role, zPermission, zRole } from '@/contracts/data'
 import { UpdateRoleRequest } from '@/contracts/requests'
-import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
-import { useFetch } from '@/util/hooks'
-import {
-    keepPreviousData,
-    skipToken,
-    useMutation,
-    useQuery,
-} from '@tanstack/react-query'
+import { useFetch, usePaginatedSearch } from '@/util/hooks'
+import { useMutation } from '@tanstack/react-query'
 import { useMemo, useRef, useState } from 'react'
 
 export default function Page() {
     const eventTarget = useRef(new EventTarget())
-    const { ready, onGet, onPatch } = useFetch()
+    const { onPatch } = useFetch()
 
-    const [roles, setRoles] = useState<Role[]>([])
     const [selectedRole, setSelectedRole] = useState<Role | null>(null)
     const [formState, setFormState] = useState<FormState<Role> | null>(null)
 
-    const getPermissionsQuery = useQuery({
-        queryKey: ['/permissions'],
-        queryFn: ready
-            ? async () => {
-                  const limit = 50
+    const {
+        query: searchQuery,
+        search,
+        onSearch,
+    } = usePaginatedSearch<Permission>('/roles', zRole)
 
-                  const getPage = async (page: number, limit: number) =>
-                      await onGet<PaginatedResponse<Permission>>(
-                          '/permissions',
-                          zPaginatedResponse(zPermission),
-                          { query: { page, limit } }
-                      )
+    const { query: permissionsQuery } = usePaginatedSearch<Permission>(
+        '/permissions',
+        zPermission,
+        { search: { limit: 50 }, all: true }
+    )
 
-                  try {
-                      const { data: page0, count } = await getPage(0, limit)
-                      const pageCount = Math.ceil(count / limit)
-
-                      const pageQueries: Promise<Permission[]>[] = []
-                      for (let page = 1; page < pageCount; page++) {
-                          const query = async (page: number) => {
-                              const currLimit = Math.min(
-                                  limit,
-                                  count - page * limit
-                              )
-                              const { data } = await getPage(page, currLimit)
-                              return data
-                          }
-
-                          pageQueries.push(query(page))
-                      }
-
-                      const pages = await Promise.all(pageQueries)
-
-                      return [page0, ...pages].flatMap((perms) => perms)
-                  } catch (e) {
-                      console.error(e)
-                      throw e
-                  }
-              }
-            : skipToken,
-        placeholderData: keepPreviousData,
-    })
-
-    const permissions = getPermissionsQuery.data ?? []
+    const permissions = permissionsQuery.data?.data ?? []
     const permissionOptions = useMemo(
         () =>
-            (getPermissionsQuery.data ?? []).map((permission) => ({
+            (permissionsQuery.data?.data ?? []).map((permission) => ({
                 value: permission.id,
                 label: permission.name,
             })),
-        [getPermissionsQuery.data]
+        [permissionsQuery.data]
     )
 
     const updateMutation = useMutation({
@@ -121,44 +83,38 @@ export default function Page() {
         })
     }
 
-    const makeItem = (role: Role) => ({
-        id: role.id.toString(),
-        value: role,
-    })
-
     return (
         <>
-            <PaginatedList<Role>
-                zodSchema={zRole}
-                eventTarget={eventTarget.current}
-                endpoint="/roles"
-                filters={[
-                    {
-                        name: 'Permission',
-                        query_key: 'permissions',
-                        display_key: 'name',
-                        value_key: 'name',
-                        options: (permissions ?? []).map((permission) => ({
-                            name: permission.name,
-                        })),
-                    },
-                ]}
-                searchFields={[
-                    {
-                        id: 'name',
-                        name: 'Name',
-                    },
-                ]}
-                items={roles.map(makeItem)}
-                selectedItem={selectedRole ? makeItem(selectedRole) : null}
-                onSelectItem={({ value }) => handleSelectItem(value)}
-                setItems={setRoles}
-                renderItem={({ value }) => (
-                    <span className={styles.roleListItemName}>
-                        {value.name}
-                    </span>
-                )}
-            />
+            <PaginatedList
+                search={search}
+                count={searchQuery.data?.count ?? null}
+                isPending={searchQuery.isPending}
+                error={searchQuery.error}
+                onSearch={onSearch}
+                // filters={[
+                //     {
+                //         name: 'Permission',
+                //         query_key: 'permissions',
+                //         display_key: 'name',
+                //         value_key: 'name',
+                //         options: (permissions ?? []).map((permission) => ({
+                //             name: permission.name,
+                //         })),
+                //     },
+                // ]}
+            >
+                {searchQuery.data?.data?.map((item) => (
+                    <ListElement
+                        key={item.id}
+                        selected={selectedRole?.id == item.id}
+                        onClick={() => handleSelectItem(item)}
+                    >
+                        <span className={styles.roleListItemName}>
+                            {item.name}
+                        </span>
+                    </ListElement>
+                ))}
+            </PaginatedList>
 
             <div className={styles.rightPane}>
                 {selectedRole ? (
