@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
-import PaginatedList from '@/components/admin/PaginatedList'
+import { ListElement, PaginatedList } from '@/components/admin/PaginatedList2'
 import { ImageWithFallback } from '@/components/common'
 import {
     CheckboxField,
@@ -12,11 +12,16 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/form'
-import { Role, User, zRole, zUser } from '@/contracts/data'
+import { Role, User, UserProfile, zRole, zUser, zUserProfile } from '@/contracts/data'
 import { UpdateUserRequest } from '@/contracts/requests'
-import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
+import { PaginatedResponse } from '@/contracts/responses'
 import { dateService } from '@/services'
-import { useCurrentUser, useFetch } from '@/util/hooks'
+import {
+    FetchError,
+    // useCurrentUser,
+    useFetch,
+    usePaginatedSearch,
+} from '@/util/hooks'
 import {
     keepPreviousData,
     skipToken,
@@ -24,106 +29,118 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { PulseLoader } from 'react-spinners'
+import { useMemo, useState } from 'react'
+
+// import { PulseLoader } from 'react-spinners'
 
 export default function Page() {
-    const eventTarget = useRef(new EventTarget())
     const queryClient = useQueryClient()
     const { ready, onGet, onPatch } = useFetch()
 
-    const [users, setUsers] = useState<User[]>([])
-    const [selectedUser, setSelectedUser] = useState<User | null>(null)
+    const [selectedId, setSelectedId] = useState<number | null>(null)
     const [formState, setFormState] = useState<FormState<User> | null>(null)
 
-    const loggedInUser = useCurrentUser()
+    // const loggedInUser = useCurrentUser()
 
-    const getRoles = async () => {
-        const limit = 50
+    const {
+        query: searchQuery,
+        search,
+        onSearch,
+    } = usePaginatedSearch<UserProfile>('/users', zUserProfile)
 
-        const getPage = async (page: number, limit: number) =>
-            await onGet<PaginatedResponse<Role>>(
-                '/roles',
-                zPaginatedResponse(zRole),
-                { query: { page, limit } }
-            )
-
-        try {
-            const result = await getPage(0, limit)
-            const page0 = result?.data ?? []
-            const count = result?.count ?? 0
-            const pageCount = Math.ceil(count / limit)
-
-            const pageQueries: Promise<Role[]>[] = []
-            for (let page = 1; page < pageCount; page++) {
-                const query = async (page: number) => {
-                    const currLimit = Math.min(limit, count - page * limit)
-                    const result = await getPage(page, currLimit)
-                    return result?.data ?? []
-                }
-
-                pageQueries.push(query(page))
-            }
-
-            const pages = await Promise.all(pageQueries)
-
-            return [page0, ...pages].flatMap((perms) => perms)
-        } catch (e) {
-            console.error(e)
-            throw e
-        }
-    }
-
-    const getRolesQuery = useQuery({
-        queryKey: ['/roles'],
-        queryFn: ready ? getRoles : skipToken,
-        placeholderData: keepPreviousData,
+    const { query: rolesQuery } = usePaginatedSearch<Role>('/roles', zRole, {
+        search: { limit: 50 },
+        all: true,
     })
 
-    const roles = getRolesQuery.data ?? []
+    const roles = rolesQuery.data?.data ?? []
     const roleOptions = useMemo(
         () =>
-            (getRolesQuery.data ?? []).map((role) => ({
+            (rolesQuery.data?.data ?? []).map((role) => ({
                 value: role.id,
                 label: role.name,
             })),
-        [getRolesQuery.data]
+        [rolesQuery.data]
     )
 
-    useQuery({
-        queryKey: [`/users/${selectedUser?.id}`],
-        queryFn: selectedUser
-            ? async () => {
-                  const user = await onGet<User>(
-                      `/users/${selectedUser?.id}`,
-                      zUser,
-                      {
+    const userQuery = useQuery({
+        queryKey: [`/users/${selectedId}`],
+        queryFn:
+            ready && selectedId != null
+                ? () =>
+                      onGet<User>(`/users/${selectedId}`, zUser, {
                           query: {
                               includeDiscordUsers: true,
                               includeHistory: true,
                           },
-                      }
-                  )
-                  setSelectedUser(user)
-              }
-            : skipToken,
+                      })
+                : skipToken,
         placeholderData: keepPreviousData,
     })
 
-    const updateMutation = useMutation({
-        async mutationFn({
-            id,
-            request,
-        }: {
-            id: number
-            request: UpdateUserRequest
-        }) {
-            await onPatch(`/users/${id}`, request, null)
+    const updateMutation = useMutation<
+        User,
+        FetchError,
+        { id: number; user: User; request: UpdateUserRequest },
+        User
+    >({
+        mutationFn: ({ id, request }) => onPatch(`/users/${id}`, request, null),
+        // When the mutation begins, optimistically update the cache to use the new state
+        onMutate: ({ id, user }) => {
+            const prev: User | undefined = queryClient.getQueryData([
+                `/users/${id}`,
+            ])
+            queryClient.setQueryData([`/users/${id}`], user)
+            queryClient.setQueryData(
+                ['/users', search],
+                (res: PaginatedResponse<Role>) => ({
+                    ...res,
+                    data: res.data.map((prev) =>
+                        prev.id == user.id ? user : prev
+                    ),
+                })
+            )
+            return prev
         },
+        // If an error occurs, rollback to the previous state
+        onError: (error, { id }, prev) => {
+            console.error(error)
+            queryClient.setQueryData([`/users/${id}`], prev)
+            queryClient.setQueryData(
+                [`/users`, search],
+                (res: PaginatedResponse<Role>) => ({
+                    ...res,
+                    data: res.data.map((user) =>
+                        user.id == prev?.id ? prev : user
+                    ),
+                })
+            )
+        },
+        // On success, update the cache to the returned value in case there are any discrepancies
+        onSuccess: (data, { id }) => {
+            queryClient.setQueryData([`/users/${id}`], data)
+            queryClient.setQueryData(
+                [`/users`, search],
+                (res: PaginatedResponse<Role>) => ({
+                    ...res,
+                    data: res.data.map((user) =>
+                        user.id == data.id ? data : user
+                    ),
+                })
+            )
+        },
+        // After either success or failure, invalidate the caches to refresh from the server
+        onSettled: (_data, _error, { id }) =>
+            Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['/users', search] }),
+                queryClient.invalidateQueries({
+                    queryKey: [`/users/${id}`],
+                }),
+            ]),
     })
 
-    const handleSelectItem = (value: User) => {
-        if (value.id === selectedUser?.id) return
+    const handleSelectItem = (value: UserProfile) => {
+        if (value.id === selectedId) return
 
         if (formState?.dirty) {
             const proceed = confirm(
@@ -132,14 +149,13 @@ export default function Page() {
             if (!proceed) return
         }
 
-        setSelectedUser(value)
+        setSelectedId(value.id)
     }
 
     const handleSave = (user: User) => {
-        eventTarget.current.dispatchEvent(new Event('refetch'))
-        setSelectedUser(user)
         updateMutation.mutate({
             id: user.id,
+            user,
             request: {
                 email: user.email ?? undefined,
                 phone: user.phone ?? undefined,
@@ -153,12 +169,7 @@ export default function Page() {
         })
     }
 
-    const makeItem = (user: User) => ({
-        id: user.id.toString(),
-        value: user,
-    })
-
-    const makeTitle = (user: User) => {
+    const makeTitle = (user: User | UserProfile) => {
         if (user.firstName && user.lastName)
             return `${user.firstName} ${user.lastName}`
         if (user.firstName) return user.firstName
@@ -166,91 +177,90 @@ export default function Page() {
         return user.email ?? ''
     }
 
-    useEffect(() => {
-        return () => {
-            void queryClient.cancelQueries({
-                queryKey: [`/roles`],
-            })
-            void queryClient.cancelQueries({
-                queryKey: [`/users/${selectedUser?.id}`],
-            })
-        }
-    })
-
     return (
         <>
-            <PaginatedList<User>
-                zodSchema={zUser}
-                eventTarget={eventTarget.current}
-                endpoint="/users"
+            <PaginatedList
+                search={search}
+                count={searchQuery.data?.count}
+                isPending={searchQuery.isPending}
+                error={searchQuery.error}
+                fields={[
+                    { value: 'email', label: 'Email' },
+                    { value: 'phone', label: 'Phone Number' },
+                    { value: 'zip', label: 'Zip Code' },
+                    { value: 'county', label: 'County' },
+                    { value: 'city', label: 'City' },
+                    { value: 'state', label: 'State' },
+                    { value: 'preferred_name', label: 'Preferred Name' },
+                    { value: 'first_name', label: 'First Name' },
+                    { value: 'last_name', label: 'Last Name' },
+                    { value: 'birthdate', label: 'Birthdate' },
+                    {
+                        value: 'accepted_alerts',
+                        label: 'Accepted Notifications',
+                    },
+                    { value: 'onboarding_stage', label: 'Onboarding Stage' },
+                    { value: 'created_at_utc', label: 'Date Created' },
+                    { value: 'joined_at_utc', label: 'Date Joined Server' },
+                    {
+                        value: 'completed_intake_utc',
+                        label: 'Date Intake Done',
+                    },
+                    { value: 'aliases', label: 'Aliases' },
+                    { value: 'discord_usernames', label: 'Discord Usernames' },
+                ]}
                 filters={[
                     {
-                        name: 'Role',
-                        query_key: 'roles',
-                        display_key: 'name',
-                        value_key: 'name',
-                        options: (roles ?? []).map((role) => ({
-                            name: role.name,
+                        label: 'Role',
+                        value: 'roleIds',
+                        options: roles.map((role) => ({
+                            label: role.name,
+                            value: role.id,
                         })),
                     },
                 ]}
-                searchFields={[
-                    { id: 'name', name: 'Name' },
-                    { id: 'email', name: 'Email' },
-                    { id: 'firstName', name: 'First Name' },
-                    { id: 'lastName', name: 'Last Name' },
-                    { id: 'preferredName', name: 'Preferred Name' },
-                    { id: 'state', name: 'State' },
-                    { id: 'createdAt', name: 'Date Created' },
-                    { id: 'completedIntake', name: 'Date Intake Done' },
-                    { id: 'joinedServer', name: 'Date Joined Server' },
-                ]}
-                items={users.map(makeItem)}
-                pinnedItem={
-                    loggedInUser.data
-                        ? makeItem(loggedInUser.data)
-                        : { id: '', value: {} as User }
-                }
-                selectedItem={selectedUser ? makeItem(selectedUser) : null}
-                onSelectItem={({ value }) => handleSelectItem(value)}
-                setItems={setUsers}
-                renderItem={({ id, value }) =>
-                    id ? (
-                        <>
-                            <ImageWithFallback
-                                useFallback={!value.discordUsers?.[0].image}
-                                src={`https://cdn.discordapp.com/avatars/${value.discordUsers?.[0].id}/${value.discordUsers?.[0].image ?? ''}`} // need to figure out alternative for this
-                                alt="user profile picture"
-                            />
-                            <div className={styles.userMeta}>
-                                <span className={styles.userName}>
-                                    {makeTitle(value)}
-                                </span>
-                                <span className={styles.userUsername}>
-                                    {value.discordUsers?.[0].username}
-                                </span>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <ImageWithFallback
-                                src=""
-                                alt="user profile picture"
-                                useFallback
-                            />
-                            <div className={styles.loading}>
-                                <PulseLoader size={8} color="#bbb" />
-                            </div>
-                        </>
-                    )
-                }
-            />
+                onSearch={onSearch}
+            >
+                {searchQuery.data?.data?.map((item) => (
+                    <ListElement
+                        key={item.id}
+                        selected={selectedId == item.id}
+                        onClick={() => handleSelectItem(item)}
+                    >
+                        <ImageWithFallback
+                            useFallback={!item.discordUsers?.[0].image}
+                            src={`https://cdn.discordapp.com/avatars/${item.discordUsers?.[0].id}/${item.discordUsers?.[0].image ?? ''}`} // need to figure out alternative for this
+                            alt="user profile picture"
+                        />
+                        <div className={styles.userMeta}>
+                            <span className={styles.userName}>
+                                {makeTitle(item)}
+                            </span>
+                            <span className={styles.userUsername}>
+                                {item.discordUsers?.[0].username}
+                            </span>
+                        </div>
+                        {/* <ImageWithFallback
+                                    src=""
+                                    alt="user profile picture"
+                                    useFallback
+                                />
+                                <div className={styles.loading}>
+                                    <PulseLoader size={8} color="#bbb" />
+                                </div> */}
+                    </ListElement>
+                ))}
+            </PaginatedList>
 
             <div className={styles.detailsPane}>
-                {selectedUser ? (
+                {selectedId == null && (
+                    <div className={styles.emptyState}>No user selected</div>
+                )}
+                {selectedId && userQuery.data && (
                     <Form<User>
-                        form={selectedUser}
-                        title={makeTitle(selectedUser)}
+                        key={selectedId}
+                        form={userQuery.data}
+                        title={makeTitle(userQuery.data)}
                         saving={updateMutation.isPending}
                         onUpdate={setFormState}
                         onSave={handleSave}
@@ -315,7 +325,7 @@ export default function Page() {
                             <SelectManyField<User>
                                 label="Aliases"
                                 field="aliases"
-                                options={(selectedUser.aliases ?? []).map(
+                                options={(userQuery.data.aliases ?? []).map(
                                     (alias) => ({
                                         value: alias,
                                         label: alias,
@@ -410,8 +420,6 @@ export default function Page() {
                             />
                         </FormGroup>
                     </Form>
-                ) : (
-                    <div className={styles.emptyState}>No user selected</div>
                 )}
             </div>
         </>

@@ -1,3 +1,4 @@
+import { zDiscordUser } from './DiscordUser'
 import z from 'zod'
 
 export const zUserProfile = z.object({
@@ -7,7 +8,7 @@ export const zUserProfile = z.object({
     firstName: z.string().nullable(),
     lastName: z.string().nullable(),
     aliases: z.array(z.string()),
-    discordUsernames: z.array(z.string()),
+    discordUsers: z.array(zDiscordUser),
 })
 
 export type UserProfile = z.infer<typeof zUserProfile>

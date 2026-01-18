@@ -107,7 +107,7 @@ export default function Page() {
         <>
             <PaginatedList
                 search={search}
-                count={searchQuery.data?.count ?? null}
+                count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}
                 error={searchQuery.error}
                 onSearch={onSearch}
