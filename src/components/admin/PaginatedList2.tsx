@@ -364,8 +364,6 @@ function PageSelect({
         else setValue((page + 1).toString())
     }
 
-    console.log(page)
-
     useEffect(() => {
         setValue((page + 1).toString())
     }, [page])

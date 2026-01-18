@@ -50,7 +50,11 @@ export function DateField<T>(props: DateFieldProps<T>) {
                     name={props.label}
                     disabled={disabled}
                     required={props.required}
-                    value={value?.toISOString()?.split('T')?.[0]}
+                    value={
+                        dateService.isValid(value)
+                            ? value!.toISOString().split('T')[0]
+                            : ''
+                    }
                     onChange={handleChange}
                     onFocus={handleFocus}
                     className={cx(

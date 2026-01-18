@@ -13,9 +13,11 @@ import {
     TextField,
 } from '@/components/form'
 import {
+    Location,
     Role,
     User,
     UserProfile,
+    zLocation,
     zRole,
     zUser,
     zUserProfile,
@@ -84,19 +86,34 @@ export default function Page() {
         placeholderData: keepPreviousData,
     })
 
+    const formZip = formState?.form?.location?.zip
+    const locationQuery = useQuery({
+        queryKey: [`/locations/${formZip}`],
+        queryFn:
+            ready && formZip != null
+                ? () => onGet<Location>(`/locations/${formZip}`, zLocation)
+                : skipToken,
+        placeholderData: keepPreviousData,
+    })
+
     const updateMutation = useMutation<
         User,
         FetchError,
         { id: number; user: User; request: UpdateUserRequest },
         User
     >({
-        mutationFn: ({ id, request }) => onPatch(`/users/${id}`, request, null),
+        mutationFn: async ({ id, user, request }) => {
+            const result = await onPatch<User>(`/users/${id}`, request, zUser)
+            return { ...user, ...result }
+        },
         // When the mutation begins, optimistically update the cache to use the new state
         onMutate: ({ id, user }) => {
             const prev: User | undefined = queryClient.getQueryData([
                 `/users/${id}`,
             ])
             queryClient.setQueryData([`/users/${id}`], user)
+            if (id == loggedInUser.data?.id)
+                queryClient.setQueryData(['/users/current'], user)
             queryClient.setQueryData(
                 ['/users', search],
                 (res: PaginatedResponse<Role>) => ({
@@ -112,6 +129,8 @@ export default function Page() {
         onError: (error, { id }, prev) => {
             console.error(error)
             queryClient.setQueryData([`/users/${id}`], prev)
+            if (id == loggedInUser.data?.id)
+                queryClient.setQueryData(['/users/current'], prev)
             queryClient.setQueryData(
                 [`/users`, search],
                 (res: PaginatedResponse<Role>) => ({
@@ -125,6 +144,8 @@ export default function Page() {
         // On success, update the cache to the returned value in case there are any discrepancies
         onSuccess: (data, { id }) => {
             queryClient.setQueryData([`/users/${id}`], data)
+            if (id == loggedInUser.data?.id)
+                queryClient.setQueryData(['/users/current'], data)
             queryClient.setQueryData(
                 [`/users`, search],
                 (res: PaginatedResponse<Role>) => ({
@@ -139,6 +160,7 @@ export default function Page() {
         onSettled: (_data, _error, { id }) =>
             Promise.all([
                 queryClient.invalidateQueries({ queryKey: ['/users', search] }),
+                queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
                 queryClient.invalidateQueries({
                     queryKey: [`/users/${id}`],
                 }),
@@ -163,13 +185,13 @@ export default function Page() {
             id: user.id,
             user,
             request: {
-                email: user.email ?? undefined,
-                phone: user.phone ?? undefined,
-                preferredName: user.preferredName ?? undefined,
-                firstName: user.firstName ?? undefined,
-                lastName: user.lastName ?? undefined,
-                birthdate: user.birthdate ?? undefined,
-                zipCode: user.location?.zip,
+                email: user.email,
+                phone: user.phone,
+                preferredName: user.preferredName,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                birthdate: user.birthdate,
+                zipCode: user.location?.zip ?? null,
                 roles: user.roles?.map((role) => role.id),
             },
         })
@@ -314,11 +336,13 @@ export default function Page() {
                             <DateField<User>
                                 label="Date of Birth"
                                 getter={(form) =>
-                                    new Date(
-                                        dateService.toISODateString(
-                                            form.birthdate
-                                        ) ?? ''
-                                    )
+                                    dateService.isValid(form.birthdate)
+                                        ? new Date(
+                                              dateService.toISODateString(
+                                                  form.birthdate
+                                              )!
+                                          )
+                                        : null
                                 }
                                 field="birthdate"
                                 format={{
@@ -363,32 +387,31 @@ export default function Page() {
                                 }
                                 setter={(form, field) => ({
                                     ...form,
-                                    location:
-                                        field != null
-                                            ? {
-                                                  ...(form.location ?? {
-                                                      city: '',
-                                                      county: '',
-                                                      state: '',
-                                                  }),
-                                                  zip: +field,
-                                              }
-                                            : null,
+                                    location: field
+                                        ? {
+                                              ...(userQuery.data.location ?? {
+                                                  city: '',
+                                                  county: '',
+                                                  state: '',
+                                              }),
+                                              zip: +field,
+                                          }
+                                        : null,
                                 })}
                             />
                             <TextField<User>
                                 label="City"
-                                getter={(form) => form.location?.city}
+                                getter={() => locationQuery.data?.city}
                                 readonly
                             />
                             <TextField<User>
                                 label="County"
-                                getter={(form) => form.location?.county}
+                                getter={() => locationQuery.data?.county}
                                 readonly
                             />
                             <TextField<User>
                                 label="State"
-                                getter={(form) => form.location?.state}
+                                getter={() => locationQuery.data?.state}
                                 readonly
                             />
                         </FormGroup>
