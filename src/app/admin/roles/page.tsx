@@ -12,14 +12,14 @@ import {
 import { Permission, Role, zPermission, zRole } from '@/contracts/data'
 import { UpdateRoleRequest } from '@/contracts/requests'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
-import { useMutation } from '@tanstack/react-query'
+import { skipToken, useMutation, useQuery } from '@tanstack/react-query'
 import { useMemo, useRef, useState } from 'react'
 
 export default function Page() {
     const eventTarget = useRef(new EventTarget())
-    const { onPatch } = useFetch()
+    const { onGet, onPatch } = useFetch()
 
-    const [selectedRole, setSelectedRole] = useState<Role | null>(null)
+    const [selectedId, setSelectedId] = useState<number | null>(null)
     const [formState, setFormState] = useState<FormState<Role> | null>(null)
 
     const {
@@ -44,6 +44,14 @@ export default function Page() {
         [permissionsQuery.data]
     )
 
+    const roleQuery = useQuery({
+        queryKey: [`/roles/${selectedId}`],
+        queryFn:
+            selectedId != null
+                ? () => onGet<Role>(`/roles/${selectedId}`, zRole)
+                : skipToken,
+    })
+
     const updateMutation = useMutation({
         async mutationFn({
             id,
@@ -58,7 +66,7 @@ export default function Page() {
     })
 
     const handleSelectItem = (value: Role) => {
-        if (value.id === selectedRole?.id) return
+        if (value.id === selectedId) return
 
         if (formState?.dirty) {
             const proceed = confirm(
@@ -67,11 +75,12 @@ export default function Page() {
             if (!proceed) return
         }
 
-        setSelectedRole(value)
+        setSelectedId(value.id)
     }
 
     const handleSave = (role: Role) => {
-        setSelectedRole(role)
+        // TODO: Optimistic save
+        void roleQuery.refetch()
         updateMutation.mutate({
             id: role.id,
             request: {
@@ -90,23 +99,22 @@ export default function Page() {
                 count={searchQuery.data?.count ?? null}
                 isPending={searchQuery.isPending}
                 error={searchQuery.error}
+                filters={[
+                    {
+                        value: 'permissionIds',
+                        label: 'Permissions',
+                        options: (permissions ?? []).map((permission) => ({
+                            value: permission.id,
+                            label: permission.name,
+                        })),
+                    },
+                ]}
                 onSearch={onSearch}
-                // filters={[
-                //     {
-                //         name: 'Permission',
-                //         query_key: 'permissions',
-                //         display_key: 'name',
-                //         value_key: 'name',
-                //         options: (permissions ?? []).map((permission) => ({
-                //             name: permission.name,
-                //         })),
-                //     },
-                // ]}
             >
                 {searchQuery.data?.data?.map((item) => (
                     <ListElement
                         key={item.id}
-                        selected={selectedRole?.id == item.id}
+                        selected={selectedId == item.id}
                         onClick={() => handleSelectItem(item)}
                     >
                         <span className={styles.roleListItemName}>
@@ -117,11 +125,14 @@ export default function Page() {
             </PaginatedList>
 
             <div className={styles.rightPane}>
-                {selectedRole ? (
+                {selectedId == null && (
+                    <div className={styles.emptyState}>No role selected</div>
+                )}
+                {selectedId != null && roleQuery.data && (
                     <Form<Role>
-                        key={selectedRole.id}
-                        form={selectedRole}
-                        title={selectedRole.name}
+                        key={selectedId}
+                        form={roleQuery.data}
+                        title={roleQuery.data.name}
                         saving={updateMutation.isPending}
                         onUpdate={setFormState}
                         onSave={handleSave}
@@ -148,8 +159,6 @@ export default function Page() {
                             />
                         </FormGroup>
                     </Form>
-                ) : (
-                    <div className={styles.emptyState}>No role selected</div>
                 )}
             </div>
         </>

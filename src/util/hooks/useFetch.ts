@@ -9,7 +9,10 @@ interface ApiError {
     message: string
 }
 
-export type QueryParams = Record<string, string | number | boolean | null | undefined>
+type QueryPrim = string | number | boolean | null
+type QueryParam = QueryPrim | QueryPrim[] | undefined
+
+export type QueryParams = Record<string, QueryParam>
 export type ZodSchema = z.ZodObject | z.ZodArray
 
 interface QueryOptions {
@@ -42,6 +45,18 @@ export function useFetch() {
         staleTime: Infinity,
         placeholderData: keepPreviousData,
     })
+
+    const onSignOut = () => {
+        localStorage.removeItem(pvSessionKey)
+    }
+
+    const queryToString = (query: QueryParam): string | undefined => {
+        if (query === undefined) return undefined
+        if (query === null) return 'null'
+        if (Array.isArray(query))
+            return query.map((item) => queryToString(item)).join(',')
+        return query.toString()
+    }
 
     // TODO: Put this into global state and delay until it's loaded
     const apiBaseUrl = settingsQuery.data?.apiBaseUrl
@@ -82,10 +97,6 @@ export function useFetch() {
         )
     }
 
-    const onSignOut = () => {
-        localStorage.removeItem(pvSessionKey)
-    }
-
     async function onFetch<R = void>(
         method: string,
         url: string,
@@ -95,7 +106,8 @@ export function useFetch() {
     ) {
         const fullUrl = new URL(url, apiBaseUrl)
         Object.entries(options?.query ?? {}).forEach(([key, value]) => {
-            if (value != null) fullUrl.searchParams.set(key, value.toString())
+            const str = queryToString(value)
+            if (str != null) fullUrl.searchParams.set(key, str)
         })
 
         const req: RequestInit = {

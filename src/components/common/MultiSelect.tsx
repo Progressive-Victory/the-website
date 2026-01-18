@@ -13,8 +13,8 @@ export interface MultiSelectProps {
     name: string
     options: MultiSelectOption[]
     selected: (string | number)[]
-    readonly: boolean
-    disabled: boolean
+    readonly?: boolean
+    disabled?: boolean
     onUpdate: (selected: (string | number)[]) => void
 }
 
@@ -67,7 +67,7 @@ export function MultiSelect({
                         styles.option,
                         !readonly && styles.removeButton
                     )}
-                    disabled={disabled || readonly}
+                    disabled={!!disabled || readonly}
                     onClick={() => handleRemove(value)}
                 >
                     {optionMap.get(value)}
