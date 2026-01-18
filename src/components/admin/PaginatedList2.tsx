@@ -1,5 +1,6 @@
 import styles from './PaginatedList.module.css'
-import { SearchRequest } from '@/contracts/requests'
+import { MultiSelect, MultiSelectOption } from '@/components/common'
+import { SearchRequest, SortDirection } from '@/contracts/requests'
 import cx from 'classnames'
 import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
 import {
@@ -12,12 +13,26 @@ import { IoMdOptions } from 'react-icons/io'
 import { IoClose } from 'react-icons/io5'
 import { IconType } from 'react-icons/lib'
 
+export interface FilterOption {
+    value: string
+    label: string
+    options: MultiSelectOption[]
+}
+
+export interface FieldOption {
+    value: string
+    label: string
+}
+
 export interface PaginatedListProps {
     search: SearchRequest
 
     count: number | null
     isPending: boolean
     error: Error | null
+
+    fields?: FieldOption[]
+    filters?: FilterOption[]
 
     children?: ReactElement<ListElementProps>[]
 
@@ -29,22 +44,39 @@ export function PaginatedList({
     count,
     isPending,
     error,
+    fields,
+    filters,
     children,
     onSearch,
 }: PaginatedListProps) {
-    const page = search.page ?? 0
-    const limit = search.limit ?? 25
+    const [searchPanelOpen, setSearchPanelOpen] = useState(false)
 
-    const [filtersOpen, setFiltersOpen] = useState(false)
-    const [searchText, setSearchText] = useState(search.query ?? '')
+    const { query, field, limit, sort, page, ...filter } = search
 
-    const handleToggleFilters = () => {
-        setFiltersOpen((prev) => !prev)
+    const handleToggleSearchPanel = () => {
+        setSearchPanelOpen((prev) => !prev)
     }
 
-    const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-        setSearchText(e.target.value)
-        onSearch({ ...search, query: e.target.value })
+    const handleChangeQuery = (query: string) => {
+        onSearch({ ...search, query })
+    }
+
+    const handleChangeField = (field: string | undefined) => {
+        onSearch({ ...search, field })
+    }
+
+    const handleChangeLimit = (limit: number) => {
+        onSearch({ ...search, limit })
+    }
+
+    const handleChangeSort = (sort: SortDirection | undefined) => {
+        onSearch({ ...search, sort })
+    }
+
+    const handleChangeFilter = (
+        filter: Record<string, (number | string)[] | undefined>
+    ) => {
+        onSearch({ query, field, limit, sort, page, ...filter })
     }
 
     const handleChangePage = (page: number) => {
@@ -54,27 +86,34 @@ export function PaginatedList({
     return (
         <div className={styles.list}>
             <div className={styles.searchPanel}>
-                <div className={styles.searchInputPanel}>
-                    <input
-                        type="text"
-                        name="search"
-                        id="search"
-                        placeholder="Search..."
-                        value={searchText}
-                        onInput={handleSearch}
-                        className={styles.searchInput}
-                    />
-                    <button
-                        title={filtersOpen ? 'Hide Filters' : 'Show Filters'}
-                        onClick={handleToggleFilters}
-                    >
-                        {filtersOpen ? (
-                            <IoClose size={20} />
-                        ) : (
-                            <IoMdOptions size={20} />
-                        )}
-                    </button>
-                </div>
+                <SearchInput
+                    query={query ?? ''}
+                    panelOpen={searchPanelOpen}
+                    onTogglePanel={handleToggleSearchPanel}
+                    onSearch={handleChangeQuery}
+                />
+
+                {searchPanelOpen && (
+                    <>
+                        <div className="flex w-full flex-wrap justify-between gap-2">
+                            <FieldSelect
+                                field={field}
+                                options={fields ?? []}
+                                onSelect={handleChangeField}
+                            />
+                            <LimitSelect
+                                limit={limit}
+                                onSelect={handleChangeLimit}
+                            />
+                        </div>
+                        <SortSelect sort={sort} onSelect={handleChangeSort} />
+                        <FilterSelect
+                            filters={filter}
+                            options={filters}
+                            onChange={handleChangeFilter}
+                        />
+                    </>
+                )}
             </div>
 
             {!count && (
@@ -94,7 +133,7 @@ export function PaginatedList({
             {count != null && (
                 <div className={styles.pageSelectContainer}>
                     <PageSelect
-                        page={page}
+                        page={page ?? 0}
                         pageSize={limit}
                         count={count}
                         disabled={isPending}
@@ -125,6 +164,155 @@ export function ListElement({
                 {children}
             </div>
         </li>
+    )
+}
+
+interface SearchInputProps {
+    query: string
+    panelOpen: boolean
+    onTogglePanel: () => void
+    onSearch: (query: string) => void
+}
+
+function SearchInput({
+    query,
+    panelOpen,
+    onTogglePanel,
+    onSearch,
+}: SearchInputProps) {
+    const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+        onSearch(e.target.value)
+    }
+
+    return (
+        <div className={styles.searchInput}>
+            <input
+                type="text"
+                name="search"
+                id="search"
+                placeholder="Search..."
+                defaultValue={query}
+                onInput={handleSearch}
+            />
+            <button
+                title={panelOpen ? 'Hide Filters' : 'Show Filters'}
+                onClick={onTogglePanel}
+            >
+                {panelOpen ? <IoClose size={20} /> : <IoMdOptions size={20} />}
+            </button>
+        </div>
+    )
+}
+
+interface FieldSelectProps {
+    field: string | undefined
+    options: FieldOption[]
+    onSelect: (field: string | undefined) => void
+}
+
+function FieldSelect({ field, options, onSelect }: FieldSelectProps) {
+    if (!options.length) return null
+
+    return (
+        <label htmlFor="field" className={styles.select}>
+            <span>Filter:</span>
+            <select
+                name="field"
+                id="field"
+                defaultValue={field}
+                onChange={(e) => onSelect(e.target.value)}
+            >
+                <option>All</option>
+                {options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                        {option.label}
+                    </option>
+                ))}
+            </select>
+        </label>
+    )
+}
+
+interface LimitSelectProps {
+    limit: number
+    onSelect: (limit: number) => void
+}
+
+function LimitSelect({ limit, onSelect }: LimitSelectProps) {
+    return (
+        <label htmlFor="limit" className={styles.select}>
+            <span>Items:</span>
+            <select
+                name="limit"
+                id="limit"
+                defaultValue={limit}
+                onChange={(e) => onSelect(+e.target.value)}
+            >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+            </select>
+        </label>
+    )
+}
+
+interface SortSelectProps {
+    sort: SortDirection | undefined
+    onSelect: (sort: SortDirection | undefined) => void
+}
+
+function SortSelect({ sort, onSelect }: SortSelectProps) {
+    return (
+        <label htmlFor="sort" className={styles.select}>
+            <span>Sort:</span>
+            <select
+                name="sort"
+                id="sort"
+                defaultValue={sort}
+                onChange={(e) =>
+                    onSelect(e.target.value as SortDirection | undefined)
+                }
+            >
+                <option>None</option>
+                <option value={SortDirection.ASC}>Ascending</option>
+                <option value={SortDirection.DESC}>Descending</option>
+            </select>
+        </label>
+    )
+}
+
+interface FilterSelectProps {
+    options: FilterOption[] | undefined
+    filters: Record<string, (string | number)[]>
+    onChange: (filters: Record<string, (string | number)[]>) => void
+}
+
+function FilterSelect({ options, filters, onChange }: FilterSelectProps) {
+    const handleUpdate = (value: string, selected: (string | number)[]) => {
+        const newFilters = { ...filters }
+        if (selected.length) newFilters[value] = selected
+        else delete newFilters[value]
+        onChange(newFilters)
+    }
+
+    return (
+        <>
+            {options?.map((option) => (
+                <div key={option.label} className="flex flex-wrap gap-2">
+                    <strong className="font-medium">{option.label}:</strong>
+                    <MultiSelect
+                        name={option.label}
+                        options={option.options}
+                        selected={filters[option.value] ?? []}
+                        onUpdate={(selected) =>
+                            handleUpdate(option.value, selected)
+                        }
+                    />
+                </div>
+            ))}
+        </>
     )
 }
 

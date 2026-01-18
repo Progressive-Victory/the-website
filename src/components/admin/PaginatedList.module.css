@@ -23,19 +23,37 @@
     padding: 1rem;
 }
 
-.searchInputPanel {
+.searchInput {
     display: flex;
     width: 100%;
     align-items: center;
     gap: 0.5rem;
 }
 
-.searchInput {
+.searchInput > input {
     width: 100%;
     border-radius: 0.5rem;
     border-width: 1px;
     border-color: #d1d5db;
     padding: 0.25rem 0.75rem;
+}
+
+.select {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.select > span {
+    font-weight: 500;
+}
+
+.select > select {
+    border-radius: 0.5rem;
+    border-width: 1px;
+    border-color: #d1d5db;
+    background-color: white;
+    padding: 0.25rem;
 }
 
 .listStatus {
