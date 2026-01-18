@@ -13,28 +13,69 @@ import z from 'zod'
 export function usePaginatedSearch<T>(
     endpoint: string,
     schema: z.ZodObject,
-    initialSearch?: SearchRequest
+    options?: {
+        search?: SearchRequest
+        all?: boolean
+    }
 ) {
     const { ready, onGet } = useFetch()
 
     const [search, setSearch] = useState<SearchRequest>({
-        ...initialSearch,
-        limit: initialSearch?.limit ?? 25,
+        ...(options?.search ?? {}),
+        limit: options?.search?.limit ?? 25,
     })
+
+    interface Options {
+        page?: number
+        count?: number
+        signal?: AbortSignal
+    }
+
+    const getPage = async (options: Options) => {
+        const page = options?.page ?? search.page ?? 0
+        const limit = options?.count
+            ? Math.min(search.limit, options.count - page * search.limit)
+            : search.limit
+
+        return await onGet<PaginatedResponse<T>>(
+            endpoint,
+            zPaginatedResponse(schema),
+            { query: { ...search, page, limit }, signal: options?.signal }
+        )
+    }
+
+    const getAllPages = async (options: Options) => {
+        const res = await getPage(options)
+        const { data, count } = res
+
+        const limit = search.limit
+        const pageCount = Math.ceil(count / limit)
+
+        const pageQueries: Promise<PaginatedResponse<T>>[] = []
+        for (let page = 1; page < pageCount; page++)
+            pageQueries.push(getPage({ ...options, page, count }))
+
+        const pages = await Promise.all(pageQueries)
+        data.push(...pages.flatMap((res) => res.data))
+
+        return res
+    }
+
+    const getter = options?.all ? getAllPages : getPage
 
     const queryClient = useQueryClient()
     const query = useQuery({
         queryKey: [endpoint, search],
-        queryFn: ready
-            ? ({ signal }) =>
-                  onGet<PaginatedResponse<T>>(
-                      endpoint,
-                      zPaginatedResponse(schema),
-                      { query: search, signal }
-                  )
-            : skipToken,
+        queryFn: ready ? getter : skipToken,
         placeholderData: keepPreviousData,
     })
+
+    const onSearch = (newSearch: SearchRequest) => {
+        void queryClient.cancelQueries({
+            queryKey: [endpoint, search],
+        })
+        setSearch(newSearch)
+    }
 
     useEffect(() => {
         return () =>
@@ -43,5 +84,5 @@ export function usePaginatedSearch<T>(
             })
     }, [queryClient, endpoint, search])
 
-    return { query, search, onSearch: setSearch }
+    return { query, search, onSearch }
 }

@@ -1,13 +1,15 @@
 import styles from './PaginatedList.module.css'
 import { SearchRequest } from '@/contracts/requests'
 import cx from 'classnames'
-import { ReactElement, useEffect, useState } from 'react'
+import { ChangeEvent, ReactElement, useEffect, useState } from 'react'
 import {
     FiChevronLeft,
     FiChevronRight,
     FiChevronsLeft,
     FiChevronsRight,
 } from 'react-icons/fi'
+import { IoMdOptions } from 'react-icons/io'
+import { IoClose } from 'react-icons/io5'
 import { IconType } from 'react-icons/lib'
 
 export interface PaginatedListProps {
@@ -33,21 +35,59 @@ export function PaginatedList({
     const page = search.page ?? 0
     const limit = search.limit ?? 25
 
+    const [filtersOpen, setFiltersOpen] = useState(false)
+    const [searchText, setSearchText] = useState(search.query ?? '')
+
+    const handleToggleFilters = () => {
+        setFiltersOpen((prev) => !prev)
+    }
+
+    const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+        setSearchText(e.target.value)
+        onSearch({ ...search, query: e.target.value })
+    }
+
     const handleChangePage = (page: number) => {
         onSearch({ ...search, page })
     }
 
     return (
         <div className={styles.list}>
-            <div className={styles.listStatus}>
-                {isPending ? (
-                    <span color="#9ca3af">Loading...</span>
-                ) : error ? (
-                    <span color="#ef4444">Error: {error.message}</span>
-                ) : !count && (
-                    <span>No results found</span>
-                )}
+            <div className={styles.searchPanel}>
+                <div className={styles.searchInputPanel}>
+                    <input
+                        type="text"
+                        name="search"
+                        id="search"
+                        placeholder="Search..."
+                        value={searchText}
+                        onInput={handleSearch}
+                        className={styles.searchInput}
+                    />
+                    <button
+                        title={filtersOpen ? 'Hide Filters' : 'Show Filters'}
+                        onClick={handleToggleFilters}
+                    >
+                        {filtersOpen ? (
+                            <IoClose size={20} />
+                        ) : (
+                            <IoMdOptions size={20} />
+                        )}
+                    </button>
+                </div>
             </div>
+
+            {!count && (
+                <div className={styles.listStatus}>
+                    {isPending ? (
+                        <span color="#9ca3af">Loading...</span>
+                    ) : error ? (
+                        <span color="#ef4444">Error: {error.message}</span>
+                    ) : (
+                        <span>No results found</span>
+                    )}
+                </div>
+            )}
 
             <ul className={styles.elementList}>{children}</ul>
 
