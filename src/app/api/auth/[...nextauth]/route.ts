@@ -1,4 +1,3 @@
- 
 import { handlers } from '@/util/auth'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -15,8 +14,6 @@ export const POST = async (req: NextRequest) => {
         if (url.pathname === '/api/auth/signin/discord') {
             // Pull the original URL out
             const body_url = new URL((await res.json()).url)
-
-            console.log('previous state:', body_url.searchParams.get('state'))
 
             // Boomerang will redirect back to whatever the state.redirect_uri is set to
             body_url.searchParams.set(
@@ -43,6 +40,9 @@ export const POST = async (req: NextRequest) => {
             // their browser
             return NextResponse.json(
                 {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
                     url: body_url,
                 },
                 res

@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
-import z from 'zod'
-
 import { User } from '@/models/User'
 import { auth } from '@/util/auth'
 import { HTTPStatus } from '@/util/https-status'
 import dbConnect from '@/util/libmongo'
 import { neutrino } from '@/util/neutrino'
 import { OnboardingStage } from '@/util/stage'
+import { NextRequest, NextResponse } from 'next/server'
+import z from 'zod'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,12 +54,8 @@ export async function POST(req: NextRequest) {
 
     if (!verified) {
         return NextResponse.json(
-            {
-                message: 'Incorrect or expired code',
-            },
-            {
-                status: HTTPStatus.BadRequest,
-            }
+            { message: 'Incorrect or expired code' },
+            { status: HTTPStatus.BadRequest }
         )
     }
 
@@ -68,12 +63,8 @@ export async function POST(req: NextRequest) {
 
     if (user.lastSmsCodeSent && code !== user.lastSmsCodeSent) {
         return NextResponse.json(
-            {
-                message: 'Incorrect or expired code',
-            },
-            {
-                status: HTTPStatus.BadRequest,
-            }
+            { message: 'Incorrect or expired code' },
+            { status: HTTPStatus.BadRequest }
         )
     }
 

@@ -1,0 +1,11 @@
+.aboutHeading {
+    width: 100%;
+    text-align: center;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: white;
+}
+
+.aboutHeadingHighlight {
+    color: #09223a;
+}

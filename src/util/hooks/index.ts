@@ -1,6 +1,8 @@
-import useUser, { hasPermission } from "./useUser";
+import useInit from './useInit'
+import useUser from './useUser'
 
-export {
-  hasPermission,
-  useUser
-}
+export { useUser, useInit }
+
+export * from './useFetch'
+export * from './useHydration'
+export * from './useUser'

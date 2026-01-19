@@ -1,62 +1,34 @@
 'use client'
 
-import { PlusIcon, MinusIcon } from '@heroicons/react/24/solid'
-import { useState } from 'react'
+import { ContentSection } from '@/components/ContentSections'
 
 const questions = [
     {
         question: "What if I'm not from the US?",
         answer: 'Progressive Victory is a U.S. based organization that is currently not equipped to organize in other countries. Only U.S. citizens and permanent residents are able to join at this time.',
     },
+    {
+        question: "What if I'm under the age of 18?",
+        answer: 'Unfortunately, all members of Progressive Victory must be 18 years or older in order to join. If you are currently between the ages 16 and 17, you may attend in person organizing or community events if accompanied by a parent or gaurdian.',
+    },
+    {
+        question: "Should I join if I don't want to volunteer?",
+        answer: "Of Course! Progressive Victory is more than just a poltical org it's a community first and foremost. We have worked hard to create a healthy & thriving social space for that also happens to swing elections!",
+    },
+    {
+        question: 'Do I need previous organizing experience?',
+        answer: 'No! Progressive Victory welcomes newcomers. Many of our most dedicated organizers started with no prior experience. We provide all necessary training and guidance.',
+    },
 ]
 
 export default function FAQ() {
     return (
-        <div className="mx-8 flex flex-col items-center justify-center gap-y-8 rounded-lg bg-black-pearl-dark pb-10 pt-6 lg:w-2/3">
-            <h1 className="w-full text-center text-4xl font-bold text-white">
-                Frequently <span className="text-valencia">Asked</span>{' '}
-                Questions?
-            </h1>
-
-            <div className="flex w-full flex-col items-center justify-center gap-x-4">
-                {questions.map((question) => (
-                    <Questions
-                        key={question.question}
-                        question={question.question}
-                        answer={question.answer}
-                    />
-                ))}
-            </div>
-        </div>
-    )
-}
-
-function Questions({ question, answer }: { question: string; answer: string }) {
-    const [isOpen, setIsOpen] = useState(false)
-    return (
-        <button
-            className="relative mx-8 flex flex-col items-center justify-center gap-y-4 overflow-y-scroll rounded-md bg-white p-4"
-            onClick={() => setIsOpen(!isOpen)}
-        >
-            <div className="mt-5 flex w-full flex-row items-center justify-between gap-x-4">
-                <h1 className="text-left text-2xl font-bold text-black">
-                    {question}
-                </h1>
-                {isOpen ? (
-                    <MinusIcon className="size-8 text-black-pearl-dark" />
-                ) : (
-                    <PlusIcon className="size-8 text-black-pearl-dark" />
-                )}
-            </div>
-            <div
-                className={`pointer-events-auto mr-10 select-text text-justify text-lg text-black-pearl-dark transition-all duration-100 ${
-                    isOpen
-                        ? 'max-h-40 overflow-auto pb-4'
-                        : 'max-h-0 overflow-hidden'
-                }`}
-            >
-                {answer}
-            </div>
-        </button>
+        <ContentSection
+            title="Frequently Asked Questions?"
+            highlight="Asked"
+            titleAlign="center"
+            bodyType="dropdown"
+            dropdownItems={questions}
+        />
     )
 }

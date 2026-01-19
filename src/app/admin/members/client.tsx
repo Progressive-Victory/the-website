@@ -9,8 +9,10 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/form'
+import { DateField } from '@/components/form/DateField'
 import { IRole } from '@/models/Role'
 import { IUser } from '@/models/User'
+import { dateService } from '@/services'
 import { useUser } from '@/util/hooks'
 import deepEqual from 'deep-equal'
 import { useRef, useState } from 'react'
@@ -49,6 +51,10 @@ export default function ClientPage({ roles }: PageProps) {
         setOriginalUser({ ...value } as IUser)
     }
 
+    const userAge = dateService.getAge(selectedUser?.dateOfBirth ?? '')
+    const fCreatedDate = selectedUser?.createdAt
+        ? dateService.formatDate(selectedUser.createdAt)
+        : ''
     const makeItem = (user: IUser) => ({ id: user._id as string, value: user })
 
     return (
@@ -90,6 +96,18 @@ export default function ClientPage({ roles }: PageProps) {
                     {
                         id: 'state',
                         name: 'State',
+                    },
+                    {
+                        id: 'createdAt',
+                        name: 'Date Created',
+                    },
+                    {
+                        id: 'completedIntake',
+                        name: 'Date Intake Done',
+                    },
+                    {
+                        id: 'joinedServer',
+                        name: 'Date Joined Server',
                     },
                 ]}
                 items={users.map(makeItem)}
@@ -176,11 +194,22 @@ export default function ClientPage({ roles }: PageProps) {
                             />
                             <TextField name="First Name" field="firstName" />
                             <TextField name="Last Name" field="lastName" />
-                            <TextField
+                            <DateField
                                 name="Date of Birth"
                                 field="dateOfBirth"
                             />
-                            <TextField name="Age" field="age" readonly />
+                            <TextField
+                                name="Age"
+                                field="age"
+                                readonly
+                                dynamic={{ value: userAge }}
+                            />
+                            <TextField
+                                name="Date Created"
+                                field="createdAt"
+                                readonly
+                                dynamic={{ value: fCreatedDate }}
+                            />
                         </FormGroup>
                         <FormGroup title="Address">
                             <TextField name="City" field="city" />
@@ -198,6 +227,16 @@ export default function ClientPage({ roles }: PageProps) {
                             <TextField
                                 name="Onboarding Stage"
                                 field="onboardingStage"
+                                readonly
+                            />
+                            <TextField
+                                name="Date Intake Done"
+                                field="completedIntake"
+                                readonly
+                            />
+                            <TextField
+                                name="Date Server Joined"
+                                field="joinedServer"
                                 readonly
                             />
                         </FormGroup>

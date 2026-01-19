@@ -1,9 +1,9 @@
+import { User, IUser } from '@/models/User'
+import { auth, checkAuth, ResponseCode } from '@/util/auth'
+import dbConnect from '@/util/libmongo'
+import { OnboardingStage } from '@/util/stage'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { User, IUser } from '@/models/User'
-import dbConnect from '@/util/libmongo'
-import { auth, checkAuth, ResponseCode } from '@/util/auth'
-import { OnboardingStage } from '@/util/stage'
 export const dynamic = 'force-dynamic'
 /**
  * Create a new user.
@@ -57,7 +57,7 @@ export async function GET() {
     }
 
     const usr: IUser = (await retrieveUser()) as IUser
-    return NextResponse.json(sanitizeUser(usr.toObject()))
+    return NextResponse.json(sanitizeUser(usr))
 }
 
 export async function PATCH(req: NextRequest) {
@@ -80,38 +80,33 @@ export async function PATCH(req: NextRequest) {
             throw Error('Unidentified response code.')
     }
 
-    // Make sure we're at onboarding stage
+    const onboardingInit = user.onboardingStage
+
+    //hey wait shouldn't fields like onboarding stage and completion dates not be editable in a user accessable endpoint?
+    const data = (await req.json()) as Partial<IUser>
+    user.firstName = data.firstName ?? user.firstName
+    user.lastName = data.lastName ?? user.lastName
+    user.dateOfBirth = data.dateOfBirth ?? user.dateOfBirth
+    user.zipCode = data.zipCode ?? user.zipCode
+    user.city = data.city ?? user.city
+    user.county = data.county ?? user.county
+    user.state = data.state ?? user.state
+    user.phoneNumber = data.phoneNumber ?? user.phoneNumber
+    user.acceptedAlerts = data.acceptedAlerts ?? user.acceptedAlerts
+    user.onboardingStage = data.onboardingStage ?? user.onboardingStage
+
     if (
-        user.onboardingStage === OnboardingStage.NOT_STARTED ||
-        user.onboardingStage === OnboardingStage.AWAIT_VERIFICATION
-    ) {
-        const data = (await req.json()) as Partial<IUser>
-        Object.keys(data).forEach((k) => {
-            const key = k as keyof IUser
-            // Sets what keys we can set on the new objects
-            const allowed = [
-                'zipCode',
-                'preferredNamed',
-                'phoneNumber',
-                'acceptedAlerts',
-                'dateOfBirth',
-                'onboardingStage',
-            ]
-            if (user[key] !== data[key] || !allowed.includes(key)) {
-                // @ts-expect-error potential bad key
-                user[key] = data[key]
-            }
-        })
-    } else {
-        // we only want to allow updating the stage and verified after this point
-        return NextResponse.json({ error: 'Bad request' }, { status: 400 })
-    }
+        (user.onboardingStage === OnboardingStage.AWAITING_VERIFY &&
+            onboardingInit === OnboardingStage.NOT_STARTED) ||
+        (user.onboardingStage === OnboardingStage.UNDERAGE &&
+            onboardingInit === OnboardingStage.NOT_STARTED)
+    )
+        user.completedIntake = new Date()
 
     await dbConnect()
-
     await user.save()
 
-    return NextResponse.json(sanitizeUser(user.toObject()))
+    return NextResponse.json(sanitizeUser(user))
 }
 
 /**
@@ -120,5 +115,5 @@ export async function PATCH(req: NextRequest) {
  */
 function sanitizeUser(user: IUser) {
     delete user.lastSmsCodeSent
-    return user
+    return user.toObject() as IUser
 }

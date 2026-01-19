@@ -1,13 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { phone } from 'phone'
-import z from 'zod'
-
 import { User } from '@/models/User'
 import { auth } from '@/util/auth'
 import { HTTPStatus } from '@/util/https-status'
 import dbConnect from '@/util/libmongo'
 import { neutrino } from '@/util/neutrino'
 import { OnboardingStage } from '@/util/stage'
+import { NextRequest, NextResponse } from 'next/server'
+import { phone } from 'phone'
+import z from 'zod'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,9 +44,7 @@ export async function POST(req: NextRequest) {
 
     if (!parsed.isValid) {
         return NextResponse.json(
-            {
-                message: 'Invalid US mobile phone number',
-            },
+            { message: 'Invalid US mobile phone number' },
             { status: HTTPStatus.BadRequest }
         )
     }
@@ -64,28 +61,11 @@ export async function POST(req: NextRequest) {
         })
     }
 
-    switch (user.onboardingStage) {
-        case OnboardingStage.NOT_STARTED: {
-            // Update user to await state
-            user.onboardingStage = OnboardingStage.AWAIT_VERIFICATION
-            await user.save()
-            break
-        }
-        case OnboardingStage.AWAIT_VERIFICATION: {
-            // Do nothing we can send another code if they need it
-            break
-        }
-        default: {
-            // They cannot request a code after being verified
-            return NextResponse.json(
-                {
-                    message: 'Already verified',
-                },
-                {
-                    status: HTTPStatus.BadRequest,
-                }
-            )
-        }
+    if (user.onboardingStage != OnboardingStage.AWAITING_VERIFY) {
+        return NextResponse.json(
+            { message: 'Stage is not awaiting verify' },
+            { status: HTTPStatus.BadRequest }
+        )
     }
 
     /* Check last sent timestamp */
@@ -102,9 +82,7 @@ export async function POST(req: NextRequest) {
                 {
                     message: `Please wait ${Math.floor(remaining / 1000)} more seconds`,
                 },
-                {
-                    status: HTTPStatus.TooManyRequests,
-                }
+                { status: HTTPStatus.TooManyRequests }
             )
         }
     }
@@ -121,7 +99,10 @@ export async function POST(req: NextRequest) {
     if ('api-error-msg' in data) {
         console.error('Failed to send SMS code:', data)
         return NextResponse.json(null, {
-            status: HTTPStatus.InternalServerError,
+            status:
+                data['api-error'] == 14
+                    ? HTTPStatus.TooManyRequests
+                    : HTTPStatus.InternalServerError,
         })
     }
 
