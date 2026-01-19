@@ -151,7 +151,7 @@ export default function ClientPage({ roles }: PageProps) {
                         updateHistory
                     >
                         <FormGroup title="Account Information">
-                            <TextField name="Username" field="name" required />
+                            <TextField name="Discord Username" field="name" readonly prefix="@" />
                             <TextField name="Email" field="email" required />
                             <TextField
                                 name="Discord ID"

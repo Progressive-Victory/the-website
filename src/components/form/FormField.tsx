@@ -6,6 +6,7 @@ export interface IBaseFormField {
     required?: boolean
     readonly?: boolean
     deprecated?: boolean
+    prefix?: string
     dynamic?: {
         value?: unknown
         disabled?: boolean

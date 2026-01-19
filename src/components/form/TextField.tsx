@@ -8,6 +8,7 @@ export function TextField({
     required = false,
     readonly = false,
     deprecated = false,
+    prefix,
     dynamic,
 }: IBaseFormField) {
     const value = (dynamic?.value as string) ?? ''
@@ -27,7 +28,7 @@ export function TextField({
             deprecated={deprecated}
         >
             {readonly || dynamic?.disabled ? (
-                <div className="col-span-2 w-full">{value}</div>
+                <div className="col-span-2 w-full">{prefix}{value}</div>
             ) : (
                 <input
                     type="text"
