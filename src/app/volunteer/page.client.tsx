@@ -45,7 +45,7 @@ export default function VolunteerPage() {
 
     const isInServerResult = useQuery({
         queryKey: [`/discordUsers/${discordUserId}/isInServer`],
-        queryFn: ready
+        queryFn: ready && discordUserId != null
             ? ({ signal }) =>
                   onGet<DiscordUserIsInServerResponse>(
                       `/discordUsers/${discordUserId}/isInServer`,

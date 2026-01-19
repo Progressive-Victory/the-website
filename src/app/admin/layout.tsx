@@ -1,3 +1,5 @@
+'use client'
+
 import styles from './admin.module.css'
 import ProtectedPage from '@/components/ProtectedPage'
 import AdminNav from '@/components/admin/AdminNav'
