@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, PaginatedList } from '@/components/admin/PaginatedList2'
+import { ListElement, PaginatedList } from '@/components/admin/PaginatedList'
 import {
     Form,
     FormGroup,
