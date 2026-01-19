@@ -2,14 +2,15 @@ import styles from './admin.module.css'
 import ProtectedPage from '@/components/ProtectedPage'
 import AdminNav from '@/components/admin/AdminNav'
 import { Header } from '@/components/layout/Header'
-import { get_collection_stats } from '@/util/stats'
+import { zPermission, zRole, zUser } from '@/contracts/data'
+import { usePaginatedSearch } from '@/util/hooks'
 
-export default async function Layout({
-    children,
-}: {
-    children: React.ReactNode
-}) {
-    const stats = await get_collection_stats()
+export default function Layout({ children }: { children: React.ReactNode }) {
+    const users = usePaginatedSearch('/users', zUser, { search: { limit: 0 } })
+    const roles = usePaginatedSearch('/roles', zRole, { search: { limit: 0 } })
+    const permissions = usePaginatedSearch('/permissions', zPermission, {
+        search: { limit: 0 },
+    })
 
     return (
         <ProtectedPage requiredRoles={['Superadmin']}>
@@ -17,7 +18,11 @@ export default async function Layout({
                 <Header />
 
                 <div className={styles.main}>
-                    <AdminNav stats={stats} />
+                    <AdminNav
+                        userCount={users.query.data?.count}
+                        roleCount={roles.query.data?.count}
+                        permissionCount={permissions.query.data?.count}
+                    />
 
                     <div className={styles.content}>{children}</div>
                 </div>
