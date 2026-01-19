@@ -1,12 +1,13 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, PaginatedList } from '@/components/admin/PaginatedList2'
+import { ListElement, PaginatedList } from '@/components/admin/PaginatedList'
 import { ImageWithFallback } from '@/components/common'
 import {
     CheckboxField,
     DateField,
     Form,
+    FormFieldProps,
     FormGroup,
     FormState,
     SelectManyField,
@@ -15,6 +16,7 @@ import {
 import {
     Location,
     Role,
+    UpdateHistory,
     User,
     UserProfile,
     zLocation,
@@ -497,9 +499,17 @@ export default function Page() {
                                 })}
                             />
                         </FormGroup>
+
+                        <FormGroup title="Account History" defaultCollapsed>
+                            <AccountHistoryField />
+                        </FormGroup>
                     </Form>
                 )}
             </div>
         </>
     )
+}
+
+function AccountHistoryField(props: FormFieldProps<UpdateHistory<User>>) {
+    return null
 }
