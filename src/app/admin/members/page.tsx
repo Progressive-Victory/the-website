@@ -2,13 +2,13 @@
 
 import styles from './page.module.css'
 import { ListElement, PaginatedList } from '@/components/admin/PaginatedList'
-import { ImageWithFallback } from '@/components/common'
+import { CollapsibleSection, ImageWithFallback } from '@/components/common'
 import {
     CheckboxField,
     DateField,
     Form,
-    FormFieldProps,
     FormGroup,
+    FormGroupProps,
     FormState,
     SelectManyField,
     TextField,
@@ -40,6 +40,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import cx from 'classnames'
 import { useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
@@ -48,6 +49,8 @@ export default function Page() {
     const { ready, onGet, onPatch } = useFetch()
 
     const [selectedId, setSelectedId] = useState<number | null>(null)
+    const [selectedHistory, setSelectedHistory] =
+        useState<UpdateHistory<User> | null>(null)
     const [formState, setFormState] = useState<FormState<User> | null>(null)
 
     const loggedInUser = useCurrentUser()
@@ -218,6 +221,12 @@ export default function Page() {
         return user.email ?? ''
     }
 
+    const makeFormTitle = (user: User | UserProfile) => {
+        const name = makeTitle(user)
+        if (!selectedHistory) return name
+        return `${name} @ ${selectedHistory.historyWhenUpdatedUtc.toLocaleString()}`
+    }
+
     const renderItem = (item: User | UserProfile) => {
         return (
             <ListElement
@@ -238,6 +247,18 @@ export default function Page() {
                 </div>
             </ListElement>
         )
+    }
+
+    const getLocation = (form: User) => {
+        if (!formState?.editing) return form.location
+        if (form.location?.zip) return locationQuery.data ?? null
+        return null
+    }
+
+    const handleSelectHistory = (history: UpdateHistory<User> | null) => {
+        if (history)
+            setSelectedHistory({ ...(userQuery.data ?? {}), ...history })
+        else setSelectedHistory(null)
     }
 
     return (
@@ -312,8 +333,9 @@ export default function Page() {
                 {selectedId && userQuery.data && (
                     <Form<User>
                         key={selectedId}
-                        form={userQuery.data}
-                        title={makeTitle(userQuery.data)}
+                        form={selectedHistory ?? userQuery.data}
+                        title={makeFormTitle(userQuery.data)}
+                        readonly={selectedHistory != null}
                         saving={updateMutation.isPending}
                         isInvalid={
                             !!formState?.form?.location?.zip &&
@@ -426,29 +448,17 @@ export default function Page() {
                             />
                             <TextField<User>
                                 label="City"
-                                getter={(form) =>
-                                    form.location?.zip
-                                        ? locationQuery.data?.city
-                                        : null
-                                }
+                                getter={(form) => getLocation(form)?.city}
                                 readonly
                             />
                             <TextField<User>
                                 label="County"
-                                getter={(form) =>
-                                    form.location?.zip
-                                        ? locationQuery.data?.county
-                                        : null
-                                }
+                                getter={(form) => getLocation(form)?.county}
                                 readonly
                             />
                             <TextField<User>
                                 label="State"
-                                getter={(form) =>
-                                    form.location?.zip
-                                        ? locationQuery.data?.state
-                                        : null
-                                }
+                                getter={(form) => getLocation(form)?.state}
                                 readonly
                             />
                         </FormGroup>
@@ -500,9 +510,15 @@ export default function Page() {
                             />
                         </FormGroup>
 
-                        <FormGroup title="Account History" defaultCollapsed>
-                            <AccountHistoryField />
-                        </FormGroup>
+                        {!formState?.editing && (
+                            <AccountHistoryField
+                                title="Account History"
+                                history={userQuery.data?.history}
+                                selected={selectedHistory}
+                                onSelect={handleSelectHistory}
+                                defaultCollapsed
+                            />
+                        )}
                     </Form>
                 )}
             </div>
@@ -510,6 +526,52 @@ export default function Page() {
     )
 }
 
-function AccountHistoryField(props: FormFieldProps<UpdateHistory<User>>) {
-    return null
+interface AccountHistoryFieldProps extends FormGroupProps<User> {
+    history?: UpdateHistory<User>[]
+    selected: UpdateHistory<User> | null
+    onSelect: (update: UpdateHistory<User> | null) => void
+}
+
+function AccountHistoryField({
+    title,
+    defaultCollapsed,
+    history,
+    selected,
+    onSelect,
+}: AccountHistoryFieldProps) {
+    const value = (history ?? []).sort(
+        (a, b) =>
+            b.historyWhenUpdatedUtc.getTime() -
+            a.historyWhenUpdatedUtc.getTime()
+    )
+
+    return (
+        <CollapsibleSection title={title} initialOpenState={!defaultCollapsed}>
+            <div className={styles.historyContainer}>
+                {value.map((update, i) => (
+                    <div key={i}>
+                        <button
+                            onClick={() => onSelect(i ? update : null)}
+                            className={cx(
+                                styles.historyEntry,
+                                (selected?.historyId == update.historyId ||
+                                    (!i && !selected)) &&
+                                    styles.selected
+                            )}
+                        >
+                            <span color="#4b5563">{`${update.historyType == 'I' ? 'Created' : 'Updated'} at `}</span>
+                            <span className={styles.historyEntryDate}>
+                                {update.historyWhenUpdatedUtc.toLocaleString()}
+                            </span>
+                            <span color="#4b5563">{' by '}</span>
+                            <code>
+                                {update.email ?? 'deleted user'}#
+                                {update.id.toString()}
+                            </code>
+                        </button>
+                    </div>
+                ))}
+            </div>
+        </CollapsibleSection>
+    )
 }

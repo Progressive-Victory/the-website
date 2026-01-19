@@ -16,12 +16,13 @@ export interface FormState<T> {
 export interface FormProps<T> {
     form: T
     title: string
+    readonly?: boolean
     isInvalid?: boolean
     saving?: boolean
 
     children?:
         | ReactElement<FormGroupProps<T>>
-        | ReactElement<FormGroupProps<T>>[]
+        | (ReactElement<FormGroupProps<T>> | false | null | undefined)[]
 
     onUpdate: (state: FormState<T>) => void
     onSave: (form: T) => void
@@ -30,6 +31,7 @@ export interface FormProps<T> {
 export function Form<T>({
     form: initialForm,
     title,
+    readonly = false,
     isInvalid = false,
     saving = false,
     children = [],
@@ -105,43 +107,47 @@ export function Form<T>({
             <header className={styles.header}>
                 <h1 className={styles.title}>{title}</h1>
 
-                <div className={styles.buttonRow}>
-                    {editing ? (
-                        <>
-                            <button
-                                onClick={handleSave}
-                                disabled={!dirty || invalid}
-                                className={styles.button}
-                            >
-                                <FaSave /> Save Changes
-                            </button>
-                            <button
-                                onClick={handleCancel}
-                                className={cx(
-                                    styles.button,
-                                    styles.discardButton
-                                )}
-                            >
-                                <FaTrashAlt /> Discard Changes
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <button
-                                onClick={handleEdit}
-                                className={styles.button}
-                            >
-                                <FaEdit /> Edit
-                            </button>
-                        </>
-                    )}
-                </div>
+                {!readonly && (
+                    <div className={styles.buttonRow}>
+                        {editing ? (
+                            <>
+                                <button
+                                    onClick={handleSave}
+                                    disabled={!dirty || invalid}
+                                    className={styles.button}
+                                >
+                                    <FaSave /> Save Changes
+                                </button>
+                                <button
+                                    onClick={handleCancel}
+                                    className={cx(
+                                        styles.button,
+                                        styles.discardButton
+                                    )}
+                                >
+                                    <FaTrashAlt /> Discard Changes
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={handleEdit}
+                                    className={styles.button}
+                                >
+                                    <FaEdit /> Edit
+                                </button>
+                            </>
+                        )}
+                    </div>
+                )}
             </header>
 
-            {groups?.map((group, i) => ({
-                ...group,
-                props: { ...group.props, id: i.toString(), dynamic },
-            }))}
+            {groups
+                ?.filter((group) => !!group)
+                .map((group, i) => ({
+                    ...group,
+                    props: { ...group.props, id: i.toString(), dynamic },
+                }))}
         </form>
     )
 }
