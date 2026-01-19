@@ -1,6 +1,7 @@
 import { Field, SupportNote } from '.'
+import { useInit } from '@/util/hooks'
 import classNames from 'classnames'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
 export interface PhoneVerifyProps {
@@ -24,19 +25,15 @@ export function PhoneVerifyStage({
     onVerify,
     onCancelVerify,
 }: PhoneVerifyProps) {
-    const [securityCode, setSecurityCode] = useState('')
-    const [autoSent, setAutoSent] = useState(false)
-    const [codeTimer, setCodeTimer] = useState(0)
+    const getCodeTime = useCallback(() => {
+        if (!lastSmsCodeSendTimeUtc) return 0
+        const elapsed = Date.now() - lastSmsCodeSendTimeUtc.getTime()
+        const remaining = 1000 * 60 - elapsed
+        return Math.ceil(remaining / 1000)
+    }, [lastSmsCodeSendTimeUtc])
 
-    const updateCodeTimer = (timer: Date | null) => {
-        if (!timer) {
-            setCodeTimer(0)
-        } else {
-            const elapsed = Date.now() - timer.getTime()
-            const remaining = 1000 * 60 - elapsed
-            setCodeTimer(Math.ceil(remaining / 1000))
-        }
-    }
+    const [securityCode, setSecurityCode] = useState('')
+    const [codeTimer, setCodeTimer] = useState(0)
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
@@ -51,19 +48,16 @@ export function PhoneVerifyStage({
     }
 
     useEffect(() => {
-        updateCodeTimer(lastSmsCodeSendTimeUtc)
+        setCodeTimer(getCodeTime())
         const interval = setInterval(() => {
-            updateCodeTimer(lastSmsCodeSendTimeUtc)
+            setCodeTimer(getCodeTime())
         }, 200)
         return () => clearInterval(interval)
-    }, [lastSmsCodeSendTimeUtc])
+    }, [getCodeTime])
 
-    useEffect(() => {
-        if (!autoSent) {
-            onRequest()
-            setAutoSent(true)
-        }
-    }, [autoSent, onRequest])
+    useInit(() => {
+        onRequest()
+    })
 
     return (
         <div>
