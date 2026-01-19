@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './admin.module.css'
-import ProtectedPage from '@/components/ProtectedPage'
+import { ProtectedPage } from '@/components/ProtectedPage'
 import AdminNav from '@/components/admin/AdminNav'
 import { Header } from '@/components/layout/Header'
 import { zPermission, zRole, zUser } from '@/contracts/data'
