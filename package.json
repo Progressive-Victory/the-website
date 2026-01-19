@@ -30,7 +30,6 @@
         "leaflet": "^1.9.4",
         "leaflet.markercluster": "^1.5.3",
         "leva": "^0.10.0",
-        "mongoose": "^8.15.1",
         "motion": "^12.15.0",
         "next": "15.4.10",
         "next-auth": "5.0.0-beta.30",
@@ -88,6 +87,9 @@
         "overrides": {
             "@babel/runtime@<7.26.10": ">=7.26.10",
             "undici@>=6.0.0 <6.21.2": ">=6.21.2"
-        }
+        },
+        "onlyBuiltDependencies": [
+            "esbuild"
+        ]
     }
 }
