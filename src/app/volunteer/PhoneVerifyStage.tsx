@@ -1,5 +1,4 @@
 import { Field, SupportNote } from '.'
-import { useInit } from '@/util/hooks'
 import classNames from 'classnames'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
@@ -7,7 +6,6 @@ import { PulseLoader } from 'react-spinners'
 export interface PhoneVerifyProps {
     lastSmsCodeSendTimeUtc: Date | null
     requestIsPending: boolean
-    requestError: Error | null
     verifyIsPending: boolean
     verifyError: Error | null
     onReturn: () => void
@@ -19,7 +17,6 @@ export interface PhoneVerifyProps {
 export function PhoneVerifyStage({
     lastSmsCodeSendTimeUtc,
     requestIsPending,
-    requestError,
     verifyIsPending,
     verifyError,
     onReturn,
@@ -28,16 +25,18 @@ export function PhoneVerifyStage({
     onCancelVerify,
 }: PhoneVerifyProps) {
     const [securityCode, setSecurityCode] = useState('')
+    const [autoSent, setAutoSent] = useState(false)
+    const [codeTimer, setCodeTimer] = useState(0)
 
-    function calculateSecondsRemaining(sentAt: Date | null) {
-        if (!sentAt) return 0
-
-        const elapsed = Date.now() - sentAt.getTime()
-        const remaining = 1000 * 60 - elapsed
-        return Math.floor(remaining / 1000)
+    const updateCodeTimer = (timer: Date | null) => {
+        if (!timer) {
+            setCodeTimer(0)
+        } else {
+            const elapsed = Date.now() - timer.getTime()
+            const remaining = 1000 * 60 - elapsed
+            setCodeTimer(Math.ceil(remaining / 1000))
+        }
     }
-
-    const codeTimer = calculateSecondsRemaining(lastSmsCodeSendTimeUtc)
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
@@ -52,12 +51,19 @@ export function PhoneVerifyStage({
     }
 
     useEffect(() => {
-        if (requestError) alert(requestError)
-    }, [requestError])
+        updateCodeTimer(lastSmsCodeSendTimeUtc)
+        const interval = setInterval(() => {
+            updateCodeTimer(lastSmsCodeSendTimeUtc)
+        }, 200)
+        return () => clearInterval(interval)
+    }, [lastSmsCodeSendTimeUtc])
 
-    useInit(() => {
-        onRequest()
-    })
+    useEffect(() => {
+        if (!autoSent) {
+            onRequest()
+            setAutoSent(true)
+        }
+    }, [autoSent, onRequest])
 
     return (
         <div>
