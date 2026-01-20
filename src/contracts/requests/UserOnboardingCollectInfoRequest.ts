@@ -3,9 +3,9 @@ import z from 'zod'
 export const zUserOnboardingCollectInfoRequest = z.object({
     firstName: z.string(),
     lastName: z.string(),
-    phoneNumber: z.string(),
+    phone: z.string(),
     zipCode: z.number(),
-    dateOfBirth: z.coerce.date(),
+    birthdate: z.coerce.date(),
     acceptedAlerts: z.boolean(),
 })
 

@@ -4,7 +4,10 @@ export type StateDataFeatureCollection = FeatureCollection<
     Polygon | MultiPolygon,
     StateDataFeatureProps
 >
-export interface StateDataFeatureProps { name: string; count?: number }
+export interface StateDataFeatureProps {
+    name: string
+    count?: number
+}
 
 const statesData: StateDataFeatureCollection = {
     type: 'FeatureCollection',

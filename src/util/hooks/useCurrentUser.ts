@@ -1,22 +1,26 @@
 import { useFetch } from './useFetch'
-import { IUser, zUser } from '@/contracts/data'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { User, zUser } from '@/contracts/data'
+import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 
 interface DataState {
-    data: IUser | undefined
+    data: User | undefined
     isLoading: boolean
     error: string | null
-    onRefetch: () => Promise<IUser | undefined>
+    onRefetch: () => Promise<User | undefined>
 }
 
 export function useCurrentUser(): DataState {
-    const { onGet } = useFetch()
+    const { ready, onGet } = useFetch()
 
     const user = useQuery({
         queryKey: ['/users/current'],
-        queryFn({ signal }) {
-            return onGet<IUser>('/users/current', zUser, { signal })
-        },
+        queryFn: ready
+            ? async () => {
+                  return onGet<User>('/users/current', zUser, {
+                      query: { includeDiscordUsers: true },
+                  })
+              }
+            : skipToken,
         placeholderData: keepPreviousData,
     })
 
@@ -33,7 +37,7 @@ export function useCurrentUser(): DataState {
     }
 }
 
-export function hasPermission(user: IUser, permission: string): boolean {
+export function hasPermission(user: User, permission: string): boolean {
     return (
         user.roles?.some((r) =>
             r.permissions?.some((p) => p.name == permission)

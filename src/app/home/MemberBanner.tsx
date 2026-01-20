@@ -1,5 +1,6 @@
 'use client'
 
+import styles from './membership.module.css'
 import { Link } from '@/components/common'
 import { motion, useSpring, useTransform } from 'motion/react'
 import Image, { StaticImageData } from 'next/image'
@@ -21,7 +22,6 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
 
     const tiltX = useSpring(0, { stiffness: 500, damping: 300 })
     const tiltY = useSpring(0, { stiffness: 500, damping: 300 })
-
     const flipSpring = useSpring(0, { stiffness: 300, damping: 30 })
 
     const rotateX = useTransform(tiltY, [-1, 1], [-15, 15])
@@ -67,9 +67,9 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
     }
 
     return (
-        <div className="flex flex-col items-center gap-6">
+        <div className={styles.cardOuter}>
             <motion.div
-                className="relative h-[300px] w-full max-w-[500px] cursor-pointer"
+                className={styles.cardStage}
                 style={{
                     perspective: 1000,
                     transformStyle: 'preserve-3d',
@@ -83,7 +83,7 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             >
                 <motion.div
-                    className="size-full"
+                    className={styles.cardInner}
                     style={{
                         rotateX,
                         rotateY,
@@ -91,7 +91,7 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
                     }}
                 >
                     <motion.div
-                        className="absolute inset-0 overflow-hidden rounded-xl bg-white shadow-2xl"
+                        className={styles.cardFace}
                         style={{
                             backfaceVisibility: 'hidden',
                             transform: 'translateZ(1px)',
@@ -101,7 +101,7 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
                             src={frontImage}
                             alt="Front content"
                             fill
-                            className="object-cover"
+                            className={styles.cardImage}
                             priority
                             sizes="500px"
                             quality={100}
@@ -110,7 +110,7 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
                     </motion.div>
 
                     <motion.div
-                        className="absolute inset-0 overflow-hidden rounded-xl bg-white shadow-2xl"
+                        className={styles.cardFace}
                         style={{
                             backfaceVisibility: 'hidden',
                             transform: 'rotateY(180deg) translateZ(1px)',
@@ -120,7 +120,7 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
                             src={backImage}
                             alt="Back content"
                             fill
-                            className="object-cover"
+                            className={styles.cardImage}
                             priority
                             sizes="500px"
                             quality={100}
@@ -128,8 +128,8 @@ function InteractiveThreeCard({ frontImage, backImage }: CardProps) {
                         />
                     </motion.div>
 
-                    <div className="absolute inset-0 rounded-xl">
-                        <div className="absolute inset-0 rounded-xl border-8 border-gray-200/50" />
+                    <div className={styles.cardOverlay}>
+                        <div className={styles.cardBorder} />
                     </div>
                 </motion.div>
             </motion.div>
@@ -159,25 +159,20 @@ function BulletPoint({
             initial={{ x: -100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay, ease: 'backInOut' }}
-            className="mb-6 flex w-full items-start gap-5"
-            // className="flex w-full items-start gap-5 rounded-xl bg-white p-5 shadow-lg"
+            className={styles.bulletRow}
         >
             <Image
-                className="mt-[3.5px]"
+                className={styles.bulletIcon}
                 src={`/images/${bullet}`}
                 alt={bullet}
                 width={48}
                 height={48}
                 unoptimized
             />
-            <div>
-                <h3 className="mb-0.5 text-lg font-semibold text-black-pearl-dark">
-                    {title}
-                </h3>
-                <h4 className="mb-3 font-semibold text-valencia">
-                    ${sub}/month
-                </h4>
-                <p className="text-base text-gray-600">{description}</p>
+            <div className={styles.bulletText}>
+                <h3 className={styles.bulletTitle}>{title}</h3>
+                <h4 className={styles.bulletSub}>${sub}/month</h4>
+                <p className={styles.bulletDescription}>{description}</p>
             </div>
         </motion.div>
     )
@@ -277,32 +272,32 @@ export function MemberBanner() {
     }, [inView])
 
     return (
-        <div className="w-full bg-white px-4 py-16 md:px-8 md:py-24">
-            <div className="mx-auto flex max-w-6xl flex-col gap-14">
-                <h1 className="text-center text-4xl/[2.75rem] font-bold text-black-pearl-dark">
+        <div className={styles.section}>
+            <div className={styles.container}>
+                <h1 className={styles.heading}>
                     Get Your Own Progressive Victory <br />
-                    <span className="text-valencia">Membership Card</span>
+                    <span className={styles.headingAccent}>
+                        Membership Card
+                    </span>
                 </h1>
-                <div
-                    ref={containerRef}
-                    className="flex flex-col gap-8 md:gap-12 min-[1020px]:flex-row-reverse"
-                >
+
+                <div ref={containerRef} className={styles.contentRow}>
                     <motion.div
-                        className="mx-auto flex w-full max-w-[500px] justify-center min-[1020px]:w-[55%] min-[1020px]:max-w-none"
+                        className={styles.cardColumn}
                         initial={{ opacity: 0, y: 50 }}
                         animate={visible ? { opacity: 1, y: 0 } : {}}
                         transition={{ duration: 0.8, ease: 'easeOut' }}
                     >
-                        <div className="mb-8 w-full max-w-[500px] min-[1020px]:mt-14">
+                        <div className={styles.cardColumnInner}>
                             <InteractiveThreeCard
                                 frontImage="/images/membercard_front.png"
                                 backImage="/images/membercard_back.png"
                             />
 
-                            <div className="mt-10 flex justify-center">
+                            <div className={styles.ctaRow}>
                                 <Link
                                     href="https://secure.actblue.com/donate/pvmember"
-                                    className="hover:bg-valencia-dark bg-valencia transition-colors"
+                                    className={styles.ctaLink}
                                 >
                                     Become a Member
                                 </Link>
@@ -311,11 +306,11 @@ export function MemberBanner() {
                     </motion.div>
 
                     <motion.div
-                        className="w-full px-4 pb-12 min-[1020px]:w-[45%] min-[1020px]:pb-0"
+                        className={styles.bulletsColumn}
                         initial="hidden"
                         animate={visible ? 'visible' : 'hidden'}
                     >
-                        <div className="overflow-hidden">
+                        <div className={styles.bulletsOverflow}>
                             {visible &&
                                 bulletPoints.map((point, index) => (
                                     <BulletPoint

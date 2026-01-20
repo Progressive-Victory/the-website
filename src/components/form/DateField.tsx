@@ -1,58 +1,65 @@
-import { FormField, IBaseFormField } from '.'
+import { FormField, FormFieldProps, getGetter, getSetter } from './FormField'
+import styles from './FormField.module.css'
 import { dateService } from '@/services'
-import classNames from 'classnames'
-import { FormEvent, useState } from 'react'
+import cx from 'classnames'
+import { ChangeEvent } from 'react'
 
-export function DateField({
-    name,
-    field,
-    required = false,
-    readonly = false,
-    deprecated = false,
-    dynamic,
-}: IBaseFormField) {
-    const initialValue = dynamic?.value as Date | undefined
+export interface DateFieldProps<T>
+    extends FormFieldProps<T, Date | null | undefined> {
+    format?: Intl.DateTimeFormatOptions
+}
 
-    const [value, setValue] = useState(initialValue?.toISOString() ?? '')
+export function DateField<T>(props: DateFieldProps<T>) {
+    props.getter ??= getGetter(props)
+    props.setter ??= getSetter(props)
+    props.validator ??= (field: Date | null | undefined) =>
+        (!props.required || field != null) && !isNaN(field?.valueOf() ?? 0)
 
-    const format = (date: string) => {
-        if (date) {
-            const [year, month, day] = date.split('-')
-            return `${month}/${day}/${year}`
-        }
-        return date
+    const readonly = !!props.readonly || !props.dynamic?.editing
+    const disabled = !!props.disabled || !!props.dynamic?.saving
+    const value = props?.getter?.(props.dynamic!.form)
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.target.value
+        props.dynamic?.onChange?.(props, new Date(newValue))
     }
 
-    const handleInput = (event: FormEvent<HTMLInputElement>) => {
-        const formatted = (event.target as HTMLTextAreaElement).value
-        setValue(formatted)
+    const handleFocus = () => {
+        props.dynamic?.onChange?.(props, value)
+    }
 
-        const isValid = dateService.isValid(formatted)
-        const date = isValid ? new Date(formatted) : null
-        dynamic?.onUpdate?.(field, date, date, isValid)
+    const format = () => {
+        if (!dateService.isValid(value)) return undefined
+        return Intl.DateTimeFormat(
+            'en-US',
+            props.format ?? {
+                dateStyle: 'long',
+                timeStyle: 'medium',
+            }
+        ).format(value!)
     }
 
     return (
-        <FormField
-            name={name}
-            field={field}
-            required={required}
-            deprecated={deprecated}
-        >
-            {readonly || dynamic?.disabled ? (
-                <div className="col-span-2 w-full">{format(value)}</div>
+        <FormField {...props}>
+            {readonly ? (
+                <div className={styles.readonly}>{format()}</div>
             ) : (
                 <input
                     type="date"
-                    name={name}
-                    id={field}
-                    disabled={dynamic?.loading}
-                    required={required}
-                    value={value}
-                    onInput={handleInput}
-                    className={classNames(
-                        'col-span-2 w-full max-w-96 rounded-lg border border-gray-300 px-3 py-0.5',
-                        value && 'border-red-300'
+                    id={props?.id}
+                    name={props.label}
+                    disabled={disabled}
+                    required={props.required}
+                    value={
+                        dateService.isValid(value)
+                            ? value!.toISOString().split('T')[0]
+                            : ''
+                    }
+                    onChange={handleChange}
+                    onFocus={handleFocus}
+                    className={cx(
+                        styles.textField,
+                        !props.validator(value) && styles.invalid
                     )}
                 />
             )}

@@ -1,6 +1,6 @@
 'use client'
 
-import { ContentSection } from '@/components/ContentSections'
+import { ContentSection } from '@/components/content_sections/ContentSections'
 
 const questions = [
     {

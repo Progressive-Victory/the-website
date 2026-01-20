@@ -1,4 +1,6 @@
+export * from './useClickAway'
 export * from './useCurrentUser'
 export * from './useFetch'
 export * from './useHydration'
 export * from './useInit'
+export * from './usePaginatedSearch'

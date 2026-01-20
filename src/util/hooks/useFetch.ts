@@ -1,4 +1,5 @@
-import { AuthRequest, FetchError } from '@/models/models'
+import { AuthRequest } from '@/contracts/requests'
+import { AuthResponse } from '@/contracts/responses'
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import z from 'zod'
@@ -8,14 +9,27 @@ interface ApiError {
     message: string
 }
 
+type QueryPrim = string | number | boolean | null
+type QueryParam = QueryPrim | QueryPrim[] | undefined
+
+export type QueryParams = Record<string, QueryParam>
+export type ZodSchema = z.ZodObject | z.ZodArray
+
 interface QueryOptions {
-    query?: Record<string, string | number | boolean>
+    query?: QueryParams
     signal?: AbortSignal
 }
 
-type ZodSchema = z.ZodObject | z.ZodArray | z.ZodRecord
-
 const pvSessionKey = 'pv-session'
+
+export class FetchError extends Error {
+    status: number
+
+    constructor(message: string, status: number) {
+        super(message)
+        this.status = status
+    }
+}
 
 export function useFetch() {
     const session = useSession()
@@ -32,11 +46,25 @@ export function useFetch() {
         placeholderData: keepPreviousData,
     })
 
+    const onSignOut = () => {
+        localStorage.removeItem(pvSessionKey)
+    }
+
+    const queryToString = (query: QueryParam): string | undefined => {
+        if (query === undefined) return undefined
+        if (query === null) return 'null'
+        if (Array.isArray(query))
+            return query.map((item) => queryToString(item)).join(',')
+        return query.toString()
+    }
+
+    // TODO: Put this into global state and delay until it's loaded
     const apiBaseUrl = settingsQuery.data?.apiBaseUrl
+    const ready = !!apiBaseUrl
 
     const authMutation = useMutation({
         mutationKey: ['/auth'],
-        async mutationFn(signal?: AbortSignal) {
+        mutationFn: async (signal?: AbortSignal) => {
             const body: AuthRequest = {
                 discordToken: `Bearer ${session.data?.accessToken}`,
             }
@@ -48,7 +76,7 @@ export function useFetch() {
                 signal,
             })
 
-            const data = (await res.json()) as { accessToken: string }
+            const data = (await res.json()) as AuthResponse
             return data.accessToken
         },
     })
@@ -78,7 +106,8 @@ export function useFetch() {
     ) {
         const fullUrl = new URL(url, apiBaseUrl)
         Object.entries(options?.query ?? {}).forEach(([key, value]) => {
-            fullUrl.searchParams.set(key, value.toString())
+            const str = queryToString(value)
+            if (str != null) fullUrl.searchParams.set(key, str)
         })
 
         const req: RequestInit = {
@@ -95,6 +124,7 @@ export function useFetch() {
         }
 
         let res = await fetch(fullUrl, req)
+
         if (res.status === 401) {
             req.headers = {
                 ...req.headers,
@@ -156,5 +186,14 @@ export function useFetch() {
         await onFetch('DELETE', url, null, null, options)
     }
 
-    return { onFetch, onGet, onPut, onPost, onPatch, onDelete }
+    return {
+        ready,
+        onSignOut,
+        onFetch,
+        onGet,
+        onPut,
+        onPost,
+        onPatch,
+        onDelete,
+    }
 }

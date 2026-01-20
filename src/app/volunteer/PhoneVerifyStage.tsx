@@ -1,13 +1,12 @@
 import { Field, SupportNote } from '.'
 import { useInit } from '@/util/hooks'
 import classNames from 'classnames'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
 export interface PhoneVerifyProps {
     lastSmsCodeSendTimeUtc: Date | null
     requestIsPending: boolean
-    requestError: Error | null
     verifyIsPending: boolean
     verifyError: Error | null
     onReturn: () => void
@@ -19,7 +18,6 @@ export interface PhoneVerifyProps {
 export function PhoneVerifyStage({
     lastSmsCodeSendTimeUtc,
     requestIsPending,
-    requestError,
     verifyIsPending,
     verifyError,
     onReturn,
@@ -27,17 +25,15 @@ export function PhoneVerifyStage({
     onVerify,
     onCancelVerify,
 }: PhoneVerifyProps) {
-    const [securityCode, setSecurityCode] = useState('')
-
-    function calculateSecondsRemaining(sentAt: Date | null) {
-        if (!sentAt) return 0
-
-        const elapsed = Date.now() - sentAt.getTime()
+    const getCodeTime = useCallback(() => {
+        if (!lastSmsCodeSendTimeUtc) return 0
+        const elapsed = Date.now() - lastSmsCodeSendTimeUtc.getTime()
         const remaining = 1000 * 60 - elapsed
-        return Math.floor(remaining / 1000)
-    }
+        return Math.ceil(remaining / 1000)
+    }, [lastSmsCodeSendTimeUtc])
 
-    const codeTimer = calculateSecondsRemaining(lastSmsCodeSendTimeUtc)
+    const [securityCode, setSecurityCode] = useState('')
+    const [codeTimer, setCodeTimer] = useState(0)
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
@@ -52,8 +48,12 @@ export function PhoneVerifyStage({
     }
 
     useEffect(() => {
-        if (requestError) alert(requestError)
-    }, [requestError])
+        setCodeTimer(getCodeTime())
+        const interval = setInterval(() => {
+            setCodeTimer(getCodeTime())
+        }, 200)
+        return () => clearInterval(interval)
+    }, [getCodeTime])
 
     useInit(() => {
         onRequest()

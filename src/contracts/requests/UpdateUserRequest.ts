@@ -1,35 +1,29 @@
-import { zOnboardingStage } from '@/contracts/data'
+import { zOnboardingStage, zUserStatus } from '@/contracts/data'
 import z from 'zod'
 
 export const zUpdateUserRequest = z
     .object({
-        name: z.string().optional(),
-        email: z.string().optional(),
-        firstName: z.string().optional(),
-        lastName: z.string().optional(),
-        preferredName: z.string().optional().nullable(),
-        dateOfBirth: z.coerce.date().optional(),
+        email: z.string().nullable().optional(),
+        phone: z.string().nullable().optional(),
+        preferredName: z.string().nullable().optional(),
+        firstName: z.string().nullable().optional(),
+        lastName: z.string().nullable().optional(),
+        birthdate: z.coerce.date().nullable().optional(),
+        zipCode: z.number().nullable().optional(),
 
-        zipCode: z.coerce.number().optional(),
-        state: z.string().optional(),
-        county: z.string().optional(),
-        city: z.string().optional(),
-
-        phoneNumber: z.string().optional(),
-
-        verified: z.coerce.boolean().optional(),
-        acceptedAlerts: z.coerce.boolean().optional(),
+        acceptedAlerts: z.boolean().optional(),
+        verified: z.boolean().optional(),
         onboardingStage: zOnboardingStage.optional(),
+        lastSmsCode: z.number().nullable().optional(),
+        lastSmsCodeSendTimeUtc: z.coerce.date().nullable().optional(),
+        status: zUserStatus.optional(),
 
-        joinedAtUtc: z.coerce.date().optional(),
-        completedIntakeUtc: z.coerce.date().optional(),
+        joinedAtUtc: z.coerce.date().nullable().optional(),
+        completedIntakeUtc: z.coerce.date().nullable().optional(),
 
-        lastSmsCode: z.coerce.number().optional(),
-        lastSmsCodeSendTimeUtc: z.coerce.date().optional(),
-        status: z.coerce.number().optional(),
-
-        roles: z.array(z.coerce.number()).optional(),
+        aliases: z.array(z.string()).optional(),
+        roles: z.array(z.number()).optional(),
     })
     .strict()
 
-export type IUpdateUserRequest = z.infer<typeof zUpdateUserRequest>
+export type UpdateUserRequest = z.infer<typeof zUpdateUserRequest>

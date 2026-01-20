@@ -1,13 +1,5 @@
 'use client'
-import { JSX, useState } from 'react'
-import {
-    motion,
-    TargetAndTransition,
-    Transition,
-    useSpring,
-    useTransform,
-} from 'motion/react'
-import Image from 'next/image'
+
 import {
     HeartIcon,
     ChatBubbleLeftRightIcon,
@@ -18,6 +10,15 @@ import {
     ChatBubbleLeftRightIcon as SolidChatBubbleLeftRightIcon,
     ArrowUpOnSquareIcon as SolidArrowUpOnSquareIcon,
 } from '@heroicons/react/24/solid'
+import {
+    motion,
+    TargetAndTransition,
+    Transition,
+    useSpring,
+    useTransform,
+} from 'motion/react'
+import Image from 'next/image'
+import { JSX, useState } from 'react'
 
 export function Message({
     avatar,

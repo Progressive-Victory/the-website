@@ -8,6 +8,7 @@ import {
     PhoneVerifyStage,
     UnderageStage,
 } from '.'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import { OnboardingStage } from '@/contracts/data'
 import {
@@ -20,16 +21,23 @@ import {
     zDiscordUserIsInServerResponse,
 } from '@/contracts/responses'
 import { useCurrentUser, useFetch } from '@/util/hooks'
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
+import {
+    keepPreviousData,
+    skipToken,
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
 export default function VolunteerPage() {
     const session = useSession()
-    const { onGet, onPost, onPut } = useFetch()
+    const queryClient = useQueryClient()
+    const { ready, onGet, onPost, onPut } = useFetch()
 
-    const [currentStage, setCurrentStage] = useState(
-        OnboardingStage.NOT_STARTED
+    const [overrideStage, setOverrideStage] = useState<OnboardingStage | null>(
+        null
     )
 
     const user = useCurrentUser()
@@ -37,13 +45,14 @@ export default function VolunteerPage() {
 
     const isInServerResult = useQuery({
         queryKey: [`/discordUsers/${discordUserId}/isInServer`],
-        async queryFn({ signal }) {
-            return await onGet<DiscordUserIsInServerResponse>(
-                `/discordUsers/${discordUserId}/isInServer`,
-                zDiscordUserIsInServerResponse,
-                { signal }
-            )
-        },
+        queryFn: ready && discordUserId != null
+            ? ({ signal }) =>
+                  onGet<DiscordUserIsInServerResponse>(
+                      `/discordUsers/${discordUserId}/isInServer`,
+                      zDiscordUserIsInServerResponse,
+                      { signal }
+                  )
+            : skipToken,
         placeholderData: keepPreviousData,
     })
 
@@ -54,7 +63,12 @@ export default function VolunteerPage() {
                 `/users/${user.data?.id}/onboardingStages/collectInfo`,
                 obj
             )
-            await user.onRefetch()
+        },
+        onSettled: () => {
+            setOverrideStage(null)
+            return queryClient.invalidateQueries({
+                queryKey: ['/users/current'],
+            })
         },
     })
 
@@ -62,7 +76,12 @@ export default function VolunteerPage() {
         mutationFn: async () => {
             if (!user.data) return
             await onPut(`/users/${user.data?.id}/onboardingStages/ageUp`, null)
-            await user.onRefetch()
+        },
+        onSettled: () => {
+            setOverrideStage(null)
+            return queryClient.invalidateQueries({
+                queryKey: ['/users/current'],
+            })
         },
     })
 
@@ -74,7 +93,12 @@ export default function VolunteerPage() {
                 null,
                 null
             )
-            await user.onRefetch()
+        },
+        onSettled: () => {
+            setOverrideStage(null)
+            return queryClient.invalidateQueries({
+                queryKey: ['/users/current'],
+            })
         },
     })
 
@@ -82,7 +106,15 @@ export default function VolunteerPage() {
         mutationFn: async (obj: UserOnboardingVerifyRequest) => {
             if (!user.data) return
             await onPut(`/users/${user.data?.id}/onboardingStages/verify`, obj)
-            await Promise.all([user.onRefetch(), isInServerResult.refetch()])
+        },
+        onSettled: () => {
+            setOverrideStage(null)
+            return Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
+                queryClient.invalidateQueries({
+                    queryKey: [`/discordUsers/${discordUserId}/isInServer`],
+                }),
+            ])
         },
     })
 
@@ -90,18 +122,19 @@ export default function VolunteerPage() {
         mutationFn: async (obj: UserOnboardingJoinRequest) => {
             if (!user.data) return
             await onPut(`/users/${user.data?.id}/onboardingStages/join`, obj)
-            await user.onRefetch()
         },
+        onSettled: () =>
+            queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
     })
 
     const handleCollectInfoSuccess = (form: IOnboardingForm) => {
         collectInfoMutation.mutate({
             firstName: form.firstName,
             lastName: form.lastName,
-            phoneNumber: form.phoneNumber,
+            phone: form.phoneNumber,
             zipCode: +form.zipCode,
             acceptedAlerts: form.getAlerts,
-            dateOfBirth: new Date(form.dateOfBirth),
+            birthdate: new Date(form.dateOfBirth),
         })
     }
 
@@ -111,12 +144,16 @@ export default function VolunteerPage() {
 
     const handleJoin = () => {
         if (!session.data) return
-        joinMutation.mutate({ discordUserId: session.data?.discordId })
+        joinMutation.mutate({
+            discordToken: `Bearer ${session.data?.accessToken}`,
+        })
     }
 
     const handleReturnToStart = () => {
-        setCurrentStage(OnboardingStage.NOT_STARTED)
+        setOverrideStage(OnboardingStage.NOT_STARTED)
     }
+
+    const currentStage = overrideStage ?? user.data?.onboardingStage
 
     useEffect(() => {
         if (
@@ -127,23 +164,15 @@ export default function VolunteerPage() {
                 !user.data?.location ||
                 !user.data?.phone)
         ) {
-            setCurrentStage(OnboardingStage.NOT_STARTED)
+            setOverrideStage(OnboardingStage.NOT_STARTED)
         }
     }, [user.data, currentStage])
 
-    useEffect(() => {
-        if (user.data?.onboardingStage)
-            setCurrentStage(user.data.onboardingStage)
-    }, [user.data?.onboardingStage])
-
     if (!user.data) return <MainLayout />
-    if (currentStage == OnboardingStage.JOINED && !isInServerResult.isLoading)
-        return <MainLayout />
 
     return (
         <MainLayout>
-            <div className="relative flex min-h-screen flex-col items-center justify-center bg-steel-blue">
-                <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
+            <div className="relative flex min-h-screen flex-col items-center justify-center">
                 <div
                     className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
                     style={{
@@ -154,6 +183,7 @@ export default function VolunteerPage() {
                         transform: 'scaleX(-1)',
                     }}
                 />
+                <HalftoneBackground />
                 <div className="flex w-full justify-center">
                     <form
                         onSubmit={(e) => e.preventDefault()}
@@ -165,8 +195,9 @@ export default function VolunteerPage() {
                                     firstName: user.data?.firstName ?? '',
                                     lastName: user.data?.lastName ?? '',
                                     dateOfBirth:
-                                        user.data?.birthdate?.toISOString() ??
-                                        '',
+                                        user.data?.birthdate
+                                            ?.toISOString()
+                                            ?.split('T')?.[0] ?? '',
                                     zipCode:
                                         user.data?.location?.zip.toString() ??
                                         '',
@@ -194,7 +225,6 @@ export default function VolunteerPage() {
                                     user.data?.lastSmsCodeSendTimeUtc
                                 }
                                 requestIsPending={sendSmsCodeMutation.isPending}
-                                requestError={sendSmsCodeMutation.error}
                                 verifyIsPending={verifyMutation.isPending}
                                 verifyError={verifyMutation.error}
                                 onReturn={handleReturnToStart}
@@ -215,13 +245,16 @@ export default function VolunteerPage() {
                             />
                         )}
 
-                        {currentStage === OnboardingStage.JOINED && (
-                            <CompleteStage
-                                isInServer={isInServerResult.data!.isInServer}
-                                isPending={joinMutation.isPending}
-                                onRejoin={handleJoin}
-                            />
-                        )}
+                        {currentStage === OnboardingStage.JOINED &&
+                            isInServerResult.data && (
+                                <CompleteStage
+                                    isInServer={
+                                        isInServerResult.data.isInServer
+                                    }
+                                    isPending={joinMutation.isPending}
+                                    onRejoin={handleJoin}
+                                />
+                            )}
                     </form>
                 </div>
             </div>
