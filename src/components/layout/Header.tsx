@@ -40,14 +40,6 @@ const navitems: NavItem[] = [
                     items: [
                         { name: 'Mission', href: '/about' },
                         { name: 'Community', href: '/about' },
-                        { name: 'Accomplishments', href: '/about' },
-                    ],
-                },
-                {
-                    title: 'Organization',
-                    items: [
-                        { name: 'Content Creators', href: '/about' },
-                        { name: 'Staff', href: '/about' },
                     ],
                 },
             ],
@@ -60,14 +52,7 @@ const navitems: NavItem[] = [
             columns: [
                 {
                     title: 'Get involved',
-                    items: [
-                        { name: 'Initiatives', href: '/volunteer' },
-                        {
-                            name: 'State Organizing Program',
-                            href: '/volunteer',
-                        },
-                        { name: 'Community', href: '/volunteer' },
-                    ],
+                    items: [{ name: 'Join', href: '/volunteer' }],
                 },
             ],
         },
@@ -79,61 +64,12 @@ const navitems: NavItem[] = [
             columns: [
                 {
                     title: 'Browse',
-                    items: [{ name: 'Calendar', href: '/events' }],
-                },
-                {
-                    title: 'Where To Get Involved',
                     items: [
-                        { name: 'State Meetings', href: '/events' },
-                        { name: 'Skill Team Meetings', href: '/events' },
-                    ],
-                },
-                {
-                    title: 'Volunteer Activities',
-                    items: [
+                        { name: 'Calendar', href: '/events' },
                         {
-                            name: 'Phonebanking',
+                            name: 'Mobilize',
                             href: 'https://www.mobilize.us/progressivevictory/',
                         },
-                        {
-                            name: 'Canvassing',
-                            href: 'https://www.mobilize.us/progressivevictory/',
-                        },
-                    ],
-                },
-                {
-                    title: 'Community Events',
-                    items: [
-                        { name: 'Meet Ups', href: '/events' },
-                        {
-                            name: 'Game Nights',
-                            href: '/events',
-                        },
-                    ],
-                },
-            ],
-        },
-    },
-    {
-        name: 'Endorsements',
-        href: '/endorsements',
-        subnav: {
-            columns: [
-                {
-                    title: 'By year',
-                    items: [
-                        { name: '2026', href: '/endorsements' },
-                        { name: '2025', href: '/endorsements' },
-                        { name: '2024', href: '/endorsements' },
-                        { name: '2023', href: '/endorsements' },
-                        { name: '2022', href: '/endorsements' },
-                    ],
-                },
-                {
-                    title: 'Highlights',
-                    items: [
-                        { name: 'Halls of Victory', href: '/endorsements' },
-                        { name: 'PV Pledge', href: '/endorsements' },
                     ],
                 },
             ],
@@ -145,23 +81,26 @@ const navitems: NavItem[] = [
         subnav: {
             columns: [
                 {
-                    title: 'Links',
+                    title: 'Join',
                     items: [
+                        { name: 'Volunteer', href: '/volunteer' },
                         {
                             name: 'Contact',
                             href: 'https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform',
+                        },
+                    ],
+                },
+                {
+                    title: 'Support PV',
+                    items: [
+                        {
+                            name: 'Dues Paying Membership',
+                            href: 'https://secure.actblue.com/donate/pvmember',
                         },
                         {
                             name: 'Merch',
                             href: 'https://progressivevictory.myshopify.com/',
                         },
-                    ],
-                },
-                {
-                    title: 'Join',
-                    items: [
-                        { name: 'Volunteer', href: '/volunteer' },
-                        { name: 'Hall of Victory', href: '/endorsements' },
                     ],
                 },
             ],
