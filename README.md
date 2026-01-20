@@ -1,6 +1,6 @@
 ## Getting Started with Development
 
-Welcome to the PV Frontpage Redux repo! This is the source code of our website. Before contributing to the codebase you **MUST** read the following information. If you're a fullstack Next.js pro you can quickly skim this.
+Welcome to the PV Frontpage Redux repo! This is the source code of our website. Before contributing to the codebase you **MUST** read the following information. If you're a fullstack Next.js pro you can quickly skim this. **NOTE**: since migrating to sql and a centralized database, you now also require the api setup on your local machine, and running in concurrence with the website.
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
@@ -34,32 +34,35 @@ pnpm install
 
 ### 3. Configure
 
-Next, check the .env.example file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to Joops on discord.
+Next, check the .env.example file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to Joops or sH3llH0und on discord.
 
 ```bash
-# $PROJECT_DIR/.env.local
+# $PROJECT_DIR/.env
 
-# These are the values for the development Discord bot
-DISCORD_CLIENT_ID="1234"
-DISCORD_CLIENT_SECRET="abcdefg"
-DISCORD_BOT_TOKEN="mx213"
+# host config
+PORT=3000
+URL="http://localhost:3000"
 
-# The auth secret and URL must stay these values for development
+# auth service vars
 NEXTAUTH_SECRET="abcdefg"
 NEXTAUTH_URL="http://localhost:3000"
 
-# The ID of the Discord server the bot is in (for dev purposes would likely be PV Dev Server)
-GUILD_ID="122"
+# discord interface vars
+DISCORD_CLIENT_ID="<bot client id>"
+DISCORD_CLIENT_SECRET="<bot client secret>"
+DISCORD_BOT_TOKEN="<bot token>"
+GUILD_ID="1308877803705335858"
 
-# Unless needed for you work the SMS API information is restricted
-NEUTRINO_USERID="pvuser"
-NEUTRINO_SECRET="123egh"
+# neutrino vars
+NEUTRINO_USERID="<neutrino id>"
+NEUTRINO_SECRET="<neutrino key>"
 
-# To connect to our dev DB
-MONGODB_URI="mongodb://localhost:27017"
+# boomerang ig
+BOOMERANG_URI="<boomerang uri>"
 
-# Does not need to change
-SITE_URL="https://example.com"
+# api vars
+PV_WEBSITE_API_URL="http://localhost:8080"
+PV_WEBSITE_API_KEY="<just the discord bot token again>"
 ```
 
 ### 4. Run
@@ -76,11 +79,9 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @somejoops, a deputy, or assistant, or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.
 
-## Working with MongoDB
+## Working with the database
 
-We utilize MongoDB Atlas, their cloud service, so you can work on a dev instance of our database without having to spin up a local instance of Mongo.
-
-For some development tasks you may need direct access to this. If so, contact a director, deputy, or assistant to be granted access to the development instance.
+In order to interact with our database at all, you will have to be running a local instance of the api. See the read me for steps on how to set it up.
 
 ## Learn More
 
@@ -107,27 +108,3 @@ npx playwright install --with-deps
 ```
 pnpm run test
 ```
-
-### Website Pages That Reference Models:
-
-- \\src\\app\\api\\onboarding\\zip\\validate\\route
-- \\src\\app\\api\\onboarding\\zip\\location\\route
-- \\src\\app\\api\\admin\\users\\route
-- \\src\\app\\admin\\roles\\route
-- \\src\\app\\api\\admin\\permissions\\route
-- \\src\\app\\api\\admin\\roles\\route
-- \\src\\app\\admin\\members\\page
-- \\src\\app\\api\\admin\\roles\\route
-- \\src\\app\\api\\admin\\users\\route
-- \\src\\app\\api\\admin\\users\\\[id\]\\route
-- \\src\\app\\api\\admin\\users\\route
-- \\src\\app\\api\\map\\count\\route
-- \\src\\app\\api\\map\\users-count\\route
-- \\src\\app\\api\\onboarding\\discord\\join\\route
-- \\src\\app\\api\\onboarding\\discord\\status\\route
-- \\src\\app\\api\\onboarding\\sms\\check\\route
-- \\src\\app\\api\\onboarding\\sms\\send\\route
-- \\src\\app\\api\\user
-- \\src\\app\\volunteer
-- \\src\\util\\auth
-- \\src\\util\\stats
