@@ -370,7 +370,7 @@ function PageSelect({
 
     useEffect(() => {
         if (page < 0) onChange(0)
-        else if (page > maxPage) onChange(maxPage)
+        else if (maxPage >= 0 && page > maxPage) onChange(maxPage)
     }, [page, maxPage, onChange])
 
     return (

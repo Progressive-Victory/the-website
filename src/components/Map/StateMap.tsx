@@ -1,4 +1,5 @@
 import { ResponsiveFit } from './ResponsiveFit'
+import styles from './StateMap.module.css'
 import { OPEN_ATTR, OPEN_MAP_URI } from './constants'
 import { StateDataFeatureCollection, statesData } from './stateData'
 import { MapView, StateMapInteractionProps } from './types'
@@ -33,7 +34,7 @@ export default function StateMap(
             scrollWheelZoom={enableInteraction}
             dragging={enableInteraction}
             doubleClickZoom={enableInteraction}
-            className="z-0 size-full rounded-md"
+            className={styles.mapContainer}
         >
             <>
                 {'bounds' in _mapView && (
