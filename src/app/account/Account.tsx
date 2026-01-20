@@ -1,8 +1,8 @@
 'use client'
 
 import AccountInfoForm from './AccountInfoForm'
+import MembershipPurchaseDialog from './MembershipPurchaseDialog'
 import { MainLayout } from '@/components/layout/MainLayout'
-import Image from 'next/image'
 
 interface AccountInformation {
     discordUsername: string
@@ -48,18 +48,7 @@ const Account = (accountInformation: AccountInformation) => {
                             {...accountInformation}
                         ></AccountInfoForm>
                     </div>
-                    <div className="flex flex-col justify-center">
-                        <Image
-                            src="/images/membercard_front.png"
-                            alt="Front content"
-                            width={480}
-                            height={302}
-                            className="rounded-lg"
-                            priority
-                            quality={100}
-                            unoptimized
-                        />
-                    </div>
+                    <MembershipPurchaseDialog />
                 </div>
             </div>
         </MainLayout>
