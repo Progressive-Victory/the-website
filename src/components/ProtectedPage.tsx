@@ -1,5 +1,7 @@
 // app/ProtectedPage.jsx
-import { checkAuth, ResponseCode } from '@/util/auth' // your NextAuth options
+import { checkAuth, ResponseCode } from '@/util/auth'
+
+// your NextAuth options
 
 interface ProtectedPageProps {
     children: React.ReactNode
@@ -19,7 +21,7 @@ export default async function ProtectedPage({
     const response = await checkAuth(requiredRoles)
 
     // switch statement handling the various responses checkAuth() will return
-    switch(response) {
+    switch (response) {
         // if all auth checks passed then render the page
         case ResponseCode.Successful:
             return <>{children}</>
@@ -36,21 +38,17 @@ export default async function ProtectedPage({
             return (
                 <div>
                     <h1>Access Denied</h1>
-                    <p>
-                        You lack sufficient permissions to view this page.
-                    </p>
+                    <p>You lack sufficient permissions to view this page.</p>
                 </div>
             )
         case ResponseCode.NoSession:
             return (
                 <div>
                     <h1>Access Denied</h1>
-                    <p>
-                        You need to be logged in to view this page.
-                    </p>
+                    <p>You need to be logged in to view this page.</p>
                 </div>
             )
         default:
-            throw Error("Unidentified response code")
+            throw Error('Unidentified response code')
     }
 }

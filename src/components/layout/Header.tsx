@@ -2,8 +2,12 @@
 
 import { NavItem } from './types'
 import { BaseButton } from '@/components/common/buttons/Button'
-import { ModularButton } from '@/components/common/buttons/ModularButton'
 import buttonStyles from '@/components/common/buttons/button.module.css'
+import { AccountButton } from '@/components/common/buttons/button_types/AccountButton'
+import { DonateButton } from '@/components/common/buttons/button_types/DonateButton'
+import { LoginButton } from '@/components/common/buttons/button_types/LoginButton'
+import { NavButton } from '@/components/common/buttons/button_types/NavButton'
+import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
 import { AnimatePresence, motion } from 'motion/react'
 import { useSession } from 'next-auth/react'
@@ -362,7 +366,9 @@ function NavDrawer(props: {
                                                 >
                                                     <BaseButton
                                                         label={item.name}
-                                                        styleKey="plain"
+                                                        className={
+                                                            buttonStyles.plain
+                                                        }
                                                         buttonVariant="long"
                                                         showChevron={
                                                             hasChildren
@@ -370,14 +376,7 @@ function NavDrawer(props: {
                                                         rotateChevronOnHover={
                                                             false
                                                         }
-                                                        className={
-                                                            buttonStyles.noChevronRotate
-                                                        }
-                                                        action={{
-                                                            buttonFunction:
-                                                                'link',
-                                                            href: item.href,
-                                                        }}
+                                                        href={item.href}
                                                         renderContent={({
                                                             showNavChevron,
                                                         }) => (
@@ -456,9 +455,8 @@ function NavDrawer(props: {
                                             animate="visible"
                                             exit="exit"
                                         >
-                                            <ModularButton
+                                            <DonateButton
                                                 label="Donate"
-                                                buttonType="donate"
                                                 buttonVariant="long"
                                             />
                                         </motion.div>
@@ -469,9 +467,8 @@ function NavDrawer(props: {
                                                 animate="visible"
                                                 exit="exit"
                                             >
-                                                <ModularButton
+                                                <LoginButton
                                                     label="Log In"
-                                                    buttonType="login"
                                                     buttonVariant="long"
                                                     href="/login"
                                                 />
@@ -482,9 +479,8 @@ function NavDrawer(props: {
                                                 animate="visible"
                                                 exit="exit"
                                             >
-                                                <ModularButton
+                                                <AccountButton
                                                     label="Account"
-                                                    buttonType="account"
                                                     buttonVariant="long"
                                                     href="/account"
                                                     avatarSrc={avatarSrc}
@@ -571,11 +567,10 @@ function NavDrawer(props: {
                                                                     animate="visible"
                                                                     exit="exit"
                                                                 >
-                                                                    <ModularButton
+                                                                    <SubNavButton
                                                                         label={
                                                                             child.name
                                                                         }
-                                                                        buttonType="subnav"
                                                                         href={
                                                                             child.href
                                                                         }
@@ -679,8 +674,29 @@ export function Header() {
 
     const closeSubnav = () => setActiveSubnav(null)
 
+    const isSubnavOpen = !!activeSubnav?.subnav?.columns?.length
+
     return (
         <>
+            <AnimatePresence>
+                {isSubnavOpen ? (
+                    <motion.div
+                        key="desktop-subnav-backdrop"
+                        className={styles.desktopSubnavBackdrop}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        aria-hidden="true"
+                        onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            closeSubnav()
+                        }}
+                    />
+                ) : null}
+            </AnimatePresence>
+
             <header
                 className={styles.headerRoot}
                 style={{
@@ -699,9 +715,11 @@ export function Header() {
                     backdropFilter: 'blur(10px)',
                     WebkitBackdropFilter: 'blur(10px)',
                 }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
             >
                 <div className={styles.headerLogoSmall}>
-                    <NextLink href="/">
+                    <NextLink href="/" onClick={() => closeSubnav()}>
                         <Image
                             src="/images/Logo_White.svg"
                             alt="progressive-victory-logo"
@@ -712,7 +730,7 @@ export function Header() {
                 </div>
 
                 <div className={styles.headerLogoLarge}>
-                    <NextLink href="/">
+                    <NextLink href="/" onClick={() => closeSubnav()}>
                         <Image
                             src="/images/LogoFull.webp"
                             alt="progressive-victory-logo"
@@ -746,11 +764,12 @@ export function Header() {
                                 onMouseEnter={() => openSubnav(item)}
                                 onFocus={() => openSubnav(item)}
                             >
-                                <ModularButton
+                                <NavButton
                                     label={item.name}
-                                    buttonType="nav"
                                     href={item.href}
                                     showChevron={item.name === 'More'}
+                                    isSubnavOpen={isActive}
+                                    onOpenSubnav={() => openSubnav(item)}
                                     className={
                                         isActive
                                             ? buttonStyles.activeNavItem
@@ -771,18 +790,13 @@ export function Header() {
                 </nav>
 
                 <div className={styles.headerRightActions}>
-                    <ModularButton label="Donate" buttonType="donate" />
+                    <DonateButton label="Donate" />
 
                     {!session ? (
-                        <ModularButton
-                            label="Log In"
-                            buttonType="login"
-                            href="/login"
-                        />
+                        <LoginButton label="Log In" href="/login" />
                     ) : (
-                        <ModularButton
+                        <AccountButton
                             label="Account"
-                            buttonType="account"
                             href="/account"
                             avatarSrc={avatarSrc}
                             avatarAlt="User avatar"
@@ -793,7 +807,10 @@ export function Header() {
                 <motion.button
                     type="button"
                     className={styles.headerMenuButton}
-                    onClick={() => setIsOpen((prev) => !prev)}
+                    onClick={() => {
+                        closeSubnav()
+                        setIsOpen((prev) => !prev)
+                    }}
                     initial={false}
                     animate={isOpen ? 'open' : 'closed'}
                     whileHover="hover"
@@ -822,6 +839,8 @@ export function Header() {
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.16, ease: 'easeOut' }}
                         onMouseLeave={closeSubnav}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <div className={styles.desktopSubnavGrid}>
                             {activeSubnav.subnav.columns.map((col) => (
@@ -835,10 +854,9 @@ export function Header() {
 
                                     <div className={styles.subnavColumnItems}>
                                         {col.items.map((child) => (
-                                            <ModularButton
+                                            <SubNavButton
                                                 key={child.name}
                                                 label={child.name}
-                                                buttonType="subnav"
                                                 href={child.href}
                                                 buttonVariant="default"
                                             />

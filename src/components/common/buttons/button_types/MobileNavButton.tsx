@@ -1,21 +1,23 @@
 'use client'
 
-import { BaseButton } from '../Button'
-import type { BaseVisualProps, ButtonStyleKey } from '../types'
+import { BaseButton, BaseVisualProps } from '../Button'
+import buttonStyles from '@/components/common/buttons/button.module.css'
 
 export type MobileNavButtonProps = BaseVisualProps & {
     href: string
-    styleKey?: ButtonStyleKey
 }
 
 export function MobileNavButton(props: MobileNavButtonProps) {
-    const { styleKey = 'plain', href, showChevron, ...rest } = props
+    const { showChevron, className, ...rest } = props
+
+    const mergedClassName = [buttonStyles.plain, className]
+        .filter(Boolean)
+        .join(' ')
 
     return (
         <BaseButton
             {...rest}
-            styleKey={styleKey}
-            action={{ buttonFunction: 'link', href }}
+            className={mergedClassName}
             showChevron={showChevron ?? true}
             rotateChevronOnHover={false}
         />

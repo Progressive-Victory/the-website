@@ -1,21 +1,18 @@
 'use client'
 
-import { BaseButton } from '../Button'
-import type { BaseVisualProps, ButtonStyleKey } from '../types'
+import { BaseButton, BaseVisualProps } from '../Button'
+import buttonStyles from '@/components/common/buttons/button.module.css'
 
 export type LoginButtonProps = BaseVisualProps & {
     href: string
-    styleKey?: ButtonStyleKey
 }
 
 export function LoginButton(props: LoginButtonProps) {
-    const { styleKey = 'primary', href, ...rest } = props
+    const { className, ...rest } = props
 
-    return (
-        <BaseButton
-            {...rest}
-            styleKey={styleKey}
-            action={{ buttonFunction: 'link', href }}
-        />
-    )
+    const mergedClassName = [buttonStyles.primary, className]
+        .filter(Boolean)
+        .join(' ')
+
+    return <BaseButton {...rest} className={mergedClassName} />
 }

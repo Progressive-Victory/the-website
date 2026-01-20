@@ -51,10 +51,10 @@ export async function executeAggregationPaginated<T>(
 
     const count = (count_results[0]?.count ?? 0) as number
 
-    const data = await aggregation
+    const data = (await aggregation
         .skip(options.skip)
         .limit(options.limit)
-        .exec() as T[]
+        .exec()) as T[]
 
     return {
         data,

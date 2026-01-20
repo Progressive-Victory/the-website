@@ -1,6 +1,6 @@
-import dbConnect from '@/util/libmongo'
 import ClientPage from './client'
 import Permission from '@/models/Permission'
+import dbConnect from '@/util/libmongo'
 
 export default async function Page() {
     await dbConnect()

@@ -10,7 +10,12 @@ export interface IBaseFormField {
         value?: unknown
         disabled?: boolean
         loading?: boolean
-        onUpdate?: (fieldKey: string, value: unknown, patchValue: unknown, valid: boolean) => void
+        onUpdate?: (
+            fieldKey: string,
+            value: unknown,
+            patchValue: unknown,
+            valid: boolean
+        ) => void
     }
 }
 

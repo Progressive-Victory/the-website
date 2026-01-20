@@ -1,8 +1,7 @@
-import mongoose from 'mongoose'
-import { NextRequest, NextResponse } from 'next/server'
-
 import User from '@/models/User'
 import { checkAuthPermissions, PermissionName, ResponseCode } from '@/util/auth'
+import mongoose from 'mongoose'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
     _req: NextRequest,

@@ -5,7 +5,7 @@ export interface IPermission extends Document {
 }
 
 const permissionSchema = new Schema<IPermission>({
-    name: {type: String, required: true}
+    name: { type: String, required: true },
 })
 
 export const Permission: Model<IPermission> =

@@ -57,7 +57,9 @@ export function ToolTip({
     closerList?.map((element: Element) => {
         if (element instanceof HTMLButtonElement) {
             const btn = element
-            btn.addEventListener('closettm', () => {setOpen(false)})
+            btn.addEventListener('closettm', () => {
+                setOpen(false)
+            })
         }
     })
 

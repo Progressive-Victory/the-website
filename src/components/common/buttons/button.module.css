@@ -87,9 +87,6 @@
     color: #ce3728;
 }
 
-.defaultVariant {
-}
-
 .longVariant {
     width: 100%;
     justify-content: center;
@@ -124,6 +121,7 @@
 .navAffordance {
     width: 0.45rem;
     height: 0.45rem;
+    margin-right: 0.3rem;
     border-right: 2px solid currentColor;
     border-bottom: 2px solid currentColor;
 
@@ -213,9 +211,14 @@
     border-radius: 9999px;
 
     background-color: #1b4568;
-    opacity: 50%;
+    opacity: 0.5;
 
     cursor: pointer;
+}
+
+.embeddedChevron:hover {
+    background-color: #ce3728;
+    color: #ffffff;
 }
 
 .embeddedChevron:hover .navAffordance {

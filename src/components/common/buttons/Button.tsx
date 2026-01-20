@@ -1,102 +1,74 @@
 'use client'
 
-import { runAction, type ActionProps } from './actions'
-import { buildButtonClassName } from './classnames'
-import type { BaseVisualProps, ButtonStyleKey } from './types'
 import styles from '@/components/common/buttons/button.module.css'
-import Image from 'next/image'
+import cx from 'classnames'
 import type React from 'react'
 
+export type ButtonVariant = 'default' | 'long' | 'mobile'
+
+export interface BaseVisualProps {
+    label: string
+    buttonVariant?: ButtonVariant
+    showChevron?: boolean
+    className?: string
+    disabled?: boolean
+}
+
 export type BaseButtonProps = BaseVisualProps & {
-    styleKey: ButtonStyleKey
-    action: ActionProps
+    className: string
+    href: string
 
     renderContent?: (args: { showNavChevron: boolean }) => React.ReactNode
-
-    isAccount?: boolean
-    avatarSrc?: string
-    avatarAlt?: string
-
     rotateChevronOnHover?: boolean
 }
 
 export function BaseButton(props: BaseButtonProps) {
     const {
         label,
-        styleKey,
+        className,
         buttonVariant = 'default',
         showChevron,
         rotateChevronOnHover = true,
-        className,
         disabled,
-        action,
+        href,
         renderContent,
-        isAccount,
-        avatarSrc,
-        avatarAlt,
     } = props
 
-    const isLongVariant = buttonVariant === 'long'
-
     const showNavChevron =
-        showChevron === true && (isLongVariant || showChevron === true)
+        showChevron === true &&
+        (buttonVariant === 'long' || showChevron === true)
 
-    const hasAvatar = typeof avatarSrc === 'string' && avatarSrc.length > 0
-    const isAccountCompact = isAccount === true && !isLongVariant
+    const finalClassName = cx(
+        styles.buttonBase,
+        className,
+        buttonVariant === 'long'
+            ? styles.longVariant
+            : buttonVariant === 'mobile'
+              ? styles.wideVariant
+              : undefined,
+        showNavChevron && styles.navButton,
+        buttonVariant === 'long' && showNavChevron && styles.longNavButton,
+        showNavChevron && !rotateChevronOnHover && styles.noChevronRotate
+    )
 
-    const composed = buildButtonClassName({
-        styleKey,
-        buttonVariant,
-        showNavChevron,
-        isAccountCompact,
-    })
+    const content = renderContent?.({ showNavChevron }) ?? (
+        <span className={styles.buttonContent}>
+            <span className={styles.buttonLabel}>{label}</span>
+            {showNavChevron ? (
+                <span className={styles.navAffordance} aria-hidden="true" />
+            ) : null}
+        </span>
+    )
 
-    const chevronBehaviorClass =
-        showNavChevron && !rotateChevronOnHover ? styles.noChevronRotate : ''
-
-    const finalClassName = [composed, chevronBehaviorClass, className]
-        .filter(Boolean)
-        .join(' ')
-
-    const content =
-        renderContent?.({ showNavChevron }) ??
-        (isAccount && hasAvatar ? (
-            isLongVariant ? (
-                <span className={styles.accountContent}>
-                    <Image
-                        src={avatarSrc}
-                        alt={avatarAlt ?? 'Account avatar'}
-                        width={40}
-                        height={40}
-                        className={styles.accountAvatar}
-                        style={{ objectFit: 'cover' }}
-                    />
-                    <span>{label}</span>
-                </span>
-            ) : (
-                <Image
-                    src={avatarSrc}
-                    alt={avatarAlt ?? 'Account avatar'}
-                    width={52}
-                    height={52}
-                    className={styles.accountAvatarSolo}
-                    style={{ objectFit: 'cover' }}
-                />
-            )
-        ) : (
-            <span className={styles.buttonContent}>
-                <span className={styles.buttonLabel}>{label}</span>
-                {showNavChevron ? (
-                    <span className={styles.navAffordance} aria-hidden="true" />
-                ) : null}
-            </span>
-        ))
+    const handleClick = () => {
+        location.href = href
+    }
 
     return (
         <button
             type="button"
             disabled={disabled}
-            onClick={() => runAction(action, label)}
+            onClick={handleClick}
             className={finalClassName}
         >
             {content}

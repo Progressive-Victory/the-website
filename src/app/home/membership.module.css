@@ -15,13 +15,13 @@
     max-width: 72rem;
     display: flex;
     flex-direction: column;
-    gap: 3.5rem; 
+    gap: 3.5rem;
 }
 
 .heading {
     text-align: center;
-    font-size: 2.25rem; 
-    line-height: 2.75rem; 
+    font-size: 2.25rem;
+    line-height: 2.75rem;
     font-weight: 700;
     color: var(--black-pearl-dark, #0b1b2b);
 }
@@ -33,12 +33,12 @@
 .contentRow {
     display: flex;
     flex-direction: column;
-    gap: 2rem; 
+    gap: 2rem;
 }
 
 @media (min-width: 768px) {
     .contentRow {
-        gap: 3rem; 
+        gap: 3rem;
     }
 }
 
@@ -66,12 +66,12 @@
 .cardColumnInner {
     width: 100%;
     max-width: 500px;
-    margin-bottom: 2rem; 
+    margin-bottom: 2rem;
 }
 
 @media (min-width: 1020px) {
     .cardColumnInner {
-        margin-top: 3.5rem; 
+        margin-top: 3.5rem;
     }
 }
 
@@ -99,7 +99,7 @@
     position: absolute;
     inset: 0;
     overflow: hidden;
-    border-radius: 0.75rem; 
+    border-radius: 0.75rem;
     background: #ffffff;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
@@ -119,11 +119,11 @@
     position: absolute;
     inset: 0;
     border-radius: 0.75rem;
-    border: 8px solid rgba(229, 231, 235, 0.5); 
+    border: 8px solid rgba(229, 231, 235, 0.5);
 }
 
 .ctaRow {
-    margin-top: 2.5rem; 
+    margin-top: 2.5rem;
     display: flex;
     justify-content: center;
 }
@@ -139,7 +139,7 @@
 
 .bulletsColumn {
     width: 100%;
-    padding: 0 1rem 3rem; 
+    padding: 0 1rem 3rem;
 }
 
 @media (min-width: 1020px) {
@@ -158,11 +158,11 @@
     display: flex;
     align-items: flex-start;
     gap: 1.25rem;
-    margin-bottom: 1.5rem; 
+    margin-bottom: 1.5rem;
 }
 
 .bulletIcon {
-    margin-top: 3.5px; 
+    margin-top: 3.5px;
 }
 
 .bulletText {
@@ -171,7 +171,7 @@
 
 .bulletTitle {
     margin: 0 0 0.125rem 0;
-    font-size: 1.125rem; 
+    font-size: 1.125rem;
     font-weight: 600;
     color: var(--black-pearl-dark, #0b1b2b);
 }
@@ -184,6 +184,6 @@
 
 .bulletDescription {
     margin: 0;
-    font-size: 1rem; 
-    color: #4b5563; 
+    font-size: 1rem;
+    color: #4b5563;
 }

@@ -1,22 +1,20 @@
 'use client'
 
-import { BaseButton } from '../Button'
-import type { BaseVisualProps, ButtonStyleKey } from '../types'
+import { BaseButton, BaseVisualProps } from '../Button'
+import buttonStyles from '@/components/common/buttons/button.module.css'
 
 const DONATE_HREF = 'https://secure.actblue.com/donate/pvwebsite'
 
-export type DonateButtonProps = BaseVisualProps & {
-    styleKey?: ButtonStyleKey
-}
+export type DonateButtonProps = BaseVisualProps
 
 export function DonateButton(props: DonateButtonProps) {
-    const { styleKey = 'prominent', ...rest } = props
+    const { className, ...rest } = props
+
+    const mergedClassName = [buttonStyles.prominent, className]
+        .filter(Boolean)
+        .join(' ')
 
     return (
-        <BaseButton
-            {...rest}
-            styleKey={styleKey}
-            action={{ buttonFunction: 'link', href: DONATE_HREF }}
-        />
+        <BaseButton {...rest} className={mergedClassName} href={DONATE_HREF} />
     )
 }

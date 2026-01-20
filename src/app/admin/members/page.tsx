@@ -1,5 +1,5 @@
-import Role from '@/models/Role'
 import ClientPage from './client'
+import Role from '@/models/Role'
 import dbConnect from '@/util/libmongo'
 
 export default async function Page() {
