@@ -4,8 +4,11 @@ import { useSession } from 'next-auth/react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
 const testUserData = {
+    discordUsername: 'discordUsername',
+    discordId: 'discordId',
     firstName: 'Eric',
     lastName: 'Oseid',
+    dateOfBirth: new Date('1994-11-27T03:24:00'),
     city: 'Seattle',
     state: 'WA',
     zip: 98102,
@@ -38,6 +41,6 @@ describe('Account page', () => {
 
         const { getByText } = render(<Account {...testUserData}></Account>)
 
-        expect(getByText('Eric')).toBeVisible()
+        expect(getByText('Username:')).toBeVisible()
     })
 })
