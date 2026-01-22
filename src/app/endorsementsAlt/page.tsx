@@ -1,4 +1,4 @@
-import EndorsementAlt from './EndorsementsAlt'
+import { EndorsementAlt } from './EndorsementsAlt'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout/MainLayout'
 import type { Metadata } from 'next'
