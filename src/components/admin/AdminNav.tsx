@@ -1,6 +1,5 @@
 'use client'
 
-import { useLocalStorage } from 'usehooks-ts'
 import classNames from 'classnames'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -8,6 +7,7 @@ import { FaDonate, FaUsers, FaUserShield, FaUserTag } from 'react-icons/fa'
 import { FaClipboardUser } from 'react-icons/fa6'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { IconType } from 'react-icons/lib'
+import { useLocalStorage } from 'usehooks-ts'
 
 const NAV_LINKS: {
     title: string

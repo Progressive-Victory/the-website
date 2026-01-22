@@ -16,7 +16,7 @@ export enum HTTPStatus {
      * This status code is primarily intended to be used with the {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Link `Link`} header, letting the user agent start {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel/preload preloading} resources while the server prepares a response or {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel/preconnectpreconnect} to an origin from which the page will need resources.
      */
     EarlyHint = 103,
-    
+
     /**
      * The request succeeded. The result and meaning of "success" depends on the HTTP method
      * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200 MDN Web Docs}
@@ -58,7 +58,7 @@ export enum HTTPStatus {
      * The server has fulfilled a `GET` request for the resource, and the response is a representation of the result of one or more instance-manipulations applied to the current instance.
      */
     IMUsed = 226,
-    
+
     /**
      * In {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Content_negotiation#agent-driven_negotiation agent-driven content negotiation}, the request has more than one possible response and the user agent or user should choose one of them. There is no standardized way for clients to automatically choose one of the responses, so this is rarely used.
      */
@@ -95,7 +95,7 @@ export enum HTTPStatus {
      * This means that the resource is now permanently located at another URI, specified by the {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Location `Location`} response header. This has the same semantics as the `301 Moved Permanently` HTTP response code, with the exception that the user agent must not change the HTTP method used: if a `POST` was used in the first request, a `POST` must be used in the second request.
      */
     PermanentRedirect = 308,
-    
+
     /**
      * The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).
      */
@@ -213,7 +213,7 @@ export enum HTTPStatus {
      * The user agent requested a resource that cannot legally be provided, such as a web page censored by a government.
      */
     UnavailableForLegalReasons = 451,
-    
+
     /**
      * The server has encountered a situation it does not know how to handle. This error is generic, indicating that the server cannot find a more appropriate `5XX` status code to respond with.
      */
@@ -257,5 +257,5 @@ export enum HTTPStatus {
     /**
      * Indicates that the client needs to authenticate to gain network access.
      */
-    NetworkAuthenticationsRequired = 511
+    NetworkAuthenticationsRequired = 511,
 }

@@ -1,12 +1,12 @@
-import { Snowflake } from 'discord-api-types/globals'
 import { rest } from './rest'
+import { DiscordAPIError, RequestMethod } from '@discordjs/rest'
+import { Snowflake } from 'discord-api-types/globals'
 import {
     APIGuildMember,
     APIUser,
     RESTJSONErrorCodes,
     Routes,
 } from 'discord-api-types/v10'
-import { DiscordAPIError, RequestMethod } from '@discordjs/rest'
 
 /**
  * Tries to join the user to the Discord guild
