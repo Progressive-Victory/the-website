@@ -1,5 +1,5 @@
 import Account from '../Account'
-import { getByDisplayValue, render } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { useSession } from 'next-auth/react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
