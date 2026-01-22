@@ -87,7 +87,7 @@ export function Hero() {
                         avatarRounded={false}
                         username="Progressive Victory"
                         nameColor="red"
-                        text="It's all fun and games w PV members at the Katie Wilson Watch Party tonight in Seattle! Congradulations to @wilsonformayer and all the volunteers who spent months working to help her win!"
+                        text="It's all fun and games w PV members at the Katie Wilson Watch Party tonight in Seattle! Congratulations to @wilsonformayor and all the volunteers who spent months working to help her win!"
                         image="/images/PVKatieWilsonWatchParty.jpeg"
                     />
                 </TiltMessage>
