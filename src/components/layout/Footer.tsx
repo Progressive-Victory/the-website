@@ -1,5 +1,6 @@
 'use client'
 
+import { useFetch } from '@/util/hooks'
 import { NavItem } from './types'
 import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
@@ -44,6 +45,12 @@ export function Footer() {
 
 function MobileFooter() {
     const { data: session } = useSession()
+    const { onSignOut} = useFetch()
+
+    const handleSignOut = () => {
+        onSignOut();
+        void signOut({ callbackUrl: '/' });
+    }
 
     return (
         <div className="flex w-full justify-center bg-black-pearl-dark px-5 lg:hidden">
@@ -135,7 +142,7 @@ function MobileFooter() {
                     </Link>
                     {session ? (
                         <button
-                            onClick={() => void signOut({ callbackUrl: '/' })}
+                            onClick={handleSignOut}
                             className="mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:text-base xs:px-4 xs:py-2 xs:text-lg"
                         >
                             Sign Out
