@@ -1,5 +1,5 @@
 import Account from '../Account'
-import { render } from '@testing-library/react'
+import { getByDisplayValue, render } from '@testing-library/react'
 import { useSession } from 'next-auth/react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
@@ -39,8 +39,11 @@ describe('Account page', () => {
             status: 'authenticated',
         })
 
-        const { getByText } = render(<Account {...testUserData}></Account>)
+        const { getByText, getByDisplayValue } = render(
+            <Account {...testUserData}></Account>
+        )
 
         expect(getByText('Username:')).toBeVisible()
+        expect(getByDisplayValue('Eric')).toBeVisible()
     })
 })

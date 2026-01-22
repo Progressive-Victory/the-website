@@ -33,22 +33,25 @@ const Account = (accountInformation: AccountInformation) => {
                     transform: 'scaleX(-1)',
                 }}
             />
-            <div className="w-fill z-0 m-4 flex h-auto flex-col justify-center gap-y-4 rounded-lg bg-white p-4 shadow-md md:m-8 md:p-6">
-                <header>
-                    <p className="mx-auto text-center text-3xl font-bold text-black">
-                        Account Dashboard
-                    </p>
-                </header>
-                <div className="flex flex-row justify-between">
-                    <div className="flex grow flex-col">
-                        <p className="text-3xl font-bold text-black md:p-6">
-                            {accountInformation.discordUsername}
+            <div className="flex flex-row justify-center">
+                <div className="z-0 m-4 flex size-auto w-fit flex-col justify-center gap-y-4 rounded-lg bg-white p-4 shadow-md md:m-8 md:p-6">
+                    <header>
+                        <p className="mx-auto text-center text-3xl font-bold text-black">
+                            Account Dashboard
                         </p>
-                        <AccountInfoForm
-                            {...accountInformation}
-                        ></AccountInfoForm>
+                    </header>
+                    <div className="flex flex-row justify-center gap-16">
+                        <div className="flex flex-col">
+                            <p className="text-3xl font-bold text-black md:p-6">
+                                {accountInformation.discordUsername}
+                            </p>
+                            <AccountInfoForm
+                                {...accountInformation}
+                            ></AccountInfoForm>
+                        </div>
+                        <div className="w-px bg-slate-300" />
+                        <MembershipPurchaseDialog />
                     </div>
-                    <MembershipPurchaseDialog />
                 </div>
             </div>
         </MainLayout>

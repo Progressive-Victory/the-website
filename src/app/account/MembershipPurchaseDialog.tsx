@@ -2,7 +2,7 @@ import Image from 'next/image'
 
 const MembershipPurchaseDialog = () => {
     return (
-        <div className="flex flex-col justify-center gap-8">
+        <div className="flex flex-col justify-center gap-8 p-4">
             <Image
                 src="/images/membercard_front.png"
                 alt="Front content"

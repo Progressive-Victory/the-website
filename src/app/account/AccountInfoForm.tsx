@@ -55,7 +55,7 @@ const AccountInfoForm = ({
     }
 
     return (
-        <form className="flex max-w-[550px] flex-col justify-start gap-y-4 rounded-lg bg-slate-100 p-4 shadow-md md:m-8 md:mt-0 md:p-6">
+        <form className="flex min-w-[500px] max-w-[550px] flex-col justify-start gap-y-4 rounded-lg bg-slate-100 p-4 shadow-md md:m-8 md:mt-0 md:p-6">
             <header>
                 <p className="text-l mx-auto text-left font-bold text-black">
                     Account Information
