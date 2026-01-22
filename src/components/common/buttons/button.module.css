@@ -76,6 +76,9 @@
 .minimal {
     background-color: #09223a;
     color: #d4d4d4;
+    border-color: #0f2f4c;
+    border-width: 0.01rem;
+    border-style: solid;
     padding-inline: 1rem;
     padding-block: 0.5rem;
     font-size: 1.05rem;
