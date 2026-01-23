@@ -254,7 +254,7 @@ function UpdateHistoryEntry(update: Partial<IDocumentUpdate>) {
                             <>
                                 (
                                 <code className="font-mono">
-                                    {(data?._id as string) ?? 'deleted user'}
+                                    {(data?._id as unknown as string) ?? 'deleted user'}
                                 </code>
                                 )
                             </>

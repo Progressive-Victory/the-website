@@ -37,7 +37,7 @@ export default function Page() {
     }
 
     const makeItem = (permission: IPermission) => ({
-        id: permission._id as string,
+        id: permission?._id?.toString(),
         value: permission,
     })
 
