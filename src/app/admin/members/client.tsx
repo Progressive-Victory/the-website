@@ -56,7 +56,7 @@ export default function ClientPage({ roles }: PageProps) {
     const fCreatedDate = selectedUser?.createdAt
         ? dateService.formatDate(selectedUser.createdAt)
         : ''
-    const makeItem = (user: IUser) => ({ id: user._id as string, value: user })
+    const makeItem = (user: IUser) => ({ id: user._id?.toString(), value: user })
 
     return (
         <>

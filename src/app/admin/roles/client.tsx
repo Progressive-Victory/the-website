@@ -39,7 +39,7 @@ export default function ClientPage({ permissions }: PageProps) {
         setOriginalRole({ ...value } as IRole)
     }
 
-    const makeItem = (role: IRole) => ({ id: role._id as string, value: role })
+    const makeItem = (role: IRole) => ({ id: role._id?.toString(), value: role })
 
     return (
         <>
