@@ -1,23 +1,46 @@
-import styles from '@/components/halftone/halftone.module.css'
 import type React from 'react'
 
 interface HalftoneBackgroundProps {
     opacity?: number
 }
 
-export function HalftoneBackground({ opacity = 1 }: HalftoneBackgroundProps) {
-    const alpha = Math.min(1, Math.max(10, opacity))
-
+export function HalftoneBackground({
+    opacity = 0.05,
+}: HalftoneBackgroundProps) {
     return (
         <div
-            className={styles.halftoneBackground}
-            style={
-                {
-                    ['--halftone-opacity' as never]: String(alpha),
-                } as React.CSSProperties
-            }
+            style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: 0,
+                pointerEvents: 'none',
+
+                backgroundColor: 'black',
+                filter: 'contrast(55)',
+                opacity,
+            }}
         >
-            <div className={styles.halftoneDots} />
+            <div
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+
+                    backgroundImage:
+                        'radial-gradient(circle at center, white 10%, transparent 96%)',
+                    backgroundSize: '0.45rem 0.45rem',
+                    backgroundRepeat: 'round',
+                    backgroundPosition: 'center',
+
+                    WebkitMaskImage:
+                        'linear-gradient(45deg, transparent 5%, rgb(255,255,255) 10%, rgba(255,255,255,0.5) 96%)',
+                    maskImage:
+                        'linear-gradient(45deg, transparent 5%, rgb(255,255,255) 10%, rgba(255,255,255,0.5) 96%)',
+                }}
+            />
         </div>
     )
 }
