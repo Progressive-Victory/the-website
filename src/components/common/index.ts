@@ -1,7 +1,7 @@
 import { Link } from './Link'
 import { Logo } from './Logo'
-import { Message, TiltMessage } from './Message'
 import { Button } from './buttons/button_types/OldButton'
+import { Message, TiltMessage } from './twitter_card_element/card'
 
 export { Button, Link, Logo, Message, TiltMessage }
 

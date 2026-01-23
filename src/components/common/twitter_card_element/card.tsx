@@ -1,5 +1,6 @@
 'use client'
 
+import styles from './card.module.css'
 import {
     HeartIcon,
     ChatBubbleLeftRightIcon,
@@ -18,6 +19,7 @@ import {
     useTransform,
 } from 'motion/react'
 import Image from 'next/image'
+import type React from 'react'
 import { JSX, useState } from 'react'
 
 export function Message({
@@ -49,13 +51,15 @@ export function Message({
     botLeftContent?: JSX.Element
     botDivider?: boolean
 }) {
-    const [clickedHeart, setClickedHeart] = useState<boolean>(false)
-    const [clickedBubble, setClickedBubble] = useState<boolean>(false)
-    const [clickedShare, setClickedShare] = useState<boolean>(false)
+    const [clickedHeart, setClickedHeart] = useState(false)
+    const [clickedBubble, setClickedBubble] = useState(false)
+    const [clickedShare, setClickedShare] = useState(false)
+
+    const rootClassName = [styles.message, className].filter(Boolean).join(' ')
 
     return (
         <motion.div
-            className={`my-2 flex size-fit max-w-[800px] flex-col gap-4 rounded-md bg-white p-4 shadow-xl ${className ?? className}`}
+            className={rootClassName}
             style={{
                 willChange: 'opacity, transform',
                 transform: 'translateZ(0)',
@@ -65,87 +69,102 @@ export function Message({
             transition={{ ease: 'backInOut', ...motionProps?.transition }}
         >
             {/* Header */}
-            <div className="flex flex-col gap-2">
-                <div className="mr-auto flex w-full flex-row items-center justify-between">
-                    <div className="flex items-center gap-x-4">
+            <div className={styles.header}>
+                <div className={styles.topRow}>
+                    <div className={styles.userWrap}>
                         <Image
                             src={avatar}
                             alt={username}
-                            className={`${avatarRounded ? 'rounded-full' : ''}`}
+                            className={
+                                avatarRounded ? styles.avatarRounded : ''
+                            }
                             width={38}
                             height={38}
                             unoptimized
                         />
-                        <p className="font-bold" style={{ color: nameColor }}>
+                        <p
+                            className={styles.username}
+                            style={{ color: nameColor }}
+                        >
                             {username}
                         </p>
                     </div>
-
-                    {/* <div className="flex items-center gap-x-4">
-                        {topRightContent && topRightContent}
-                        <EllipsisHorizontalIcon className="size-7 cursor-pointer" />
-                    </div> */}
                 </div>
 
-                <p className="mr-auto text-left">{text}</p>
+                <p className={styles.text}>{text}</p>
             </div>
 
-            {/* Middle - Image */}
             {image && (
-                <div className="relative h-[300px] w-full">
+                <div className={styles.mediaWrap}>
                     <Image
                         src={image}
                         alt={username}
-                        className="rounded-lg object-cover"
+                        className={styles.media}
                         style={{ objectPosition: '25% 25%' }}
-                        fill={true}
+                        fill
                         sizes="100%"
                     />
                 </div>
             )}
 
-            {/* Middle - Children */}
+            {/* Middle - Image */}
             {children && children}
 
+            {botDivider && <hr className={styles.divider} />}
             {/* Bottom Row */}
-            {botDivider && <hr className="h-px w-full border-gray-200" />}
-
-            <div className="flex flex-row items-center justify-between">
-                <div className="flex gap-x-4">
+            <div className={styles.bottomRow}>
+                <div className={styles.bottomLeft}>
                     {botLeftContent && botLeftContent}
                 </div>
 
-                <div className="flex gap-x-4">
-                    <div
-                        className="group size-6"
-                        onClick={() => setClickedBubble(!clickedBubble)}
+                <div className={styles.actions}>
+                    <button
+                        type="button"
+                        className={styles.action}
+                        onClick={() => setClickedBubble((v) => !v)}
+                        aria-pressed={clickedBubble}
+                        aria-label="Comment"
                     >
                         {clickedBubble ? (
-                            <SolidChatBubbleLeftRightIcon className="grow text-blue-500" />
+                            <SolidChatBubbleLeftRightIcon
+                                className={`${styles.iconSolid} ${styles.bubbleActive}`}
+                            />
                         ) : (
-                            <ChatBubbleLeftRightIcon className="text-black transition-all duration-100 group-hover:scale-110" />
+                            <ChatBubbleLeftRightIcon className={styles.icon} />
                         )}
-                    </div>
-                    <div
-                        className="group size-6"
-                        onClick={() => setClickedShare(!clickedShare)}
+                    </button>
+
+                    <button
+                        type="button"
+                        className={styles.action}
+                        onClick={() => setClickedShare((v) => !v)}
+                        aria-pressed={clickedShare}
+                        aria-label="Share"
                     >
                         {clickedShare ? (
-                            <SolidArrowUpOnSquareIcon className="grow text-green-500" />
+                            <SolidArrowUpOnSquareIcon
+                                className={`${styles.iconSolid} ${styles.shareActive}`}
+                            />
                         ) : (
-                            <ArrowUpOnSquareIcon className="text-black transition-all duration-100 group-hover:scale-110" />
+                            <ArrowUpOnSquareIcon className={styles.icon} />
                         )}
-                    </div>
-                    <div
-                        className="group size-6"
-                        onClick={() => setClickedHeart(!clickedHeart)}
+                    </button>
+
+                    <button
+                        type="button"
+                        className={styles.action}
+                        onClick={() => setClickedHeart((v) => !v)}
+                        aria-pressed={clickedHeart}
+                        aria-label="Like"
                     >
                         {clickedHeart ? (
-                            <SolidHeartIcon className="grow text-red-500" />
+                            <SolidHeartIcon
+                                className={`${styles.iconSolid} ${styles.heartActive}`}
+                            />
                         ) : (
-                            <HeartIcon className="text-black transition-all duration-100 group-hover:scale-110" />
+                            <HeartIcon className={styles.icon} />
                         )}
-                    </div>
+                    </button>
                 </div>
             </div>
         </motion.div>
