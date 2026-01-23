@@ -1,5 +1,4 @@
 import Endorsements from './Endorsements'
-import styles from '@/app/endorsements/endorsement.module.css'
 import { ContentPageFrame } from '@/components/content_sections/ContentSections'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout/MainLayout'
@@ -22,16 +21,41 @@ export default function EndorsementsPage() {
     return (
         <MainLayout>
             <HalftoneBackground />
+
             <ContentPageFrame
                 heading={
-                    <div className={styles.headingWrap}>
-                        <p className={styles.heading}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '0.35rem',
+                        }}
+                    >
+                        <p
+                            style={{
+                                width: '100%',
+                                textAlign: 'center',
+                                fontSize: '2.25rem',
+                                fontWeight: 700,
+                                color: '#ffffff',
+                                margin: 0,
+                            }}
+                        >
                             Endorsements{' '}
-                            <span className={styles.headingHighlight}>
-                                for 2026
-                            </span>
+                            <span style={{ color: '#09223a' }}>for 2026</span>
                         </p>
-                        <p className={styles.subheading}>
+
+                        <p
+                            style={{
+                                margin: 0,
+                                textAlign: 'center',
+                                maxWidth: '52rem',
+                                color: 'rgba(255,255,255,0.85)',
+                                fontWeight: 500,
+                                fontSize: '0.95rem',
+                            }}
+                        >
                             Learn about each of the candidates we are
                             supporting.
                         </p>

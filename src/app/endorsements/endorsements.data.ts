@@ -50,8 +50,8 @@ export interface Endorsement {
     PvPledge: boolean
     PVMember: boolean
 
-    imageSrc?: string
-    imageAlt?: string
+    imageSrc: string
+    imageAlt: string
 
     website: string
     donateLink: string
@@ -88,7 +88,7 @@ export const ENDORSEMENTS: Endorsement[] = [
             'College For All',
         ],
         PvPledge: false,
-        PVMember: false,
+        PVMember: true,
         imageSrc: '/images/ANALILIA MEJIA.png',
         imageAlt: 'Analilia Mejia',
         website: 'https://www.analiliafornj.com',
@@ -119,6 +119,22 @@ export const ENDORSEMENTS: Endorsement[] = [
         district: 'CA-11',
         stage: 'General',
         electionDate: 'Nov. 3rd, 2026',
+        quote: 'In a year full of amazing candidates, Saikat stands out as a true progressive movement leader.',
+        issues: ['Blank', 'Blank', 'Blank'],
+        PvPledge: true,
+        PVMember: false,
+        imageSrc: '/images/SAIKAT CHAKRABARTI.png',
+        imageAlt: 'Saikat Chakrabarti',
+        website: 'https://www.analiliafornj.com',
+        donateLink: 'https://secure.actblue.com/donate/analiliafornj',
+    },
+    {
+        id: '4',
+        candidateName: 'Karishma Manzur',
+        office: 'U.S. Senate',
+        state: 'NH',
+        stage: 'Primary',
+        electionDate: 'Sep. 8th, 2026',
         quote: 'Our official quote by some member of PV Leadership that is deeply unique and relevant.',
         issues: ['Blank', 'Blank', 'Blank'],
         PvPledge: true,

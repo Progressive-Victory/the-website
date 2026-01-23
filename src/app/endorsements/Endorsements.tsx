@@ -13,45 +13,43 @@ function formatRaceLine(e: Endorsement) {
 export default function Endorsements() {
     return (
         <div className={styles.page}>
-            <div className={styles.list}>
-                {ENDORSEMENTS.map((e) => (
-                    <article key={e.id} className={styles.card}>
+            {ENDORSEMENTS.map((e) => (
+                <article key={e.id} className={styles.card}>
+                    <div className={styles.cardInner}>
                         <div className={styles.photoWrap}>
                             <Image
-                                src={
-                                    e.imageSrc ??
-                                    '/images/placeholder-candidate.png'
-                                }
-                                alt={e.imageAlt ?? e.candidateName}
+                                src={e.imageSrc}
+                                alt={e.candidateName}
                                 fill
-                                sizes="(min-width: 768px) 160px, 96px"
-                                className={styles.photo}
+                                sizes="(min-width: 1024px) 160px, 128px"
+                                style={{ objectFit: 'cover' }}
                             />
+                            <div className={styles.photoOverlay} />
                         </div>
 
-                        <div className={styles.body}>
-                            <div className={styles.header}>
-                                <div className={styles.title}>
-                                    <p className={styles.name}>
+                        <div className={styles.content}>
+                            <div className={styles.headerRow}>
+                                <div>
+                                    <div className={styles.name}>
                                         {e.candidateName}
-                                    </p>
-                                    <p className={styles.race}>
+                                    </div>
+                                    <div className={styles.race}>
                                         {formatRaceLine(e)}
-                                    </p>
+                                    </div>
                                 </div>
 
                                 {(e.PVMember || e.PvPledge) && (
-                                    <div className={styles.badges}>
+                                    <div className={styles.badgeWrap}>
                                         {e.PVMember && (
                                             <span
-                                                className={`${styles.badge} ${styles.badgeMember}`}
+                                                className={styles.badgeMember}
                                             >
                                                 PV Member
                                             </span>
                                         )}
                                         {e.PvPledge && (
                                             <span
-                                                className={`${styles.badge} ${styles.badgePledge}`}
+                                                className={styles.badgePledge}
                                             >
                                                 PV Pledge
                                             </span>
@@ -61,34 +59,36 @@ export default function Endorsements() {
                             </div>
 
                             <div className={styles.meta}>
-                                <p className={styles.date}>
+                                <span className={styles.date}>
                                     Election: {e.electionDate}
-                                </p>
+                                </span>
                             </div>
 
-                            <p className={styles.summary}>{e.quote}</p>
+                            {e.quote && (
+                                <div className={styles.quote}>{e.quote}</div>
+                            )}
 
-                            {e.issues?.length ? (
-                                <div className={styles.issues}>
-                                    <p className={styles.issuesLabel}>
+                            {e.issues?.length && (
+                                <div className={styles.issuesWrap}>
+                                    <div className={styles.issuesTitle}>
                                         Primary Issues
-                                    </p>
-                                    <div className={styles.tags}>
+                                    </div>
+                                    <div className={styles.issuesList}>
                                         {e.issues.map((issue) => (
                                             <span
                                                 key={issue}
-                                                className={styles.tag}
+                                                className={styles.issues}
                                             >
                                                 {issue}
                                             </span>
                                         ))}
                                     </div>
                                 </div>
-                            ) : null}
+                            )}
                         </div>
-                    </article>
-                ))}
-            </div>
+                    </div>
+                </article>
+            ))}
         </div>
     )
 }
