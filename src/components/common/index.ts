@@ -1,4 +1,4 @@
-export * from './Button'
+export * from './buttons/button_types/OldButton'
 export * from './CollapsibleSection'
 export * from './ImageWithFallback'
 export * from './Link'
