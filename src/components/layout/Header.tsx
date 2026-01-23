@@ -2,7 +2,7 @@
 
 import { NavItem } from './types'
 import { BaseButton } from '@/components/common/buttons/Button'
-import buttonStyles from '@/components/common/buttons/button.module.css'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
 import { AccountButton } from '@/components/common/buttons/button_types/AccountButton'
 import { DonateButton } from '@/components/common/buttons/button_types/DonateButton'
 import { LoginButton } from '@/components/common/buttons/button_types/LoginButton'

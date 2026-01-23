@@ -1,7 +1,7 @@
 'use client'
 
 import { BaseButton, BaseVisualProps } from '../Button'
-import buttonStyles from '@/components/common/buttons/button.module.css'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
 
 export type MobileNavButtonProps = BaseVisualProps & {
     href: string
