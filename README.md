@@ -1,3 +1,5 @@
+# The Progressive Victory Website
+
 ## Getting Started with Development
 
 Welcome to the PV Frontpage Redux repo! This is the source code of our website. Before contributing to the codebase you **MUST** read the following information. If you're a fullstack Next.js pro you can quickly skim this. **NOTE**: since migrating to sql and a centralized database, you now also require the api setup on your local machine, and running in concurrence with the website.
@@ -22,13 +24,13 @@ Check out a new branch from `main` before you begin working on any new feature. 
 
 The easiest way to install pnpm is via npm after installing Node.js. Otherwise visit the linked page above to install it on your machine.
 
-```
+```sh
 npm install -g pnpm@latest-10
 ```
 
 First, install the dependencies,
 
-```
+```sh
 pnpm install
 ```
 
@@ -53,9 +55,8 @@ DISCORD_CLIENT_SECRET="<bot client secret>"
 DISCORD_BOT_TOKEN="<bot token>"
 GUILD_ID="1308877803705335858"
 
-# neutrino vars
-NEUTRINO_USERID="<neutrino id>"
-NEUTRINO_SECRET="<neutrino key>"
+# Does not need to change
+SITE_URL="https://example.com"
 
 # boomerang ig
 BOOMERANG_URI="<boomerang uri>"
@@ -69,7 +70,7 @@ PV_WEBSITE_API_KEY="<just the discord bot token again>"
 
 Finally, run the development server
 
-```
+```sh
 pnpm dev
 ```
 
@@ -79,17 +80,12 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @somejoops, a deputy, or assistant, or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.
 
-## Working with the database
-
-In order to interact with our database at all, you will have to be running a local instance of the api. See the read me for steps on how to set it up.
-
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [Mongoose Documentation](https://mongoosejs.com/docs/typescript.html) - learn more about Mongoose, a library we use to query MongoDB
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
@@ -105,6 +101,6 @@ npx playwright install --with-deps
 
 ### Run tests
 
-```
+```sh
 pnpm run test
 ```

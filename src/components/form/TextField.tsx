@@ -1,45 +1,41 @@
-import { FormField, IBaseFormField } from '.'
-import classNames from 'classnames'
-import { FormEvent } from 'react'
+import { FormField, FormFieldProps, getGetter, getSetter } from './FormField'
+import styles from './FormField.module.css'
+import cx from 'classnames'
+import { ChangeEvent } from 'react'
 
-export function TextField({
-    name,
-    field,
-    required = false,
-    readonly = false,
-    deprecated = false,
-    dynamic,
-}: IBaseFormField) {
-    const value = (dynamic?.value as string) ?? ''
+export function TextField<T>(
+    props: FormFieldProps<T, string | null | undefined>
+) {
+    props.getter ??= getGetter(props)
+    props.setter ??= getSetter(props)
+    props.validator ??= (field: string | null | undefined) =>
+        !props.required || !!field?.trim()
 
-    const isValid = (text: string) => !required || text.trim().length > 0
+    const readonly = !!props.readonly || !props.dynamic?.editing
+    const disabled = !!props.disabled || !!props.dynamic?.saving
+    const value = props?.getter?.(props.dynamic!.form) ?? ''
 
-    const handleInput = (event: FormEvent<HTMLInputElement>) => {
-        const newValue = (event.target as HTMLTextAreaElement).value
-        dynamic?.onUpdate?.(field, newValue, newValue.trim(), isValid(newValue))
+    const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.target.value
+        props.dynamic?.onChange?.(props, newValue)
     }
 
     return (
-        <FormField
-            name={name}
-            field={field}
-            required={required}
-            deprecated={deprecated}
-        >
-            {readonly || dynamic?.disabled ? (
-                <div className="col-span-2 w-full">{value}</div>
+        <FormField {...props}>
+            {readonly ? (
+                <div className={styles.readonly}>{value}</div>
             ) : (
                 <input
                     type="text"
-                    name={name}
-                    id={field}
-                    disabled={dynamic?.loading}
-                    required={required}
+                    id={props?.id}
+                    name={props.label}
+                    disabled={disabled}
+                    required={props.required}
                     value={value}
                     onInput={handleInput}
-                    className={classNames(
-                        'col-span-2 w-full max-w-96 rounded-lg border border-gray-300 px-3 py-0.5',
-                        !isValid(value) && 'border-red-300'
+                    className={cx(
+                        styles.textField,
+                        !props.validator(value) && styles.invalid
                     )}
                 />
             )}

@@ -6,6 +6,8 @@
     },
     "eslint.format.enable": true,
     "editor.tabSize": 4,
+    "editor.indentSize": "tabSize",
     "editor.insertSpaces": true,
-    "editor.detectIndentation": true,
+    "editor.detectIndentation": false,
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

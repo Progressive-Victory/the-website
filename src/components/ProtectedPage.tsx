@@ -1,54 +1,48 @@
-// app/ProtectedPage.jsx
-import { checkAuth, ResponseCode } from '@/util/auth'
-
-// your NextAuth options
+import { useCurrentUser } from '@/util/hooks'
+import { useSession } from 'next-auth/react'
+import { ReactNode } from 'react'
 
 interface ProtectedPageProps {
-    children: React.ReactNode
+    children: ReactNode
     requiredRoles: string[]
 }
 
-/**
- * A server-side protected wrapper that conditionally renders its child component
- * based on authentication and role requirements.
- */
-export default async function ProtectedPage({
+export function ProtectedPage({
     children,
     requiredRoles = [],
 }: ProtectedPageProps) {
-    // Run util function that handles the logic for checking whether
-    // there is a current session and whether it has sufficient permissions
-    const response = await checkAuth(requiredRoles)
+    const session = useSession()
+    const currentUser = useCurrentUser()
 
-    // switch statement handling the various responses checkAuth() will return
-    switch (response) {
-        // if all auth checks passed then render the page
-        case ResponseCode.Successful:
-            return <>{children}</>
-        case ResponseCode.Exception:
-            return (
-                <div>
-                    <h1>Access Denied</h1>
-                    <p>
-                        There was an error while checking your authentication.
-                    </p>
-                </div>
-            )
-        case ResponseCode.InsufficientAccess:
-            return (
-                <div>
-                    <h1>Access Denied</h1>
-                    <p>You lack sufficient permissions to view this page.</p>
-                </div>
-            )
-        case ResponseCode.NoSession:
-            return (
-                <div>
-                    <h1>Access Denied</h1>
-                    <p>You need to be logged in to view this page.</p>
-                </div>
-            )
-        default:
-            throw Error('Unidentified response code')
-    }
+    if (currentUser.isLoading || session.status == 'loading') return null
+
+    if (session.status == 'unauthenticated')
+        return (
+            <div>
+                <h1>Access Denied</h1>
+                <p>You need to be logged in to view this page.</p>
+            </div>
+        )
+
+    if (!currentUser.data || currentUser.error)
+        return (
+            <div>
+                <h1>Access Denied</h1>
+                <p>There was an error while checking your authentication.</p>
+            </div>
+        )
+
+    if (
+        !requiredRoles.every((role) =>
+            currentUser.data?.roles?.some((found) => found.name == role)
+        )
+    )
+        return (
+            <div>
+                <h1>Access Denied</h1>
+                <p>You lack sufficient permissions to view this page.</p>
+            </div>
+        )
+
+    return children
 }

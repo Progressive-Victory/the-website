@@ -65,9 +65,9 @@ export type BrandColor =
     | 'brandWhite'
     | 'offBrandGrey'
     | 'mapBlue'
-export type ShadeIndex = 700 | 600 | 500 | 400 | 300 | 200 | 100
+export type ShadeIndex = 700 | 600 | 500 | 400 | 300 | 200 | 100 | 'DEFAULT'
 
 export const getBrandColor = (color: BrandColor, shade?: ShadeIndex) => {
-    const shades = colors[color]
-    return shades[shade ?? 'DEFAULT'] ?? shades.DEFAULT
+    const shades = colors[color] as Record<ShadeIndex, string>
+    return shades?.[shade ?? 'DEFAULT'] ?? shades?.DEFAULT ?? '#FFFFFF'
 }
