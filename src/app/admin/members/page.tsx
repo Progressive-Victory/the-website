@@ -116,7 +116,7 @@ export default function Page() {
         User,
         FetchError,
         { id: number; user: User; request: UpdateUserRequest },
-        User
+        User | undefined
     >({
         mutationFn: async ({ id, user, request }) => {
             const result = await onPatch<User>(`/users/${id}`, request, zUser)

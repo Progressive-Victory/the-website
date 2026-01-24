@@ -64,7 +64,7 @@ export default function Page() {
         Role,
         FetchError,
         { id: number; role: Role; request: UpdateRoleRequest },
-        Role
+        Role | undefined
     >({
         mutationFn: ({ id, request }) =>
             onPatch<Role>(`/roles/${id}`, request, zRole),
