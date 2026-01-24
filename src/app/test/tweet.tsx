@@ -11,9 +11,39 @@ import {
     ArrowUpOnSquareIcon as SolidArrowUpOnSquareIcon,
 } from '@heroicons/react/24/solid'
 import Image from 'next/image'
-import { useState } from 'react'
+import Link from 'next/link'
+import type React from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 const avatarImage = '/images/PV_Pride_Logo.png'
+
+function clamp(n: number, min: number, max: number) {
+    return Math.max(min, Math.min(max, n))
+}
+
+function useViewport() {
+    const [viewportPx, setViewportPx] = useState(0)
+    const [rootFontPx, setRootFontPx] = useState(16)
+
+    useEffect(() => {
+        const read = () => {
+            setViewportPx(window.innerWidth)
+            const fs = window.getComputedStyle(
+                document.documentElement
+            ).fontSize
+            const parsed = Number.parseFloat(fs)
+            setRootFontPx(Number.isFinite(parsed) && parsed > 0 ? parsed : 16)
+        }
+
+        read()
+        window.addEventListener('resize', read)
+        return () => window.removeEventListener('resize', read)
+    }, [])
+
+    const viewportRem = rootFontPx > 0 ? viewportPx / rootFontPx : 0
+
+    return { viewportPx, viewportRem, rootFontPx }
+}
 
 export function TestPage() {
     const messages = [
@@ -52,65 +82,185 @@ export function TestPage() {
             imageOffsetX: -5,
             imageOffsetY: 10,
         },
+        {
+            username: 'Sam Dryzmala',
+            nameColor: 'purple',
+            text: 'I founded Progressive Victory with the dream of creating a political action community that comes together to get progressive policies & candidates the attention they deserve!',
+            image: '/images/sam.jpg',
+            avatar: '/images/sam_twitter_photo.jpeg',
+            avatarRounded: true,
+            imagePosition: 'center center',
+            imageZoom: 1.2,
+            imageOffsetX: -5,
+            imageOffsetY: 10,
+        },
+        {
+            username: 'Sam Dryzmala',
+            nameColor: 'purple',
+            text: 'I founded Progressive Victory with the dream of creating a political action community that comes together to get progressive policies & candidates the attention they deserve!',
+            image: '/images/sam.jpg',
+            avatar: '/images/sam_twitter_photo.jpeg',
+            avatarRounded: true,
+            imagePosition: 'center center',
+            imageZoom: 1.2,
+            imageOffsetX: -5,
+            imageOffsetY: 10,
+        },
     ]
 
-    const cardCount = messages.length
+    const { viewportRem } = useViewport()
+
+    const cardsPerRow = useMemo(() => {
+        let n = 1
+        if (viewportRem >= 80) n = 3
+        else if (viewportRem >= 55) n = 2
+        else n = 1
+        return clamp(n, 1, messages.length)
+    }, [viewportRem, messages.length])
 
     const paddingRem = 1
     const gapRem = 1
 
     const totalPaddingRem = paddingRem * 2
-    const totalGapsRem = gapRem * Math.max(0, cardCount - 1)
+    const totalGapsRem = gapRem * Math.max(0, cardsPerRow - 1)
 
     return (
-        <div
-            style={{
-                zIndex: 1,
-            }}
-        >
-            <p
+        <div style={{ zIndex: 1 }}>
+            <div
                 style={{
-                    width: '100%',
+                    color: '#ffffff',
+                    paddingBlock: '3rem',
+                    position: 'relative',
+                    alignItems: 'center',
+                    alignContent: 'center',
                     textAlign: 'center',
-                    fontSize: '2.25rem',
-                    fontWeight: 700,
-                    color: 'white',
-                    padding: '3rem',
                 }}
             >
-                Test <span style={{ color: '#09223a' }}>Page</span>
-            </p>
-
-            <span style={{}}>
-                <div
-                    style={
-                        {
-                            display: 'flex',
-                            flexDirection: 'row',
-                            '--screen-width': `calc(100dvw - ${totalPaddingRem}rem - ${totalGapsRem}rem)`,
-                            '--card-count': cardCount,
-                            padding: `${paddingRem}rem`,
-                            gap: `${gapRem}rem`,
-                        } as React.CSSProperties
-                    }
+                <h1
+                    style={{
+                        fontSize: '2rem',
+                        lineHeight: '2rem',
+                        fontWeight: '700',
+                        color: '#ffffff',
+                    }}
                 >
-                    {messages.map((m, i) => (
-                        <Message
-                            key={i}
-                            username={m.username}
-                            text={m.text}
-                            nameColor={m.nameColor}
-                            image={m.image}
-                            avatar={m.avatar}
-                            avatarRounded={m.avatarRounded}
-                            imagePosition={m.imagePosition}
-                            imageZoom={m.imageZoom}
-                            imageOffsetX={m.imageOffsetX}
-                            imageOffsetY={m.imageOffsetY}
-                        />
-                    ))}
+                    Welcome to{' '}
+                    <span style={{ color: '#09223a' }}>
+                        Progressive Victory
+                    </span>{' '}
+                    the Online Community for Political Action.
+                </h1>
+                <h2
+                    style={{
+                        margin: '2rem 0',
+                        fontSize: '1rem',
+                        lineHeight: '1.5rem',
+                        fontWeight: '500',
+                        color: '#ffffff',
+                    }}
+                >
+                    Find like minded people, share ideas, and engage in
+                    meaningful political action. Get involved today!
+                </h2>
+
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '1rem',
+                    }}
+                >
+                    <Link
+                        href="/about"
+                        style={{
+                            borderRadius: '9999px',
+                            paddingBlock: '0.5rem',
+                            paddingInline: '1.5rem',
+                            fontSize: '1rem',
+                            fontWeight: 700,
+                            color: '#ffffff',
+                            backgroundColor: '#09223a',
+                            transitionProperty: 'all',
+                            transitionDuration: '200ms',
+                            transitionTimingFunction: 'ease-in-out',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#ffffff'
+                            e.currentTarget.style.color = '#ce3728'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#09223a'
+                            e.currentTarget.style.color = '#ffffff'
+                        }}
+                    >
+                        Learn More
+                    </Link>
+
+                    <Link
+                        href="/volunteer"
+                        style={{
+                            borderRadius: '9999px',
+                            paddingBlock: '0.5rem',
+                            paddingInline: '1.35rem',
+                            fontSize: '1rem',
+                            fontWeight: 700,
+                            color: '#ffffff',
+                            backgroundColor: '#ce3728',
+                            transitionProperty: 'all',
+                            transitionDuration: '200ms',
+                            transitionTimingFunction: 'ease-in-out',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#ffffff'
+                            e.currentTarget.style.color = '#CE3728'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#ce3728'
+                            e.currentTarget.style.color = '#ffffff'
+                        }}
+                    >
+                        Join
+                    </Link>
                 </div>
-            </span>
+            </div>
+
+            <div
+                style={
+                    {
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+
+                        padding: `${paddingRem}rem`,
+                        gap: `${gapRem}rem`,
+
+                        '--row-width': `calc(100dvw - ${totalPaddingRem}rem - ${totalGapsRem}rem)`,
+
+                        '--cards-per-row': cardsPerRow,
+
+                        '--card-width': `calc(var(--row-width) / var(--cards-per-row))`,
+                    } as React.CSSProperties
+                }
+            >
+                {messages.map((m, i) => (
+                    <Message
+                        key={i}
+                        username={m.username}
+                        text={m.text}
+                        nameColor={m.nameColor}
+                        image={m.image}
+                        avatar={m.avatar}
+                        avatarRounded={m.avatarRounded}
+                        imagePosition={m.imagePosition}
+                        imageZoom={m.imageZoom}
+                        imageOffsetX={m.imageOffsetX}
+                        imageOffsetY={m.imageOffsetY}
+                    />
+                ))}
+            </div>
         </div>
     )
 }
@@ -143,25 +293,33 @@ export function Message({
     const [clickedShare, setClickedShare] = useState(false)
 
     return (
-        <div>
-            <div //Background
+        <div
+            style={{
+                flex: '0 0 calc(var(--card-width))',
+                width: 'calc(var(--card-width))',
+                boxSizing: 'border-box',
+            }}
+        >
+            <div
                 style={{
+                    display: 'flex',
                     flexDirection: 'column',
-                    gap: 'calc(var(--screen-width)/100)',
-                    width: 'calc(var(--screen-width) / var(--card-count))',
 
-                    borderRadius: 'calc(var(--screen-width)/150)',
+                    gap: 'calc(var(--card-width) / 50)',
+
+                    width: '100%',
+                    borderRadius: 'calc(var(--card-width) / 50)',
                     background: '#ffffff',
-                    padding: 'calc(var(--screen-width)/100)',
+                    padding: 'calc(var(--card-width) / 40)',
                     boxShadow:
                         '0 1rem 1.25rem -0.25rem rgba(0,0,0,0.1), 0 0.4rem 0.5rem -0.3rem rgba(0,0,0,0.1)',
                 }}
             >
-                <div //Card Header
+                <div
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: 'calc(var(--screen-width)/100)',
+                        gap: 'calc(var(--card-width) / 50)',
                     }}
                 >
                     <div
@@ -171,29 +329,24 @@ export function Message({
                             alignItems: 'center',
                         }}
                     >
-                        <div>
-                            <div>
-                                <Image
-                                    src={avatar}
-                                    alt={username}
-                                    width={0}
-                                    height={0}
-                                    unoptimized
-                                    style={{
-                                        width: 'calc(var(--screen-width) / 35)',
-                                        borderRadius: avatarRounded
-                                            ? '9999px'
-                                            : '0',
-                                        objectFit: 'cover',
-                                    }}
-                                />
-                            </div>
-                        </div>
+                        <Image
+                            src={avatar}
+                            alt={username}
+                            width={0}
+                            height={0}
+                            unoptimized
+                            style={{
+                                width: 'calc(var(--card-width) / 12)',
+                                height: 'calc(var(--card-width) / 12)',
+                                borderRadius: avatarRounded ? '9999px' : '0',
+                                objectFit: 'cover',
+                            }}
+                        />
 
                         <p
                             style={{
-                                fontSize: 'calc(var(--screen-width)/95)',
-                                paddingLeft: 'calc(var(--screen-width)/100)',
+                                fontSize: 'calc(var(--card-width) / 30)',
+                                paddingLeft: 'calc(var(--card-width) / 30)',
                                 color: nameColor,
                                 fontWeight: '700',
                             }}
@@ -202,11 +355,7 @@ export function Message({
                         </p>
                     </div>
 
-                    <p
-                        style={{
-                            fontSize: 'calc(var(--screen-width)/100)',
-                        }}
-                    >
+                    <p style={{ fontSize: 'calc(var(--card-width) / 35)' }}>
                         {text}
                     </p>
                 </div>
@@ -214,14 +363,14 @@ export function Message({
                 {image && (
                     <div
                         style={{
-                            paddingBlock: 'calc(var(--screen-width) / 100)',
+                            paddingBlock: 'calc(var(--card-width) / 100)',
                         }}
                     >
                         <div
                             style={{
                                 position: 'relative',
                                 aspectRatio: '16 / 9',
-                                borderRadius: 'calc(var(--screen-width) / 150)',
+                                borderRadius: 'calc(var(--card-width) / 50)',
                                 overflow: 'hidden',
                             }}
                         >
@@ -241,18 +390,18 @@ export function Message({
                     </div>
                 )}
 
-                <div //Card Bottom
+                <div
                     style={{
                         display: 'flex',
                         justifyContent: 'end',
-                        gap: 'calc(var(--screen-width) / 100)',
+                        gap: 'calc(var(--card-width) / 35)',
                     }}
                 >
                     <button
                         type="button"
                         style={{
-                            width: 'calc(var(--screen-width)/70)',
-                            height: 'calc(var(--screen-width)/70)',
+                            width: 'calc(var(--card-width) / 20)',
+                            height: 'calc(var(--card-width) / 20)',
                             cursor: 'pointer',
                         }}
                         onClick={() => setClickedBubble((v) => !v)}
@@ -262,14 +411,14 @@ export function Message({
                         {clickedBubble ? (
                             <SolidChatBubbleLeftRightIcon
                                 style={{
-                                    width: 'calc(var(--screen-width)/70)',
+                                    width: 'calc(var(--card-width) / 22)',
                                     color: '#3b82f6',
                                 }}
                             />
                         ) : (
                             <ChatBubbleLeftRightIcon
                                 style={{
-                                    width: 'calc(var(--screen-width)/70)',
+                                    width: 'calc(var(--card-width) / 22)',
                                 }}
                             />
                         )}
@@ -278,8 +427,8 @@ export function Message({
                     <button
                         type="button"
                         style={{
-                            width: 'calc(var(--screen-width)/70)',
-                            height: 'calc(var(--screen-width)/70)',
+                            width: 'calc(var(--card-width) / 22)',
+                            height: 'calc(var(--card-width) / 22)',
                             cursor: 'pointer',
                         }}
                         onClick={() => setClickedShare((v) => !v)}
@@ -289,23 +438,24 @@ export function Message({
                         {clickedShare ? (
                             <SolidArrowUpOnSquareIcon
                                 style={{
-                                    width: 'calc(var(--screen-width)/70)',
+                                    width: 'calc(var(--card-width) / 22)',
                                     color: '#22c55e',
                                 }}
                             />
                         ) : (
                             <ArrowUpOnSquareIcon
                                 style={{
-                                    width: 'calc(var(--screen-width)/70)',
+                                    width: 'calc(var(--card-width) / 22)',
                                 }}
                             />
                         )}
                     </button>
+
                     <button
                         type="button"
                         style={{
-                            width: 'calc(var(--screen-width)/70)',
-                            height: 'calc(var(--screen-width)/70)',
+                            width: 'calc(var(--card-width) / 22)',
+                            height: 'calc(var(--card-width) / 22)',
                             cursor: 'pointer',
                         }}
                         onClick={() => setClickedHeart((v) => !v)}
@@ -315,14 +465,14 @@ export function Message({
                         {clickedHeart ? (
                             <SolidHeartIcon
                                 style={{
-                                    width: 'calc(var(--screen-width)/70)',
+                                    width: 'calc(var(--card-width) / 22)',
                                     color: '#ef4444',
                                 }}
                             />
                         ) : (
                             <HeartIcon
                                 style={{
-                                    width: 'calc(var(--screen-width)/70)',
+                                    width: 'calc(var(--card-width) / 22)',
                                 }}
                             />
                         )}
