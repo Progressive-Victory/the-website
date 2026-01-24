@@ -1,45 +1,41 @@
-import { FormField, IBaseFormField } from '.'
-import classNames from 'classnames'
+import { FormField, FormFieldProps, getGetter, getSetter } from './FormField'
+import styles from './FormField.module.css'
+import cx from 'classnames'
 import { ChangeEvent } from 'react'
 
-export function CheckboxField({
-    name,
-    field,
-    required = false,
-    readonly = false,
-    deprecated = false,
-    dynamic,
-}: IBaseFormField) {
-    const value = (dynamic?.value as boolean) ?? false
+export function CheckboxField<T>(
+    props: FormFieldProps<T, boolean | null | undefined>
+) {
+    props.getter ??= getGetter(props)
+    props.setter ??= getSetter(props)
+    props.validator ??= (field: boolean | null | undefined) =>
+        !props.required || !!field
 
-    const isValid = (checked: boolean) => !required || checked
+    const readonly = !!props.readonly || !props.dynamic?.editing
+    const disabled = !!props.disabled || !!props.dynamic?.saving
+    const value = props?.getter?.(props.dynamic!.form) ?? false
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const checked = event.target.checked
-        dynamic?.onUpdate?.(field, checked, checked, isValid(checked))
+        const newValue = event.target.checked
+        props.dynamic?.onChange?.(props, newValue)
     }
 
     return (
-        <FormField
-            name={name}
-            field={field}
-            required={required}
-            deprecated={deprecated}
-        >
-            {readonly || dynamic?.disabled ? (
-                <div className="col-span-2 w-full">{`${value}`}</div>
+        <FormField {...props}>
+            {readonly ? (
+                <div className={styles.readonly}>{value}</div>
             ) : (
-                <div className="col-span-2 flex items-center">
+                <div className={styles.checkboxField}>
                     <input
                         type="checkbox"
-                        name={name}
-                        id={field}
-                        disabled={dynamic?.loading}
-                        required={required}
+                        id={props?.id}
+                        name={props.label}
+                        disabled={disabled}
+                        required={props.required}
                         checked={value}
                         onChange={handleChange}
-                        className={classNames(
-                            !isValid(value) && 'border-red-300'
+                        className={cx(
+                            !props.validator(value) && styles.invalid
                         )}
                     />
                 </div>

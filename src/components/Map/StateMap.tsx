@@ -1,4 +1,5 @@
 import { ResponsiveFit } from './ResponsiveFit'
+import styles from './StateMap.module.css'
 import { OPEN_ATTR, OPEN_MAP_URI } from './constants'
 import { StateDataFeatureCollection, statesData } from './stateData'
 import { MapView, StateMapInteractionProps } from './types'
@@ -33,7 +34,7 @@ export default function StateMap(
             scrollWheelZoom={enableInteraction}
             dragging={enableInteraction}
             doubleClickZoom={enableInteraction}
-            className="z-0 size-full rounded-md"
+            className={styles.mapContainer}
         >
             <>
                 {'bounds' in _mapView && (
@@ -120,16 +121,24 @@ function USMapLayer({
             })
         }
         return newObj
-    }, [stateMemberCount])
+    }, [stateMemberCount, getFillColor])
 
     function onEachFeature(
         f: Feature<Geometry, { name: string }>,
         layer: L.Layer
     ) {
         layer.on({
-            mouseover: (e) => onFeatureHover(e.target.feature.properties.name),
+            mouseover: (e) =>
+                onFeatureHover(
+                    (e.target as { feature: { properties: { name: string } } })
+                        .feature.properties.name
+                ),
             mouseout: () => onFeatureHover(null),
-            click: (e) => onFeatureClick(e.target.feature.properties.name),
+            click: (e) =>
+                onFeatureClick(
+                    (e.target as { feature: { properties: { name: string } } })
+                        .feature.properties.name
+                ),
         })
     }
 
@@ -152,14 +161,19 @@ function USMapLayer({
                 data={data}
                 onEachFeature={onEachFeature}
                 style={(feature) => {
-                    const baseColor =
-                        baseStateColors?.[feature?.properties?.name]
+                    const properties = feature?.properties as
+                        | { name: string }
+                        | undefined
+
+                    const baseColor = properties?.name
+                        ? baseStateColors?.[properties.name]
+                        : undefined
 
                     return {
                         fillColor:
-                            selectedState === feature?.properties?.name
+                            selectedState === properties?.name
                                 ? '#CE3728'
-                                : hoveredState === feature?.properties?.name
+                                : hoveredState === properties?.name
                                   ? '#EBAFA9'
                                   : (baseColor ??
                                     getBrandColor('mapBlue', 100)),

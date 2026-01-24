@@ -1,8 +1,6 @@
-import useInit from './useInit'
-import useUser from './useUser'
-
-export { useUser, useInit }
-
+export * from './useClickAway'
+export * from './useCurrentUser'
 export * from './useFetch'
 export * from './useHydration'
-export * from './useUser'
+export * from './useInit'
+export * from './usePaginatedSearch'

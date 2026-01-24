@@ -1,4 +1,4 @@
-import styles from '@/components/halftone/halftone.module.css'
+import styles from './HalftoneBackground.module.css'
 import type React from 'react'
 
 interface HalftoneBackgroundProps {
