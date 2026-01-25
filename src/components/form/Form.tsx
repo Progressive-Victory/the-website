@@ -112,7 +112,7 @@ export function Form<
         if (valid) {
             if (hasField(invalidMap)) {
                 delete invalidMap[field]
-                setPatchMap({ ...invalidMap })
+                setInvalidMap({ ...invalidMap })
             }
         } else {
             setInvalidMap({ ...invalidMap, [field]: true })

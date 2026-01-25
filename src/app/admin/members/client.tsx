@@ -7,6 +7,7 @@ import {
     CheckboxField,
     Form,
     FormGroup,
+    PhoneField,
     SelectManyField,
     TextField,
 } from '@/components/form'
@@ -158,7 +159,7 @@ export default function ClientPage({ roles }: PageProps) {
                                 field="discordId"
                                 readonly
                             />
-                            <TextField
+                            <PhoneField
                                 name="Phone Number"
                                 field="phoneNumber"
                                 required
