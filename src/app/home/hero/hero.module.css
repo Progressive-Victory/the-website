@@ -5,7 +5,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 4rem 0;
+    padding: 3rem 0;
 }
 
 .blendPanel {
@@ -39,7 +39,7 @@
     flex-direction: column;
     align-items: center;
 
-    padding: 0 1rem;
+    padding-inline: 1rem;
     text-align: center;
 }
 
@@ -68,60 +68,41 @@
     color: #ffffff;
 }
 
-.cta {
-    background: #ce3728;
-    font-size: 1rem;
-}
-
-.messages {
-    margin-top: 1rem; /* gap between tweets and title */
+.heroButtons {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: 1.5rem;
-    padding: 0 1rem;
+    align-items: center;
+    gap: 1rem;
 }
 
-.messageCard {
-    max-width: 36rem;
+.learnMoreBtn,
+.joinBtn {
+    border-radius: 9999px;
+    padding-block: 0.4rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    transition: all 200ms ease-in-out;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-@media (min-width: 1280px) {
-    .messageCard {
-        width: 30vw;
-    }
+.learnMoreBtn {
+    padding-inline: 1.5rem;
+    background-color: #09223a;
+}
+.learnMoreBtn:hover {
+    background-color: #ffffff;
+    color: #ce3728;
 }
 
-.orderLastXlFirst {
-    order: 9999;
+.joinBtn {
+    padding-inline: 1.35rem;
+    background-color: #ce3728;
 }
-
-@media (min-width: 1280px) {
-    .orderLastXlFirst {
-        order: -9999;
-    }
-}
-
-.orderFirstXlLast {
-    order: -9999;
-}
-
-@media (min-width: 1280px) {
-    .orderFirstXlLast {
-        order: 9999;
-    }
-}
-
-.messageMid {
-    height: fit-content;
-}
-
-@media (min-width: 1024px) {
-    .messageMid {
-        margin-top: 6rem;
-    }
-}
-
-.tilt {
-    /* empty don't touch this Joops */
+.joinBtn:hover {
+    background-color: #ffffff;
+    color: #ce3728;
 }

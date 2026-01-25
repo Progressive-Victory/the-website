@@ -1,6 +1,6 @@
 'use client'
 
-import styles from './Card.module.css'
+import styles from './OldCard.module.css'
 import {
     HeartIcon,
     ChatBubbleLeftRightIcon,

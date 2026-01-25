@@ -1,0 +1,42 @@
+.row {
+    --pad: 3rem;
+    --gap: clamp(1.25rem, calc(6rem - 5dvw), 3rem);
+    --cols: 1;
+
+    --row-width: calc(
+        100dvw - (var(--pad) * 2) - (var(--gap) * (var(--cols) - 1))
+    );
+    --card-width: calc(var(--row-width) / var(--cols));
+
+    display: flex;
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    padding: 2rem var(--pad);
+    gap: var(--gap);
+    box-sizing: border-box;
+}
+
+@media (min-width: 55rem) {
+    .row {
+        --cols: 2;
+    }
+}
+
+@media (min-width: 80rem) {
+    .row {
+        --cols: 3;
+    }
+}
+
+.messageMid {
+    height: fit-content;
+}
+
+@media (min-width: 80rem) {
+    .messageMid {
+        margin-top: 6rem;
+    }
+}
