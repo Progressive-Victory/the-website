@@ -70,20 +70,20 @@
     color: #ce3728;
 }
 
-.grid {
-    --pad: 2rem;
-    --gap: 1rem;
-
+.row {
+    --pad: 3rem;
+    --gap: clamp(1.25rem, calc(6rem - 5dvw), 3rem);
     --cols: 1;
 
     --row-width: calc(
         100dvw - (var(--pad) * 2) - (var(--gap) * (var(--cols) - 1))
     );
-
     --card-width: calc(var(--row-width) / var(--cols));
 
-    display: grid;
-    grid-template-columns: repeat(var(--cols), var(--card-width));
+    display: flex;
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
 
     padding: var(--pad);
@@ -92,19 +92,19 @@
 }
 
 @media (min-width: 55rem) {
-    .grid {
+    .row {
         --cols: 2;
     }
 }
 
-/* >= 80rem => 3 per row */
 @media (min-width: 80rem) {
-    .grid {
+    .row {
         --cols: 3;
     }
 }
 
 .cardOuter {
+    flex: 0 0 var(--card-width);
     width: var(--card-width);
     box-sizing: border-box;
 }
@@ -197,9 +197,16 @@
     justify-content: center;
 }
 
+.actionBtn:hover .icon {
+    transform: scale(1.1);
+}
+
 .icon {
     width: calc(var(--card-width) / 22);
     height: calc(var(--card-width) / 22);
+    transition:
+        transform 80ms ease,
+        color 80ms ease;
 }
 
 .iconBubbleOn {
@@ -212,4 +219,18 @@
 
 .iconHeartOn {
     color: #ef4444;
+}
+
+.messageMid {
+    height: fit-content;
+}
+
+@media (min-width: 80rem) {
+    .messageMid {
+        margin-top: 6rem;
+    }
+}
+
+.tilt {
+    /* empty don't touch this Joops */
 }
