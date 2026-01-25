@@ -115,3 +115,37 @@
 .iconHeartOn {
     color: #ef4444;
 }
+
+@keyframes growPop {
+    0% {
+        transform: scale(0);
+    }
+    10% {
+        transform: scale(0.15);
+    }
+    15% {
+        transform: scale(0.25);
+    }
+    20% {
+        transform: scale(0.4);
+    }
+    20% {
+        transform: scale(0.6);
+    }
+
+    70% {
+        transform: scale(1.45);
+    }
+    95% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.iconGrowPop {
+    animation: growPop 250ms;
+    transform-origin: center;
+    will-change: transform;
+}

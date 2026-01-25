@@ -149,7 +149,7 @@ export function Message({
                     >
                         {clickedBubble ? (
                             <SolidChatBubbleLeftRightIcon
-                                className={`${styles.icon} ${styles.iconBubbleOn}`}
+                                className={`${styles.icon} ${styles.iconBubbleOn} ${styles.iconGrowPop}`}
                             />
                         ) : (
                             <ChatBubbleLeftRightIcon className={styles.icon} />
@@ -165,7 +165,7 @@ export function Message({
                     >
                         {clickedShare ? (
                             <SolidArrowUpOnSquareIcon
-                                className={`${styles.icon} ${styles.iconShareOn}`}
+                                className={`${styles.icon} ${styles.iconShareOn} ${styles.iconGrowPop}`}
                             />
                         ) : (
                             <ArrowUpOnSquareIcon className={styles.icon} />
@@ -181,7 +181,7 @@ export function Message({
                     >
                         {clickedHeart ? (
                             <SolidHeartIcon
-                                className={`${styles.icon} ${styles.iconHeartOn}`}
+                                className={`${styles.icon} ${styles.iconHeartOn} ${styles.iconGrowPop}`}
                             />
                         ) : (
                             <HeartIcon className={styles.icon} />
