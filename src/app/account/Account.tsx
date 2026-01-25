@@ -2,6 +2,7 @@
 
 import AccountInfoForm from './AccountInfoForm'
 import MembershipPurchaseDialog from './MembershipPurchaseDialog'
+import styles from './account.module.css'
 import { MainLayout } from '@/components/layout/MainLayout'
 
 interface AccountInformation {
@@ -22,9 +23,9 @@ interface AccountInformation {
 const Account = (accountInformation: AccountInformation) => {
     return (
         <MainLayout>
-            <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
+            <div className={`${styles.background} halftone`} />
             <div
-                className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
+                className={styles.whiteHouseImage}
                 style={{
                     backgroundImage: "url('/images/blend_test.png')",
                     backgroundSize: 'cover',
@@ -33,23 +34,21 @@ const Account = (accountInformation: AccountInformation) => {
                     transform: 'scaleX(-1)',
                 }}
             />
-            <div className="flex flex-row justify-center">
-                <div className="z-0 m-4 flex size-auto w-fit flex-col justify-center gap-y-4 rounded-lg bg-white p-4 shadow-md md:m-8 md:p-6">
+            <div className={styles.mainDiv}>
+                <div className={styles.contentBox}>
                     <header>
-                        <p className="mx-auto text-center text-3xl font-bold text-black">
-                            Account Dashboard
-                        </p>
+                        <p className={styles.pageTitle}>Account Dashboard</p>
                     </header>
-                    <div className="flex flex-row justify-center gap-16">
-                        <div className="flex flex-col">
-                            <p className="text-3xl font-bold text-black md:p-6">
+                    <div className={styles.contentRow}>
+                        <div className={styles.accountInfoColumn}>
+                            <p className={styles.accountNameTitle}>
                                 {accountInformation.discordUsername}
                             </p>
                             <AccountInfoForm
                                 {...accountInformation}
                             ></AccountInfoForm>
                         </div>
-                        <div className="w-px bg-slate-300" />
+                        <div className={styles.divider} />
                         <MembershipPurchaseDialog />
                     </div>
                 </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import StateSelector from './StateSelector'
+import styles from './accountInfoForm.module.css'
 import { useState } from 'react'
 
 interface MutableFields {
@@ -57,32 +58,30 @@ const AccountInfoForm = ({
     return (
         <form className="flex min-w-[500px] max-w-[550px] flex-col justify-start gap-y-4 rounded-lg bg-slate-100 p-4 shadow-md md:m-8 md:mt-0 md:p-6">
             <header>
-                <p className="text-l mx-auto text-left font-bold text-black">
-                    Account Information
-                </p>
+                <p className={styles.accountInfoTitle}>Account Information</p>
             </header>
-            <div className="flex flex-col gap-y-2">
-                <div className="flex flex-row justify-between">
+            <div className={styles.accountInfoColumn}>
+                <div className={styles.accountInfoField}>
                     <p>Username:</p>
                     <input
                         defaultValue={discordUsername}
                         disabled
-                        className={'rounded-md ring-steel-blue'}
+                        className={styles.accountInfoInput}
                     ></input>
                 </div>
-                <div className="flex flex-row justify-between ">
+                <div className={styles.accountInfoField}>
                     <p>Discord ID:</p>
                     <input
                         defaultValue={discordId}
                         disabled
-                        className={'rounded-md ring-steel-blue'}
+                        className={styles.accountInfoInput}
                     ></input>
                 </div>
-                <div className="flex flex-row justify-between ">
+                <div className={styles.accountInfoField}>
                     <p>First Name:</p>
                     <input
                         defaultValue={firstName}
-                        className={'rounded-md ring-steel-blue'}
+                        className={styles.accountInfoInput}
                         onChange={(e) => {
                             onUpdate({
                                 ...updatedForm,
@@ -91,11 +90,11 @@ const AccountInfoForm = ({
                         }}
                     ></input>
                 </div>
-                <div className="flex flex-row justify-between ">
+                <div className={styles.accountInfoField}>
                     <p>Last Name:</p>
                     <input
                         defaultValue={lastName}
-                        className={'rounded-md ring-steel-blue'}
+                        className={styles.accountInfoInput}
                         onChange={(e) => {
                             onUpdate({
                                 ...updatedForm,
@@ -104,12 +103,12 @@ const AccountInfoForm = ({
                         }}
                     ></input>
                 </div>
-                <div className="flex flex-row justify-between ">
+                <div className={styles.accountInfoField}>
                     <p>Email:</p>
                     <input
                         type="email"
                         defaultValue={emailAddress}
-                        className={'rounded-md ring-steel-blue'}
+                        className={styles.accountInfoInput}
                         onChange={(e) => {
                             onUpdate({
                                 ...updatedForm,
@@ -118,12 +117,12 @@ const AccountInfoForm = ({
                         }}
                     ></input>
                 </div>
-                <div className="flex flex-row justify-between ">
+                <div className={styles.accountInfoField}>
                     <p>Phone Number:</p>
                     <input
                         type="tel"
                         defaultValue={phoneNumber}
-                        className={'rounded-md ring-steel-blue'}
+                        className={styles.accountInfoInput}
                         onChange={(e) => {
                             onUpdate({
                                 ...updatedForm,
@@ -132,12 +131,12 @@ const AccountInfoForm = ({
                         }}
                     ></input>
                 </div>
-                <div className="flex flex-row justify-between ">
+                <div className={styles.accountInfoField}>
                     <p>Date Of Birth:</p>
                     <input
                         type="date"
                         defaultValue={dateOfBirth.toISOString().split('T')[0]}
-                        className={'rounded-md ring-steel-blue'}
+                        className={styles.accountInfoInput}
                         onChange={(e) => {
                             if (e.target.valueAsDate) {
                                 onUpdate({
@@ -148,7 +147,7 @@ const AccountInfoForm = ({
                         }}
                     ></input>
                 </div>
-                <div className="flex flex-row justify-between ">
+                <div className={styles.accountInfoField}>
                     <p>State:</p>
                     <StateSelector
                         initialValue={state}
@@ -160,11 +159,11 @@ const AccountInfoForm = ({
                         }}
                     />
                 </div>
-                <div className="flex flex-row justify-between ">
+                <div className={styles.accountInfoField}>
                     <p>city:</p>
                     <input
                         defaultValue={city}
-                        className={'rounded-md ring-steel-blue'}
+                        className={styles.accountInfoInput}
                         onChange={(e) => {
                             onUpdate({
                                 ...updatedForm,
@@ -173,12 +172,12 @@ const AccountInfoForm = ({
                         }}
                     ></input>
                 </div>
-                <div className="flex flex-row justify-between ">
+                <div className={styles.accountInfoField}>
                     <p>ZIP Code:</p>
                     <input
                         defaultValue={zip}
                         type="number"
-                        className={'rounded-md ring-steel-blue'}
+                        className={styles.accountInfoInput}
                         onChange={(e) => {
                             onUpdate({
                                 ...updatedForm,
@@ -187,11 +186,11 @@ const AccountInfoForm = ({
                         }}
                     ></input>
                 </div>
-                <div className="flex flex-row justify-between ">
+                <div className={styles.accountInfoField}>
                     <p>Address Line 1:</p>
                     <input
                         defaultValue={addressLine1}
-                        className={'rounded-md ring-steel-blue'}
+                        className={styles.accountInfoInput}
                         onChange={(e) => {
                             onUpdate({
                                 ...updatedForm,
@@ -200,11 +199,11 @@ const AccountInfoForm = ({
                         }}
                     ></input>
                 </div>
-                <div className="flex flex-row justify-between ">
+                <div className={styles.accountInfoField}>
                     <p>Address Line 2:</p>
                     <input
                         defaultValue={addressLine2}
-                        className={'rounded-md ring-steel-blue'}
+                        className={styles.accountInfoInput}
                         onChange={(e) => {
                             onUpdate({
                                 ...updatedForm,

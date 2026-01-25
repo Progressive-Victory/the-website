@@ -1,70 +1,65 @@
-.pageRoot {
-    position: relative;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
-.controlsRow {
-    min-width: 270px;
-    display: flex;
-    justify-content: space-evenly;
-    flex-wrap: wrap;
-}
-
-.primaryButton {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-    border-radius: 9999px;
-    padding: 0.5rem 1rem;
+.pageTitle {
+    text-align: center;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
     font-weight: 700;
-    color: #fff;
-    background: #ce3728;
-    transition:
-        background-color 200ms ease,
-        color 200ms ease;
+    color: rgb(0 0 0 / 1);
+    margin-bottom: 1rem;
 }
 
-.primaryButton:hover {
-    background: #fff;
-    color: #09223a;
+.mainDiv,
+.contentRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
 }
 
-.primaryButton:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.85);
-    outline-offset: 3px;
+.contentRow {
+    gap: 4rem;
 }
 
-.adminLink {
-    text-decoration: none;
-}
-
-.notice {
-    position: relative;
+.contentBox {
+    background-color: rgb(255 255 255 / 1);
     z-index: 1;
-    margin-bottom: 50px;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-
+    margin: 2rem;
+    padding: 2rem;
     border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-
-    font-size: 0.75rem;
-    color: #fff;
-
-    background: #09223a;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 5px 5px 5px rgb(0 0 0 / 10%);
 }
 
-.noticeIcon {
-    width: 16px;
-    height: 16px;
-    border-radius: 9999px;
-    background: #fff;
-    color: #2986cc;
+.accountInfoColumn {
+    display: flex;
+    flex-direction: column;
+}
+
+.accountNameTitle {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+    color: rgb(0 0 0 / 1);
+    margin-left: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.divider {
+    width: 1px;
+    background-color: rgb(203 213 225);
+}
+
+.background {
+    position: absolute;
+    z-index: 0;
+    left: 0px;
+    top: 0px;
+    height: 100%;
+    width: 100%;
+    opacity: 0.1;
+}
+
+.whiteHouseImage {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    height: 100%;
+    width: 50%;
 }
