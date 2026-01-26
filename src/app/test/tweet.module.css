@@ -92,6 +92,39 @@
     box-sizing: border-box;
 }
 
+.grid {
+    --pad: 2rem;
+    --gap: 1rem;
+
+    --cols: 1;
+
+    --row-width: calc(
+        100dvw - (var(--pad) * 2) - (var(--gap) * (var(--cols) - 1))
+    );
+
+    --card-width: calc(var(--row-width) / var(--cols));
+
+    display: grid;
+    grid-template-columns: repeat(var(--cols), var(--card-width));
+    justify-content: center;
+
+    padding: var(--pad);
+    gap: var(--gap);
+    box-sizing: border-box;
+}
+
+@media (min-width: 55rem) {
+    .grid {
+        --cols: 2;
+    }
+}
+
+@media (min-width: 80rem) {
+    .grid {
+        --cols: 3;
+    }
+}
+
 @media (min-width: 55rem) {
     .row {
         --cols: 2;

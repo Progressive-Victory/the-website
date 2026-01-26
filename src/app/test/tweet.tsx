@@ -157,7 +157,7 @@ export function TestPage() {
                 </div>
             </div>
 
-            <div className={styles.row}>
+            <div className={styles.grid}>
                 {messages.map((m, i) => (
                     <TiltMessage
                         key={m.username + i}
@@ -214,7 +214,19 @@ export function Message({
     const imgOffsetY = imageProps?.offsetY ?? 0
 
     return (
-        <motion.div className={styles.cardOuter}>
+        <motion.div
+            className={styles.cardOuter}
+            style={{
+                willChange: 'opacity, transform',
+                transform: 'translateZ(0)',
+            }}
+            initial={{ opacity: 0, scale: 0, ...(motionProps?.initial ?? {}) }}
+            animate={{ opacity: 1, scale: 1, ...(motionProps?.animate ?? {}) }}
+            transition={{
+                ease: 'backInOut',
+                ...(motionProps?.transition ?? {}),
+            }}
+        >
             <div className={styles.card}>
                 <div className={styles.cardTop}>
                     <div className={styles.userRow}>
