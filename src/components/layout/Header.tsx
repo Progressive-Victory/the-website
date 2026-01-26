@@ -76,10 +76,6 @@ const navitems: NavItem[] = [
         },
     },
     {
-        name: 'Test',
-        href: '/test',
-    },
-    {
         name: 'More',
         href: '/home',
         subnav: {
