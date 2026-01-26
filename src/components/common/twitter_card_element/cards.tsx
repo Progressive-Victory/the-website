@@ -86,12 +86,12 @@ export function Message({
                 willChange: 'opacity, transform',
                 transform: 'translateZ(0)',
             }}
-            initial={{ opacity: 0, scale: 0, ...(motionProps?.initial ?? {}) }}
-            animate={{ opacity: 1, scale: 1, ...(motionProps?.animate ?? {}) }}
-            transition={{
-                ease: 'backInOut',
-                ...(motionProps?.transition ?? {}),
-            }}
+            // initial={{ opacity: 0, scale: 0, ...(motionProps?.initial ?? {}) }}
+            // animate={{ opacity: 1, scale: 1, ...(motionProps?.animate ?? {}) }}
+            // transition={{
+            //     ease: 'backInOut',
+            //     ...(motionProps?.transition ?? {}),
+            // }}
         >
             <div className={styles.card}>
                 <div className={styles.cardTop}>
