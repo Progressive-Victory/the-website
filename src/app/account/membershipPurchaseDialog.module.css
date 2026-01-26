@@ -1,0 +1,17 @@
+.containerDiv {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+	row-gap: 2rem;
+}
+
+.buttonDiv {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.imageDiv {
+	min-width: 480px;
+	min-height: 302px;
+}

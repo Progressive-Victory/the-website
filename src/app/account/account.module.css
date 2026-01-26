@@ -1,17 +1,29 @@
-@media (max-width: 1000px) {
+@media (max-width: 1200px) {
     .contentRow {
         display: flex;
         flex-direction: column;
         justify-content: start;
+		row-gap: 2rem;
     }
+
+	.divider {
+	    height: 1px;
+	    background-color: rgb(203 213 225);
+	}
 }
 
-@media (min-width: 1001px) {
+@media (min-width: 1201px) {
     .contentRow {
         display: flex;
         flex-direction: row;
         justify-content: center;
+    	gap: 4rem;
     }
+
+	.divider {
+	    width: 1px;
+	    background-color: rgb(203 213 225);
+	}
 }
 
 .pageTitle {
@@ -27,10 +39,6 @@
     display: flex;
     flex-direction: row;
     justify-content: center;
-}
-
-.contentRow {
-    gap: 4rem;
 }
 
 .contentBox {
@@ -52,14 +60,9 @@
     line-height: 1.75rem;
     font-weight: 700;
     color: rgb(0 0 0 / 1);
-    margin-left: 2rem;
     margin-bottom: 0.5rem;
 }
 
-.divider {
-    width: 1px;
-    background-color: rgb(203 213 225);
-}
 
 .background {
     position: absolute;
