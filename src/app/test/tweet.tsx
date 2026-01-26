@@ -64,11 +64,6 @@ export function TestPage() {
     const messages: MessageData[] = [
         {
             username: 'Progressive Victory',
-            motionProps: {
-                initial: { rotate: 20, y: 50 },
-                animate: { rotate: -5, y: 0 },
-                transition: { delay: 0.15, duration: 0.65 },
-            },
             nameColor: 'red',
             text: "It's all fun and games w PV members at the Katie Wilson Watch Party tonight in Seattle! Congratulations to @wilsonformayor and all the volunteers who spent months working to help her win!",
             image: '/images/PVKatieWilsonWatchParty.jpeg',
@@ -86,11 +81,7 @@ export function TestPage() {
         },
         {
             username: 'Progressive Victory',
-            motionProps: {
-                initial: { rotate: 15, y: 50 },
-                animate: { rotate: 1, y: 0 },
-                transition: { delay: 0.65, duration: 0.65 },
-            },
+
             nameColor: 'red',
             text: 'Built by the internet, for America. Progressive Victory is a new kind of political institution: seamlessly marrying the electoral impact and volunteer power of traditional progressive organizations with the culture and community of digital third places.',
             avatar: avatarImage,
@@ -108,11 +99,7 @@ export function TestPage() {
         },
         {
             username: 'Sam Dryzmala',
-            motionProps: {
-                initial: { rotate: 30, y: 50 },
-                animate: { rotate: 6, y: 0 },
-                transition: { delay: 0.3, duration: 0.9 },
-            },
+
             nameColor: 'purple',
             text: 'I founded Progressive Victory with the dream of creating a political action community that comes together to get progressive policies & candidates the attention they deserve!',
             image: '/images/sam.jpg',
