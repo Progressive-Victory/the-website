@@ -152,7 +152,7 @@ export function Hero() {
                     </div>
                 </motion.div>
             </div>
-            <div className={styles.row}>
+            <div className={styles.grid}>
                 {messages.map((m, i) => (
                     <TiltMessage
                         key={m.username + i}
