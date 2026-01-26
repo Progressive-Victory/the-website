@@ -235,3 +235,220 @@
 .tilt {
     /* empty don't touch this Joops */
 }
+
+/* 
+.page {
+    z-index: 1;
+}
+
+.hero {
+    color: #ffffff;
+    padding-top: 4rem;
+    padding-bottom: 1rem;
+    padding-inline: 2rem;
+    position: relative;
+    text-align: center;
+}
+
+.heroTitle {
+    font-size: 2rem;
+    line-height: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+.heroTitleAccent {
+    color: #09223a;
+}
+
+.heroSubtitle {
+    margin: 2rem 0;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.heroButtons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.learnMoreBtn,
+.joinBtn {
+    border-radius: 9999px;
+    padding-block: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    transition: all 200ms ease-in-out;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.learnMoreBtn {
+    padding-inline: 1.5rem;
+    background-color: #09223a;
+}
+.learnMoreBtn:hover {
+    background-color: #ffffff;
+    color: #ce3728;
+}
+
+.joinBtn {
+    padding-inline: 1.35rem;
+    background-color: #ce3728;
+}
+.joinBtn:hover {
+    background-color: #ffffff;
+    color: #ce3728;
+}
+
+.grid {
+    --pad: 2rem;
+    --gap: 1rem;
+
+    --cols: 1;
+
+    --row-width: calc(
+        100dvw - (var(--pad) * 2) - (var(--gap) * (var(--cols) - 1))
+    );
+
+    --card-width: calc(var(--row-width) / var(--cols));
+
+    display: grid;
+    grid-template-columns: repeat(var(--cols), var(--card-width));
+    justify-content: center;
+
+    padding: var(--pad);
+    gap: var(--gap);
+    box-sizing: border-box;
+}
+
+@media (min-width: 55rem) {
+    .grid {
+        --cols: 2;
+    }
+}
+
+
+@media (min-width: 80rem) {
+    .grid {
+        --cols: 3;
+    }
+}
+
+.cardOuter {
+    width: var(--card-width);
+    box-sizing: border-box;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+
+    gap: calc(var(--card-width) / 50);
+
+    width: 100%;
+    box-sizing: border-box;
+
+    border-radius: calc(var(--card-width) / 50);
+    background: #ffffff;
+    padding: calc(var(--card-width) / 40);
+
+    box-shadow:
+        0 1rem 1.25rem -0.25rem rgba(0, 0, 0, 0.1),
+        0 0.4rem 0.5rem -0.3rem rgba(0, 0, 0, 0.1);
+}
+
+.cardTop {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--card-width) / 50);
+}
+
+.userRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.avatar {
+    width: calc(var(--card-width) / 12);
+    height: calc(var(--card-width) / 12);
+    border-radius: 0;
+    object-fit: cover;
+}
+
+.avatarRounded {
+    border-radius: 9999px;
+}
+
+.username {
+    font-size: calc(var(--card-width) / 30);
+    padding-left: calc(var(--card-width) / 30);
+    font-weight: 700;
+    margin: 0;
+}
+
+.text {
+    font-size: calc(var(--card-width) / 35);
+    margin: 0;
+}
+
+.mediaPad {
+    padding-block: calc(var(--card-width) / 100);
+}
+
+.mediaFrame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: calc(var(--card-width) / 50);
+    overflow: hidden;
+}
+
+.media {
+    object-fit: cover;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: calc(var(--card-width) / 35);
+}
+
+.actionBtn {
+    width: calc(var(--card-width) / 22);
+    height: calc(var(--card-width) / 22);
+    cursor: pointer;
+
+    padding: 0;
+    border: none;
+    background: transparent;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon {
+    width: calc(var(--card-width) / 22);
+    height: calc(var(--card-width) / 22);
+}
+
+.iconBubbleOn {
+    color: #3b82f6;
+}
+
+.iconShareOn {
+    color: #22c55e;
+}
+
+.iconHeartOn {
+    color: #ef4444;
+} */
