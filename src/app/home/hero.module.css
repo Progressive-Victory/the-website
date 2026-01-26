@@ -22,7 +22,7 @@
     pointer-events: none;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 64rem) {
     .blendPanel {
         width: 50%;
         transform: translateX(-50%);
@@ -43,7 +43,7 @@
     text-align: center;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 48rem) {
     .content {
         width: 66.6667%;
     }
