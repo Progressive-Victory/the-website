@@ -53,7 +53,7 @@
 }
 
 .text {
-    font-size: calc(var(--card-width) / 35);
+    font-size: calc(var(--card-width) / 32);
     margin: 0;
 }
 
