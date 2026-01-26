@@ -129,8 +129,8 @@
 }
 
 .grid {
-    --pad: 2rem;
-    --gap: 1rem;
+    --pad: 3rem;
+    --gap: 2rem;
 
     --cols: 1;
 
@@ -149,7 +149,7 @@
     box-sizing: border-box;
 }
 
-@media (min-width: 55rem) {
+@media (min-width: 64rem) {
     .grid {
         --cols: 2;
     }
@@ -182,4 +182,3 @@
         margin-top: 6rem;
     }
 }
-
