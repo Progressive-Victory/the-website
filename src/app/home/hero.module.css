@@ -108,7 +108,7 @@
 }
 
 .row {
-    --pad: 2rem;
+    --pad: 1rem;
     --gap: clamp(1.25rem, calc(6rem - 5dvw), 3rem);
     --cols: 1;
 
@@ -132,6 +132,7 @@
 
 @media (min-width: 64rem) {
     .row {
+        --pad: 3rem;
         --cols: 2;
     }
 }
