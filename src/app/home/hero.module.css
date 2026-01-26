@@ -130,7 +130,7 @@
 
 .grid {
     --pad: 3rem;
-    --gap: 2rem;
+    --gap: clamp(1.25rem, calc(6rem - 5dvw), 3rem);
 
     --cols: 1;
 
@@ -144,7 +144,7 @@
     grid-template-columns: repeat(var(--cols), var(--card-width));
     justify-content: center;
 
-    padding: var(--pad);
+    padding: 5rem var(--pad);
     gap: var(--gap);
     box-sizing: border-box;
 }
@@ -158,6 +158,7 @@
 @media (min-width: 80rem) {
     .grid {
         --cols: 3;
+        padding: 2rem var(--pad);
     }
 }
 
