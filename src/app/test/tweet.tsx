@@ -11,13 +11,7 @@ import {
     ChatBubbleLeftRightIcon as SolidChatBubbleLeftRightIcon,
     ArrowUpOnSquareIcon as SolidArrowUpOnSquareIcon,
 } from '@heroicons/react/24/solid'
-import {
-    motion,
-    TargetAndTransition,
-    Transition,
-    useSpring,
-    useTransform,
-} from 'motion/react'
+import { motion, TargetAndTransition, Transition } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -64,6 +58,7 @@ export function TestPage() {
     const messages: MessageData[] = [
         {
             username: 'Progressive Victory',
+
             nameColor: 'red',
             text: "It's all fun and games w PV members at the Katie Wilson Watch Party tonight in Seattle! Congratulations to @wilsonformayor and all the volunteers who spent months working to help her win!",
             image: '/images/PVKatieWilsonWatchParty.jpeg',
@@ -74,9 +69,6 @@ export function TestPage() {
                 zoom: 1.4,
                 offsetX: -8.5,
                 offsetY: 0,
-            },
-            tiltProps: {
-                strength: 1,
             },
         },
         {
@@ -92,10 +84,6 @@ export function TestPage() {
                 offsetX: 0,
                 offsetY: 0,
             },
-            tiltProps: {
-                className: styles.messageMid,
-                strength: 0.85,
-            },
         },
         {
             username: 'Sam Dryzmala',
@@ -110,9 +98,6 @@ export function TestPage() {
                 zoom: 1.2,
                 offsetX: -5,
                 offsetY: 10,
-            },
-            tiltProps: {
-                strength: 1.1,
             },
         },
     ]
@@ -146,15 +131,7 @@ export function TestPage() {
 
             <div className={styles.row}>
                 {messages.map((m, i) => (
-                    <TiltMessage
-                        key={m.username + i}
-                        className={m.tiltProps?.className}
-                        disabled={m.tiltProps?.disabled}
-                        strength={m.tiltProps?.strength}
-                        rotateMax={m.tiltProps?.rotateMax}
-                        zRotate={m.tiltProps?.zRotate}
-                        hoverScale={m.tiltProps?.hoverScale}
-                    >
+                    <div key={m.username + i}>
                         <Message
                             username={m.username}
                             text={m.text}
@@ -165,7 +142,7 @@ export function TestPage() {
                             motionProps={m.motionProps}
                             imageProps={m.imageProps}
                         />
-                    </TiltMessage>
+                    </div>
                 ))}
             </div>
         </div>
@@ -310,104 +287,6 @@ export function Message({
                     </button>
                 </div>
             </div>
-        </motion.div>
-    )
-}
-
-function useMousePosition() {
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        setMousePosition({ x: e.clientX, y: e.clientY })
-    }
-
-    return { mousePosition, handleMouseMove }
-}
-
-function TiltMessage({
-    children,
-    className,
-    disabled = false,
-    strength = 1,
-    rotateMax = 10,
-    zRotate = -2.5,
-    hoverScale = 1.02,
-}: {
-    children: React.ReactNode
-    className?: string
-    disabled?: boolean
-    strength?: number
-    rotateMax?: number
-    zRotate?: number
-    hoverScale?: number
-}) {
-    const [isHovered, setIsHovered] = useState(false)
-    const [canTilt, setCanTilt] = useState(false)
-    const [elementPosition, setElementPosition] = useState({
-        left: 0,
-        top: 0,
-        width: 0,
-        height: 0,
-    })
-    const { mousePosition, handleMouseMove } = useMousePosition()
-
-    const tiltX = useSpring(0, { stiffness: 300, damping: 50 })
-    const tiltY = useSpring(0, { stiffness: 300, damping: 50 })
-
-    const rotateX = useTransform(tiltY, [-1, 1], [-rotateMax, rotateMax])
-    const rotateY = useTransform(tiltX, [-1, 1], [-rotateMax, rotateMax])
-
-    const handleMouseEnter = (e: React.MouseEvent) => {
-        if (disabled) return
-        setIsHovered(true)
-        const rect = e.currentTarget.getBoundingClientRect()
-        setElementPosition({
-            left: rect.left,
-            top: rect.top,
-            width: rect.width,
-            height: rect.height,
-        })
-    }
-
-    const handleMouseLeave = () => {
-        if (disabled) return
-        setIsHovered(false)
-        setCanTilt(false)
-        tiltX.set(0)
-        tiltY.set(0)
-    }
-
-    if (!disabled && isHovered && canTilt) {
-        const x =
-            (mousePosition.x - elementPosition.left) / elementPosition.width
-        const y =
-            (mousePosition.y - elementPosition.top) / elementPosition.height
-
-        tiltX.set((x - 0.5) * 0.5 * strength)
-        tiltY.set((y - 0.5) * -0.5 * strength)
-    }
-
-    return (
-        <motion.div
-            className={[styles.tilt, className].filter(Boolean).join(' ')}
-            style={{
-                rotateX: disabled ? 0 : rotateX,
-                rotateY: disabled ? 0 : rotateY,
-                transformPerspective: 1000,
-            }}
-            animate={{
-                rotateZ: disabled ? 0 : isHovered ? zRotate : 0,
-                scale: disabled ? 1 : isHovered ? hoverScale : 1,
-            }}
-            transition={{ duration: 0.2 }}
-            onAnimationComplete={() => {
-                if (!disabled && isHovered) setCanTilt(true)
-            }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onMouseMove={disabled ? undefined : handleMouseMove}
-        >
-            {children}
         </motion.div>
     )
 }
