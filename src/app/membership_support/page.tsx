@@ -1,5 +1,4 @@
 import { Metadata } from 'next'
-import { MainLayout } from '@/components/layout'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
@@ -14,29 +13,6 @@ export const metadata: Metadata = {
     },
 }
 
-/**
- * The About page.
- *
- * This page explains the purpose and goals of Progressive Victory, and how it
- * works.
- *
- * The page is divided into sections, each explaining a different aspect of
- * Progressive Victory. The sections are: Our Community, How it Works, and
- * Values.
- *
- * @returns The About page.
- */
-export default function About() {
+export default function MembershipSupport() {
     redirect('https://forms.gle/jbNftCSaqv416q3V6')
-
-    return (
-        <MainLayout>
-            {/* Halftone background */}
-            <div className="halftone z-1 absolute inset-0 size-full opacity-10" />
-
-            <div className="z-2 relative m-auto flex min-h-screen w-full flex-col items-center justify-start gap-y-10 pb-16 pt-10 xl:min-h-[unset]">
-                Redirecting you to form...
-            </div>
-        </MainLayout>
-    )
 }

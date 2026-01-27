@@ -1,24 +1,32 @@
-import ProtectedPage from '@/components/ProtectedPage'
-import AdminNav from '@/components/admin/AdminNav'
-import { Header } from '@/components/layout'
-import { get_collection_stats } from '@/util/stats'
+'use client'
 
-export default async function Layout({
-    children,
-}: {
-    children: React.ReactNode
-}) {
-    const stats = await get_collection_stats()
+import styles from './admin.module.css'
+import { ProtectedPage } from '@/components/ProtectedPage'
+import AdminNav from '@/components/admin/AdminNav'
+import { Header } from '@/components/layout/Header'
+import { zPermission, zRole, zUser } from '@/contracts/data'
+import { usePaginatedSearch } from '@/util/hooks'
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+    const users = usePaginatedSearch('/users', zUser, { search: { limit: 0 } })
+    const roles = usePaginatedSearch('/roles', zRole, { search: { limit: 0 } })
+    const permissions = usePaginatedSearch('/permissions', zPermission, {
+        search: { limit: 0 },
+    })
 
     return (
         <ProtectedPage requiredRoles={['Superadmin']}>
-            <div className="relative flex size-full min-h-screen flex-col">
+            <div className={styles.root}>
                 <Header />
-                <div className="flex flex-1 bg-gray-50">
-                    <AdminNav stats={stats} />
-                    <div className="flex h-[calc(100vh-100px)] flex-1">
-                        {children}
-                    </div>
+
+                <div className={styles.main}>
+                    <AdminNav
+                        userCount={users.query.data?.count}
+                        roleCount={roles.query.data?.count}
+                        permissionCount={permissions.query.data?.count}
+                    />
+
+                    <div className={styles.content}>{children}</div>
                 </div>
             </div>
         </ProtectedPage>

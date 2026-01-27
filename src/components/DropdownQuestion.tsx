@@ -1,6 +1,6 @@
 'use client'
 
-import styles from '@/app/styles/components/ContentSections.module.css'
+import styles from '@/components/content_sections/ContentSections.module.css'
 import { PlusIcon, MinusIcon } from '@heroicons/react/24/solid'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'

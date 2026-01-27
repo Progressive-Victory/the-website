@@ -1,7 +1,9 @@
-import notFoundStyles from '@/app/styles/pages/NotFoundPage.module.css'
-import { ContentPageFrame, ContentSection } from '@/components/ContentSections'
-import { HalftoneBackground } from '@/components/HalftoneBackground'
-import { MainLayout } from '@/components/layout'
+import {
+    ContentPageFrame,
+    ContentSection,
+} from '@/components/content_sections/ContentSections'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
+import { MainLayout } from '@/components/layout/MainLayout'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -17,6 +19,25 @@ export const metadata: Metadata = {
     },
 }
 
+const styles = {
+    heading: {
+        width: '100%',
+        textAlign: 'center' as const,
+        fontSize: '2rem',
+        fontWeight: 700,
+        color: 'white',
+    },
+    headingHighlight: {
+        color: '#09223a',
+    },
+    body: {
+        whiteSpace: 'pre-line' as const,
+        paddingTop: '0.5rem',
+        fontSize: '0.9rem',
+        fontWeight: 500,
+    },
+}
+
 export default function NotFound() {
     return (
         <MainLayout>
@@ -24,11 +45,9 @@ export default function NotFound() {
 
             <ContentPageFrame
                 heading={
-                    <p className={notFoundStyles.notFoundHeading}>
+                    <p style={styles.heading}>
                         Oops!{' '}
-                        <span
-                            className={notFoundStyles.notFoundHeadingHighlight}
-                        >
+                        <span style={styles.headingHighlight}>
                             Page Not Found
                         </span>
                     </p>
@@ -40,7 +59,7 @@ export default function NotFound() {
                     highlight="404"
                     highlightColor="#CE3728"
                 >
-                    <p className={notFoundStyles.notFoundBody}>
+                    <p style={styles.body}>
                         This page does not exist. It may have been moved,
                         deleted, or the URL might be incorrect.
                         {'\n\n'}

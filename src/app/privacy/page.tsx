@@ -1,7 +1,10 @@
-import styles from '@/app/styles/pages/PrivacyPage.module.css'
-import { ContentPageFrame, ContentSection } from '@/components/ContentSections'
-import { HalftoneBackground } from '@/components/HalftoneBackground'
-import { MainLayout } from '@/components/layout'
+import styles from '@/app/privacy/privacy.module.css'
+import {
+    ContentPageFrame,
+    ContentSection,
+} from '@/components/content_sections/ContentSections'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
+import { MainLayout } from '@/components/layout/MainLayout'
 import type { Metadata } from 'next'
 import type React from 'react'
 

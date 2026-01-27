@@ -1,11 +1,11 @@
-import type { Metadata } from 'next'
-import { Montserrat } from 'next/font/google'
-import { AuthProvider } from '@/components/AuthProvider'
-import { Analytics } from '@vercel/analytics/react'
-import Script from 'next/script'
-import 'leaflet/dist/leaflet.css'
 import './globals.css'
 import QueryClientWrapper from '@/app/QueryClientWrapper'
+import { AuthProvider } from '@/components/AuthProvider'
+import { Analytics } from '@vercel/analytics/react'
+import 'leaflet/dist/leaflet.css'
+import type { Metadata } from 'next'
+import { Montserrat } from 'next/font/google'
+import Script from 'next/script'
 
 export const metadata: Metadata = {
     title: 'Progressive Victory',

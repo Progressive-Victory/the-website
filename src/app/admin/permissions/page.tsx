@@ -1,88 +1,144 @@
 'use client'
 
-import PaginatedList from '@/components/admin/PaginatedList'
-import { Form, FormGroup, TextField } from '@/components/form'
-import { IPermission } from '@/models/Permission'
-import deepEqual from 'deep-equal'
-import { useRef, useState } from 'react'
+import styles from './page.module.css'
+import { ListElement, PaginatedList } from '@/components/admin/PaginatedList'
+import { Form, FormGroup, FormState, TextField } from '@/components/form'
+import { Permission, zPermission } from '@/contracts/data'
+import { UpdatePermissionRequest } from '@/contracts/requests'
+import { PaginatedResponse } from '@/contracts/responses'
+import { FetchError, useFetch, usePaginatedSearch } from '@/util/hooks'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 
 export default function Page() {
-    const eventTarget = useRef(new EventTarget())
+    const queryClient = useQueryClient()
+    const { onPatch } = useFetch()
 
-    // We save the original value we got from the API so that we can easily
-    // discard changes without saving
-    const [originalPermission, setOriginalPermission] =
-        useState<IPermission | null>(null)
-    // This is the mutable copy we actually update when the user interacts with
-    // the form
     const [selectedPermission, setSelectedPermission] =
-        useState<IPermission | null>(null)
-    const [permissions, setPermissions] = useState<IPermission[]>([])
+        useState<Permission | null>(null)
 
-    const handleSelectItem = (value: IPermission) => {
-        if (value._id === selectedPermission?._id) return
+    const [formState, setFormState] = useState<FormState<Permission> | null>(
+        null
+    )
 
-        if (!deepEqual(selectedPermission, originalPermission)) {
+    const {
+        query: searchQuery,
+        search,
+        onSearch,
+    } = usePaginatedSearch<Permission>('/permissions', zPermission)
+
+    const updateMutation = useMutation<
+        Permission,
+        FetchError,
+        {
+            id: number
+            permission: Permission
+            request: UpdatePermissionRequest
+        },
+        Permission
+    >({
+        mutationFn: ({ id, request }) =>
+            onPatch<Permission>(`/permissions/${id}`, request, zPermission),
+        onMutate: ({ id, permission }) => {
+            const prev = searchQuery.data?.data?.find((prev) => prev.id == id)
+            setSelectedPermission(permission)
+            queryClient.setQueryData(
+                ['/permissions', search],
+                (res: PaginatedResponse<Permission>) => ({
+                    ...res,
+                    data: res.data.map((prev) =>
+                        prev.id == permission.id ? permission : prev
+                    ),
+                })
+            )
+            return prev
+        },
+        onError: (error, _variables, prev) => {
+            console.error(error)
+            setSelectedPermission(prev ?? null)
+            queryClient.setQueryData(
+                [`/permissions`, search],
+                (res: PaginatedResponse<Permission>) => ({
+                    ...res,
+                    data: res.data.map((permission) =>
+                        permission.id == prev?.id ? prev : permission
+                    ),
+                })
+            )
+        },
+        onSuccess: (data) => {
+            setSelectedPermission(data)
+            queryClient.setQueryData(
+                [`/permissions`, search],
+                (res: PaginatedResponse<Permission>) => ({
+                    ...res,
+                    data: res.data.map((permission) =>
+                        permission.id == data.id ? data : permission
+                    ),
+                })
+            )
+        },
+        onSettled: () =>
+            queryClient.invalidateQueries({ queryKey: ['/roles', search] }),
+    })
+
+    const handleSelectItem = (value: Permission) => {
+        if (value.id === selectedPermission?.id) return
+
+        if (formState?.dirty) {
             const proceed = confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
             )
             if (!proceed) return
         }
 
-        // We need to copy to make sure that the value in the list is not
-        // modified until we save
-        setSelectedPermission({ ...value } as IPermission)
-        setOriginalPermission({ ...value } as IPermission)
+        setSelectedPermission(value)
     }
 
-    const makeItem = (permission: IPermission) => ({
-        id: permission._id as string,
-        value: permission,
-    })
+    const handleSave = (permission: Permission) => {
+        updateMutation.mutate({
+            id: permission.id,
+            permission,
+            request: { name: permission.name },
+        })
+    }
 
     return (
         <>
-            <PaginatedList<IPermission>
-                eventTarget={eventTarget.current}
-                endpoint="/api/admin/permissions"
-                filters={[]}
-                searchFields={[
-                    {
-                        id: 'name',
-                        name: 'Name',
-                    },
-                ]}
-                items={permissions.map(makeItem)}
-                selectedItem={
-                    selectedPermission ? makeItem(selectedPermission) : null
-                }
-                onSelectItem={({ value }) => handleSelectItem(value)}
-                setItems={setPermissions}
-                renderItem={({ value }) => (
-                    <span className="font-medium text-black">{value.name}</span>
-                )}
-            />
-            <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto">
-                {selectedPermission && originalPermission ? (
-                    <Form<IPermission>
-                        initialValue={originalPermission}
-                        setInitialValue={setOriginalPermission}
-                        currentValue={selectedPermission}
-                        setCurrentValue={setSelectedPermission}
-                        computeTitle={(permission) => permission.name ?? ''}
-                        patchEndpoint="/api/admin/permissions"
-                        onChangesSaved={() => {
-                            eventTarget.current.dispatchEvent(
-                                new Event('refetch')
-                            )
-                        }}
+            <PaginatedList
+                search={search}
+                count={searchQuery.data?.count}
+                isPending={searchQuery.isPending}
+                error={searchQuery.error}
+                onSearch={onSearch}
+            >
+                {searchQuery.data?.data?.map((item) => (
+                    <ListElement
+                        key={item.id}
+                        selected={selectedPermission?.id == item.id}
+                        onClick={() => handleSelectItem(item)}
+                    >
+                        <span className={styles.listItemText}>{item.name}</span>
+                    </ListElement>
+                ))}
+            </PaginatedList>
+
+            <div className={styles.detailPane}>
+                {selectedPermission ? (
+                    <Form<Permission>
+                        key={selectedPermission.id}
+                        form={selectedPermission}
+                        title={selectedPermission.name}
+                        saving={updateMutation.isPending}
+                        onUpdate={setFormState}
+                        onSave={handleSave}
                     >
                         <FormGroup title="Details">
-                            <TextField name="Name" field="name" required />
+                            <TextField label="Name" field="name" required />
                         </FormGroup>
                     </Form>
                 ) : (
-                    <div className="flex h-full items-center justify-center">
+                    <div className={styles.emptyState}>
                         No permission selected
                     </div>
                 )}

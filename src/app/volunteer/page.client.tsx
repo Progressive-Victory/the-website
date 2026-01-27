@@ -8,131 +8,171 @@ import {
     PhoneVerifyStage,
     UnderageStage,
 } from '.'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
-import { IUser } from '@/models/User'
-import { dateService } from '@/services'
-import { OnboardingStage } from '@/util/stage'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useState } from 'react'
+import { OnboardingStage } from '@/contracts/data'
+import {
+    UserOnboardingCollectInfoRequest,
+    UserOnboardingJoinRequest,
+    UserOnboardingVerifyRequest,
+} from '@/contracts/requests'
+import {
+    DiscordUserIsInServerResponse,
+    zDiscordUserIsInServerResponse,
+} from '@/contracts/responses'
+import { useCurrentUser, useFetch } from '@/util/hooks'
+import {
+    keepPreviousData,
+    skipToken,
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
 
-export interface VolunteerPageProps {
-    user: IUser | null
-    isInSever: boolean
-}
-
-export default function VolunteerPage({
-    user: initialUser,
-    isInSever: initialIsInServer,
-}: VolunteerPageProps) {
+export default function VolunteerPage() {
+    const session = useSession()
     const queryClient = useQueryClient()
+    const { ready, onGet, onPost, onPut } = useFetch()
 
-    const [isInServer, setIsInServer] = useState(initialIsInServer)
-
-    const userQuery = useQuery({
-        queryKey: ['user'],
-        async queryFn() {
-            initialUser = null
-
-            const response = await fetch('/api/user')
-            return (await response.json()) as IUser
-        },
-        initialData: initialUser,
-    })
-
-    const updateUserMutation = useMutation({
-        mutationFn: async (obj: Partial<IUser>) => {
-            if (obj.zipCode) {
-                const res = await fetch(
-                    `/api/onboarding/zip/location?zipcode=${obj.zipCode}`
-                )
-                const { city, county, state } = await res.json()
-                obj.city = city
-                obj.county = county
-                obj.state = state
-            }
-
-            console.log(obj)
-            const resp = await fetch('/api/user', {
-                method: 'PATCH',
-                body: JSON.stringify(obj),
-            })
-
-            if (resp.status === 200) {
-                const data = (await resp.json()) as IUser
-                queryClient.setQueryData(['user'], () => data)
-            } else {
-                throw new Error()
-            }
-        },
-    })
-    const updateUser = updateUserMutation.mutateAsync
-    const updateStage = useCallback(
-        (onboardingStage: OnboardingStage) =>
-            void updateUser({ onboardingStage }),
-        [updateUser]
+    const [overrideStage, setOverrideStage] = useState<OnboardingStage | null>(
+        null
     )
 
-    const user = userQuery.data
-    const currentStage = user?.onboardingStage ?? OnboardingStage.NOT_STARTED
+    const user = useCurrentUser()
+    const discordUserId = session.data?.discordId
+
+    const isInServerResult = useQuery({
+        queryKey: [`/discordUsers/${discordUserId}/isInServer`],
+        queryFn: ready && discordUserId != null
+            ? ({ signal }) =>
+                  onGet<DiscordUserIsInServerResponse>(
+                      `/discordUsers/${discordUserId}/isInServer`,
+                      zDiscordUserIsInServerResponse,
+                      { signal }
+                  )
+            : skipToken,
+        placeholderData: keepPreviousData,
+    })
+
+    const collectInfoMutation = useMutation({
+        mutationFn: async (obj: UserOnboardingCollectInfoRequest) => {
+            if (!user.data) return
+            await onPut(
+                `/users/${user.data?.id}/onboardingStages/collectInfo`,
+                obj
+            )
+        },
+        onSettled: () => {
+            setOverrideStage(null)
+            return queryClient.invalidateQueries({
+                queryKey: ['/users/current'],
+            })
+        },
+    })
+
+    const ageUpMutation = useMutation({
+        mutationFn: async () => {
+            if (!user.data) return
+            await onPut(`/users/${user.data?.id}/onboardingStages/ageUp`, null)
+        },
+        onSettled: () => {
+            setOverrideStage(null)
+            return queryClient.invalidateQueries({
+                queryKey: ['/users/current'],
+            })
+        },
+    })
+
+    const sendSmsCodeMutation = useMutation({
+        mutationFn: async () => {
+            if (!user.data) return
+            await onPost(
+                `/users/${user.data?.id}/onboardingStages/sendVerificationCode`,
+                null,
+                null
+            )
+        },
+        onSettled: () => {
+            setOverrideStage(null)
+            return queryClient.invalidateQueries({
+                queryKey: ['/users/current'],
+            })
+        },
+    })
+
+    const verifyMutation = useMutation({
+        mutationFn: async (obj: UserOnboardingVerifyRequest) => {
+            if (!user.data) return
+            await onPut(`/users/${user.data?.id}/onboardingStages/verify`, obj)
+        },
+        onSettled: () => {
+            setOverrideStage(null)
+            return Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
+                queryClient.invalidateQueries({
+                    queryKey: [`/discordUsers/${discordUserId}/isInServer`],
+                }),
+            ])
+        },
+    })
+
+    const joinMutation = useMutation({
+        mutationFn: async (obj: UserOnboardingJoinRequest) => {
+            if (!user.data) return
+            await onPut(`/users/${user.data?.id}/onboardingStages/join`, obj)
+        },
+        onSettled: () =>
+            queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
+    })
 
     const handleCollectInfoSuccess = (form: IOnboardingForm) => {
-        const nextStage =
-            (dateService.getAge(form.dateOfBirth) ?? 0 < 18)
-                ? OnboardingStage.UNDERAGE
-                : OnboardingStage.AWAITING_VERIFY
-
-        //hook into van here
-        if (!user) throw Error("Couldn't identify user")
-
-        void updateUserMutation.mutateAsync({
+        collectInfoMutation.mutate({
             firstName: form.firstName,
             lastName: form.lastName,
-            phoneNumber: form.phoneNumber,
-            zipCode: form.zipCode,
+            phone: form.phoneNumber,
+            zipCode: +form.zipCode,
             acceptedAlerts: form.getAlerts,
-            dateOfBirth: form.dateOfBirth,
-            onboardingStage: nextStage,
+            birthdate: new Date(form.dateOfBirth),
         })
     }
 
-    const handleAgeUp = () => {
-        updateStage(OnboardingStage.AWAITING_VERIFY)
+    const handleVerifySmsCode = (code: number) => {
+        verifyMutation.mutate({ code })
     }
 
-    const handlePhoneVerifySuccess = () => {
-        updateStage(OnboardingStage.VERIFIED)
-    }
-
-    const handleJoinSuccess = () => {
-        setIsInServer(true)
-        updateStage(OnboardingStage.JOINED)
+    const handleJoin = () => {
+        if (!session.data) return
+        joinMutation.mutate({
+            discordToken: `Bearer ${session.data?.accessToken}`,
+        })
     }
 
     const handleReturnToStart = () => {
-        updateStage(OnboardingStage.NOT_STARTED)
+        setOverrideStage(OnboardingStage.NOT_STARTED)
     }
 
-    const handleRejoin = () => {
-        updateStage(OnboardingStage.VERIFIED)
-    }
+    const currentStage = overrideStage ?? user.data?.onboardingStage
 
     useEffect(() => {
         if (
-            user?.onboardingStage === OnboardingStage.JOINED &&
-            (!user.firstName ||
-                !user.lastName ||
-                !user.dateOfBirth ||
-                !user.zipCode ||
-                !user.phoneNumber)
+            currentStage === OnboardingStage.JOINED &&
+            (!user.data?.firstName ||
+                !user.data?.lastName ||
+                !user.data?.birthdate ||
+                !user.data?.location ||
+                !user.data?.phone)
         ) {
-            updateStage(OnboardingStage.NOT_STARTED)
+            setOverrideStage(OnboardingStage.NOT_STARTED)
         }
-    }, [user, updateStage])
+    }, [user.data, currentStage])
+
+    if (!user.data) return <MainLayout />
 
     return (
         <MainLayout>
-            <div className="relative flex min-h-screen flex-col items-center justify-center bg-steel-blue">
-                <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
+            <div className="relative flex min-h-screen flex-col items-center justify-center">
                 <div
                     className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
                     style={{
@@ -143,6 +183,7 @@ export default function VolunteerPage({
                         transform: 'scaleX(-1)',
                     }}
                 />
+                <HalftoneBackground />
                 <div className="flex w-full justify-center">
                     <form
                         onSubmit={(e) => e.preventDefault()}
@@ -151,53 +192,69 @@ export default function VolunteerPage({
                         {currentStage === OnboardingStage.NOT_STARTED && (
                             <CollectInfoStage
                                 initialForm={{
-                                    firstName: user?.firstName ?? '',
-                                    lastName: user?.lastName ?? '',
-                                    dateOfBirth: user?.dateOfBirth ?? '',
-                                    zipCode: user?.zipCode ?? '',
-                                    phoneNumber: user?.phoneNumber ?? '',
-                                    getAlerts: user?.acceptedAlerts ?? false,
+                                    firstName: user.data?.firstName ?? '',
+                                    lastName: user.data?.lastName ?? '',
+                                    dateOfBirth:
+                                        user.data?.birthdate
+                                            ?.toISOString()
+                                            ?.split('T')?.[0] ?? '',
+                                    zipCode:
+                                        user.data?.location?.zip.toString() ??
+                                        '',
+                                    phoneNumber: user.data?.phone ?? '',
+                                    getAlerts:
+                                        user.data?.acceptedAlerts ?? false,
                                     usCitizen: false,
                                     privacyPolicy: false,
                                 }}
-                                onSuccess={handleCollectInfoSuccess}
+                                isPending={collectInfoMutation.isPending}
+                                onSubmit={handleCollectInfoSuccess}
                             />
                         )}
 
                         {currentStage === OnboardingStage.UNDERAGE && (
                             <UnderageStage
-                                dateOfBirth={user?.dateOfBirth}
-                                onAgeUp={handleAgeUp}
+                                isPending={ageUpMutation.isPending}
+                                onAgeUp={ageUpMutation.mutate}
                             />
                         )}
 
                         {currentStage === OnboardingStage.AWAITING_VERIFY && (
                             <PhoneVerifyStage
-                                queryClient={queryClient}
-                                phoneNumber={user?.phoneNumber ?? ''}
-                                lastSmsCodeSentAt={
-                                    user?.lastSmsCodeSentAt
-                                        ? new Date(user?.lastSmsCodeSentAt)
-                                        : null
+                                lastSmsCodeSendTimeUtc={
+                                    user.data?.lastSmsCodeSendTimeUtc
                                 }
-                                goBack={handleReturnToStart}
-                                onSuccess={handlePhoneVerifySuccess}
+                                requestIsPending={sendSmsCodeMutation.isPending}
+                                verifyIsPending={verifyMutation.isPending}
+                                verifyError={verifyMutation.error}
+                                onReturn={handleReturnToStart}
+                                onRequest={sendSmsCodeMutation.mutate}
+                                onVerify={handleVerifySmsCode}
+                                onCancelVerify={verifyMutation.reset}
                             />
                         )}
 
                         {currentStage === OnboardingStage.VERIFIED && (
                             <JoiningStage
-                                queryClient={queryClient}
-                                onSuccess={handleJoinSuccess}
+                                isPending={
+                                    joinMutation.isPending ||
+                                    isInServerResult.isLoading
+                                }
+                                error={joinMutation.error}
+                                onJoin={handleJoin}
                             />
                         )}
 
-                        {currentStage === OnboardingStage.JOINED && (
-                            <CompleteStage
-                                isInServer={isInServer}
-                                onRejoin={handleRejoin}
-                            />
-                        )}
+                        {currentStage === OnboardingStage.JOINED &&
+                            isInServerResult.data && (
+                                <CompleteStage
+                                    isInServer={
+                                        isInServerResult.data.isInServer
+                                    }
+                                    isPending={joinMutation.isPending}
+                                    onRejoin={handleJoin}
+                                />
+                            )}
                     </form>
                 </div>
             </div>

@@ -1,4 +1,3 @@
-import { HTTPStatus } from '../https-status'
 import { rest } from './rest'
 import {
     calculateUserDefaultAvatarIndex,
@@ -58,5 +57,5 @@ function getDefaultAvatar(id: Snowflake) {
 
 async function isFound(url: string) {
     const request = await fetch(url, { method: 'HEAD' })
-    return request.status === HTTPStatus.Ok
+    return request.ok
 }
