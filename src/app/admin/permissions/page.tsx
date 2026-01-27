@@ -35,7 +35,7 @@ export default function Page() {
             permission: Permission
             request: UpdatePermissionRequest
         },
-        Permission
+        Permission | undefined
     >({
         mutationFn: ({ id, request }) =>
             onPatch<Permission>(`/permissions/${id}`, request, zPermission),

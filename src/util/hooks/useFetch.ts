@@ -64,7 +64,7 @@ export function useFetch() {
 
     const authMutation = useMutation({
         mutationKey: ['/auth'],
-        async mutationFn(signal?: AbortSignal) {
+        mutationFn: async (signal?: AbortSignal) => {
             const body: AuthRequest = {
                 discordToken: `Bearer ${session.data?.accessToken}`,
             }

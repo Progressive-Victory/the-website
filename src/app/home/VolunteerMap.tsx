@@ -34,24 +34,18 @@ export function VolunteerMap() {
                       { signal }
                   )
 
-                  const stateCountMap = data.states.reduce(
-                      (map, state) => {
-                          const name = US_STATES.find(
-                              (s) => s.code.toLowerCase() === state.code
-                          )?.name
-                          if (name) map[name] = state.count
-                          return map
-                      },
-                      {} as Record<string, number>
-                  )
+                  data.states = US_STATES.reduce((map, state) => {
+                      map[state.name] = map[state.code]
+                      return map
+                  }, data.states)
 
-                  return { total: data.total, stateCountMap }
+                  return data
               }
             : skipToken,
         placeholderData: keepPreviousData,
     })
 
-    const stateMemberCounts = memberCountQuery.data?.stateCountMap
+    const stateMemberCounts = memberCountQuery.data?.states
     const totalMemberCount = memberCountQuery.data?.total
 
     function onFeatureClick(state: string | null) {

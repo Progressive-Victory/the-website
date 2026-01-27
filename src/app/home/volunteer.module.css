@@ -22,7 +22,7 @@
 .cardsWrapper {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
     gap: 2.5rem;
     padding-left: 2vw;
@@ -32,6 +32,7 @@
 @media (min-width: 1280px) {
     .cardsWrapper {
         flex-direction: row;
+        align-items: stretch;
     }
 }
 
@@ -56,7 +57,7 @@
 
 @media (min-width: 768px) {
     .card {
-        height: 250px;
+        height: auto;
     }
 }
 

@@ -78,7 +78,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6vw;
+    gap: 3vw; /* gap between items */
     background: #09223a;
     padding: 2.5rem 0;
 }

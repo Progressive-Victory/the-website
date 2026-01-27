@@ -116,7 +116,7 @@ export default function Page() {
         User,
         FetchError,
         { id: number; user: User; request: UpdateUserRequest },
-        User
+        User | undefined
     >({
         mutationFn: async ({ id, user, request }) => {
             const result = await onPatch<User>(`/users/${id}`, request, zUser)
@@ -510,15 +510,16 @@ export default function Page() {
                             />
                         </FormGroup>
 
-                        {!formState?.editing && (
-                            <AccountHistoryField
-                                title="Account History"
-                                history={userQuery.data?.history}
-                                selected={selectedHistory}
-                                onSelect={handleSelectHistory}
-                                defaultCollapsed
-                            />
-                        )}
+                        {!formState?.editing &&
+                            !!userQuery.data?.history?.length && (
+                                <AccountHistoryField
+                                    title="Account History"
+                                    history={userQuery.data?.history}
+                                    selected={selectedHistory}
+                                    onSelect={handleSelectHistory}
+                                    defaultCollapsed
+                                />
+                            )}
                     </Form>
                 )}
             </div>

@@ -2,7 +2,7 @@
 
 ## Getting Started with Development
 
-Welcome to the PV Frontpage Redux repo! This is the source code of our website. Before contributing to the codebase you **MUST** read the following information. If you're a fullstack Next.js pro you can quickly skim this.
+Welcome to the PV Frontpage Redux repo! This is the source code of our website. Before contributing to the codebase you **MUST** read the following information. If you're a fullstack Next.js pro you can quickly skim this. **NOTE**: since migrating to sql and a centralized database, you now also require the api setup on your local machine, and running in concurrence with the website.
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
@@ -36,25 +36,34 @@ pnpm install
 
 ### 3. Configure
 
-Next, check the .env.example file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to Joops on discord.
+Next, check the .env.example file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to Joops or sH3llH0und on discord.
 
 ```bash
-# $PROJECT_DIR/.env.local
+# $PROJECT_DIR/.env
 
-# These are the values for the development Discord bot
-DISCORD_CLIENT_ID="1234"
-DISCORD_CLIENT_SECRET="abcdefg"
-DISCORD_BOT_TOKEN="mx213"
+# host config
+PORT=3000
+URL="http://localhost:3000"
 
-# The auth secret and URL must stay these values for development
+# auth service vars
 NEXTAUTH_SECRET="abcdefg"
 NEXTAUTH_URL="http://localhost:3000"
 
-# The ID of the Discord server the bot is in (for dev purposes would likely be PV Dev Server)
-GUILD_ID="122"
+# discord interface vars
+DISCORD_CLIENT_ID="<bot client id>"
+DISCORD_CLIENT_SECRET="<bot client secret>"
+DISCORD_BOT_TOKEN="<bot token>"
+GUILD_ID="1308877803705335858"
 
 # Does not need to change
 SITE_URL="https://example.com"
+
+# boomerang ig
+BOOMERANG_URI="<boomerang uri>"
+
+# api vars
+PV_WEBSITE_API_URL="http://localhost:8080"
+PV_WEBSITE_API_KEY="<just the discord bot token again>"
 ```
 
 ### 4. Run
@@ -95,11 +104,3 @@ npx playwright install --with-deps
 ```sh
 pnpm run test
 ```
-
-### Website Pages That Reference Models
-
-- \\src\\app\\admin\\roles\\route
-- \\src\\app\\admin\\members\\page
-- \\src\\app\\api\\user
-- \\src\\util\\auth
-- \\src\\util\\stats
