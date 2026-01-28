@@ -108,7 +108,8 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }),
     ],
     callbacks: {
-        signIn({ profile }) {
+        signIn({ profile, account }) {
+            console.log(account?.access_token)
             if (!profile?.email || !profile?.verified) {
                 return '/login?error=DiscordEmailNotVerified'
             }
