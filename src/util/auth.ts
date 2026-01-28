@@ -109,7 +109,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     ],
     callbacks: {
         signIn({ profile, account }) {
-            console.log(account?.access_token)
             if (!profile?.email || !profile?.verified) {
                 return '/login?error=DiscordEmailNotVerified'
             }
@@ -120,6 +119,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         session({ session, token }) {
             session.discordId = token.discordId as string
             session.accessToken = token.accessToken as string
+            session.refreshToken = token.refreshToken as string
             session.apiUrl = process.env.PV_WEBSITE_API_URL ?? ''
             return session
         },
@@ -135,6 +135,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             if (account && profile) {
                 token.accessToken = account.access_token
                 token.discordId = eprofile.id
+                token.refreshToken = account.refresh_token
 
                 if (!process.env.PV_WEBSITE_API_KEY)
                     throw Error('set PV_WEBSITE_API_KEY in env vars')
@@ -203,6 +204,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                         await verifyResponse(post)
                     }
                 } catch (e) {
+                    console.log('something broke in auth.ts')
                     console.error(e)
                 }
             }
