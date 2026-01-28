@@ -30,6 +30,13 @@ async function serverAuth(token: string): Promise<string> {
     return accessToken
 }
 
+async function verifyResponse(res: Response) {
+    if (!res.ok)
+        throw Error(
+            `API threw error: ${res.status} ${res.statusText}${res.body ? '\n' + (await res.text()) : ''}`
+        )
+}
+
 export const { auth, handlers, signIn, signOut } = NextAuth({
     pages: {
         signIn: '/login',
@@ -151,6 +158,8 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                         }
                     )
 
+                    await verifyResponse(res)
+
                     if (res.status === 404) {
                         const usr = await fetch(
                             new URL(`/users`, process.env.PV_WEBSITE_API_URL),
@@ -165,7 +174,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                                 }),
                             }
                         )
-                        await fetch(
+
+                        await verifyResponse(usr)
+
+                        const post = await fetch(
                             new URL(
                                 `/discordUsers`,
                                 process.env.PV_WEBSITE_API_URL
@@ -186,9 +198,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                                 }),
                             }
                         )
+
+                        await verifyResponse(post)
                     }
                 } catch (e) {
-                    console.log(e)
+                    console.error(e)
                 }
             }
 
