@@ -1,6 +1,6 @@
 'use client'
 
-import buttonStyles from '@/components/common/buttons/button.module.css'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
 import type React from 'react'
 
 export function ChevronButton(props: {

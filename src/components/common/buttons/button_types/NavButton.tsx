@@ -1,7 +1,7 @@
 'use client'
 
 import type { BaseVisualProps } from '../Button'
-import buttonStyles from '@/components/common/buttons/button.module.css'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
 import cx from 'classnames'
 import NextLink from 'next/link'
 
