@@ -9,7 +9,7 @@ interface MutableFields {
     lastName: string
     dateOfBirth: Date
     state: string
-	county: string
+    county: string
     city: string
     zip: number
     emailAddress: string
@@ -28,7 +28,7 @@ const AccountInfoForm = ({
     lastName,
     dateOfBirth,
     state,
-	county,
+    county,
     city,
     zip,
     emailAddress,
@@ -39,10 +39,10 @@ const AccountInfoForm = ({
         firstName,
         lastName,
         dateOfBirth,
-    	state,
-		county,
-    	city,
-    	zip,
+        state,
+        county,
+        city,
+        zip,
         emailAddress,
         phoneNumber,
     })
@@ -198,7 +198,7 @@ const AccountInfoForm = ({
                 </div>
             </div>
             <button
-				title="save-button"
+                title="save-button"
                 className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
                 type="button"
                 disabled={!formIsUpdated}
