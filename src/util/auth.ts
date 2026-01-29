@@ -27,7 +27,7 @@ async function serverAuth(token: string): Promise<string> {
     const { accessToken } = (await res.json()) as { accessToken: string }
 
     if (!accessToken) throw Error('Failed to generate server jwt')
-    return accessToken
+    return `Bot ${accessToken}`
 }
 
 async function verifyResponse(res: Response) {
@@ -108,7 +108,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }),
     ],
     callbacks: {
-        signIn({ profile, account }) {
+        signIn({ profile }) {
             if (!profile?.email || !profile?.verified) {
                 return '/login?error=DiscordEmailNotVerified'
             }
@@ -123,7 +123,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             session.apiUrl = process.env.PV_WEBSITE_API_URL ?? ''
             return session
         },
-        async jwt({ token, account, profile }) {
+        async jwt({ token, profile, account }) {
             interface EProfile extends Profile {
                 id: string
                 username: string
@@ -160,7 +160,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                         }
                     )
 
-                    await verifyResponse(res)
+                    if (res.status !== 404) {
+                        await verifyResponse(res)
+                    }
 
                     if (res.status === 404) {
                         const usr = await fetch(
@@ -168,7 +170,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                             {
                                 method: 'POST',
                                 headers: {
-                                    Authorization: `Bearer ${serverToken}`,
+                                    Authorization: serverToken,
                                     'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify({
@@ -187,7 +189,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                             {
                                 method: 'POST',
                                 headers: {
-                                    Authorization: `Bearer ${serverToken}`,
+                                    Authorization: serverToken,
                                     'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify({
@@ -204,7 +206,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                         await verifyResponse(post)
                     }
                 } catch (e) {
-                    console.log('something broke in auth.ts')
                     console.error(e)
                 }
             }
