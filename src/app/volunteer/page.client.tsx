@@ -45,14 +45,15 @@ export default function VolunteerPage() {
 
     const isInServerResult = useQuery({
         queryKey: [`/discordUsers/${discordUserId}/isInServer`],
-        queryFn: ready && discordUserId != null
-            ? ({ signal }) =>
-                  onGet<DiscordUserIsInServerResponse>(
-                      `/discordUsers/${discordUserId}/isInServer`,
-                      zDiscordUserIsInServerResponse,
-                      { signal }
-                  )
-            : skipToken,
+        queryFn:
+            ready && discordUserId != null
+                ? ({ signal }) =>
+                      onGet<DiscordUserIsInServerResponse>(
+                          `/discordUsers/${discordUserId}/isInServer`,
+                          zDiscordUserIsInServerResponse,
+                          { signal }
+                      )
+                : skipToken,
         placeholderData: keepPreviousData,
     })
 
@@ -64,6 +65,7 @@ export default function VolunteerPage() {
                 obj
             )
         },
+        throwOnError: true,
         onSettled: () => {
             setOverrideStage(null)
             return queryClient.invalidateQueries({
@@ -77,6 +79,7 @@ export default function VolunteerPage() {
             if (!user.data) return
             await onPut(`/users/${user.data?.id}/onboardingStages/ageUp`, null)
         },
+        throwOnError: true,
         onSettled: () => {
             setOverrideStage(null)
             return queryClient.invalidateQueries({
@@ -94,6 +97,7 @@ export default function VolunteerPage() {
                 null
             )
         },
+        throwOnError: true,
         onSettled: () => {
             setOverrideStage(null)
             return queryClient.invalidateQueries({
@@ -107,6 +111,7 @@ export default function VolunteerPage() {
             if (!user.data) return
             await onPut(`/users/${user.data?.id}/onboardingStages/verify`, obj)
         },
+        throwOnError: true,
         onSettled: () => {
             setOverrideStage(null)
             return Promise.all([
@@ -123,6 +128,7 @@ export default function VolunteerPage() {
             if (!user.data) return
             await onPut(`/users/${user.data?.id}/onboardingStages/join`, obj)
         },
+        throwOnError: true,
         onSettled: () =>
             queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
     })
