@@ -9,7 +9,7 @@ const StateSelector = ({
         <select
             defaultValue={initialValue}
             onChange={(e) => {
-				console.log('heck')
+                console.log('heck')
                 onUpdate(e.target.value)
             }}
         >
