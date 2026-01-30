@@ -1,0 +1,15 @@
+.content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    width: 100%;
+}
+
+.children {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    background-color: #4483c7;
+}

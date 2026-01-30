@@ -1,9 +1,8 @@
-import MultiSelect from '@/components/admin/MultiSelect'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { useDebounce } from '@uidotdev/usehooks'
-import classNames from 'classnames'
-import Image from 'next/image'
-import { FC, useEffect, useState } from 'react'
+import styles from './PaginatedList.module.css'
+import { MultiSelect, MultiSelectOption } from '@/components/common'
+import { SearchRequest, SortDirection } from '@/contracts/requests'
+import cx from 'classnames'
+import { ChangeEvent, ReactNode, useEffect, useState } from 'react'
 import {
     FiChevronLeft,
     FiChevronRight,
@@ -14,539 +13,444 @@ import { IoMdOptions } from 'react-icons/io'
 import { IoClose } from 'react-icons/io5'
 import { IconType } from 'react-icons/lib'
 
-export interface PaginatedListProps<T extends object> {
-    event_target?: EventTarget
-    /**
-     * The endpoint that will be used to fetch the data
-     */
-    api_endpoint: string
+export interface FilterOption {
+    value: string
+    label: string
+    options: MultiSelectOption[]
+}
 
-    /**
-     * Called when an element in the list is selected by the user. The handler can
-     * return false to disallow the selection (like if there are edits in progress
-     * for example)
-     */
-    before_element_selection?: (value: T) => boolean
+export interface FieldOption {
+    value: string
+    label: string
+}
 
-    /**
-     * Called after an element is selected from the list
-     */
-    on_element_selected: (value: T) => void
+export interface PaginatedListProps {
+    search: SearchRequest
 
-    id_key: keyof T
-    display_key: keyof T | ((value: T) => string)
-    alternate_display_key?: keyof T | ((value: T) => string)
-    image?: {
-        key: keyof T
-        alt: string
+    count: number | undefined
+    isPending: boolean
+    error: Error | null
+
+    fields?: FieldOption[]
+    filters?: FilterOption[]
+
+    pinnedContent?: ReactNode
+    children?: ReactNode
+
+    onSearch: (search: SearchRequest) => void
+}
+
+export function PaginatedList({
+    search,
+    count,
+    isPending,
+    error,
+    fields,
+    filters,
+    pinnedContent,
+    children,
+    onSearch,
+}: PaginatedListProps) {
+    const [searchPanelOpen, setSearchPanelOpen] = useState(false)
+
+    const { query, field, limit, sort, page, ...filter } = search
+
+    const handleToggleSearchPanel = () => {
+        setSearchPanelOpen((prev) => !prev)
     }
 
-    filters: Filter[]
-    search_fields?: ({ name: string; id: string } | string)[]
-}
+    const handleChangeQuery = (query: string) => {
+        onSearch({ ...search, query })
+    }
 
-export interface Filter {
-    /**
-     * The name to display in the filter dropdown
-     */
-    name: string
-    /**
-     * The key to use when constructing the query parameters for the fetch
-     */
-    query_key: string
-    /**
-     * The key to use when displaying each option
-     */
-    display_key: string
-    /**
-     * The key to use when getting the value of an option
-     */
-    value_key: string
-    /**
-     * Values for each filter option
-     */
-    options: Record<string, string>[]
-}
+    const handleChangeField = (field: string | undefined) => {
+        onSearch({ ...search, field })
+    }
 
-export interface PaginatedResponse<T> {
-    page: number
-    limit: number
-    pages: number
-    count: number
-    data: T[]
-}
+    const handleChangeLimit = (limit: number) => {
+        onSearch({ ...search, limit })
+    }
 
-export default function PaginatedList<T extends object>(
-    props: PaginatedListProps<T>
-) {
-    const [page, setPage] = useState(0)
-    const [pages, setPages] = useState(1)
-    const [limit, setLimit] = useState(25)
-    const [selected_id, set_selected_id] = useState<string | null>(null)
+    const handleChangeSort = (sort: SortDirection | undefined) => {
+        onSearch({ ...search, sort })
+    }
 
-    const [searchQuery, setSearchQuery] = useState('')
-    const [searchField, setSearchField] = useState<string>('all')
-
-    const [filtersOpen, setFiltersOpen] = useState(false)
-    const [activeFilterMenu, setActiveFilterMenu] = useState<string | null>(
-        null
-    )
-    const [searchFilters, setSearchFilters] = useState<
-        Record<string, string[]>
-    >({})
-    const [sortOrder, setSortOrder] = useState('')
-
-    const searchParams = useDebounce(
-        [
-            page,
-            pages,
-            limit,
-            searchQuery,
-            searchField,
-            searchFilters,
-            sortOrder,
-        ],
-        50
-    )
-
-    // takes info from PaginatedResponse object and constructs new object with filtered data so that the unordered list is still avialable when filters are cleared
-    const sortedData = (
-        arr: T[],
-        count: number,
-        setting: string,
-        field: string
+    const handleChangeFilter = (
+        filter: Record<string, (number | string)[] | undefined>
     ) => {
-        const obj: PaginatedResponse<T> = {
-            page: page,
-            limit: limit,
-            pages: pages,
-            count: count,
-            data:
-                setting === ''
-                    ? arr
-                    : setting === 'A-Z'
-                      ? arr.sort((a, b) => (a[field] < b[field] ? -1 : 1))
-                      : setting === 'Z-A'
-                        ? arr.sort((a, b) => (a[field] > b[field] ? -1 : 1))
-                        : arr,
-        }
-        return obj
+        onSearch({ query, field, limit, sort, page, ...filter })
     }
 
-    const { isPending, isSuccess, error, data, refetch } = useQuery<
-        PaginatedResponse<T>
-    >({
-        queryKey: [props.api_endpoint, ...searchParams],
-        queryFn: async ({ signal }) => {
-            const url = new URL(location.href)
-            url.pathname = props.api_endpoint
-            url.searchParams.set('page', page + '')
-            url.searchParams.set('limit', limit + '')
-            if (searchQuery) url.searchParams.set('query', searchQuery)
-            if (searchField !== 'all')
-                url.searchParams.set('search_field', searchField)
-
-            for (const [key, values] of Object.entries(searchFilters)) {
-                for (const value of values) {
-                    url.searchParams.append(key, value)
-                }
-            }
-            console.log(url.search)
-
-            const res = await fetch(url, { signal })
-            return (await res.json()) as PaginatedResponse<T>
-        },
-        placeholderData: keepPreviousData,
-    })
-
-    // new list object with filtered 'data: T[]' property to be updated with useEffect function
-    const sortedList = sortedData(
-        // @ts-expect-error shut up
-        data?.data,
-        data?.count,
-        sortOrder,
-        searchField
-    )
-
-    useEffect(() => {
-        if (isSuccess) {
-            setPage(data?.page)
-            setLimit(data?.limit)
-            setPages(data?.pages)
-        }
-    }, [isSuccess, data, sortedList])
-
-    const handleListItemClick = (clicked_id: string) => {
-        const selected = data?.data.find((e) => e[props.id_key] === selected_id)
-        const clicked = data?.data.find((e) => e[props.id_key] === clicked_id)
-
-        if (!clicked || selected === clicked) return
-
-        if (
-            props.before_element_selection &&
-            !props.before_element_selection(clicked)
-        )
-            return
-
-        set_selected_id(clicked_id)
-        props.on_element_selected(clicked)
+    const handleChangePage = (page: number) => {
+        onSearch({ ...search, page })
     }
-
-    useEffect(() => {
-        const { event_target } = props
-        if (!event_target) return
-
-        function handleSaveChanges() {
-            void refetch()
-        }
-
-        event_target.addEventListener('refetch', handleSaveChanges)
-
-        return () => {
-            event_target.removeEventListener('refetch', handleSaveChanges)
-        }
-    }, [props, props.event_target, refetch])
 
     return (
-        <div className="flex w-96 flex-col self-stretch border-x-2 border-gray-200 bg-gray-50 2xl:w-[28rem]">
-            <div className="flex flex-col gap-3 border-b-2 p-4">
-                <div className="flex w-full items-center gap-2">
-                    <input
-                        type="text"
-                        name="search_query"
-                        id="search_query"
-                        className="w-full rounded-lg border border-gray-300 px-3 py-1"
-                        placeholder="Search..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    {props.filters.length > 0 && (
-                        <button
-                            title={
-                                filtersOpen ? 'Hide Filters' : 'Show Filters'
-                            }
-                            onClick={() => setFiltersOpen(!filtersOpen)}
-                        >
-                            {filtersOpen ? (
-                                <IoClose size={20} />
-                            ) : (
-                                <IoMdOptions size={20} />
-                            )}
-                        </button>
-                    )}
-                </div>
-                {filtersOpen && (
+        <div className={styles.list}>
+            <div className={styles.searchPanel}>
+                <SearchInput
+                    query={query ?? ''}
+                    panelOpen={searchPanelOpen}
+                    onTogglePanel={handleToggleSearchPanel}
+                    onSearch={handleChangeQuery}
+                />
+
+                {searchPanelOpen && (
                     <>
-                        <div className="flex w-full flex-wrap justify-between gap-2">
-                            {props.search_fields && (
-                                <label
-                                    htmlFor="search_field"
-                                    className="flex shrink items-center gap-2"
-                                >
-                                    <span className="font-medium">Field:</span>
-                                    <select
-                                        name="search_field"
-                                        id="search_field"
-                                        className="rounded-lg border border-gray-300 bg-white p-1"
-                                        defaultValue={'all'}
-                                        onChange={(e) =>
-                                            setSearchField(e.target.value)
-                                        }
-                                    >
-                                        <option value={'all'}>
-                                            All (exact only)
-                                        </option>
-                                        {props.search_fields.map((sf) => (
-                                            <option
-                                                key={
-                                                    typeof sf === 'string'
-                                                        ? sf
-                                                        : sf.id
-                                                }
-                                                value={
-                                                    typeof sf === 'string'
-                                                        ? sf
-                                                        : sf.id
-                                                }
-                                            >
-                                                {typeof sf === 'string'
-                                                    ? sf
-                                                    : sf.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
-                            )}
-                            <label
-                                htmlFor="limit"
-                                className="flex items-center gap-2"
-                            >
-                                <span className="font-medium">Items:</span>
-                                <select
-                                    name="limit"
-                                    id="limit"
-                                    className="rounded-lg border border-gray-300 bg-white p-1"
-                                    defaultValue={limit}
-                                    onChange={(e) => setLimit(+e.target.value)}
-                                >
-                                    <option value={5}>5</option>
-                                    <option value={10}>10</option>
-                                    <option value={25}>25</option>
-                                    <option value={50}>50</option>
-                                    <option value={100}>100</option>
-                                </select>
-                            </label>
+                        <div className={styles.searchPanelTop}>
+                            <FieldSelect
+                                field={field}
+                                options={fields ?? []}
+                                onSelect={handleChangeField}
+                            />
+                            <LimitSelect
+                                limit={limit}
+                                onSelect={handleChangeLimit}
+                            />
                         </div>
-                        {data && searchField !== 'all' ? (
-                            <label
-                                htmlFor="Sort"
-                                className="flex items-center gap-2"
-                            >
-                                <span className="font-medium">Sort:</span>
-                                <select
-                                    name="sort"
-                                    id="sort"
-                                    className="rounded-lg border border-gray-300 bg-white p-1"
-                                    value={sortOrder}
-                                    onChange={(e) => {
-                                        setSortOrder(e.target.value)
-                                    }}
-                                >
-                                    <option value={''}>...</option>
-                                    <option value={'A-Z'}>A-Z</option>
-                                    <option value={'Z-A'}>Z-A</option>
-                                </select>
-                            </label>
-                        ) : (
-                            <div className="d-none"></div>
-                        )}
-                        {props.filters?.map((f) => (
-                            <div key={f.name} className="flex flex-wrap gap-2">
-                                <strong className="font-medium">
-                                    {f.name}:
-                                </strong>
-                                <MultiSelect
-                                    {...f}
-                                    active={searchFilters[f.query_key] ?? []}
-                                    addActive={(value) => {
-                                        searchFilters[f.query_key] = [
-                                            ...(searchFilters[f.query_key] ??
-                                                []),
-                                            value,
-                                        ]
-                                        setSearchFilters({ ...searchFilters })
-                                    }}
-                                    removeActive={(value) => {
-                                        searchFilters[f.query_key] = (
-                                            searchFilters[f.query_key] ?? []
-                                        ).filter((v) => v !== value)
-                                        setSearchFilters({ ...searchFilters })
-                                    }}
-                                    menuOpen={activeFilterMenu == f.query_key}
-                                    setMenuOpen={(open) =>
-                                        setActiveFilterMenu(
-                                            open ? f.query_key : null
-                                        )
-                                    }
-                                />
-                            </div>
-                        ))}
+                        <SortSelect sort={sort} onSelect={handleChangeSort} />
+                        <FilterSelect
+                            filters={filter}
+                            options={filters}
+                            onChange={handleChangeFilter}
+                        />
                     </>
                 )}
             </div>
 
-            {sortedList && sortedList.count > 0 ? (
-                <ul className="overflow-y-auto">
-                    {sortedList.data.map((e) => (
-                        <li
-                            key={e[props.id_key] as string}
-                            className={classNames(
-                                'flex cursor-pointer items-center gap-5 p-4',
-                                {
-                                    'bg-gray-200 hover:bg-gray-300':
-                                        selected_id === e[props.id_key],
-                                    'hover:bg-gray-200':
-                                        selected_id !== e[props.id_key],
-                                }
-                            )}
-                            onClick={() =>
-                                handleListItemClick(e[props.id_key] as string)
-                            }
-                        >
-                            {props.image && (
-                                <ImageWithFallback
-                                    src={e[props.image.key] as string}
-                                    alt={props.image.alt}
-                                />
-                            )}
-
-                            <div className="flex flex-col">
-                                <span className="font-medium text-black">
-                                    {typeof props.display_key === 'function'
-                                        ? props.display_key(e)
-                                        : (e[props.display_key] as string)}
-                                </span>
-                                {props.alternate_display_key && (
-                                    <span className="text-gray-500">
-                                        {typeof props.alternate_display_key ===
-                                        'function'
-                                            ? props.alternate_display_key(e)
-                                            : (e[
-                                                  props.alternate_display_key
-                                              ] as string)}
-                                    </span>
-                                )}
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <div className="flex flex-1 items-center justify-center">
-                    {isPending && (
-                        <span className="text-gray-400">Loading...</span>
+            {count == null && (
+                <div className={styles.listStatus}>
+                    {isPending ? (
+                        <span color="#9ca3af">Loading...</span>
+                    ) : error ? (
+                        <span color="#ef4444">Error: {error.message}</span>
+                    ) : (
+                        <span>No results found</span>
                     )}
-                    {error && (
-                        <span className="text-red-500">
-                            Error: {error.message}
-                        </span>
-                    )}
-                    {data?.count === 0 && <>No results found</>}
                 </div>
             )}
 
-            <div className="mt-auto flex gap-4 border-t-2">
-                <Pagination
-                    page={page + 1}
-                    maxPage={pages}
-                    onPageChange={(page) => setPage(page - 1)}
-                    enabled={!isPending}
-                    total={data?.count ?? 0}
-                />
-            </div>
+            {count != null && (
+                <>
+                    {pinnedContent && (
+                        <div className={styles.pinned}>{pinnedContent}</div>
+                    )}
+
+                    <ul className={styles.elementList}>{children}</ul>
+
+                    <div className={styles.pageSelectContainer}>
+                        <PageSelect
+                            page={page ?? 0}
+                            pageSize={limit}
+                            count={count}
+                            disabled={isPending}
+                            onChange={handleChangePage}
+                        />
+                    </div>
+                </>
+            )}
         </div>
     )
 }
 
-const Pagination: FC<{
-    page: number
-    onPageChange: (page: number) => void
-    maxPage: number
-    enabled: boolean
-    total: number
-}> = ({ page, onPageChange, maxPage, enabled, total }) => {
-    const can_change = maxPage > 1
+export interface ListElementProps {
+    selected?: boolean
+    className?: string
+    children?: React.ReactNode
+    onClick?: () => void
+}
 
-    const [value, setValue] = useState(page.toString())
+export function ListElement({
+    selected,
+    children,
+    className,
+    onClick,
+}: ListElementProps) {
+    return (
+        <li className={className} onClick={onClick}>
+            <div className={cx(styles.element, selected && styles.selected)}>
+                {children}
+            </div>
+        </li>
+    )
+}
 
-    useEffect(() => {
-        setValue(page.toString())
-    }, [page])
+interface SearchInputProps {
+    query: string
+    panelOpen: boolean
+    onTogglePanel: () => void
+    onSearch: (query: string) => void
+}
+
+function SearchInput({
+    query,
+    panelOpen,
+    onTogglePanel,
+    onSearch,
+}: SearchInputProps) {
+    const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+        onSearch(e.target.value)
+    }
 
     return (
-        <div className="flex w-full items-center justify-between">
-            <div className="mx-auto flex items-center justify-center gap-1 p-4">
+        <div className={styles.searchInput}>
+            <input
+                type="text"
+                name="search"
+                id="search"
+                placeholder="Search..."
+                defaultValue={query}
+                onInput={handleSearch}
+            />
+            <button
+                title={panelOpen ? 'Hide Filters' : 'Show Filters'}
+                onClick={onTogglePanel}
+            >
+                {panelOpen ? <IoClose size={20} /> : <IoMdOptions size={20} />}
+            </button>
+        </div>
+    )
+}
+
+interface FieldSelectProps {
+    field: string | undefined
+    options: FieldOption[]
+    onSelect: (field: string | undefined) => void
+}
+
+function FieldSelect({ field, options, onSelect }: FieldSelectProps) {
+    if (!options.length) return null
+
+    const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value
+        onSelect(value == 'all' ? undefined : value)
+    }
+
+    return (
+        <label htmlFor="field" className={styles.select}>
+            <span>Filter:</span>
+            <select
+                name="field"
+                id="field"
+                defaultValue={field ?? 'all'}
+                onChange={handleChange}
+            >
+                <option value={'all'}>All</option>
+                {options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                        {option.label}
+                    </option>
+                ))}
+            </select>
+        </label>
+    )
+}
+
+interface LimitSelectProps {
+    limit: number
+    onSelect: (limit: number) => void
+}
+
+function LimitSelect({ limit, onSelect }: LimitSelectProps) {
+    return (
+        <label htmlFor="limit" className={styles.select}>
+            <span>Items:</span>
+            <select
+                name="limit"
+                id="limit"
+                defaultValue={limit}
+                onChange={(e) => onSelect(+e.target.value)}
+            >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+            </select>
+        </label>
+    )
+}
+
+interface SortSelectProps {
+    sort: SortDirection | undefined
+    onSelect: (sort: SortDirection | undefined) => void
+}
+
+function SortSelect({ sort, onSelect }: SortSelectProps) {
+    const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value as SortDirection | 'none'
+        onSelect(value == 'none' ? undefined : value)
+    }
+
+    return (
+        <label htmlFor="sort" className={styles.select}>
+            <span>Sort:</span>
+            <select
+                name="sort"
+                id="sort"
+                defaultValue={sort ?? 'none'}
+                onChange={handleChange}
+            >
+                <option value="none">None</option>
+                <option value={SortDirection.ASC}>Ascending</option>
+                <option value={SortDirection.DESC}>Descending</option>
+            </select>
+        </label>
+    )
+}
+
+interface FilterSelectProps {
+    options: FilterOption[] | undefined
+    filters: Record<string, (string | number)[]>
+    onChange: (filters: Record<string, (string | number)[]>) => void
+}
+
+function FilterSelect({ options, filters, onChange }: FilterSelectProps) {
+    const handleUpdate = (value: string, selected: (string | number)[]) => {
+        const newFilters = { ...filters }
+        if (selected.length) newFilters[value] = selected
+        else delete newFilters[value]
+        onChange(newFilters)
+    }
+
+    return (
+        <>
+            {options?.map((option) => (
+                <div key={option.label} className={styles.filterSelect}>
+                    <strong>{option.label}:</strong>
+                    <MultiSelect
+                        name={option.label}
+                        options={option.options}
+                        selected={filters[option.value] ?? []}
+                        onUpdate={(selected) =>
+                            handleUpdate(option.value, selected)
+                        }
+                    />
+                </div>
+            ))}
+        </>
+    )
+}
+
+interface PageSelectProps {
+    page: number
+    count: number
+    pageSize: number
+    disabled?: boolean
+    onChange: (page: number) => void
+}
+
+function PageSelect({
+    page,
+    count,
+    pageSize,
+    disabled,
+    onChange,
+}: PageSelectProps) {
+    const [value, setValue] = useState('')
+
+    const pageCount = Math.ceil(count / pageSize)
+    const canNavigate = pageCount > 1
+    const maxPage = pageCount - 1
+
+    const handleChangeValue = (value: string) => {
+        if (!value || (/^\d+$/.test(value) && value.length < 10))
+            setValue(value)
+    }
+
+    const handleSubmit = () => {
+        const newPage = +value - 1
+        if (0 <= newPage && newPage <= maxPage) onChange(newPage)
+        else setValue((page + 1).toString())
+    }
+
+    useEffect(() => {
+        setValue((page + 1).toString())
+    }, [page])
+
+    useEffect(() => {
+        if (page < 0) onChange(0)
+        else if (maxPage >= 0 && page > maxPage) onChange(maxPage)
+    }, [page, maxPage, onChange])
+
+    return (
+        <div className={styles.pageSelect}>
+            <div className={styles.pageSelectButtons}>
                 <PaginationArrow
-                    onClick={() => onPageChange(1)}
+                    onClick={() => onChange(0)}
                     icon={FiChevronsLeft}
                     title="First"
-                    enabled={can_change && page > 1}
+                    enabled={canNavigate && page > 0}
                 />
                 <PaginationArrow
-                    onClick={() => onPageChange(page - 1)}
+                    onClick={() => onChange(page - 1)}
                     icon={FiChevronLeft}
                     title="Previous"
-                    enabled={can_change && page > 1}
+                    enabled={canNavigate && page > 0}
                 />
                 <form
-                    className="flex items-center gap-2 px-2"
+                    className={styles.pageSelectForm}
                     onSubmit={(e) => {
                         e.preventDefault()
-
-                        const p = +value || page
-                        setValue(p.toString())
-                        onPageChange(p)
+                        handleSubmit()
                     }}
                 >
                     <input
                         type="text"
                         value={value}
-                        onChange={(e) => {
-                            if (
-                                e.target.value.length === 0 ||
-                                (/^\d+$/.test(e.target.value) &&
-                                    e.target.value.length < 10)
-                            ) {
-                                setValue(e.target.value)
-                            }
-                        }}
-                        onBlur={() => {
-                            if (value.length === 0) setValue(page.toString())
-                        }}
-                        disabled={!enabled}
-                        className="w-[6ch] max-w-min rounded-lg border border-gray-300 px-2 py-0.5 text-center"
+                        disabled={disabled}
+                        onBlur={handleSubmit}
+                        onChange={(e) => handleChangeValue(e.target.value)}
+                        className={styles.pageSelectInput}
                     />
-                    <input type="submit" className="hidden" />
-                    <span className="text-gray-600">
+                    <input type="submit" hidden />
+                    <span className={styles.pageSelectSpan} color="#4b5563">
                         of{' '}
-                        <span title={`${total} total results`}>{maxPage}</span>
+                        <span title={`${count} total results`}>
+                            {pageCount}
+                        </span>
                     </span>
                 </form>
                 <PaginationArrow
-                    onClick={() => onPageChange(page + 1)}
+                    onClick={() => onChange(page + 1)}
                     icon={FiChevronRight}
                     title="Next"
-                    enabled={can_change && page < maxPage}
+                    enabled={canNavigate && page < maxPage}
                 />
                 <PaginationArrow
-                    onClick={() => onPageChange(maxPage)}
+                    onClick={() => onChange(maxPage)}
                     icon={FiChevronsRight}
                     title="Last"
-                    enabled={can_change && page < maxPage}
+                    enabled={canNavigate && page < maxPage}
                 />
             </div>
         </div>
     )
 }
 
-const PaginationArrow: FC<{
+interface PaginationArrowProps {
     onClick: () => void
     icon: IconType
     title: string
     enabled: boolean
-}> = ({ onClick, icon: Icon, title, enabled }) => {
+}
+
+function PaginationArrow({
+    onClick,
+    icon: Icon,
+    title,
+    enabled,
+}: PaginationArrowProps) {
     return (
         <a
-            className={classNames(
-                'flex select-none items-center justify-center rounded-lg p-1.5 font-semibold',
-                {
-                    'cursor-pointer text-gray-700 hover:bg-gray-200 active:bg-gray-100':
-                        enabled,
-                    'cursor-not-allowed text-gray-400': !enabled,
-                }
+            className={cx(
+                styles.arrow,
+                enabled ? styles.enabled : styles.disabled
             )}
             onClick={() => enabled && onClick()}
             title={title}
         >
             <Icon size={20} />
         </a>
-    )
-}
-
-const ImageWithFallback: FC<{ src: string; alt: string }> = ({ src, alt }) => {
-    const [hasErrored, setHasErrored] = useState(false)
-
-    return (
-        <Image
-            src={
-                hasErrored
-                    ? 'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
-                    : src
-            }
-            alt={alt}
-            width={48}
-            height={48}
-            className="aspect-square max-h-[48px] rounded-full"
-            onError={() => setHasErrored(true)}
-        />
     )
 }

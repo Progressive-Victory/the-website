@@ -1,5 +1,7 @@
-import { Metadata } from 'next'
 import { Account } from './Account'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
+import { MainLayout } from '@/components/layout/MainLayout'
+import { Metadata } from 'next'
 
 export const metadata: Metadata = {
     title: 'PV - Account',
@@ -12,6 +14,12 @@ export const metadata: Metadata = {
         images: [{ url: `https://${process.env.SITE_URL}/images/banner.png` }],
     },
 }
+
 export default function AccountPage() {
-    return <Account />
+    return (
+        <MainLayout>
+            <HalftoneBackground />
+            <Account />
+        </MainLayout>
+    )
 }

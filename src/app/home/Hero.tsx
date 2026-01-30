@@ -1,26 +1,29 @@
 'use client'
-import { useState } from 'react'
+
+import styles from './hero.module.css'
+import { Message } from '@/components/common'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
+import { BaseButton } from '@/components/common/buttons/Button'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
 import { motion, useTransform, useSpring } from 'motion/react'
-import { Link, Message } from '@/components/common'
+import type React from 'react'
+import { useState } from 'react'
+
 const avatarImage = '/images/PV_Pride_Logo.png'
 
 export function Hero() {
     return (
-        <div className="relative flex w-full flex-col items-center justify-start py-20">
-            {/* Background */}
-            <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
+        <div className={styles.hero}>
+            <HalftoneBackground />
+
             <div
-                className="z-1 absolute left-0 top-0 size-full lg:w-1/2 lg:-translate-x-1/2"
+                className={styles.blendPanel}
                 style={{
                     backgroundImage: "url('/images/blend_test.png')",
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'right',
-                    mixBlendMode: 'lighten',
                 }}
             />
 
-            {/* Content */}
-            <div className="z-2 relative left-0 top-0 flex flex-col items-center px-4 text-center md:w-2/3">
+            <div className={styles.content}>
                 <motion.div
                     style={{
                         willChange: 'opacity, transform',
@@ -30,9 +33,9 @@ export function Hero() {
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     transition={{ ease: 'backInOut', duration: 1, delay: 0.45 }}
                 >
-                    <h1 className="text-4xl font-bold text-white">
+                    <h1 className={styles.title}>
                         Welcome to{' '}
-                        <span className="text-black-pearl-dark">
+                        <span className={styles.titleEmphasis}>
                             Progressive Victory
                         </span>{' '}
                         the Online Community for Political Action.
@@ -48,7 +51,7 @@ export function Hero() {
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     transition={{ ease: 'backInOut', duration: 1, delay: 0.25 }}
                 >
-                    <p className="my-8 text-xl font-[500] text-white">
+                    <p className={styles.subtitle}>
                         Find like minded people, share ideas, and engage in
                         meaningful political action. Get involved today!
                     </p>
@@ -58,6 +61,8 @@ export function Hero() {
                     style={{
                         willChange: 'opacity, transform',
                         transform: 'translateZ(0)',
+                        display: 'flex',
+                        gap: '1rem',
                     }}
                     initial={{ y: 50, opacity: 0, scale: 0 }}
                     animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -67,17 +72,15 @@ export function Hero() {
                         delay: 0.15,
                     }}
                 >
-                    <Link href="/volunteer" className="bg-valencia">
-                        Get Involved
-                    </Link>
+                    <BaseButton label="Learn More" href="/about" className={buttonStyles.minimalProminent} />
+                    <BaseButton label="Join" href="/volunteer" className={styles.joinButton} />
                 </motion.div>
             </div>
 
-            {/* Message Blocks with Tilt Effect */}
-            <div className="mt-20 flex flex-wrap justify-center gap-6 px-4">
-                <TiltMessage className="order-last xl:order-first">
+            <div className={styles.messages}>
+                <TiltMessage className={styles.orderLastXlFirst}>
                     <Message
-                        className="max-w-xl xl:w-[30vw]"
+                        className={styles.messageCard}
                         motionProps={{
                             initial: { rotate: 20, y: 50 },
                             animate: { rotate: -5, y: 0 },
@@ -87,15 +90,14 @@ export function Hero() {
                         avatarRounded={false}
                         username="Progressive Victory"
                         nameColor="red"
-                        text="Progressive Victory is proud to support progressive candidates! 💙
-            We need more bold Democrats with track records of proven results leading the charge 💪"
-                        image="/images/our_mission.png"
+                        text="It's all fun and games w PV members at the Katie Wilson Watch Party tonight in Seattle! Congratulations to @wilsonformayor and all the volunteers who spent months working to help her win!"
+                        image="/images/PVKatieWilsonWatchParty.jpeg"
                     />
                 </TiltMessage>
 
-                <TiltMessage className="h-fit lg:mt-24">
+                <TiltMessage className={styles.messageMid}>
                     <Message
-                        className="max-w-xl xl:w-[30vw]"
+                        className={styles.messageCard}
                         motionProps={{
                             initial: { rotate: 15, y: 50 },
                             animate: { rotate: 1, y: 0 },
@@ -105,13 +107,13 @@ export function Hero() {
                         avatarRounded={false}
                         username="Progressive Victory"
                         nameColor="red"
-                        text="Built by the internet, for the internet! — Progressive Victory is a new kind of political community turning the tides of elections across the country."
+                        text="Built by the internet, for America. Progressive Victory is a new kind of political institution: seamlessly marrying the electoral impact and volunteer power of traditional progressive organizations with the culture and community of digital third places."
                     />
                 </TiltMessage>
 
-                <TiltMessage className="order-first xl:order-last">
+                <TiltMessage className={styles.orderFirstXlLast}>
                     <Message
-                        className="max-w-xl xl:w-[30vw]"
+                        className={styles.messageCard}
                         motionProps={{
                             initial: { rotate: 30, y: 50 },
                             animate: { rotate: 6, y: 0 },
@@ -194,7 +196,7 @@ function TiltMessage({
 
     return (
         <motion.div
-            className={className}
+            className={[styles.tilt, className].filter(Boolean).join(' ')}
             style={{
                 rotateX,
                 rotateY,
@@ -216,4 +218,3 @@ function TiltMessage({
         </motion.div>
     )
 }
-

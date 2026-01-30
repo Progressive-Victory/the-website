@@ -2,7 +2,6 @@ name: Build with pnpm
 
 on:
     push:
-    pull_request:
 
 jobs:
     build:
@@ -32,6 +31,3 @@ jobs:
                   DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
                   DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}
                   GUILD_ID: ${{ secrets.GUILD_ID }}
-                  MONGODB_URI: ${{ secrets.MONGODB_URI }}
-                  NEUTRINO_SECRET: ${{ secrets.NEUTRINO_SECRET }}
-                  NEUTRINO_USERID: ${{ secrets.NEUTRINO_USERID }}

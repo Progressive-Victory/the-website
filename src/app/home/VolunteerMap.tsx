@@ -1,8 +1,7 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { Link, Message, TiltMessage } from '@/components/common'
+
+import styles from './map.module.css'
 import { StateMap } from '@/components/Map'
-import { MapView, StateMapInteractionProps } from '@/components/Map/types'
 import {
     BBOX_AK,
     BBOX_HI,
@@ -10,66 +9,70 @@ import {
     BBOX_US,
     US_STATES,
 } from '@/components/Map/constants'
+import { MapView, StateMapInteractionProps } from '@/components/Map/types'
+import { Link, Message, TiltMessage } from '@/components/common'
+import {
+    MapMemberCountResponse,
+    zMapMemberCountResponse,
+} from '@/contracts/responses'
+import { useFetch } from '@/util/hooks'
+import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 
 export function VolunteerMap() {
-    /* States */
     const [hoveredState, setHoveredState] = useState<string | null>(null)
     const [selectedState, setSelectedState] = useState<string | null>(null)
-    const [totalMemberCount, setTotalMemberCount] = useState<number>(0)
-    const [stateMemberCount, setStateMemberCount] =
-        useState<Record<string, number>>()
+    const { ready, onGet } = useFetch()
 
-    useEffect(() => {
-        void (async () => {
-            const statesCount: Record<string, number> = {}
-            const smc = (await (
-                await fetch('/api/map/count')
-            ).json()) as Record<string, number>
-            Object.entries(smc).forEach(([k, v]) => {
-                const state = US_STATES.find((s) => s.code === k)?.name
-                if (typeof state === 'string') {
-                    statesCount[state] = typeof v === 'number' ? v : 0
-                }
-            })
+    const memberCountQuery = useQuery({
+        queryKey: ['/map/memberCounts'],
+        queryFn: ready
+            ? async ({ signal }) => {
+                  const data = await onGet<MapMemberCountResponse>(
+                      '/map/memberCounts',
+                      zMapMemberCountResponse,
+                      { signal }
+                  )
 
-            const total = (await (
-                await fetch('/api/map/users-count')
-            ).json()) as number
+                  data.states = US_STATES.reduce((map, state) => {
+                      map[state.name] = map[state.code]
+                      return map
+                  }, data.states)
 
-            setStateMemberCount(statesCount)
-            setTotalMemberCount(total)
-        })()
-    }, [])
+                  return data
+              }
+            : skipToken,
+        placeholderData: keepPreviousData,
+    })
+
+    const stateMemberCounts = memberCountQuery.data?.states
+    const totalMemberCount = memberCountQuery.data?.total
 
     function onFeatureClick(state: string | null) {
         setSelectedState((prev) => (prev === state ? null : state))
     }
 
     return (
-        <div className="relative flex w-full flex-col items-center justify-center gap-[6vw] bg-black-pearl-dark py-10 2xl:grid 2xl:grid-cols-2">
-            {/* Text */}
-            <div className="z-10 flex max-w-[750px] flex-col items-center text-center text-white 2xl:order-last">
-                <h1 className="mb-8 text-4xl font-bold">
+        <div className={styles.container}>
+            <div className={styles.textBlock}>
+                <h1 className={styles.title}>
                     Thousands of{' '}
-                    <span className="text-valencia">Volunteers</span>
+                    <span className={styles.titleAccent}>Volunteers</span>
                     <br /> Across the US
                 </h1>
-                <p className="mb-8 px-4 text-lg font-[500] md:px-24">
+                <p className={styles.subtitle}>
                     The PV community is constantly growing. Every new voice adds
                     to the movement!
                 </p>
-                <Link
-                    href={'/volunteer'}
-                    className="w-fit justify-self-center bg-valencia"
-                >
+
+                <Link href={'/volunteer'} className={styles.ctaLink}>
                     Get Involved
                 </Link>
             </div>
 
-            {/* Map */}
-            <TiltMessage className="flex justify-center xl:justify-end">
+            <TiltMessage className={styles.tiltMessage}>
                 <Message
-                    className="xl:w-[30vw]"
+                    className={styles.message}
                     avatar="/images/pv_pride.png"
                     avatarRounded={false}
                     nameColor="red"
@@ -79,15 +82,15 @@ export function VolunteerMap() {
                     }
                     botDivider={true}
                     botLeftContent={
-                        <p className="font-medium">
+                        <p className={styles.botLeftText}>
                             {selectedState
-                                ? `Members in ${selectedState}: ${stateMemberCount?.[selectedState]}`
+                                ? `Members in ${selectedState}: ${stateMemberCounts?.[selectedState]}`
                                 : `Total Members: ${totalMemberCount}`}
                         </p>
                     }
                 >
                     <CombinedMap
-                        stateMemberCount={stateMemberCount}
+                        stateMemberCount={stateMemberCounts}
                         onFeatureClick={onFeatureClick}
                         onFeatureHover={setHoveredState}
                         hoveredState={hoveredState}
@@ -129,8 +132,8 @@ function CombinedMap(props: StateMapInteractionProps) {
     }
 
     return (
-        <div className="relative min-w-[350px] max-w-[750px] rounded-md border">
-            <div className="aspect-video md:aspect-[5/3]">
+        <div className={styles.mapShell}>
+            <div className={styles.mainMapAspect}>
                 <StateMap
                     mapView={{ bounds: BBOX_US }}
                     stateMemberCount={props.stateMemberCount}
@@ -141,12 +144,11 @@ function CombinedMap(props: StateMapInteractionProps) {
                 />
             </div>
 
-            <div className="pointer-events-none relative bottom-0 left-0 m-1 flex w-3/5 items-end gap-1 sm:absolute sm:w-2/5">
+            <div className={styles.extraMaps}>
                 {Object.entries(extraMaps).map(([, map], i) => (
                     <div
                         key={i}
-                        // className={`relative w-full rounded-md border`}
-                        className={`relative w-full`}
+                        className={styles.extraMapItem}
                         style={{
                             aspectRatio: map.w / map.h,
                             maxWidth: map.w,
