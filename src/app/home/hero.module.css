@@ -68,9 +68,19 @@
     color: #ffffff;
 }
 
-.cta {
-    background: #ce3728;
-    font-size: 1rem;
+.joinButton {
+    background-color: #ce3728;
+    color: #ffffff;
+    padding-inline: 1.25rem;
+    padding-block: 0.5rem;
+    font-size: 1.0rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}
+.joinButton:hover {
+    background-color: #ffffff;
+    color: #ce3728;
+    transform: translateY(-2px);
 }
 
 .messages {
@@ -78,7 +88,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 1.5rem;
+    gap: 1.75rem;
     padding: 0 1rem;
 }
 
