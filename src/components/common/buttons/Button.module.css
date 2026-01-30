@@ -29,6 +29,7 @@
 .prominent:hover {
     background-color: #ffffff;
     color: #ce3728;
+    transform: translateY(-2px);
 }
 
 .primary {
@@ -43,6 +44,7 @@
 .primary:hover {
     background-color: #ffffff;
     color: #ce3728;
+    transform: translateY(-2px);
 }
 
 .secondary {
@@ -112,6 +114,10 @@
     padding-block: 1rem;
     min-height: 3.75rem;
     height: 3.75rem;
+}
+
+.longVariant:hover {
+    transform: translateY(0px);
 }
 
 .buttonContent {
