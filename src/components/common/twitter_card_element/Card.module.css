@@ -87,32 +87,11 @@
     gap: 0.8rem;
 }
 
-/* .actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: calc(var(--card-width) / 35);
-} */
-
-
 .action {
     width: 1.2rem;
     height: 1.2rem;
     cursor: pointer;
 }
-
-/* .actionBtn {
-    width: calc(var(--card-width) / 22);
-    height: calc(var(--card-width) / 22);
-    cursor: pointer;
-
-    padding: 0;
-    border: none;
-    background: transparent;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-} */
 
 .icon {
     width: 100%;
@@ -159,9 +138,6 @@
     }
     15% {
         transform: scale(0.25);
-    }
-    20% {
-        transform: scale(0.4);
     }
     20% {
         transform: scale(0.6);
