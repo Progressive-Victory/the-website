@@ -4,7 +4,7 @@ class DateService {
     }
 
     isValid(date: Date | string | null | undefined) {
-        return date && !isNaN(new Date(date).valueOf())
+        return !!date && !isNaN(new Date(date).valueOf())
     }
 
     toISODateString(date: Date | string | null | undefined) {
@@ -19,6 +19,7 @@ class DateService {
     }
 
     getAge(dateOfBirth: Date) {
+        if (!this.isValid(dateOfBirth)) return null
         const current = this.now()
 
         if (dateOfBirth > current) return null
