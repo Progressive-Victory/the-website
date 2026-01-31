@@ -65,10 +65,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             redirectProxyUrl: process.env.BOOMERANG_URI,
 
             async profile(profile: DiscordProfile) {
-                if (!process.env.PV_WEBSITE_API_KEY)
-                    throw Error('set PV_WEBSITE_API_KEY in env vars')
+                if (!process.env.DISCORD_BOT_TOKEN)
+                    throw Error('set DISCORD_BOT_TOKEN in env vars')
                 const serverToken = await serverAuth(
-                    process.env.PV_WEBSITE_API_KEY
+                    process.env.DISCORD_BOT_TOKEN
                 )
 
                 if (!serverToken)
@@ -77,7 +77,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                 if (profile.avatar) {
                     try {
                         await fetch(
-                            `${process.env.PV_WEBSITE_API_URL}/discordUsers/${profile.id}/avatar`,
+                            new URL(
+                                '/discordUsers/${profile.id}/avatar',
+                                process.env.PV_WEBSITE_API_URL
+                            ),
                             {
                                 method: 'PATCH',
                                 headers: {
@@ -137,10 +140,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                 token.discordId = eprofile.id
                 token.refreshToken = account.refresh_token
 
-                if (!process.env.PV_WEBSITE_API_KEY)
-                    throw Error('set PV_WEBSITE_API_KEY in env vars')
+                if (!process.env.DISCORD_BOT_TOKEN)
+                    throw Error('set DISCORD_BOT_TOKEN in env vars')
                 const serverToken = await serverAuth(
-                    process.env.PV_WEBSITE_API_KEY
+                    process.env.DISCORD_BOT_TOKEN
                 )
 
                 if (!serverToken)

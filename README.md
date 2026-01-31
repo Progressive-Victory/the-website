@@ -47,7 +47,6 @@ URL="http://localhost:3000"
 
 # auth service vars
 NEXTAUTH_SECRET="abcdefg"
-NEXTAUTH_URL="http://localhost:3000"
 
 # discord interface vars
 DISCORD_CLIENT_ID="<bot client id>"
@@ -58,12 +57,11 @@ GUILD_ID="1308877803705335858"
 # Does not need to change
 SITE_URL="https://example.com"
 
-# boomerang ig
+# boomerang
 BOOMERANG_URI="<boomerang uri>"
 
 # api vars
 PV_WEBSITE_API_URL="http://localhost:8080"
-PV_WEBSITE_API_KEY="<just the discord bot token again>"
 ```
 
 ### 4. Run
