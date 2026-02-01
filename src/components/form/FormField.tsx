@@ -6,24 +6,6 @@ export interface FormFieldProps<T, F = unknown> {
     label: string
 
     readonly?: boolean
-    deprecated?: boolean
-    prefix?: string
-    dynamic?: {
-        value?: unknown
-        disabled?: boolean
-        loading?: boolean
-        onUpdate?: (
-            fieldKey: string,
-            value: unknown,
-            patchValue: unknown,
-            valid: boolean
-        ) => void
-    }
-}
-
-export interface FormFieldProps {
-    name: string
-    field: string
     required?: boolean
     disabled?: boolean
     deprecated?: boolean
@@ -31,6 +13,8 @@ export interface FormFieldProps {
     dynamic?: DynamicFormFieldProps<T, F>
 
     children?: ReactElement
+
+    prefix?: string
 
     field?: string
     getter?: (form: T) => F

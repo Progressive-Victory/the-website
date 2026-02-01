@@ -21,14 +21,9 @@ export function TextField<T>(
     }
 
     return (
-        <FormField
-            name={name}
-            field={field}
-            required={required}
-            deprecated={deprecated}
-        >
-            {readonly || dynamic?.disabled ? (
-                <div className="col-span-2 w-full">
+        <FormField {...props}>
+            {readonly ? (
+                <div className={styles.readonly}>
                     {props.prefix}
                     {value}
                 </div>
