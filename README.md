@@ -22,13 +22,13 @@ Check out a new branch from `main` before you begin working on any new feature. 
 
 The easiest way to install pnpm is via npm after installing Node.js. Otherwise visit the linked page above to install it on your machine.
 
-```
+```sh
 npm install -g pnpm@latest-10
 ```
 
 First, install the dependencies,
 
-```
+```sh
 pnpm install
 ```
 
@@ -36,7 +36,7 @@ pnpm install
 
 Next, check the .env.example file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to Joops on discord.
 
-```bash
+```sh
 # $PROJECT_DIR/.env.local
 
 # These are the values for the development Discord bot
@@ -66,7 +66,7 @@ SITE_URL="https://example.com"
 
 Finally, run the development server
 
-```
+```sh
 pnpm dev
 ```
 
@@ -104,7 +104,7 @@ npx playwright install --with-deps
 
 ### Run tests
 
-```
+```sh
 pnpm run test
 ```
 
