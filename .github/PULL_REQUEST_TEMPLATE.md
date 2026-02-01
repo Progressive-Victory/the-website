@@ -1,21 +1,25 @@
-# (Bug|Feature|Chore)/(Issue ID) Description
+# (Bug|Feature|Task)/(Issue ID)
 
-- A short summary of the PR, 120 characters or fewer.
+## Short Description < Ex: Changed A Tweet Card Image>
 
-## Full Description
+Describe your changes to the code, and why you're making them.
+
+< Ex: Change photo in middle tweet card on homepage to `coolTweetPhoto.png` >
+
+## Details
 
 What is your discord username?
 
 - Answer here
 
-Please link to the related issue:
+Please link to the related github issue:
 
 - Answer here
 
-How does this PR address the bug or implement the feature?
+Do your changes impact anything else or introduce any bugs?
 
 - Answer here
 
-Do your changes impact anything else?
+Any extra notes:
 
-- Answer here
+- (OPTIONAL) Answer here
