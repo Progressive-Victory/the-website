@@ -81,8 +81,14 @@ const navitems: NavItem[] = [
         subnav: {
             columns: [
                 {
-                    title: 'Get involved',
-                    items: [{ name: 'Join', href: '/volunteer' }],
+                    title: 'Endorsement Test Pages',
+                    items: [
+                        { name: 'Endorsement Page 1', href: '/endorsements' },
+                        {
+                            name: 'Endorsement Page 2',
+                            href: '/endorsementsAlt',
+                        },
+                    ],
                 },
             ],
         },
