@@ -82,6 +82,7 @@ export function useFetch() {
     })
 
     async function refreshToken(signal?: AbortSignal) {
+        console.log('refreshing token')
         localStorage.removeItem(pvSessionKey)
 
         await authMutation.mutateAsync(signal)

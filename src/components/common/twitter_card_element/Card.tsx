@@ -127,7 +127,7 @@ export function Message({
                     >
                         {clickedBubble ? (
                             <SolidChatBubbleLeftRightIcon
-                                className={`${styles.iconSolid} ${styles.bubbleActive}`}
+                                className={`${styles.iconSolid} ${styles.bubbleActive} ${styles.iconGrowPop}`}
                             />
                         ) : (
                             <ChatBubbleLeftRightIcon className={styles.icon} />
@@ -143,7 +143,7 @@ export function Message({
                     >
                         {clickedShare ? (
                             <SolidArrowUpOnSquareIcon
-                                className={`${styles.iconSolid} ${styles.shareActive}`}
+                                className={`${styles.iconSolid} ${styles.shareActive} ${styles.iconGrowPop}`}
                             />
                         ) : (
                             <ArrowUpOnSquareIcon className={styles.icon} />
@@ -159,7 +159,7 @@ export function Message({
                     >
                         {clickedHeart ? (
                             <SolidHeartIcon
-                                className={`${styles.iconSolid} ${styles.heartActive}`}
+                                 className={`${styles.iconSolid} ${styles.heartActive} ${styles.iconGrowPop}`}
                             />
                         ) : (
                             <HeartIcon className={styles.icon} />

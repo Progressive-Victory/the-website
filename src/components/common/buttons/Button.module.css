@@ -103,6 +103,21 @@
     color: #ce3728;
 }
 
+.minimalProminent {
+    background-color: #09223a;
+    color: #ffffff;
+    padding-inline: 1.25rem;
+    padding-block: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}
+.minimalProminent:hover {
+    background-color: #ffffff;
+    color: #ce3728;
+    transform: translateY(-2px);
+}
+
 .longVariant {
     width: 100%;
     justify-content: center;
