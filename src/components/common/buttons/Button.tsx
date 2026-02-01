@@ -16,7 +16,10 @@ export interface BaseVisualProps {
 
 export type BaseButtonProps = BaseVisualProps & {
     className: string
-    href: string
+
+    href?: string
+
+    onClick?: () => void
 
     renderContent?: (args: { showNavChevron: boolean }) => React.ReactNode
     rotateChevronOnHover?: boolean
@@ -31,6 +34,7 @@ export function BaseButton(props: BaseButtonProps) {
         rotateChevronOnHover = true,
         disabled,
         href,
+        onClick,
         renderContent,
     } = props
 
@@ -61,7 +65,14 @@ export function BaseButton(props: BaseButtonProps) {
     )
 
     const handleClick = () => {
-        location.href = href
+        if (disabled) return
+        if (onClick) {
+            onClick()
+            return
+        }
+        if (href) {
+            location.href = href
+        }
     }
 
     return (
