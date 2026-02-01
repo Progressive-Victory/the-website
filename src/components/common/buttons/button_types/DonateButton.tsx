@@ -2,6 +2,8 @@
 
 import { BaseButton, BaseVisualProps } from '../Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
+import { DonationOverlay } from '@/components/donation'
+import React from 'react'
 
 const DONATE_HREF = 'https://secure.actblue.com/donate/pvwebsite'
 
@@ -14,7 +16,25 @@ export function DonateButton(props: DonateButtonProps) {
         .filter(Boolean)
         .join(' ')
 
+    const [showDonationOverlay, setShowDonationOverlay] = React.useState(false)
+
+    const handleShowOverlay = () => {
+        setShowDonationOverlay(!showDonationOverlay)
+    }
+
     return (
-        <BaseButton {...rest} className={mergedClassName} href={DONATE_HREF} />
+        <div>
+            <BaseButton
+                {...rest}
+                className={mergedClassName}
+                href={DONATE_HREF}
+                onMouseEnter={handleShowOverlay}
+            />
+            {showDonationOverlay && (
+                <DonationOverlay
+                    handleShowOverlay={handleShowOverlay}
+                ></DonationOverlay>
+            )}
+        </div>
     )
 }

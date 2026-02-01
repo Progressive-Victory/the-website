@@ -1,3 +1,12 @@
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
 .buttonBase {
     display: inline-flex;
     align-items: center;
@@ -27,8 +36,12 @@
     min-height: 2.75rem;
 }
 .prominent:hover {
-    background-color: #ffffff;
+    background: linear-gradient(90deg, #ffffff 25%, #ff8b82 50%, #ffffff 75%);
+    background-size: 200% 100%;
     color: #ce3728;
+    box-shadow: 0 0 30px rgba(206, 55, 40, 0.9);
+    transform: scale(1.2);
+    animation: shimmer 2s linear infinite;
 }
 
 .primary {

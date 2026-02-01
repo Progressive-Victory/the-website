@@ -1,7 +1,8 @@
 'use client'
 
-import { useFetch } from '@/util/hooks'
+import { DonateButton } from '../common/buttons'
 import { NavItem } from './types'
+import { useFetch } from '@/util/hooks'
 import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -45,23 +46,18 @@ export function Footer() {
 
 function MobileFooter() {
     const { data: session } = useSession()
-    const { onSignOut} = useFetch()
+    const { onSignOut } = useFetch()
 
     const handleSignOut = () => {
-        onSignOut();
-        void signOut({ callbackUrl: '/' });
+        onSignOut()
+        void signOut({ callbackUrl: '/' })
     }
 
     return (
         <div className="flex w-full justify-center bg-black-pearl-dark px-5 lg:hidden">
             <div className="flex flex-col items-center py-6">
                 <div className="mb-2 flex items-center sm:mb-6">
-                    <Link
-                        href="https://secure.actblue.com/donate/pvwebsite"
-                        className="text-l mx-px flex items-center rounded-full bg-valencia px-4 py-2 text-center font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:mx-2 xs:text-xl sm:hidden"
-                    >
-                        Donate
-                    </Link>
+                    <DonateButton label="Donate" />
                     <div className="hidden xs:flex">
                         <Image
                             src="/images/LogoFull.webp"
@@ -91,12 +87,7 @@ function MobileFooter() {
                     ))}
                 </div>
                 <div className="mt-4 flex w-[293px] flex-row items-center justify-between gap-x-4 border-b-2 border-footer-grey pb-4 xxs:hidden">
-                    <Link
-                        href="https://secure.actblue.com/donate/pvwebsite"
-                        className="mr-[-14px] hidden h-[50px] items-center rounded-full bg-valencia px-4 py-2 text-center text-xl font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia sm:flex"
-                    >
-                        Donate
-                    </Link>
+                    <DonateButton label="Donate" />
                     {socials.map((social) => (
                         <SocialIcon
                             key={social}
@@ -107,12 +98,7 @@ function MobileFooter() {
                     ))}
                 </div>
                 <div className="mt-4 hidden w-full flex-row items-center justify-between gap-x-4 border-b-2 border-footer-grey pb-4 xxs:flex">
-                    <Link
-                        href="https://secure.actblue.com/donate/pvwebsite"
-                        className="mr-[-14px] hidden h-[50px] items-center rounded-full bg-valencia px-4 py-2 text-center text-xl font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia sm:flex"
-                    >
-                        Donate
-                    </Link>
+                    <DonateButton label="Donate" />
                     {socials.map((social) => (
                         <SocialIcon key={social} url={social} fgColor="white" />
                     ))}
@@ -179,12 +165,7 @@ function DesktopFooter() {
                                 {item.name}
                             </Link>
                         ))}
-                        <Link
-                            href="https://secure.actblue.com/donate/pvwebsite"
-                            className="mx-6 flex items-center rounded-full bg-valencia px-4 py-2 text-center text-xl font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xl:hidden"
-                        >
-                            Donate
-                        </Link>
+                        <DonateButton label="Donate" />
                     </div>
                 </div>
                 <div className="my-4 flex items-center">
@@ -219,12 +200,7 @@ function DesktopFooter() {
                                 />
                             ))}
                         </div>
-                        <Link
-                            href="https://secure.actblue.com/donate/pvwebsite"
-                            className="mx-6 hidden items-center rounded-full bg-valencia px-4 py-2 text-center text-xl font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xl:flex"
-                        >
-                            Donate
-                        </Link>
+                        <DonateButton label="Donate" />
                     </div>
                 </div>
                 <div className="flex items-center">

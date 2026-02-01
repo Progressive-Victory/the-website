@@ -20,7 +20,7 @@ export type BaseButtonProps = BaseVisualProps & {
 
     renderContent?: (args: { showNavChevron: boolean }) => React.ReactNode
     rotateChevronOnHover?: boolean
-}
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof BaseVisualProps>
 
 export function BaseButton(props: BaseButtonProps) {
     const {
@@ -32,6 +32,7 @@ export function BaseButton(props: BaseButtonProps) {
         disabled,
         href,
         renderContent,
+        ...rest
     } = props
 
     const showNavChevron =
@@ -70,6 +71,7 @@ export function BaseButton(props: BaseButtonProps) {
             disabled={disabled}
             onClick={handleClick}
             className={finalClassName}
+            {...rest}
         >
             {content}
         </button>
