@@ -122,17 +122,8 @@
     color: #ce3728;
 }
 
-@media (min-width: 360px) {
-    .mobileTopNavLink {
-        margin-inline: 0.25rem;
-        font-size: 1rem;
-        line-height: 1.5rem;
-    }
-}
-
 @media (min-width: 480px) {
     .mobileTopNavLink {
-        padding: 0.5rem 1rem;
         font-size: 1.125rem;
         line-height: 1.75rem;
     }
