@@ -10,7 +10,9 @@ import {
     US_STATES,
 } from '@/components/Map/constants'
 import { MapView, StateMapInteractionProps } from '@/components/Map/types'
-import { Link, Message, TiltMessage } from '@/components/common'
+import { Message, TiltMessage } from '@/components/common'
+import { BaseButton } from '@/components/common/buttons/Button'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
 import {
     MapMemberCountResponse,
     zMapMemberCountResponse,
@@ -65,9 +67,11 @@ export function VolunteerMap() {
                     to the movement!
                 </p>
 
-                <Link href={'/volunteer'} className={styles.ctaLink}>
-                    Get Involved
-                </Link>
+                <BaseButton
+                    label="Get Involved"
+                    href="/volunteer"
+                    className={buttonStyles.prominent}
+                />
             </div>
 
             <TiltMessage className={styles.tiltMessage}>

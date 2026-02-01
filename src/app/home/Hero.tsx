@@ -2,9 +2,9 @@
 
 import styles from './hero.module.css'
 import { Message } from '@/components/common'
-import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { motion, useTransform, useSpring } from 'motion/react'
 import type React from 'react'
 import { useState } from 'react'
@@ -72,8 +72,16 @@ export function Hero() {
                         delay: 0.15,
                     }}
                 >
-                    <BaseButton label="Learn More" href="/about" className={buttonStyles.minimalProminent} />
-                    <BaseButton label="Join" href="/volunteer" className={styles.joinButton} />
+                    <BaseButton
+                        label="Learn More"
+                        href="/about"
+                        className={buttonStyles.minimalProminent}
+                    />
+                    <BaseButton
+                        label="Join"
+                        href="/volunteer"
+                        className={styles.joinButton}
+                    />
                 </motion.div>
             </div>
 

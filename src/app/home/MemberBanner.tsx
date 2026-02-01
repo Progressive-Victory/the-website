@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './membership.module.css'
-import { Link } from '@/components/common'
+import { DonateButton } from '@/components/common/buttons/button_types/DonateButton'
 import { motion, useSpring, useTransform } from 'motion/react'
 import Image, { StaticImageData } from 'next/image'
 import React, { useState, useRef, useEffect, useCallback } from 'react'
@@ -295,12 +295,10 @@ export function MemberBanner() {
                             />
 
                             <div className={styles.ctaRow}>
-                                <Link
-                                    href="https://secure.actblue.com/donate/pvmember"
-                                    className={styles.ctaLink}
-                                >
-                                    Become a Member
-                                </Link>
+                                <DonateButton
+                                    label="Become a Member"
+                                    className={styles.buttonHover}
+                                />
                             </div>
                         </div>
                     </motion.div>
