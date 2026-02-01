@@ -57,7 +57,6 @@ function MobileFooter() {
         <div className="flex w-full justify-center bg-black-pearl-dark px-5 lg:hidden">
             <div className="flex flex-col items-center py-6">
                 <div className="mb-2 flex items-center sm:mb-6">
-                    <DonateButton label="Donate" />
                     <div className="hidden xs:flex">
                         <Image
                             src="/images/LogoFull.webp"
@@ -165,7 +164,6 @@ function DesktopFooter() {
                                 {item.name}
                             </Link>
                         ))}
-                        <DonateButton label="Donate" />
                     </div>
                 </div>
                 <div className="my-4 flex items-center">
