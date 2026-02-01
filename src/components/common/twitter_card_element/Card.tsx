@@ -159,7 +159,7 @@ export function Message({
                     >
                         {clickedHeart ? (
                             <SolidHeartIcon
-                                 className={`${styles.iconSolid} ${styles.heartActive} ${styles.iconGrowPop}`}
+                                className={`${styles.iconSolid} ${styles.heartActive} ${styles.iconGrowPop}`}
                             />
                         ) : (
                             <HeartIcon className={styles.icon} />
