@@ -1,6 +1,7 @@
 import { Field, SupportNote, Toggle } from '.'
+import { zLocation, Location } from '@/contracts/data'
 import { dateService } from '@/services'
-import { useInit } from '@/util/hooks'
+import { useFetch, useInit } from '@/util/hooks'
 import Link from 'next/link'
 import phone from 'phone'
 import { Country, isValidCountryPostalCode } from 'postal-code-validator'
@@ -20,13 +21,17 @@ export interface IOnboardingForm {
 
 export interface CollectInfoStageProps {
     initialForm: IOnboardingForm
-    onSuccess: (form: IOnboardingForm) => void
+    isPending: boolean
+    onSubmit: (form: IOnboardingForm) => void
 }
 
 export function CollectInfoStage({
     initialForm,
-    onSuccess,
+    isPending,
+    onSubmit,
 }: CollectInfoStageProps) {
+    const { onGet } = useFetch()
+
     const [form, setForm] = useState(initialForm)
     const [phoneNumber, setPhoneNumber] = useState('')
 
@@ -35,7 +40,7 @@ export function CollectInfoStage({
     const firstNameIsValid = validName(form.firstName)
     const lastNameIsValid = validName(form.lastName)
 
-    const age = dateService.getAge(form.dateOfBirth)
+    const age = dateService.getAge(new Date(form.dateOfBirth))
     const dateOfBirthIsValid = age != null
 
     const zipCodeIsValid = isValidCountryPostalCode(
@@ -60,22 +65,23 @@ export function CollectInfoStage({
         setPhoneNumber(formatted)
     }
 
-    const checkZip = useCallback(async (code: string): Promise<boolean> => {
-        const result = await fetch('/api/onboarding/zip/validate', {
-            method: 'POST',
-            body: JSON.stringify({
-                code,
-            }),
-        })
-        const { isValidZip }: { isValidZip: boolean } = await result.json()
-        return isValidZip
-    }, [])
+    const checkZip = useCallback(
+        async (code: string): Promise<boolean> => {
+            try {
+                await onGet<Location>(`/locations/${code}`, zLocation)
+                return true
+            } catch {
+                return false
+            }
+        },
+        [onGet]
+    )
 
     const handleSubmit = async (): Promise<void> => {
         const isValidZip = await checkZip(form.zipCode)
         setZipCodeError(!isValidZip)
         if (!isValidZip) return
-        onSuccess(form)
+        onSubmit(form)
     }
 
     const isValid =
@@ -229,7 +235,7 @@ export function CollectInfoStage({
                 onClick={() => {
                     void handleSubmit()
                 }}
-                disabled={!isValid}
+                disabled={!isValid || isPending}
                 className="w-full rounded-md bg-steel-blue py-2 text-lg font-bold text-white transition-all duration-100 hover:bg-valencia disabled:cursor-not-allowed disabled:bg-gray-500 [&:not(:disabled)]:hover:scale-[103%]"
             >
                 Join Now

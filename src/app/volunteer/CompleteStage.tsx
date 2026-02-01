@@ -2,10 +2,15 @@ import { CakeIcon, TrophyIcon } from '@heroicons/react/24/solid'
 
 export interface CompleteStageProps {
     isInServer: boolean
+    isPending: boolean
     onRejoin: () => void
 }
 
-export function CompleteStage({ isInServer, onRejoin }: CompleteStageProps) {
+export function CompleteStage({
+    isInServer,
+    isPending,
+    onRejoin,
+}: CompleteStageProps) {
     return (
         <div className="flex min-h-[200px] flex-col items-center justify-center p-4">
             {!isInServer ? (
@@ -18,6 +23,7 @@ export function CompleteStage({ isInServer, onRejoin }: CompleteStageProps) {
                         Click the button below to rejoin.
                     </p>
                     <button
+                        disabled={isPending}
                         onClick={onRejoin}
                         className="mt-2 rounded-full bg-valencia px-4 py-2 font-bold text-white hover:bg-red-900"
                     >

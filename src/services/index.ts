@@ -1,1 +1,1 @@
-export { dateService } from './dateService'
+export * from './dateService'

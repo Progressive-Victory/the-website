@@ -1,9 +1,10 @@
-import { ReactNode } from 'react'
+import styles from './FormField.module.css'
+import { ReactElement } from 'react'
 
-export interface IBaseFormField {
-    name: string
-    field: string
-    required?: boolean
+export interface FormFieldProps<T, F = unknown> {
+    id?: string
+    label: string
+
     readonly?: boolean
     deprecated?: boolean
     prefix?: string
@@ -11,7 +12,12 @@ export interface IBaseFormField {
         value?: unknown
         disabled?: boolean
         loading?: boolean
-        onUpdate?: (fieldKey: string, value: unknown, patchValue: unknown, valid: boolean) => void
+        onUpdate?: (
+            fieldKey: string,
+            value: unknown,
+            patchValue: unknown,
+            valid: boolean
+        ) => void
     }
 }
 
@@ -19,33 +25,70 @@ export interface FormFieldProps {
     name: string
     field: string
     required?: boolean
+    disabled?: boolean
     deprecated?: boolean
-    children?: ReactNode
+
+    dynamic?: DynamicFormFieldProps<T, F>
+
+    children?: ReactElement
+
+    field?: string
+    getter?: (form: T) => F
+    setter?: (form: T, field: F) => T
+    validator?: (field: F) => boolean
 }
 
-export function FormField({
-    name,
-    field,
-    required = false,
-    deprecated = false,
-    children,
-}: FormFieldProps) {
+export interface DynamicFormFieldProps<T, F = unknown> {
+    form: T
+    editing: boolean
+    saving: boolean
+    onChange: (props: FormFieldProps<T, F>, field: F) => void
+}
+
+export const getGetter = <T, F>(props: FormFieldProps<T, F>) => {
+    const getter = props.getter
+    if (getter) return (form: T) => getter(form)
+
+    const key = props.field
+    if (key) return (form: T) => (form as Record<string, F>)[key]
+
+    return undefined
+}
+
+export const getSetter = <T, F>(props: FormFieldProps<T, F>) => {
+    const setter = props.setter
+    if (setter) return (form: T, field: F) => setter(form, field)
+
+    const key = props.field
+    if (key) return (form: T, field: F) => ({ ...form, [key]: field }) as T
+
+    return (form: T) => form
+}
+
+export function FormField<T, F>(props: FormFieldProps<T, F>) {
+    props.getter ??= getGetter(props)
+    props.setter ??= getSetter(props)
+
     return (
-        <div className="contents">
-            <div className="pl-6">
-                <label key={field} htmlFor={field} className="font-medium">
-                    {name}
-                    {required && (
+        <div className={styles.field}>
+            <div className={styles.fieldHeader}>
+                <label
+                    key={props?.id}
+                    htmlFor={props?.id}
+                    className={styles.fieldLabel}
+                >
+                    {props.label}
+                    {props.required && (
                         <span
-                            className="ml-1 text-red-500"
+                            className={styles.required}
                             title="Required Field"
                         >
                             *
                         </span>
                     )}
-                    {deprecated && (
+                    {props.deprecated && (
                         <span
-                            className="ml-1 text-yellow-500"
+                            className={styles.deprecated}
                             title="Deprecated Field"
                         >
                             **
@@ -53,7 +96,7 @@ export function FormField({
                     )}
                 </label>
             </div>
-            {children}
+            {props.children}
         </div>
     )
 }

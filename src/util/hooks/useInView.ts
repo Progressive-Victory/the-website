@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from 'react'
 
 export default function useInView() {
     const [inView, setInView] = useState(false)
@@ -18,4 +18,3 @@ export default function useInView() {
 
     return { inView, observe }
 }
-

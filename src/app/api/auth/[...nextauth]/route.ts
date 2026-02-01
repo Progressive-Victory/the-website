@@ -13,14 +13,18 @@ export const POST = async (req: NextRequest) => {
 
         if (url.pathname === '/api/auth/signin/discord') {
             // Pull the original URL out
-            const body_url = new URL((await res.json()).url)
+            const urlJson = (await res.json()) as { url: string }
+            const body_url = new URL(urlJson.url)
 
             // Boomerang will redirect back to whatever the state.redirect_uri is set to
             body_url.searchParams.set(
                 'state',
                 btoa(
                     JSON.stringify({
-                        redirect_uri: `${process.env.NEXTAUTH_URL ?? req.headers.get('origin')}/api/auth/callback/discord`,
+                        redirect_uri: new URL(
+                            '/api/auth/callback/discord',
+                            req.headers.get('origin') ?? ''
+                        ),
                         original_state: body_url.searchParams.get('state'),
                     })
                 )

@@ -1,4 +1,4 @@
-import NextAuth, { DefaultSession } from 'next-auth'
+import { DefaultSession } from 'next-auth'
 import { DefaultJWT } from 'next-auth/jwt'
 
 declare module 'next-auth' {
@@ -6,6 +6,7 @@ declare module 'next-auth' {
     interface Session extends DefaultSession {
         discordId: string
         accessToken: string
+        refreshToken: string
         apiUrl: string
     }
 
@@ -13,5 +14,6 @@ declare module 'next-auth' {
     interface JWT extends DefaultJWT {
         discordId: string
         accessToken: string
+        refreshToken: string
     }
 }
