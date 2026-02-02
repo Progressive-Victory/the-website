@@ -67,10 +67,6 @@
     }
 }
 
-.cta {
-    background-color: #ce3728;
-}
-
 .container {
     position: relative;
     display: flex;
@@ -129,12 +125,6 @@
     .subtitle {
         padding: 0 6rem;
     }
-}
-
-.ctaLink {
-    width: fit-content;
-    justify-self: center;
-    background: #ce3728;
 }
 
 .tiltMessage {

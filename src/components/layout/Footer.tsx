@@ -1,11 +1,16 @@
 'use client'
 
-import { DonateButton } from '../common/buttons'
+import { LogoutButton } from '../common/buttons/button_types/LogoutButton'
 import { NavItem } from './types'
-import { useFetch } from '@/util/hooks'
-import { useSession, signOut } from 'next-auth/react'
+import { BaseButton } from '@/components/common/buttons/Button'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
+import { DonateButton } from '@/components/common/buttons/button_types/DonateButton'
+import { LoginButton } from '@/components/common/buttons/button_types/LoginButton'
+import { NavButton } from '@/components/common/buttons/button_types/NavButton'
+import styles from '@/components/layout/footer.module.css'
+import { motion } from 'motion/react'
+import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { SocialIcon } from 'react-social-icons'
 
 const socials = [
@@ -17,27 +22,15 @@ const socials = [
 ]
 
 const navitems: NavItem[] = [
-    {
-        name: 'About',
-        href: '/about',
-    },
-    {
-        name: 'Volunteer',
-        href: '/volunteer',
-    },
-    {
-        name: 'Events',
-        href: '/events',
-    },
-    {
-        name: 'Merch',
-        href: 'https://progressivevictory.myshopify.com/',
-    },
+    { name: 'About', href: '/about' },
+    { name: 'Volunteer', href: '/volunteer' },
+    { name: 'Events', href: '/events' },
+    { name: 'Merch', href: 'https://progressivevictory.myshopify.com/' },
 ]
 
 export function Footer() {
     return (
-        <div>
+        <div className={styles.footerRoot}>
             <MobileFooter />
             <DesktopFooter />
         </div>
@@ -46,18 +39,17 @@ export function Footer() {
 
 function MobileFooter() {
     const { data: session } = useSession()
-    const { onSignOut } = useFetch()
-
-    const handleSignOut = () => {
-        onSignOut()
-        void signOut({ callbackUrl: '/' })
-    }
 
     return (
-        <div className="flex w-full justify-center bg-black-pearl-dark px-5 lg:hidden">
-            <div className="flex flex-col items-center py-6">
-                <div className="mb-2 flex items-center sm:mb-6">
-                    <div className="hidden xs:flex">
+        <div className={styles.mobileFooterContainer}>
+            <div className={styles.mobileInner}>
+                <div className={styles.mobileLogoRow}>
+                    <DonateButton
+                        label="Donate"
+                        className={styles.mobileDonateTop}
+                    />
+
+                    <div className={styles.mobileLogoWrapLarge}>
                         <Image
                             src="/images/LogoFull.webp"
                             alt="progressive-victory-logo"
@@ -65,7 +57,8 @@ function MobileFooter() {
                             height={256}
                         />
                     </div>
-                    <div className="flex xs:hidden">
+
+                    <div className={styles.mobileLogoWrapSmall}>
                         <Image
                             src="/images/LogoFull.webp"
                             alt="progressive-victory-logo"
@@ -74,71 +67,84 @@ function MobileFooter() {
                         />
                     </div>
                 </div>
-                <div className="flex w-[293px] items-center justify-around border-y-2 border-footer-grey py-2 xxs:w-full sm:py-4">
+
+                <div className={styles.mobileTopNavRow}>
                     {navitems.map((item) => (
-                        <Link
+                        <NavButton
                             key={item.name}
+                            label={item.name}
                             href={item.href}
-                            className="m-auto mx-px rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:mx-1 xxs:text-base xs:px-4 xs:py-2 xs:text-lg"
-                        >
-                            {item.name}
-                        </Link>
+                            className={`${buttonStyles.plain} ${styles.mobileTopNavLink}`}
+                        />
                     ))}
                 </div>
-                <div className="mt-4 flex w-[293px] flex-row items-center justify-between gap-x-4 border-b-2 border-footer-grey pb-4 xxs:hidden">
-                    <DonateButton label="Donate" />
+
+                <div className={styles.mobileSocialsRowCompact}>
+                    <DonateButton
+                        label="Donate"
+                        className={styles.mobileDonateSmOnly}
+                    />
+
                     {socials.map((social) => (
                         <SocialIcon
                             key={social}
                             url={social}
                             fgColor="white"
-                            style={{ height: 44, width: 44 }}
+                            className={styles.mobileSocialIconFixed}
                         />
                     ))}
                 </div>
-                <div className="mt-4 hidden w-full flex-row items-center justify-between gap-x-4 border-b-2 border-footer-grey pb-4 xxs:flex">
-                    <DonateButton label="Donate" />
+
+                <div className={styles.mobileSocialsRowFull}>
+                    <DonateButton
+                        label="Donate"
+                        className={styles.mobileDonateSmOnly}
+                    />
+
                     {socials.map((social) => (
-                        <SocialIcon key={social} url={social} fgColor="white" />
+                        <SocialIcon
+                            key={social}
+                            url={social}
+                            fgColor="white"
+                            className={styles.mobileSocialIconAuto}
+                        />
                     ))}
                 </div>
-                <div className="my-4 w-[293px] border-2 border-white p-1 text-center text-sm font-bold text-steel-blue xxs:w-full xs:text-lg sm:my-6">
+
+                <div className={styles.mobileDisclaimer}>
                     PAID FOR BY PROGRESSIVE VICTORY{' '}
-                    <Link
+                    <BaseButton
+                        label="WWW.PROGRESSIVEVICTORY.WIN"
                         href="https://progressivevictory.win"
-                        className="text-valencia"
-                    >
-                        WWW.PROGRESSIVEVICTORY.WIN
-                    </Link>{' '}
+                        className={styles.disclaimerLink}
+                    />{' '}
                     NOT AUTHORIZED BY ANY CANDIDATE OR CANDIDATE’S COMMITTEE.
                 </div>
-                <div className="flex w-[293px] items-center justify-around border-y-2 border-footer-grey py-4 xxs:w-full">
-                    <Link
-                        className="mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:text-base xs:px-4 xs:py-2 xs:text-lg"
-                        key="Contact"
+
+                <div className={styles.mobileBottomNavRow}>
+                    <BaseButton
+                        label="Contact"
                         href="https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform"
-                    >
-                        Contact
-                    </Link>
-                    <Link href="/privacy">
-                        <p className="mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:text-base xs:px-4 xs:py-2 xs:text-lg">
-                            Privacy Policy
-                        </p>
-                    </Link>
+                        className={`${buttonStyles.plain} ${styles.mobileBottomNavLink}`}
+                    />
+                    <BaseButton
+                        label="Privacy Policy"
+                        href="/privacy"
+                        className={`${buttonStyles.plain} ${styles.mobileBottomNavLink}`}
+                    />
+
                     {session ? (
-                        <button
-                            onClick={handleSignOut}
-                            className="mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:text-base xs:px-4 xs:py-2 xs:text-lg"
-                        >
-                            Sign Out
-                        </button>
+                        <LogoutButton
+                            label="Sign Out"
+                            callbackUrl="/"
+                            className={`${buttonStyles.plain} ${styles.mobileBottomNavButton}`}
+                        />
                     ) : (
-                        <Link
+                        <LoginButton
+                            label="Log In"
                             href="/login"
-                            className="mx-1 rounded-full px-2 py-1 text-center text-sm font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia xxs:text-base xs:px-4 xs:py-2 xs:text-lg"
-                        >
-                            Log In
-                        </Link>
+                            className={`${buttonStyles.plain} ${styles.mobileBottomNavLink}`}
+                        />
                     )}
                 </div>
             </div>
@@ -150,37 +156,43 @@ function DesktopFooter() {
     const { data: session } = useSession()
 
     return (
-        <div className="hidden w-full items-center justify-center bg-black-pearl-dark py-6 lg:flex">
-            <div className="w-full flex-col">
-                <div className="flex items-center">
-                    <div className="ml-10 mr-4 flex w-full border-t-[3px] border-footer-grey pt-3 opacity-20"></div>
-                    <div className="flex justify-end">
+        <div className={styles.desktopFooterContainer}>
+            <div className={styles.desktopInner}>
+                <div className={styles.desktopTopRow}>
+                    <div className={styles.desktopDividerTop} />
+
+                    <div className={styles.desktopTopRight}>
                         {navitems.map((item) => (
-                            <Link
+                            <NavButton
                                 key={item.name}
+                                label={item.name}
                                 href={item.href}
-                                className="mx-6 rounded-full px-4 py-2 text-center text-lg font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia"
-                            >
-                                {item.name}
-                            </Link>
+                                className={`${buttonStyles.plain} ${styles.topNavButtonAdjustment}`}
+                            />
                         ))}
+
+                        <DonateButton
+                            label="Donate"
+                            className={styles.desktopTopDonateButton}
+                        />
                     </div>
                 </div>
-                <div className="my-4 flex items-center">
-                    <div className="flex w-full items-center justify-start">
-                        <div className="ml-10 w-[350px] border-2 border-white p-1 text-center font-bold text-steel-blue">
+
+                <div className={styles.desktopMiddleRow}>
+                    <div className={styles.desktopLeft}>
+                        <div className={styles.desktopDisclaimer}>
                             PAID FOR BY PROGRESSIVE VICTORY{' '}
-                            <Link
+                            <BaseButton
+                                label="WWW.PROGRESSIVEVICTORY.WIN"
                                 href="https://progressivevictory.win"
-                                className="text-valencia"
-                            >
-                                WWW.PROGRESSIVEVICTORY.WIN
-                            </Link>{' '}
+                                className={styles.disclaimerLink}
+                            />{' '}
                             NOT AUTHORIZED BY ANY CANDIDATE OR CANDIDATE’S
                             COMMITTEE.
                         </div>
                     </div>
-                    <div className="flex items-center">
+
+                    <div className={styles.desktopLogoWrap}>
                         <Image
                             src="/images/Logo_White.svg"
                             alt="progressive-victory-icon"
@@ -188,50 +200,52 @@ function DesktopFooter() {
                             height={200}
                         />
                     </div>
-                    <div className="m-6 flex w-full justify-end">
-                        <div className="flex flex-row items-center justify-center gap-x-4">
+
+                    <div className={styles.desktopRight}>
+                        <motion.div className={styles.desktopSocials}>
                             {socials.map((social) => (
                                 <SocialIcon
                                     key={social}
                                     url={social}
                                     fgColor="white"
+                                    className={styles.socialIcons}
                                 />
                             ))}
-                        </div>
-                        <DonateButton label="Donate" />
+                        </motion.div>
+
+                        <DonateButton
+                            label="Donate"
+                            className={styles.desktopMiddleDonateButton}
+                        />
                     </div>
                 </div>
-                <div className="flex items-center">
-                    <div className="ml-10 mr-8 flex w-full border-b-[3px] border-footer-grey pb-3 opacity-20"></div>
-                    <div className="flex items-center justify-end">
-                        <Link
-                            className="mx-2 rounded-full px-4 py-2 text-center text-lg font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia"
-                            key="Contact"
+
+                <div className={styles.desktopBottomRow}>
+                    <div className={styles.desktopDividerBottom} />
+
+                    <div className={styles.desktopBottomRight}>
+                        <BaseButton
+                            label="Contact"
                             href="https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform"
-                        >
-                            Contact
-                        </Link>
-                        <Link href="/privacy">
-                            <p className="mx-2 whitespace-nowrap rounded-full px-4 py-2 text-center text-lg font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia">
-                                Privacy Policy
-                            </p>
-                        </Link>
+                            className={`${buttonStyles.plain} ${styles.bottomNavButtonAdjustment}`}
+                        />
+                        <BaseButton
+                            label="Privacy Policy"
+                            href="/privacy"
+                            className={`${buttonStyles.plain} ${styles.bottomNavButtonAdjustment}`}
+                        />
                         {session ? (
-                            <button
-                                onClick={() =>
-                                    void signOut({ callbackUrl: '/' })
-                                }
-                                className="ml-2 mr-6 whitespace-nowrap rounded-full px-4 py-2 text-center text-lg font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia"
-                            >
-                                Sign Out
-                            </button>
+                            <LogoutButton
+                                label="Sign Out"
+                                callbackUrl="/"
+                                className={`${buttonStyles.plain} ${styles.bottomNavButtonAdjustment}`}
+                            />
                         ) : (
-                            <Link
+                            <LoginButton
+                                label="Log In"
                                 href="/login"
-                                className="ml-2 mr-6 whitespace-nowrap rounded-full px-4 py-2 text-center text-lg font-bold text-white transition duration-200 ease-in-out hover:bg-white hover:text-valencia"
-                            >
-                                Log In
-                            </Link>
+                                className={`${buttonStyles.plain} ${styles.bottomNavButtonAdjustment}`}
+                            />
                         )}
                     </div>
                 </div>

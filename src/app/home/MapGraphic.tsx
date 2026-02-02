@@ -2,7 +2,8 @@
 
 import styles from './map.module.css'
 import { Map } from '@/components/Map'
-import { Link } from '@/components/common'
+import { BaseButton } from '@/components/common/buttons/Button'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
 
 export function MapGraphic() {
     return (
@@ -24,10 +25,11 @@ export function MapGraphic() {
                     in their area, and using the shared resources, tactics, and
                     people power of Progressive Victory!
                 </p>
-
-                <Link href="/volunteer" className={styles.cta}>
-                    Get Involved
-                </Link>
+                <BaseButton
+                    label="Get Involved"
+                    href="/volunteer"
+                    className={buttonStyles.prominent}
+                />
             </div>
         </div>
     )

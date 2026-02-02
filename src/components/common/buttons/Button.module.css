@@ -40,7 +40,7 @@
     background-size: 200% 100%;
     color: #ce3728;
     box-shadow: 0 0 30px rgba(206, 55, 40, 0.9);
-    transform: scale(1.2);
+    transform: translateY(-2px);
     animation: shimmer 2s linear infinite;
 }
 
@@ -56,6 +56,7 @@
 .primary:hover {
     background-color: #ffffff;
     color: #ce3728;
+    transform: translateY(-2px);
 }
 
 .secondary {
@@ -125,6 +126,10 @@
     padding-block: 1rem;
     min-height: 3.75rem;
     height: 3.75rem;
+}
+
+.longVariant:hover {
+    transform: translateY(0px);
 }
 
 .buttonContent {
