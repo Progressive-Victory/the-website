@@ -10,7 +10,9 @@ import {
     US_STATES,
 } from '@/components/Map/constants'
 import { MapView, StateMapInteractionProps } from '@/components/Map/types'
-import { Link, Message, TiltMessage } from '@/components/common'
+import { Message } from '@/components/common'
+import { BaseButton } from '@/components/common/buttons/Button'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
 import {
     MapMemberCountResponse,
     zMapMemberCountResponse,
@@ -60,44 +62,47 @@ export function VolunteerMap() {
                     <span className={styles.titleAccent}>Volunteers</span>
                     <br /> Across the US
                 </h1>
+
                 <p className={styles.subtitle}>
                     The PV community is constantly growing. Every new voice adds
                     to the movement!
                 </p>
 
-                <Link href={'/volunteer'} className={styles.ctaLink}>
-                    Get Involved
-                </Link>
+                <BaseButton
+                    label="Get Involved"
+                    href="/volunteer"
+                    className={buttonStyles.prominent}
+                />
             </div>
 
-            <TiltMessage className={styles.tiltMessage}>
-                <Message
-                    className={styles.message}
-                    avatar="/images/pv_pride.png"
-                    avatarRounded={false}
-                    nameColor="red"
-                    username="Progressive Victory"
-                    text={
-                        'Our members are organizing in their local communities, identifying campaigns in their area, and using the shared resources, tactics, and people power of Progressive Victory!'
-                    }
-                    botDivider={true}
-                    botLeftContent={
-                        <p className={styles.botLeftText}>
-                            {selectedState
-                                ? `Members in ${selectedState}: ${stateMemberCounts?.[selectedState]}`
-                                : `Total Members: ${totalMemberCount}`}
-                        </p>
-                    }
-                >
-                    <CombinedMap
-                        stateMemberCount={stateMemberCounts}
-                        onFeatureClick={onFeatureClick}
-                        onFeatureHover={setHoveredState}
-                        hoveredState={hoveredState}
-                        selectedState={selectedState}
-                    />
-                </Message>
-            </TiltMessage>
+            <Message
+                className={styles.message}
+                tiltProps={{
+                    className: styles.tiltMessage,
+                    rotation: { z: 0 },
+                }}
+                avatar="/images/pv_pride.png"
+                avatarRounded={false}
+                nameColor="red"
+                username="Progressive Victory"
+                text="Our members are organizing in their local communities, identifying campaigns in their area, and using the shared resources, tactics, and people power of Progressive Victory!"
+                botDivider={true}
+                botLeftContent={
+                    <p className={styles.botLeftText}>
+                        {selectedState
+                            ? `Members in ${selectedState}: ${stateMemberCounts?.[selectedState]}`
+                            : `Total Members: ${totalMemberCount}`}
+                    </p>
+                }
+            >
+                <CombinedMap
+                    stateMemberCount={stateMemberCounts}
+                    onFeatureClick={onFeatureClick}
+                    onFeatureHover={setHoveredState}
+                    hoveredState={hoveredState}
+                    selectedState={selectedState}
+                />
+            </Message>
         </div>
     )
 }

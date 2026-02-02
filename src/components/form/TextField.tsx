@@ -23,7 +23,10 @@ export function TextField<T>(
     return (
         <FormField {...props}>
             {readonly ? (
-                <div className={styles.readonly}>{value}</div>
+                <div className={styles.readonly}>
+                    {props.prefix}
+                    {value}
+                </div>
             ) : (
                 <input
                     type="text"

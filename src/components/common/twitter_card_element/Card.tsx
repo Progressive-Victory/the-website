@@ -13,59 +13,138 @@ import {
 } from '@heroicons/react/24/solid'
 import {
     motion,
-    TargetAndTransition,
-    Transition,
     useSpring,
     useTransform,
+    type TargetAndTransition,
+    type Transition,
 } from 'motion/react'
 import Image from 'next/image'
 import type React from 'react'
-import { JSX, useState } from 'react'
+import { useState } from 'react'
+
+interface MotionProps {
+    initial?: TargetAndTransition
+    animate?: TargetAndTransition
+    transition?: Transition
+}
+
+interface ImageProps {
+    position?: string
+    zoom?: number
+    offsetX?: number // percent
+    offsetY?: number // percent
+}
+
+export interface TiltProps {
+    className?: string
+    disabled?: boolean
+
+    strength?: {
+        amount?: number
+    }
+
+    rotation?: {
+        max?: number
+        z?: number
+    }
+
+    scale?: {
+        hover?: number
+    }
+}
+
+export interface MessageData {
+    username: string
+    nameColor?: string
+    text: string
+    image?: string
+    avatar: string
+    avatarRounded?: boolean
+    motionProps?: MotionProps
+    tiltProps?: TiltProps
+    imageProps?: ImageProps
+}
+
+interface MessageProps {
+    avatar: string
+    text: string
+    username: string
+    motionProps?: MotionProps
+    tiltProps?: TiltProps
+    avatarRounded?: boolean
+    className?: string
+    nameColor?: string
+    image?: string
+    imageProps?: ImageProps
+    children?: React.JSX.Element
+    botLeftContent?: React.JSX.Element
+    botDivider?: boolean
+}
 
 export function Message({
     avatar,
     text,
     username,
     motionProps,
+    tiltProps,
     avatarRounded = true,
     className,
     nameColor,
     image,
+    imageProps,
     children,
     botLeftContent,
     botDivider = false,
-}: {
-    avatar: string
-    text: string
-    username: string
-    motionProps?: {
-        initial?: TargetAndTransition
-        animate?: TargetAndTransition
-        transition?: Transition
-    }
-    avatarRounded?: boolean
-    className?: string
-    nameColor?: string
-    image?: string
-    children?: JSX.Element
-    botLeftContent?: JSX.Element
-    botDivider?: boolean
-}) {
+}: MessageProps): React.JSX.Element {
     const [clickedHeart, setClickedHeart] = useState(false)
     const [clickedBubble, setClickedBubble] = useState(false)
     const [clickedShare, setClickedShare] = useState(false)
 
-    const rootClassName = [styles.message, className].filter(Boolean).join(' ')
+    const cardClassName = [styles.message, className].filter(Boolean).join(' ')
 
-    return (
+    const imgPosition = imageProps?.position ?? 'center'
+    const imgZoom = imageProps?.zoom ?? 1
+    const imgOffsetX = imageProps?.offsetX ?? 0
+    const imgOffsetY = imageProps?.offsetY ?? 0
+
+    const tiltDefaults: Required<
+        Pick<TiltProps, 'disabled' | 'strength' | 'rotation' | 'scale'>
+    > = {
+        disabled: false,
+        strength: { amount: 1 },
+        rotation: { max: 10, z: -2.5 },
+        scale: { hover: 1.02 },
+    }
+
+    const mergedTilt: TiltProps = {
+        className: tiltProps?.className,
+        disabled: tiltProps?.disabled ?? tiltDefaults.disabled,
+
+        strength: {
+            ...tiltDefaults.strength,
+            ...(tiltProps?.strength ?? {}),
+        },
+
+        rotation: {
+            ...tiltDefaults.rotation,
+            ...(tiltProps?.rotation ?? {}),
+        },
+
+        scale: {
+            ...tiltDefaults.scale,
+            ...(tiltProps?.scale ?? {}),
+        },
+    }
+
+    const card = (
         <motion.div
-            className={rootClassName}
+            className={cardClassName}
             style={{
                 willChange: 'opacity, transform',
                 transform: 'translateZ(0)',
             }}
-            initial={{ opacity: 0, scale: 0, ...motionProps?.initial }} // Start position: off-screen to the right
-            animate={{ opacity: 1, scale: 1, ...motionProps?.animate }} // End position: visible and on-screen
+            initial={{ opacity: 0, scale: 0, ...motionProps?.initial }}
+            animate={{ opacity: 1, scale: 1, ...motionProps?.animate }}
             transition={{ ease: 'backInOut', ...motionProps?.transition }}
         >
             {/* Header */}
@@ -100,17 +179,21 @@ export function Message({
                         src={image}
                         alt={username}
                         className={styles.media}
-                        style={{ objectPosition: '25% 25%' }}
                         fill
                         sizes="100%"
+                        style={{
+                            objectPosition: imgPosition,
+                            transform: `translate(${imgOffsetX}%, ${imgOffsetY}%) scale(${imgZoom})`,
+                            transformOrigin: imgPosition,
+                        }}
                     />
                 </div>
             )}
 
-            {/* Middle - Image */}
             {children && children}
 
             {botDivider && <hr className={styles.divider} />}
+
             {/* Bottom Row */}
             <div className={styles.bottomRow}>
                 <div className={styles.bottomLeft}>
@@ -159,7 +242,7 @@ export function Message({
                     >
                         {clickedHeart ? (
                             <SolidHeartIcon
-                                 className={`${styles.iconSolid} ${styles.heartActive} ${styles.iconGrowPop}`}
+                                className={`${styles.iconSolid} ${styles.heartActive} ${styles.iconGrowPop}`}
                             />
                         ) : (
                             <HeartIcon className={styles.icon} />
@@ -169,17 +252,26 @@ export function Message({
             </div>
         </motion.div>
     )
+
+    return <TiltWrapper tiltProps={mergedTilt}>{card}</TiltWrapper>
 }
 
-/**
- * TiltMessage is meant to wrap about the `<Message>` component
- */
-export function TiltMessage({
+function useMousePosition() {
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        setMousePosition({ x: e.clientX, y: e.clientY })
+    }
+
+    return { mousePosition, handleMouseMove }
+}
+
+function TiltWrapper({
     children,
-    className,
+    tiltProps,
 }: {
     children: React.ReactNode
-    className?: string
+    tiltProps: TiltProps
 }) {
     const [isHovered, setIsHovered] = useState(false)
     const [canTilt, setCanTilt] = useState(false)
@@ -189,16 +281,23 @@ export function TiltMessage({
         width: 0,
         height: 0,
     })
+
     const { mousePosition, handleMouseMove } = useMousePosition()
 
-    // tilt
+    const disabled = tiltProps.disabled ?? false
+    const strength = tiltProps.strength?.amount ?? 1
+    const rotateMax = tiltProps.rotation?.max ?? 10
+    const zRotate = tiltProps.rotation?.z ?? -2.5
+    const hoverScale = tiltProps.scale?.hover ?? 1.02
+
     const tiltX = useSpring(0, { stiffness: 300, damping: 50 })
     const tiltY = useSpring(0, { stiffness: 300, damping: 50 })
 
-    const rotateX = useTransform(tiltY, [-1, 1], [-10, 10])
-    const rotateY = useTransform(tiltX, [-1, 1], [-10, 10])
+    const rotateX = useTransform(tiltY, [-1, 1], [-rotateMax, rotateMax])
+    const rotateY = useTransform(tiltX, [-1, 1], [-rotateMax, rotateMax])
 
     const handleMouseEnter = (e: React.MouseEvent) => {
+        if (disabled) return
         setIsHovered(true)
         const rect = e.currentTarget.getBoundingClientRect()
         setElementPosition({
@@ -210,54 +309,46 @@ export function TiltMessage({
     }
 
     const handleMouseLeave = () => {
+        if (disabled) return
         setIsHovered(false)
         setCanTilt(false)
         tiltX.set(0)
         tiltY.set(0)
     }
 
-    // tilt when rotation is done
-    if (isHovered && canTilt) {
+    if (!disabled && isHovered && canTilt) {
         const x =
             (mousePosition.x - elementPosition.left) / elementPosition.width
         const y =
             (mousePosition.y - elementPosition.top) / elementPosition.height
 
-        tiltX.set((x - 0.5) * 0.5)
-        tiltY.set((y - 0.5) * -0.5)
+        tiltX.set((x - 0.5) * 0.5 * strength)
+        tiltY.set((y - 0.5) * -0.5 * strength)
     }
 
     return (
         <motion.div
-            className={className}
+            className={[styles.tilt, tiltProps.className]
+                .filter(Boolean)
+                .join(' ')}
             style={{
-                rotateX,
-                rotateY,
+                rotateX: disabled ? 0 : rotateX,
+                rotateY: disabled ? 0 : rotateY,
                 transformPerspective: 1000,
             }}
             animate={{
-                // rotateZ: isHovered ? -2.5 : 0,
-                scale: isHovered ? 1.01 : 1,
+                rotateZ: disabled ? 0 : isHovered ? zRotate : 0,
+                scale: disabled ? 1 : isHovered ? hoverScale : 1,
             }}
             transition={{ duration: 0.2 }}
             onAnimationComplete={() => {
-                if (isHovered) setCanTilt(true) // tilt after rotation
+                if (!disabled && isHovered) setCanTilt(true)
             }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            onMouseMove={handleMouseMove}
+            onMouseMove={disabled ? undefined : handleMouseMove}
         >
             {children}
         </motion.div>
     )
-}
-
-function useMousePosition() {
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        setMousePosition({ x: e.clientX, y: e.clientY })
-    }
-
-    return { mousePosition, handleMouseMove }
 }

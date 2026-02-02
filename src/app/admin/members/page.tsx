@@ -346,13 +346,14 @@ export default function Page() {
                     >
                         <FormGroup title="Account Information">
                             <TextField<User>
-                                label="Usernames"
+                                label="Discord Username"
                                 getter={(form) =>
                                     (form.discordUsers ?? [])
                                         ?.map(({ username }) => username)
                                         .join(', ')
                                 }
                                 readonly
+                                prefix="@"
                             />
                             <TextField<User>
                                 label="Discord Id"

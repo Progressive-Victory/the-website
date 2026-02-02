@@ -128,13 +128,9 @@
     justify-content: center;
 }
 
-.ctaLink {
-    background: var(--valencia, #ce3728);
-    transition: background-color 150ms ease;
-}
-
-.ctaLink:hover {
-    background: var(--valencia-dark, #b92f23);
+.buttonHover:hover {
+    color: #ffffff;
+    background: #2986cc;
 }
 
 .bulletsColumn {

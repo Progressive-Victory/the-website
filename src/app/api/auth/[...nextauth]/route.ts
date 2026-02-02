@@ -21,7 +21,10 @@ export const POST = async (req: NextRequest) => {
                 'state',
                 btoa(
                     JSON.stringify({
-                        redirect_uri: `${process.env.NEXTAUTH_URL ?? req.headers.get('origin')}/api/auth/callback/discord`,
+                        redirect_uri: new URL(
+                            '/api/auth/callback/discord',
+                            req.headers.get('origin') ?? ''
+                        ),
                         original_state: body_url.searchParams.get('state'),
                     })
                 )
