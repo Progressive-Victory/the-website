@@ -1,0 +1,23 @@
+.container {
+    display: flex;
+    width: 360px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropdownContainer {
+    overflow: hidden;
+}
+
+.targetHandle {
+    border-color: #fcd34d;
+    background-color: #fffbeb;
+    opacity: 0;
+}
+
+.sourceHandle {
+    border-color: #fcd34d;
+    background-color: #1b4568;
+    opacity: 0;
+}

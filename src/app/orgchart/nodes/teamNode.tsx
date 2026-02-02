@@ -1,7 +1,8 @@
-import { Handle, Node, NodeProps, Position, useStore } from '@xyflow/react'
+import PositionBubble from '../bubbles/positionBubble'
 import TeamBubble from '../bubbles/teamBubble'
 import PositionData from '../types/positionData'
-import PositionBubble from '../bubbles/positionBubble'
+import styles from './nodes.module.css'
+import { Handle, Node, NodeProps, Position, useStore } from '@xyflow/react'
 import { motion } from 'motion/react'
 
 export type TeamNodeData = Node<{
@@ -28,18 +29,15 @@ export default function TeamNode({
     }
 
     return (
-        <div
-            key={data.id}
-            className="flex w-[360px] flex-col items-center justify-center"
-        >
+        <div key={data.id} className={styles.container}>
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
-                className="border-amber-300 bg-amber-50 opacity-0"
+                className={styles.targetHandle}
             />
             <TeamBubble name={data.name} />
             <motion.div
-                className="overflow-hidden"
+                className={styles.dropdownContainer}
                 style={{
                     willChange: 'max-height',
                 }}
@@ -55,7 +53,7 @@ export default function TeamNode({
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}
-                className="border-amber-300 bg-black-pearl-light opacity-0"
+                className={styles.sourceHandle}
             />
         </div>
     )

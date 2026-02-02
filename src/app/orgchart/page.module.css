@@ -1,0 +1,42 @@
+.backdrop {
+    z-index: 1;
+    position: absolute;
+    inset: 0px;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+}
+
+.container {
+    z-index: 2;
+    position: relative;
+    margin: auto;
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 2.5rem;
+    padding: 2.5rem 0 4rem 0;
+    @media (min-width: 1280px) {
+        min-height: unset;
+    }
+}
+
+.header {
+    width: 100%;
+    text-align: center;
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.appContainer {
+    height: 75vh;
+    width: 97vw;
+    overflow: auto;
+    border-radius: 0.5rem;
+    background-color: #09223a;
+    padding: 0.5rem;
+}

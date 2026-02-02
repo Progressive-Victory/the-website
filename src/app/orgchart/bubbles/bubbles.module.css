@@ -1,0 +1,13 @@
+.yellowBubble {
+    width: 360px;
+    border-radius: 0rem 1rem 1rem 0rem;
+    border-width: 4px;
+    border-color: #fcd34d;
+    background-color: #fffbeb;
+    padding: 0.5rem;
+    color: #09223a;
+    text-align: center;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 800;
+}

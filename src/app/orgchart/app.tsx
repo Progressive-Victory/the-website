@@ -1,5 +1,13 @@
-/* Next task: refine and implement legend panel */
-import React, { useState, useCallback } from 'react'
+import '../../../tailwind.config'
+import styles from './app.module.css'
+import PositionBubble from './bubbles/positionBubble'
+import DepartmentNode, { DepartmentNodeData } from './nodes/departmentNode'
+import PositionNode from './nodes/positionNode'
+import TeamNode, { TeamNodeData } from './nodes/teamNode'
+import OrgChartEdge from './orgchartEdge'
+import Committee from './types/committee'
+import PositionData from './types/positionData'
+import dagre from '@dagrejs/dagre'
 import {
     type Node,
     type Edge,
@@ -11,17 +19,9 @@ import {
     XYPosition,
     Panel,
 } from '@xyflow/react'
-import dagre from '@dagrejs/dagre'
 import '@xyflow/react/dist/base.css'
 import '@xyflow/react/dist/style.css'
-import PositionNode from './nodes/positionNode'
-import DepartmentNode, { DepartmentNodeData } from './nodes/departmentNode'
-import TeamNode, { TeamNodeData } from './nodes/teamNode'
-import OrgChartEdge from './orgchartEdge'
-import '../../../tailwind.config'
-import Committee from './types/committee'
-import PositionData from './types/positionData'
-import PositionBubble from './bubbles/positionBubble'
+import React, { useState, useCallback } from 'react'
 
 /* A number of committees can be defined up to the number of icons. */
 export const Committees: Committee[] = [
@@ -109,13 +109,13 @@ function CreatePositionNode({
         type: 'pos',
         position: defaultPos,
         data: {
-            id: id,
-            title: title,
-            name: name,
-            acting: acting,
-            redacted: redacted,
-            leadership: leadership,
-            committees: committees,
+            id,
+            title,
+            name,
+            acting,
+            redacted,
+            leadership,
+            committees,
         },
     }
 }
@@ -136,10 +136,10 @@ function CreateDepartmentNode({
         type: 'dep',
         position: defaultPos,
         data: {
-            id: id,
-            name: name,
-            leads: leads,
-            members: members,
+            id,
+            name,
+            leads,
+            members,
         },
     }
 }
@@ -162,18 +162,18 @@ function CreateTeamNode({
         type: 'tea',
         position: defaultPos,
         data: {
-            id: id,
-            name: name,
-            desc: desc,
-            leads: leads,
-            members: members,
+            id,
+            name,
+            desc,
+            leads,
+            members,
         },
     }
 }
 
 function CreateEdge(id: string, source: number, target: number) {
     return {
-        id: id,
+        id,
         source: source.toString(),
         target: target.toString(),
         type: 'custom-edge',
@@ -300,14 +300,18 @@ export default function OrgChartApp() {
         return (
             <Panel position="top-left">
                 {!legendEnabled ? null : (
-                    <div className="mb-2 rounded-xl border-4 border-amber-300 bg-amber-50 p-2 text-xs font-bold text-black-pearl-dark">
-                        <div className="mb-2 flex">
-                            <div className="size-4 border-2 border-amber-300 bg-blue-400"></div>
-                            <p className="ml-2">{'JUNIOR LEADERSHIP'}</p>
+                    <div className={styles.legend}>
+                        <div className={styles.colorSampleContainer}>
+                            <div className={styles.juniorColorSample}></div>
+                            <p style={{ marginLeft: '0.5rem' }}>
+                                {'JUNIOR LEADERSHIP'}
+                            </p>
                         </div>
-                        <div className="mb-2 flex">
-                            <div className="size-4 border-2 border-amber-300 bg-red-600"></div>
-                            <p className="ml-2">{'SENIOR LEADERSHIP'}</p>
+                        <div className={styles.colorSampleContainer}>
+                            <div className={styles.seniorColorSample}></div>
+                            <p style={{ marginLeft: '0.5rem' }}>
+                                {'SENIOR LEADERSHIP'}
+                            </p>
                         </div>
                         <PositionBubble
                             data={{
@@ -319,13 +323,13 @@ export default function OrgChartApp() {
                             }}
                             mini={true}
                         />
-                        <p className="mt-2">
+                        <p style={{ marginTop: '0.5rem' }}>
                             {'SHAPES INDICATE TEAM/COMMITTEE GROUPING'}
                         </p>
                     </div>
                 )}
                 <button
-                    className="rounded-xl border-4 border-amber-300 bg-amber-50 p-1 font-black text-black-pearl-dark"
+                    className={styles.legendButton}
                     onClick={() => toggleLegend(!legendEnabled)}
                 >
                     {legendEnabled ? 'HIDE LEGEND' : 'SHOW LEGEND'}
@@ -366,27 +370,24 @@ export default function OrgChartApp() {
 
         return (
             <Panel
-                className={`${name ? null : 'hidden'} h-[96%] w-[320px] rounded-3xl border-4 border-amber-300 bg-amber-50 p-2 font-extrabold`}
+                className={styles.detailPanel}
+                style={{ display: `${name ? 'block' : 'none'}` }}
                 position="center-right"
             >
                 <button
-                    className="mb-1 rounded-xl bg-black-pearl-dark p-1 px-2 text-xl font-bold text-white"
+                    className={styles.closeButton}
                     onClick={() => setCurrentDetails(<DetailPanel />)}
                 >
                     {'< Close'}
                 </button>
-                <p className="border-t-4 border-red-600 text-xl text-black-pearl-dark">
-                    {name}
-                </p>
+                <p className={styles.detailTitle}>{name}</p>
                 {!desc ? null : (
-                    <div className="max-h-[30%] overflow-y-auto border-t-4 border-red-600">
-                        <p className="py-1 text-sm font-semibold text-black-pearl-dark">
-                            {desc}
-                        </p>
+                    <div className={styles.descriptionContainer}>
+                        <p className={styles.description}>{desc}</p>
                     </div>
                 )}
                 {!leads && !members ? null : (
-                    <div className="flex flex-col items-center overflow-auto border-t-4 border-red-600 py-1">
+                    <div className={styles.memberList}>
                         <MemberList />
                     </div>
                 )}
@@ -459,7 +460,7 @@ export default function OrgChartApp() {
     }
 
     return (
-        <div className="size-full bg-white" /*ref={viewportRef}*/>
+        <div className={styles.background} /*ref={viewportRef}*/>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}

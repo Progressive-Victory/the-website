@@ -1,7 +1,8 @@
-import { Handle, Node, NodeProps, Position } from '@xyflow/react'
-import PositionData from '../types/positionData'
 import PositionBubble from '../bubbles/positionBubble'
 import Committee from '../types/committee'
+import PositionData from '../types/positionData'
+import styles from './nodes.module.css'
+import { Handle, Node, NodeProps, Position } from '@xyflow/react'
 
 type PositionNodeData = Node<{
     id: number
@@ -29,20 +30,17 @@ export default function PositionNode({
     }
 
     return (
-        <div
-            key={data.id}
-            className="flex flex-col items-center justify-center"
-        >
+        <div key={data.id} className={styles.container}>
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
-                className="border-amber-300 bg-amber-50 opacity-0"
+                className={styles.targetHandle}
             />
             <PositionBubble data={properties} />
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}
-                className="border-amber-300 bg-black-pearl-dark opacity-0"
+                className={styles.sourceHandle}
             />
         </div>
     )
