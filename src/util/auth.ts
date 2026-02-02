@@ -27,7 +27,14 @@ async function serverAuth(token: string): Promise<string> {
     const { accessToken } = (await res.json()) as { accessToken: string }
 
     if (!accessToken) throw Error('Failed to generate server jwt')
-    return accessToken
+    return `Bot ${accessToken}`
+}
+
+async function verifyResponse(res: Response) {
+    if (!res.ok)
+        throw Error(
+            `API threw error: ${res.status} ${res.statusText}${res.body ? '\n' + (await res.text()) : ''}`
+        )
 }
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
@@ -112,10 +119,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         session({ session, token }) {
             session.discordId = token.discordId as string
             session.accessToken = token.accessToken as string
+            session.refreshToken = token.refreshToken as string
             session.apiUrl = process.env.PV_WEBSITE_API_URL ?? ''
             return session
         },
-        async jwt({ token, account, profile }) {
+        async jwt({ token, profile, account }) {
             interface EProfile extends Profile {
                 id: string
                 username: string
@@ -127,6 +135,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             if (account && profile) {
                 token.accessToken = account.access_token
                 token.discordId = eprofile.id
+                token.refreshToken = account.refresh_token
 
                 if (!process.env.PV_WEBSITE_API_KEY)
                     throw Error('set PV_WEBSITE_API_KEY in env vars')
@@ -151,13 +160,17 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                         }
                     )
 
+                    if (res.status !== 404) {
+                        await verifyResponse(res)
+                    }
+
                     if (res.status === 404) {
                         const usr = await fetch(
                             new URL(`/users`, process.env.PV_WEBSITE_API_URL),
                             {
                                 method: 'POST',
                                 headers: {
-                                    Authorization: `Bearer ${serverToken}`,
+                                    Authorization: serverToken,
                                     'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify({
@@ -165,7 +178,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                                 }),
                             }
                         )
-                        await fetch(
+
+                        await verifyResponse(usr)
+
+                        const post = await fetch(
                             new URL(
                                 `/discordUsers`,
                                 process.env.PV_WEBSITE_API_URL
@@ -173,7 +189,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                             {
                                 method: 'POST',
                                 headers: {
-                                    Authorization: `Bearer ${serverToken}`,
+                                    Authorization: serverToken,
                                     'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify({
@@ -186,9 +202,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                                 }),
                             }
                         )
+
+                        await verifyResponse(post)
                     }
                 } catch (e) {
-                    console.log(e)
+                    console.error(e)
                 }
             }
 

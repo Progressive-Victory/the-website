@@ -5,8 +5,8 @@ interface HalftoneBackgroundProps {
     opacity?: number
 }
 
-export function HalftoneBackground({ opacity = 0.1 }: HalftoneBackgroundProps) {
-    const alpha = Math.min(1, Math.max(0, opacity))
+export function HalftoneBackground({ opacity = 1 }: HalftoneBackgroundProps) {
+    const alpha = Math.min(1, Math.max(10, opacity))
 
     return (
         <div

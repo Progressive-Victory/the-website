@@ -1,8 +1,10 @@
 'use client'
 
 import styles from './hero.module.css'
-import { Link, Message } from '@/components/common'
+import { Message } from '@/components/common'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
+import { BaseButton } from '@/components/common/buttons/Button'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
 import { motion, useTransform, useSpring } from 'motion/react'
 import type React from 'react'
 import { useState } from 'react'
@@ -59,6 +61,8 @@ export function Hero() {
                     style={{
                         willChange: 'opacity, transform',
                         transform: 'translateZ(0)',
+                        display: 'flex',
+                        gap: '1rem',
                     }}
                     initial={{ y: 50, opacity: 0, scale: 0 }}
                     animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -68,9 +72,8 @@ export function Hero() {
                         delay: 0.15,
                     }}
                 >
-                    <Link href="/volunteer" className={styles.cta}>
-                        Get Involved
-                    </Link>
+                    <BaseButton label="Learn More" href="/about" className={buttonStyles.minimalProminent} />
+                    <BaseButton label="Join" href="/volunteer" className={styles.joinButton} />
                 </motion.div>
             </div>
 

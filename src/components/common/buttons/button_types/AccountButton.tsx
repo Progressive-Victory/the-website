@@ -2,7 +2,7 @@
 
 import { BaseButton } from '../Button'
 import type { BaseVisualProps } from '../Button'
-import styles from '@/components/common/buttons/button.module.css'
+import styles from '@/components/common/buttons/Button.module.css'
 import cx from 'classnames'
 import Image from 'next/image'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import styles from '@/components/common/buttons/button.module.css'
+import styles from '@/components/common/buttons/Button.module.css'
 import cx from 'classnames'
 import type React from 'react'
 

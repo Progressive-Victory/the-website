@@ -6,6 +6,7 @@ declare module 'next-auth' {
     interface Session extends DefaultSession {
         discordId: string
         accessToken: string
+        refreshToken: string
         apiUrl: string
     }
 
@@ -13,5 +14,6 @@ declare module 'next-auth' {
     interface JWT extends DefaultJWT {
         discordId: string
         accessToken: string
+        refreshToken: string
     }
 }

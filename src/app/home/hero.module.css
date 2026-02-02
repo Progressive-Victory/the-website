@@ -5,7 +5,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 5rem 0;
+    padding: 4rem 0;
 }
 
 .blendPanel {
@@ -50,8 +50,8 @@
 }
 
 .title {
-    font-size: 2.25rem;
-    line-height: 2.5rem;
+    font-size: 2rem;
+    line-height: 2rem;
     font-weight: 700;
     color: #ffffff;
 }
@@ -62,22 +62,33 @@
 
 .subtitle {
     margin: 2rem 0;
-    font-size: 1.25rem;
-    line-height: 1.75rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
     font-weight: 500;
     color: #ffffff;
 }
 
-.cta {
-    background: #ce3728;
+.joinButton {
+    background-color: #ce3728;
+    color: #ffffff;
+    padding-inline: 1.25rem;
+    padding-block: 0.5rem;
+    font-size: 1.0rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}
+.joinButton:hover {
+    background-color: #ffffff;
+    color: #ce3728;
+    transform: translateY(-2px);
 }
 
 .messages {
-    margin-top: 5rem;
+    margin-top: 1rem; /* gap between tweets and title */
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 1.5rem;
+    gap: 1.75rem;
     padding: 0 1rem;
 }
 
