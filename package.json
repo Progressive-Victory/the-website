@@ -3,6 +3,7 @@
     "version": "1.1.0",
     "private": true,
     "type": "module",
+    "type": "module",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
@@ -13,6 +14,7 @@
     },
     "dependencies": {
         "@auth/core": "^0.40.0",
+        "@dagrejs/dagre": "^2.0.3",
         "@discordjs/rest": "^2.6.0",
         "@headlessui/react": "^2.2.9",
         "@heroicons/react": "^2.2.0",
@@ -20,6 +22,7 @@
         "@tanstack/react-query": "^5.90.19",
         "@uidotdev/usehooks": "^2.4.1",
         "@vercel/analytics": "^1.6.1",
+        "@xyflow/react": "^12.10.0",
         "classnames": "^2.5.1",
         "csv-parser": "^3.2.0",
         "deep-equal": "^2.2.3",
@@ -87,5 +90,6 @@
             "@babel/runtime@<7.26.10": ">=7.26.10",
             "undici@>=6.0.0 <6.21.2": ">=6.21.2"
         }
-    }
+    },
+    "packageManager": "pnpm@10.23.0+sha512.21c4e5698002ade97e4efe8b8b4a89a8de3c85a37919f957e7a0f30f38fbc5bbdd05980ffe29179b2fb6e6e691242e098d945d1601772cad0fef5fb6411e2a4b"
 }
