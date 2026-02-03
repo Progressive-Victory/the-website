@@ -18,6 +18,9 @@ importers:
       '@dagrejs/dagre':
         specifier: ^2.0.3
         version: 2.0.3
+      '@dagrejs/graphlib':
+        specifier: ^3.0.2
+        version: 3.0.2
       '@discordjs/rest':
         specifier: ^2.6.0
         version: 2.6.0
@@ -504,6 +507,9 @@ packages:
   '@dagrejs/graphlib@2.2.4':
     resolution: {integrity: sha512-mepCf/e9+SKYy1d02/UkvSy6+6MoyXhVxP8lLDfA7BPE1X1d4dR0sZznmbM8/XVJ1GPM+Svnx7Xj6ZweByWUkw==}
     engines: {node: '>17.0.0'}
+
+  '@dagrejs/graphlib@3.0.2':
+    resolution: {integrity: sha512-xLlNn839TeCCpagljel3kgiZAPeuEQiWZnY3OHppACbC8h4zk4Ih8rXK9d8CB1TlI0tSqRrEEMqFDUPEVJ8Pdw==}
 
   '@dimforge/rapier3d-compat@0.12.0':
     resolution: {integrity: sha512-uekIGetywIgopfD97oDL5PfeezkFpNhwlzlaEYNOA0N6ghdsOvh/HYjSMek5Q2O1PYvRSDFcqFVJl4r4ZBwOow==}
@@ -5558,6 +5564,8 @@ snapshots:
       '@dagrejs/graphlib': 2.2.4
 
   '@dagrejs/graphlib@2.2.4': {}
+
+  '@dagrejs/graphlib@3.0.2': {}
 
   '@dimforge/rapier3d-compat@0.12.0': {}
 
