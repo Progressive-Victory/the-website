@@ -1,6 +1,6 @@
 'use client'
 
-import StateSelector from './StateSelector'
+import { StateSelector } from './StateSelector'
 import styles from './accountInfoForm.module.css'
 import { useState } from 'react'
 
@@ -21,7 +21,7 @@ interface InitialAccountInformation extends MutableFields {
     discordId: string
 }
 
-const AccountInfoForm = ({
+export const AccountInfoForm = ({
     discordUsername,
     discordId,
     firstName,
@@ -212,4 +212,3 @@ const AccountInfoForm = ({
     )
 }
 
-export default AccountInfoForm
