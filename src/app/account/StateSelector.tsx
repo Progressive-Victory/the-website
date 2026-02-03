@@ -1,4 +1,4 @@
-const StateSelector = ({
+export const StateSelector = ({
     initialValue,
     onUpdate,
 }: {
@@ -68,4 +68,3 @@ const StateSelector = ({
     )
 }
 
-export default StateSelector
