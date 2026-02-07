@@ -16,7 +16,21 @@ export function Hero() {
         {
             username: 'Progressive Victory',
             nameColor: 'red',
-            text: "It's all fun and games w PV members at the Katie Wilson Watch Party tonight in Seattle! Congratulations to @wilsonformayor and all the volunteers who spent months working to help her win!",
+            text: [
+                {
+                    type: 'text',
+                    value: "It's all fun and games w PV members at the Katie Wilson Watch Party tonight in Seattle! Congratulations to ",
+                },
+                {
+                    type: 'highlight',
+                    value: '@wilsonformayor',
+                    href: 'https://x.com/wilsonformayor',
+                },
+                {
+                    type: 'text',
+                    value: ' and all the volunteers who spent months working to help her win!',
+                },
+            ],
             image: '/images/PVKatieWilsonWatchParty.jpeg',
             avatar: avatarImage,
             avatarRounded: false,
@@ -39,7 +53,12 @@ export function Hero() {
         {
             username: 'Progressive Victory',
             nameColor: 'red',
-            text: 'Built by the internet, for America. Progressive Victory is a new kind of political institution: seamlessly marrying the electoral impact and volunteer power of traditional progressive organizations with the culture and community of digital third places.',
+            text: [
+                {
+                    type: 'text',
+                    value: 'Built by the internet, for America. Progressive Victory is a new kind of political institution: seamlessly marrying the electoral impact and volunteer power of traditional progressive organizations with the culture and community of digital third places.',
+                },
+            ],
             avatar: avatarImage,
             avatarRounded: false,
             motionProps: {
@@ -55,7 +74,12 @@ export function Hero() {
         {
             username: 'Sam Dryzmala',
             nameColor: 'purple',
-            text: 'I founded Progressive Victory with the dream of creating a political action community that comes together to get progressive policies & candidates the attention they deserve!',
+            text: [
+                {
+                    type: 'text',
+                    value: 'I founded Progressive Victory with the dream of creating a political action community that comes together to get progressive policies & candidates the attention they deserve!',
+                },
+            ],
             image: '/images/sam.jpg',
             avatar: '/images/sam_twitter_photo.jpeg',
             avatarRounded: true,

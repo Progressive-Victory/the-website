@@ -1,4 +1,4 @@
-import Endorsements from './Endorsements'
+import { EndorsementAlt } from './EndorsementsAlt'
 import styles from '@/app/endorsements/endorsement.module.css'
 import { ContentPageFrame } from '@/components/content_sections/ContentSections'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
@@ -6,10 +6,10 @@ import { MainLayout } from '@/components/layout/MainLayout'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'PV - Endorsements',
+    title: 'PV - EndorsementsAlt',
     description: 'Progressive Victory endorsements and supported candidates.',
     openGraph: {
-        title: 'PV - Endorsements',
+        title: 'PV - EndorsementsAlt',
         description:
             'Progressive Victory endorsements and supported candidates.',
         url: `https://${process.env.SITE_URL}/`,
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     },
 }
 
-export default function EndorsementsPage() {
+export default function EndorsementsAltPage() {
     return (
         <MainLayout>
             <HalftoneBackground />
@@ -38,8 +38,9 @@ export default function EndorsementsPage() {
                     </div>
                 }
             >
-                <Endorsements />
+                <></>
             </ContentPageFrame>
+            <EndorsementAlt />
         </MainLayout>
     )
 }

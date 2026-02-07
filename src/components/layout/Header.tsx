@@ -88,6 +88,10 @@ const navitems: NavItem[] = [
                             name: 'Endorsement Page 2',
                             href: '/endorsementsAlt',
                         },
+                        {
+                            name: 'Endorsement Page 3',
+                            href: '/endorsementsAlt2',
+                        },
                     ],
                 },
             ],

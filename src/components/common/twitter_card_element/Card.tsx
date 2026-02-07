@@ -1,10 +1,12 @@
 'use client'
 
 import styles from './Card.module.css'
+import { BaseButton } from '@/components/common/buttons/Button'
 import {
     HeartIcon,
     ChatBubbleLeftRightIcon,
     ArrowUpOnSquareIcon,
+    EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline'
 import {
     HeartIcon as SolidHeartIcon,
@@ -53,21 +55,35 @@ export interface TiltProps {
     }
 }
 
+export type TextPart =
+    | { type: 'text'; value: string }
+    | {
+          type: 'highlight'
+          value: string
+          href?: string
+          onClick?: () => void
+          title?: string
+      }
+
 export interface MessageData {
     username: string
     nameColor?: string
-    text: string
+    text: TextPart[]
     image?: string
     avatar: string
     avatarRounded?: boolean
     motionProps?: MotionProps
     tiltProps?: TiltProps
     imageProps?: ImageProps
+
+    ctaLabel?: string
+    ctaHref?: string
+    ctaClassName?: string
 }
 
 interface MessageProps {
     avatar: string
-    text: string
+    text: TextPart[]
     username: string
     motionProps?: MotionProps
     tiltProps?: TiltProps
@@ -79,6 +95,11 @@ interface MessageProps {
     children?: React.JSX.Element
     botLeftContent?: React.JSX.Element
     botDivider?: boolean
+    showEllipsis?: boolean
+
+    ctaLabel?: string
+    ctaHref?: string
+    ctaClassName?: string
 }
 
 export function Message({
@@ -95,6 +116,11 @@ export function Message({
     children,
     botLeftContent,
     botDivider = false,
+    showEllipsis = false,
+
+    ctaLabel,
+    ctaHref,
+    ctaClassName,
 }: MessageProps): React.JSX.Element {
     const [clickedHeart, setClickedHeart] = useState(false)
     const [clickedBubble, setClickedBubble] = useState(false)
@@ -136,6 +162,10 @@ export function Message({
         },
     }
 
+    function isExternalHref(href: string) {
+        return href.startsWith('http://') || href.startsWith('https://')
+    }
+
     const card = (
         <motion.div
             className={cardClassName}
@@ -154,23 +184,90 @@ export function Message({
                         <Image
                             src={avatar}
                             alt={username}
-                            className={
-                                avatarRounded ? styles.avatarRounded : ''
-                            }
+                            className={avatarRounded ? styles.avatarRounded : ''}
                             width={38}
                             height={38}
                             unoptimized
                         />
-                        <p
-                            className={styles.username}
-                            style={{ color: nameColor }}
-                        >
+
+                        <p className={styles.username} style={{ color: nameColor }}>
                             {username}
                         </p>
                     </div>
+
+                    {showEllipsis && (
+                        <div className={styles.ellipsisLayout}>
+                            <BaseButton
+                                label={ctaLabel ?? ''}
+                                href={ctaHref}
+                                className={[
+                                    styles.primary,
+                                    ctaClassName,
+                                ]
+                                    .filter(Boolean)
+                                    .join(' ')}
+                            />
+
+                            <button
+                                type="button"
+                                className={styles.ellipsisButton}
+                                aria-label="More options"
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                }}
+                            >
+                                <EllipsisHorizontalIcon className={styles.ellipsisIcon} />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
-                <p className={styles.text}>{text}</p>
+                <p className={styles.text}>
+                    {text.map((part, i) => {
+                        if (part.type === 'highlight') {
+                            if (part.href) {
+                                const external = isExternalHref(part.href)
+
+                                return (
+                                    <a
+                                        key={i}
+                                        href={part.href}
+                                        target={external ? '_blank' : undefined}
+                                        rel={external ? 'noopener noreferrer' : undefined}
+                                        className={styles.textHighlight}
+                                        title={part.title}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                        }}
+                                    >
+                                        {part.value}
+                                    </a>
+                                )
+                            }
+
+                            return (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    className={styles.textHighlightButton}
+                                    title={part.title}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        part.onClick?.()
+                                    }}
+                                >
+                                    {part.value}
+                                </button>
+                            )
+                        }
+
+                        return (
+                            <span key={i} className={styles.textPart}>
+                                {part.value}
+                            </span>
+                        )
+                    })}
+                </p>
             </div>
 
             {image && (
@@ -196,9 +293,7 @@ export function Message({
 
             {/* Bottom Row */}
             <div className={styles.bottomRow}>
-                <div className={styles.bottomLeft}>
-                    {botLeftContent && botLeftContent}
-                </div>
+                <div className={styles.bottomLeft}>{botLeftContent && botLeftContent}</div>
 
                 <div className={styles.actions}>
                     <button
@@ -317,10 +412,8 @@ function TiltWrapper({
     }
 
     if (!disabled && isHovered && canTilt) {
-        const x =
-            (mousePosition.x - elementPosition.left) / elementPosition.width
-        const y =
-            (mousePosition.y - elementPosition.top) / elementPosition.height
+        const x = (mousePosition.x - elementPosition.left) / elementPosition.width
+        const y = (mousePosition.y - elementPosition.top) / elementPosition.height
 
         tiltX.set((x - 0.5) * 0.5 * strength)
         tiltY.set((y - 0.5) * -0.5 * strength)
@@ -328,9 +421,7 @@ function TiltWrapper({
 
     return (
         <motion.div
-            className={[styles.tilt, tiltProps.className]
-                .filter(Boolean)
-                .join(' ')}
+            className={[styles.tilt, tiltProps.className].filter(Boolean).join(' ')}
             style={{
                 rotateX: disabled ? 0 : rotateX,
                 rotateY: disabled ? 0 : rotateY,
