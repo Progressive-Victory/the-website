@@ -14,8 +14,6 @@ export interface FormFieldProps<T, F = unknown> {
 
     children?: ReactElement
 
-    prefix?: string
-
     field?: string
     getter?: (form: T) => F
     setter?: (form: T, field: F) => T
