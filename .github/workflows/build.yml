@@ -26,7 +26,6 @@ jobs:
             - name: Run build
               run: pnpm run build
               env:
-                  BOOMERANG_URI: ${{ secrets.BOOMERANG_URI }}
                   DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
                   DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
                   DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}

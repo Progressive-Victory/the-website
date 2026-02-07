@@ -57,9 +57,6 @@ GUILD_ID="1308877803705335858"
 # Does not need to change
 SITE_URL="https://example.com"
 
-# boomerang
-BOOMERANG_URI="<boomerang uri>"
-
 # api vars
 PV_WEBSITE_API_URL="http://localhost:8080"
 ```
