@@ -50,10 +50,10 @@ function CandidateButtons({ candidate }: { candidate: CandidateConfig }) {
         </div>
     )
 }
+
 export function EndorsementAlt() {
     const [filter, setFilter] = useState<FilterType>('all')
     const [hasAnimatedIn, setHasAnimatedIn] = useState(false)
-
     useEffect(() => {
         setHasAnimatedIn(true)
     }, [])
