@@ -1,9 +1,9 @@
 import styles from './Form.module.css'
-import { DynamicFormFieldProps, FormFieldProps } from './FormField'
+import { DynamicFormFieldProps, FieldConfiguration } from './FormField'
 import { FormGroupProps } from './FormGroup'
 import cx from 'classnames'
 import deepEqual from 'deep-equal'
-import { ReactElement, useEffect, useState } from 'react'
+import { ReactElement, useCallback, useEffect, useState } from 'react'
 import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 
 export interface FormState<T> {
@@ -41,6 +41,9 @@ export function Form<T>({
     const [editForm, setEditForm] = useState<T | null>(null)
     const [dirtyMap, setDirtyMap] = useState(new Set<string>())
     const [invalidMap, setInvalidMap] = useState(new Set<string>())
+    const [configureMap, setConfigureMap] = useState<
+        Record<string, FieldConfiguration<T, unknown>>
+    >({})
 
     const form = editForm ?? initialForm
     const editing = editForm != null
@@ -64,31 +67,44 @@ export function Form<T>({
         setInvalidMap(new Set<string>())
     }
 
-    const handleChange = (props: FormFieldProps<T>, field: unknown) => {
-        if (!props.setter || !props.getter) return
+    const handleChange = useCallback(
+        (id: string, field: unknown) => {
+            const configuration = configureMap[id]
+            if (!configuration) return
 
-        const currForm = props.setter(form, field)
-        setEditForm(currForm)
+            const { getter, setter, validator } = configuration
 
-        const init = props.getter(initialForm)
-        const curr = props.getter(currForm)
+            const currForm = setter(form, field)
+            setEditForm(currForm)
 
-        const clean = (!init && !curr) || deepEqual(init, curr)
-        setDirtyMap((prev) => {
-            if (clean) prev.delete(props.id ?? '')
-            else prev.add(props.id ?? '')
-            return prev
-        })
+            const init = getter(initialForm)
+            const curr = getter(currForm)
 
-        if (props.validator) {
-            const valid = props.validator(curr)
-            setInvalidMap((prev) => {
-                if (valid) prev.delete(props.id ?? '')
-                else prev.add(props.id ?? '')
+            const clean = (!init && !curr) || deepEqual(init, curr)
+            setDirtyMap((prev) => {
+                if (clean) prev.delete(id)
+                else prev.add(id)
                 return prev
             })
-        }
-    }
+
+            if (validator) {
+                const valid = validator(curr)
+                setInvalidMap((prev) => {
+                    if (valid) prev.delete(id)
+                    else prev.add(id)
+                    return prev
+                })
+            }
+        },
+        [configureMap, form, initialForm]
+    )
+
+    const handleConfigure = useCallback(
+        (id: string, configuration: FieldConfiguration<T, unknown>) => {
+            setConfigureMap((prev) => ({ ...prev, [id]: configuration }))
+        },
+        []
+    )
 
     const groups = Array.isArray(children) ? children : [children]
     const dynamic: DynamicFormFieldProps<T> = {
@@ -96,6 +112,7 @@ export function Form<T>({
         editing,
         saving,
         onChange: handleChange,
+        onConfigure: handleConfigure,
     }
 
     useEffect(() => {
