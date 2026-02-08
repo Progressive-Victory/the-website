@@ -25,7 +25,7 @@ import type React from 'react'
 import { useState } from 'react'
 
 interface MotionProps {
-    initial?: TargetAndTransition | false
+    initial?: TargetAndTransition
     animate?: TargetAndTransition
     transition?: Transition
 }
@@ -166,22 +166,6 @@ export function Message({
         return href.startsWith('http://') || href.startsWith('https://')
     }
 
-    const resolvedInitial =
-        motionProps?.initial === false
-            ? false
-            : { opacity: 0, scale: 0, ...(motionProps?.initial ?? {}) }
-
-    const resolvedAnimate = {
-        opacity: 1,
-        scale: 1,
-        ...(motionProps?.animate ?? {}),
-    }
-
-    const resolvedTransition = {
-        ease: 'backInOut',
-        ...(motionProps?.transition ?? {}),
-    }
-
     const card = (
         <motion.div
             className={cardClassName}
@@ -189,9 +173,9 @@ export function Message({
                 willChange: 'opacity, transform',
                 transform: 'translateZ(0)',
             }}
-            initial={resolvedInitial}
-            animate={resolvedAnimate}
-            transition={resolvedTransition}
+            initial={{ opacity: 0, scale: 0, ...motionProps?.initial }}
+            animate={{ opacity: 1, scale: 1, ...motionProps?.animate }}
+            transition={{ ease: 'backInOut', ...motionProps?.transition }}
         >
             {/* Header */}
             <div className={styles.header}>

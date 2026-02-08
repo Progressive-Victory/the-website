@@ -5,7 +5,7 @@ import styles from '@/app/endorsements/endorsement.module.css'
 import { Message } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 const avatarImage = '/images/PV_Pride_Logo.png'
 
@@ -53,10 +53,6 @@ function CandidateButtons({ candidate }: { candidate: CandidateConfig }) {
 
 export function EndorsementAlt() {
     const [filter, setFilter] = useState<FilterType>('all')
-    const [hasAnimatedIn, setHasAnimatedIn] = useState(false)
-    useEffect(() => {
-        setHasAnimatedIn(true)
-    }, [])
 
     const sortedCandidates = useMemo(() => {
         return [...CANDIDATES].sort((a, b) => {
@@ -152,9 +148,7 @@ export function EndorsementAlt() {
                         avatar={avatarImage}
                         avatarRounded={false}
                         motionProps={{
-                            initial: hasAnimatedIn
-                                ? false
-                                : { rotate: 20, y: 50 },
+                            initial: { rotate: 20, y: 50 },
                             animate: { rotate: 0, y: 0 },
                             transition: { delay: 0.15, duration: 0.65 },
                         }}
