@@ -1,4 +1,3 @@
-export * from './AuthRequest'
 export * from './CreateUserRequest'
 export * from './SearchRequest'
 export * from './UpdatePermissionRequest'

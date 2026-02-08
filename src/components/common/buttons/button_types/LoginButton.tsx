@@ -4,7 +4,8 @@ import { BaseButton, BaseVisualProps } from '../Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
 
 export type LoginButtonProps = BaseVisualProps & {
-    href: string
+    href?: string
+    onClick?: () => void
 }
 
 export function LoginButton(props: LoginButtonProps) {

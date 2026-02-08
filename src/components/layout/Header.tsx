@@ -9,6 +9,8 @@ import { LoginButton } from '@/components/common/buttons/button_types/LoginButto
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
+import { TokenClaims } from '@/contracts/data'
+import { useAuth } from '@/util/hooks'
 import { AnimatePresence, motion } from 'motion/react'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
@@ -234,23 +236,25 @@ function MobileBackButton(props: { onClick: () => void }) {
     )
 }
 
-function NavDrawer(props: {
+interface NavDrawerProps {
     isOpen: boolean
     navitems: NavItem[]
     mobileSubnavItem: NavItem | null
     setMobileSubnavItem: (item: NavItem | null) => void
-    session: unknown
+    session: TokenClaims | undefined
     avatarSrc: string
-}) {
-    const {
-        isOpen,
-        navitems,
-        mobileSubnavItem,
-        setMobileSubnavItem,
-        session,
-        avatarSrc,
-    } = props
+    onLogin: () => Promise<void>
+}
 
+function NavDrawer({
+    isOpen,
+    navitems,
+    mobileSubnavItem,
+    setMobileSubnavItem,
+    session,
+    avatarSrc,
+    onLogin,
+}: NavDrawerProps) {
     const showSubnav = mobileSubnavItem !== null
 
     return (
@@ -409,7 +413,9 @@ function NavDrawer(props: {
                                                 <LoginButton
                                                     label="Log In"
                                                     buttonVariant="long"
-                                                    href="/login"
+                                                    onClick={() =>
+                                                        void onLogin()
+                                                    }
                                                 />
                                             </motion.div>
                                         ) : (
@@ -537,14 +543,16 @@ function NavDrawer(props: {
 }
 
 export function Header() {
+    const { session, onLogin } = useAuth()
+
     const [isOpen, setIsOpen] = useState(false)
     const [activeSubnav, setActiveSubnav] = useState<NavItem | null>(null)
     const [mobileSubnavItem, setMobileSubnavItem] = useState<NavItem | null>(
         null
     )
 
-    const { data: session } = useSession()
-    const avatarSrc = session?.user?.image ?? ''
+    const { data: imgSession } = useSession()
+    const avatarSrc = imgSession?.user?.image ?? ''
 
     useEffect(() => {
         if (!isOpen) return
@@ -732,7 +740,10 @@ export function Header() {
                     <DonateButton label="Donate" />
 
                     {!session ? (
-                        <LoginButton label="Log In" href="/login" />
+                        <LoginButton
+                            label="Log In"
+                            onClick={() => void onLogin()}
+                        />
                     ) : (
                         <AccountButton
                             label="Account"
@@ -837,6 +848,7 @@ export function Header() {
                 setMobileSubnavItem={setMobileSubnavItem}
                 session={session}
                 avatarSrc={avatarSrc}
+                onLogin={onLogin}
             />
         </>
     )

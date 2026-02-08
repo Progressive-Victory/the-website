@@ -1,13 +1,6 @@
-import { AuthRequest } from '@/contracts/requests'
-import { AuthResponse } from '@/contracts/responses'
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
+import { useAuth } from './useAuth'
+import { ApiError, FetchError } from '@/models'
 import z from 'zod'
-
-interface ApiError {
-    error: string
-    message: string
-}
 
 type QueryPrim = string | number | boolean | null
 type QueryParam = QueryPrim | QueryPrim[] | undefined
@@ -20,35 +13,8 @@ interface QueryOptions {
     signal?: AbortSignal
 }
 
-const pvSessionKey = 'pv-session'
-
-export class FetchError extends Error {
-    status: number
-
-    constructor(message: string, status: number) {
-        super(message)
-        this.status = status
-    }
-}
-
 export function useFetch() {
-    const session = useSession()
-
-    const settingsQuery = useQuery({
-        queryKey: ['/api/settings'],
-        async queryFn({ signal }) {
-            const res = await fetch('/api/settings', { signal })
-            return (await res.json()) as {
-                apiBaseUrl: string
-            }
-        },
-        staleTime: Infinity,
-        placeholderData: keepPreviousData,
-    })
-
-    const onSignOut = () => {
-        localStorage.removeItem(pvSessionKey)
-    }
+    const { apiBaseUrl, session, onRefresh } = useAuth()
 
     const queryToString = (query: QueryParam): string | undefined => {
         if (query === undefined) return undefined
@@ -56,46 +22,6 @@ export function useFetch() {
         if (Array.isArray(query))
             return query.map((item) => queryToString(item)).join(',')
         return query.toString()
-    }
-
-    // TODO: Put this into global state and delay until it's loaded
-    const apiBaseUrl = settingsQuery.data?.apiBaseUrl
-    const ready = !!apiBaseUrl
-
-    const authMutation = useMutation({
-        mutationKey: ['/auth'],
-        mutationFn: async (signal?: AbortSignal) => {
-            const body: AuthRequest = {
-                discordToken: `Bearer ${session.data?.accessToken}`,
-            }
-
-            const res = await fetch(new URL('/auth', apiBaseUrl), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-                signal,
-            })
-
-            const data = (await res.json()) as AuthResponse
-            return data.accessToken
-        },
-    })
-
-    async function refreshToken(signal?: AbortSignal) {
-        console.log('refreshing token')
-        localStorage.removeItem(pvSessionKey)
-
-        await authMutation.mutateAsync(signal)
-        const accessToken = authMutation.data
-
-        if (accessToken) localStorage.setItem(pvSessionKey, accessToken)
-        return accessToken
-    }
-
-    async function getToken(signal?: AbortSignal) {
-        return (
-            localStorage.getItem(pvSessionKey) ?? (await refreshToken(signal))
-        )
     }
 
     async function onFetch<R = void>(
@@ -113,9 +39,6 @@ export function useFetch() {
 
         const req: RequestInit = {
             method,
-            headers: {
-                Authorization: `Bearer ${await getToken(options?.signal)}`,
-            },
             signal: options?.signal,
         }
 
@@ -126,21 +49,14 @@ export function useFetch() {
 
         let res = await fetch(fullUrl, req)
 
-        if (res.status === 401) {
-            req.headers = {
-                ...req.headers,
-                Authorization: `Bearer ${await refreshToken(options?.signal)}`,
-            }
+        if (session && res.status === 401) {
+            await onRefresh()
             res = await fetch(fullUrl, req)
         }
 
         if (!res.ok) {
             const error = (await res.json()) as ApiError
-            throw {
-                status: res.status,
-                cause: error.error,
-                message: error.message,
-            } as FetchError
+            throw new FetchError(error.message, res.status, error.error)
         }
 
         const data = (await res.json()) as unknown
@@ -188,8 +104,8 @@ export function useFetch() {
     }
 
     return {
-        ready,
-        onSignOut,
+        ready: !!apiBaseUrl,
+        session,
         onFetch,
         onGet,
         onPut,
