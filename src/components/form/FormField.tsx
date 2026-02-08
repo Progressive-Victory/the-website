@@ -14,8 +14,6 @@ export interface FormFieldProps<T, F = unknown> {
 
     children?: ReactElement
 
-    prefix?: string
-
     field?: string
     getter?: (form: T) => F
     setter?: (form: T, field: F) => T
@@ -34,16 +32,6 @@ export interface DynamicFormFieldProps<T, F = unknown> {
     saving: boolean
     onChange: (id: string, field: F) => void
     onConfigure: (id: string, configuration: FieldConfiguration<T, F>) => void
-}
-
-export const getSetter = <T, F>(props: FormFieldProps<T, F>) => {
-    const setter = props.setter
-    if (setter) return setter
-
-    const key = props.field
-    if (key) return (form: T, field: F) => ({ ...form, [key]: field }) as T
-
-    return (form: T) => form
 }
 
 export function useConfigure<T, F>(
