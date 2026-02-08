@@ -25,7 +25,7 @@ import type React from 'react'
 import { useState } from 'react'
 
 interface MotionProps {
-    initial?: TargetAndTransition
+    initial?: TargetAndTransition | false
     animate?: TargetAndTransition
     transition?: Transition
 }
@@ -166,6 +166,22 @@ export function Message({
         return href.startsWith('http://') || href.startsWith('https://')
     }
 
+    const resolvedInitial =
+        motionProps?.initial === false
+            ? false
+            : { opacity: 0, scale: 0, ...(motionProps?.initial ?? {}) }
+
+    const resolvedAnimate = {
+        opacity: 1,
+        scale: 1,
+        ...(motionProps?.animate ?? {}),
+    }
+
+    const resolvedTransition = {
+        ease: 'backInOut',
+        ...(motionProps?.transition ?? {}),
+    }
+
     const card = (
         <motion.div
             className={cardClassName}
@@ -173,9 +189,9 @@ export function Message({
                 willChange: 'opacity, transform',
                 transform: 'translateZ(0)',
             }}
-            initial={{ opacity: 0, scale: 0, ...motionProps?.initial }}
-            animate={{ opacity: 1, scale: 1, ...motionProps?.animate }}
-            transition={{ ease: 'backInOut', ...motionProps?.transition }}
+            initial={resolvedInitial}
+            animate={resolvedAnimate}
+            transition={resolvedTransition}
         >
             {/* Header */}
             <div className={styles.header}>
@@ -184,13 +200,18 @@ export function Message({
                         <Image
                             src={avatar}
                             alt={username}
-                            className={avatarRounded ? styles.avatarRounded : ''}
+                            className={
+                                avatarRounded ? styles.avatarRounded : ''
+                            }
                             width={38}
                             height={38}
                             unoptimized
                         />
 
-                        <p className={styles.username} style={{ color: nameColor }}>
+                        <p
+                            className={styles.username}
+                            style={{ color: nameColor }}
+                        >
                             {username}
                         </p>
                     </div>
@@ -200,10 +221,7 @@ export function Message({
                             <BaseButton
                                 label={ctaLabel ?? ''}
                                 href={ctaHref}
-                                className={[
-                                    styles.primary,
-                                    ctaClassName,
-                                ]
+                                className={[styles.primary, ctaClassName]
                                     .filter(Boolean)
                                     .join(' ')}
                             />
@@ -216,7 +234,9 @@ export function Message({
                                     e.stopPropagation()
                                 }}
                             >
-                                <EllipsisHorizontalIcon className={styles.ellipsisIcon} />
+                                <EllipsisHorizontalIcon
+                                    className={styles.ellipsisIcon}
+                                />
                             </button>
                         </div>
                     )}
@@ -233,7 +253,11 @@ export function Message({
                                         key={i}
                                         href={part.href}
                                         target={external ? '_blank' : undefined}
-                                        rel={external ? 'noopener noreferrer' : undefined}
+                                        rel={
+                                            external
+                                                ? 'noopener noreferrer'
+                                                : undefined
+                                        }
                                         className={styles.textHighlight}
                                         title={part.title}
                                         onClick={(e) => {
@@ -293,7 +317,9 @@ export function Message({
 
             {/* Bottom Row */}
             <div className={styles.bottomRow}>
-                <div className={styles.bottomLeft}>{botLeftContent && botLeftContent}</div>
+                <div className={styles.bottomLeft}>
+                    {botLeftContent && botLeftContent}
+                </div>
 
                 <div className={styles.actions}>
                     <button
@@ -412,8 +438,10 @@ function TiltWrapper({
     }
 
     if (!disabled && isHovered && canTilt) {
-        const x = (mousePosition.x - elementPosition.left) / elementPosition.width
-        const y = (mousePosition.y - elementPosition.top) / elementPosition.height
+        const x =
+            (mousePosition.x - elementPosition.left) / elementPosition.width
+        const y =
+            (mousePosition.y - elementPosition.top) / elementPosition.height
 
         tiltX.set((x - 0.5) * 0.5 * strength)
         tiltY.set((y - 0.5) * -0.5 * strength)
@@ -421,7 +449,9 @@ function TiltWrapper({
 
     return (
         <motion.div
-            className={[styles.tilt, tiltProps.className].filter(Boolean).join(' ')}
+            className={[styles.tilt, tiltProps.className]
+                .filter(Boolean)
+                .join(' ')}
             style={{
                 rotateX: disabled ? 0 : rotateX,
                 rotateY: disabled ? 0 : rotateY,

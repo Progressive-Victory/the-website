@@ -4,9 +4,12 @@ import { CANDIDATES, type CandidateConfig } from './endorsements.data'
 import styles from '@/app/endorsements/endorsement.module.css'
 import { Message } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
-import React, { useMemo } from 'react'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
+import React, { useEffect, useMemo, useState } from 'react'
 
 const avatarImage = '/images/PV_Pride_Logo.png'
+
+type FilterType = 'national' | 'state' | 'pledge' | 'member' | 'all'
 
 function CandidateButtons({ candidate }: { candidate: CandidateConfig }) {
     const showAny =
@@ -48,6 +51,13 @@ function CandidateButtons({ candidate }: { candidate: CandidateConfig }) {
     )
 }
 export function EndorsementAlt() {
+    const [filter, setFilter] = useState<FilterType>('all')
+    const [hasAnimatedIn, setHasAnimatedIn] = useState(false)
+
+    useEffect(() => {
+        setHasAnimatedIn(true)
+    }, [])
+
     const sortedCandidates = useMemo(() => {
         return [...CANDIDATES].sort((a, b) => {
             const aTime = a.electionDate?.getTime() ?? Infinity
@@ -56,10 +66,82 @@ export function EndorsementAlt() {
         })
     }, [])
 
+    const filteredCandidates = useMemo(() => {
+        return sortedCandidates.filter((candidate) => {
+            if (filter === 'all') return true
+            if (filter === 'national')
+                return candidate.initiativeType === 'national'
+            if (filter === 'state') return candidate.initiativeType === 'state'
+            if (filter === 'pledge') return candidate.showPvPledge
+            if (filter === 'member') return candidate.showPvMember
+            return true
+        })
+    }, [sortedCandidates, filter])
+
     return (
         <div className={styles.hero}>
+            <div
+                style={{
+                    display: 'flex',
+                    gap: '0.75rem',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                    marginBottom: '0.75rem',
+                }}
+            >
+                <BaseButton
+                    label="National Initiative"
+                    onClick={() => setFilter('national')}
+                    className={
+                        filter === 'national'
+                            ? styles.filterButtonActive
+                            : buttonStyles.minimalProminent
+                    }
+                />
+
+                <BaseButton
+                    label="State Initiative"
+                    onClick={() => setFilter('state')}
+                    className={
+                        filter === 'state'
+                            ? styles.filterButtonActive
+                            : buttonStyles.minimalProminent
+                    }
+                />
+
+                <BaseButton
+                    label="PV Pledge"
+                    onClick={() => setFilter('pledge')}
+                    className={
+                        filter === 'pledge'
+                            ? styles.filterButtonActive
+                            : buttonStyles.minimalProminent
+                    }
+                />
+
+                <BaseButton
+                    label="PV Member"
+                    onClick={() => setFilter('member')}
+                    className={
+                        filter === 'member'
+                            ? styles.filterButtonActive
+                            : buttonStyles.minimalProminent
+                    }
+                />
+
+                <BaseButton
+                    label="Show All"
+                    onClick={() => setFilter('all')}
+                    className={
+                        filter === 'all'
+                            ? styles.filterButtonActive
+                            : buttonStyles.minimalProminent
+                    }
+                />
+            </div>
+
             <div className={styles.messages}>
-                {sortedCandidates.map((candidate) => (
+                {filteredCandidates.map((candidate) => (
                     <Message
                         key={candidate.id}
                         className={styles.messageCard}
@@ -70,7 +152,9 @@ export function EndorsementAlt() {
                         avatar={avatarImage}
                         avatarRounded={false}
                         motionProps={{
-                            initial: { rotate: 20, y: 50 },
+                            initial: hasAnimatedIn
+                                ? false
+                                : { rotate: 20, y: 50 },
                             animate: { rotate: 0, y: 0 },
                             transition: { delay: 0.15, duration: 0.65 },
                         }}

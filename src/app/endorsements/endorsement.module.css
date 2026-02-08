@@ -114,3 +114,12 @@
     font-weight: 600;
     min-height: 0rem;
 }
+
+.filterButtonActive {
+    background-color: #ce3728;
+    color: #ffffff;
+    padding-inline: 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}

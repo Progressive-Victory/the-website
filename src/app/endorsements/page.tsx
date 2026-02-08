@@ -1,4 +1,4 @@
-import { EndorsementAlt } from './EndorsementsAlt'
+import { EndorsementAlt } from './Endorsements'
 import styles from '@/app/endorsements/endorsement.module.css'
 import { ContentPageFrame } from '@/components/content_sections/ContentSections'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
