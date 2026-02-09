@@ -12,8 +12,126 @@
 .overlay {
     position: fixed;
     inset: 0;
-    z-index: 50;
+    z-index: 100;
     background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     animation: slideDown 0.3s ease-out;
+}
+
+.container {
+    position: relative;
+    padding: 3rem 1rem;
+    width: 100%;
+    max-width: 1400px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #1b4568;
+    border-radius: 0.75rem;
+}
+
+.title {
+    padding-bottom: 2.5rem;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: white;
+}
+
+.highlight {
+    color: #ce3728;
+}
+
+.cardsWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 2.5rem;
+    padding-left: 2vw;
+    padding-right: 2vw;
+    flex: 1;
+    width: 100%;
+}
+
+@media (min-width: 1280px) {
+    .cardsWrapper {
+        flex-direction: row;
+        align-items: stretch;
+    }
+}
+
+@media (min-width: 1536px) {
+    .cardsWrapper {
+        padding-left: 2vw;
+        padding-right: 2vw;
+    }
+}
+
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 280px;
+    padding: 2rem 1.5rem 5rem 1.5rem;
+    border-radius: 0.75rem;
+    background-color: white;
+}
+
+@media (min-width: 768px) {
+    .card {
+        height: auto;
+    }
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.cardContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.cardTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #09223a;
+}
+
+.cardDescription {
+    font-size: 1rem;
+    color: black;
+}
+
+.cardButton {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+}
+
+.bottomButtons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    width: 100%;
+    padding-right: 2vw;
+    flex-wrap: wrap;
 }

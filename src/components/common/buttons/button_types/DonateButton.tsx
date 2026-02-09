@@ -27,8 +27,7 @@ export function DonateButton(props: DonateButtonProps) {
             <BaseButton
                 {...rest}
                 className={mergedClassName}
-                href={DONATE_HREF}
-                onMouseEnter={handleShowOverlay}
+                onClick={handleShowOverlay}
             />
             {showDonationOverlay && (
                 <DonationOverlay
