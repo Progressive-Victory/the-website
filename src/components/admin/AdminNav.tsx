@@ -13,12 +13,14 @@ interface AdminNavProps {
     userCount?: number
     roleCount?: number
     permissionCount?: number
+    donorCount?: number
 }
 
 export default function AdminNav({
     userCount,
     roleCount,
     permissionCount,
+    donorCount,
 }: AdminNavProps) {
     const [open, setOpen] = useLocalStorage('pv.admin-nav-open', true)
 
@@ -48,6 +50,7 @@ export default function AdminNav({
                     title="Donors"
                     href="/admin/donors"
                     icon={FaDonate}
+                    count={donorCount}
                     open={open}
                 />
                 <NavLink
