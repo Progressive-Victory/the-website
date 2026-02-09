@@ -13,12 +13,12 @@
     position: fixed;
     inset: 0;
     z-index: 100;
-    background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: center;
     animation: slideDown 0.3s ease-out;
+    overflow: hidden;
 }
 
 .container {
@@ -32,7 +32,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: #1b4568;
+    background-color: rgba(9, 34, 58, 0.88);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.25);
     border-radius: 0.75rem;
 }
 
