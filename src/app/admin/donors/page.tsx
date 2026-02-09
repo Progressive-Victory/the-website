@@ -9,7 +9,11 @@ import {
     FormGroup,
     SelectManyField,
 } from '@/components/form'
-import { ActBlueDonor, zActBlueDonor } from '@/contracts/data/ActBlueDonor'
+import {
+    ActBlueDonor,
+    zActBlueDonor,
+    ActBlueContribution,
+} from '@/contracts/data'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -181,22 +185,27 @@ export default function Page() {
                                 }
                             />
                         </FormGroup>
-                        <FormGroup title="Contributions">
-                            <SelectManyField<ActBlueDonor>
-                                label="Contributions"
-                                field="contributions"
-                                options={(
-                                    donorQuery.data.contributions ?? []
-                                ).map((contribution) => {
-                                    console.log(contribution)
-                                    return {
-                                        value: contribution.orderNumber,
-                                        label: `${contribution.orderNumber}`,
-                                    }
-                                })}
-                                readonly
-                            />
-                        </FormGroup>
+                        <>
+                            {donorQuery.data.contributions ? (
+                                donorQuery.data.contributions.map(
+                                    (contribution) => (
+                                        <FormGroup
+                                            title={contribution.orderNumber}
+                                            key={contribution.orderNumber}
+                                        >
+                                            <TextField<ActBlueDonor>
+                                                label="Order Number"
+                                                getter={(form) =>
+                                                    contribution.orderNumber
+                                                }
+                                            />
+                                        </FormGroup>
+                                    )
+                                )
+                            ) : (
+                                <div>None</div>
+                            )}
+                        </>
                     </Form>
                 )}
             </div>
