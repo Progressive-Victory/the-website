@@ -73,3 +73,7 @@
 .historyEntry.selected:hover {
     background-color: #d1d5db;
 }
+
+.subHeader {
+    font-weight: 300;
+}

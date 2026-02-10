@@ -19,6 +19,12 @@ export interface FormGroupProps<T> {
     /** Whether the group is displayed as collapsed by default. */
     defaultCollapsed?: boolean
 
+    /**Whether the group is meant to wrap other form groups or not */
+    wrapper?: boolean
+
+    /**Wheter the group is a sub group of a bigger */
+    subGroup?: boolean
+
     /**
      * Internal form state, populated automatically by the parent Form
      * component. Do not put any value here!
@@ -49,6 +55,8 @@ export function FormGroup<T>({
     id,
     title,
     defaultCollapsed,
+    wrapper,
+    subGroup,
     dynamic,
     children = [],
 }: FormGroupProps<T>) {
@@ -72,8 +80,16 @@ export function FormGroup<T>({
     })
 
     return (
-        <CollapsibleSection title={title} initialOpenState={!defaultCollapsed}>
-            <div className={styles.group}>{hydratedChildren}</div>
+        <CollapsibleSection
+            title={title}
+            initialOpenState={!defaultCollapsed}
+            subGroup={subGroup}
+        >
+            {wrapper ? (
+                <div>{hydratedChildren}</div>
+            ) : (
+                <div className={styles.group}>{hydratedChildren}</div>
+            )}
         </CollapsibleSection>
     )
 }

@@ -8,11 +8,13 @@ import {
     TextField,
     FormGroup,
     SelectManyField,
+    DateField,
 } from '@/components/form'
 import {
     ActBlueDonor,
     zActBlueDonor,
     ActBlueContribution,
+    ActBlueLineitem,
 } from '@/contracts/data'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
@@ -21,12 +23,18 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+
+interface contributionData {
+    total: number
+    hasActiveRecurring: boolean
+    lineitems: ActBlueLineitem[]
+}
 
 //import styles from './page.'
 
 export default function Page() {
-    const queryClient = useQueryClient()
+    //const queryClient = useQueryClient()
     const { ready, onGet, onPatch } = useFetch()
 
     const [selectedEmail, setSelectedEmail] = useState<string | null>(null)
@@ -56,6 +64,57 @@ export default function Page() {
         placeholderData: keepPreviousData,
     })
 
+    const calcFutureDate = (
+        initialTime: Date,
+        period: 'weekly' | 'monthly',
+        duration: number
+    ) => {
+        switch (period) {
+            case 'weekly':
+                return new Date(
+                    initialTime.getTime() +
+                        new Date(duration * 7 * 24 * 60 * 60 * 1000).getTime()
+                )
+            case 'monthly':
+                initialTime.setMonth(initialTime.getMonth())
+                return initialTime
+        }
+    }
+
+    const contributionData = useMemo(() => {
+        const li: ActBlueLineitem[] = []
+        let hasActiveRecurring = false
+        let total = 0
+        ;(donorQuery.data?.contributions ?? []).forEach(
+            (contribution: ActBlueContribution) => {
+                if (
+                    contribution.isRecurring &&
+                    ((contribution.recurringDuration ?? 1) < 0 ||
+                        calcFutureDate(
+                            contribution.createdAt,
+                            contribution.recurringPeriod as
+                                | 'weekly'
+                                | 'monthly',
+                            contribution.recurringDuration ?? 1
+                        ) > new Date())
+                )
+                    hasActiveRecurring = true
+                ;(contribution.lineitems ?? []).forEach(
+                    (lineitem: ActBlueLineitem) => {
+                        total += lineitem.amount
+                        li.push(lineitem)
+                    }
+                )
+            }
+        )
+
+        return {
+            total,
+            hasActiveRecurring,
+            lineitems: li,
+        } satisfies contributionData
+    }, [donorQuery.data])
+
     const handleSelectItem = (value: ActBlueDonor) => {
         if (value?.email === selectedEmail) return
 
@@ -70,7 +129,7 @@ export default function Page() {
     }
 
     const makeTitle = (donor: ActBlueDonor) => {
-        return donor.email
+        return `${donor.firstname} ${donor.lastname}`
     }
 
     const makeFormTitle = (donor: ActBlueDonor) => {
@@ -185,27 +244,63 @@ export default function Page() {
                                 }
                             />
                         </FormGroup>
-                        <>
-                            {donorQuery.data.contributions ? (
-                                donorQuery.data.contributions.map(
-                                    (contribution) => (
-                                        <FormGroup
-                                            title={contribution.orderNumber}
-                                            key={contribution.orderNumber}
-                                        >
-                                            <TextField<ActBlueDonor>
-                                                label="Order Number"
-                                                getter={(form) =>
-                                                    contribution.orderNumber
-                                                }
-                                            />
-                                        </FormGroup>
-                                    )
+                        <FormGroup title="Contributions" wrapper>
+                            <FormGroup title="All Time Stats" subGroup>
+                                <TextField<ActBlueDonor>
+                                    label="Total Dollar Donations"
+                                    getter={() => `$${contributionData.total}`}
+                                />
+                                <TextField<ActBlueDonor>
+                                    label="Currently Has a Recurring Donation"
+                                    getter={() =>
+                                        `${contributionData.hasActiveRecurring}`
+                                    }
+                                />
+                                <TextField<ActBlueDonor>
+                                    label="Total Contributions"
+                                    getter={() =>
+                                        `${contributionData.lineitems.length}`
+                                    }
+                                />
+                            </FormGroup>
+                            {(contributionData.lineitems ?? []).map(
+                                (lineitem) => (
+                                    <FormGroup
+                                        title={`${lineitem.lineitemId}`}
+                                        key={lineitem.lineitemId}
+                                        defaultCollapsed
+                                        subGroup
+                                    >
+                                        <DateField<ActBlueDonor>
+                                            label="Paid At"
+                                            getter={() => lineitem.paidAt}
+                                        />
+                                        <TextField<ActBlueDonor>
+                                            label="Sequence"
+                                            getter={() =>
+                                                `${lineitem.sequence}`
+                                            }
+                                        />
+                                        <TextField<ActBlueDonor>
+                                            label="Amount"
+                                            getter={() => `$${lineitem.amount}`}
+                                        />
+                                        <TextField<ActBlueDonor>
+                                            label="Recurring Amount"
+                                            getter={() =>
+                                                `$${lineitem.recurringAmount}`
+                                            }
+                                        />
+                                        <TextField<ActBlueDonor>
+                                            label="Amount Less AB Fees"
+                                            getter={() =>
+                                                `$${lineitem.amountLessAbFees}`
+                                            }
+                                        />
+                                    </FormGroup>
                                 )
-                            ) : (
-                                <div>None</div>
                             )}
-                        </>
+                        </FormGroup>
                     </Form>
                 )}
             </div>
