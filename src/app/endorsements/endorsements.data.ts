@@ -222,7 +222,7 @@ export const CANDIDATES: CandidateConfig[] = [
                 value: ' has quickly become a beloved presence in the PV community. We are proud to endorse him for Virginia’s 9th Congressional District.',
             },
         ],
-        image: '/images/endorsement_images/AdamMurphy.png',
+        image: '/images/endorsement_images/ADAMMURPHY.png',
         learnMoreHref: '',
         initiativeType: 'state',
         showPvPledge: true,
