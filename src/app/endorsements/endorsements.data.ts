@@ -455,4 +455,25 @@ export const CANDIDATES: CandidateConfig[] = [
         showPvPledge: true,
         showPvMember: false,
     },
+    {
+        id: '21',
+        name: 'Michael Black',
+        electionDate: new Date('06/23/26'),
+        messageText: [
+            {
+                type: 'highlight',
+                value: '@MrMikeBlake',
+                href: 'https://x.com/MrMikeBlake',
+            },
+            {
+                type: 'text',
+                value: ' is an authentic, progressive fighter who has a deep love for his community. The progressive movement won in New Jersey and he will bring that momentum to New York!',
+            },
+        ],
+        image: '/images/endorsement_images/Michael Blake.png',
+        learnMoreHref: '',
+        initiativeType: '',
+        showPvPledge: true,
+        showPvMember: false,
+    },
 ]
