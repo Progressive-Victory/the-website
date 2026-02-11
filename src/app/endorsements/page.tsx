@@ -6,10 +6,10 @@ import { MainLayout } from '@/components/layout/MainLayout'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'PV - EndorsementsAlt',
+    title: 'PV - Endorsements',
     description: 'Progressive Victory endorsements and supported candidates.',
     openGraph: {
-        title: 'PV - EndorsementsAlt',
+        title: 'PV - Endorsements',
         description:
             'Progressive Victory endorsements and supported candidates.',
         url: `https://${process.env.SITE_URL}/`,
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     },
 }
 
-export default function EndorsementsAltPage() {
+export default function EndorsementsPage() {
     return (
         <MainLayout>
             <HalftoneBackground />
