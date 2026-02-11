@@ -25,6 +25,7 @@ export function Hero() {
                     type: 'highlight',
                     value: '@wilsonformayor',
                     href: 'https://x.com/wilsonformayor',
+                    target: '_blank',
                 },
                 {
                     type: 'text',

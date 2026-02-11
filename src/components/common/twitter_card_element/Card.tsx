@@ -63,6 +63,9 @@ export type TextPart =
           href?: string
           onClick?: () => void
           title?: string
+
+          target?: React.HTMLAttributeAnchorTarget
+          rel?: string
       }
 
 export interface MessageData {
@@ -79,6 +82,8 @@ export interface MessageData {
     ctaLabel?: string
     ctaHref?: string
     ctaClassName?: string
+    ctaTarget?: React.HTMLAttributeAnchorTarget
+    ctaRel?: string
 }
 
 interface MessageProps {
@@ -100,6 +105,8 @@ interface MessageProps {
     ctaLabel?: string
     ctaHref?: string
     ctaClassName?: string
+    ctaTarget?: React.HTMLAttributeAnchorTarget
+    ctaRel?: string
 }
 
 export function Message({
@@ -121,6 +128,8 @@ export function Message({
     ctaLabel,
     ctaHref,
     ctaClassName,
+    ctaTarget,
+    ctaRel,
 }: MessageProps): React.JSX.Element {
     const [clickedHeart, setClickedHeart] = useState(false)
     const [clickedBubble, setClickedBubble] = useState(false)
@@ -162,10 +171,6 @@ export function Message({
         },
     }
 
-    function isExternalHref(href: string) {
-        return href.startsWith('http://') || href.startsWith('https://')
-    }
-
     const card = (
         <motion.div
             className={cardClassName}
@@ -202,13 +207,17 @@ export function Message({
 
                     {showEllipsis && (
                         <div className={styles.ellipsisLayout}>
-                            <BaseButton
-                                label={ctaLabel ?? ''}
-                                href={ctaHref}
-                                className={[styles.primary, ctaClassName]
-                                    .filter(Boolean)
-                                    .join(' ')}
-                            />
+                            {ctaHref && ctaLabel ? (
+                                <BaseButton
+                                    label={ctaLabel}
+                                    href={ctaHref}
+                                    target={ctaTarget}
+                                    rel={ctaRel}
+                                    className={[styles.primary, ctaClassName]
+                                        .filter(Boolean)
+                                        .join(' ')}
+                                />
+                            ) : null}
 
                             <button
                                 type="button"
@@ -230,17 +239,16 @@ export function Message({
                     {text.map((part, i) => {
                         if (part.type === 'highlight') {
                             if (part.href) {
-                                const external = isExternalHref(part.href)
-
                                 return (
                                     <a
                                         key={i}
                                         href={part.href}
-                                        target={external ? '_blank' : undefined}
+                                        target={part.target}
                                         rel={
-                                            external
-                                                ? 'noopener noreferrer'
-                                                : undefined
+                                            part.target === '_blank'
+                                                ? (part.rel ??
+                                                  'noopener noreferrer')
+                                                : part.rel
                                         }
                                         className={styles.textHighlight}
                                         title={part.title}

@@ -21,7 +21,8 @@ export type BaseButtonProps = BaseVisualProps & {
     renderContent?: (args: { showNavChevron: boolean }) => React.ReactNode
     rotateChevronOnHover?: boolean
 
-    openInNewTab?: boolean
+    target?: React.HTMLAttributeAnchorTarget
+    rel?: string
 }
 
 export function BaseButton(props: BaseButtonProps) {
@@ -35,7 +36,8 @@ export function BaseButton(props: BaseButtonProps) {
         href,
         onClick,
         renderContent,
-        openInNewTab = false,
+        target,
+        rel,
     } = props
 
     const showNavChevron =
@@ -64,29 +66,31 @@ export function BaseButton(props: BaseButtonProps) {
         </span>
     )
 
-    const handleClick = () => {
-        if (disabled) return
+    if (href) {
+        const finalRel =
+            target === '_blank' ? (rel ?? 'noopener noreferrer') : rel
 
-        if (onClick) {
-            onClick()
-            return
-        }
-
-        if (href) {
-            if (openInNewTab) {
-                window.open(href, '_blank', 'noopener,noreferrer')
-                return
-            }
-
-            location.href = href
-        }
+        return (
+            <a
+                href={href}
+                className={finalClassName}
+                target={target}
+                rel={finalRel}
+                aria-disabled={disabled ?? undefined}
+                onClick={(e) => {
+                    if (disabled) e.preventDefault()
+                }}
+            >
+                {content}
+            </a>
+        )
     }
 
     return (
         <button
             type="button"
             disabled={disabled}
-            onClick={handleClick}
+            onClick={onClick}
             className={finalClassName}
         >
             {content}
