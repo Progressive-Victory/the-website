@@ -30,8 +30,6 @@ function CandidateButtons({ candidate }: { candidate: CandidateConfig }) {
                 <BaseButton
                     label="National Initiative"
                     className={initiativeClassName}
-                    // If you have a destination for this badge, set href:
-                    // href="/initiatives/national"
                 />
             )}
 
@@ -39,7 +37,6 @@ function CandidateButtons({ candidate }: { candidate: CandidateConfig }) {
                 <BaseButton
                     label="State Initiative"
                     className={initiativeClassName}
-                    // href="/initiatives/state"
                 />
             )}
 
@@ -47,7 +44,6 @@ function CandidateButtons({ candidate }: { candidate: CandidateConfig }) {
                 <BaseButton
                     label="PV Pledge"
                     className={styles.tertiary}
-                    // href="/pledge"
                 />
             )}
 
@@ -55,7 +51,6 @@ function CandidateButtons({ candidate }: { candidate: CandidateConfig }) {
                 <BaseButton
                     label="PV Member"
                     className={styles.secondary}
-                    // href="/members"
                 />
             )}
         </div>
@@ -173,9 +168,6 @@ export function EndorsementAlt() {
                         botDivider={true}
                         ctaLabel="Learn More"
                         ctaHref={candidate.learnMoreHref}
-                        // If your Message component renders the CTA using BaseButton now,
-                        // pass through a target prop (you may need to add a prop to Message for this)
-                        // ctaTarget="_blank"
                         botLeftContent={
                             <CandidateButtons candidate={candidate} />
                         }
