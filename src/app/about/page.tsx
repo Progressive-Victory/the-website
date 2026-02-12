@@ -9,6 +9,7 @@ import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout/MainLayout'
 import type { Metadata } from 'next'
 
+
 export const metadata: Metadata = {
     title: 'PV - About',
     description: 'Learn about Progressive Victory!',
