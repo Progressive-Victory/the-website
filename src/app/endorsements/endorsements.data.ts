@@ -94,7 +94,8 @@ export const CANDIDATES: CandidateConfig[] = [
         electionDate: new Date('08/01/26'),
         handle: '@salaambhattiva',
         handleHref: 'https://x.com/SalaamBhattiVA',
-        bodyText: '',
+        bodyText:
+            ' is a candidate whose advocacy for Medicare for All and drive to fight to get money out of politics will bring us one step closer to free healthcare once he wins his district.',
         image: '/images/endorsement_images/SALAAM BHATTI.png',
         learnMoreHref: '',
         initiativeType: 'state',
@@ -175,7 +176,8 @@ export const CANDIDATES: CandidateConfig[] = [
         electionDate: new Date('11/03/26'),
         handle: '@marypeltola',
         handleHref: 'https://x.com/MaryPeltola',
-        bodyText: '',
+        bodyText:
+            " is America's first Native Alaskan representative and a fierce advocate for her community. We are proud to endorse her for re-election in Alaska's at-large congressional district!",
         image: '/images/endorsement_images/MARY PELTOLA.png',
         learnMoreHref: '',
         initiativeType: 'state',
@@ -188,7 +190,8 @@ export const CANDIDATES: CandidateConfig[] = [
         electionDate: new Date('11/03/26'),
         handle: '@erica4ok',
         handleHref: 'https://x.com/erica4ok',
-        bodyText: '',
+        bodyText:
+            " stands apart not just as someone who will take on the machine, but someone with bold ideas to fight Oklahoma's poverty and exploitation.",
         image: '/images/endorsement_images/ERICA WATKINS.png',
         learnMoreHref: '',
         initiativeType: 'state',
