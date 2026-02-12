@@ -1,38 +1,31 @@
-export type MessageTextSegment =
-    | { type: 'text'; value: string }
-    | { type: 'highlight'; value: string; href?: string }
-
 export type InitiativeType = 'national' | 'state' | ''
 
 export interface CandidateConfig {
     id: string
     name: string
     electionDate?: Date
-    messageText: MessageTextSegment[]
+
+    handle: string
+    handleHref?: string
+    bodyText: string
+
     image: string
     learnMoreHref: string
 
     initiativeType: InitiativeType
-
     showPvPledge: boolean
     showPvMember: boolean
 }
+
 export const CANDIDATES: CandidateConfig[] = [
     {
         id: '1',
         name: 'Jeromie Whalen',
         electionDate: new Date('09/01/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@jeromiewhalen',
-                href: 'https://www.whalenforcongressma.com/',
-            },
-            {
-                type: 'text',
-                value: ' is not only a passionate progressive voice, he is also a powerful member of our community! There is nobody we are more excited to endorse this midterm season!',
-            },
-        ],
+        handle: '@jeromiewhalen',
+        handleHref: 'https://www.whalenforcongressma.com/',
+        bodyText:
+            ' is not only a passionate progressive voice, he is also a powerful member of our community! There is nobody we are more excited to endorse this midterm season!',
         image: '/images/endorsement_images/JEROMIE WHALEN.png',
         learnMoreHref: 'https://www.whalenforcongressma.com/platform',
         initiativeType: 'national',
@@ -43,17 +36,10 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '2',
         name: 'Abdul El-Sayed',
         electionDate: new Date('11/03/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@abdulelsayed',
-                href: 'https://x.com/AbdulElSayed',
-            },
-            {
-                type: 'text',
-                value: ' is challenging the status quo by embracing new ways to reach voters! With RFK and Trump’s attacks on medicine, a doctor like him is exactly what we need to pass Medicare For All!',
-            },
-        ],
+        handle: '@abdulelsayed',
+        handleHref: 'https://x.com/AbdulElSayed',
+        bodyText:
+            ' is challenging the status quo by embracing new ways to reach voters! With RFK and Trump’s attacks on medicine, a doctor like him is exactly what we need to pass Medicare For All!',
         image: '/images/endorsement_images/ABDUL EL-SAYED.png',
         learnMoreHref: '',
         initiativeType: 'national',
@@ -64,38 +50,24 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '3',
         name: 'Saikat Chakrabarti',
         electionDate: new Date('06/02/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@saikatc',
-                href: 'https://x.com/saikatc',
-            },
-            {
-                type: 'text',
-                value: " founded the Justice Democrats because he belives in the left's ability to come togeather to fight establishment power. In congress, he will continue that energy!",
-            },
-        ],
+        handle: '@saikatc',
+        handleHref: 'https://x.com/saikatc',
+        bodyText:
+            " founded the Justice Democrats because he belives in the left's ability to come togeather to fight establishment power. In congress, he will continue that energy!",
         image: '/images/endorsement_images/SAIKAT CHAKRABARTI.png',
         learnMoreHref: '',
         initiativeType: 'national',
-        showPvPledge: false,
+        showPvPledge: true,
         showPvMember: false,
     },
     {
         id: '4',
         name: 'Kat Abughazaleh',
         electionDate: new Date('03/17/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@katabughazaleh',
-                href: 'https://x.com/KatAbughazaleh',
-            },
-            {
-                type: 'text',
-                value: ' is exactly what we are looking for at PV. A young, media savvy firebrand willing to tackle any challenge that gets in her way.',
-            },
-        ],
+        handle: '@katabughazaleh',
+        handleHref: 'https://x.com/KatAbughazaleh',
+        bodyText:
+            ' is exactly what we are looking for at PV. A young, media savvy firebrand willing to tackle any challenge that gets in her way.',
         image: '/images/endorsement_images/KAT ABUGHAZALEH.png',
         learnMoreHref: '',
         initiativeType: 'national',
@@ -106,17 +78,10 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '5',
         name: 'Graham Platner',
         electionDate: new Date('11/03/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@grahamformaine',
-                href: 'https://x.com/grahamformaine',
-            },
-            {
-                type: 'text',
-                value: ' is what happens when normal people get fed up and run for office over sanitized aspiring political wannabes! Our Maine team is so excited to get to work on his behalf!',
-            },
-        ],
+        handle: '@grahamformaine',
+        handleHref: 'https://x.com/grahamformaine',
+        bodyText:
+            ' is what happens when normal people get fed up and run for office over sanitized aspiring political wannabes! Our Maine team is so excited to get to work on his behalf!',
         image: '/images/endorsement_images/GRAHAM PLATNER.png',
         learnMoreHref: '',
         initiativeType: 'national',
@@ -127,17 +92,9 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '6',
         name: 'Salaam Bhatti',
         electionDate: new Date('08/01/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@salaambhattiva',
-                href: 'https://x.com/SalaamBhattiVA',
-            },
-            {
-                type: 'text',
-                value: '',
-            },
-        ],
+        handle: '@salaambhattiva',
+        handleHref: 'https://x.com/SalaamBhattiVA',
+        bodyText: '',
         image: '/images/endorsement_images/SALAAM BHATTI.png',
         learnMoreHref: '',
         initiativeType: 'state',
@@ -148,38 +105,23 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '7',
         name: 'Karishma Manzur',
         electionDate: new Date('09/08/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: 'karishma4senate',
-                href: 'https://x.com/Karishma4Senate',
-            },
-            {
-                type: 'text',
-                value: '',
-            },
-        ],
+        handle: '@karishma4senate',
+        handleHref: 'https://x.com/Karishma4Senate',
+        bodyText: '',
         image: '/images/endorsement_images/KARISHMA MANZUR.png',
         learnMoreHref: '',
         initiativeType: '',
-        showPvPledge: false,
+        showPvPledge: true,
         showPvMember: false,
     },
     {
         id: '8',
         name: 'Oliver Larkin',
         electionDate: new Date('08/18/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@oliveralarkin',
-                href: 'https://x.com/OliverALarkin',
-            },
-            {
-                type: 'text',
-                value: ' is proving Progressive politics is alive and well even in places like Florida! We are proud to endorse him and to do our part to help him win.',
-            },
-        ],
+        handle: '@oliveralarkin',
+        handleHref: 'https://x.com/OliverALarkin',
+        bodyText:
+            ' is proving Progressive politics is alive and well even in places like Florida! We are proud to endorse him and to do our part to help him win.',
         image: '/images/endorsement_images/OLIVER LARKIN.png',
         learnMoreHref: '',
         initiativeType: 'state',
@@ -190,38 +132,23 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '9',
         name: 'Heath Howard',
         electionDate: new Date('09/08/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@heathhowardnh',
-                href: 'https://x.com/HeathHowardNH',
-            },
-            {
-                type: 'text',
-                value: '',
-            },
-        ],
+        handle: '@heathhowardnh',
+        handleHref: 'https://x.com/HeathHowardNH',
+        bodyText: '',
         image: '/images/endorsement_images/HEATH HOWARD.png',
         learnMoreHref: '',
         initiativeType: 'state',
-        showPvPledge: false,
+        showPvPledge: true,
         showPvMember: true,
     },
     {
         id: '10',
         name: 'Adam Murphy',
         electionDate: new Date('08/01/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: 'murphy4va',
-                href: 'https://x.com/Murphy4VA',
-            },
-            {
-                type: 'text',
-                value: ' has quickly become a beloved presence in the PV community. We are proud to endorse him for Virginia’s 9th Congressional District.',
-            },
-        ],
+        handle: '@murphy4va',
+        handleHref: 'https://x.com/Murphy4VA',
+        bodyText:
+            ' has quickly become a beloved presence in the PV community. We are proud to endorse him for Virginia’s 9th Congressional District.',
         image: '/images/endorsement_images/ADAMMURPHY.png',
         learnMoreHref: '',
         initiativeType: 'state',
@@ -232,17 +159,10 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '11',
         name: 'Analilia Mejia',
         electionDate: new Date('02/05/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@analilia_mejia',
-                href: 'https://x.com/Analilia_Mejia',
-            },
-            {
-                type: 'text',
-                value: ' is a life long organizer who will be instrumental in organizing the progressive movement from within congress! We are thrilled to endorse her, and to see her take the PV Pledge.',
-            },
-        ],
+        handle: '@analilia_mejia',
+        handleHref: 'https://x.com/Analilia_Mejia',
+        bodyText:
+            ' is a life long organizer who will be instrumental in organizing the progressive movement from within congress! We are thrilled to endorse her, and to see her take the PV Pledge.',
         image: '/images/endorsement_images/ANALILIA MEJIA.png',
         learnMoreHref: '',
         initiativeType: 'national',
@@ -253,17 +173,9 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '12',
         name: 'Mary Peltola',
         electionDate: new Date('11/03/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@marypeltola',
-                href: 'https://x.com/MaryPeltola',
-            },
-            {
-                type: 'text',
-                value: '',
-            },
-        ],
+        handle: '@marypeltola',
+        handleHref: 'https://x.com/MaryPeltola',
+        bodyText: '',
         image: '/images/endorsement_images/MARY PELTOLA.png',
         learnMoreHref: '',
         initiativeType: 'state',
@@ -274,17 +186,9 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '13',
         name: 'Erica Watkins',
         electionDate: new Date('11/03/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@erica4ok',
-                href: 'https://x.com/erica4ok',
-            },
-            {
-                type: 'text',
-                value: '',
-            },
-        ],
+        handle: '@erica4ok',
+        handleHref: 'https://x.com/erica4ok',
+        bodyText: '',
         image: '/images/endorsement_images/ERICA WATKINS.png',
         learnMoreHref: '',
         initiativeType: 'state',
@@ -295,17 +199,9 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '14',
         name: 'Taylor Rehmet',
         electionDate: new Date('01/27/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@taylorrehmettx',
-                href: 'https://x.com/TaylorRehmetTX',
-            },
-            {
-                type: 'text',
-                value: '',
-            },
-        ],
+        handle: '@taylorrehmettx',
+        handleHref: 'https://x.com/TaylorRehmetTX',
+        bodyText: '',
         image: '/images/endorsement_images/TAYLOR REHMET.png',
         learnMoreHref: '',
         initiativeType: 'state',
@@ -316,17 +212,9 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '15',
         name: 'Luis Villarreal',
         electionDate: new Date('11/03/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@luis4utah',
-                href: 'https://x.com/Luis4Utah',
-            },
-            {
-                type: 'text',
-                value: '',
-            },
-        ],
+        handle: '@luis4utah',
+        handleHref: 'https://x.com/Luis4Utah',
+        bodyText: '',
         image: '/images/endorsement_images/LUIS VILLARREAL.png',
         learnMoreHref: '',
         initiativeType: 'state',
@@ -337,17 +225,9 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '16',
         name: 'Brad Lander',
         electionDate: new Date('11/03/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@bradlander',
-                href: 'https://x.com/bradlander',
-            },
-            {
-                type: 'text',
-                value: '',
-            },
-        ],
+        handle: '@bradlander',
+        handleHref: 'https://x.com/bradlander',
+        bodyText: '',
         image: '/images/endorsement_images/BRAD LANDER.png',
         learnMoreHref: '',
         initiativeType: '',
@@ -358,17 +238,10 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '17',
         name: 'Ro Khanna',
         electionDate: new Date('11/03/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@rokhanna',
-                href: 'https://x.com/RoKhanna',
-            },
-            {
-                type: 'text',
-                value: ' is the leader our party needs! His commitment to new media politics has made him an outstanding voice capable of real change.',
-            },
-        ],
+        handle: '@rokhanna',
+        handleHref: 'https://x.com/RoKhanna',
+        bodyText:
+            ' is the leader our party needs! His commitment to new media politics has made him an outstanding voice capable of real change.',
         image: '/images/endorsement_images/RO KHANNA.png',
         learnMoreHref: '',
         initiativeType: '',
@@ -379,17 +252,10 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '18',
         name: 'Cori Bush',
         electionDate: new Date('08/04/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@coribush',
-                href: 'https://x.com/CoriBush',
-            },
-            {
-                type: 'text',
-                value: ' is back to finish what she started! Her passion and tenacity have repeatedly shown that she is a powerful progressive voice ready to take on whatever battle is needed.',
-            },
-        ],
+        handle: '@coribush',
+        handleHref: 'https://x.com/CoriBush',
+        bodyText:
+            ' is back to finish what she started! Her passion and tenacity have repeatedly shown that she is a powerful progressive voice ready to take on whatever battle is needed.',
         image: '/images/endorsement_images/CORI BUSH.png',
         learnMoreHref: '',
         initiativeType: '',
@@ -400,17 +266,10 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '19',
         name: 'James Talarico',
         electionDate: new Date('03/03/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@jamestalarico',
-                href: 'https://x.com/jamestalarico',
-            },
-            {
-                type: 'text',
-                value: "'s time has come to turn Texas blue. PV is proud to endorse him for the US Senate Seat in Texas! He is exctly what is needed.",
-            },
-        ],
+        handle: '@jamestalarico',
+        handleHref: 'https://x.com/jamestalarico',
+        bodyText:
+            "'s time has come to turn Texas blue. PV is proud to endorse him for the US Senate Seat in Texas! He is exctly what is needed.",
         image: '/images/endorsement_images/JAMES TALARICO.png',
         learnMoreHref: '',
         initiativeType: 'national',
@@ -421,17 +280,10 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '20',
         name: 'Jon Stewart',
         electionDate: new Date('11/07/28'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@jonstewart',
-                href: 'https://x.com/jonstewart',
-            },
-            {
-                type: 'text',
-                value: ' isn’t perfect, but his decades long track record of integrity and progressivism make him the decisive pick. We urge him to serve his country by running for the office.',
-            },
-        ],
+        handle: '@jonstewart',
+        handleHref: 'https://x.com/jonstewart',
+        bodyText:
+            ' isn’t perfect, but his decades long track record of integrity and progressivism make him the decisive pick. We urge him to serve his country by running for the office.',
         image: '/images/endorsement_images/JON STEWART.png',
         learnMoreHref: '',
         initiativeType: '',
@@ -442,13 +294,10 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '21',
         name: 'Zeeshan Hafeez',
         electionDate: new Date('03/03/26'),
-        messageText: [
-            { type: 'highlight', value: '@zeeshanfortexas', href: '' },
-            {
-                type: 'text',
-                value: "is going to bring a fire to Texa's 33rd Congressional District. We are excited to see a bold progressive like him making all the right waves in all the right places!",
-            },
-        ],
+        handle: '@zeeshanfortexas',
+        handleHref: '',
+        bodyText:
+            " is going to bring a fire to Texa's 33rd Congressional District. We are excited to see a bold progressive like him making all the right waves in all the right places!",
         image: '/images/endorsement_images/ZEESHAN HAFEEZ.png',
         learnMoreHref: '',
         initiativeType: 'national',
@@ -459,17 +308,10 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '22',
         name: 'Michael Black',
         electionDate: new Date('06/23/26'),
-        messageText: [
-            {
-                type: 'highlight',
-                value: '@MrMikeBlake',
-                href: 'https://x.com/MrMikeBlake',
-            },
-            {
-                type: 'text',
-                value: ' is an authentic, progressive fighter who has a deep love for his community. The progressive movement won in New Jersey and he will bring that momentum to New York!',
-            },
-        ],
+        handle: '@MrMikeBlake',
+        handleHref: 'https://x.com/MrMikeBlake',
+        bodyText:
+            ' is an authentic, progressive fighter who has a deep love for his community. The progressive movement won in New Jersey and he will bring that momentum to New York!',
         image: '/images/endorsement_images/MICHAEL BLAKE.png',
         learnMoreHref: '',
         initiativeType: '',

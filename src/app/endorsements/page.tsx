@@ -1,4 +1,4 @@
-import { EndorsementAlt } from './Endorsements'
+import { Endorsements } from './Endorsements'
 import styles from '@/app/endorsements/endorsement.module.css'
 import { ContentPageFrame } from '@/components/content_sections/ContentSections'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
@@ -40,7 +40,7 @@ export default function EndorsementsPage() {
             >
                 <></>
             </ContentPageFrame>
-            <EndorsementAlt />
+            <Endorsements />
         </MainLayout>
     )
 }

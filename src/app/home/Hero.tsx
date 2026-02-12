@@ -5,6 +5,7 @@ import { Message } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
 import { MessageData } from '@/components/common/twitter_card_element/Card'
+import cardStyles from '@/components/common/twitter_card_element/Card.module.css'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { motion } from 'motion/react'
 import type React from 'react'
@@ -16,22 +17,32 @@ export function Hero() {
         {
             username: 'Progressive Victory',
             nameColor: 'red',
-            text: [
-                {
-                    type: 'text',
-                    value: "It's all fun and games w PV members at the Katie Wilson Watch Party tonight in Seattle! Congratulations to ",
-                },
-                {
-                    type: 'highlight',
-                    value: '@wilsonformayor',
-                    href: 'https://x.com/wilsonformayor',
-                    target: '_blank',
-                },
-                {
-                    type: 'text',
-                    value: ' and all the volunteers who spent months working to help her win!',
-                },
-            ],
+            body: (
+                <>
+                    <span className={cardStyles.textPart}>
+                        {
+                            "It's all fun and games w PV members at the Katie Wilson Watch Party tonight in Seattle! Congratulations to "
+                        }
+                    </span>
+
+                    <a
+                        href="https://x.com/wilsonformayor"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cardStyles.textHighlight}
+                        title="Katie Wilson"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        @wilsonformayor
+                    </a>
+
+                    <span className={cardStyles.textPart}>
+                        {
+                            ' and all the volunteers who spent months working to help her win!'
+                        }
+                    </span>
+                </>
+            ),
             image: '/images/PVKatieWilsonWatchParty.jpeg',
             avatar: avatarImage,
             avatarRounded: false,
@@ -54,12 +65,13 @@ export function Hero() {
         {
             username: 'Progressive Victory',
             nameColor: 'red',
-            text: [
-                {
-                    type: 'text',
-                    value: 'Built by the internet, for America. Progressive Victory is a new kind of political institution: seamlessly marrying the electoral impact and volunteer power of traditional progressive organizations with the culture and community of digital third places.',
-                },
-            ],
+            body: (
+                <span className={cardStyles.textPart}>
+                    {
+                        'Built by the internet, for America. Progressive Victory is a new kind of political institution: seamlessly marrying the electoral impact and volunteer power of traditional progressive organizations with the culture and community of digital third places.'
+                    }
+                </span>
+            ),
             avatar: avatarImage,
             avatarRounded: false,
             motionProps: {
@@ -75,12 +87,13 @@ export function Hero() {
         {
             username: 'Sam Dryzmala',
             nameColor: 'purple',
-            text: [
-                {
-                    type: 'text',
-                    value: 'I founded Progressive Victory with the dream of creating a political action community that comes together to get progressive policies & candidates the attention they deserve!',
-                },
-            ],
+            body: (
+                <span className={cardStyles.textPart}>
+                    {
+                        'I founded Progressive Victory with the dream of creating a political action community that comes together to get progressive policies & candidates the attention they deserve!'
+                    }
+                </span>
+            ),
             image: '/images/sam.jpg',
             avatar: '/images/sam_twitter_photo.jpeg',
             avatarRounded: true,
@@ -167,6 +180,7 @@ export function Hero() {
                         href="/about"
                         className={buttonStyles.minimalProminent}
                     />
+
                     <BaseButton
                         label="Join"
                         href="/volunteer"
@@ -181,7 +195,7 @@ export function Hero() {
                         key={i}
                         className={styles.messageCard}
                         username={m.username}
-                        text={m.text}
+                        body={m.body}
                         nameColor={m.nameColor}
                         image={m.image}
                         imageProps={m.imageProps}

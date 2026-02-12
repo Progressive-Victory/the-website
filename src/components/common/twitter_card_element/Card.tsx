@@ -55,23 +55,10 @@ export interface TiltProps {
     }
 }
 
-export type TextPart =
-    | { type: 'text'; value: string }
-    | {
-          type: 'highlight'
-          value: string
-          href?: string
-          onClick?: () => void
-          title?: string
-
-          target?: React.HTMLAttributeAnchorTarget
-          rel?: string
-      }
-
 export interface MessageData {
     username: string
     nameColor?: string
-    text: TextPart[]
+    body: React.ReactNode
     image?: string
     avatar: string
     avatarRounded?: boolean
@@ -88,7 +75,7 @@ export interface MessageData {
 
 interface MessageProps {
     avatar: string
-    text: TextPart[]
+    body: React.ReactNode
     username: string
     motionProps?: MotionProps
     tiltProps?: TiltProps
@@ -111,7 +98,7 @@ interface MessageProps {
 
 export function Message({
     avatar,
-    text,
+    body,
     username,
     motionProps,
     tiltProps,
@@ -235,55 +222,7 @@ export function Message({
                     )}
                 </div>
 
-                <p className={styles.text}>
-                    {text.map((part, i) => {
-                        if (part.type === 'highlight') {
-                            if (part.href) {
-                                return (
-                                    <a
-                                        key={i}
-                                        href={part.href}
-                                        target={part.target}
-                                        rel={
-                                            part.target === '_blank'
-                                                ? (part.rel ??
-                                                  'noopener noreferrer')
-                                                : part.rel
-                                        }
-                                        className={styles.textHighlight}
-                                        title={part.title}
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                        }}
-                                    >
-                                        {part.value}
-                                    </a>
-                                )
-                            }
-
-                            return (
-                                <button
-                                    key={i}
-                                    type="button"
-                                    className={styles.textHighlightButton}
-                                    title={part.title}
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        part.onClick?.()
-                                    }}
-                                >
-                                    {part.value}
-                                </button>
-                            )
-                        }
-
-                        return (
-                            <span key={i} className={styles.textPart}>
-                                {part.value}
-                            </span>
-                        )
-                    })}
-                </p>
+                <p className={styles.text}>{body}</p>
             </div>
 
             {image && (
