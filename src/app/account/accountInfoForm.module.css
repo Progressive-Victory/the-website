@@ -1,7 +1,5 @@
 .accountInfoBackground {
-	background-color: rgb(255 255 255);
-	z-index: 1;
-	border-radius: 10px;
+    background-color: rgb(255 255 255);
+    z-index: 1;
+    border-radius: 10px;
 }
-
-
