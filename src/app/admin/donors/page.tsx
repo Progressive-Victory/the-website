@@ -7,7 +7,6 @@ import {
     Form,
     TextField,
     FormGroup,
-    SelectManyField,
     DateField,
 } from '@/components/form'
 import {
@@ -17,12 +16,7 @@ import {
     ActBlueLineitem,
 } from '@/contracts/data'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
-import {
-    keepPreviousData,
-    skipToken,
-    useQuery,
-    useQueryClient,
-} from '@tanstack/react-query'
+import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import { useState, useMemo } from 'react'
 
 interface contributionData {
@@ -31,10 +25,7 @@ interface contributionData {
     lineitems: ActBlueLineitem[]
 }
 
-//import styles from './page.'
-
 export default function Page() {
-    //const queryClient = useQueryClient()
     const { ready, onGet, onPatch } = useFetch()
 
     const [selectedEmail, setSelectedEmail] = useState<string | null>(null)
@@ -132,11 +123,6 @@ export default function Page() {
         return `${donor.firstname} ${donor.lastname}`
     }
 
-    const makeFormTitle = (donor: ActBlueDonor) => {
-        const name = makeTitle(donor)
-        return name
-    }
-
     const renderItem = (item: ActBlueDonor) => {
         return (
             <ListElement
@@ -172,7 +158,7 @@ export default function Page() {
                     <Form<ActBlueDonor>
                         key={selectedEmail}
                         form={donorQuery.data}
-                        title={makeFormTitle(donorQuery.data)}
+                        title={makeTitle(donorQuery.data)}
                         readonly={false}
                         saving={false}
                         isInvalid={false}
