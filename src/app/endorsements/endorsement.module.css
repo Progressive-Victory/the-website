@@ -40,6 +40,14 @@
     gap: 0.25rem;
 }
 
+.buttonRow {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
 .hero {
     position: relative;
     width: 100%;

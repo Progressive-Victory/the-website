@@ -55,28 +55,11 @@ export interface TiltProps {
     }
 }
 
-export interface MessageData {
-    username: string
-    nameColor?: string
-    body: React.ReactNode
-    image?: string
-    avatar: string
-    avatarRounded?: boolean
-    motionProps?: MotionProps
-    tiltProps?: TiltProps
-    imageProps?: ImageProps
-
-    ctaLabel?: string
-    ctaHref?: string
-    ctaClassName?: string
-    ctaTarget?: React.HTMLAttributeAnchorTarget
-    ctaRel?: string
-}
-
 interface MessageProps {
     avatar: string
-    body: React.ReactNode
     username: string
+    children: React.ReactNode
+
     motionProps?: MotionProps
     tiltProps?: TiltProps
     avatarRounded?: boolean
@@ -84,7 +67,8 @@ interface MessageProps {
     nameColor?: string
     image?: string
     imageProps?: ImageProps
-    children?: React.JSX.Element
+
+    childrenBelowText?: React.JSX.Element
     botLeftContent?: React.JSX.Element
     botDivider?: boolean
     showEllipsis?: boolean
@@ -98,8 +82,9 @@ interface MessageProps {
 
 export function Message({
     avatar,
-    body,
     username,
+    children,
+
     motionProps,
     tiltProps,
     avatarRounded = true,
@@ -107,7 +92,7 @@ export function Message({
     nameColor,
     image,
     imageProps,
-    children,
+
     botLeftContent,
     botDivider = false,
     showEllipsis = false,
@@ -210,9 +195,7 @@ export function Message({
                                 type="button"
                                 className={styles.ellipsisButton}
                                 aria-label="More options"
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                }}
+                                onClick={(e) => e.stopPropagation()}
                             >
                                 <EllipsisHorizontalIcon
                                     className={styles.ellipsisIcon}
@@ -222,7 +205,7 @@ export function Message({
                     )}
                 </div>
 
-                <p className={styles.text}>{body}</p>
+                <div className={styles.text}>{children}</div>
             </div>
 
             {image && (
@@ -241,8 +224,6 @@ export function Message({
                     />
                 </div>
             )}
-
-            {children && children}
 
             {botDivider && <hr className={styles.divider} />}
 

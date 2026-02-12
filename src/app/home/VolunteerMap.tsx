@@ -85,14 +85,6 @@ export function VolunteerMap() {
                 avatarRounded={false}
                 nameColor="red"
                 username="Progressive Victory"
-                body={
-                    <span>
-                        Our members are organizing in their local communities,
-                        identifying campaigns in their area, and using the
-                        shared resources, tactics, and people power of
-                        Progressive Victory!
-                    </span>
-                }
                 botDivider={true}
                 botLeftContent={
                     <p className={styles.botLeftText}>
@@ -102,6 +94,12 @@ export function VolunteerMap() {
                     </p>
                 }
             >
+                <span>
+                    Our members are organizing in their local communities,
+                    identifying campaigns in their area, and using the shared
+                    resources, tactics, and people power of Progressive Victory!
+                </span>
+
                 <CombinedMap
                     stateMemberCount={stateMemberCounts}
                     onFeatureClick={onFeatureClick}

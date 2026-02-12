@@ -38,15 +38,7 @@ export function Endorsements() {
 
     return (
         <div className={styles.hero}>
-            <div
-                style={{
-                    display: 'flex',
-                    gap: '0.75rem',
-                    flexWrap: 'wrap',
-                    justifyContent: 'center',
-                    marginBottom: '0.75rem',
-                }}
-            >
+            <div className={styles.buttonRow}>
                 <BaseButton
                     label="National Initiative"
                     onClick={() => setFilter('national')}
@@ -56,7 +48,6 @@ export function Endorsements() {
                             : buttonStyles.minimalProminent
                     }
                 />
-
                 <BaseButton
                     label="State Initiative"
                     onClick={() => setFilter('state')}
@@ -66,7 +57,6 @@ export function Endorsements() {
                             : buttonStyles.minimalProminent
                     }
                 />
-
                 <BaseButton
                     label="PV Pledge"
                     onClick={() => setFilter('pledge')}
@@ -76,7 +66,6 @@ export function Endorsements() {
                             : buttonStyles.minimalProminent
                     }
                 />
-
                 <BaseButton
                     label="PV Member"
                     onClick={() => setFilter('member')}
@@ -86,7 +75,6 @@ export function Endorsements() {
                             : buttonStyles.minimalProminent
                     }
                 />
-
                 <BaseButton
                     label="Show All"
                     onClick={() => setFilter('all')}
@@ -104,37 +92,12 @@ export function Endorsements() {
                         ? candidate.handle
                         : `@${candidate.handle}`
 
-                    const body = (
-                        <>
-                            {candidate.handleHref ? (
-                                <a
-                                    href={candidate.handleHref}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={cardStyles.textHighlight}
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    {handle}
-                                </a>
-                            ) : (
-                                <span className={cardStyles.textHighlight}>
-                                    {handle}
-                                </span>
-                            )}
-
-                            <span className={cardStyles.textPart}>
-                                {candidate.bodyText}
-                            </span>
-                        </>
-                    )
-
                     return (
                         <Message
                             key={candidate.id}
                             className={styles.messageCard}
                             username="Progressive Victory"
                             nameColor="red"
-                            body={body}
                             image={candidate.image}
                             avatar={avatarImage}
                             avatarRounded={false}
@@ -159,7 +122,27 @@ export function Endorsements() {
                                 <CandidateButtons candidate={candidate} />
                             }
                             showEllipsis={false}
-                        />
+                        >
+                            {candidate.handleHref ? (
+                                <a
+                                    href={candidate.handleHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={cardStyles.textHighlight}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {handle}
+                                </a>
+                            ) : (
+                                <span className={cardStyles.textHighlight}>
+                                    {handle}
+                                </span>
+                            )}
+
+                            <span className={cardStyles.textPart}>
+                                {candidate.bodyText}
+                            </span>
+                        </Message>
                     )
                 })}
             </div>
