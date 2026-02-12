@@ -1,21 +1,13 @@
 'use client'
 
-import { StateSelector } from './StateSelector'
 import styles from './accountInfoForm.module.css'
-import {
-    CheckboxField,
-    DateField,
-    Form,
-    FormGroup,
-    FormGroupProps,
-    FormState,
-    SelectManyField,
-    TextField,
-} from '@/components/form'
+import { DateField, Form, FormGroup, TextField } from '@/components/form'
 import { dateService } from '@/services'
 import { useState } from 'react'
 
-interface MutableFields {
+interface AccountInformation {
+    discordUsername: string
+    discordId: string
     firstName: string
     lastName: string
     birthdate: Date
@@ -27,13 +19,8 @@ interface MutableFields {
     phoneNumber: string
 }
 
-interface AccountInformation extends MutableFields {
-    discordUsername: string
-    discordId: string
-}
-
 export const AccountInfoForm = ({ form }: { form: AccountInformation }) => {
-    const [updatedForm, setUpdatedForm] = useState<MutableFields>(form)
+    const [updatedForm, setUpdatedForm] = useState<AccountInformation>(form)
 
     const onSave = (newForm: AccountInformation) => {
         setUpdatedForm(newForm)
@@ -44,10 +31,10 @@ export const AccountInfoForm = ({ form }: { form: AccountInformation }) => {
             <Form<AccountInformation>
                 form={updatedForm}
                 title="Account Information"
-                onUpdate={() => {}}
+                onUpdate={() => undefined}
                 onSave={onSave}
             >
-                <FormGroup>
+                <FormGroup title="">
                     <TextField
                         label="Discord Username"
                         field="discordUsername"
@@ -56,7 +43,7 @@ export const AccountInfoForm = ({ form }: { form: AccountInformation }) => {
                     <TextField label="Discord ID" field="discordId" readonly />
                     <TextField label="First Name" field="firstName" />
                     <TextField label="Last Name" field="lastName" />
-                    <DateField
+                    <DateField<AccountInformation>
                         label="Date of Birth"
                         getter={(form) =>
                             dateService.isValid(form.birthdate)
@@ -76,7 +63,7 @@ export const AccountInfoForm = ({ form }: { form: AccountInformation }) => {
                     <TextField label="State" field="state" />
                     <TextField label="County" field="county" />
                     <TextField label="City" field="city" />
-                    <TextField<User>
+                    <TextField<AccountInformation>
                         label="Zip Code"
                         getter={(form) =>
                             form.zip.toString().padStart(5, '0').slice(-5)
@@ -84,9 +71,11 @@ export const AccountInfoForm = ({ form }: { form: AccountInformation }) => {
                         setter={(form, field) => ({
                             ...form,
                             zip: field
-                                .replace(/[^\d]/, '')
-                                .padStart(5, '0')
-                                .slice(-5),
+                                ? +field
+                                      .replace(/[^\d]/, '')
+                                      .padStart(5, '0')
+                                      .slice(-5)
+                                : 0,
                         })}
                     />
                     <TextField label="Email" field="emailAddress" />
