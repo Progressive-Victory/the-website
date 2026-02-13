@@ -1,5 +1,16 @@
-/* Next task: refine and implement legend panel */
-import React, { useState, useCallback } from 'react'
+import '../../../tailwind.config'
+import styles from './app.module.css'
+import PositionBubble from './bubbles/positionBubble'
+import DepartmentNode, { DepartmentNodeData } from './nodes/departmentNode'
+import PositionNode from './nodes/positionNode'
+import TeamNode, { TeamNodeData } from './nodes/teamNode'
+import OrgChartEdge from './orgchartEdge'
+import Committee from './types/committee'
+import PositionData from './types/positionData'
+import { User, zUser } from '@/contracts/data'
+import { useFetch } from '@/util/hooks'
+import dagre from '@dagrejs/dagre'
+import { keepPreviousData, useQuery, skipToken } from '@tanstack/react-query'
 import {
     type Node,
     type Edge,
@@ -11,18 +22,9 @@ import {
     XYPosition,
     Panel,
 } from '@xyflow/react'
-import dagre from '@dagrejs/dagre'
 import '@xyflow/react/dist/base.css'
 import '@xyflow/react/dist/style.css'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import PositionNode from './nodes/positionNode'
-import DepartmentNode, { DepartmentNodeData } from './nodes/departmentNode'
-import TeamNode, { TeamNodeData } from './nodes/teamNode'
-import OrgChartEdge from './orgchartEdge'
-import '../../../tailwind.config'
-import Committee from './types/committee'
-import PositionData from './types/positionData'
-import PositionBubble from './bubbles/positionBubble'
+import React, { useState, useCallback } from 'react'
 
 export interface PaginatedResponse<T> {
     //This is just a test.
@@ -61,13 +63,12 @@ export const Committees: Committee[] = [
     },
 ]
 
-
 const testNodes: Node[] = [
     {
         id: 0,
         title: 'Executive Director',
         name: 'Sam Dryzmala',
-        leadership: 'Senior'
+        leadership: 'Senior',
     },
     {
         id: 1,
@@ -80,25 +81,25 @@ const testNodes: Node[] = [
         title: 'Community Relations Director',
         name: 'Auntifa',
         leadership: 'Senior',
-        department: "Community",
+        department: 'Community',
         team: null,
-        committees: []
+        committees: [],
     },
     {
         id: 3,
         title: 'Community Mananger',
         name: 'Jenywlfersn',
         leadership: 'Junior',
-        department: "Community",
+        department: 'Community',
         team: null,
         committees: [Committees[0], Committees[1]],
     },
     {
         id: 4,
         title: 'Community Manager',
-        name: "?",
+        name: '?',
         leadership: 'Junior',
-        department: "Community",
+        department: 'Community',
         team: null,
         committees: [Committees[0], Committees[1]],
     },
@@ -106,82 +107,89 @@ const testNodes: Node[] = [
         id: 5,
         title: 'Welcome Team Lead',
         name: 'Monarch',
-        department: "Community",
-        team: "Welcome",
+        department: 'Community',
+        team: 'Welcome',
         leadership: 'Junior',
         committees: [Committees[0]],
     },
     {
         id: 6,
         title: 'Welcome Team Lead',
-        name: "?",
+        name: '?',
         leadership: 'Junior',
-        department: "Community",
-        team: "Welcome",
+        department: 'Community',
+        team: 'Welcome',
         committees: [Committees[0]],
     },
 
     {
         id: 7,
-        name: "?",
+        name: '?',
         title: 'Welcome Team Deputy',
-        leadership: "?",
-        department: "Community",
-        team: "Welcome",
-        committees: []
+        leadership: '?',
+        department: 'Community',
+        team: 'Welcome',
+        committees: [],
     },
     {
         id: 8,
         title: 'Events Team Lead',
         name: 'BrewMasterCraft',
         leadership: 'Junior',
-        department: "Community",
-        team: "Events",
+        department: 'Community',
+        team: 'Events',
         committees: [Committees[0]],
     },
     {
         id: 9,
         title: 'Events Team Lead',
-        name: "?",
+        name: '?',
         leadership: 'Junior',
-        department: "Community",
-        team: "Events",
+        department: 'Community',
+        team: 'Events',
         committees: [Committees[0]],
     },
     {
         id: 10,
         title: 'Events Team Deputy',
-        name: "?",
-        leadership: "?",
-        department: "Community",
-        team: "Events",
+        name: '?',
+        leadership: '?',
+        department: 'Community',
+        team: 'Events',
         name: 'EM',
-    }
+    },
 ]
 
-
 const departments = [
-    {depName: "Community", teams: ["Welcome", "Events", "Moderation", "Writing"]}, 
-    {depName: "Media", teams: ["Writing", "Audio-Video", "Design"]}, 
-    {depName: "Operations", teams: ["Fundraising", "Documentation"]}, 
-    {depName: "Infrastructure", teams: ["Documentation", "Research"]}, 
-    {depName: "Organizing", teams: ["Recruitment", "Mobilization"], coalitions: ["Western", "Midwest", "Northwestern", "Southern"]},
-    {depName: "Technology", teams: ["Discord", "Database", "Website"]}
+    {
+        depName: 'Community',
+        teams: ['Welcome', 'Events', 'Moderation', 'Writing'],
+    },
+    { depName: 'Media', teams: ['Writing', 'Audio-Video', 'Design'] },
+    { depName: 'Operations', teams: ['Fundraising', 'Documentation'] },
+    { depName: 'Infrastructure', teams: ['Documentation', 'Research'] },
+    {
+        depName: 'Organizing',
+        teams: ['Recruitment', 'Mobilization'],
+        coalitions: ['Western', 'Midwest', 'Northwestern', 'Southern'],
+    },
+    { depName: 'Technology', teams: ['Discord', 'Database', 'Website'] },
 ]
 
 /*const departments = [
     {depName: "Community", teams: ["Welcome", "Events"]}
 ]*/
 
-function BuildGraphNodes(){
-
+function BuildGraphNodes() {
     const nodes: Node[] = []
     const edges: Edge[] = []
 
-    let id = testNodes.length;
+    let id = testNodes.length
 
-    const execDir = testNodes.find(e => e?.title === "Executive Director")
-    const depExecDir = testNodes.find(e => e?.title === "Deputy Executive Director")
+    const execDir = testNodes.find((e) => e?.title === 'Executive Director')
+    const depExecDir = testNodes.find(
+        (e) => e?.title === 'Deputy Executive Director'
+    )
 
     nodes.push(CreatePositionNode(execDir))
     nodes.push(CreatePositionNode(depExecDir))
@@ -193,38 +201,51 @@ function BuildGraphNodes(){
     edges.push(CreateEdge(`e${edgeId}`, 0, 1))
     edgeId++
 
-
-    departments.forEach(dep => {
-        const depLeads = testNodes.filter(d => ((d.department == dep.depName) && (!d.team)))
+    departments.forEach((dep) => {
+        const depLeads = testNodes.filter(
+            (d) => d.department == dep.depName && !d.team
+        )
         id++
         departmentId = id
-        nodes.push(CreateDepartmentNode({id: departmentId, name: dep.depName, leads: depLeads}))
+        nodes.push(
+            CreateDepartmentNode({
+                id: departmentId,
+                name: dep.depName,
+                leads: depLeads,
+            })
+        )
 
         edges.push(CreateEdge(`e${edgeId}`, 1, departmentId))
         edgeId++
 
         //Find a way to add the name from the user document into each object.
 
-        dep?.teams.forEach(team => {
-            const teamLeads = testNodes.filter(t => (t.team === team))
+        dep?.teams.forEach((team) => {
+            const teamLeads = testNodes.filter((t) => t.team === team)
             id++
             teamId = id
 
-            nodes.push(CreateTeamNode({id: teamId, name: team, desc: "Description", leads: teamLeads}))
+            nodes.push(
+                CreateTeamNode({
+                    id: teamId,
+                    name: team,
+                    desc: 'Description',
+                    leads: teamLeads,
+                })
+            )
             //initial edges
-            
+
             edges.push(CreateEdge(`e${edgeId}`, departmentId, teamId))
-            
+
             edgeId++
         })
     })
 
-    console.log(nodes)
-    console.log(edges)
+    //console.log(nodes)
+    //console.log(edges)
 
     return { initialTestNodes: nodes, initialTestEdges: edges }
-} 
-
+}
 
 const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
 
@@ -280,13 +301,13 @@ function CreatePositionNode({
         type: 'pos',
         position: defaultPos,
         data: {
-            id: id,
-            title: title,
-            name: name,
-            acting: acting,
-            redacted: redacted,
-            leadership: leadership,
-            committees: committees,
+            id,
+            title,
+            name,
+            acting,
+            redacted,
+            leadership,
+            committees,
         },
     }
 }
@@ -307,10 +328,10 @@ function CreateDepartmentNode({
         type: 'dep',
         position: defaultPos,
         data: {
-            id: id,
-            name: name,
-            leads: leads,
-            members: members,
+            id,
+            name,
+            leads,
+            members,
         },
     }
 }
@@ -333,18 +354,18 @@ function CreateTeamNode({
         type: 'tea',
         position: defaultPos,
         data: {
-            id: id,
-            name: name,
-            desc: desc,
-            leads: leads,
-            members: members,
+            id,
+            name,
+            desc,
+            leads,
+            members,
         },
     }
 }
 
 function CreateEdge(id: string, source: number, target: number) {
     return {
-        id: id,
+        id,
         source: source.toString(),
         target: target.toString(),
         type: 'custom-edge',
@@ -356,9 +377,8 @@ function CreateEdge(id: string, source: number, target: number) {
 
 const { initialTestNodes, initialTestEdges } = BuildGraphNodes()
 
-console.log("initialTestEdges")
-console.log(initialTestEdges)
-
+//console.log('initialTestEdges')
+//console.log(initialTestEdges)
 
 /* Changes to this do not hot refresh on save; must use F5*/
 const initialNodes: Node[] = [
@@ -468,13 +488,11 @@ const edgeTypes = {
     'custom-edge': OrgChartEdge,
 }
 
-
 /*console.log("initialNodes")
 console.log(initialNodes)*/
 
-console.log("initialTestNodes")
-console.log(initialTestNodes)
-
+//console.log('initialTestNodes')
+//console.log(initialTestNodes)
 
 /*const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
     initialNodes,
@@ -489,37 +507,59 @@ export default function OrgChartApp<T extends Object>() {
     const [legendEnabled, toggleLegend] = useState(false)
     const [page, setPage] = useState(0)
     const [limit, setLimit] = useState(50)
-    
-    const { data } = useQuery<PaginatedResponse<T>>({
-        queryKey: ['users'],
+    const { ready, onGet, onPatch } = useFetch()
+
+    /*const { data } = useQuery<PaginatedResponse<T>>({
+        queryKey: ['/users/'],
         queryFn: async ({ signal }) => {
             const url = new URL(location.href)
-            url.pathname = 'api/admin/users'
-    
+            url.pathname = '/users' //url.pathname = 'api/admin/users'
+
             url.searchParams.set('page', page + '')
             url.searchParams.set('limit', limit + '')
-    
+
             const res = await fetch(url, { signal })
             return (await res.json()) as PaginatedResponse<T>
         },
         placeholderData: keepPreviousData,
+    })*/
+
+    const userQuery = useQuery({
+        queryKey: [`/users/`],
+        queryFn:
+            ready != null
+                ? () =>
+                      onGet<User>(`/users/`, zUser, {
+                          query: {
+                              includeDiscordUsers: true,
+                              includeHistory: true,
+                          },
+                      })
+                : skipToken,
+        placeholderData: keepPreviousData,
     })
 
-    const filteredData = data?.data.filter((e) => e.userPositions.length > 0)
-    console.log(filteredData)
+    console.log(userQuery.isPending)
+
+    //const filteredData = data?.data.filter((e) => e.userPositions.length > 0)
+    //console.log(filteredData)
 
     function LegendPanel() {
         return (
             <Panel position="top-left">
                 {!legendEnabled ? null : (
-                    <div className="mb-2 rounded-xl border-4 border-amber-300 bg-amber-50 p-2 text-xs font-bold text-black-pearl-dark">
-                        <div className="mb-2 flex">
-                            <div className="size-4 border-2 border-amber-300 bg-blue-400"></div>
-                            <p className="ml-2">{'JUNIOR LEADERSHIP'}</p>
+                    <div className={styles.legend}>
+                        <div className={styles.colorSampleContainer}>
+                            <div className={styles.juniorColorSample}></div>
+                            <p style={{ marginLeft: '0.5rem' }}>
+                                {'JUNIOR LEADERSHIP'}
+                            </p>
                         </div>
-                        <div className="mb-2 flex">
-                            <div className="size-4 border-2 border-amber-300 bg-red-600"></div>
-                            <p className="ml-2">{'SENIOR LEADERSHIP'}</p>
+                        <div className={styles.colorSampleContainer}>
+                            <div className={styles.seniorColorSample}></div>
+                            <p style={{ marginLeft: '0.5rem' }}>
+                                {'SENIOR LEADERSHIP'}
+                            </p>
                         </div>
                         <PositionBubble
                             data={{
@@ -531,13 +571,13 @@ export default function OrgChartApp<T extends Object>() {
                             }}
                             mini={true}
                         />
-                        <p className="mt-2">
+                        <p style={{ marginTop: '0.5rem' }}>
                             {'SHAPES INDICATE TEAM/COMMITTEE GROUPING'}
                         </p>
                     </div>
                 )}
                 <button
-                    className="rounded-xl border-4 border-amber-300 bg-amber-50 p-1 font-black text-black-pearl-dark"
+                    className={styles.legendButton}
                     onClick={() => toggleLegend(!legendEnabled)}
                 >
                     {legendEnabled ? 'HIDE LEGEND' : 'SHOW LEGEND'}
@@ -578,27 +618,24 @@ export default function OrgChartApp<T extends Object>() {
 
         return (
             <Panel
-                className={`${name ? null : 'hidden'} h-[96%] w-[320px] rounded-3xl border-4 border-amber-300 bg-amber-50 p-2 font-extrabold`}
+                className={styles.detailPanel}
+                style={{ display: `${name ? 'block' : 'none'}` }}
                 position="center-right"
             >
                 <button
-                    className="mb-1 rounded-xl bg-black-pearl-dark p-1 px-2 text-xl font-bold text-white"
+                    className={styles.closeButton}
                     onClick={() => setCurrentDetails(<DetailPanel />)}
                 >
                     {'< Close'}
                 </button>
-                <p className="border-t-4 border-red-600 text-xl text-black-pearl-dark">
-                    {name}
-                </p>
+                <p className={styles.detailTitle}>{name}</p>
                 {!desc ? null : (
-                    <div className="max-h-[30%] overflow-y-auto border-t-4 border-red-600">
-                        <p className="py-1 text-sm font-semibold text-black-pearl-dark">
-                            {desc}
-                        </p>
+                    <div className={styles.descriptionContainer}>
+                        <p className={styles.description}>{desc}</p>
                     </div>
                 )}
                 {!leads && !members ? null : (
-                    <div className="flex flex-col items-center overflow-auto border-t-4 border-red-600 py-1">
+                    <div className={styles.memberList}>
                         <MemberList />
                     </div>
                 )}
@@ -671,7 +708,7 @@ export default function OrgChartApp<T extends Object>() {
     }
 
     return (
-        <div className="size-full bg-white" /*ref={viewportRef}*/>
+        <div className={styles.background} /*ref={viewportRef}*/>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}

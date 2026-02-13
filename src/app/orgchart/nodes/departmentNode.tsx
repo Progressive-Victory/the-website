@@ -1,7 +1,8 @@
-import { Handle, Node, NodeProps, Position, useStore } from '@xyflow/react'
 import DepartmentBubble from '../bubbles/departmentBubble'
-import PositionData from '../types/positionData'
 import PositionBubble from '../bubbles/positionBubble'
+import PositionData from '../types/positionData'
+import styles from './nodes.module.css'
+import { Handle, Node, NodeProps, Position, useStore } from '@xyflow/react'
 import { motion } from 'motion/react'
 
 export type DepartmentNodeData = Node<{
@@ -28,18 +29,15 @@ export default function DepartmentNode({
     }
 
     return (
-        <div
-            key={data.id}
-            className="flex flex-col items-center justify-center"
-        >
+        <div key={data.id} className={styles.container}>
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
-                className="border-amber-300 bg-amber-50 opacity-0"
+                className={styles.targetHandle}
             />
             <DepartmentBubble name={data.name}></DepartmentBubble>
             <motion.div
-                className="overflow-hidden"
+                className={styles.dropdownContainer}
                 style={{
                     willChange: 'max-height',
                 }}
@@ -59,7 +57,7 @@ export default function DepartmentNode({
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}
-                className="border-amber-300 bg-black-pearl-light opacity-0"
+                className={styles.sourceHandle}
             />
         </div>
     )
