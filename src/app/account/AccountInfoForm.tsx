@@ -18,12 +18,22 @@ export const AccountInfoForm = ({ user }: { user: User }) => {
                 onSave={setUpdatedUser}
             >
                 <FormGroup title="">
-                    <TextField
+                    <TextField<User>
                         label="Discord Username"
-                        field="discordUsername"
+                        getter={(user) =>
+                            user.discordUsers
+                                ? user.discordUsers[0].username
+                                : null
+                        }
                         readonly
                     />
-                    <TextField label="Discord ID" field="discordId" readonly />
+                    <TextField<User>
+                        label="Discord ID"
+                        getter={(user) =>
+                            user.discordUsers ? user.discordUsers[0].id : null
+                        }
+                        readonly
+                    />
                     <TextField label="First Name" field="firstName" />
                     <TextField label="Last Name" field="lastName" />
                     <DateField<User>
@@ -45,36 +55,15 @@ export const AccountInfoForm = ({ user }: { user: User }) => {
                     />
                     <TextField<User>
                         label="State"
-                        getter={(user) =>
-                            user.location?.county
-                                ? user.location?.county
-                                      .toString()
-                                      .padStart(5, '0')
-                                      .slice(-5)
-                                : null
-                        }
+                        getter={(user) => user.location?.state ?? null}
                     />
                     <TextField<User>
                         label="County"
-                        getter={(user) =>
-                            user.location?.county
-                                ? user.location?.county
-                                      .toString()
-                                      .padStart(5, '0')
-                                      .slice(-5)
-                                : null
-                        }
+                        getter={(user) => user.location?.county ?? null}
                     />
                     <TextField<User>
                         label="City"
-                        getter={(user) =>
-                            user.location?.city
-                                ? user.location?.city
-                                      .toString()
-                                      .padStart(5, '0')
-                                      .slice(-5)
-                                : null
-                        }
+                        getter={(user) => user.location?.city ?? null}
                     />
                     <TextField<User>
                         label="Zip Code"
@@ -103,8 +92,8 @@ export const AccountInfoForm = ({ user }: { user: User }) => {
                                 : null,
                         })}
                     />
-                    <TextField label="Email" field="emailAddress" />
-                    <TextField label="Phone Number" field="phoneNumber" />
+                    <TextField label="Email" field="email" />
+                    <TextField label="Phone Number" field="phone" />
                 </FormGroup>
             </Form>
         </div>
