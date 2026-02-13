@@ -2,33 +2,20 @@
 
 import styles from './accountInfoForm.module.css'
 import { DateField, Form, FormGroup, TextField } from '@/components/form'
+import { User } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useState } from 'react'
 
-interface AccountInformation {
-    discordUsername: string
-    discordId: string
-    firstName: string
-    lastName: string
-    birthdate: Date
-    state: string
-    county: string
-    city: string
-    zip: number
-    emailAddress: string
-    phoneNumber: string
-}
-
-export const AccountInfoForm = ({ form }: { form: AccountInformation }) => {
-    const [updatedForm, setUpdatedForm] = useState<AccountInformation>(form)
+export const AccountInfoForm = ({ user }: { user: User }) => {
+    const [updatedUser, setUpdatedUser] = useState<User>(user)
 
     return (
         <div className={styles.accountInfoBackground}>
-            <Form<AccountInformation>
-                form={updatedForm}
+            <Form<User>
+                form={updatedUser}
                 title="Account Information"
                 onUpdate={() => undefined}
-                onSave={setUpdatedForm}
+                onSave={setUpdatedUser}
             >
                 <FormGroup title="">
                     <TextField
@@ -39,13 +26,13 @@ export const AccountInfoForm = ({ form }: { form: AccountInformation }) => {
                     <TextField label="Discord ID" field="discordId" readonly />
                     <TextField label="First Name" field="firstName" />
                     <TextField label="Last Name" field="lastName" />
-                    <DateField<AccountInformation>
+                    <DateField<User>
                         label="Date of Birth"
-                        getter={(form) =>
-                            dateService.isValid(form.birthdate)
+                        getter={(user) =>
+                            dateService.isValid(user.birthdate)
                                 ? new Date(
                                       dateService.toISODateString(
-                                          form.birthdate
+                                          user.birthdate
                                       )!
                                   )
                                 : null
@@ -56,22 +43,64 @@ export const AccountInfoForm = ({ form }: { form: AccountInformation }) => {
                             dateStyle: 'medium',
                         }}
                     />
-                    <TextField label="State" field="state" />
-                    <TextField label="County" field="county" />
-                    <TextField label="City" field="city" />
-                    <TextField<AccountInformation>
-                        label="Zip Code"
-                        getter={(form) =>
-                            form.zip.toString().padStart(5, '0').slice(-5)
-                        }
-                        setter={(form, field) => ({
-                            ...form,
-                            zip: field
-                                ? +field
-                                      .replace(/[^\d]/, '')
+                    <TextField<User>
+                        label="State"
+                        getter={(user) =>
+                            user.location?.county
+                                ? user.location?.county
+                                      .toString()
                                       .padStart(5, '0')
                                       .slice(-5)
-                                : 0,
+                                : null
+                        }
+                    />
+                    <TextField<User>
+                        label="County"
+                        getter={(user) =>
+                            user.location?.county
+                                ? user.location?.county
+                                      .toString()
+                                      .padStart(5, '0')
+                                      .slice(-5)
+                                : null
+                        }
+                    />
+                    <TextField<User>
+                        label="City"
+                        getter={(user) =>
+                            user.location?.city
+                                ? user.location?.city
+                                      .toString()
+                                      .padStart(5, '0')
+                                      .slice(-5)
+                                : null
+                        }
+                    />
+                    <TextField<User>
+                        label="Zip Code"
+                        getter={(user) =>
+                            user.location?.zip
+                                ? user.location?.zip
+                                      .toString()
+                                      .padStart(5, '0')
+                                      .slice(-5)
+                                : null
+                        }
+                        setter={(user, field) => ({
+                            ...user,
+                            location: field
+                                ? {
+                                      ...(user.location ?? {
+                                          city: '',
+                                          county: '',
+                                          state: '',
+                                      }),
+                                      zip: +field
+                                          .replace(/[^\d]/, '')
+                                          .padStart(5, '0')
+                                          .slice(-5),
+                                  }
+                                : null,
                         })}
                     />
                     <TextField label="Email" field="emailAddress" />
