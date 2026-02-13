@@ -22,17 +22,13 @@ interface AccountInformation {
 export const AccountInfoForm = ({ form }: { form: AccountInformation }) => {
     const [updatedForm, setUpdatedForm] = useState<AccountInformation>(form)
 
-    const onSave = (newForm: AccountInformation) => {
-        setUpdatedForm(newForm)
-    }
-
     return (
         <div className={styles.accountInfoBackground}>
             <Form<AccountInformation>
                 form={updatedForm}
                 title="Account Information"
                 onUpdate={() => undefined}
-                onSave={onSave}
+                onSave={setUpdatedForm}
             >
                 <FormGroup title="">
                     <TextField
