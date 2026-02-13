@@ -242,7 +242,7 @@ export default function Page() {
                 <div className={styles.userMeta}>
                     <span className={styles.userName}>{makeTitle(item)}</span>
                     <span className={styles.userUsername}>
-                        {item.discordUsers?.[0].username}
+                        {item.discordUsers?.[0].username ?? 'NOT FOUND'}
                     </span>
                 </div>
             </ListElement>
