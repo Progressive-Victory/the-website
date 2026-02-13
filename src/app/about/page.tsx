@@ -1,4 +1,3 @@
-import { AccountInfoForm } from '../account/AccountInfoForm'
 import FAQ from './FAQ'
 import styles from '@/app/about/about.module.css'
 import {
@@ -8,7 +7,6 @@ import {
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout/MainLayout'
 import type { Metadata } from 'next'
-
 
 export const metadata: Metadata = {
     title: 'PV - About',
@@ -72,21 +70,6 @@ export default function About() {
     return (
         <MainLayout>
             <HalftoneBackground />
-            <AccountInfoForm
-                form={{
-                    discordUsername: 'username',
-                    discordId: 'ID',
-                    firstName: 'first',
-                    lastName: 'last',
-                    county: 'King',
-                    state: 'Washington',
-                    city: 'Seattle',
-                    emailAddress: 'ericoseid@gmail.com',
-                    phoneNumber: '6036678599',
-                    birthdate: new Date(),
-                    zip: 12345,
-                }}
-            />
             <AboutContent />
         </MainLayout>
     )
