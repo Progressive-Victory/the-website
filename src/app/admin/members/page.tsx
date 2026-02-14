@@ -349,11 +349,10 @@ export default function Page() {
                                 label="Discord Username"
                                 getter={(form) =>
                                     (form.discordUsers ?? [])
-                                        ?.map(({ username }) => username)
+                                        ?.map(({ username }) => `@${username}`)
                                         .join(', ')
                                 }
                                 readonly
-                                prefix="@"
                             />
                             <TextField<User>
                                 label="Discord Id"

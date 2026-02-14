@@ -1,31 +1,37 @@
-import { FormField, FormFieldProps, getGetter, getSetter } from './FormField'
+import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import { dateService } from '@/services'
 import cx from 'classnames'
-import { ChangeEvent } from 'react'
+import { ChangeEvent, useCallback } from 'react'
 
-export interface DateFieldProps<T>
-    extends FormFieldProps<T, Date | null | undefined> {
+export interface DateFieldProps<T> extends FormFieldProps<
+    T,
+    Date | null | undefined
+> {
     format?: Intl.DateTimeFormatOptions
 }
 
 export function DateField<T>(props: DateFieldProps<T>) {
-    props.getter ??= getGetter(props)
-    props.setter ??= getSetter(props)
-    props.validator ??= (field: Date | null | undefined) =>
-        (!props.required || field != null) && !isNaN(field?.valueOf() ?? 0)
+    const { getter, validator, onChange } = useConfigure(
+        props,
+        useCallback(
+            (field: Date | null | undefined) =>
+                (!props.required || field != null) &&
+                !isNaN(field?.valueOf() ?? 0),
+            [props.required]
+        )
+    )
 
     const readonly = !!props.readonly || !props.dynamic?.editing
     const disabled = !!props.disabled || !!props.dynamic?.saving
-    const value = props?.getter?.(props.dynamic!.form)
+    const value = getter(props.dynamic!.form)
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const newValue = event.target.value
-        props.dynamic?.onChange?.(props, new Date(newValue))
+        onChange(new Date(event.target.value))
     }
 
     const handleFocus = () => {
-        props.dynamic?.onChange?.(props, value)
+        onChange(value)
     }
 
     const format = () => {
@@ -59,7 +65,7 @@ export function DateField<T>(props: DateFieldProps<T>) {
                     onFocus={handleFocus}
                     className={cx(
                         styles.textField,
-                        !props.validator(value) && styles.invalid
+                        !validator(value) && styles.invalid
                     )}
                 />
             )}

@@ -70,7 +70,7 @@
     gap: 0.5rem;
 }
 
-.filterSelect>strong {
+.filterSelect > strong {
     font-weight: 500;
 }
 
@@ -82,12 +82,32 @@
 }
 
 .pinned {
-    border-bottom-width: 4px;
+    border-bottom-width: 3px;
     border-bottom-style: solid;
+}
+
+.pinned .element {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    gap: 0.5rem;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    border-radius: 0rem;
+
+    margin: 0rem;
 }
 
 .elementList {
     overflow-y: auto;
+    overflow-x: hidden;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.elementList::-webkit-scrollbar {
+    display: none;
 }
 
 .pageSelectContainer {
@@ -103,7 +123,8 @@
     align-items: center;
     gap: 1.25rem;
     padding: 1rem;
-    border-bottom-width: 1px;
+    border-radius: 1rem;
+    margin: 0.25rem;
 }
 
 .element:hover {

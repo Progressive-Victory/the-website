@@ -17,7 +17,7 @@
     cursor: pointer;
 
     text-align: center;
-    line-height: 1.75rem;
+    line-height: 1.3rem;
     white-space: nowrap;
 
     transition: all 0.2s ease-in-out;
@@ -80,7 +80,7 @@
     padding-block: 0.5rem;
     font-size: 1.25rem;
     font-weight: 600;
-    min-height: 2.25rem;
+    min-height: 2.75rem;
 }
 .plain:hover {
     background-color: #ffffff;
