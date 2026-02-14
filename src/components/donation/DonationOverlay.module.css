@@ -131,7 +131,11 @@
     right: 2rem;
     z-index: 10;
 }
-
+@media (min-width: 1280px) {
+    .closeButtonWrapper {
+        top: 1rem;
+    }
+}
 .bottomContainerButtons {
     display: flex;
     flex-direction: row;
