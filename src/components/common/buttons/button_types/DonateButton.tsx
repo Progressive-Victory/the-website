@@ -5,8 +5,6 @@ import buttonStyles from '@/components/common/buttons/Button.module.css'
 import { DonationOverlay } from '@/components/donation'
 import React from 'react'
 
-const DONATE_HREF = 'https://secure.actblue.com/donate/pvwebsite'
-
 export type DonateButtonProps = BaseVisualProps
 
 export function DonateButton(props: DonateButtonProps) {

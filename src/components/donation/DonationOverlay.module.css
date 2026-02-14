@@ -31,7 +31,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     background-color: rgba(9, 34, 58, 0.88);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.25);
@@ -57,7 +57,7 @@
     gap: 2.5rem;
     padding-left: 2vw;
     padding-right: 2vw;
-    flex: 1;
+    padding-top: 3rem;
     width: 100%;
 }
 
@@ -65,13 +65,7 @@
     .cardsWrapper {
         flex-direction: row;
         align-items: stretch;
-    }
-}
-
-@media (min-width: 1536px) {
-    .cardsWrapper {
-        padding-left: 2vw;
-        padding-right: 2vw;
+        padding-top: 0;
     }
 }
 
@@ -80,7 +74,6 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    flex: 1;
     justify-content: flex-start;
     width: 100%;
     min-height: 280px;
@@ -92,6 +85,12 @@
 @media (min-width: 768px) {
     .card {
         height: auto;
+    }
+}
+
+@media (min-width: 1280px) {
+    .card {
+        flex: 1;
     }
 }
 
@@ -126,13 +125,20 @@
     right: 1.5rem;
 }
 
-.bottomButtons {
+.closeButtonWrapper {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    z-index: 10;
+}
+
+.bottomContainerButtons {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
     gap: 1rem;
-    margin-top: 2rem;
+    margin-top: 3rem;
     width: 100%;
     padding-right: 2vw;
     flex-wrap: wrap;

@@ -3,6 +3,7 @@
 import { BaseButton } from '../common/buttons'
 import styles from './DonationOverlay.module.css'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
+import useInView from '@/util/hooks/useInView'
 import { motion } from 'motion/react'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
@@ -11,7 +12,7 @@ import { createPortal } from 'react-dom'
 const DONATE_HREF = 'https://secure.actblue.com/donate/pvwebsite'
 const MERCH_HREF = 'https://progressivevictory.myshopify.com/'
 
-const actions = [
+const donationActions = [
     {
         image: '/images/Halftone-Phone.webp',
         title: 'Membership',
@@ -73,9 +74,18 @@ export function DonationOverlay({ handleShowOverlay }: DonationOverlayProps) {
                 className={styles.container}
                 onClick={(e) => e.stopPropagation()}
             >
+                <div className={styles.closeButtonWrapper}>
+                    <BaseButton
+                        label="×"
+                        onClick={handleShowOverlay}
+                        className={buttonStyles.plain}
+                        aria-label="Close donation overlay"
+                    />
+                </div>
+
                 <div className={styles.cardsWrapper}>
                     {visible &&
-                        actions.map((action, index) => (
+                        donationActions.map((action, index) => (
                             <Card
                                 key={action.title}
                                 image={action.image}
@@ -87,7 +97,7 @@ export function DonationOverlay({ handleShowOverlay }: DonationOverlayProps) {
                             </Card>
                         ))}
                 </div>
-                <div className={styles.bottomButtons}>
+                <div className={styles.bottomContainerButtons}>
                     <BaseButton
                         label="button 1"
                         href={DONATE_HREF}
@@ -143,23 +153,4 @@ function Card({
             <div className={styles.cardButton}>{children}</div>
         </motion.div>
     )
-}
-
-const useInView = () => {
-    const [inView, setInView] = useState(false)
-    const observerRef = useRef<IntersectionObserver | null>(null)
-
-    useEffect(() => {
-        observerRef.current = new IntersectionObserver(([entry]) => {
-            setInView(entry.isIntersecting)
-        })
-
-        return () => observerRef.current?.disconnect()
-    }, [])
-
-    const observe = (element: HTMLElement | null) => {
-        if (element) observerRef.current?.observe(element)
-    }
-
-    return { inView, observe }
 }
