@@ -1,13 +1,13 @@
 'use client'
 
-import styles from './adminNav.module.css'
+import styles from './AdminNav.module.css'
 import classNames from 'classnames'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { FaDonate, FaUsers, FaUserShield, FaUserTag } from 'react-icons/fa'
 import { FaClipboardUser } from 'react-icons/fa6'
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
-import { IconType } from 'react-icons/lib'
+import { FiChevronLeft } from 'react-icons/fi'
+import type { IconType } from 'react-icons/lib'
 import { useLocalStorage } from 'usehooks-ts'
 
 interface AdminNavProps {
@@ -28,11 +28,11 @@ export default function AdminNav({
     return (
         <div
             className={classNames(styles.nav, {
-                [styles.open]: open,
-                [styles.closed]: !open,
+                [styles.navOpen]: open,
+                [styles.navClosed]: !open,
             })}
         >
-            <h1 className={styles.title}>
+            <h1 className={styles.heading}>
                 {open ? 'Volunteer Dashboard' : null}
             </h1>
 
@@ -77,12 +77,14 @@ export default function AdminNav({
                 className={styles.toggleButton}
                 onClick={() => setOpen(!open)}
                 title={open ? 'Collapse' : 'Expand'}
+                type="button"
             >
-                {open ? (
-                    <FiChevronLeft size={20} />
-                ) : (
-                    <FiChevronRight size={20} />
-                )}
+                <FiChevronLeft
+                    size={20}
+                    className={classNames(styles.toggleIcon, {
+                        [styles.toggleIconClosed]: !open,
+                    })}
+                />
             </button>
         </div>
     )
@@ -100,20 +102,22 @@ function NavLink({ title, href, icon: Icon, count, open }: NavLinkProps) {
     const pathname = usePathname()
     const active = pathname === href
 
+    const formattedCount = (count ?? 0).toLocaleString()
+
     return (
         <li
-            className={classNames(styles.navItem, {
-                [styles.active]: active,
-                [styles.inactive]: !active,
+            className={classNames(styles.item, {
+                [styles.itemActive]: active,
+                [styles.itemInactive]: !active,
             })}
         >
-            <Link href={href} title={title} className={styles.navLink}>
+            <Link href={href} title={title} className={styles.link}>
                 <Icon size={22} />
 
                 {open ? (
-                    <span className={styles.labelRow}>
-                        <span className={styles.label}>{title}</span>
-                        <span className={styles.count}>{count ?? 0}</span>
+                    <span className={styles.linkRow}>
+                        <span className={styles.title}>{title}</span>
+                        <span className={styles.count}>{formattedCount}</span>
                     </span>
                 ) : null}
             </Link>
