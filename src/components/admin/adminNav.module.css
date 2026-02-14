@@ -4,69 +4,70 @@
     flex-direction: column;
     gap: 0.5rem;
     overflow-y: auto;
-    background: #ffffff;
+    background: white;
     padding: 1rem;
 }
 
-.navOpen {
+.open {
     min-width: 12rem;
 }
 
 @media (min-width: 96rem) {
-    .navOpen {
+    .open {
         min-width: 15rem;
     }
 }
 
-.navClosed {
+.closed {
     min-width: 3.5rem;
 }
 
-.heading {
+.title {
     font-size: 1.125rem;
     font-weight: 600;
-    color: var(--black-pearl-dark, #0b1320);
+    color: var(--black-pearl-dark, #0b1220);
     margin: 0;
 }
 
 .list {
     list-style: none;
-    margin: 0;
     padding: 0;
+    margin: 0;
 }
 
-.item {
+.navItem {
     position: relative;
     cursor: pointer;
     padding: 0.25rem 0;
+    transition: color 0.15s ease;
 }
 
-.item:hover {
+.navItem:hover {
     color: #0284c7;
 }
 
-.itemActive {
+.active {
     font-weight: 700;
     color: #0ea5e9;
 }
 
-.itemActive::after {
+.active::after {
     content: '';
     position: absolute;
-    right: -1rem;
     top: 0;
+    right: -1rem;
     height: 100%;
     width: 0.25rem;
-    background: #0ea5e9;
     border-top-left-radius: 0.5rem;
     border-bottom-left-radius: 0.5rem;
+    background: #0ea5e9;
 }
 
-.itemInactive {
+.inactive {
     font-weight: 500;
 }
 
-.link {
+.navLink {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -74,41 +75,50 @@
     text-decoration: none;
 }
 
-.linkRow {
+.labelRow {
     display: flex;
     width: 100%;
     align-items: center;
     justify-content: space-between;
 }
 
-.title {
+.label {
     display: inline-block;
 }
 
 .count {
     text-align: right;
     font-size: 0.875rem;
+    opacity: 0.85;
 }
 
 .toggleButton {
     position: absolute;
-    right: 0.75rem;
     bottom: 0.75rem;
+    right: 0.75rem;
 
     display: flex;
-    width: 2rem;
     height: 2rem;
+    width: 2rem;
+
+    cursor: pointer;
     align-items: center;
     justify-content: center;
 
-    cursor: pointer;
     border-radius: 9999px;
     border: 2px solid #e5e7eb;
-    background: transparent;
 
+    background: white;
     color: #9ca3af;
+
+    transition:
+        color 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease;
 }
 
 .toggleButton:hover {
     color: #6b7280;
+    border-color: #d1d5db;
+    transform: scale(1.05);
 }
