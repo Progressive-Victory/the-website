@@ -1,5 +1,4 @@
 .detailsPane {
-    height: calc(100dvh - 100px);
     flex: 1;
     overflow-y: auto;
 }
@@ -94,7 +93,4 @@
     text-decoration-thickness: 2px;
     text-underline-offset: 4px;
     text-decoration-color: rgba(255, 255, 255, 0.9);
-}
-.formSection {
-    gap: 1rem;
 }
