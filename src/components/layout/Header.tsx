@@ -76,6 +76,20 @@ const navitems: NavItem[] = [
         },
     },
     {
+        name: 'Endorsements',
+        href: '/endorsements',
+        subnav: {
+            columns: [
+                {
+                    title: 'Endorsements',
+                    items: [
+                        { name: 'View Endorsements', href: '/endorsements' },
+                    ],
+                },
+            ],
+        },
+    },
+    {
         name: 'More',
         href: '/home',
         subnav: {

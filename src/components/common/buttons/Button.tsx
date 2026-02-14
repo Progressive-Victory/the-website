@@ -16,13 +16,13 @@ export interface BaseVisualProps {
 
 export type BaseButtonProps = BaseVisualProps & {
     className: string
-
     href?: string
-
     onClick?: () => void
-
     renderContent?: (args: { showNavChevron: boolean }) => React.ReactNode
     rotateChevronOnHover?: boolean
+
+    target?: React.HTMLAttributeAnchorTarget
+    rel?: string
 }
 
 export function BaseButton(props: BaseButtonProps) {
@@ -36,6 +36,8 @@ export function BaseButton(props: BaseButtonProps) {
         href,
         onClick,
         renderContent,
+        target,
+        rel,
     } = props
 
     const showNavChevron =
@@ -64,22 +66,31 @@ export function BaseButton(props: BaseButtonProps) {
         </span>
     )
 
-    const handleClick = () => {
-        if (disabled) return
-        if (onClick) {
-            onClick()
-            return
-        }
-        if (href) {
-            location.href = href
-        }
+    if (href) {
+        const finalRel =
+            target === '_blank' ? (rel ?? 'noopener noreferrer') : rel
+
+        return (
+            <a
+                href={href}
+                className={finalClassName}
+                target={target}
+                rel={finalRel}
+                aria-disabled={disabled ?? undefined}
+                onClick={(e) => {
+                    if (disabled) e.preventDefault()
+                }}
+            >
+                {content}
+            </a>
+        )
     }
 
     return (
         <button
             type="button"
             disabled={disabled}
-            onClick={handleClick}
+            onClick={onClick}
             className={finalClassName}
         >
             {content}

@@ -99,12 +99,10 @@
 .pageHeader {
     width: 100%;
     text-align: center;
-    margin-top: 1.5rem;
-    margin-bottom: 1.2rem;
 }
 
 .pageWrapper {
-    min-width: 100vw;
+    min-width: 100dvw;
     z-index: 2;
     position: relative;
     margin: 0 auto;
@@ -121,7 +119,7 @@
 .container {
     position: relative;
     width: 100%;
-    min-height: 100vh;
+    min-height: 100dvh;
     overflow: hidden;
 }
 
@@ -143,7 +141,8 @@
 @media (min-width: 1280px) {
     .pageWrapper {
         max-width: 80%;
-        padding-block: 3rem;
+        padding-top: 3rem;
+        padding-bottom: 2rem;
         padding-inline: 15rem;
     }
 }

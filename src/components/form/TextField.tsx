@@ -1,32 +1,32 @@
-import { FormField, FormFieldProps, getGetter, getSetter } from './FormField'
+import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import cx from 'classnames'
-import { ChangeEvent } from 'react'
+import { ChangeEvent, useCallback } from 'react'
 
 export function TextField<T>(
     props: FormFieldProps<T, string | null | undefined>
 ) {
-    props.getter ??= getGetter(props)
-    props.setter ??= getSetter(props)
-    props.validator ??= (field: string | null | undefined) =>
-        !props.required || !!field?.trim()
+    const { getter, validator, onChange } = useConfigure(
+        props,
+        useCallback(
+            (field: string | null | undefined) =>
+                !props.required || !!field?.trim(),
+            [props.required]
+        )
+    )
 
     const readonly = !!props.readonly || !props.dynamic?.editing
     const disabled = !!props.disabled || !!props.dynamic?.saving
-    const value = props?.getter?.(props.dynamic!.form) ?? ''
+    const value = getter(props.dynamic!.form) ?? ''
 
     const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
-        const newValue = event.target.value
-        props.dynamic?.onChange?.(props, newValue)
+        onChange(event.target.value)
     }
 
     return (
         <FormField {...props}>
             {readonly ? (
-                <div className={styles.readonly}>
-                    {props.prefix}
-                    {value}
-                </div>
+                <div className={styles.readonly}>{value}</div>
             ) : (
                 <input
                     type="text"
@@ -38,7 +38,7 @@ export function TextField<T>(
                     onInput={handleInput}
                     className={cx(
                         styles.textField,
-                        !props.validator(value) && styles.invalid
+                        !validator(value) && styles.invalid
                     )}
                 />
             )}
