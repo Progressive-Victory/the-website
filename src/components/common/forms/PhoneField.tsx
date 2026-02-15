@@ -21,8 +21,6 @@ function formatPhoneDisplay(phoneNumber: string): string {
 /**
  * Form field component for US phone number input with validation.
  * Uses the `phone` library for proper validation and E164 normalization.
- *
- * NOTE: Currently stores raw input because Form.tsx dirtyMap has a Set mutation bug.
  */
 export function PhoneField<T>(
     props: FormFieldProps<T, string | null | undefined>
