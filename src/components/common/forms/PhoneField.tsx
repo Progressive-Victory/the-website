@@ -1,89 +1,83 @@
-import { FormField, IBaseFormField } from '.'
-import classNames from 'classnames'
-import { FormEvent } from 'react'
+import { FormField, FormFieldProps, useConfigure } from './FormField'
+import styles from './FormField.module.css'
+import cx from 'classnames'
+import phone from 'phone'
+import { ChangeEvent, useCallback } from 'react'
 
-const US_PHONE_REGEX =
-    /^(\+?1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$/
+/**
+ * Formats a phone number string for display in readonly mode.
+ * Accepts various formats and normalizes to "(XXX) XXX-XXXX" format.
+ */
+function formatPhoneDisplay(phoneNumber: string): string {
+    if (!phoneNumber) return ''
 
+    const parsed = phone(phoneNumber, { country: 'US' })
+    if (!parsed.isValid) return phoneNumber
 
-function formatPhoneDisplay(phone: string): string {
-    if (!phone) return ''
-
-    const cleaned = phone.replace(/[^\d+]/g, '')
-
-    const hasCountryCode = cleaned.startsWith('+1') || cleaned.startsWith('1')
-    const digits = cleaned.replace(/^\+?1?/, '')
-
-    if (digits.length !== 10) return phone
-
-    const formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
-    return hasCountryCode ? `+1 ${formatted}` : formatted
+    const digits = parsed.phoneNumber.substring(2)
+    return `(${digits.substring(0, 3)}) ${digits.substring(3, 6)}-${digits.substring(6, 10)}`
 }
 
-function normalizeToE164(phone: string): string {
-    if (!phone) return ''
-    const digits = phone.replace(/\D/g, '') 
-    const last10 = digits.slice(-10) 
-    if (last10.length !== 10) return phone 
-    return `+1${last10}`
-}
+/**
+ * Form field component for US phone number input with validation.
+ * Uses the `phone` library for proper validation and E164 normalization.
+ *
+ * NOTE: Currently stores raw input because Form.tsx dirtyMap has a Set mutation bug.
+ */
+export function PhoneField<T>(
+    props: FormFieldProps<T, string | null | undefined>
+) {
+    const { getter, validator, onChange } = useConfigure(
+        props,
+        useCallback(
+            (field: string | null | undefined) => {
+                const text = field ?? ''
 
-export function PhoneField({
-    name,
-    field,
-    required = false,
-    readonly = false,
-    deprecated = false,
-    dynamic,
-}: IBaseFormField) {
-    const value = (dynamic?.value as string) ?? ''
+                if (!text.trim()) return !props.required
 
-    const isValidPhone = (text: string): boolean => {
-        if (!text.trim()) return !required
-        return US_PHONE_REGEX.test(text.trim())
-    }
+                const parsed = phone(text, {
+                    country: 'US',
+                    strictDetection: true,
+                    validateMobilePrefix: true,
+                })
+                return parsed.isValid
+            },
+            [props.required]
+        )
+    )
 
-    const isValid = (text: string) => {
-        if (required && !text.trim()) return false
-        if (text.trim() && !US_PHONE_REGEX.test(text.trim())) return false
-        return true
-    }
+    const readonly = !!props.readonly || !props.dynamic?.editing
+    const disabled = !!props.disabled || !!props.dynamic?.saving
+    const value = props.dynamic?.form ? (getter(props.dynamic.form) ?? '') : ''
 
-    const handleInput = (event: FormEvent<HTMLInputElement>) => {
-        const newValue = (event.target as HTMLInputElement).value
-        const normalizedValue = normalizeToE164(newValue) // Always submit as +1xxxxxxxxxx
-        dynamic?.onUpdate?.(field, newValue, normalizedValue, isValid(newValue))
+    const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
+        onChange(event.target.value)
     }
 
     return (
-        <FormField
-            name={name}
-            field={field}
-            required={required}
-            deprecated={deprecated}
-        >
-            {readonly || dynamic?.disabled ? (
-                <div className="col-span-2 w-full">
+        <FormField {...props}>
+            {readonly ? (
+                <div className={styles.readonly}>
                     {formatPhoneDisplay(value)}
                 </div>
             ) : (
-                <div className="col-span-2 flex w-full max-w-96 flex-col">
+                <div className={styles.phoneField}>
                     <input
                         type="tel"
-                        name={name}
-                        id={field}
-                        disabled={dynamic?.loading}
-                        required={required}
+                        id={props?.id}
+                        name={props.label}
+                        disabled={disabled}
+                        required={props.required}
                         value={value}
                         onInput={handleInput}
                         placeholder="(123) 456-7890"
-                        className={classNames(
-                            'w-full rounded-lg border border-gray-300 px-3 py-0.5',
-                            !isValid(value) && 'border-red-300'
+                        className={cx(
+                            styles.textField,
+                            !validator(value) && styles.invalid
                         )}
                     />
-                    {value.trim() && !isValidPhone(value) && (
-                        <span className="mt-1 text-xs text-red-500">
+                    {value?.trim() && !validator(value) && (
+                        <span className={styles.validationError}>
                             Enter a valid US phone number
                         </span>
                     )}
