@@ -95,14 +95,8 @@ export function PaginatedList({
                     onSearch={handleChangeQuery}
                 />
 
-                <div
-                    className={cx(
-                        styles.searchPanelBody,
-                        searchPanelOpen && styles.searchPanelBodyOpen
-                    )}
-                    aria-hidden={!searchPanelOpen}
-                >
-                    <div className={styles.searchPanelBodyInner}>
+                {searchPanelOpen && (
+                    <div className={styles.searchPanelContent}>
                         <div className={styles.searchPanelTop}>
                             <FieldSelect
                                 field={field}
@@ -114,16 +108,14 @@ export function PaginatedList({
                                 onSelect={handleChangeLimit}
                             />
                         </div>
-
                         <SortSelect sort={sort} onSelect={handleChangeSort} />
-
                         <FilterSelect
                             filters={filter}
                             options={filters}
                             onChange={handleChangeFilter}
                         />
                     </div>
-                </div>
+                )}
             </div>
 
             {count == null && (
