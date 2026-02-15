@@ -9,6 +9,7 @@ import {
     FormGroup,
     FormGroupProps,
     FormState,
+    PhoneField,
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
@@ -78,7 +79,7 @@ export function MemberView({
                     readonly
                 />
                 <TextField label="Email" field="email" required />
-                <TextField label="Phone Number" field="phone" required />
+                <PhoneField label="Phone Number" field="phone" required />
                 <TextField
                     label="Preferred Name"
                     field="preferredName"
