@@ -106,7 +106,7 @@ export function DonationOverlay({ handleShowOverlay }: DonationOverlayProps) {
                     <BaseButton
                         label="button 2"
                         href={MERCH_HREF}
-                        className={buttonStyles.plain}
+                        className={buttonStyles.secondary}
                     />
                 </div>
 
