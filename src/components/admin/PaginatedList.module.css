@@ -197,11 +197,7 @@
 
     margin: 0.25rem;
 
-    transition:
-        transform 140ms ease,
-        box-shadow 140ms ease,
-        background-color 140ms ease,
-        border-color 140ms ease;
+    transition: background-color 50ms ease;
 }
 
 .element:hover {
