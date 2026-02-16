@@ -125,42 +125,44 @@ export function Account() {
 
     return (
         <div className={styles.pageRoot}>
-            <p className={styles.pageTitle}>Account Dashboard</p>
-            <div className={styles.contentRow}>
-                <div className={styles.accountColumn}>
-                    <div className={styles.accountControls}>
-                        <div className={styles.sectionHeader}>
-                            Account Controls
-                        </div>
+            <div className={styles.contentColumn}>
+                <p className={styles.pageTitle}>Account Dashboard</p>
+                <div className={styles.contentRow}>
+                    <div className={styles.accountColumn}>
+                        <div className={styles.accountControls}>
+                            <div className={styles.sectionHeader}>
+                                Account Controls
+                            </div>
 
-                        <div className={styles.controlRow}>
-                            <button
-                                type="button"
-                                onClick={handleSignOut}
-                                className={styles.primaryButton}
-                            >
-                                Sign Out
-                            </button>
-
-                            {canAccessAdminPanel && (
-                                <Link
-                                    href="/admin"
-                                    className={styles.adminLink}
+                            <div className={styles.controlRow}>
+                                <button
+                                    type="button"
+                                    onClick={handleSignOut}
+                                    className={styles.primaryButton}
                                 >
-                                    <span className={styles.primaryButton}>
-                                        Admin Panel
-                                    </span>
-                                </Link>
-                            )}
-                        </div>
-                    </div>
+                                    Sign Out
+                                </button>
 
-                    {loggedInUser.data && (
-                        <AccountInfoForm
-                            user={loggedInUser.data}
-                            onSave={onSave}
-                        />
-                    )}
+                                {canAccessAdminPanel && (
+                                    <Link
+                                        href="/admin"
+                                        className={styles.adminLink}
+                                    >
+                                        <span className={styles.primaryButton}>
+                                            Admin Panel
+                                        </span>
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+
+                        {loggedInUser.data && (
+                            <AccountInfoForm
+                                user={loggedInUser.data}
+                                onSave={onSave}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
