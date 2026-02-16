@@ -133,7 +133,7 @@ export function PaginatedList({
             {count != null && (
                 <>
                     {pinnedContent && (
-                        <div className={styles.pinned}>{pinnedContent}</div>
+                        <ul className={styles.pinned}>{pinnedContent}</ul>
                     )}
 
                     <ul className={styles.elementList}>{children}</ul>
