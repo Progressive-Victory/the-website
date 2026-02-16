@@ -8,7 +8,7 @@ function extractAvatarHash(url: string) {
     const split = url.split('/')
     const hashRaw = split[split.length - 1]
     const hashSplit = hashRaw.split('.')
-    const hash = hashSplit[hashSplit.length - 1]
+    const hash = hashSplit[0]
     return hash
 }
 
