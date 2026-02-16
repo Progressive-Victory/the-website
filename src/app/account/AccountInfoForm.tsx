@@ -6,8 +6,20 @@ import { User } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useState } from 'react'
 
-export const AccountInfoForm = ({ user }: { user: User }) => {
+export const AccountInfoForm = ({
+    user,
+    onSave,
+}: {
+    user: User
+    onSave: (user: User) => void
+}) => {
     const [updatedUser, setUpdatedUser] = useState<User>(user)
+
+    const handleFormSave = (user: User) => {
+        setUpdatedUser(user)
+
+        onSave(user)
+    }
 
     return (
         <div className={styles.accountInfoBackground}>
@@ -15,7 +27,7 @@ export const AccountInfoForm = ({ user }: { user: User }) => {
                 form={updatedUser}
                 title="Account Information"
                 onUpdate={() => undefined}
-                onSave={setUpdatedUser}
+                onSave={handleFormSave}
             >
                 <FormGroup title="">
                     <TextField<User>
@@ -56,14 +68,53 @@ export const AccountInfoForm = ({ user }: { user: User }) => {
                     <TextField<User>
                         label="State"
                         getter={(user) => user.location?.state ?? null}
+                        setter={(user, field) => ({
+                            ...user,
+                            location: field
+                                ? {
+                                      ...(user.location ?? {
+                                          city: '',
+                                          county: '',
+                                          zip: 0,
+                                      }),
+                                      state: field,
+                                  }
+                                : null,
+                        })}
                     />
                     <TextField<User>
                         label="County"
                         getter={(user) => user.location?.county ?? null}
+                        setter={(user, field) => ({
+                            ...user,
+                            location: field
+                                ? {
+                                      ...(user.location ?? {
+                                          city: '',
+                                          zip: 0,
+                                          state: '',
+                                      }),
+                                      county: field,
+                                  }
+                                : null,
+                        })}
                     />
                     <TextField<User>
                         label="City"
                         getter={(user) => user.location?.city ?? null}
+                        setter={(user, field) => ({
+                            ...user,
+                            location: field
+                                ? {
+                                      ...(user.location ?? {
+                                          zip: 0,
+                                          county: '',
+                                          state: '',
+                                      }),
+                                      city: field,
+                                  }
+                                : null,
+                        })}
                     />
                     <TextField<User>
                         label="Zip Code"
