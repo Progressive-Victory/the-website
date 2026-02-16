@@ -39,13 +39,6 @@ export const AccountInfoForm = ({
                         }
                         readonly
                     />
-                    <TextField<User>
-                        label="Discord ID"
-                        getter={(user) =>
-                            user.discordUsers ? user.discordUsers[0].id : null
-                        }
-                        readonly
-                    />
                     <TextField label="First Name" field="firstName" />
                     <TextField label="Last Name" field="lastName" />
                     <DateField<User>
@@ -64,57 +57,6 @@ export const AccountInfoForm = ({
                             timeZone: 'UTC',
                             dateStyle: 'medium',
                         }}
-                    />
-                    <TextField<User>
-                        label="State"
-                        getter={(user) => user.location?.state ?? null}
-                        setter={(user, field) => ({
-                            ...user,
-                            location: field
-                                ? {
-                                      ...(user.location ?? {
-                                          city: '',
-                                          county: '',
-                                          zip: 0,
-                                      }),
-                                      state: field,
-                                  }
-                                : null,
-                        })}
-                    />
-                    <TextField<User>
-                        label="County"
-                        getter={(user) => user.location?.county ?? null}
-                        setter={(user, field) => ({
-                            ...user,
-                            location: field
-                                ? {
-                                      ...(user.location ?? {
-                                          city: '',
-                                          zip: 0,
-                                          state: '',
-                                      }),
-                                      county: field,
-                                  }
-                                : null,
-                        })}
-                    />
-                    <TextField<User>
-                        label="City"
-                        getter={(user) => user.location?.city ?? null}
-                        setter={(user, field) => ({
-                            ...user,
-                            location: field
-                                ? {
-                                      ...(user.location ?? {
-                                          zip: 0,
-                                          county: '',
-                                          state: '',
-                                      }),
-                                      city: field,
-                                  }
-                                : null,
-                        })}
                     />
                     <TextField<User>
                         label="Zip Code"
@@ -142,6 +84,21 @@ export const AccountInfoForm = ({
                                   }
                                 : null,
                         })}
+                    />
+                    <TextField<User>
+                        label="State"
+                        getter={(user) => user.location?.state ?? null}
+                        readonly
+                    />
+                    <TextField<User>
+                        label="County"
+                        getter={(user) => user.location?.county ?? null}
+                        readonly
+                    />
+                    <TextField<User>
+                        label="City"
+                        getter={(user) => user.location?.city ?? null}
+                        readonly
                     />
                     <TextField label="Email" field="email" />
                     <TextField label="Phone Number" field="phone" />
