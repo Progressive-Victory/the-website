@@ -6,6 +6,7 @@ import {
     IOnboardingForm,
     JoiningStage,
     PhoneVerifyStage,
+    SupportNote,
     UnderageStage,
 } from '.'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
@@ -45,14 +46,15 @@ export default function VolunteerPage() {
 
     const isInServerResult = useQuery({
         queryKey: [`/discordUsers/${discordUserId}/isInServer`],
-        queryFn: ready && discordUserId != null
-            ? ({ signal }) =>
-                  onGet<DiscordUserIsInServerResponse>(
-                      `/discordUsers/${discordUserId}/isInServer`,
-                      zDiscordUserIsInServerResponse,
-                      { signal }
-                  )
-            : skipToken,
+        queryFn:
+            ready && discordUserId != null
+                ? ({ signal }) =>
+                      onGet<DiscordUserIsInServerResponse>(
+                          `/discordUsers/${discordUserId}/isInServer`,
+                          zDiscordUserIsInServerResponse,
+                          { signal }
+                      )
+                : skipToken,
         placeholderData: keepPreviousData,
     })
 
@@ -168,7 +170,25 @@ export default function VolunteerPage() {
         }
     }, [user.data, currentStage])
 
-    if (!user.data) return <MainLayout />
+    if (!user.data)
+        return (
+            <MainLayout>
+                <div className="flex min-h-[200px] flex-col items-center justify-center p-4">
+                    <p className="mt-6 text-center text-lg font-bold text-white">
+                        Unfortunately, we were not able to load your user data.
+                        <br /> Please refresh the page, and if the issue
+                        persists, contact support at:
+                        <br />{' '}
+                        <a
+                            href="mailto:support@progress.win"
+                            className="text-yellow-500"
+                        >
+                            support@progress.win
+                        </a>
+                    </p>
+                </div>
+            </MainLayout>
+        )
 
     return (
         <MainLayout>
