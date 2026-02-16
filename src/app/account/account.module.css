@@ -1,15 +1,53 @@
 .pageRoot {
     position: relative;
-    width: 100%;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: start;
+    background-color: #fff;
+    margin: 1rem;
+    border-radius: 0.5rem;
 }
 
-.controlsRow {
-    min-width: 270px;
+.pageTitle {
+    font-size: 1.875rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.contentRow {
     display: flex;
-    justify-content: space-evenly;
-    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: start;
+}
+
+.accountColumn {
+    display: flex;
+    width: 100%;
+    max-width: 750px;
+    flex-direction: column;
+    justify-content: start;
+}
+
+.sectionHeader {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 600;
+    margin-left: 1rem;
+    margin-top: 1.5rem;
+}
+
+.controlRow {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    margin: 1rem;
+}
+
+.accountControls {
+    background-color: #dee1e3;
+    z-index: 1;
+    border-radius: 10px;
+    margin: 1rem;
 }
 
 .primaryButton {
