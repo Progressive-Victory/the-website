@@ -23,7 +23,7 @@ export type BaseButtonProps = BaseVisualProps & {
 
     target?: React.HTMLAttributeAnchorTarget
     rel?: string
-}
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof BaseVisualProps>
 
 export function BaseButton(props: BaseButtonProps) {
     const {
@@ -38,6 +38,7 @@ export function BaseButton(props: BaseButtonProps) {
         renderContent,
         target,
         rel,
+        ...rest
     } = props
 
     const showNavChevron =
@@ -92,6 +93,7 @@ export function BaseButton(props: BaseButtonProps) {
             disabled={disabled}
             onClick={onClick}
             className={finalClassName}
+            {...rest}
         >
             {content}
         </button>
