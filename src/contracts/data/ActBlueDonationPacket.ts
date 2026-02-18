@@ -17,7 +17,7 @@ export const zActBlueDonationPacket = z.object({
     recurringDuration: z.number().nullable(),
     firstName: z.string(),
     lastName: z.string(),
-    state: z.string(),
+    state: z.string().nullable(),
     email: z.string(),
     kind: z.string(),
 })
