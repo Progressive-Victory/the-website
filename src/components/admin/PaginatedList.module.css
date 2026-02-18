@@ -3,8 +3,8 @@
     width: 24rem;
     flex-direction: column;
     align-self: stretch;
-    border-left: 1.5px solid rgba(17, 24, 39, 0.08);
-    border-right: 1.5px solid rgba(17, 24, 39, 0.08);
+    border-left: 2px solid;
+    border-right: 2px solid;
     border-color: #e5e7eb;
     background-color: #f9fafb;
 }
@@ -19,7 +19,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    border-bottom: 1px solid rgba(17, 24, 39, 0.1);
+    border-bottom: 2px solid rgba(17, 24, 39, 0.1);
     padding: 0.9rem;
 }
 
@@ -109,7 +109,8 @@
 }
 
 .pinned {
-    border-bottom: 1.5px solid rgba(17, 24, 39, 0.1);
+    border-bottom-width: 3px;
+    border-bottom-style: solid;
 }
 
 .pinned .element {
@@ -140,7 +141,7 @@
     margin-top: auto;
     display: flex;
     gap: 1rem;
-    border-top: 1px solid rgba(17, 24, 39, 0.1);
+    border-top-width: 2px;
 }
 
 .element {
@@ -188,14 +189,14 @@
     gap: 0.5rem;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
-        color: rgba(15, 23, 42, 0.72);
+    color: rgba(15, 23, 42, 0.72);
 }
 
 .pageSelectInput {
     width: 6ch;
     max-width: min-content;
     border-radius: 0.65rem;
-    border-width: 1.5px;
+    border-width: 1px;
     border-color: #d1d5db;
     padding: 0.125rem 0.5rem;
     text-align: center;
