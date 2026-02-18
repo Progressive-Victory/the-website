@@ -96,7 +96,7 @@ export function PaginatedList({
                 />
 
                 {searchPanelOpen && (
-                    <>
+                    <div className={styles.searchPanelContent}>
                         <div className={styles.searchPanelTop}>
                             <FieldSelect
                                 field={field}
@@ -114,7 +114,7 @@ export function PaginatedList({
                             options={filters}
                             onChange={handleChangeFilter}
                         />
-                    </>
+                    </div>
                 )}
             </div>
 
