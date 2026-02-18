@@ -55,7 +55,7 @@ export function DonateButton(props: DonateButtonProps) {
     )
 }
 
-const MEMBER_HREF = 'https://secure.actblue.com/donate/pvmember'
+const MEMBER_HREF = 'https://secure.actblue.com/donate/pvmember?refcode=website'
 const DONATE_HREF = 'https://secure.actblue.com/donate/pvwebsite'
 const MERCH_HREF = 'https://progressivevictory.myshopify.com/'
 
@@ -71,8 +71,8 @@ const donationActions: {
     {
         key: 'single',
         image: '/images/Halftone-Phone.webp',
-        title: 'Large Donation',
-        description: 'Select this option to make larger donations. ',
+        title: 'Donation',
+        description: 'Select this option to make simple donations. ',
         children: (
             <BaseButton
                 label="Donate"
@@ -103,7 +103,7 @@ const donationActions: {
             <BaseButton
                 label="Shop"
                 href={MERCH_HREF}
-                className={buttonStyles.prominent}
+                className={buttonStyles.primary}
             />
         ),
     },
