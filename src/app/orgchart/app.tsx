@@ -503,7 +503,7 @@ const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
     initialTestEdges
 )
 
-export default function OrgChartApp<T extends Object>() {
+export default function OrgChartApp() {
     const [legendEnabled, toggleLegend] = useState(false)
     const [page, setPage] = useState(0)
     const [limit, setLimit] = useState(50)
@@ -538,8 +538,6 @@ export default function OrgChartApp<T extends Object>() {
                 : skipToken,
         placeholderData: keepPreviousData,
     })
-
-    console.log(userQuery.isPending)
 
     //const filteredData = data?.data.filter((e) => e.userPositions.length > 0)
     //console.log(filteredData)

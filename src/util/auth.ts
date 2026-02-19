@@ -5,10 +5,11 @@ import NextAuth, { Profile } from 'next-auth'
 import Discord, { DiscordProfile } from 'next-auth/providers/discord'
 
 function extractAvatarHash(url: string) {
-    const split = url.split('/')
-    const hashRaw = split[split.length - 1]
-    const hashSplit = hashRaw.split('.')
-    const hash = hashSplit[hashSplit.length - 1]
+    const myUrl = new URL(url)
+    const splitPath = myUrl.pathname.split('/')
+    const rawHash = splitPath[splitPath.length - 1]
+    const splitHash = rawHash.split('.')
+    const hash = splitHash[0]
     return hash
 }
 
@@ -78,7 +79,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     try {
                         await fetch(
                             new URL(
-                                '/discordUsers/${profile.id}/avatar',
+                                `/discordUsers/${profile.id}/avatar`,
                                 process.env.PV_WEBSITE_API_URL
                             ),
                             {
