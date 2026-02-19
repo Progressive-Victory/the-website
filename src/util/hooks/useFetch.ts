@@ -143,10 +143,14 @@ export function useFetch() {
             } as FetchError
         }
 
-        const data = (await res.json()) as unknown
+        if (res.status !== 204) {
+            const data = (await res.json()) as unknown
 
-        if (!schema) return data as R
-        return z.parse(schema, data) as R
+            if (!schema) return data as R
+            return z.parse(schema, data) as R
+        } else {
+            return
+        }
     }
 
     async function onGet<R>(

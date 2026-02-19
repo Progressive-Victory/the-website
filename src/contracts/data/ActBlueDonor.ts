@@ -1,19 +1,6 @@
 import { zActBlueContribution } from './ActBlueContribution'
 import z from 'zod'
 
-export enum MembershipDeliverableStatus {
-    NotEligible = 0,
-    NotStarted = 1,
-    Printed = 2,
-    InTransit = 3,
-    Recieved = 4,
-    Returned = 5,
-}
-
-export const zMembershipDeliverableStatus = z
-    .enum(MembershipDeliverableStatus)
-    .default(0)
-
 export const zActBlueDonor = z
     .object({
         firstname: z.string(),
@@ -37,8 +24,7 @@ export const zActBlueDonor = z
             .nullable(),
         email: z.string(),
         phone: z.string().optional(),
-        membershipCardStatus: zMembershipDeliverableStatus,
-        membershipMerchStatus: zMembershipDeliverableStatus,
+        userId: z.int().nullable(),
         contributions: z.array(zActBlueContribution).optional(),
     })
     .strict()
