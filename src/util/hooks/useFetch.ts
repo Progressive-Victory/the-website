@@ -149,7 +149,7 @@ export function useFetch() {
             if (!schema) return data as R
             return z.parse(schema, data) as R
         } else {
-            return
+            return {} as R
         }
     }
 
