@@ -16,6 +16,8 @@ export const POST = async (req: NextRequest) => {
             console.log('Attempting to pull urls')
             const urlJson = (await res.json()) as { url: string }
             const body_url = new URL(urlJson.url)
+            console.log('urlJson', urlJson)
+            console.log('body_url', body_url)
             console.log('Urls pulled succesfully')
 
             // Boomerang will redirect back to whatever the state.redirect_uri is set to
