@@ -13,8 +13,10 @@ export const POST = async (req: NextRequest) => {
 
         if (url.pathname === '/api/auth/signin/discord') {
             // Pull the original URL out
+            console.log('Attempting to pull urls')
             const urlJson = (await res.json()) as { url: string }
             const body_url = new URL(urlJson.url)
+            console.log('Urls pulled succesfully')
 
             // Boomerang will redirect back to whatever the state.redirect_uri is set to
             body_url.searchParams.set(
