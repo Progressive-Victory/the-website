@@ -612,7 +612,7 @@ export default function Page() {
                                     )}
                             </Form>
                         </TabPane>
-                        <TabPane key="donorMatching" label="Donor Matching">
+                        <TabPane key="donorMatching" label="Donations">
                             <div className={styles.detailsPane}>
                                 <button
                                     onClick={() =>
