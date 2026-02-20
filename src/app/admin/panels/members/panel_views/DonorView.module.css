@@ -1,0 +1,313 @@
+.donorPane {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.root {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+}
+
+.emptyStage {
+    height: 100%;
+    min-height: 24rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+}
+
+.emptyCard {
+    width: min(38rem, 100%);
+    border-radius: 1rem;
+    padding: 1.1rem 1.1rem 1rem;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 18px 45px rgba(15, 23, 42, 0.025);
+}
+
+.emptyCardHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0.9rem;
+}
+
+.emptyTitle {
+    font-size: 1.05rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    color: #0f172a;
+}
+
+.emptySubtitle {
+    font-size: 0.95rem;
+    color: #475569;
+    line-height: 1.35;
+}
+
+.emptyActions {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.linkedStage {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1rem;
+}
+
+.linkedHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-radius: 1rem;
+    padding: 0.95rem 1rem;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 18px 45px rgba(15, 23, 42, 0.03);
+}
+
+.linkedHeaderLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.linkedTitle {
+    font-size: 1.05rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    color: #0f172a;
+}
+
+.linkedSubtitle {
+    font-size: 0.92rem;
+    color: #475569;
+    line-height: 1.35;
+}
+
+.linkedHeaderRight {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-shrink: 0;
+}
+
+.linkedList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.donorCard {
+    border-radius: 1rem;
+    padding: 0.85rem 0.9rem;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 18px 45px rgba(15, 23, 42, 0.02);
+}
+
+.donorCardTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.65rem;
+}
+
+.donorCardTitle {
+    font-size: 1rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    color: #0f172a;
+}
+
+.ghostButton {
+    appearance: none;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.55);
+    color: #0f172a;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        transform 120ms ease,
+        background 120ms ease;
+}
+
+.ghostButton:hover {
+    background-color: #e5e7eb;
+}
+
+.ghostDangerButton {
+    appearance: none;
+    border: 1px solid rgba(239, 68, 68, 0.22);
+    border-radius: 9999px;
+    padding: 0.5rem 0.75rem;
+    background: rgba(239, 68, 68, 0.1);
+    color: #7f1d1d;
+    font-weight: 650;
+    cursor: pointer;
+    transition:
+        transform 120ms ease,
+        background 120ms ease;
+}
+
+.ghostDangerButton:hover {
+    background: rgba(239, 68, 68, 0.352);
+}
+
+.ghostDangerButton:active {
+    transform: translateY(0px);
+}
+
+.refetchingPill {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 500;
+    color: #475569;
+    padding-right: 1rem;
+}
+
+.modalBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    background: rgba(2, 6, 23, 0.38);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+}
+
+.modal {
+    width: min(56rem, 100%);
+    height: min(80dvh, 48rem);
+    min-height: 18rem;
+    display: flex;
+    flex-direction: column;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 30px 80px rgba(15, 23, 42, 0.35);
+    overflow: hidden;
+}
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.95rem 1rem;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.1);
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.modalHeaderLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.modalTitle {
+    font-size: 1.05rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    color: #0f172a;
+}
+
+.modalSubtitle {
+    font-size: 0.92rem;
+    color: #475569;
+    line-height: 1.35;
+}
+
+.modalHeaderRight {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-shrink: 0;
+}
+
+.modalBody {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.62);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    font-weight: 500;
+    padding-inline: 1rem;
+}
+
+.modalBody :global(.pinned),
+.modalBody :global(.elementList),
+.modalBody :global(.listStatus) {
+    padding: 0.9rem 1rem 1rem;
+}
+
+.modalBody :global(.listStatus) {
+    flex: 1;
+    min-height: 0;
+}
+
+.modalFooter {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid rgba(17, 24, 39, 0.1);
+    background: rgba(255, 255, 255, 0.6);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+}
+
+.modalFooterButton {
+    min-width: 7rem;
+}
+
+.modalSearch {
+    width: min(22rem, 52vw);
+}
+
+.searchInputBare {
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+
+.searchInputBare > input {
+    width: 100%;
+    height: 2.35rem;
+    line-height: 2.35rem;
+    border-radius: 0.6rem;
+    border: 1px solid #d1d5db;
+    padding: 0 0.75rem;
+    background: rgba(255, 255, 255, 0.75);
+}

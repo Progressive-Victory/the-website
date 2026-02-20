@@ -1,13 +1,15 @@
 'use client'
 
-import styles from '../page.module.css'
-import { ListElement, List } from '@/app/admin/layout/List'
+import styles from './DonorView.module.css'
+import { ListBody } from '@/app/admin/layout/List'
 import { Form, FormGroup, TextField } from '@/components/common/forms'
 import { ActBlueDonor, User } from '@/contracts/data'
 import type { SearchRequest } from '@/contracts/requests'
 import type { PaginatedResponse } from '@/contracts/responses'
 import type { FetchError } from '@/util/hooks'
 import type { UseQueryResult } from '@tanstack/react-query'
+import cx from 'classnames'
+import React, { ChangeEvent, useMemo } from 'react'
 
 export interface DonorViewProps {
     selectedId: number
@@ -41,42 +43,94 @@ export function DonorView({
     renderDonorItem,
     handleDeleteDonorItem,
 }: DonorViewProps) {
+    const linkedDonors = user.donors ?? []
+    const hasLinked = linkedDonors.length > 0
+
+    const openPicker = () => setPickingDonor(true)
+    const closePicker = () => setPickingDonor(false)
+
+    const unlinkAll = () => {
+        for (const donor of linkedDonors) {
+            handleDeleteDonorItem(donor, selectedId)
+        }
+    }
+
+    const queryValue = useMemo(
+        () => donorSearch.query ?? '',
+        [donorSearch.query]
+    )
+
+    const handleOverlaySearch = (e: ChangeEvent<HTMLInputElement>) => {
+        onDonorSearch({ ...donorSearch, query: e.target.value })
+    }
+
     return (
-        <>
-            <div className={styles.detailsPane}>
-                <button onClick={() => setPickingDonor(!pickingDonor)}>
-                    {pickingDonor ? 'Cancel' : 'Link Donor'}
-                </button>
+        <div className={styles.root}>
+            {!hasLinked && (
+                <div className={styles.emptyStage}>
+                    <div className={styles.emptyCard}>
+                        <div className={styles.emptyCardHeader}>
+                            <div className={styles.emptyTitle}>
+                                No Donors Found
+                            </div>
+                            <div className={styles.emptySubtitle}>
+                                Automatic donor matching not implemented yet.
+                            </div>
+                        </div>
 
-                {isRefetching ? <span>refreshing...</span> : <></>}
-
-                {pickingDonor ? (
-                    <List
-                        search={donorSearch}
-                        count={donorSearchQuery.data?.count}
-                        isPending={donorSearchQuery.isPending}
-                        error={donorSearchQuery.error}
-                        onSearch={onDonorSearch}
-                    >
-                        {donorSearchQuery.data?.data.map((donor) =>
-                            renderDonorItem(donor, selectedId)
-                        )}
-                    </List>
-                ) : (
-                    <></>
-                )}
-            </div>
-
-            <div>
-                {(user.donors ?? []).length > 0 ? (
-                    <>
-                        {user.donors?.map((donor) => (
-                            <div
-                                key={donor.email}
-                                className={styles.detailsPane}
+                        <div className={styles.emptyActions}>
+                            <button
+                                type="button"
+                                className={styles.ghostButton}
+                                onClick={openPicker}
                             >
+                                Search Donors
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {hasLinked && (
+                <div className={styles.linkedStage}>
+                    <div className={styles.linkedHeader}>
+                        <div className={styles.linkedHeaderLeft}>
+                            <div className={styles.linkedTitle}>
+                                Donor Details
+                            </div>
+                            <div className={styles.linkedSubtitle}>
+                                Manage donor links for this user.
+                            </div>
+                        </div>
+
+                        <div className={styles.linkedHeaderRight}>
+                            {isRefetching ? (
+                                <span className={styles.refetchingPill}>
+                                    Loading...
+                                </span>
+                            ) : null}
+
+                            <button
+                                type="button"
+                                className={styles.ghostDangerButton}
+                                onClick={unlinkAll}
+                            >
+                                Remove Match
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className={styles.linkedList}>
+                        {linkedDonors.map((donor) => (
+                            <div key={donor.email} className={styles.donorCard}>
+                                <div className={styles.donorCardTop}>
+                                    <div className={styles.donorCardTitle}>
+                                        {donor.firstname} {donor.lastname}
+                                    </div>
+                                </div>
+
                                 <Form<ActBlueDonor>
-                                    title={`${donor.firstname} ${donor.lastname}`}
+                                    title=""
                                     readonly
                                     form={donor}
                                     onSave={() => {
@@ -84,9 +138,9 @@ export function DonorView({
                                     }}
                                 >
                                     <FormGroup
-                                        title="Details"
+                                        title=""
                                         wrapper
-                                        defaultCollapsed
+                                        defaultCollapsed={false}
                                     >
                                         <FormGroup
                                             title="Contact Info"
@@ -134,24 +188,81 @@ export function DonorView({
                                         </FormGroup>
                                     </FormGroup>
                                 </Form>
-
-                                <button
-                                    onClick={() =>
-                                        void handleDeleteDonorItem(
-                                            donor,
-                                            selectedId
-                                        )
-                                    }
-                                >
-                                    Unlink
-                                </button>
                             </div>
                         ))}
-                    </>
-                ) : (
-                    <span>Select a Donor to Link</span>
-                )}
-            </div>
-        </>
+                    </div>
+                </div>
+            )}
+
+            {pickingDonor ? (
+                <div
+                    className={styles.modalBackdrop}
+                    role="presentation"
+                    onMouseDown={(e) => {
+                        if (e.target === e.currentTarget) closePicker()
+                    }}
+                >
+                    <div
+                        className={styles.modal}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Link donor"
+                    >
+                        <div className={styles.modalHeader}>
+                            <div className={styles.modalHeaderLeft}>
+                                <div className={styles.modalTitle}>
+                                    Link Donors
+                                </div>
+                                <div className={styles.modalSubtitle}>
+                                    Search ActBlue donors and link one to this
+                                    user.
+                                </div>
+                            </div>
+
+                            <div className={styles.modalHeaderRight}>
+                                {/* DonorView-only: search input with NO filter button */}
+                                <div className={styles.modalSearch}>
+                                    <div className={styles.searchInputBare}>
+                                        <input
+                                            type="text"
+                                            name="donorSearch"
+                                            id="donorSearch"
+                                            placeholder="Search..."
+                                            value={queryValue}
+                                            onChange={handleOverlaySearch}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={styles.modalBody}>
+                            <ListBody
+                                count={donorSearchQuery.data?.count}
+                                isPending={donorSearchQuery.isPending}
+                                error={donorSearchQuery.error}
+                            >
+                                {donorSearchQuery.data?.data.map((donor) =>
+                                    renderDonorItem(donor, selectedId)
+                                )}
+                            </ListBody>
+                        </div>
+
+                        <div className={styles.modalFooter}>
+                            <button
+                                type="button"
+                                className={cx(
+                                    styles.ghostButton,
+                                    styles.modalFooterButton
+                                )}
+                                onClick={closePicker}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+        </div>
     )
 }
