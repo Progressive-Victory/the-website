@@ -7,7 +7,7 @@ export interface TabPaneProps {
     children?: React.ReactNode
 }
 
-export function TabPane({ label, children }: TabPaneProps) {
+export function TabPane({ children }: TabPaneProps) {
     return children
 }
 
