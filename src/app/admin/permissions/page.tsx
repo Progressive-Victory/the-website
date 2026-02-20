@@ -2,7 +2,12 @@
 
 import styles from './page.module.css'
 import { ListElement, PaginatedList } from '@/components/admin/PaginatedList'
-import { Form, FormGroup, FormState, TextField } from '@/components/form'
+import {
+    Form,
+    FormGroup,
+    FormState,
+    TextField,
+} from '@/components/common/forms'
 import { Permission, zPermission } from '@/contracts/data'
 import { UpdatePermissionRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'

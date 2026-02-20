@@ -3,8 +3,6 @@
 import styles from './page.module.css'
 import { ListElement, PaginatedList } from '@/components/admin/PaginatedList'
 import { CollapsibleSection, ImageWithFallback } from '@/components/common'
-import { TabPane } from '@/components/common/tab_panel/TabPane'
-import { TabPanel } from '@/components/common/tab_panel/TabPanel'
 import {
     CheckboxField,
     DateField,
@@ -15,7 +13,9 @@ import {
     FormState,
     SelectManyField,
     TextField,
-} from '@/components/form'
+} from '@/components/common/forms'
+import { TabPane } from '@/components/common/tab_panel/TabPane'
+import { TabPanel } from '@/components/common/tab_panel/TabPanel'
 import {
     ActBlueDonor,
     Location,

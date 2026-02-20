@@ -8,7 +8,7 @@ import {
     FormState,
     SelectManyField,
     TextField,
-} from '@/components/form'
+} from '@/components/common/forms'
 import { Permission, Role, zPermission, zRole } from '@/contracts/data'
 import { UpdateRoleRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
