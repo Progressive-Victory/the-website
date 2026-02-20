@@ -1,15 +1,15 @@
 'use client'
 
-import { ITabPane } from './TabPane'
-import styles from './tabPanel.module.css'
+import { ITab } from './Tab'
+import styles from './TabBar.module.css'
 import cx from 'classnames'
 import { useMemo, useState } from 'react'
 
-export interface TabPanelProps {
-    children?: ITabPane[]
+export interface TabBarProps {
+    children?: ITab[]
 }
 
-export function TabPanel({ children = [] }: TabPanelProps) {
+export function TabBar({ children = [] }: TabBarProps) {
     if (!children?.[0]?.key)
         throw Error('Tab panels must have children with keys')
 

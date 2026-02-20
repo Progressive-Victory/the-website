@@ -1,14 +1,14 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, PaginatedList } from '@/components/admin/PaginatedList'
+import { ListElement, List } from '@/app/admin/layout/List'
 import {
     FormGroup,
     FormState,
     TextField,
     Form,
     DateField,
-} from '@/components/form'
+} from '@/components/common/forms'
 import {
     ActBlueDonationPacket,
     UpdateHistory,
@@ -109,7 +109,7 @@ export default function Page() {
 
     return (
         <>
-            <PaginatedList
+            <List
                 search={search}
                 count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}
@@ -125,7 +125,7 @@ export default function Page() {
                 onSearch={onSearch}
             >
                 {searchQuery.data?.data?.map((item) => renderItem(item))}
-            </PaginatedList>
+            </List>
 
             <div className={styles.detailsPane}>
                 {selectedLineitemId == null && (
@@ -191,7 +191,7 @@ export default function Page() {
                             <br />
                             <Link
                                 href={{
-                                    pathname: '/admin/donors',
+                                    pathname: '/admin/panels/donors',
                                     query: {
                                         email: contributionQuery.data.email,
                                     },

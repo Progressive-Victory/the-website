@@ -1,6 +1,6 @@
 'use client'
 
-import styles from './adminNav.module.css'
+import styles from './Sidebar.module.css'
 import classNames from 'classnames'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -10,7 +10,7 @@ import { FiChevronLeft } from 'react-icons/fi'
 import type { IconType } from 'react-icons/lib'
 import { useLocalStorage } from 'usehooks-ts'
 
-interface AdminNavProps {
+interface SidebarProps {
     userCount?: number
     roleCount?: number
     permissionCount?: number
@@ -18,13 +18,13 @@ interface AdminNavProps {
     contributionCount?: number
 }
 
-export default function AdminNav({
+export default function Sidebar({
     userCount,
     roleCount,
     permissionCount,
     donorCount,
     contributionCount,
-}: AdminNavProps) {
+}: SidebarProps) {
     const [open, setOpen] = useLocalStorage('pv.admin-nav-open', true)
 
     return (
@@ -41,41 +41,41 @@ export default function AdminNav({
             <ul className={styles.list}>
                 <NavLink
                     title="Members"
-                    href="/admin/members"
+                    href="/admin/panels/members"
                     icon={FaUsers}
                     count={userCount}
                     open={open}
                 />
                 <NavLink
                     title="Donors"
-                    href="/admin/donors"
+                    href="/admin/panels/donors"
                     icon={FaDonate}
                     count={donorCount}
                     open={open}
                 />
                 <NavLink
                     title="Contributions"
-                    href="/admin/contributions"
+                    href="/admin/panels/contributions"
                     icon={FaDollarSign}
                     count={contributionCount}
                     open={open}
                 />
                 <NavLink
                     title="Positions"
-                    href="/admin/positions"
+                    href="/admin/panels/positions"
                     icon={FaClipboardUser}
                     open={open}
                 />
                 <NavLink
                     title="Roles"
-                    href="/admin/roles"
+                    href="/admin/panels/roles"
                     icon={FaUserTag}
                     count={roleCount}
                     open={open}
                 />
                 <NavLink
                     title="Permissions"
-                    href="/admin/permissions"
+                    href="/admin/panels/permissions"
                     icon={FaUserShield}
                     count={permissionCount}
                     open={open}

@@ -1,14 +1,14 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, PaginatedList } from '@/components/admin/PaginatedList'
+import { ListElement, List } from '@/app/admin/layout/List'
 import {
     FormState,
     Form,
     TextField,
     FormGroup,
     DateField,
-} from '@/components/form'
+} from '@/components/common/forms'
 import {
     ActBlueDonor,
     zActBlueDonor,
@@ -144,7 +144,7 @@ export default function Page() {
 
     return (
         <>
-            <PaginatedList
+            <List
                 search={search}
                 count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}
@@ -153,7 +153,7 @@ export default function Page() {
                 onSearch={onSearch}
             >
                 {searchQuery.data?.data?.map((item) => renderItem(item))}
-            </PaginatedList>
+            </List>
 
             <div className={styles.detailsPane}>
                 {selectedEmail == null && (
@@ -291,7 +291,7 @@ export default function Page() {
                                         <br />
                                         <Link
                                             href={{
-                                                pathname: `/admin/contributions`,
+                                                pathname: `/admin/panels/contributions`,
                                                 query: {
                                                     lineitemId:
                                                         lineitem.lineitemId,
