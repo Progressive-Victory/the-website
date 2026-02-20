@@ -1,7 +1,7 @@
 'use client'
 
-import { ITabPane } from './TabPane'
-import styles from './tabPanel.module.css'
+import { ITabPane } from './Tab'
+import styles from './TabBar.module.css'
 import cx from 'classnames'
 import { useMemo, useState } from 'react'
 

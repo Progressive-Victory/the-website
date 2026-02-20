@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, PaginatedList } from '@/components/admin/PaginatedList'
+import { ListElement, PaginatedList } from '@/app/admin/layout/List'
 import {
     FormState,
     Form,
@@ -291,7 +291,7 @@ export default function Page() {
                                         <br />
                                         <Link
                                             href={{
-                                                pathname: `/admin/contributions`,
+                                                pathname: `/admin/panels/contributions`,
                                                 query: {
                                                     lineitemId:
                                                         lineitem.lineitemId,

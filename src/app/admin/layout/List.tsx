@@ -1,4 +1,4 @@
-import styles from './PaginatedList.module.css'
+import styles from './List.module.css'
 import { MultiSelect, MultiSelectOption } from '@/components/common'
 import { SearchRequest, SortDirection } from '@/contracts/requests'
 import cx from 'classnames'

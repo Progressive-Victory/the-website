@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, PaginatedList } from '@/components/admin/PaginatedList'
+import { ListElement, PaginatedList } from '@/app/admin/layout/List'
 import { CollapsibleSection, ImageWithFallback } from '@/components/common'
 import {
     CheckboxField,
@@ -14,8 +14,8 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
-import { TabPane } from '@/components/common/tab_panel/TabPane'
-import { TabPanel } from '@/components/common/tab_panel/TabPanel'
+import { TabPane } from '@/components/common/tab_bar/Tab'
+import { TabPanel } from '@/components/common/tab_bar/TabBar'
 import {
     ActBlueDonor,
     Location,
