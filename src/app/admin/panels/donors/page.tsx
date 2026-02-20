@@ -135,7 +135,7 @@ export default function Page() {
                 selected={selectedEmail == item.email}
                 onClick={() => handleSelectItem(item)}
             >
-                <div>
+                <div className={styles.userName}>
                     <span>{makeTitle(item)}</span>
                 </div>
             </ListElement>
