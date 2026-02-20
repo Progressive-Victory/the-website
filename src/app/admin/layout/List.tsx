@@ -24,7 +24,7 @@ export interface FieldOption {
     label: string
 }
 
-export interface PaginatedListProps {
+export interface ListProps {
     search: SearchRequest
 
     count: number | undefined
@@ -40,7 +40,7 @@ export interface PaginatedListProps {
     onSearch: (search: SearchRequest) => void
 }
 
-export function PaginatedList({
+export function List({
     search,
     count,
     isPending,
@@ -50,7 +50,7 @@ export function PaginatedList({
     pinnedContent,
     children,
     onSearch,
-}: PaginatedListProps) {
+}: ListProps) {
     const [searchPanelOpen, setSearchPanelOpen] = useState(false)
 
     const { query, field, limit, sort, page, ...filter } = search

@@ -1,21 +1,13 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, PaginatedList } from '@/app/admin/layout/List'
+import { DonorView } from './panel_views/DonorView'
+import { MemberView } from './panel_views/MemberView'
+import { ListElement, List } from '@/app/admin/layout/List'
 import { CollapsibleSection, ImageWithFallback } from '@/components/common'
-import {
-    CheckboxField,
-    DateField,
-    Form,
-    FormField,
-    FormGroup,
-    FormGroupProps,
-    FormState,
-    SelectManyField,
-    TextField,
-} from '@/components/common/forms'
-import { TabPane } from '@/components/common/tab_bar/Tab'
-import { TabPanel } from '@/components/common/tab_bar/TabBar'
+import { FormState } from '@/components/common/forms'
+import { Tab } from '@/components/common/tab_bar/Tab'
+import { TabBar } from '@/components/common/tab_bar/TabBar'
 import {
     ActBlueDonor,
     Location,
@@ -31,7 +23,6 @@ import {
 } from '@/contracts/data'
 import { UpdateUserRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
-import { dateService } from '@/services'
 import {
     FetchError,
     useCurrentUser,
@@ -44,6 +35,7 @@ import {
     useMutation,
     useQuery,
     useQueryClient,
+    UseQueryResult,
 } from '@tanstack/react-query'
 import cx from 'classnames'
 import { useCallback, useMemo, useState } from 'react'
@@ -76,7 +68,13 @@ export default function Page() {
         query: donorSearchQuery,
         search: donorSearch,
         onSearch: onDonorSearch,
-    } = usePaginatedSearch<ActBlueDonor>('/actblue/donors', zActBlueDonor)
+    } = usePaginatedSearch<ActBlueDonor>('/actblue/donors', zActBlueDonor) as {
+        query: UseQueryResult<PaginatedResponse<ActBlueDonor>, FetchError>
+        search: ReturnType<typeof usePaginatedSearch<ActBlueDonor>>['search']
+        onSearch: ReturnType<
+            typeof usePaginatedSearch<ActBlueDonor>
+        >['onSearch']
+    }
 
     const roles = rolesQuery.data?.data ?? []
     const roleOptions = useMemo(
@@ -212,15 +210,16 @@ export default function Page() {
     )
 
     const handleDeleteDonorItem = useCallback(
-        async (value: ActBlueDonor, userId) => {
-            await onPost<void>(
+        (value: ActBlueDonor, userId) => {
+            void onPost<void>(
                 `/actblue/donors/${value.email}/link`,
                 { userId: null },
                 null
+            ).then(() =>
+                queryClient.invalidateQueries({
+                    queryKey: [`/users/${userId}`],
+                })
             )
-            await queryClient.invalidateQueries({
-                queryKey: [`/users/${userId}`],
-            })
         },
         [onPost, queryClient]
     )
@@ -322,7 +321,7 @@ export default function Page() {
 
     return (
         <>
-            <PaginatedList
+            <List
                 search={search}
                 count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}
@@ -383,409 +382,55 @@ export default function Page() {
                 onSearch={onSearch}
             >
                 {searchQuery.data?.data?.map((item) => renderItem(item))}
-            </PaginatedList>
+            </List>
 
             <div className={styles.detailsPane}>
                 {selectedId == null && (
                     <div className={styles.emptyState}>No user selected</div>
                 )}
+
                 {selectedId && userQuery.data && (
-                    <TabPanel>
-                        <TabPane key="overview" label="Overview">
-                            <Form<User>
-                                key={selectedId}
-                                form={selectedHistory ?? userQuery.data}
-                                title={makeFormTitle(userQuery.data)}
-                                readonly={selectedHistory != null}
+                    <TabBar>
+                        <Tab key="overview" label="Overview">
+                            <MemberView
+                                selectedId={selectedId}
+                                user={userQuery.data}
+                                selectedHistory={selectedHistory}
+                                onSelectHistory={handleSelectHistory}
+                                formState={formState}
+                                setFormState={setFormState}
                                 saving={updateMutation.isPending}
                                 isInvalid={
                                     !!formState?.form?.location?.zip &&
                                     locationQuery.data == null
                                 }
-                                onUpdate={setFormState}
-                                onSave={handleSave}
-                            >
-                                <FormGroup title="Account Information">
-                                    <TextField<User>
-                                        label="Discord Username"
-                                        getter={(form) =>
-                                            (form.discordUsers ?? [])
-                                                ?.map(
-                                                    ({ username }) =>
-                                                        `@${username}`
-                                                )
-                                                .join(', ')
-                                        }
-                                        readonly
-                                    />
-                                    <TextField<User>
-                                        label="Discord Id"
-                                        getter={(form) =>
-                                            form.discordUsers?.[0]?.id
-                                        }
-                                        readonly
-                                    />
-                                    <TextField
-                                        label="Email"
-                                        field="email"
-                                        required
-                                    />
-                                    <TextField
-                                        label="Phone Number"
-                                        field="phone"
-                                        required
-                                    />
-                                    <TextField
-                                        label="Preferred Name"
-                                        field="preferredName"
-                                        deprecated
-                                    />
-                                    <TextField
-                                        label="First Name"
-                                        field="firstName"
-                                    />
-                                    <TextField
-                                        label="Last Name"
-                                        field="lastName"
-                                    />
-                                    <DateField<User>
-                                        label="Date of Birth"
-                                        getter={(form) =>
-                                            dateService.isValid(form.birthdate)
-                                                ? new Date(
-                                                      dateService.toISODateString(
-                                                          form.birthdate
-                                                      )!
-                                                  )
-                                                : null
-                                        }
-                                        field="birthdate"
-                                        format={{
-                                            timeZone: 'UTC',
-                                            dateStyle: 'medium',
-                                        }}
-                                    />
-                                    <TextField<User>
-                                        label="Age"
-                                        readonly
-                                        getter={(form) =>
-                                            dateService.isValid(form.birthdate)
-                                                ? dateService
-                                                      .getAge(form.birthdate!)
-                                                      ?.toString()
-                                                : null
-                                        }
-                                    />
-                                    <DateField
-                                        label="Date Created"
-                                        field="createdAtUtc"
-                                        readonly
-                                    />
-                                    <SelectManyField<User>
-                                        label="Aliases"
-                                        field="aliases"
-                                        options={(
-                                            userQuery.data.aliases ?? []
-                                        ).map((alias) => ({
-                                            value: alias,
-                                            label: alias,
-                                        }))}
-                                        readonly
-                                    />
-                                </FormGroup>
+                                roles={roles}
+                                roleOptions={roleOptions}
+                                makeFormTitle={() =>
+                                    makeFormTitle(userQuery.data)
+                                }
+                                handleSave={handleSave}
+                                getLocation={getLocation}
+                            />
+                        </Tab>
 
-                                <FormGroup title="Address">
-                                    <TextField<User>
-                                        label="Zip Code"
-                                        getter={(form) =>
-                                            form.location?.zip
-                                                ? form.location?.zip
-                                                      .toString()
-                                                      .padStart(5, '0')
-                                                      .slice(-5)
-                                                : null
-                                        }
-                                        setter={(form, field) => ({
-                                            ...form,
-                                            location: field
-                                                ? {
-                                                      ...(userQuery.data
-                                                          ?.location ?? {
-                                                          city: '',
-                                                          county: '',
-                                                          state: '',
-                                                      }),
-                                                      zip: +field
-                                                          .replace(/[^\d]/, '')
-                                                          .padStart(5, '0')
-                                                          .slice(-5),
-                                                  }
-                                                : null,
-                                        })}
-                                    />
-                                    <TextField<User>
-                                        label="City"
-                                        getter={(form) =>
-                                            getLocation(form)?.city
-                                        }
-                                        readonly
-                                    />
-                                    <TextField<User>
-                                        label="County"
-                                        getter={(form) =>
-                                            getLocation(form)?.county
-                                        }
-                                        readonly
-                                    />
-                                    <TextField<User>
-                                        label="State"
-                                        getter={(form) =>
-                                            getLocation(form)?.state
-                                        }
-                                        readonly
-                                    />
-                                </FormGroup>
-
-                                <FormGroup
-                                    title="Account Status"
-                                    defaultCollapsed
-                                >
-                                    <CheckboxField
-                                        label="Accepted Alerts"
-                                        field="acceptedAlerts"
-                                        readonly
-                                    />
-                                    <CheckboxField
-                                        label="Verified"
-                                        field="verified"
-                                        readonly
-                                    />
-                                    <TextField
-                                        label="Onboarding Stage"
-                                        field="onboardingStage"
-                                        readonly
-                                    />
-                                    <DateField
-                                        label="Date Intake Done"
-                                        field="completedIntakeUtc"
-                                        readonly
-                                    />
-                                    <DateField
-                                        label="Date Server Joined"
-                                        field="joinedAtUtc"
-                                        readonly
-                                    />
-                                </FormGroup>
-
-                                <FormGroup title="Roles">
-                                    <SelectManyField<User>
-                                        label="Roles"
-                                        options={roleOptions}
-                                        getter={(form) =>
-                                            (form.roles ?? []).map(
-                                                (role) => role.id
-                                            )
-                                        }
-                                        setter={(form, field) => ({
-                                            ...form,
-                                            roles:
-                                                field != null
-                                                    ? roles.filter((role) =>
-                                                          field.includes(
-                                                              role.id
-                                                          )
-                                                      )
-                                                    : form.roles,
-                                        })}
-                                    />
-                                </FormGroup>
-
-                                {!formState?.editing &&
-                                    !!userQuery.data?.history?.length && (
-                                        <AccountHistoryField
-                                            title="Account History"
-                                            history={userQuery.data?.history}
-                                            selected={selectedHistory}
-                                            onSelect={handleSelectHistory}
-                                            defaultCollapsed
-                                        />
-                                    )}
-                            </Form>
-                        </TabPane>
-                        <TabPane key="donorMatching" label="Donations">
-                            <div className={styles.detailsPane}>
-                                <button
-                                    onClick={() =>
-                                        setPickingDonor(!pickingDonor)
-                                    }
-                                >
-                                    {pickingDonor ? 'Cancel' : 'Link Donor'}
-                                </button>
-                                {userQuery.isRefetching ? (
-                                    <span>refreshing...</span>
-                                ) : (
-                                    <></>
-                                )}
-                                {pickingDonor ? (
-                                    <PaginatedList
-                                        search={donorSearch}
-                                        count={donorSearchQuery.data?.count}
-                                        isPending={donorSearchQuery.isPending}
-                                        error={donorSearchQuery.error}
-                                        onSearch={onDonorSearch}
-                                    >
-                                        {donorSearchQuery.data?.data.map(
-                                            (donor) =>
-                                                renderDonorItem(
-                                                    donor,
-                                                    selectedId
-                                                )
-                                        )}
-                                    </PaginatedList>
-                                ) : (
-                                    <></>
-                                )}
-                            </div>
-                            <div>
-                                {(userQuery.data.donors ?? []).length > 0 ? (
-                                    <>
-                                        {userQuery.data.donors?.map((donor) => (
-                                            <div
-                                                key={donor.email}
-                                                className={styles.detailsPane}
-                                            >
-                                                <Form<ActBlueDonor>
-                                                    title={`${donor.firstname} ${donor.lastname}`}
-                                                    readonly
-                                                    form={donor}
-                                                    onSave={() => {
-                                                        return
-                                                    }}
-                                                >
-                                                    <FormGroup
-                                                        title="Details"
-                                                        wrapper
-                                                        defaultCollapsed
-                                                    >
-                                                        <FormGroup
-                                                            title="Contact Info"
-                                                            subGroup
-                                                        >
-                                                            <TextField
-                                                                label="First Name"
-                                                                field="firstName"
-                                                            />
-                                                            <TextField
-                                                                label="Last Name"
-                                                                field="lastName"
-                                                            />
-                                                            <TextField
-                                                                label="Email"
-                                                                field="email"
-                                                            />
-                                                            <TextField
-                                                                label="Phone"
-                                                                field="phone"
-                                                            />
-                                                        </FormGroup>
-                                                        <FormGroup
-                                                            title="Address"
-                                                            subGroup
-                                                        >
-                                                            <TextField
-                                                                label="Street Address"
-                                                                field="addr1"
-                                                            />
-                                                            <TextField
-                                                                label="City"
-                                                                field="city"
-                                                            />
-                                                            <TextField
-                                                                label="State"
-                                                                field="state"
-                                                            />
-                                                            <TextField
-                                                                label="Zip"
-                                                                field="zip"
-                                                            />
-                                                            <TextField
-                                                                label="Country"
-                                                                field="country"
-                                                            />
-                                                        </FormGroup>
-                                                    </FormGroup>
-                                                </Form>
-                                                <button
-                                                    onClick={() =>
-                                                        void handleDeleteDonorItem(
-                                                            donor,
-                                                            selectedId
-                                                        )
-                                                    }
-                                                >
-                                                    Unlink
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </>
-                                ) : (
-                                    <span>Select a Donor to Link</span>
-                                )}
-                            </div>
-                        </TabPane>
-                    </TabPanel>
+                        <Tab key="donorMatching" label="Donations">
+                            <DonorView
+                                selectedId={selectedId}
+                                user={userQuery.data}
+                                pickingDonor={pickingDonor}
+                                setPickingDonor={setPickingDonor}
+                                isRefetching={userQuery.isRefetching}
+                                donorSearch={donorSearch}
+                                donorSearchQuery={donorSearchQuery}
+                                onDonorSearch={onDonorSearch}
+                                renderDonorItem={renderDonorItem}
+                                handleDeleteDonorItem={handleDeleteDonorItem}
+                            />
+                        </Tab>
+                    </TabBar>
                 )}
             </div>
         </>
-    )
-}
-
-interface AccountHistoryFieldProps extends FormGroupProps<User> {
-    history?: UpdateHistory<User>[]
-    selected: UpdateHistory<User> | null
-    onSelect: (update: UpdateHistory<User> | null) => void
-}
-
-function AccountHistoryField({
-    title,
-    defaultCollapsed,
-    history,
-    selected,
-    onSelect,
-}: AccountHistoryFieldProps) {
-    const value = (history ?? []).sort(
-        (a, b) =>
-            b.historyWhenUpdatedUtc.getTime() -
-            a.historyWhenUpdatedUtc.getTime()
-    )
-
-    return (
-        <CollapsibleSection title={title} initialOpenState={!defaultCollapsed}>
-            <div className={styles.historyContainer}>
-                {value.map((update, i) => (
-                    <div key={i}>
-                        <button
-                            onClick={() => onSelect(i ? update : null)}
-                            className={cx(
-                                styles.historyEntry,
-                                (selected?.historyId == update.historyId ||
-                                    (!i && !selected)) &&
-                                    styles.selected
-                            )}
-                        >
-                            <span color="#4b5563">{`${update.historyType == 'I' ? 'Created' : 'Updated'} at `}</span>
-                            <span className={styles.historyEntryDate}>
-                                {update.historyWhenUpdatedUtc.toLocaleString()}
-                            </span>
-                            <span color="#4b5563">{' by '}</span>
-                            <code>
-                                {update.email ?? 'deleted user'}#
-                                {update.id.toString()}
-                            </code>
-                        </button>
-                    </div>
-                ))}
-            </div>
-        </CollapsibleSection>
     )
 }

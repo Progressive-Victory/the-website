@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, PaginatedList } from '@/app/admin/layout/List'
+import { ListElement, List } from '@/app/admin/layout/List'
 import {
     FormGroup,
     FormState,
@@ -109,7 +109,7 @@ export default function Page() {
 
     return (
         <>
-            <PaginatedList
+            <List
                 search={search}
                 count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}
@@ -125,7 +125,7 @@ export default function Page() {
                 onSearch={onSearch}
             >
                 {searchQuery.data?.data?.map((item) => renderItem(item))}
-            </PaginatedList>
+            </List>
 
             <div className={styles.detailsPane}>
                 {selectedLineitemId == null && (

@@ -2,13 +2,13 @@
 
 import { ReactElement, ComponentProps } from 'react'
 
-export interface TabPaneProps {
+export interface TabProps {
     label: string
     children?: React.ReactNode
 }
 
-export function TabPane({ children }: TabPaneProps) {
+export function Tab({ children }: TabProps) {
     return children
 }
 
-export type ITabPane = ReactElement<ComponentProps<typeof TabPane>>
+export type ITab = ReactElement<ComponentProps<typeof Tab>>
