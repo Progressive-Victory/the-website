@@ -19,7 +19,7 @@ import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 
 interface contributionData {
     total: number
@@ -42,6 +42,10 @@ export default function Page() {
         search,
         onSearch,
     } = usePaginatedSearch<ActBlueDonor>('/actblue/donors', zActBlueDonor)
+
+    useCallback(() => {
+        console.error(searchQuery.error)
+    }, [searchQuery.error])
 
     const donorQuery = useQuery({
         queryKey: [`/actblue/donors/${selectedEmail}`],

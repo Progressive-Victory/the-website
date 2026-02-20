@@ -24,7 +24,7 @@ export const zActBlueDonor = z
             .nullable(),
         email: z.string(),
         phone: z.string().optional(),
-        userId: z.int().nullable(),
+        userId: z.number().optional(),
         contributions: z.array(zActBlueContribution).optional(),
     })
     .strict()
