@@ -1,4 +1,3 @@
-// panel_views/MemberView.tsx
 'use client'
 
 import styles from './MemberView.module.css'
@@ -13,8 +12,6 @@ import {
 } from '@/components/common/forms'
 import { Location, Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
-
-// panel_views/MemberView.tsx
 
 export interface MemberViewProps {
     selectedId: number

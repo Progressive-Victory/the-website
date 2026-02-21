@@ -1,4 +1,3 @@
-// page.tsx
 'use client'
 
 import styles from './page.module.css'
@@ -41,8 +40,6 @@ import {
 } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
-
-// page.tsx
 
 export default function Page() {
     const queryClient = useQueryClient()
@@ -239,7 +236,6 @@ export default function Page() {
         }
 
         setSelectedId(value.id)
-        // Optional: clear any prior history snapshot when switching users
         setSelectedHistory(null)
     }
 

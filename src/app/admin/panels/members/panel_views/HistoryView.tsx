@@ -1,4 +1,3 @@
-// panel_views/HistoryView.tsx
 'use client'
 
 import styles from './HistoryView.module.css'
@@ -6,12 +5,6 @@ import { CollapsibleSection } from '@/components/common'
 import { FormGroupProps } from '@/components/common/forms'
 import { UpdateHistory, User } from '@/contracts/data'
 import cx from 'classnames'
-
-// panel_views/HistoryView.tsx
-
-// panel_views/HistoryView.tsx
-
-// panel_views/HistoryView.tsx
 
 export interface HistoryViewProps {
     selectedId: number
@@ -28,8 +21,6 @@ export function HistoryView({
     onSelectHistory,
     isRefetching,
 }: HistoryViewProps) {
-    // Keep the exact UX you already liked, just moved into its own tab.
-    // (Also keep the "first item clears selection" behavior you had.)
     if (selectedId == null) return null
 
     if (isRefetching) {
