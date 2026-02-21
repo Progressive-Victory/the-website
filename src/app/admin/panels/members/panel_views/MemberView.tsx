@@ -1,6 +1,6 @@
 'use client'
 
-import styles from '../page.module.css'
+import styles from './MemberView.module.css'
 import { CollapsibleSection } from '@/components/common'
 import {
     CheckboxField,
@@ -12,15 +12,7 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
-import {
-    Location,
-    Role,
-    UpdateHistory,
-    User,
-    zLocation,
-    zRole,
-    zUser,
-} from '@/contracts/data'
+import { Location, Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
 import cx from 'classnames'
 
@@ -259,7 +251,7 @@ function AccountHistoryField({
                                 styles.historyEntry,
                                 (selected?.historyId == update.historyId ||
                                     (!i && !selected)) &&
-                                    styles.selected
+                                    styles.historyEntrySelected
                             )}
                         >
                             <span color="#4b5563">{`${update.historyType == 'I' ? 'Created' : 'Updated'} at `}</span>
