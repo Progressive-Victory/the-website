@@ -12,7 +12,8 @@ import {
 import { Permission, Role, zPermission, zRole } from '@/contracts/data'
 import { UpdateRoleRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
-import { FetchError, useFetch, usePaginatedSearch } from '@/util/hooks'
+import { FetchError } from '@/models'
+import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     keepPreviousData,
     skipToken,

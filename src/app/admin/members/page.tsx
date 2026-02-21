@@ -26,13 +26,9 @@ import {
 } from '@/contracts/data'
 import { UpdateUserRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
+import { FetchError } from '@/models'
 import { dateService } from '@/services'
-import {
-    FetchError,
-    useCurrentUser,
-    useFetch,
-    usePaginatedSearch,
-} from '@/util/hooks'
+import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     keepPreviousData,
     skipToken,

@@ -6,10 +6,13 @@ import {
     skipToken,
     useMutation,
     useQuery,
+    useQueryClient,
 } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
 export function useAuth() {
+    const queryClient = useQueryClient()
+
     const settingsQuery = useQuery({
         queryKey: ['/api/settings'],
         async queryFn({ signal }) {
@@ -24,24 +27,33 @@ export function useAuth() {
 
     const apiBaseUrl = settingsQuery.data?.apiBaseUrl
 
-    const getSession = async () => {
-        const res = await fetch(new URL('/auth', apiBaseUrl))
-
-        if (!res.ok) {
-            const error = (await res.json()) as ApiError
-            throw new FetchError(error.message, res.status, error.error)
-        }
-
-        return (await res.json()) as TokenClaims
-    }
     const sessionQuery = useQuery({
         queryKey: ['/auth'],
-        queryFn: apiBaseUrl ? getSession : skipToken,
+        queryFn: apiBaseUrl
+            ? async () => {
+                  const res = await fetch(new URL('/auth', apiBaseUrl), {
+                      credentials: 'include',
+                  })
+
+                  if (!res.ok) {
+                      if (res.status == 404) return null
+
+                      const error = (await res.json()) as ApiError
+                      throw new FetchError(
+                          error.message,
+                          res.status,
+                          error.error
+                      )
+                  }
+
+                  return (await res.json()) as TokenClaims
+              }
+            : skipToken,
     })
 
     const loginMutation = useMutation({
         mutationKey: ['/auth/discord/login'],
-        mutationFn: async () => {
+        async mutationFn() {
             if (!apiBaseUrl) return
 
             const redirectUri = encodeURIComponent(window.location.href)
@@ -62,11 +74,15 @@ export function useAuth() {
 
     const refreshMutation = useMutation({
         mutationKey: ['/auth/refresh'],
-        mutationFn: async () => {
+        async mutationFn() {
             if (!apiBaseUrl) return
             await fetch(new URL('/auth/refresh', apiBaseUrl), {
                 method: 'POST',
+                credentials: 'include',
             })
+        },
+        async onSuccess() {
+            await queryClient.invalidateQueries({ queryKey: ['/auth'] })
         },
     })
 
@@ -76,7 +92,11 @@ export function useAuth() {
             if (!apiBaseUrl) return
             await fetch(new URL('/auth/logout', apiBaseUrl), {
                 method: 'POST',
+                credentials: 'include',
             })
+        },
+        async onSuccess() {
+            await queryClient.invalidateQueries({ queryKey: ['/auth'] })
         },
     })
 
@@ -94,7 +114,7 @@ export function useAuth() {
 
     return {
         apiBaseUrl,
-        session: sessionQuery.data,
+        session: sessionQuery.data ?? null,
         onLogin,
         onRefresh,
         onLogout,

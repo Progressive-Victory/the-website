@@ -255,7 +255,7 @@ interface NavDrawerProps {
     navitems: NavItem[]
     mobileSubnavItem: NavItem | null
     setMobileSubnavItem: (item: NavItem | null) => void
-    session: TokenClaims | undefined
+    session: TokenClaims | null
     avatarSrc: string
     onLogin: () => Promise<void>
 }

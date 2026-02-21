@@ -39,6 +39,7 @@ export function useFetch() {
 
         const req: RequestInit = {
             method,
+            credentials: 'include',
             signal: options?.signal,
         }
 
