@@ -17,6 +17,7 @@ import Image from 'next/image'
 import NextLink from 'next/link'
 import type React from 'react'
 import { useEffect, useState } from 'react'
+import z from 'zod'
 
 /**
  * A navigation header for the Progressive Victory website.
@@ -566,19 +567,19 @@ export function Header() {
         null
     )
 
-    const { data: discordUser } = useQuery({
-        queryKey: [`/discordUsers/${session?.discordUserId}`],
+    const { data: discordUsers } = useQuery({
+        queryKey: [`/discordUsers/${session?.userId}`],
         queryFn:
             session?.discordUserId != null
                 ? async () => {
-                      return await onGet<DiscordUser>(
-                          `/discordUsers/${session.discordUserId}`,
-                          zDiscordUser
+                      return await onGet<DiscordUser[]>(
+                          `/discordUsers/${session?.userId}`,
+                          z.array(zDiscordUser)
                       )
                   }
                 : skipToken,
     })
-    const avatarSrc = discordUser?.image ?? ''
+    const avatarSrc = discordUsers?.[0]?.image ?? ''
 
     useEffect(() => {
         if (!isOpen) return
