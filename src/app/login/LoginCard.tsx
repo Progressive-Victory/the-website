@@ -12,24 +12,22 @@ export interface LoginCardProps {
 export function LoginCard({ redirect }: LoginCardProps) {
     const { onLogin } = useAuth()
 
-    function get_error_message(code: string | null) {
+    const params = useSearchParams()
+    const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+    function getErrorMessage(code: string | null) {
         if (!code) return null
 
         switch (code) {
             case 'DiscordEmailNotVerified':
                 return 'Your Discord email is not verified! Please go verify it and then try again.'
-            case 'OAuthCallbackError':
-                return 'Failed to login with Discord. Please try again later.'
             default:
                 return 'An unknown error occurred. Please try again later.'
         }
     }
 
-    const params = useSearchParams()
-    const [errorMessage, setErrorMessage] = useState<string | null>(null)
-
     useEffect(() => {
-        setErrorMessage(get_error_message(params.get('error')))
+        setErrorMessage(getErrorMessage(params.get('error')))
     }, [params])
 
     return (
