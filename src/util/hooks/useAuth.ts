@@ -51,16 +51,18 @@ export function useAuth() {
             : skipToken,
     })
 
-    const loginMutation = useMutation({
+    const loginMutation = useMutation<void, Error, { redirect?: string }>({
         mutationKey: ['/auth/discord/login'],
-        async mutationFn() {
+        async mutationFn({ redirect }) {
             if (!apiBaseUrl) return
 
-            const redirectUri = encodeURIComponent(window.location.href)
+            const redirectUri =
+                redirect ?? encodeURIComponent(window.location.href)
+            const errorUri = `${window.location.origin}/login`
 
             const res = await fetch(
                 new URL(
-                    `/auth/discord/login?redirectUri=${redirectUri}`,
+                    `/auth/discord/login?redirectUri=${redirectUri}&errorUri=${errorUri}`,
                     apiBaseUrl
                 )
             )
@@ -101,7 +103,8 @@ export function useAuth() {
         },
     })
 
-    const onLogin = loginMutation.mutateAsync
+    const onLogin = (redirect?: string) =>
+        loginMutation.mutateAsync({ redirect })
     const onRefresh = refreshMutation.mutateAsync
     const onLogout = logoutMutation.mutateAsync
 

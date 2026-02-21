@@ -563,7 +563,7 @@ function NavDrawer({
 
 export function Header() {
     const { session, onLogin } = useAuth()
-    const { onGet } = useFetch()
+    const { ready, onGet } = useFetch()
 
     const [isOpen, setIsOpen] = useState(false)
     const [activeSubnav, setActiveSubnav] = useState<NavItem | null>(null)
@@ -574,7 +574,7 @@ export function Header() {
     const { data: discordUsers } = useQuery({
         queryKey: [`/discordUsers/${session?.userId}`],
         queryFn:
-            session?.discordUserId != null
+            session?.discordUserId != null && ready
                 ? async () => {
                       return await onGet<DiscordUser[]>(
                           `/discordUsers/${session?.userId}`,
