@@ -1,10 +1,12 @@
 'use client'
 
 import styles from './Card.module.css'
+import { BaseButton } from '@/components/common/buttons/Button'
 import {
     HeartIcon,
     ChatBubbleLeftRightIcon,
     ArrowUpOnSquareIcon,
+    EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline'
 import {
     HeartIcon as SolidHeartIcon,
@@ -53,22 +55,11 @@ export interface TiltProps {
     }
 }
 
-export interface MessageData {
-    username: string
-    nameColor?: string
-    text: string
-    image?: string
-    avatar: string
-    avatarRounded?: boolean
-    motionProps?: MotionProps
-    tiltProps?: TiltProps
-    imageProps?: ImageProps
-}
-
 interface MessageProps {
     avatar: string
-    text: string
     username: string
+    children: React.ReactNode
+
     motionProps?: MotionProps
     tiltProps?: TiltProps
     avatarRounded?: boolean
@@ -76,15 +67,24 @@ interface MessageProps {
     nameColor?: string
     image?: string
     imageProps?: ImageProps
-    children?: React.JSX.Element
+
+    childrenBelowText?: React.JSX.Element
     botLeftContent?: React.JSX.Element
     botDivider?: boolean
+    showEllipsis?: boolean
+
+    ctaLabel?: string
+    ctaHref?: string
+    ctaClassName?: string
+    ctaTarget?: React.HTMLAttributeAnchorTarget
+    ctaRel?: string
 }
 
 export function Message({
     avatar,
-    text,
     username,
+    children,
+
     motionProps,
     tiltProps,
     avatarRounded = true,
@@ -92,9 +92,16 @@ export function Message({
     nameColor,
     image,
     imageProps,
-    children,
+
     botLeftContent,
     botDivider = false,
+    showEllipsis = false,
+
+    ctaLabel,
+    ctaHref,
+    ctaClassName,
+    ctaTarget,
+    ctaRel,
 }: MessageProps): React.JSX.Element {
     const [clickedHeart, setClickedHeart] = useState(false)
     const [clickedBubble, setClickedBubble] = useState(false)
@@ -161,6 +168,7 @@ export function Message({
                             height={38}
                             unoptimized
                         />
+
                         <p
                             className={styles.username}
                             style={{ color: nameColor }}
@@ -168,9 +176,36 @@ export function Message({
                             {username}
                         </p>
                     </div>
+
+                    {showEllipsis && (
+                        <div className={styles.ellipsisLayout}>
+                            {ctaHref && ctaLabel ? (
+                                <BaseButton
+                                    label={ctaLabel}
+                                    href={ctaHref}
+                                    target={ctaTarget}
+                                    rel={ctaRel}
+                                    className={[styles.primary, ctaClassName]
+                                        .filter(Boolean)
+                                        .join(' ')}
+                                />
+                            ) : null}
+
+                            <button
+                                type="button"
+                                className={styles.ellipsisButton}
+                                aria-label="More options"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <EllipsisHorizontalIcon
+                                    className={styles.ellipsisIcon}
+                                />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
-                <p className={styles.text}>{text}</p>
+                <div className={styles.text}>{children}</div>
             </div>
 
             {image && (
@@ -189,8 +224,6 @@ export function Message({
                     />
                 </div>
             )}
-
-            {children && children}
 
             {botDivider && <hr className={styles.divider} />}
 

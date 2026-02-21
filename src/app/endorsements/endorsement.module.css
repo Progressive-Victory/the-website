@@ -1,0 +1,133 @@
+.page {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-inline: 1rem;
+    padding-bottom: 2rem;
+}
+
+.headingWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.heading {
+    width: 100%;
+    text-align: center;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.headingHighlight {
+    color: #09223a;
+}
+
+.subheading {
+    margin: 0;
+    text-align: center;
+    max-width: 52rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.container {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.buttonRow {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
+.hero {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-bottom: 4rem;
+}
+
+.messages {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.75rem;
+    padding: 0 1rem;
+}
+
+.messageCard {
+    max-width: 36rem;
+}
+
+@media (min-width: 1280px) {
+    .messageCard {
+        width: 30vw;
+    }
+}
+
+.orderLastXlFirst {
+    order: 9999;
+}
+
+@media (min-width: 1280px) {
+    .orderLastXlFirst {
+        order: -9999;
+    }
+}
+
+.primary {
+    background-color: #ebafa9;
+    color: #ce3728;
+    padding-inline: 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-height: 0rem;
+}
+
+.stateInitative {
+    background-color: #fed67c;
+    color: #ab7500;
+    padding-inline: 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-height: 0rem;
+}
+
+.secondary {
+    background-color: #d4e7f5;
+    color: #2986cc;
+    padding-inline: 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-height: 0rem;
+}
+
+.tertiary {
+    background-color: #9fc9e8;
+    color: #1b4568;
+    padding-inline: 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-height: 0rem;
+}
+
+.filterButtonActive {
+    background-color: #ce3728;
+    color: #ffffff;
+    padding-inline: 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}
