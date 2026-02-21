@@ -113,6 +113,7 @@
 }
 
 .donorCard {
+    position: relative;
     border-radius: 1rem;
     padding: 0.85rem 0.9rem;
     background: rgba(255, 255, 255, 0.72);
@@ -198,9 +199,11 @@
     background: rgba(2, 6, 23, 0.38);
     backdrop-filter: blur(10px) saturate(140%);
     -webkit-backdrop-filter: blur(10px) saturate(140%);
+    will-change: opacity, backdrop-filter;
 }
 
 .modal {
+    position: relative;
     width: min(56rem, 100%);
     height: min(80dvh, 48rem);
     min-height: 18rem;
@@ -215,6 +218,21 @@
         0 1px 0 rgba(255, 255, 255, 0.75) inset,
         0 30px 80px rgba(15, 23, 42, 0.35);
     overflow: hidden;
+    transform-origin: 50% 40%;
+    will-change: transform, opacity;
+}
+
+.modal::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.55),
+        rgba(255, 255, 255, 0) 22%
+    );
+    opacity: 0.35;
 }
 
 .modalHeader {
@@ -310,4 +328,14 @@
     border: 1px solid #d1d5db;
     padding: 0 0.75rem;
     background: rgba(255, 255, 255, 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .modalBackdrop {
+        will-change: auto;
+    }
+
+    .modal {
+        will-change: auto;
+    }
 }
