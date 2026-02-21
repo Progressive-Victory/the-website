@@ -1,10 +1,12 @@
+// page.tsx
 'use client'
 
 import styles from './page.module.css'
 import { DonorView } from './panel_views/DonorView'
+import { HistoryView } from './panel_views/HistoryView'
 import { MemberView } from './panel_views/MemberView'
 import { ListElement, List } from '@/app/admin/layout/List'
-import { CollapsibleSection, ImageWithFallback } from '@/components/common'
+import { ImageWithFallback } from '@/components/common'
 import { FormState } from '@/components/common/forms'
 import { Tab } from '@/components/common/tab_bar/Tab'
 import { TabBar } from '@/components/common/tab_bar/TabBar'
@@ -37,9 +39,10 @@ import {
     useQueryClient,
     UseQueryResult,
 } from '@tanstack/react-query'
-import cx from 'classnames'
 import { useCallback, useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
+
+// page.tsx
 
 export default function Page() {
     const queryClient = useQueryClient()
@@ -105,6 +108,7 @@ export default function Page() {
     const formZip = formState?.editing
         ? formState?.form?.location?.zip
         : userQuery.data?.location?.zip
+
     const locationQuery = useQuery({
         queryKey: [`/locations/${formZip}`],
         queryFn:
@@ -235,6 +239,8 @@ export default function Page() {
         }
 
         setSelectedId(value.id)
+        // Optional: clear any prior history snapshot when switching users
+        setSelectedHistory(null)
     }
 
     const handleSave = (user: User) => {
@@ -396,7 +402,6 @@ export default function Page() {
                                 selectedId={selectedId}
                                 user={userQuery.data}
                                 selectedHistory={selectedHistory}
-                                onSelectHistory={handleSelectHistory}
                                 formState={formState}
                                 setFormState={setFormState}
                                 saving={updateMutation.isPending}
@@ -426,6 +431,16 @@ export default function Page() {
                                 onDonorSearch={onDonorSearch}
                                 renderDonorItem={renderDonorItem}
                                 handleDeleteDonorItem={handleDeleteDonorItem}
+                            />
+                        </Tab>
+
+                        <Tab key="history" label="History">
+                            <HistoryView
+                                selectedId={selectedId}
+                                user={userQuery.data}
+                                selectedHistory={selectedHistory}
+                                onSelectHistory={handleSelectHistory}
+                                isRefetching={userQuery.isRefetching}
                             />
                         </Tab>
                     </TabBar>
