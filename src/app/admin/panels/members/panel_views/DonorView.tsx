@@ -9,7 +9,8 @@ import type { PaginatedResponse } from '@/contracts/responses'
 import type { FetchError } from '@/util/hooks'
 import type { UseQueryResult } from '@tanstack/react-query'
 import cx from 'classnames'
-import React, { ChangeEvent, useMemo } from 'react'
+import { motion } from 'motion/react'
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
 
 export interface DonorViewProps {
     selectedId: number
@@ -64,6 +65,52 @@ export function DonorView({
         onDonorSearch({ ...donorSearch, query: e.target.value })
     }
 
+    const [overlayMounted, setOverlayMounted] = useState(false)
+    const [overlayOpen, setOverlayOpen] = useState(false)
+
+    useEffect(() => {
+        if (pickingDonor) {
+            setOverlayMounted(true)
+            requestAnimationFrame(() => setOverlayOpen(true))
+        } else if (overlayMounted) {
+            setOverlayOpen(false)
+        }
+    }, [pickingDonor, overlayMounted])
+
+    const backdropVariants = {
+        open: {
+            opacity: 1,
+            backdropFilter: 'blur(10px) saturate(140%)',
+        },
+        closed: {
+            opacity: 0,
+            backdropFilter: 'blur(0px) saturate(140%)',
+        },
+    } as const
+
+    const modalVariants = {
+        open: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+        },
+        closed: {
+            opacity: 0,
+            y: 10,
+            scale: 0.985,
+        },
+    } as const
+
+    const backdropTransition = {
+        duration: 0.22,
+        ease: [0.2, 0.9, 0.2, 1],
+    } as const
+
+    const modalTransition = {
+        duration: 0.26,
+        ease: [0.22, 1, 0.36, 1],
+    } as const
+
     return (
         <div className={styles.root}>
             {!hasLinked && (
@@ -99,7 +146,8 @@ export function DonorView({
                                 Donor Details
                             </div>
                             <div className={styles.linkedSubtitle}>
-                                Manage donor links for this user.
+                                View donor information sourced from ActBlue
+                                contributions.
                             </div>
                         </div>
 
@@ -194,19 +242,30 @@ export function DonorView({
                 </div>
             )}
 
-            {pickingDonor ? (
-                <div
+            {overlayMounted ? (
+                <motion.div
                     className={styles.modalBackdrop}
                     role="presentation"
+                    initial="closed"
+                    animate={overlayOpen ? 'open' : 'closed'}
+                    variants={backdropVariants}
+                    transition={backdropTransition}
+                    onAnimationComplete={() => {
+                        if (!overlayOpen) setOverlayMounted(false)
+                    }}
                     onMouseDown={(e) => {
                         if (e.target === e.currentTarget) closePicker()
                     }}
                 >
-                    <div
+                    <motion.div
                         className={styles.modal}
                         role="dialog"
                         aria-modal="true"
                         aria-label="Link donor"
+                        initial="closed"
+                        animate={overlayOpen ? 'open' : 'closed'}
+                        variants={modalVariants}
+                        transition={modalTransition}
                     >
                         <div className={styles.modalHeader}>
                             <div className={styles.modalHeaderLeft}>
@@ -220,7 +279,6 @@ export function DonorView({
                             </div>
 
                             <div className={styles.modalHeaderRight}>
-                                {/* DonorView-only: search input with NO filter button */}
                                 <div className={styles.modalSearch}>
                                     <div className={styles.searchInputBare}>
                                         <input
@@ -260,8 +318,8 @@ export function DonorView({
                                 Cancel
                             </button>
                         </div>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             ) : null}
         </div>
     )
