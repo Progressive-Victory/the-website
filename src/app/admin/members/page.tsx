@@ -2,7 +2,7 @@
 
 import styles from './page.module.css'
 import { ListElement, PaginatedList } from '@/components/admin/PaginatedList'
-import { CollapsibleSection, ImageWithFallback } from '@/components/common'
+import { CollapsibleSection, DiscordAvatar } from '@/components/common'
 import {
     CheckboxField,
     DateField,
@@ -230,10 +230,10 @@ export default function Page() {
                 selected={selectedId == item.id}
                 onClick={() => handleSelectItem(item)}
             >
-                <ImageWithFallback
-                    useFallback={!item.discordUsers?.[0].image}
-                    src={`https://cdn.discordapp.com/avatars/${item.discordUsers?.[0].id}/${item.discordUsers?.[0].image ?? ''}`} // need to figure out alternative for this
-                    alt="user profile picture"
+                <DiscordAvatar
+                    discordUserId={item.discordUsers?.[0]?.id}
+                    imageId={item.discordUsers?.[0]?.image}
+                    size={48}
                 />
                 <div className={styles.userMeta}>
                     <span className={styles.userName}>{makeTitle(item)}</span>
@@ -305,10 +305,10 @@ export default function Page() {
                     ) : (
                         <ul>
                             <ListElement>
-                                <ImageWithFallback
-                                    src=""
-                                    alt="user profile picture"
-                                    useFallback
+                                <DiscordAvatar
+                                    discordUserId={undefined}
+                                    imageId={undefined}
+                                    size={48}
                                 />
                                 <div className={styles.loading}>
                                     <PulseLoader size={8} color="#bbb" />

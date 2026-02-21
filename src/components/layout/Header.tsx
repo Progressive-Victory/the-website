@@ -257,7 +257,8 @@ interface NavDrawerProps {
     mobileSubnavItem: NavItem | null
     setMobileSubnavItem: (item: NavItem | null) => void
     session: TokenClaims | null
-    avatarSrc: string
+    discordUserId: string | undefined
+    avatarImageId: string | undefined
     onLogin: () => Promise<void>
 }
 
@@ -267,7 +268,8 @@ function NavDrawer({
     mobileSubnavItem,
     setMobileSubnavItem,
     session,
-    avatarSrc,
+    discordUserId,
+    avatarImageId,
     onLogin,
 }: NavDrawerProps) {
     const showSubnav = mobileSubnavItem !== null
@@ -443,8 +445,10 @@ function NavDrawer({
                                                     label="Account"
                                                     buttonVariant="long"
                                                     href="/account"
-                                                    avatarSrc={avatarSrc}
-                                                    avatarAlt="User avatar"
+                                                    discordUserId={
+                                                        discordUserId
+                                                    }
+                                                    imageId={avatarImageId}
                                                 />
                                             </motion.div>
                                         )}
@@ -579,7 +583,6 @@ export function Header() {
                   }
                 : skipToken,
     })
-    const avatarSrc = discordUsers?.[0]?.image ?? ''
 
     useEffect(() => {
         if (!isOpen) return
@@ -775,8 +778,8 @@ export function Header() {
                         <AccountButton
                             label="Account"
                             href="/account"
-                            avatarSrc={avatarSrc}
-                            avatarAlt="User avatar"
+                            discordUserId={discordUsers?.[0]?.id}
+                            imageId={discordUsers?.[0]?.image}
                         />
                     )}
                 </div>
@@ -874,7 +877,8 @@ export function Header() {
                 mobileSubnavItem={mobileSubnavItem}
                 setMobileSubnavItem={setMobileSubnavItem}
                 session={session}
-                avatarSrc={avatarSrc}
+                discordUserId={discordUsers?.[0]?.id}
+                avatarImageId={discordUsers?.[0]?.image}
                 onLogin={onLogin}
             />
         </>

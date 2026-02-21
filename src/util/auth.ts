@@ -78,7 +78,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     try {
                         await fetch(
                             new URL(
-                                '/discordUsers/${profile.id}/avatar',
+                                `/discordUsers/${profile.id}/avatar`,
                                 process.env.PV_WEBSITE_API_URL
                             ),
                             {
