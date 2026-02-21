@@ -106,7 +106,6 @@ export function useFetch() {
 
     return {
         ready: !!apiBaseUrl,
-        session,
         onFetch,
         onGet,
         onPut,

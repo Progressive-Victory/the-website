@@ -13,14 +13,13 @@ import { MainLayout } from '@/components/layout'
 import { OnboardingStage } from '@/contracts/data'
 import {
     UserOnboardingCollectInfoRequest,
-    UserOnboardingJoinRequest,
     UserOnboardingVerifyRequest,
 } from '@/contracts/requests'
 import {
     DiscordUserIsInServerResponse,
     zDiscordUserIsInServerResponse,
 } from '@/contracts/responses'
-import { useCurrentUser, useFetch } from '@/util/hooks'
+import { useAuth, useCurrentUser, useFetch } from '@/util/hooks'
 import {
     keepPreviousData,
     skipToken,
@@ -28,12 +27,11 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
 export default function VolunteerPage() {
-    const session = useSession()
     const queryClient = useQueryClient()
+    const { session } = useAuth()
     const { ready, onGet, onPost, onPut } = useFetch()
 
     const [overrideStage, setOverrideStage] = useState<OnboardingStage | null>(
@@ -41,18 +39,19 @@ export default function VolunteerPage() {
     )
 
     const user = useCurrentUser()
-    const discordUserId = session.data?.discordId
+    const discordUserId = session?.discordUserId ?? null
 
     const isInServerResult = useQuery({
         queryKey: [`/discordUsers/${discordUserId}/isInServer`],
-        queryFn: ready && discordUserId != null
-            ? ({ signal }) =>
-                  onGet<DiscordUserIsInServerResponse>(
-                      `/discordUsers/${discordUserId}/isInServer`,
-                      zDiscordUserIsInServerResponse,
-                      { signal }
-                  )
-            : skipToken,
+        queryFn:
+            ready && discordUserId != null
+                ? ({ signal }) =>
+                      onGet<DiscordUserIsInServerResponse>(
+                          `/discordUsers/${discordUserId}/isInServer`,
+                          zDiscordUserIsInServerResponse,
+                          { signal }
+                      )
+                : skipToken,
         placeholderData: keepPreviousData,
     })
 
@@ -119,9 +118,13 @@ export default function VolunteerPage() {
     })
 
     const joinMutation = useMutation({
-        mutationFn: async (obj: UserOnboardingJoinRequest) => {
+        mutationFn: async () => {
             if (!user.data) return
-            await onPut(`/users/${user.data?.id}/onboardingStages/join`, obj)
+            await onPost(
+                `/users/${user.data?.id}/onboardingStages/join`,
+                null,
+                null
+            )
         },
         onSettled: () =>
             queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
@@ -143,10 +146,8 @@ export default function VolunteerPage() {
     }
 
     const handleJoin = () => {
-        if (!session.data) return
-        joinMutation.mutate({
-            discordToken: `Bearer ${session.data?.accessToken}`,
-        })
+        if (!session) return
+        joinMutation.mutate()
     }
 
     const handleReturnToStart = () => {

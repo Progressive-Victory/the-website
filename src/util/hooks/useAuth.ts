@@ -96,6 +96,7 @@ export function useAuth() {
             })
         },
         async onSuccess() {
+            window.location.href = '/'
             await queryClient.invalidateQueries({ queryKey: ['/auth'] })
         },
     })
@@ -114,6 +115,7 @@ export function useAuth() {
 
     return {
         apiBaseUrl,
+        isSessionLoading: sessionQuery.isLoading,
         session: sessionQuery.data ?? null,
         onLogin,
         onRefresh,

@@ -9,10 +9,10 @@ import { LoginButton } from '@/components/common/buttons/button_types/LoginButto
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
-import { TokenClaims } from '@/contracts/data'
-import { useAuth } from '@/util/hooks'
+import { DiscordUser, TokenClaims, zDiscordUser } from '@/contracts/data'
+import { useAuth, useFetch } from '@/util/hooks'
+import { skipToken, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
-import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import NextLink from 'next/link'
 import type React from 'react'
@@ -558,6 +558,7 @@ function NavDrawer({
 
 export function Header() {
     const { session, onLogin } = useAuth()
+    const { onGet } = useFetch()
 
     const [isOpen, setIsOpen] = useState(false)
     const [activeSubnav, setActiveSubnav] = useState<NavItem | null>(null)
@@ -565,8 +566,19 @@ export function Header() {
         null
     )
 
-    const { data: imgSession } = useSession()
-    const avatarSrc = imgSession?.user?.image ?? ''
+    const { data: discordUser } = useQuery({
+        queryKey: [`/discordUsers/${session?.discordUserId}`],
+        queryFn:
+            session?.discordUserId != null
+                ? async () => {
+                      return await onGet<DiscordUser>(
+                          `/discordUsers/${session.discordUserId}`,
+                          zDiscordUser
+                      )
+                  }
+                : skipToken,
+    })
+    const avatarSrc = discordUser?.image ?? ''
 
     useEffect(() => {
         if (!isOpen) return
