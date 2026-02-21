@@ -2,14 +2,18 @@
 
 import { BaseButton, BaseVisualProps } from '../Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
-import { signOut } from 'next-auth/react'
+import { useAuth } from '@/util/hooks'
 
 export type LogoutButtonProps = BaseVisualProps & {
     callbackUrl?: string
 }
 
-export function LogoutButton(props: LogoutButtonProps) {
-    const { className, callbackUrl, ...rest } = props
+export function LogoutButton({
+    className,
+    callbackUrl,
+    ...rest
+}: LogoutButtonProps) {
+    const { onLogout } = useAuth()
 
     const mergedClassName = [buttonStyles.primary, className]
         .filter(Boolean)
@@ -20,7 +24,7 @@ export function LogoutButton(props: LogoutButtonProps) {
             {...rest}
             className={mergedClassName}
             onClick={() => {
-                void signOut({ callbackUrl })
+                void onLogout(callbackUrl)
             }}
         />
     )

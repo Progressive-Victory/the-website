@@ -31,8 +31,11 @@ import { useEffect, useState } from 'react'
 
 export default function VolunteerPage() {
     const queryClient = useQueryClient()
-    const { session } = useAuth()
+    const { isSessionLoading, session } = useAuth()
     const { ready, onGet, onPost, onPut } = useFetch()
+
+    if (!isSessionLoading && !session)
+        window.location.href = '/login?redirect=/volunteer'
 
     const [overrideStage, setOverrideStage] = useState<OnboardingStage | null>(
         null

@@ -31,7 +31,6 @@
         "mongoose": "^8.21.0",
         "motion": "^12.29.0",
         "next": "15.4.10",
-        "next-auth": "5.0.0-beta.30",
         "next-sitemap": "^4.2.3",
         "phone": "^3.1.70",
         "postal-code-validator": "^1.0.3",

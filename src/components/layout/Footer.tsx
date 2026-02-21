@@ -136,7 +136,6 @@ function MobileFooter() {
                     {session ? (
                         <LogoutButton
                             label="Sign Out"
-                            callbackUrl="/"
                             className={`${buttonStyles.plain} ${styles.mobileBottomNavButton}`}
                         />
                     ) : (
@@ -237,7 +236,6 @@ function DesktopFooter() {
                         {session ? (
                             <LogoutButton
                                 label="Sign Out"
-                                callbackUrl="/"
                                 className={`${buttonStyles.plain} ${styles.bottomNavButtonAdjustment}`}
                             />
                         ) : (

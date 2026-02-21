@@ -1,17 +1,15 @@
-'use client'
-
-import { LoginCard } from '@/app/login/LoginCard'
+import { LoginCard } from './LoginCard'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
-import { MainLayout } from '@/components/layout/MainLayout'
+import { MainLayout } from '@/components/layout'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 
-export interface LoginPageProps {
-    redirect: string | null
-}
+export default function Login() {
+    const params = useSearchParams()
+    const redirect = params.get('redirect')
 
-export function LoginPage({ redirect }: LoginPageProps) {
     return (
         <MainLayout>
             <div

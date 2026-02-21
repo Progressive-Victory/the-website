@@ -88,7 +88,7 @@ export function useAuth() {
         },
     })
 
-    const logoutMutation = useMutation({
+    const logoutMutation = useMutation<void, Error, { redirect?: string }>({
         mutationKey: ['/auth/logout'],
         mutationFn: async () => {
             if (!apiBaseUrl) return
@@ -97,8 +97,8 @@ export function useAuth() {
                 credentials: 'include',
             })
         },
-        async onSuccess() {
-            window.location.href = '/'
+        async onSuccess(_data, { redirect }) {
+            window.location.href = redirect ?? '/'
             await queryClient.invalidateQueries({ queryKey: ['/auth'] })
         },
     })
@@ -106,7 +106,8 @@ export function useAuth() {
     const onLogin = (redirect?: string) =>
         loginMutation.mutateAsync({ redirect })
     const onRefresh = refreshMutation.mutateAsync
-    const onLogout = logoutMutation.mutateAsync
+    const onLogout = (redirect?: string) =>
+        logoutMutation.mutateAsync({ redirect })
 
     useEffect(() => {
         const interval = setInterval(() => {
