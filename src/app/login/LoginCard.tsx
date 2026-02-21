@@ -10,7 +10,9 @@ export interface LoginCardProps {
 }
 
 export function LoginCard({ redirect }: LoginCardProps) {
-    const { onLogin } = useAuth()
+    const { session, onLogin } = useAuth()
+
+    if (session) window.location.href = redirect
 
     const params = useSearchParams()
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
