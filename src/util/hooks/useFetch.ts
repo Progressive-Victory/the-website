@@ -45,7 +45,8 @@ export function useFetch() {
 
         if (body != null && method != 'GET') {
             req.body = JSON.stringify(body)
-            req.headers!['Content-Type'] = 'application/json'
+            req.headers ??= {}
+            req.headers['Content-Type'] = 'application/json'
         }
 
         let res = await fetch(fullUrl, req)
