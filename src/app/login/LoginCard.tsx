@@ -3,32 +3,21 @@
 import { useAuth } from '@/util/hooks'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
 
-export interface LoginCardProps {
-    redirect: string
-}
-
-export function LoginCard({ redirect }: LoginCardProps) {
+export function LoginCard() {
     const { session, onLogin } = useAuth()
 
     const params = useSearchParams()
-    const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-    function getErrorMessage(code: string | null) {
-        if (!code) return null
+    const redirect = params.get('redirect') ?? '/account'
+    const error = params.get('error')
 
-        switch (code) {
-            case 'DiscordEmailNotVerified':
-                return 'Your Discord email is not verified! Please go verify it and then try again.'
-            default:
-                return 'An unknown error occurred. Please try again later.'
-        }
-    }
-
-    useEffect(() => {
-        setErrorMessage(getErrorMessage(params.get('error')))
-    }, [params])
+    const errorMessage =
+        error == 'DiscordEmailNotVerified'
+            ? 'Your Discord email is not verified! Please go verify it and then try again.'
+            : error
+              ? 'An unknown error occurred. Please try again later.'
+              : null
 
     if (session) {
         window.location.href = redirect
