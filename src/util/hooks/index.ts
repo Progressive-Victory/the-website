@@ -1,3 +1,4 @@
+export * from './useAuth'
 export * from './useClickAway'
 export * from './useCurrentUser'
 export * from './useFetch'

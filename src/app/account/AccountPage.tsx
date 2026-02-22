@@ -5,15 +5,13 @@ import {
     ContentPageFrame,
     ContentSection,
 } from '@/components/content_sections/ContentSections'
-import { hasPermission, useCurrentUser, useFetch } from '@/util/hooks'
+import { hasPermission, useAuth, useCurrentUser } from '@/util/hooks'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
-import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useMemo } from 'react'
 
-export function Account() {
-    const { data: session } = useSession()
-    const { onSignOut } = useFetch()
+export function AccountPage() {
+    const { isSessionLoading, session, onLogout } = useAuth()
     const user = useCurrentUser()
 
     const canAccessAdminPanel = useMemo(() => {
@@ -23,11 +21,15 @@ export function Account() {
     }, [user.data])
 
     const handleSignOut = () => {
-        onSignOut()
-        void signOut({ callbackUrl: '/' })
+        void onLogout()
     }
 
-    if (!session) return null
+    if (isSessionLoading) return null
+
+    if (!session) {
+        window.location.href = '/'
+        return null
+    }
 
     return (
         <div className={styles.pageRoot}>

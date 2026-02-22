@@ -11,7 +11,8 @@ import {
 import { Permission, zPermission } from '@/contracts/data'
 import { UpdatePermissionRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
-import { FetchError, useFetch, usePaginatedSearch } from '@/util/hooks'
+import { FetchError } from '@/models'
+import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 

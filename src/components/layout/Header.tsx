@@ -9,12 +9,15 @@ import { LoginButton } from '@/components/common/buttons/button_types/LoginButto
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
+import { DiscordUser, TokenClaims, zDiscordUser } from '@/contracts/data'
+import { useAuth, useFetch } from '@/util/hooks'
+import { skipToken, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
-import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import NextLink from 'next/link'
 import type React from 'react'
 import { useEffect, useState } from 'react'
+import z from 'zod'
 
 /**
  * A navigation header for the Progressive Victory website.
@@ -248,23 +251,27 @@ function MobileBackButton(props: { onClick: () => void }) {
     )
 }
 
-function NavDrawer(props: {
+interface NavDrawerProps {
     isOpen: boolean
     navitems: NavItem[]
     mobileSubnavItem: NavItem | null
     setMobileSubnavItem: (item: NavItem | null) => void
-    session: unknown
-    avatarSrc: string
-}) {
-    const {
-        isOpen,
-        navitems,
-        mobileSubnavItem,
-        setMobileSubnavItem,
-        session,
-        avatarSrc,
-    } = props
+    session: TokenClaims | null
+    discordUserId: string | undefined
+    avatarImageId: string | undefined
+    onLogin: () => Promise<void>
+}
 
+function NavDrawer({
+    isOpen,
+    navitems,
+    mobileSubnavItem,
+    setMobileSubnavItem,
+    session,
+    discordUserId,
+    avatarImageId,
+    onLogin,
+}: NavDrawerProps) {
     const showSubnav = mobileSubnavItem !== null
 
     return (
@@ -423,7 +430,9 @@ function NavDrawer(props: {
                                                 <LoginButton
                                                     label="Log In"
                                                     buttonVariant="long"
-                                                    href="/login"
+                                                    onClick={() =>
+                                                        void onLogin()
+                                                    }
                                                 />
                                             </motion.div>
                                         ) : (
@@ -436,8 +445,10 @@ function NavDrawer(props: {
                                                     label="Account"
                                                     buttonVariant="long"
                                                     href="/account"
-                                                    avatarSrc={avatarSrc}
-                                                    avatarAlt="User avatar"
+                                                    discordUserId={
+                                                        discordUserId
+                                                    }
+                                                    imageId={avatarImageId}
                                                 />
                                             </motion.div>
                                         )}
@@ -551,14 +562,27 @@ function NavDrawer(props: {
 }
 
 export function Header() {
+    const { session, onLogin } = useAuth()
+    const { ready, onGet } = useFetch()
+
     const [isOpen, setIsOpen] = useState(false)
     const [activeSubnav, setActiveSubnav] = useState<NavItem | null>(null)
     const [mobileSubnavItem, setMobileSubnavItem] = useState<NavItem | null>(
         null
     )
 
-    const { data: session } = useSession()
-    const avatarSrc = session?.user?.image ?? ''
+    const { data: discordUsers } = useQuery({
+        queryKey: [`/discordUsers/${session?.userId}`],
+        queryFn:
+            session?.discordUserId != null && ready
+                ? async () => {
+                      return await onGet<DiscordUser[]>(
+                          `/discordUsers/${session?.userId}`,
+                          z.array(zDiscordUser)
+                      )
+                  }
+                : skipToken,
+    })
 
     useEffect(() => {
         if (!isOpen) return
@@ -746,13 +770,16 @@ export function Header() {
                     <DonateButton label="Donate" />
 
                     {!session ? (
-                        <LoginButton label="Log In" href="/login" />
+                        <LoginButton
+                            label="Log In"
+                            onClick={() => void onLogin()}
+                        />
                     ) : (
                         <AccountButton
                             label="Account"
                             href="/account"
-                            avatarSrc={avatarSrc}
-                            avatarAlt="User avatar"
+                            discordUserId={discordUsers?.[0]?.id}
+                            imageId={discordUsers?.[0]?.image}
                         />
                     )}
                 </div>
@@ -850,7 +877,9 @@ export function Header() {
                 mobileSubnavItem={mobileSubnavItem}
                 setMobileSubnavItem={setMobileSubnavItem}
                 session={session}
-                avatarSrc={avatarSrc}
+                discordUserId={discordUsers?.[0]?.id}
+                avatarImageId={discordUsers?.[0]?.image}
+                onLogin={onLogin}
             />
         </>
     )

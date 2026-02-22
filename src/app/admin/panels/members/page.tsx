@@ -2,9 +2,10 @@
 
 import styles from './page.module.css'
 import { DonorView } from './panel_views/DonorView'
+import { HistoryView } from './panel_views/HistoryView'
 import { MemberView } from './panel_views/MemberView'
 import { ListElement, List } from '@/app/admin/layout/List'
-import { CollapsibleSection, ImageWithFallback } from '@/components/common'
+import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
 import { Tab } from '@/components/common/tab_bar/Tab'
 import { TabBar } from '@/components/common/tab_bar/TabBar'
@@ -23,12 +24,8 @@ import {
 } from '@/contracts/data'
 import { UpdateUserRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
-import {
-    FetchError,
-    useCurrentUser,
-    useFetch,
-    usePaginatedSearch,
-} from '@/util/hooks'
+import { FetchError } from '@/models'
+import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     keepPreviousData,
     skipToken,
@@ -37,7 +34,6 @@ import {
     useQueryClient,
     UseQueryResult,
 } from '@tanstack/react-query'
-import cx from 'classnames'
 import { useCallback, useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
@@ -46,8 +42,10 @@ export default function Page() {
     const { ready, onGet, onPatch, onPost } = useFetch()
 
     const [selectedId, setSelectedId] = useState<number | null>(null)
+
     const [selectedHistory, setSelectedHistory] =
         useState<UpdateHistory<User> | null>(null)
+
     const [formState, setFormState] = useState<FormState<User> | null>(null)
     const [pickingDonor, setPickingDonor] = useState<boolean>(false)
 
@@ -105,6 +103,7 @@ export default function Page() {
     const formZip = formState?.editing
         ? formState?.form?.location?.zip
         : userQuery.data?.location?.zip
+
     const locationQuery = useQuery({
         queryKey: [`/locations/${formZip}`],
         queryFn:
@@ -133,14 +132,16 @@ export default function Page() {
             const result = await onPatch<User>(`/users/${id}`, request, zUser)
             return { ...user, ...result }
         },
-        // When the mutation begins, optimistically update the cache to use the new state
         onMutate: ({ id, user }) => {
             const prev: User | undefined = queryClient.getQueryData([
                 `/users/${id}`,
             ])
+
             queryClient.setQueryData([`/users/${id}`], user)
+
             if (id == loggedInUser.data?.id)
                 queryClient.setQueryData(['/users/current'], user)
+
             queryClient.setQueryData(
                 ['/users', search],
                 (res: PaginatedResponse<Role>) => ({
@@ -150,14 +151,17 @@ export default function Page() {
                     ),
                 })
             )
+
             return prev
         },
-        // If an error occurs, rollback to the previous state
         onError: (error, { id }, prev) => {
             console.error(error)
+
             queryClient.setQueryData([`/users/${id}`], prev)
+
             if (id == loggedInUser.data?.id)
                 queryClient.setQueryData(['/users/current'], prev)
+
             queryClient.setQueryData(
                 [`/users`, search],
                 (res: PaginatedResponse<Role>) => ({
@@ -168,11 +172,12 @@ export default function Page() {
                 })
             )
         },
-        // On success, update the cache to the returned value in case there are any discrepancies
         onSuccess: (data, { id }) => {
             queryClient.setQueryData([`/users/${id}`], data)
+
             if (id == loggedInUser.data?.id)
                 queryClient.setQueryData(['/users/current'], data)
+
             queryClient.setQueryData(
                 [`/users`, search],
                 (res: PaginatedResponse<Role>) => ({
@@ -183,7 +188,6 @@ export default function Page() {
                 })
             )
         },
-        // After either success or failure, invalidate the caches to refresh from the server
         onSettled: (_data, _error, { id }) =>
             Promise.all([
                 queryClient.invalidateQueries({ queryKey: ['/users', search] }),
@@ -197,11 +201,13 @@ export default function Page() {
     const handleSelectDonorItem = useCallback(
         async (value: ActBlueDonor, userId: number) => {
             setPickingDonor(false)
+
             await onPost<void>(
                 `/actblue/donors/${value.email}/link`,
                 { userId },
                 null
             )
+
             await queryClient.invalidateQueries({
                 queryKey: [`/users/${userId}`],
             })
@@ -210,7 +216,7 @@ export default function Page() {
     )
 
     const handleDeleteDonorItem = useCallback(
-        (value: ActBlueDonor, userId) => {
+        (value: ActBlueDonor, userId: number) => {
             void onPost<void>(
                 `/actblue/donors/${value.email}/link`,
                 { userId: null },
@@ -235,6 +241,8 @@ export default function Page() {
         }
 
         setSelectedId(value.id)
+
+        setSelectedHistory(null)
     }
 
     const handleSave = (user: User) => {
@@ -262,7 +270,11 @@ export default function Page() {
         return user.email ?? ''
     }
 
-    const makeFormTitle = (user: User | UserProfile) => {
+    const makeOverviewFormTitle = (user: User | UserProfile) => {
+        return makeTitle(user)
+    }
+
+    const makeHistoryFormTitle = (user: User | UserProfile) => {
         const name = makeTitle(user)
         if (!selectedHistory) return name
         return `${name} @ ${selectedHistory.historyWhenUpdatedUtc.toLocaleString()}`
@@ -292,15 +304,15 @@ export default function Page() {
                 selected={selectedId == item.id}
                 onClick={() => handleSelectItem(item)}
             >
-                <ImageWithFallback
-                    useFallback={!item.discordUsers?.[0].image}
-                    src={`https://cdn.discordapp.com/avatars/${item.discordUsers?.[0].id}/${item.discordUsers?.[0].image ?? ''}`} // need to figure out alternative for this
-                    alt="user profile picture"
+                <DiscordAvatar
+                    discordUserId={item.discordUsers?.[0]?.id}
+                    imageId={item.discordUsers?.[0]?.image}
+                    size={48}
                 />
                 <div className={styles.userMeta}>
                     <span className={styles.userName}>{makeTitle(item)}</span>
                     <span className={styles.userUsername}>
-                        {item.discordUsers?.[0].username ?? 'NOT FOUND'}
+                        {item.discordUsers?.[0]?.username ?? 'NOT FOUND'}
                     </span>
                 </div>
             </ListElement>
@@ -314,9 +326,7 @@ export default function Page() {
     }
 
     const handleSelectHistory = (history: UpdateHistory<User> | null) => {
-        if (history)
-            setSelectedHistory({ ...(userQuery.data ?? {}), ...history })
-        else setSelectedHistory(null)
+        setSelectedHistory(history)
     }
 
     return (
@@ -367,10 +377,10 @@ export default function Page() {
                     ) : (
                         <ul>
                             <ListElement>
-                                <ImageWithFallback
-                                    src=""
-                                    alt="user profile picture"
-                                    useFallback
+                                <DiscordAvatar
+                                    discordUserId={undefined}
+                                    imageId={undefined}
+                                    size={48}
                                 />
                                 <div className={styles.loading}>
                                     <PulseLoader size={8} color="#bbb" />
@@ -395,8 +405,7 @@ export default function Page() {
                             <MemberView
                                 selectedId={selectedId}
                                 user={userQuery.data}
-                                selectedHistory={selectedHistory}
-                                onSelectHistory={handleSelectHistory}
+                                selectedHistory={null}
                                 formState={formState}
                                 setFormState={setFormState}
                                 saving={updateMutation.isPending}
@@ -407,7 +416,7 @@ export default function Page() {
                                 roles={roles}
                                 roleOptions={roleOptions}
                                 makeFormTitle={() =>
-                                    makeFormTitle(userQuery.data)
+                                    makeOverviewFormTitle(userQuery.data)
                                 }
                                 handleSave={handleSave}
                                 getLocation={getLocation}
@@ -426,6 +435,20 @@ export default function Page() {
                                 onDonorSearch={onDonorSearch}
                                 renderDonorItem={renderDonorItem}
                                 handleDeleteDonorItem={handleDeleteDonorItem}
+                            />
+                        </Tab>
+
+                        <Tab key="history" label="History">
+                            <HistoryView
+                                selectedId={selectedId}
+                                user={userQuery.data}
+                                selectedHistory={selectedHistory}
+                                onSelectHistory={handleSelectHistory}
+                                isRefetching={userQuery.isRefetching}
+                                roles={roles}
+                                roleOptions={roleOptions}
+                                makeFormTitle={(u) => makeHistoryFormTitle(u)}
+                                getLocation={getLocation}
                             />
                         </Tab>
                     </TabBar>

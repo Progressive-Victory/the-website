@@ -1,26 +1,23 @@
 'use client'
 
 import styles from './MemberView.module.css'
-import { CollapsibleSection } from '@/components/common'
 import {
     CheckboxField,
     DateField,
     Form,
     FormGroup,
-    FormGroupProps,
     FormState,
+    PhoneField,
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
 import { Location, Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
-import cx from 'classnames'
 
 export interface MemberViewProps {
     selectedId: number
     user: User
     selectedHistory: UpdateHistory<User> | null
-    onSelectHistory: (update: UpdateHistory<User> | null) => void
 
     formState: FormState<User> | null
     setFormState: (next: FormState<User> | null) => void
@@ -40,7 +37,6 @@ export function MemberView({
     selectedId,
     user,
     selectedHistory,
-    onSelectHistory,
     formState,
     setFormState,
     saving,
@@ -78,7 +74,7 @@ export function MemberView({
                     readonly
                 />
                 <TextField label="Email" field="email" required />
-                <TextField label="Phone Number" field="phone" required />
+                <PhoneField label="Phone Number" field="phone" required />
                 <TextField
                     label="Preferred Name"
                     field="preferredName"
@@ -207,66 +203,6 @@ export function MemberView({
                     })}
                 />
             </FormGroup>
-
-            {!formState?.editing && !!user?.history?.length && (
-                <AccountHistoryField
-                    title="Account History"
-                    history={user?.history}
-                    selected={selectedHistory}
-                    onSelect={onSelectHistory}
-                    defaultCollapsed
-                />
-            )}
         </Form>
-    )
-}
-
-interface AccountHistoryFieldProps extends FormGroupProps<User> {
-    history?: UpdateHistory<User>[]
-    selected: UpdateHistory<User> | null
-    onSelect: (update: UpdateHistory<User> | null) => void
-}
-
-function AccountHistoryField({
-    title,
-    defaultCollapsed,
-    history,
-    selected,
-    onSelect,
-}: AccountHistoryFieldProps) {
-    const value = (history ?? []).sort(
-        (a, b) =>
-            b.historyWhenUpdatedUtc.getTime() -
-            a.historyWhenUpdatedUtc.getTime()
-    )
-
-    return (
-        <CollapsibleSection title={title} initialOpenState={!defaultCollapsed}>
-            <div className={styles.historyContainer}>
-                {value.map((update, i) => (
-                    <div key={i}>
-                        <button
-                            onClick={() => onSelect(i ? update : null)}
-                            className={cx(
-                                styles.historyEntry,
-                                (selected?.historyId == update.historyId ||
-                                    (!i && !selected)) &&
-                                    styles.historyEntrySelected
-                            )}
-                        >
-                            <span color="#4b5563">{`${update.historyType == 'I' ? 'Created' : 'Updated'} at `}</span>
-                            <span className={styles.historyEntryDate}>
-                                {update.historyWhenUpdatedUtc.toLocaleString()}
-                            </span>
-                            <span color="#4b5563">{' by '}</span>
-                            <code>
-                                {update.email ?? 'deleted user'}#
-                                {update.id.toString()}
-                            </code>
-                        </button>
-                    </div>
-                ))}
-            </div>
-        </CollapsibleSection>
     )
 }
