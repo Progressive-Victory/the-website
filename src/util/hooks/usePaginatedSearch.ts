@@ -37,11 +37,15 @@ export function usePaginatedSearch<T>(
             ? Math.min(search.limit, options.count - page * search.limit)
             : search.limit
 
-        return await onGet<PaginatedResponse<T>>(
+        const res = await onGet<PaginatedResponse<T>>(
             endpoint,
             zPaginatedResponse(schema),
             { query: { ...search, page, limit }, signal: options?.signal }
         )
+
+        console.log(res)
+
+        return res
     }
 
     const getAllPages = async (options: Options) => {

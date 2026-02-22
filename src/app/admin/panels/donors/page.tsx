@@ -1,14 +1,14 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, PaginatedList } from '@/components/admin/PaginatedList'
+import { ListElement, List } from '@/app/admin/layout/List'
 import {
     FormState,
     Form,
     TextField,
     FormGroup,
     DateField,
-} from '@/components/form'
+} from '@/components/common/forms'
 import {
     ActBlueDonor,
     zActBlueDonor,
@@ -17,7 +17,9 @@ import {
 } from '@/contracts/data'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
-import { useState, useMemo } from 'react'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { useState, useMemo, useCallback } from 'react'
 
 interface contributionData {
     total: number
@@ -27,8 +29,10 @@ interface contributionData {
 
 export default function Page() {
     const { ready, onGet, onPatch } = useFetch()
+    const navParams = useSearchParams()
+    const navEmail = navParams.get('email')
 
-    const [selectedEmail, setSelectedEmail] = useState<string | null>(null)
+    const [selectedEmail, setSelectedEmail] = useState<string | null>(navEmail)
     const [formState, setFormState] = useState<FormState<ActBlueDonor> | null>(
         null
     )
@@ -39,18 +43,19 @@ export default function Page() {
         onSearch,
     } = usePaginatedSearch<ActBlueDonor>('/actblue/donors', zActBlueDonor)
 
+    useCallback(() => {
+        console.error(searchQuery.error)
+    }, [searchQuery.error])
+
     const donorQuery = useQuery({
         queryKey: [`/actblue/donors/${selectedEmail}`],
         queryFn:
             ready && selectedEmail != null
-                ? async () => {
-                      const res = await onGet<ActBlueDonor>(
+                ? async () =>
+                      onGet<ActBlueDonor>(
                           `/actblue/donors/${selectedEmail}`,
                           zActBlueDonor
                       )
-                      console.log(res)
-                      return res
-                  }
                 : skipToken,
         placeholderData: keepPreviousData,
     })
@@ -130,7 +135,7 @@ export default function Page() {
                 selected={selectedEmail == item.email}
                 onClick={() => handleSelectItem(item)}
             >
-                <div>
+                <div className={styles.userName}>
                     <span>{makeTitle(item)}</span>
                 </div>
             </ListElement>
@@ -139,7 +144,7 @@ export default function Page() {
 
     return (
         <>
-            <PaginatedList
+            <List
                 search={search}
                 count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}
@@ -148,7 +153,7 @@ export default function Page() {
                 onSearch={onSearch}
             >
                 {searchQuery.data?.data?.map((item) => renderItem(item))}
-            </PaginatedList>
+            </List>
 
             <div className={styles.detailsPane}>
                 {selectedEmail == null && (
@@ -159,7 +164,7 @@ export default function Page() {
                         key={selectedEmail}
                         form={donorQuery.data}
                         title={makeTitle(donorQuery.data)}
-                        readonly={false}
+                        readonly={true}
                         saving={false}
                         isInvalid={false}
                         onUpdate={() => {
@@ -283,6 +288,18 @@ export default function Page() {
                                                 `$${lineitem.amountLessAbFees}`
                                             }
                                         />
+                                        <br />
+                                        <Link
+                                            href={{
+                                                pathname: `/admin/panels/contributions`,
+                                                query: {
+                                                    lineitemId:
+                                                        lineitem.lineitemId,
+                                                },
+                                            }}
+                                        >
+                                            Full Details
+                                        </Link>
                                     </FormGroup>
                                 )
                             )}

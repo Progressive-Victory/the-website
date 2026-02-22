@@ -1,8 +1,14 @@
-import styles from './PaginatedList.module.css'
+import styles from './List.module.css'
 import { MultiSelect, MultiSelectOption } from '@/components/common'
 import { SearchRequest, SortDirection } from '@/contracts/requests'
 import cx from 'classnames'
-import { ChangeEvent, ReactNode, useEffect, useState } from 'react'
+import React, {
+    ChangeEvent,
+    ReactNode,
+    useEffect,
+    useMemo,
+    useState,
+} from 'react'
 import {
     FiChevronLeft,
     FiChevronRight,
@@ -24,7 +30,7 @@ export interface FieldOption {
     label: string
 }
 
-export interface PaginatedListProps {
+export interface ListProps {
     search: SearchRequest
 
     count: number | undefined
@@ -40,23 +46,61 @@ export interface PaginatedListProps {
     onSearch: (search: SearchRequest) => void
 }
 
-export function PaginatedList({
+export function List(props: ListProps) {
+    const [searchPanelOpen, setSearchPanelOpen] = useState(false)
+
+    return (
+        <div className={styles.list}>
+            <ListTop
+                {...props}
+                searchPanelOpen={searchPanelOpen}
+                setSearchPanelOpen={setSearchPanelOpen}
+                mode="full"
+            />
+
+            <ListBody {...props} />
+
+            <ListBottom {...props} />
+        </div>
+    )
+}
+export type ListTopMode = 'full' | 'compact'
+
+export interface ListTopProps extends Pick<
+    ListProps,
+    'search' | 'fields' | 'filters' | 'onSearch'
+> {
+    searchPanelOpen?: boolean
+    setSearchPanelOpen?: (next: boolean) => void
+
+    mode?: ListTopMode
+
+    className?: string
+}
+
+export function ListTop({
     search,
-    count,
-    isPending,
-    error,
     fields,
     filters,
-    pinnedContent,
-    children,
     onSearch,
-}: PaginatedListProps) {
-    const [searchPanelOpen, setSearchPanelOpen] = useState(false)
+    searchPanelOpen,
+    setSearchPanelOpen,
+    mode = 'full',
+    className,
+}: ListTopProps) {
+    const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+
+    const isControlled =
+        typeof searchPanelOpen === 'boolean' &&
+        typeof setSearchPanelOpen === 'function'
+
+    const panelOpen = isControlled ? searchPanelOpen : uncontrolledOpen
+    const setPanelOpen = isControlled ? setSearchPanelOpen : setUncontrolledOpen
 
     const { query, field, limit, sort, page, ...filter } = search
 
     const handleToggleSearchPanel = () => {
-        setSearchPanelOpen((prev) => !prev)
+        setPanelOpen(!panelOpen)
     }
 
     const handleChangeQuery = (query: string) => {
@@ -76,79 +120,107 @@ export function PaginatedList({
     }
 
     const handleChangeFilter = (
-        filter: Record<string, (number | string)[] | undefined>
+        nextFilters: Record<string, (number | string)[] | undefined>
     ) => {
-        onSearch({ query, field, limit, sort, page, ...filter })
+        onSearch({ query, field, limit, sort, page, ...nextFilters })
     }
+
+    return (
+        <div className={cx(styles.searchPanel, className)}>
+            <SearchInput
+                query={query ?? ''}
+                panelOpen={panelOpen}
+                onTogglePanel={handleToggleSearchPanel}
+                onSearch={handleChangeQuery}
+            />
+
+            {mode === 'full' && panelOpen && (
+                <>
+                    <div className={styles.searchPanelTop}>
+                        <FieldSelect
+                            field={field}
+                            options={fields ?? []}
+                            onSelect={handleChangeField}
+                        />
+                        <LimitSelect
+                            limit={limit}
+                            onSelect={handleChangeLimit}
+                        />
+                    </div>
+
+                    <SortSelect sort={sort} onSelect={handleChangeSort} />
+
+                    <FilterSelect
+                        filters={filter as Record<string, (string | number)[]>}
+                        options={filters}
+                        onChange={handleChangeFilter}
+                    />
+                </>
+            )}
+        </div>
+    )
+}
+
+type ListBodyProps = Pick<
+    ListProps,
+    'count' | 'isPending' | 'error' | 'pinnedContent' | 'children'
+>
+
+export function ListBody({
+    count,
+    isPending,
+    error,
+    pinnedContent,
+    children,
+}: ListBodyProps) {
+    if (count == null) {
+        return (
+            <div className={styles.listStatus}>
+                {isPending ? (
+                    <span color="#9ca3af">Loading...</span>
+                ) : error ? (
+                    <span color="#ef4444">Error: {error.message}</span>
+                ) : (
+                    <span>No results found</span>
+                )}
+            </div>
+        )
+    }
+
+    return (
+        <>
+            {pinnedContent && (
+                <ul className={styles.pinned}>{pinnedContent}</ul>
+            )}
+            <ul className={styles.elementList}>{children}</ul>
+        </>
+    )
+}
+
+export function ListBottom({
+    search,
+    count,
+    isPending,
+    onSearch,
+}: Pick<ListProps, 'search' | 'count' | 'isPending' | 'onSearch'>) {
+    if (count == null) return null
+
+    const page = search.page ?? 0
+    const limit = search.limit
 
     const handleChangePage = (page: number) => {
         onSearch({ ...search, page })
     }
 
     return (
-        <div className={styles.list}>
-            <div className={styles.searchPanel}>
-                <SearchInput
-                    query={query ?? ''}
-                    panelOpen={searchPanelOpen}
-                    onTogglePanel={handleToggleSearchPanel}
-                    onSearch={handleChangeQuery}
-                />
-
-                {searchPanelOpen && (
-                    <>
-                        <div className={styles.searchPanelTop}>
-                            <FieldSelect
-                                field={field}
-                                options={fields ?? []}
-                                onSelect={handleChangeField}
-                            />
-                            <LimitSelect
-                                limit={limit}
-                                onSelect={handleChangeLimit}
-                            />
-                        </div>
-                        <SortSelect sort={sort} onSelect={handleChangeSort} />
-                        <FilterSelect
-                            filters={filter}
-                            options={filters}
-                            onChange={handleChangeFilter}
-                        />
-                    </>
-                )}
-            </div>
-
-            {count == null && (
-                <div className={styles.listStatus}>
-                    {isPending ? (
-                        <span color="#9ca3af">Loading...</span>
-                    ) : error ? (
-                        <span color="#ef4444">Error: {error.message}</span>
-                    ) : (
-                        <span>No results found</span>
-                    )}
-                </div>
-            )}
-
-            {count != null && (
-                <>
-                    {pinnedContent && (
-                        <div className={styles.pinned}>{pinnedContent}</div>
-                    )}
-
-                    <ul className={styles.elementList}>{children}</ul>
-
-                    <div className={styles.pageSelectContainer}>
-                        <PageSelect
-                            page={page ?? 0}
-                            pageSize={limit}
-                            count={count}
-                            disabled={isPending}
-                            onChange={handleChangePage}
-                        />
-                    </div>
-                </>
-            )}
+        <div className={styles.pageSelectContainer}>
+            <PageSelect
+                page={page}
+                pageSize={limit}
+                count={count}
+                disabled={isPending}
+                onChange={handleChangePage}
+            />
         </div>
     )
 }

@@ -1,4 +1,5 @@
 export * from './ActBlueContribution'
+export * from './ActBlueDonationPacket'
 export * from './ActBlueDonor'
 export * from './ActBlueForm'
 export * from './ActBlueLineitem'

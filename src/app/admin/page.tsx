@@ -14,5 +14,5 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
-    redirect('/admin/members', RedirectType.replace)
+    redirect('/admin/panels/members', RedirectType.replace)
 }

@@ -16,6 +16,7 @@
 
 .userUsername {
     color: #6b7280;
+    font-size: small;
 }
 
 .emptyState {
@@ -72,8 +73,4 @@
 
 .historyEntry.selected:hover {
     background-color: #d1d5db;
-}
-
-.subHeader {
-    font-weight: 300;
 }
