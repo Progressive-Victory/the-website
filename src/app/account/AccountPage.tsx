@@ -10,8 +10,8 @@ import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 import { useMemo } from 'react'
 
-export function Account() {
-    const { session, onLogout } = useAuth()
+export function AccountPage() {
+    const { isSessionLoading, session, onLogout } = useAuth()
     const user = useCurrentUser()
 
     const canAccessAdminPanel = useMemo(() => {
@@ -24,7 +24,12 @@ export function Account() {
         void onLogout()
     }
 
-    if (!session) return null
+    if (isSessionLoading) return null
+
+    if (!session) {
+        window.location.href = '/'
+        return null
+    }
 
     return (
         <div className={styles.pageRoot}>

@@ -34,9 +34,6 @@ export default function VolunteerPage() {
     const { isSessionLoading, session } = useAuth()
     const { ready, onGet, onPost, onPut } = useFetch()
 
-    if (!isSessionLoading && !session)
-        window.location.href = '/login?redirect=/volunteer'
-
     const [overrideStage, setOverrideStage] = useState<OnboardingStage | null>(
         null
     )
@@ -171,6 +168,13 @@ export default function VolunteerPage() {
             setOverrideStage(OnboardingStage.NOT_STARTED)
         }
     }, [user.data, currentStage])
+
+    if (isSessionLoading) return null
+
+    if (!session) {
+        window.location.href = '/login?redirect=/volunteer'
+        return null
+    }
 
     if (!user.data) return <MainLayout />
 

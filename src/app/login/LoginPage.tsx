@@ -1,3 +1,5 @@
+'use client'
+
 import { LoginCard } from './LoginCard'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'

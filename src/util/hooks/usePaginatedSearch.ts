@@ -43,8 +43,6 @@ export function usePaginatedSearch<T>(
             { query: { ...search, page, limit }, signal: options?.signal }
         )
 
-        console.log(res)
-
         return res
     }
 

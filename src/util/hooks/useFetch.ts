@@ -63,7 +63,6 @@ export function useFetch() {
 
         if (res.status !== 204) {
             const data = (await res.json()) as unknown
-            console.log(data)
 
             if (!schema) return data as R
             return z.parse(schema, data) as R

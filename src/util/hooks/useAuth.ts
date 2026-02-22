@@ -56,8 +56,9 @@ export function useAuth() {
         async mutationFn({ redirect }) {
             if (!apiBaseUrl) return
 
-            const redirectUri =
-                redirect ?? encodeURIComponent(window.location.href)
+            const redirectUri = redirect
+                ? `${window.location.origin}/${redirect}`
+                : encodeURIComponent(window.location.toString())
             const errorUri = `${window.location.origin}/login`
 
             const res = await fetch(
@@ -119,7 +120,7 @@ export function useAuth() {
 
     return {
         apiBaseUrl,
-        isSessionLoading: sessionQuery.isLoading,
+        isSessionLoading: sessionQuery.isLoading || sessionQuery.isPending,
         session: sessionQuery.data ?? null,
         onLogin,
         onRefresh,

@@ -12,8 +12,6 @@ export interface LoginCardProps {
 export function LoginCard({ redirect }: LoginCardProps) {
     const { session, onLogin } = useAuth()
 
-    if (session) window.location.href = redirect
-
     const params = useSearchParams()
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -31,6 +29,11 @@ export function LoginCard({ redirect }: LoginCardProps) {
     useEffect(() => {
         setErrorMessage(getErrorMessage(params.get('error')))
     }, [params])
+
+    if (session) {
+        window.location.href = redirect
+        return null
+    }
 
     return (
         <div className="flex max-w-[30rem] flex-col items-center justify-center gap-6 rounded-md bg-black-pearl-dark p-8 text-center shadow-lg">
