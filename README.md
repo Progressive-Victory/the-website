@@ -41,19 +41,6 @@ Next, check the .env.example file you'll see the list of required variables for 
 ```sh
 # $PROJECT_DIR/.env
 
-# host config
-PORT=3000
-URL="http://localhost:3000"
-
-# auth service vars
-NEXTAUTH_SECRET="abcdefg"
-
-# discord interface vars
-DISCORD_CLIENT_ID="<bot client id>"
-DISCORD_CLIENT_SECRET="<bot client secret>"
-DISCORD_BOT_TOKEN="<bot token>"
-GUILD_ID="1308877803705335858"
-
 # Does not need to change
 SITE_URL="https://example.com"
 
