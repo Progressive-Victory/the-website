@@ -186,8 +186,6 @@
 }
 
 .accountAvatar {
-    width: 44px;
-    height: 44px;
     border-radius: 9999px;
     border: 2px solid #ffffff;
     object-fit: cover;
@@ -206,8 +204,6 @@
 }
 
 .accountAvatarSolo {
-    width: 52px;
-    height: 52px;
     border-radius: 9999px;
     object-fit: cover;
     display: block;

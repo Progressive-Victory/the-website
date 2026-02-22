@@ -5,6 +5,7 @@ import { Message } from './twitter_card_element/Card'
 export { Button, Logo, Message }
 
 export * from './CollapsibleSection'
+export * from './DiscordAvatar'
 export * from './ImageWithFallback'
 export * from './Logo'
 export * from './MultiSelect'
