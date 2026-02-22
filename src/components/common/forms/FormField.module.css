@@ -27,7 +27,8 @@
 }
 
 .invalid {
-    border-color: #fca5a5;
+    border-color: #ef4444 !important;
+    border-width: 2px;
 }
 
 .textField {
@@ -55,4 +56,19 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
+}
+
+.phoneField {
+    grid-column: span 2 / span 2;
+    width: 100%;
+    max-width: 24rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.validationError {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: #ef4444;
 }
