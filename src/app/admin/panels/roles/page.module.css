@@ -2,6 +2,7 @@
     height: calc(100dvh - 100px);
     flex: 1;
     overflow-y: auto;
+    padding-block: 1rem;
 }
 
 .roleListItemName {
