@@ -26,11 +26,6 @@ import '@xyflow/react/dist/base.css'
 import '@xyflow/react/dist/style.css'
 import React, { useState, useCallback } from 'react'
 
-export interface PaginatedResponse<T> {
-    //This is just a test.
-    data: T[]
-}
-
 /* A number of committees can be defined up to the number of icons. */
 export const Committees: Committee[] = [
     {
@@ -175,10 +170,6 @@ const departments = [
     },
     { depName: 'Technology', teams: ['Discord', 'Database', 'Website'] },
 ]
-
-/*const departments = [
-    {depName: "Community", teams: ["Welcome", "Events"]}
-]*/
 
 function BuildGraphNodes() {
     const nodes: Node[] = []
@@ -372,111 +363,7 @@ function CreateEdge(id: string, source: number, target: number) {
     }
 }
 
-//BuildGraphNodes(initialTestNodes, initialTestEdges)
-//BuildGraphNodes()
-
 const { initialTestNodes, initialTestEdges } = BuildGraphNodes()
-
-//console.log('initialTestEdges')
-//console.log(initialTestEdges)
-
-/* Changes to this do not hot refresh on save; must use F5*/
-const initialNodes: Node[] = [
-    CreatePositionNode({
-        id: 0,
-        title: 'Executive Director',
-        name: 'Sam Dryzmala',
-        leadership: 'Senior',
-    }),
-    CreatePositionNode({
-        id: 1,
-        title: 'Deputy Executive Director',
-        name: 'Benjamin Gilbert-Lif',
-        leadership: 'Senior',
-    }),
-    CreateDepartmentNode({
-        id: 2,
-        name: 'Community Department',
-        leads: [
-            {
-                id: 3,
-                title: 'Community Relations Director',
-                name: 'Auntifa',
-                leadership: 'Senior',
-            },
-            {
-                id: 4,
-                title: 'Community Mananger',
-                name: 'Jenywlfersn',
-                leadership: 'Junior',
-                committees: [Committees[0], Committees[1]],
-            },
-            {
-                id: 5,
-                title: 'Community Manager',
-                leadership: 'Junior',
-                committees: [Committees[0], Committees[1]],
-            },
-        ],
-    }),
-    CreateTeamNode({
-        id: 6,
-        name: 'Welcome Team',
-        desc: "Welcome team gurantees... I'm not gonna copy all of that.",
-        leads: [
-            {
-                id: 7,
-                title: 'Welcome Team Lead',
-                name: 'Monarch',
-                leadership: 'Junior',
-                committees: [Committees[0]],
-            },
-            {
-                id: 8,
-                title: 'Welcome Team Lead',
-                leadership: 'Junior',
-                committees: [Committees[0]],
-            },
-            {
-                id: 9,
-                title: 'Welcome Team Deputy',
-            },
-        ],
-    }),
-    CreateTeamNode({
-        id: 10,
-        name: 'Events Team',
-        desc: "The Events Team... I'm also not gonna copy all of that.",
-        leads: [
-            {
-                id: 11,
-                title: 'Events Team Lead',
-                name: 'BrewMasterCraft',
-                leadership: 'Junior',
-                committees: [Committees[0]],
-            },
-            {
-                id: 12,
-                title: 'Events Team Lead',
-                leadership: 'Junior',
-                committees: [Committees[0]],
-            },
-            {
-                id: 13,
-                title: 'Events Team Deputy',
-                name: 'EM',
-            },
-        ],
-    }),
-]
-
-/* Changes to this do not hot refresh on save; must use F5*/
-const initialEdges: Edge[] = [
-    CreateEdge('e0', 0, 1),
-    CreateEdge('e1', 1, 2),
-    CreateEdge('e2', 2, 6),
-    CreateEdge('e3', 2, 10),
-]
 
 const nodeTypes = {
     pos: PositionNode,
@@ -488,16 +375,6 @@ const edgeTypes = {
     'custom-edge': OrgChartEdge,
 }
 
-/*console.log("initialNodes")
-console.log(initialNodes)*/
-
-//console.log('initialTestNodes')
-//console.log(initialTestNodes)
-
-/*const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
-    initialNodes,
-    initialEdges
-)*/
 const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
     initialTestNodes,
     initialTestEdges
@@ -509,27 +386,12 @@ export default function OrgChartApp() {
     const [limit, setLimit] = useState(50)
     const { ready, onGet, onPatch } = useFetch()
 
-    /*const { data } = useQuery<PaginatedResponse<T>>({
-        queryKey: ['/users/'],
-        queryFn: async ({ signal }) => {
-            const url = new URL(location.href)
-            url.pathname = '/users' //url.pathname = 'api/admin/users'
-
-            url.searchParams.set('page', page + '')
-            url.searchParams.set('limit', limit + '')
-
-            const res = await fetch(url, { signal })
-            return (await res.json()) as PaginatedResponse<T>
-        },
-        placeholderData: keepPreviousData,
-    })*/
-
     const userQuery = useQuery({
         queryKey: [`/users/`],
         queryFn:
             ready != null
                 ? () =>
-                      onGet<User>(`/users/`, zUser, {
+                      onGet<User>(`/users`, zUser, {
                           query: {
                               includeDiscordUsers: true,
                               includeHistory: true,
@@ -539,8 +401,7 @@ export default function OrgChartApp() {
         placeholderData: keepPreviousData,
     })
 
-    //const filteredData = data?.data.filter((e) => e.userPositions.length > 0)
-    //console.log(filteredData)
+    console.log(userQuery)
 
     function LegendPanel() {
         return (

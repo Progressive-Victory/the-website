@@ -4,7 +4,12 @@ import styles from './admin.module.css'
 import { ProtectedPage } from '@/components/ProtectedPage'
 import AdminNav from '@/components/admin/AdminNav'
 import { Header } from '@/components/layout/Header'
-import { zPermission, zRole, zUser } from '@/contracts/data'
+import {
+    zActBlueDonationPacket,
+    zPermission,
+    zRole,
+    zUser,
+} from '@/contracts/data'
 import { zActBlueDonor } from '@/contracts/data/ActBlueDonor'
 import { usePaginatedSearch } from '@/util/hooks'
 
@@ -17,6 +22,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const donors = usePaginatedSearch('/actblue/donors', zActBlueDonor, {
         search: { limit: 0 },
     })
+    const contributions = usePaginatedSearch(
+        '/actblue/contributions',
+        zActBlueDonationPacket,
+        { search: { limit: 0 } }
+    )
 
     return (
         <ProtectedPage requiredRoles={['Superadmin']}>
@@ -29,6 +39,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         roleCount={roles.query.data?.count}
                         permissionCount={permissions.query.data?.count}
                         donorCount={donors.query.data?.count}
+                        contributionCount={contributions.query.data?.count}
                     />
 
                     <div className={styles.content}>{children}</div>

@@ -5,7 +5,7 @@ import classNames from 'classnames'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { FaDonate, FaUsers, FaUserShield, FaUserTag } from 'react-icons/fa'
-import { FaClipboardUser } from 'react-icons/fa6'
+import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 import { FiChevronLeft } from 'react-icons/fi'
 import type { IconType } from 'react-icons/lib'
 import { useLocalStorage } from 'usehooks-ts'
@@ -15,6 +15,7 @@ interface AdminNavProps {
     roleCount?: number
     permissionCount?: number
     donorCount?: number
+    contributionCount?: number
 }
 
 export default function AdminNav({
@@ -22,6 +23,7 @@ export default function AdminNav({
     roleCount,
     permissionCount,
     donorCount,
+    contributionCount,
 }: AdminNavProps) {
     const [open, setOpen] = useLocalStorage('pv.admin-nav-open', true)
 
@@ -49,6 +51,13 @@ export default function AdminNav({
                     href="/admin/donors"
                     icon={FaDonate}
                     count={donorCount}
+                    open={open}
+                />
+                <NavLink
+                    title="Contributions"
+                    href="/admin/contributions"
+                    icon={FaDollarSign}
+                    count={contributionCount}
                     open={open}
                 />
                 <NavLink

@@ -17,6 +17,8 @@ import {
 } from '@/contracts/data'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { useState, useMemo } from 'react'
 
 interface contributionData {
@@ -27,8 +29,10 @@ interface contributionData {
 
 export default function Page() {
     const { ready, onGet, onPatch } = useFetch()
+    const navParams = useSearchParams()
+    const navEmail = navParams.get('email')
 
-    const [selectedEmail, setSelectedEmail] = useState<string | null>(null)
+    const [selectedEmail, setSelectedEmail] = useState<string | null>(navEmail)
     const [formState, setFormState] = useState<FormState<ActBlueDonor> | null>(
         null
     )
@@ -43,14 +47,11 @@ export default function Page() {
         queryKey: [`/actblue/donors/${selectedEmail}`],
         queryFn:
             ready && selectedEmail != null
-                ? async () => {
-                      const res = await onGet<ActBlueDonor>(
+                ? async () =>
+                      onGet<ActBlueDonor>(
                           `/actblue/donors/${selectedEmail}`,
                           zActBlueDonor
                       )
-                      console.log(res)
-                      return res
-                  }
                 : skipToken,
         placeholderData: keepPreviousData,
     })
@@ -159,7 +160,7 @@ export default function Page() {
                         key={selectedEmail}
                         form={donorQuery.data}
                         title={makeTitle(donorQuery.data)}
-                        readonly={false}
+                        readonly={true}
                         saving={false}
                         isInvalid={false}
                         onUpdate={() => {
@@ -283,6 +284,18 @@ export default function Page() {
                                                 `$${lineitem.amountLessAbFees}`
                                             }
                                         />
+                                        <br />
+                                        <Link
+                                            href={{
+                                                pathname: `/admin/contributions`,
+                                                query: {
+                                                    lineitemId:
+                                                        lineitem.lineitemId,
+                                                },
+                                            }}
+                                        >
+                                            Full Details
+                                        </Link>
                                     </FormGroup>
                                 )
                             )}
