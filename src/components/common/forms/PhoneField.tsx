@@ -46,17 +46,24 @@ export function PhoneField<T>(
 
     const readonly = !!props.readonly || !props.dynamic?.editing
     const disabled = !!props.disabled || !!props.dynamic?.saving
-    const value = props.dynamic?.form ? (getter(props.dynamic.form) ?? '') : ''
+    const storedValue = props.dynamic?.form ? (getter(props.dynamic.form) ?? '') : ''
+    const displayValue = storedValue.replace(/^\+1/, '').replace(/\D/g, '')
 
     const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
-        onChange(event.target.value)
+        const input = event.target.value
+        const digitsOnly = input.replace(/\D/g, '')
+        const limitedDigits = digitsOnly.slice(0, 10)
+
+        event.target.value = limitedDigits
+        const e164Value = limitedDigits.length === 10 ? `+1${limitedDigits}` : limitedDigits
+        onChange(e164Value)
     }
 
     return (
         <FormField {...props}>
             {readonly ? (
                 <div className={styles.readonly}>
-                    {formatPhoneDisplay(value)}
+                    {formatPhoneDisplay(storedValue)}
                 </div>
             ) : (
                 <div className={styles.phoneField}>
@@ -66,15 +73,16 @@ export function PhoneField<T>(
                         name={props.label}
                         disabled={disabled}
                         required={props.required}
-                        value={value}
+                        value={displayValue}
                         onInput={handleInput}
-                        placeholder="(123) 456-7890"
+                        placeholder="8005551234"
+                        maxLength={10}
                         className={cx(
                             styles.textField,
-                            !validator(value) && styles.invalid
+                            storedValue?.trim() && !validator(storedValue) && styles.invalid
                         )}
                     />
-                    {value?.trim() && !validator(value) && (
+                    {storedValue?.trim() && !validator(storedValue) && (
                         <span className={styles.validationError}>
                             Enter a valid US phone number
                         </span>

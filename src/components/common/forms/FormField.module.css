@@ -27,7 +27,8 @@
 }
 
 .invalid {
-    border-color: #fca5a5;
+    border-color: #ef4444 !important;
+    border-width: 2px;
 }
 
 .textField {
