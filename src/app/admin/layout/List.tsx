@@ -2,13 +2,7 @@ import styles from './List.module.css'
 import { MultiSelect, MultiSelectOption } from '@/components/common'
 import { SearchRequest, SortDirection } from '@/contracts/requests'
 import cx from 'classnames'
-import React, {
-    ChangeEvent,
-    ReactNode,
-    useEffect,
-    useMemo,
-    useState,
-} from 'react'
+import React, { ChangeEvent, ReactNode, useEffect, useState } from 'react'
 import {
     FiChevronLeft,
     FiChevronRight,

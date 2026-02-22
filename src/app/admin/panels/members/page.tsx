@@ -5,7 +5,7 @@ import { DonorView } from './panel_views/DonorView'
 import { HistoryView } from './panel_views/HistoryView'
 import { MemberView } from './panel_views/MemberView'
 import { ListElement, List } from '@/app/admin/layout/List'
-import { ImageWithFallback } from '@/components/common'
+import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
 import { Tab } from '@/components/common/tab_bar/Tab'
 import { TabBar } from '@/components/common/tab_bar/TabBar'
@@ -24,12 +24,8 @@ import {
 } from '@/contracts/data'
 import { UpdateUserRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
-import {
-    FetchError,
-    useCurrentUser,
-    useFetch,
-    usePaginatedSearch,
-} from '@/util/hooks'
+import { FetchError } from '@/models'
+import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     keepPreviousData,
     skipToken,
@@ -308,15 +304,15 @@ export default function Page() {
                 selected={selectedId == item.id}
                 onClick={() => handleSelectItem(item)}
             >
-                <ImageWithFallback
-                    useFallback={!item.discordUsers?.[0].image}
-                    src={`https://cdn.discordapp.com/avatars/${item.discordUsers?.[0].id}/${item.discordUsers?.[0].image ?? ''}`}
-                    alt="user profile picture"
+                <DiscordAvatar
+                    discordUserId={item.discordUsers?.[0]?.id}
+                    imageId={item.discordUsers?.[0]?.image}
+                    size={48}
                 />
                 <div className={styles.userMeta}>
                     <span className={styles.userName}>{makeTitle(item)}</span>
                     <span className={styles.userUsername}>
-                        {item.discordUsers?.[0].username ?? 'NOT FOUND'}
+                        {item.discordUsers?.[0]?.username ?? 'NOT FOUND'}
                     </span>
                 </div>
             </ListElement>
@@ -381,10 +377,10 @@ export default function Page() {
                     ) : (
                         <ul>
                             <ListElement>
-                                <ImageWithFallback
-                                    src=""
-                                    alt="user profile picture"
-                                    useFallback
+                                <DiscordAvatar
+                                    discordUserId={undefined}
+                                    imageId={undefined}
+                                    size={48}
                                 />
                                 <div className={styles.loading}>
                                     <PulseLoader size={8} color="#bbb" />

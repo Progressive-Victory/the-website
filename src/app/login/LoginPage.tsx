@@ -1,14 +1,13 @@
 'use client'
 
-import { LoginCard } from '@/app/login/LoginCard'
+import { LoginCard } from './LoginCard'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
-import { MainLayout } from '@/components/layout/MainLayout'
+import { MainLayout } from '@/components/layout'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
-import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
-export function LoginPage({ redirect }: { redirect: string | null }) {
+export default function Login() {
     return (
         <MainLayout>
             <div
@@ -24,12 +23,7 @@ export function LoginPage({ redirect }: { redirect: string | null }) {
 
             <div className="z-2 relative flex h-screen w-full flex-col items-center justify-center px-2">
                 <Suspense>
-                    <LoginCard
-                        signIn={(provider, options, params) =>
-                            void signIn(provider, options, params)
-                        }
-                        redirect={redirect ?? '/account'}
-                    />
+                    <LoginCard />
                 </Suspense>
                 <div className="mt-4 flex flex-row items-center rounded-lg bg-black-pearl-dark p-4 text-xs text-white shadow-lg">
                     <InformationCircleIcon className="mr-1 size-4 rounded-full bg-white text-steel-blue" />
