@@ -75,7 +75,7 @@ export function PhoneField<T>(
                         required={props.required}
                         value={displayValue}
                         onInput={handleInput}
-                        placeholder="8005551234"
+                        placeholder="2345556789"
                         maxLength={10}
                         className={cx(
                             styles.textField,
