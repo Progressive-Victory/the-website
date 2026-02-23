@@ -12,6 +12,7 @@ import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import { OnboardingStage } from '@/contracts/data'
 import {
+    SolidarityPostUserRequest,
     UserOnboardingCollectInfoRequest,
     UserOnboardingVerifyRequest,
 } from '@/contracts/requests'
@@ -27,6 +28,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import phone from 'phone'
 import { useEffect, useState } from 'react'
 
 export default function VolunteerPage() {
@@ -40,6 +42,22 @@ export default function VolunteerPage() {
 
     const user = useCurrentUser()
     const discordUserId = session?.discordUserId ?? null
+
+    const solidarityUser: SolidarityPostUserRequest = {
+        phone_number: user.data?.phone?.toString(),
+        email: user.data?.email,
+        first_name: user.data?.firstName,
+        last_name: user.data?.lastName,
+        chapter_id: 1454, // this ID is for Fundraising Team chapter, need to talk to Picklyme about this
+        custom_user_properties: {
+            discord_id: discordUserId?.toString(),
+        },
+        address: {
+            city: user.data?.location?.city,
+            state: user.data?.location?.state,
+            zip_code: user.data?.location?.zip.toString(),
+        },
+    }
 
     const isInServerResult = useQuery({
         queryKey: [`/discordUsers/${discordUserId}/isInServer`],
@@ -250,6 +268,7 @@ export default function VolunteerPage() {
                                 }
                                 error={joinMutation.error}
                                 onJoin={handleJoin}
+                                solidarityUser={solidarityUser}
                             />
                         )}
 

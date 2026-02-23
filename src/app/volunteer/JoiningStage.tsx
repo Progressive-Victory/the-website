@@ -1,4 +1,5 @@
 import { SupportNote } from '.'
+import { SolidarityPostUserRequest } from '@/contracts/requests'
 import { useInit } from '@/util/hooks'
 import { ArrowPathIcon } from '@heroicons/react/24/solid'
 
@@ -6,12 +7,40 @@ export interface JoiningStageProps {
     isPending: boolean
     error: Error | null
     onJoin: () => void
+    solidarityUser: SolidarityPostUserRequest
 }
 
-export function JoiningStage({ isPending, error, onJoin }: JoiningStageProps) {
+export function JoiningStage({
+    isPending,
+    error,
+    onJoin,
+    solidarityUser,
+}: JoiningStageProps) {
     useInit(() => {
         onJoin()
     })
+
+    // for debugging
+    console.log(
+        `Solidarity user request object as JSON: ${JSON.stringify(solidarityUser)}`
+    )
+
+    fetch('https://api.solidarity.tech/v1/users', {
+        method: 'POST',
+        headers: new Headers({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SOLIDARITY_TOKEN}`,
+        }),
+        body: JSON.stringify(solidarityUser),
+    })
+        .then((response) => {
+            console.log(
+                `Response from Solidarity: ${response.status} - ${response.statusText}`
+            )
+        })
+        .catch((error) => {
+            console.log(`ERROR sending user data to SolidarityTech: ${error}`)
+        })
 
     return (
         <div>
