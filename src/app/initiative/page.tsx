@@ -1,3 +1,4 @@
+import InteractiveThreeCard from '@/app/home/MemberBanner'
 import styles from '@/app/initiative/Initiative.module.css'
 import {
     ContentPageFrame,
@@ -38,7 +39,7 @@ function InitiativeContent() {
                 <p className={styles.initiativeBody}>
                     Join the PV Discord to get started with the call campaign.
                     PV Leadership will be in Organizing VC 1 hosting the
-                    legislature phonebank and providing traning and material on
+                    legislature phonebank and providing training and material on
                     how best to conduct your call.
                     <br />
                     <br />
@@ -90,21 +91,31 @@ function InitiativeContent() {
             </ContentSection>
 
             <ContentSection title="Step 4 - Get your PV Membership Card">
-                <p className={styles.initiativeBody}>
-                    Become a Dues Paying Member of Progressive Victory for just
-                    $5/month and get your PV Membership Card and help us have
-                    the necessary funds to navigate opperating on a hostile
-                    platform like Discord.
-                    <br />
-                    <br />
-                    Click this link to become a member:{' '}
-                    <a
-                        href="https://secure.actblue.com/donate/pvmember"
-                        className={styles.inlineLink}
-                    >
-                        {'Become a Member'}
-                    </a>
-                </p>
+                <div className={styles.cardContainer}>
+                    <div>
+                        <p className={styles.initiativeBody}>
+                            Become a Dues Paying Member of Progressive Victory
+                            for just $5/month and get your PV Membership Card
+                            and help us have the necessary funds to navigate
+                            opperating on a hostile platform like Discord.
+                            <br />
+                            <br />
+                            Click this link to become a member:{' '}
+                            <a
+                                href="https://secure.actblue.com/donate/pvmember"
+                                className={styles.inlineLink}
+                            >
+                                {'Become a Member'}
+                            </a>
+                        </p>
+                    </div>
+                    <div className={styles.membershipCardWrap}>
+                        <InteractiveThreeCard
+                            frontImage="/images/membercard_front.png"
+                            backImage="/images/membercard_back.png"
+                        />
+                    </div>
+                </div>
             </ContentSection>
         </ContentPageFrame>
     )
