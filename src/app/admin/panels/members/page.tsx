@@ -22,7 +22,11 @@ import {
     zUser,
     zUserProfile,
 } from '@/contracts/data'
-import { UpdateUserRequest } from '@/contracts/requests'
+import { MetaData } from '@/contracts/data/MetaData'
+import {
+    ActBlueDonorLinkRequest,
+    UpdateUserRequest,
+} from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
@@ -204,7 +208,13 @@ export default function Page() {
 
             await onPost<void>(
                 `/actblue/donors/${value.email}/link`,
-                { userId },
+                {
+                    userId,
+                    metaData: {
+                        dataSource: 'Member Panel',
+                        userWhoUpdatedId: loggedInUser.data?.id,
+                    },
+                } satisfies ActBlueDonorLinkRequest,
                 null
             )
 
