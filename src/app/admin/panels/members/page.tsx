@@ -22,7 +22,6 @@ import {
     zUser,
     zUserProfile,
 } from '@/contracts/data'
-import { MetaData } from '@/contracts/data/MetaData'
 import {
     ActBlueDonorLinkRequest,
     UpdateUserRequest,
