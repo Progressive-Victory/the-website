@@ -1,18 +1,25 @@
 'use client'
 
+import cx from 'classnames'
 import Image from 'next/image'
 import { useState } from 'react'
 
 export interface ImageWithFallbackProps {
     src: string
     alt: string
+    width: number
+    height: number
     useFallback?: boolean
+    className?: string
 }
 
 export function ImageWithFallback({
     src,
     alt,
+    width,
+    height,
     useFallback = false,
+    className,
 }: ImageWithFallbackProps) {
     const [hasErrored, setHasErrored] = useState(false)
 
@@ -24,9 +31,9 @@ export function ImageWithFallback({
                     : src
             }
             alt={alt}
-            width={48}
-            height={48}
-            className="aspect-square max-h-[48px] rounded-full"
+            width={width}
+            height={height}
+            className={cx('aspect-square max-h-[48px] rounded-full', className)}
             onError={() => setHasErrored(true)}
         />
     )

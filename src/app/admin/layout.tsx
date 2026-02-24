@@ -1,8 +1,8 @@
 'use client'
 
 import styles from './admin.module.css'
+import Sidebar from './layout/Sidebar'
 import { ProtectedPage } from '@/components/ProtectedPage'
-import AdminNav from '@/components/admin/AdminNav'
 import { Header } from '@/components/layout/Header'
 import {
     zActBlueDonationPacket,
@@ -34,7 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <Header />
 
                 <div className={styles.main}>
-                    <AdminNav
+                    <Sidebar
                         userCount={users.query.data?.count}
                         roleCount={roles.query.data?.count}
                         permissionCount={permissions.query.data?.count}

@@ -1,5 +1,4 @@
-import { useCurrentUser } from '@/util/hooks'
-import { useSession } from 'next-auth/react'
+import { useAuth, useCurrentUser } from '@/util/hooks'
 import { ReactNode } from 'react'
 
 interface ProtectedPageProps {
@@ -11,12 +10,12 @@ export function ProtectedPage({
     children,
     requiredRoles = [],
 }: ProtectedPageProps) {
-    const session = useSession()
+    const { isSessionLoading, session } = useAuth()
     const currentUser = useCurrentUser()
 
-    if (currentUser.isLoading || session.status == 'loading') return null
+    if (currentUser.isLoading || isSessionLoading) return null
 
-    if (session.status == 'unauthenticated')
+    if (!session)
         return (
             <div>
                 <h1>Access Denied</h1>
