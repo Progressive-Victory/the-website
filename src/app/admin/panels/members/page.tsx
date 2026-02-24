@@ -222,7 +222,7 @@ export default function Page() {
                 queryKey: [`/users/${userId}`],
             })
         },
-        [onPost, queryClient]
+        [onPost, queryClient, loggedInUser.data]
     )
 
     const handleDeleteDonorItem = useCallback(
