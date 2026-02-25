@@ -1,12 +1,23 @@
 'use client'
 
+import { DonorView } from './DonorView'
 import styles from './HistoryView.module.css'
 import { MemberView } from './MemberView'
 import { CollapsibleSection } from '@/components/common'
 import { FormGroupProps, FormState } from '@/components/common/forms'
-import { Location, Role, UpdateHistory, User } from '@/contracts/data'
+import {
+    ActBlueDonor,
+    Location,
+    Role,
+    UpdateHistory,
+    User,
+} from '@/contracts/data'
+import { PaginatedResponse } from '@/contracts/responses'
+import { FetchError } from '@/models'
+import { usePaginatedSearch } from '@/util/hooks'
+import { useQuery, UseQueryResult } from '@tanstack/react-query'
 import cx from 'classnames'
-import { useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 
 export interface HistoryViewProps {
     selectedId: number
@@ -14,6 +25,9 @@ export interface HistoryViewProps {
 
     selectedHistory: UpdateHistory<User> | null
     onSelectHistory: (update: UpdateHistory<User> | null) => void
+
+    selectedDonorHistory: UpdateHistory<ActBlueDonor> | null
+    onSelectDonorHistory: (update: UpdateHistory<ActBlueDonor> | null) => void
 
     isRefetching: boolean
 
@@ -28,6 +42,8 @@ export function HistoryView({
     user,
     selectedHistory,
     onSelectHistory,
+    selectedDonorHistory,
+    onSelectDonorHistory,
     isRefetching,
     roles,
     roleOptions,
@@ -45,6 +61,39 @@ export function HistoryView({
             )
         })
     }, [user?.history])
+
+    const sortedDonorHistory = useMemo(() => {
+        return (user?.donorHistory ?? []).slice().sort((a, b) => {
+            return (
+                b.historyWhenUpdatedUtc.getTime() -
+                a.historyWhenUpdatedUtc.getTime()
+            )
+        })
+    }, [user?.donorHistory])
+
+    const handleMakeHistoryLabel = (update: UpdateHistory<User>) => {
+        return (
+            <>
+                <code className={styles.historyEntryCode}>
+                    {update.email ?? 'deleted user'}#{update.id.toString()}
+                </code>
+            </>
+        )
+    }
+
+    const handleMakeDonorHistoryLabel = (
+        update: UpdateHistory<ActBlueDonor>
+    ) => {
+        return (
+            <>
+                <code className={styles.historyEntryCode}>
+                    {update.historyWhoUpdatedId
+                        ? `${update.historyWhoUpdatedId}#${update.historyDataSource ?? 'Unknown'}`
+                        : `${update.historyDataSource ?? 'Unknown'}`}
+                </code>
+            </>
+        )
+    }
 
     if (selectedId == null) return null
 
@@ -83,51 +132,80 @@ export function HistoryView({
     }
 
     return (
-        <div className={styles.section}>
-            <AccountHistoryField
-                title="Account History"
-                history={sortedHistory}
-                selected={selectedHistory}
-                onSelect={onSelectHistory}
-            />
+        <>
+            <div className={styles.section}>
+                <AccountHistoryField<User>
+                    title="Account History"
+                    history={sortedHistory}
+                    selected={selectedHistory}
+                    onSelect={onSelectHistory}
+                    makeLabel={handleMakeHistoryLabel}
+                />
 
-            {selectedHistory ? (
-                <div className={styles.snapshotWrap}>
-                    <MemberView
-                        selectedId={selectedId}
-                        user={user}
-                        selectedHistory={selectedHistory}
-                        formState={historyFormState}
-                        setFormState={setHistoryFormState}
-                        saving={false}
-                        isInvalid={false}
-                        roles={roles}
-                        roleOptions={roleOptions}
-                        makeFormTitle={(u) => makeFormTitle(u)}
-                        handleSave={() => {
-                            return
-                        }}
-                        getLocation={getLocation}
-                    />
-                </div>
-            ) : null}
-        </div>
+                {selectedHistory ? (
+                    <div className={styles.snapshotWrap}>
+                        <MemberView
+                            selectedId={selectedId}
+                            user={user}
+                            selectedHistory={selectedHistory}
+                            formState={historyFormState}
+                            setFormState={setHistoryFormState}
+                            saving={false}
+                            isInvalid={false}
+                            roles={roles}
+                            roleOptions={roleOptions}
+                            makeFormTitle={(u) => makeFormTitle(u)}
+                            handleSave={() => {
+                                return
+                            }}
+                            getLocation={getLocation}
+                        />
+                    </div>
+                ) : null}
+            </div>
+            <div className={styles.section}>
+                <AccountHistoryField<ActBlueDonor>
+                    title="Donor History"
+                    history={sortedDonorHistory}
+                    selected={selectedDonorHistory}
+                    onSelect={onSelectDonorHistory}
+                    makeLabel={handleMakeDonorHistoryLabel}
+                />
+
+                {selectedDonorHistory ? (
+                    <div className={styles.snapshotWrap}>
+                        <span>
+                            Donor:{' '}
+                            {`${selectedDonorHistory.firstname} ${selectedDonorHistory.lastname}`}
+                        </span>
+                        <br />
+                        <span>
+                            {selectedDonorHistory.userId
+                                ? 'Linked'
+                                : 'Unlinked'}
+                        </span>
+                    </div>
+                ) : null}
+            </div>
+        </>
     )
 }
 
-interface AccountHistoryFieldProps extends FormGroupProps<User> {
-    history: UpdateHistory<User>[]
-    selected: UpdateHistory<User> | null
-    onSelect: (update: UpdateHistory<User> | null) => void
+interface AccountHistoryFieldProps<T> extends FormGroupProps<T> {
+    history: UpdateHistory<T>[]
+    selected: UpdateHistory<T> | null
+    onSelect: (update: UpdateHistory<T> | null) => void
+    makeLabel: (update: UpdateHistory<T>) => ReactNode
 }
 
-function AccountHistoryField({
+function AccountHistoryField<T>({
     title,
     defaultCollapsed,
     history,
     selected,
     onSelect,
-}: AccountHistoryFieldProps) {
+    makeLabel,
+}: AccountHistoryFieldProps<T>) {
     return (
         <CollapsibleSection title={title} initialOpenState={!defaultCollapsed}>
             <div className={styles.historyContainer}>
@@ -157,8 +235,7 @@ function AccountHistoryField({
                                 </span>
 
                                 <code className={styles.historyEntryCode}>
-                                    {update.email ?? 'deleted user'}#
-                                    {update.id.toString()}
+                                    {makeLabel(update)}
                                 </code>
                             </button>
                         </div>
