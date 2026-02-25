@@ -47,10 +47,10 @@ export default function VolunteerPage() {
         email: user.data?.email,
         first_name: user.data?.firstName,
         last_name: user.data?.lastName,
-        chapter_id: 1454, // this ID is for Fundraising Team chapter, need to talk to Picklyme about this
         custom_user_properties: {
             discord_id: discordUserId?.toString(),
         },
+        preferred_language: 'English',
         address: {
             city: user.data?.location?.city,
             state: user.data?.location?.state,

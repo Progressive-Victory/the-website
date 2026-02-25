@@ -5,6 +5,7 @@ export const zSolidarityPostUserRequest = z.object({
     email: z.string().nullish(),
     first_name: z.string().nullish(),
     last_name: z.string().nullish(),
+    preferred_language: z.string(),
     chapter_id: z.int().nullish(),
     chapter_ids: z.array(z.int()).nullish(),
     custom_user_properties: z

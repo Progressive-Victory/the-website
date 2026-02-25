@@ -20,26 +20,16 @@ export function JoiningStage({
         onJoin()
     })
 
-    // for debugging
-    console.log(
-        `Solidarity user request object as JSON: ${JSON.stringify(solidarityUser)}`
+    fetch(
+        `/api/solidarityTech?phone=${solidarityUser.phone_number}&email=${solidarityUser.email}&first_name=${solidarityUser.first_name}&last_name=${solidarityUser.last_name}&discord_id=${solidarityUser.custom_user_properties?.discord_id}&city=${solidarityUser.address?.city}&state=${solidarityUser.address?.state}&zip=${solidarityUser.address?.zip_code}`
     )
-
-    fetch('https://api.solidarity.tech/v1/users', {
-        method: 'POST',
-        headers: new Headers({
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${process.env.SOLIDARITY_TOKEN}`,
-        }),
-        body: JSON.stringify(solidarityUser),
-    })
         .then((response) => {
             console.log(
-                `Response from Solidarity: ${response.status} - ${response.statusText}`
+                `Response from route /api/Solidarity: ${response.status} - ${response.statusText}`
             )
         })
         .catch((error) => {
-            console.log(`ERROR sending user data to SolidarityTech: ${error}`)
+            console.log(`ERROR fetching route /api/SolidarityTech: ${error}`)
         })
 
     return (
