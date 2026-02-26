@@ -56,8 +56,6 @@ export function useFetch() {
             res = await fetch(fullUrl, req)
         }
 
-        console.log('fetch res', res)
-
         if (!res.ok) {
             const error = (await res.json()) as ApiError
             throw new FetchError(error.message, res.status, error.error)
@@ -65,7 +63,6 @@ export function useFetch() {
 
         if (res.status !== 204) {
             const data = (await res.json()) as unknown
-            console.log('res data', data)
 
             if (!schema) return data as R
             return z.parse(schema, data) as R

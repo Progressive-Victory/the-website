@@ -105,10 +105,6 @@ export default function Page() {
         placeholderData: keepPreviousData,
     })
 
-    useMemo(() => {
-        console.log(userQuery.data)
-    }, [userQuery.data])
-
     const formZip = formState?.editing
         ? formState?.form?.location?.zip
         : userQuery.data?.location?.zip
