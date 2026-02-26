@@ -4,8 +4,8 @@ import styles from './Sidebar.module.css'
 import classNames from 'classnames'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FaDonate, FaUsers, FaUserShield, FaUserTag } from 'react-icons/fa'
-import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
+import { FaUsers, FaUserShield, FaUserTag, FaDonate } from 'react-icons/fa'
+import { FaClipboardUser } from 'react-icons/fa6'
 import { FiChevronLeft } from 'react-icons/fi'
 import type { IconType } from 'react-icons/lib'
 import { useLocalStorage } from 'usehooks-ts'
@@ -46,26 +46,24 @@ export default function Sidebar({
                     count={userCount}
                     open={open}
                 />
+
                 <NavLink
-                    title="Donors"
-                    href="/admin/panels/donors"
+                    title="Fundraising"
+                    href="/admin/panels/fundraising"
                     icon={FaDonate}
-                    count={donorCount}
+                    // if you want *some* badge, uncomment one of these:
+                    // count={donorCount}
+                    // count={contributionCount}
                     open={open}
                 />
-                <NavLink
-                    title="Contributions"
-                    href="/admin/panels/contributions"
-                    icon={FaDollarSign}
-                    count={contributionCount}
-                    open={open}
-                />
+
                 <NavLink
                     title="Positions"
                     href="/admin/panels/positions"
                     icon={FaClipboardUser}
                     open={open}
                 />
+
                 <NavLink
                     title="Roles"
                     href="/admin/panels/roles"
@@ -73,6 +71,7 @@ export default function Sidebar({
                     count={roleCount}
                     open={open}
                 />
+
                 <NavLink
                     title="Permissions"
                     href="/admin/panels/permissions"
@@ -126,7 +125,11 @@ function NavLink({ title, href, icon: Icon, count, open }: NavLinkProps) {
                 {open ? (
                     <span className={styles.linkRow}>
                         <span className={styles.title}>{title}</span>
-                        <span className={styles.count}>{formattedCount}</span>
+                        {typeof count === 'number' ? (
+                            <span className={styles.count}>
+                                {formattedCount}
+                            </span>
+                        ) : null}
                     </span>
                 ) : null}
             </Link>

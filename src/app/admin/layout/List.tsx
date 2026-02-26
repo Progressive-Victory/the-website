@@ -2,6 +2,7 @@ import styles from './List.module.css'
 import { MultiSelect, MultiSelectOption } from '@/components/common'
 import { SearchRequest, SortDirection } from '@/contracts/requests'
 import cx from 'classnames'
+import Link from 'next/link'
 import React, { ChangeEvent, ReactNode, useEffect, useState } from 'react'
 import {
     FiChevronLeft,
@@ -38,6 +39,10 @@ export interface ListProps {
     children?: ReactNode
 
     onSearch: (search: SearchRequest) => void
+
+    // NEW: Optional back button shown in the list header
+    backHref?: string
+    backLabel?: string
 }
 
 export function List(props: ListProps) {
@@ -62,7 +67,7 @@ export type ListTopMode = 'full' | 'compact'
 
 export interface ListTopProps extends Pick<
     ListProps,
-    'search' | 'fields' | 'filters' | 'onSearch'
+    'search' | 'fields' | 'filters' | 'onSearch' | 'backHref' | 'backLabel'
 > {
     searchPanelOpen?: boolean
     setSearchPanelOpen?: (next: boolean) => void
@@ -81,6 +86,8 @@ export function ListTop({
     setSearchPanelOpen,
     mode = 'full',
     className,
+    backHref,
+    backLabel = 'Back',
 }: ListTopProps) {
     const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
 
@@ -121,12 +128,27 @@ export function ListTop({
 
     return (
         <div className={cx(styles.searchPanel, className)}>
-            <SearchInput
-                query={query ?? ''}
-                panelOpen={panelOpen}
-                onTogglePanel={handleToggleSearchPanel}
-                onSearch={handleChangeQuery}
-            />
+            <div className={styles.searchRow}>
+                {backHref ? (
+                    <Link
+                        href={backHref}
+                        className={styles.backIconButton}
+                        title={backLabel}
+                        aria-label={backLabel}
+                    >
+                        <FiChevronsLeft size={20} />
+                    </Link>
+                ) : null}
+
+                <div className={styles.searchRowMain}>
+                    <SearchInput
+                        query={query ?? ''}
+                        panelOpen={panelOpen}
+                        onTogglePanel={handleToggleSearchPanel}
+                        onSearch={handleChangeQuery}
+                    />
+                </div>
+            </div>
 
             {mode === 'full' && panelOpen && (
                 <>
