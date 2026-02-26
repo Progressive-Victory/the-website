@@ -58,6 +58,7 @@ const zBaseUser = z.object({
 
 export const zUser = zBaseUser.extend({
     history: z.array(zUpdateHistory(zBaseUser)).optional(),
+    donorHistory: z.array(zUpdateHistory(zActBlueDonor)).optional(),
 })
 
 export type User = z.infer<typeof zUser>

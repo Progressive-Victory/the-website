@@ -48,6 +48,8 @@ export default function Page() {
 
     const [selectedHistory, setSelectedHistory] =
         useState<UpdateHistory<User> | null>(null)
+    const [selectedDonorHistory, setSelectedDonorHistory] =
+        useState<UpdateHistory<ActBlueDonor> | null>(null)
 
     const [formState, setFormState] = useState<FormState<User> | null>(null)
     const [pickingDonor, setPickingDonor] = useState<boolean>(false)
@@ -228,7 +230,13 @@ export default function Page() {
         (value: ActBlueDonor, userId: number) => {
             void onPost<void>(
                 `/actblue/donors/${value.email}/link`,
-                { userId: null },
+                {
+                    userId: null,
+                    metaData: {
+                        dataSource: 'Member Panel',
+                        userWhoUpdatedId: loggedInUser.data?.id,
+                    },
+                },
                 null
             ).then(() =>
                 queryClient.invalidateQueries({
@@ -336,6 +344,12 @@ export default function Page() {
 
     const handleSelectHistory = (history: UpdateHistory<User> | null) => {
         setSelectedHistory(history)
+    }
+
+    const handleSelectDonorHistory = (
+        history: UpdateHistory<ActBlueDonor> | null
+    ) => {
+        setSelectedDonorHistory(history)
     }
 
     return (
@@ -453,6 +467,8 @@ export default function Page() {
                                 user={userQuery.data}
                                 selectedHistory={selectedHistory}
                                 onSelectHistory={handleSelectHistory}
+                                selectedDonorHistory={selectedDonorHistory}
+                                onSelectDonorHistory={handleSelectDonorHistory}
                                 isRefetching={userQuery.isRefetching}
                                 roles={roles}
                                 roleOptions={roleOptions}
