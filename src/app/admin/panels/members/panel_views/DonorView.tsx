@@ -10,6 +10,7 @@ import {
 } from '@/components/common/forms'
 import {
     ActBlueContribution,
+    ActBlueContributionCustomField,
     ActBlueDonor,
     ActBlueLineitem,
     User,
@@ -46,6 +47,7 @@ export interface DonorViewProps {
 interface ContributionData {
     total: number
     hasActiveRecurring: boolean
+    customFields: ActBlueContributionCustomField[]
     lineitems: ActBlueLineitem[]
 }
 
@@ -70,9 +72,11 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
     const li: ActBlueLineitem[] = []
     let hasActiveRecurring = false
     let total = 0
+    let customFields: ActBlueContributionCustomField[] = []
 
     ;(donor.contributions ?? []).forEach(
         (contribution: ActBlueContribution) => {
+            customFields = contribution.customFields
             if (
                 contribution.isRecurring &&
                 ((contribution.recurringDuration ?? 1) < 0 ||
@@ -92,9 +96,12 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
         }
     )
 
+    console.log(customFields)
+
     return {
         total,
         hasActiveRecurring,
+        customFields,
         lineitems: li,
     }
 }
@@ -435,6 +442,21 @@ export function DonorView({
                                                                 `$${lineitem.amountLessAbFees}`
                                                             }
                                                         />
+                                                        {contributionData.customFields?.map(
+                                                            (field) => (
+                                                                <TextField
+                                                                    key={
+                                                                        field.label
+                                                                    }
+                                                                    label={
+                                                                        field.label
+                                                                    }
+                                                                    getter={() =>
+                                                                        field.answer
+                                                                    }
+                                                                />
+                                                            )
+                                                        )}
                                                         <br />
                                                         <Link
                                                             href={{
