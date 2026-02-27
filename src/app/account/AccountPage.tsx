@@ -3,12 +3,8 @@
 import { AccountInfoForm } from './AccountInfoForm'
 import styles from '@/app/account/account.module.css'
 import { User } from '@/contracts/data'
-import { useUpdatedUser } from '@/contracts/mutations/user'
-import {
-    hasPermission,
-    useCurrentUser,
-    useFetch,
-} from '@/util/hooks'
+import { useUpdatedUser } from '@/queries/users.queries'
+import { hasPermission, useCurrentUser, useFetch } from '@/util/hooks'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useMemo } from 'react'
@@ -28,7 +24,7 @@ export function Account() {
         void onLogout()
     }
 
-	const updateMutation = useUpdatedUser({ loggedInUser: loggedInUser.data, })
+    const updateMutation = useUpdatedUser({ loggedInUser: loggedInUser.data })
 
     const onSave = (user: User) => {
         updateMutation.mutate({
