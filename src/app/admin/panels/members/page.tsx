@@ -62,6 +62,29 @@ export default function Page() {
         onSearch,
     } = usePaginatedSearch<UserProfile>('/users', zUserProfile)
 
+    const { query: updaterDirectoryQuery } = usePaginatedSearch<UserProfile>(
+        '/users',
+        zUserProfile,
+        {
+            search: { limit: 500 },
+            all: true,
+        }
+    )
+
+    const updaterNameById = useMemo(() => {
+        const map = new Map<number, string>()
+        for (const u of updaterDirectoryQuery.data?.data ?? []) {
+            const name =
+                (u.firstName && u.lastName && `${u.firstName} ${u.lastName}`) ??
+                u.firstName ??
+                u.preferredName ??
+                u.email ??
+                `User #${u.id}`
+            map.set(u.id, name)
+        }
+        return map
+    }, [updaterDirectoryQuery.data])
+
     const { query: rolesQuery } = usePaginatedSearch<Role>('/roles', zRole, {
         search: { limit: 50 },
         all: true,
@@ -474,6 +497,7 @@ export default function Page() {
                                 roleOptions={roleOptions}
                                 makeFormTitle={(u) => makeHistoryFormTitle(u)}
                                 getLocation={getLocation}
+                                updaterNameById={updaterNameById}
                             />
                         </Tab>
                     </TabBar>

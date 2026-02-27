@@ -30,6 +30,8 @@ export interface HistoryViewProps {
     roleOptions: { value: number; label: string }[]
     makeFormTitle: (user: User) => string
     getLocation: (form: User) => Location | null
+
+    updaterNameById: Map<number, string>
 }
 
 type UnifiedHistoryItem =
@@ -60,6 +62,7 @@ export function HistoryView({
     roleOptions,
     makeFormTitle,
     getLocation,
+    updaterNameById,
 }: HistoryViewProps) {
     const [historyFormState, setHistoryFormState] =
         useState<FormState<User> | null>(null)
@@ -95,20 +98,26 @@ export function HistoryView({
         selectedDonorHistory?.historyId,
     ])
 
-    const makeAccountLabel = (update: UpdateHistory<User>) => {
-        return (
-            <code className={styles.historyEntryCode}>
-                {update.email ?? 'deleted user'}#{update.id.toString()}
-            </code>
-        )
-    }
+    const makeUpdaterLabel = (
+        update: UpdateHistory<User> | UpdateHistory<ActBlueDonor>
+    ) => {
+        const whoId = update.historyWhoUpdatedId
 
-    const makeDonorLabel = (update: UpdateHistory<ActBlueDonor>) => {
-        const label = update.historyWhoUpdatedId
-            ? `${update.historyWhoUpdatedId}#${update.historyDataSource ?? 'Unknown'}`
-            : `${update.historyDataSource ?? 'Unknown'}`
+        if (whoId != null) {
+            const whoName = updaterNameById.get(whoId) ?? `User #${whoId}`
 
-        return <code className={styles.historyEntryCode}>{label}</code>
+            return <span className={styles.historyEntryName}>{whoName}</span>
+        }
+
+        if ('historyDataSource' in update && update.historyDataSource) {
+            return (
+                <span className={styles.historyEntryName}>
+                    {update.historyDataSource}
+                </span>
+            )
+        }
+
+        return <span className={styles.historyEntryName}>Unknown</span>
     }
 
     const handleSelectUnified = (item: UnifiedHistoryItem) => {
@@ -164,11 +173,7 @@ export function HistoryView({
                 title="History"
                 history={unified}
                 onSelect={handleSelectUnified}
-                makeLabel={(item) =>
-                    item.kind === 'account'
-                        ? makeAccountLabel(item.update)
-                        : makeDonorLabel(item.update)
-                }
+                makeLabel={(item) => makeUpdaterLabel(item.update)}
             />
 
             {selectedHistory ? (
@@ -240,19 +245,6 @@ function AccountHistoryField({
                                     item.selected && styles.historyEntrySelected
                                 )}
                             >
-                                <span
-                                    className={cx(
-                                        styles.historyEntryTag,
-                                        item.kind === 'account'
-                                            ? styles.historyEntryTagAccount
-                                            : styles.historyEntryTagDonor
-                                    )}
-                                >
-                                    {item.kind === 'account'
-                                        ? 'Account'
-                                        : 'Donor'}
-                                </span>
-
                                 <span className={styles.historyEntryPrefix}>
                                     {`${update.historyType == 'I' ? 'Created' : 'Updated'} at `}
                                 </span>

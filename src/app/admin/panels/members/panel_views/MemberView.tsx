@@ -69,7 +69,7 @@ export function MemberView({
                     readonly
                 />
                 <TextField<User>
-                    label="Discord Id"
+                    label="Discord ID"
                     getter={(form) => form.discordUsers?.[0]?.id}
                     readonly
                 />
