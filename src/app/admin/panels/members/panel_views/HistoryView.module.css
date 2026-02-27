@@ -64,6 +64,37 @@
     background: rgba(15, 23, 42, 0.1);
 }
 
+.historyEntryTag {
+    display: inline-flex;
+    align-items: center;
+    height: 1.35rem;
+    padding: 0 0.55rem;
+
+    border-radius: 9999px;
+
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+
+    flex-shrink: 0;
+
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    background: rgba(15, 23, 42, 0.05);
+    color: rgba(15, 23, 42, 0.72);
+}
+
+.historyEntryTagAccount {
+    background: rgba(14, 165, 233, 0.12);
+    border-color: rgba(14, 165, 233, 0.22);
+    color: rgba(2, 132, 199, 1);
+}
+
+.historyEntryTagDonor {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.22);
+    color: rgba(5, 150, 105, 1);
+}
+
 .historyEntryPrefix {
     color: rgba(15, 23, 42, 0.62);
     font-weight: 550;
