@@ -5,7 +5,7 @@ import classNames from 'classnames'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { FaUsers, FaUserShield, FaUserTag, FaDonate } from 'react-icons/fa'
-import { FaClipboardUser } from 'react-icons/fa6'
+import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 import { FiChevronLeft } from 'react-icons/fi'
 import type { IconType } from 'react-icons/lib'
 import { useLocalStorage } from 'usehooks-ts'
@@ -46,14 +46,19 @@ export default function Sidebar({
                     count={userCount}
                     open={open}
                 />
+                <NavLink
+                    title="Donors"
+                    href="/admin/panels/donors"
+                    icon={FaDonate}
+                    count={donorCount}
+                    open={open}
+                />
 
                 <NavLink
-                    title="Fundraising"
-                    href="/admin/panels/fundraising"
-                    icon={FaDonate}
-                    // if you want *some* badge, uncomment one of these:
-                    // count={donorCount}
-                    // count={contributionCount}
+                    title="Contributions"
+                    href="/admin/panels/contributions"
+                    icon={FaDollarSign}
+                    count={contributionCount}
                     open={open}
                 />
 
@@ -61,6 +66,7 @@ export default function Sidebar({
                     title="Positions"
                     href="/admin/panels/positions"
                     icon={FaClipboardUser}
+                    count={0}
                     open={open}
                 />
 
@@ -77,6 +83,13 @@ export default function Sidebar({
                     href="/admin/panels/permissions"
                     icon={FaUserShield}
                     count={permissionCount}
+                    open={open}
+                />
+                <NavLink
+                    title="Fundraising"
+                    href="/admin/panels/fundraising"
+                    icon={FaDonate}
+                    count={2}
                     open={open}
                 />
             </ul>

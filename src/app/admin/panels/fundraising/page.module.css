@@ -74,7 +74,6 @@
     display: grid;
     gap: 1.1rem;
 
-    /* Bigger cards: 2 columns on desktop */
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
