@@ -4,17 +4,15 @@ import { AccountInfoForm } from './AccountInfoForm'
 import styles from '@/app/account/account.module.css'
 import { User } from '@/contracts/data'
 import { useUpdatedUser } from '@/queries/users.queries'
-import { hasPermission, useCurrentUser, useFetch } from '@/util/hooks'
-import { useSession, signOut } from 'next-auth/react'
+import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
 import Link from 'next/link'
 import { useMemo } from 'react'
 
 export function Account() {
-    const { data: session } = useSession()
-    const { onSignOut } = useFetch()
+	const { isSessionLoading, session, onLogout } = useAuth()
     const loggedInUser = useCurrentUser()
 
-    const canAccessAdminPanel = useMemo(() => {
+ 	const canAccessAdminPanel = useMemo(() => {
         return loggedInUser.data
             ? hasPermission(loggedInUser.data, 'Admin Panel Access')
             : false
@@ -40,6 +38,8 @@ export function Account() {
             },
         })
     }
+
+	if (isSessionLoading) return null
 
     if (!session) return null
 
