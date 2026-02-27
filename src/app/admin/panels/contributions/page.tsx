@@ -206,6 +206,15 @@ export default function Page() {
                                 field="contributionForm"
                             />
                             <TextField label="Form Kind" field="kind" />
+                            {contributionQuery.data?.customFields?.map(
+                                (field) => (
+                                    <TextField
+                                        key={field.label}
+                                        label={field.label}
+                                        getter={() => field.answer}
+                                    />
+                                )
+                            )}
                         </FormGroup>
                     </Form>
                 )}
