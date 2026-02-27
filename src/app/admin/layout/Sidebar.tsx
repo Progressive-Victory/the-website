@@ -4,7 +4,7 @@ import styles from './Sidebar.module.css'
 import classNames from 'classnames'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FaDonate, FaUsers, FaUserShield, FaUserTag } from 'react-icons/fa'
+import { FaUsers, FaUserShield, FaUserTag, FaDonate } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 import { FiChevronLeft } from 'react-icons/fi'
 import type { IconType } from 'react-icons/lib'
@@ -53,6 +53,7 @@ export default function Sidebar({
                     count={donorCount}
                     open={open}
                 />
+
                 <NavLink
                     title="Contributions"
                     href="/admin/panels/contributions"
@@ -60,12 +61,15 @@ export default function Sidebar({
                     count={contributionCount}
                     open={open}
                 />
+
                 <NavLink
                     title="Positions"
                     href="/admin/panels/positions"
                     icon={FaClipboardUser}
+                    count={0}
                     open={open}
                 />
+
                 <NavLink
                     title="Roles"
                     href="/admin/panels/roles"
@@ -73,11 +77,19 @@ export default function Sidebar({
                     count={roleCount}
                     open={open}
                 />
+
                 <NavLink
                     title="Permissions"
                     href="/admin/panels/permissions"
                     icon={FaUserShield}
                     count={permissionCount}
+                    open={open}
+                />
+                <NavLink
+                    title="Fundraising"
+                    href="/admin/panels/fundraising"
+                    icon={FaDonate}
+                    count={2}
                     open={open}
                 />
             </ul>
@@ -126,7 +138,11 @@ function NavLink({ title, href, icon: Icon, count, open }: NavLinkProps) {
                 {open ? (
                     <span className={styles.linkRow}>
                         <span className={styles.title}>{title}</span>
-                        <span className={styles.count}>{formattedCount}</span>
+                        {typeof count === 'number' ? (
+                            <span className={styles.count}>
+                                {formattedCount}
+                            </span>
+                        ) : null}
                     </span>
                 ) : null}
             </Link>

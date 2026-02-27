@@ -145,6 +145,8 @@ export default function Page() {
     return (
         <>
             <List
+                backHref="/admin/panels/fundraising"
+                backLabel="Fundraising"
                 search={search}
                 count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}

@@ -98,6 +98,15 @@ const navitems: NavItem[] = [
         subnav: {
             columns: [
                 {
+                    title: 'Initiatives',
+                    items: [
+                        {
+                            name: 'Save Section 230',
+                            href: '/initiative',
+                        },
+                    ],
+                },
+                {
                     title: 'Join',
                     items: [
                         { name: 'Volunteer', href: '/volunteer' },

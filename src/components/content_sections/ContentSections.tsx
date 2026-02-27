@@ -15,6 +15,7 @@ interface DropdownItem {
 
 export interface InfoSectionProps {
     title: string
+    subtitle?: string
     highlight?: string
     highlightColor?: string
     titleAlign?: TitleAlign
@@ -25,6 +26,7 @@ export interface InfoSectionProps {
 
 export function ContentSection({
     title,
+    subtitle,
     highlight,
     highlightColor,
     titleAlign,
@@ -37,12 +39,13 @@ export function ContentSection({
     const [openIndex, setOpenIndex] = useState<number | null>(null)
 
     let renderedTitle: React.ReactNode = title
+    let renderedSubtitle: React.ReactNode = subtitle
 
     if (highlight) {
-        const index = title.indexOf(highlight)
-        if (index !== -1) {
-            const before = title.slice(0, index)
-            const after = title.slice(index + highlight.length)
+        const titleIndex = title.indexOf(highlight)
+        if (titleIndex !== -1) {
+            const before = title.slice(0, titleIndex)
+            const after = title.slice(titleIndex + highlight.length)
 
             renderedTitle = (
                 <>
@@ -57,6 +60,28 @@ export function ContentSection({
                     {after}
                 </>
             )
+        }
+
+        if (subtitle) {
+            const subtitleIndex = subtitle.indexOf(highlight)
+            if (subtitleIndex !== -1) {
+                const before = subtitle.slice(0, subtitleIndex)
+                const after = subtitle.slice(subtitleIndex + highlight.length)
+
+                renderedSubtitle = (
+                    <>
+                        {before}
+                        <span
+                            style={{
+                                color: highlightColor ?? defaultHighlightColor,
+                            }}
+                        >
+                            {highlight}
+                        </span>
+                        {after}
+                    </>
+                )
+            }
         }
     }
 
@@ -95,6 +120,14 @@ export function ContentSection({
         <section className={styles.infoSection}>
             <p className={`${styles.infoSectionTitle} ${alignmentClass}`}>
                 {renderedTitle}
+                {subtitle && (
+                    <>
+                        <br />
+                        <span className={styles.infoSectionSubtitle}>
+                            {renderedSubtitle}
+                        </span>
+                    </>
+                )}
             </p>
 
             {bodyContent}
