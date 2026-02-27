@@ -58,16 +58,27 @@ function InitiativeContent() {
                     After recieving training and materials in the Discord, you
                     can start by making three calls to your House Rep and
                     Senators.
-                    <br />
-                    <br />
-                    Click this link to call your local representatives:{' '}
-                    <a
-                        href="https://www.progressivevictory.win/login?redirect=/volunteer"
-                        className={styles.actionLink}
-                    >
-                        {'unfilled'}
-                    </a>
                 </p>
+
+                <ul className={styles.bulletList}>
+                    Links to call your local representatives:
+                    <li className={styles.bulletListItem}>
+                        <a
+                            href="https://progressive-victory.solidarity.tech/call-your-representative"
+                            className={styles.actionLink}
+                        >
+                            Click Here to call your House Rep
+                        </a>
+                    </li>
+                    <li className={styles.bulletListItem}>
+                        <a
+                            href="https://progressive-victory.solidarity.tech/call-your-senator"
+                            className={styles.actionLink}
+                        >
+                            Click Here to call your Senators
+                        </a>
+                    </li>
+                </ul>
             </ContentSection>
 
             <ContentSection title="Step 3 - Call the FIVE Key Congresspeople">
@@ -78,16 +89,18 @@ function InitiativeContent() {
                     join the Discord to learn why we are targeting these five.)
                     The five key congresspeople are: Ro Khanna, Thomas Massie,
                     Frank Pallone, Doris Matsui, Amy Klobuchar.
-                    <br />
-                    <br />
-                    Click this link to start dialing:{' '}
-                    <a
-                        href="https://www.progressivevictory.win/login?redirect=/volunteer"
-                        className={styles.actionLink}
-                    >
-                        {'unfilled'}
-                    </a>
                 </p>
+                <ul className={styles.bulletList}>
+                    Link to start dialing:
+                    <li className={styles.bulletListItem}>
+                        <a
+                            href="https://progressive-victory.solidarity.tech/keep-section-230-call-congress"
+                            className={styles.actionLink}
+                        >
+                            {'Click Here to Call 5 Key Congresspeople'}
+                        </a>
+                    </li>
+                </ul>
             </ContentSection>
 
             <ContentSection title="Step 4 - Get your PV Membership Card">

@@ -22,6 +22,16 @@
     padding-top: 1.25rem;
 }
 
+.bulletList {
+    margin-top: 1rem;
+    font-weight: 500;
+    padding: 0;
+}
+
+.bulletListItem {
+    margin-left: 1rem;
+}
+
 .inlineLink {
     text-decoration: underline;
     font-size: 1rem;
@@ -37,7 +47,7 @@
 }
 
 .cardContainer {
-    display: column;
+    display: flex;
     flex-direction: column;
 }
 
