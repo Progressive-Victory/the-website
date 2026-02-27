@@ -1,8 +1,8 @@
 import {
-    FetchError,
 	useFetch,
 	usePaginatedSearch,
 } from '@/util/hooks'
+import { FetchError } from '@/models'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Role, User, zUser, zUserProfile, UserProfile } from '@/contracts/data'
 import { UpdateUserRequest } from '@/contracts/requests'
