@@ -8,11 +8,11 @@ import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
 import Link from 'next/link'
 import { useMemo } from 'react'
 
-export function Account() {
-	const { isSessionLoading, session, onLogout } = useAuth()
+export function AccountPage() {
+    const { isSessionLoading, session, onLogout } = useAuth()
     const loggedInUser = useCurrentUser()
 
- 	const canAccessAdminPanel = useMemo(() => {
+    const canAccessAdminPanel = useMemo(() => {
         return loggedInUser.data
             ? hasPermission(loggedInUser.data, 'Admin Panel Access')
             : false
@@ -39,7 +39,7 @@ export function Account() {
         })
     }
 
-	if (isSessionLoading) return null
+    if (isSessionLoading) return null
 
     if (!session) return null
 
