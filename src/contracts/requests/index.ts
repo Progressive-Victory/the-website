@@ -1,4 +1,6 @@
+export * from './ActBlueDonorLinkRequest'
 export * from './CreateUserRequest'
+export * from './MutationRequest'
 export * from './SearchRequest'
 export * from './UpdatePermissionRequest'
 export * from './UpdateRoleRequest'
