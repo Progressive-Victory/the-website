@@ -1,69 +1,90 @@
 'use client'
 
+import { AccountInfoForm } from './AccountInfoForm'
 import styles from '@/app/account/account.module.css'
-import {
-    ContentPageFrame,
-    ContentSection,
-} from '@/components/content_sections/ContentSections'
-import { hasPermission, useAuth, useCurrentUser } from '@/util/hooks'
-import { InformationCircleIcon } from '@heroicons/react/24/solid'
+import { User } from '@/contracts/data'
+import { useUpdatedUser } from '@/queries/users.queries'
+import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
 import Link from 'next/link'
 import { useMemo } from 'react'
 
 export function AccountPage() {
     const { isSessionLoading, session, onLogout } = useAuth()
-    const user = useCurrentUser()
+    const loggedInUser = useCurrentUser()
 
     const canAccessAdminPanel = useMemo(() => {
-        return user.data
-            ? hasPermission(user.data, 'Admin Panel Access')
+        return loggedInUser.data
+            ? hasPermission(loggedInUser.data, 'Admin Panel Access')
             : false
-    }, [user.data])
+    }, [loggedInUser.data])
 
     const handleSignOut = () => {
         void onLogout()
     }
 
+    const updateMutation = useUpdatedUser({ loggedInUser: loggedInUser.data })
+
+    const onSave = (user: User) => {
+        updateMutation.mutate({
+            id: user.id,
+            user,
+            request: {
+                email: user.email,
+                phone: user.phone,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                birthdate: user.birthdate,
+                zipCode: user.location?.zip ?? null,
+            },
+        })
+    }
+
     if (isSessionLoading) return null
 
-    if (!session) {
-        window.location.href = '/'
-        return null
-    }
+    if (!session) return null
 
     return (
         <div className={styles.pageRoot}>
-            <ContentPageFrame>
-                <ContentSection
-                    title="Account Controls"
-                    titleAlign="center"
-                    highlight="Controls"
-                    highlightColor="#CE3728"
-                >
-                    <div className={styles.controlsRow}>
-                        <button
-                            type="button"
-                            onClick={handleSignOut}
-                            className={styles.primaryButton}
-                        >
-                            Sign Out
-                        </button>
+            <div className={styles.contentColumn}>
+                <p className={styles.pageTitle}>Account Dashboard</p>
+                <div className={styles.contentRow}>
+                    <div className={styles.accountColumn}>
+                        <div className={styles.accountControls}>
+                            <div className={styles.sectionHeader}>
+                                Account Controls
+                            </div>
 
-                        {canAccessAdminPanel && (
-                            <Link href="/admin" className={styles.adminLink}>
-                                <span className={styles.primaryButton}>
-                                    Admin Panel
-                                </span>
-                            </Link>
+                            <div className={styles.controlRow}>
+                                <button
+                                    type="button"
+                                    onClick={handleSignOut}
+                                    className={styles.primaryButton}
+                                >
+                                    Sign Out
+                                </button>
+
+                                {canAccessAdminPanel && (
+                                    <Link
+                                        href="/admin"
+                                        className={styles.adminLink}
+                                    >
+                                        <span className={styles.primaryButton}>
+                                            Admin Panel
+                                        </span>
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+
+                        {loggedInUser.data && (
+                            <AccountInfoForm
+                                user={loggedInUser.data}
+                                onSave={onSave}
+                            />
                         )}
                     </div>
-                </ContentSection>
-
-                <div className={styles.notice}>
-                    <InformationCircleIcon className={styles.noticeIcon} />
-                    <span>Pardon our dust while we work on this page</span>
                 </div>
-            </ContentPageFrame>
+            </div>
         </div>
     )
 }
