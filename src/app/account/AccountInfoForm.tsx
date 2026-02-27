@@ -1,7 +1,12 @@
 'use client'
 
 import styles from './accountInfoForm.module.css'
-import { DateField, Form, FormGroup, TextField } from '@/components/form'
+import {
+    Form,
+    DateField,
+    FormGroup,
+    TextField,
+} from '@/components/common/forms'
 import { User } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useState } from 'react'
