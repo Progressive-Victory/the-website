@@ -2,14 +2,25 @@
 
 import styles from './DonorView.module.css'
 import { ListBody } from '@/app/admin/layout/List'
-import { Form, FormGroup, TextField } from '@/components/common/forms'
-import { ActBlueDonor, User } from '@/contracts/data'
+import {
+    DateField,
+    Form,
+    FormGroup,
+    TextField,
+} from '@/components/common/forms'
+import {
+    ActBlueContribution,
+    ActBlueDonor,
+    ActBlueLineitem,
+    User,
+} from '@/contracts/data'
 import type { SearchRequest } from '@/contracts/requests'
 import type { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import type { UseQueryResult } from '@tanstack/react-query'
 import cx from 'classnames'
 import { motion } from 'motion/react'
+import Link from 'next/link'
 import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
 
 export interface DonorViewProps {
@@ -30,6 +41,62 @@ export interface DonorViewProps {
 
     renderDonorItem: (item: ActBlueDonor, userId: number) => React.ReactNode
     handleDeleteDonorItem: (value: ActBlueDonor, userId: number) => void
+}
+
+interface ContributionData {
+    total: number
+    hasActiveRecurring: boolean
+    lineitems: ActBlueLineitem[]
+}
+
+const calcFutureDate = (
+    initialTime: Date,
+    period: 'weekly' | 'monthly',
+    duration: number
+) => {
+    switch (period) {
+        case 'weekly':
+            return new Date(
+                initialTime.getTime() +
+                    new Date(duration * 7 * 24 * 60 * 60 * 1000).getTime()
+            )
+        case 'monthly':
+            initialTime.setMonth(initialTime.getMonth())
+            return initialTime
+    }
+}
+
+const calcContributionData = (donor: ActBlueDonor): ContributionData => {
+    const li: ActBlueLineitem[] = []
+    let hasActiveRecurring = false
+    let total = 0
+
+    ;(donor.contributions ?? []).forEach(
+        (contribution: ActBlueContribution) => {
+            if (
+                contribution.isRecurring &&
+                ((contribution.recurringDuration ?? 1) < 0 ||
+                    calcFutureDate(
+                        contribution.createdAt,
+                        contribution.recurringPeriod as 'weekly' | 'monthly',
+                        contribution.recurringDuration ?? 1
+                    ) > new Date())
+            )
+                hasActiveRecurring = true
+            ;(contribution.lineitems ?? []).forEach(
+                (lineitem: ActBlueLineitem) => {
+                    total += lineitem.amount
+                    li.push(lineitem)
+                }
+            )
+        }
+    )
+
+    return {
+        total,
+        hasActiveRecurring,
+        lineitems: li,
+    }
 }
 
 export function DonorView({
@@ -169,75 +236,253 @@ export function DonorView({
                     </div>
 
                     <div className={styles.linkedList}>
-                        {linkedDonors.map((donor) => (
-                            <div key={donor.email} className={styles.donorCard}>
-                                <div className={styles.donorCardTop}>
-                                    <div className={styles.donorCardTitle}>
-                                        {donor.firstname} {donor.lastname}
-                                    </div>
-                                </div>
+                        {linkedDonors.map((donor) => {
+                            const contributionData = calcContributionData(donor)
 
-                                <Form<ActBlueDonor>
-                                    title=""
-                                    readonly
-                                    form={donor}
-                                    onSave={() => {
-                                        return
-                                    }}
+                            const makeTitle = (d: ActBlueDonor) =>
+                                `${d.firstname} ${d.lastname}`
+
+                            return (
+                                <div
+                                    key={donor.email}
+                                    className={styles.donorCard}
                                 >
-                                    <FormGroup
-                                        title=""
-                                        wrapper
-                                        defaultCollapsed={false}
-                                    >
-                                        <FormGroup
-                                            title="Contact Info"
-                                            subGroup
-                                        >
-                                            <TextField
-                                                label="First Name"
-                                                field="firstName"
-                                            />
-                                            <TextField
-                                                label="Last Name"
-                                                field="lastName"
-                                            />
-                                            <TextField
-                                                label="Email"
-                                                field="email"
-                                            />
-                                            <TextField
-                                                label="Phone"
-                                                field="phone"
-                                            />
-                                        </FormGroup>
+                                    <div className={styles.donorCardTop}>
+                                        <div className={styles.donorCardTitle}>
+                                            {donor.firstname} {donor.lastname}
+                                        </div>
+                                    </div>
 
-                                        <FormGroup title="Address" subGroup>
-                                            <TextField
-                                                label="Street Address"
-                                                field="addr1"
-                                            />
-                                            <TextField
-                                                label="City"
-                                                field="city"
-                                            />
-                                            <TextField
-                                                label="State"
-                                                field="state"
-                                            />
-                                            <TextField
-                                                label="Zip"
-                                                field="zip"
-                                            />
-                                            <TextField
-                                                label="Country"
-                                                field="country"
-                                            />
+                                    <Form<ActBlueDonor>
+                                        title=""
+                                        readonly
+                                        form={donor}
+                                        onSave={() => {
+                                            return
+                                        }}
+                                    >
+                                        <FormGroup title="" wrapper>
+                                            <FormGroup
+                                                title="Contact Info"
+                                                subGroup
+                                            >
+                                                <TextField
+                                                    label="First Name"
+                                                    field="firstname"
+                                                    required
+                                                />
+                                                <TextField
+                                                    label="Last Name"
+                                                    field="lastname"
+                                                    required
+                                                />
+                                                <TextField
+                                                    label="Email"
+                                                    field="email"
+                                                    readonly
+                                                />
+                                                <TextField
+                                                    label="Phone Number"
+                                                    field="phone"
+                                                />
+                                            </FormGroup>
+
+                                            <FormGroup title="Address" subGroup>
+                                                <TextField
+                                                    label="Street Address"
+                                                    field="addr1"
+                                                />
+                                                <TextField
+                                                    label="City"
+                                                    field="city"
+                                                />
+                                                <TextField
+                                                    label="State"
+                                                    field="state"
+                                                />
+                                                <TextField
+                                                    label="Zip Code"
+                                                    field="zip"
+                                                />
+                                                <TextField
+                                                    label="Country"
+                                                    field="country"
+                                                />
+                                            </FormGroup>
+
+                                            <FormGroup
+                                                title="Employer Info"
+                                                subGroup
+                                            >
+                                                <TextField<ActBlueDonor>
+                                                    label="Employer Name"
+                                                    getter={(form) =>
+                                                        form.employerData
+                                                            ?.employer
+                                                    }
+                                                />
+                                                <TextField<ActBlueDonor>
+                                                    label="Occupation"
+                                                    getter={(form) =>
+                                                        form.employerData
+                                                            ?.occupation
+                                                    }
+                                                />
+                                                <TextField<ActBlueDonor>
+                                                    label="Employer Street Address"
+                                                    getter={(form) =>
+                                                        form.employerData
+                                                            ?.employerAddr1
+                                                    }
+                                                />
+                                                <TextField<ActBlueDonor>
+                                                    label="Employer City"
+                                                    getter={(form) =>
+                                                        form.employerData
+                                                            ?.employerCity
+                                                    }
+                                                />
+                                                <TextField<ActBlueDonor>
+                                                    label="Employer State"
+                                                    getter={(form) =>
+                                                        form.employerData
+                                                            ?.employerState
+                                                    }
+                                                />
+                                                <TextField<ActBlueDonor>
+                                                    label="Employer Zip Code"
+                                                    getter={(form) =>
+                                                        `${form.employerData?.employerZip ?? ''}`
+                                                    }
+                                                />
+                                                <TextField<ActBlueDonor>
+                                                    label="Employer Country"
+                                                    getter={(form) =>
+                                                        form.employerData
+                                                            ?.employerCountry
+                                                    }
+                                                />
+                                            </FormGroup>
+
+                                            <FormGroup
+                                                title="Contributions"
+                                                wrapper
+                                                subGroup
+                                            >
+                                                <FormGroup
+                                                    title="All Time Stats"
+                                                    subGroup
+                                                >
+                                                    <TextField<ActBlueDonor>
+                                                        label="Total Dollar Donations"
+                                                        getter={() =>
+                                                            `$${contributionData.total}`
+                                                        }
+                                                    />
+                                                    <TextField<ActBlueDonor>
+                                                        label="Currently Has a Recurring Donation"
+                                                        getter={() =>
+                                                            `${contributionData.hasActiveRecurring}`
+                                                        }
+                                                    />
+                                                    <TextField<ActBlueDonor>
+                                                        label="Total Contributions"
+                                                        getter={() =>
+                                                            `${contributionData.lineitems.length}`
+                                                        }
+                                                    />
+                                                </FormGroup>
+
+                                                {(
+                                                    contributionData.lineitems ??
+                                                    []
+                                                ).map((lineitem) => (
+                                                    <FormGroup
+                                                        title={`${lineitem.lineitemId}`}
+                                                        key={
+                                                            lineitem.lineitemId
+                                                        }
+                                                        defaultCollapsed
+                                                        subGroup
+                                                    >
+                                                        <DateField<ActBlueDonor>
+                                                            label="Paid At"
+                                                            getter={() =>
+                                                                lineitem.paidAt
+                                                            }
+                                                        />
+                                                        <TextField<ActBlueDonor>
+                                                            label="Sequence"
+                                                            getter={() =>
+                                                                `${lineitem.sequence}`
+                                                            }
+                                                        />
+                                                        <TextField<ActBlueDonor>
+                                                            label="Amount"
+                                                            getter={() =>
+                                                                `$${lineitem.amount}`
+                                                            }
+                                                        />
+                                                        <TextField<ActBlueDonor>
+                                                            label="Recurring Amount"
+                                                            getter={() =>
+                                                                `$${lineitem.recurringAmount}`
+                                                            }
+                                                        />
+                                                        <TextField<ActBlueDonor>
+                                                            label="Amount Less AB Fees"
+                                                            getter={() =>
+                                                                `$${lineitem.amountLessAbFees}`
+                                                            }
+                                                        />
+                                                        <br />
+                                                        <Link
+                                                            href={{
+                                                                pathname:
+                                                                    '/admin/panels/contributions',
+                                                                query: {
+                                                                    lineitemId:
+                                                                        lineitem.lineitemId,
+                                                                },
+                                                            }}
+                                                        >
+                                                            Full Details
+                                                        </Link>
+                                                    </FormGroup>
+                                                ))}
+
+                                                <br />
+                                                <Link
+                                                    href={{
+                                                        pathname:
+                                                            '/admin/panels/donors',
+                                                        query: {
+                                                            email: donor.email,
+                                                        },
+                                                    }}
+                                                >
+                                                    Open in Donors Panel
+                                                </Link>
+                                            </FormGroup>
+
+                                            <FormGroup
+                                                title="Contribution Form"
+                                                subGroup
+                                            >
+                                                <TextField
+                                                    label="Form Name"
+                                                    field="contributionForm"
+                                                />
+                                                <TextField
+                                                    label="Form Kind"
+                                                    field="kind"
+                                                />
+                                            </FormGroup>
                                         </FormGroup>
-                                    </FormGroup>
-                                </Form>
-                            </div>
-                        ))}
+                                    </Form>
+                                </div>
+                            )
+                        })}
                     </div>
                 </div>
             )}

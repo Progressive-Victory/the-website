@@ -3,7 +3,6 @@
     width: 24rem;
     flex-direction: column;
     align-self: stretch;
-    border-left: 2px solid;
     border-right: 2px solid;
     border-color: #e5e7eb;
     background-color: #f9fafb;
@@ -20,7 +19,50 @@
     flex-direction: column;
     gap: 0.75rem;
     border-bottom: 2px solid rgba(17, 24, 39, 0.1);
-    padding: 0.9rem;
+
+    padding-block: 0.85rem;
+    padding-right: 0.85rem;
+    padding-left: 0.6rem;
+}
+
+.searchRow {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.searchRowMain {
+    flex: 1;
+    min-width: 0;
+}
+
+.backIconButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 0.85rem;
+    padding: 0.45rem;
+
+    font-weight: 600;
+    cursor: pointer;
+
+    color: rgba(15, 23, 42, 0.62);
+    text-decoration: none;
+
+    transition:
+        background-color 140ms ease,
+        transform 140ms ease,
+        color 140ms ease,
+        box-shadow 140ms ease;
+}
+
+.backIconButton:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.backIconButton:active {
+    transform: translateY(0px) scale(0.99);
 }
 
 .searchPanelTop {

@@ -17,6 +17,12 @@
     line-height: 1.2;
 }
 
+.infoSectionSubtitle {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
 .alignLeft {
     text-align: left;
 }
