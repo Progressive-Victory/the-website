@@ -1,6 +1,5 @@
 'use client'
 
-import styles from './MemberView.module.css'
 import {
     CheckboxField,
     DateField,
@@ -37,7 +36,6 @@ export function MemberView({
     selectedId,
     user,
     selectedHistory,
-    formState,
     setFormState,
     saving,
     isInvalid,

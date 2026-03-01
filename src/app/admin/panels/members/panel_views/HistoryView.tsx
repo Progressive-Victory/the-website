@@ -1,6 +1,5 @@
 'use client'
 
-import { DonorView } from './DonorView'
 import styles from './HistoryView.module.css'
 import { MemberView } from './MemberView'
 import { CollapsibleSection } from '@/components/common'
@@ -12,10 +11,6 @@ import {
     UpdateHistory,
     User,
 } from '@/contracts/data'
-import { PaginatedResponse } from '@/contracts/responses'
-import { FetchError } from '@/models'
-import { usePaginatedSearch } from '@/util/hooks'
-import { useQuery, UseQueryResult } from '@tanstack/react-query'
 import cx from 'classnames'
 import { ReactNode, useMemo, useState } from 'react'
 

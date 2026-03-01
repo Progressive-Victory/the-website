@@ -28,14 +28,12 @@ interface contributionData {
 }
 
 export default function Page() {
-    const { ready, onGet, onPatch } = useFetch()
+    const { ready, onGet } = useFetch()
     const navParams = useSearchParams()
     const navEmail = navParams.get('email')
 
     const [selectedEmail, setSelectedEmail] = useState<string | null>(navEmail)
-    const [formState, setFormState] = useState<FormState<ActBlueDonor> | null>(
-        null
-    )
+    const [formState] = useState<FormState<ActBlueDonor> | null>(null)
 
     const {
         query: searchQuery,
