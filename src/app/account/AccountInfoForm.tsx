@@ -1,5 +1,3 @@
-'use client'
-
 import styles from './accountInfoForm.module.css'
 import {
     Form,
