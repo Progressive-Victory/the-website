@@ -81,11 +81,11 @@ export default function Page() {
     const { ready, onGet } = useFetch()
 
     const fullDonations = useQuery({
-        queryKey: [`/actblue/contributions/total?type=${TotalType.ALL}`],
+        queryKey: [`/actblue/contributions/total/${TotalType.ALL}`],
         queryFn: ready
             ? async () =>
                   onGet<DonationTotal>(
-                      `/actblue/contributions/total?type=${TotalType.ALL}`,
+                      `/actblue/contributions/total/${TotalType.ALL}`,
                       zDonationTotal
                   )
             : skipToken,
@@ -93,11 +93,11 @@ export default function Page() {
     })
 
     const recurringDonations = useQuery({
-        queryKey: [`/actblue/contributions/total?type=${TotalType.RECURRING}`],
+        queryKey: [`/actblue/contributions/total/${TotalType.RECURRING}`],
         queryFn: ready
             ? async () =>
                   onGet<DonationTotal>(
-                      `/actblue/contributions/total?type=${TotalType.RECURRING}`,
+                      `/actblue/contributions/total/${TotalType.RECURRING}`,
                       zDonationTotal
                   )
             : skipToken,
@@ -105,11 +105,11 @@ export default function Page() {
     })
 
     const oneTimeDonations = useQuery({
-        queryKey: [`/actblue/contributions/total?type=${TotalType.ONE_TIME}`],
+        queryKey: [`/actblue/contributions/total/${TotalType.ONE_TIME}`],
         queryFn: ready
             ? async () =>
                   onGet<DonationTotal>(
-                      `/actblue/contributions/total?type=${TotalType.ONE_TIME}`,
+                      `/actblue/contributions/total/${TotalType.ONE_TIME}`,
                       zDonationTotal
                   )
             : skipToken,
