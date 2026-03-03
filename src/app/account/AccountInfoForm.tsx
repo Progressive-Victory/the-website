@@ -1,8 +1,9 @@
-import styles from './accountInfoForm.module.css'
+import styles from './account.module.css'
 import {
     Form,
     DateField,
     FormGroup,
+    PhoneField,
     TextField,
 } from '@/components/common/forms'
 import { User } from '@/contracts/data'
@@ -17,6 +18,7 @@ export const AccountInfoForm = ({
     onSave: (user: User) => void
 }) => {
     const [updatedUser, setUpdatedUser] = useState<User>(user)
+    const [isEditing, setIsEditing] = useState(false)
 
     const handleFormSave = (user: User) => {
         setUpdatedUser(user)
@@ -29,21 +31,36 @@ export const AccountInfoForm = ({
             <Form<User>
                 form={updatedUser}
                 title="Account Information"
-                onUpdate={() => undefined}
+                onUpdate={(state) => setIsEditing(state.editing)}
                 onSave={handleFormSave}
             >
                 <FormGroup title="">
+                    {isEditing ? (
+                        <TextField label="First Name" field="firstName" />
+                    ) : (
+                        <TextField<User>
+                            label="Full Name"
+                            getter={(user) =>
+                                `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() ||
+                                null
+                            }
+                            readonly
+                        />
+                    )}
+                    {isEditing && (
+                        <TextField label="Last Name" field="lastName" />
+                    )}
                     <TextField<User>
                         label="Discord Username"
                         getter={(user) =>
                             user.discordUsers
-                                ? user.discordUsers[0].username
+                                ? `@${user.discordUsers[0].username}`
                                 : null
                         }
                         readonly
                     />
-                    <TextField label="First Name" field="firstName" />
-                    <TextField label="Last Name" field="lastName" />
+                    <PhoneField label="Phone Number" field="phone" />
+                    <TextField label="Email" field="email" readonly />
                     <DateField<User>
                         label="Date of Birth"
                         getter={(user) =>
@@ -89,22 +106,15 @@ export const AccountInfoForm = ({
                         })}
                     />
                     <TextField<User>
-                        label="State"
-                        getter={(user) => user.location?.state ?? null}
-                        readonly
-                    />
-                    <TextField<User>
-                        label="County"
-                        getter={(user) => user.location?.county ?? null}
-                        readonly
-                    />
-                    <TextField<User>
                         label="City"
                         getter={(user) => user.location?.city ?? null}
                         readonly
                     />
-                    <TextField label="Email" field="email" />
-                    <TextField label="Phone Number" field="phone" />
+                    <TextField<User>
+                        label="State"
+                        getter={(user) => user.location?.state ?? null}
+                        readonly
+                    />
                 </FormGroup>
             </Form>
         </div>

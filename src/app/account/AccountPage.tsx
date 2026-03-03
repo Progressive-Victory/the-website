@@ -5,7 +5,7 @@ import styles from '@/app/account/account.module.css'
 import { User } from '@/contracts/data'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
-import Link from 'next/link'
+import { BaseButton } from '@/components/common/buttons/Button'
 import { useMemo } from 'react'
 
 export function AccountPage() {
@@ -44,46 +44,45 @@ export function AccountPage() {
     if (!session) return null
 
     return (
-        <div className={styles.pageRoot}>
-            <div className={styles.contentColumn}>
-                <p className={styles.pageTitle}>Account Dashboard</p>
-                <div className={styles.contentRow}>
-                    <div className={styles.accountColumn}>
-                        <div className={styles.accountControls}>
-                            <div className={styles.sectionHeader}>
-                                Account Controls
+        <div className={styles.root}>
+            <div className={styles.main}>
+                <section className={styles.content}>
+                    <header className={styles.contentHeader}>
+                        <div className={styles.headerTopRow}>
+                            <div className={styles.headerTextBlock}>
+                                <p className={styles.pageTitle}>Account Dashboard</p>
+
+                                <p className={styles.pageSubtitle}>
+                                    View and update your personal account
+                                    information. We use this info to create and
+                                    ship membership cards.
+                                </p>
                             </div>
 
-                            <div className={styles.controlRow}>
-                                <button
-                                    type="button"
+                            <div className={styles.headerActions}>
+                                {canAccessAdminPanel && (
+                                    <BaseButton
+                                        label="Admin Panel"
+                                        href="/admin"
+                                        className={styles.secondaryButton}
+                                    />
+                                )}
+
+                                <BaseButton
+                                    label="Sign Out"
                                     onClick={handleSignOut}
                                     className={styles.primaryButton}
-                                >
-                                    Sign Out
-                                </button>
-
-                                {canAccessAdminPanel && (
-                                    <Link
-                                        href="/admin"
-                                        className={styles.adminLink}
-                                    >
-                                        <span className={styles.primaryButton}>
-                                            Admin Panel
-                                        </span>
-                                    </Link>
-                                )}
+                                />
                             </div>
                         </div>
+                    </header>
 
+                    <div className={styles.contentPanel}>
                         {loggedInUser.data && (
-                            <AccountInfoForm
-                                user={loggedInUser.data}
-                                onSave={onSave}
-                            />
+                            <AccountInfoForm user={loggedInUser.data} onSave={onSave} />
                         )}
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     )
