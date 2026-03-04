@@ -8,7 +8,6 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { useEffect } from 'react'
 
 export function useAuth() {
     const queryClient = useQueryClient()
@@ -75,18 +74,19 @@ export function useAuth() {
         },
     })
 
-    const refreshMutation = useMutation({
-        mutationKey: ['/auth/refresh'],
-        async mutationFn() {
-            if (!apiBaseUrl) return
-            await fetch(new URL('/auth/refresh', apiBaseUrl), {
-                method: 'POST',
-                credentials: 'include',
-            })
-        },
-        async onSuccess() {
-            await queryClient.invalidateQueries({ queryKey: ['/auth'] })
-        },
+    const refreshQuery = useQuery({
+        queryKey: ['/auth/refresh'],
+        queryFn: apiBaseUrl
+            ? async () => {
+                  await fetch(new URL('/auth/refresh', apiBaseUrl), {
+                      method: 'POST',
+                      credentials: 'include',
+                  })
+                  await queryClient.invalidateQueries({ queryKey: ['/auth'] })
+                  return true
+              }
+            : skipToken,
+        refetchInterval: 10 * 1000,
     })
 
     const logoutMutation = useMutation<void, Error, { redirect?: string }>({
@@ -106,17 +106,9 @@ export function useAuth() {
 
     const onLogin = (redirect?: string) =>
         loginMutation.mutateAsync({ redirect })
-    const onRefresh = refreshMutation.mutateAsync
+    const onRefresh = refreshQuery.refetch
     const onLogout = (redirect?: string) =>
         logoutMutation.mutateAsync({ redirect })
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            void onRefresh()
-        }, 60000)
-
-        return () => clearInterval(interval)
-    }, [onRefresh])
 
     return {
         apiBaseUrl,
