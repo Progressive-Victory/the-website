@@ -22,4 +22,4 @@ jobs:
             - name: Install dependencies
               run: pnpm install
             - name: NEXT Lint
-              run: pnpm lint
+              run: pnpm lint-ci
