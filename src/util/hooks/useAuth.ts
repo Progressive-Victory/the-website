@@ -26,30 +26,6 @@ export function useAuth() {
 
     const apiBaseUrl = settingsQuery.data?.apiBaseUrl
 
-    const sessionQuery = useQuery({
-        queryKey: ['/auth'],
-        queryFn: apiBaseUrl
-            ? async () => {
-                  const res = await fetch(new URL('/auth', apiBaseUrl), {
-                      credentials: 'include',
-                  })
-
-                  if (!res.ok) {
-                      if (res.status == 404) return null
-
-                      const error = (await res.json()) as ApiError
-                      throw new FetchError(
-                          error.message,
-                          res.status,
-                          error.error
-                      )
-                  }
-
-                  return (await res.json()) as TokenClaims
-              }
-            : skipToken,
-    })
-
     const loginMutation = useMutation<void, Error, { redirect?: string }>({
         mutationKey: ['/auth/discord/login'],
         async mutationFn({ redirect }) {
@@ -74,21 +50,6 @@ export function useAuth() {
         },
     })
 
-    const refreshQuery = useQuery({
-        queryKey: ['/auth/refresh'],
-        queryFn: apiBaseUrl
-            ? async () => {
-                  await fetch(new URL('/auth/refresh', apiBaseUrl), {
-                      method: 'POST',
-                      credentials: 'include',
-                  })
-                  await queryClient.invalidateQueries({ queryKey: ['/auth'] })
-                  return true
-              }
-            : skipToken,
-        refetchInterval: 10 * 1000,
-    })
-
     const logoutMutation = useMutation<void, Error, { redirect?: string }>({
         mutationKey: ['/auth/logout'],
         mutationFn: async () => {
@@ -106,14 +67,71 @@ export function useAuth() {
 
     const onLogin = (redirect?: string) =>
         loginMutation.mutateAsync({ redirect })
-    const onRefresh = refreshQuery.refetch
     const onLogout = (redirect?: string) =>
         logoutMutation.mutateAsync({ redirect })
 
+    const sessionQuery = useQuery({
+        queryKey: ['/auth'],
+        queryFn: apiBaseUrl
+            ? async () => {
+                  const res = await fetch(new URL('/auth', apiBaseUrl), {
+                      credentials: 'include',
+                  })
+
+                  if (!res.ok) {
+                      if (res.status == 404) return null
+
+                      await onLogout()
+
+                      const error = (await res.json()) as ApiError
+                      throw new FetchError(
+                          error.message,
+                          res.status,
+                          error.error
+                      )
+                  }
+
+                  return (await res.json()) as TokenClaims
+              }
+            : skipToken,
+    })
+
+    const isSessionLoading = sessionQuery.isLoading || sessionQuery.isPending
+    const session = sessionQuery.data ?? null
+
+    const refreshQuery = useQuery({
+        queryKey: ['/auth/refresh'],
+        queryFn:
+            apiBaseUrl && session
+                ? async () => {
+                      const res = await fetch(
+                          new URL('/auth/refresh', apiBaseUrl),
+                          {
+                              method: 'POST',
+                              credentials: 'include',
+                          }
+                      )
+
+                      if (res.ok) {
+                          await queryClient.invalidateQueries({
+                              queryKey: ['/auth'],
+                          })
+                          return true
+                      }
+
+                      await onLogout()
+                      return false
+                  }
+                : skipToken,
+        refetchInterval: 5 * 60 * 1000,
+    })
+
+    const onRefresh = refreshQuery.refetch
+
     return {
         apiBaseUrl,
-        isSessionLoading: sessionQuery.isLoading || sessionQuery.isPending,
-        session: sessionQuery.data ?? null,
+        isSessionLoading,
+        session,
         onLogin,
         onRefresh,
         onLogout,
