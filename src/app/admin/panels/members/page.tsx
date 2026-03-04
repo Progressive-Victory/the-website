@@ -265,13 +265,16 @@ export default function Page() {
         console.log(user.address, locationQuery.data)
 
         const address = {
-            addressLine1: orNull(user.address.addressLine1),
-            addressLine2: orNull(user.address.addressLine2),
-            city: orNull(user.address.city) ?? locationQuery.data?.city,
-            county: orNull(user.address.county) ?? locationQuery.data?.county,
-            state: orNull(user.address.state) ?? locationQuery.data?.state,
+            addressLine1: orNull(user.address.addressLine1?.trim()),
+            addressLine2: orNull(user.address.addressLine2?.trim()),
+            city: orNull(user.address.city?.trim()) ?? locationQuery.data?.city,
+            county:
+                orNull(user.address.county?.trim()) ??
+                locationQuery.data?.county,
+            state:
+                orNull(user.address.state?.trim()) ?? locationQuery.data?.state,
             zip:
-                orNull(user.address.zip) ??
+                orNull(user.address.zip?.trim()) ??
                 locationQuery.data?.zip?.toString().padStart(5, '0'),
         }
 
