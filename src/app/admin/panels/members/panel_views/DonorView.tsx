@@ -256,6 +256,7 @@ export function DonorView({
                                     </div>
 
                                     <Form<ActBlueDonor>
+                                        key={donor.userId}
                                         title=""
                                         readonly
                                         form={donor}
@@ -437,11 +438,21 @@ export function DonorView({
                                                                 `$${lineitem.amountLessAbFees}`
                                                             }
                                                         />
+                                                        <TextField
+                                                            label="Form Name"
+                                                            field="contributionForm"
+                                                            getter={() =>
+                                                                donor
+                                                                    .contributions?.[0]
+                                                                    ?.contributionForm
+                                                            }
+                                                        />
+                                                        <br />
                                                         {contributionData.customFields?.map(
                                                             (field) => (
                                                                 <TextField
                                                                     key={
-                                                                        field.label
+                                                                        field.id
                                                                     }
                                                                     label={
                                                                         field.label
@@ -467,7 +478,6 @@ export function DonorView({
                                                         </Link>
                                                     </FormGroup>
                                                 ))}
-
                                                 <br />
                                                 <Link
                                                     href={{
@@ -480,20 +490,6 @@ export function DonorView({
                                                 >
                                                     Open in Donors Panel
                                                 </Link>
-                                            </FormGroup>
-
-                                            <FormGroup
-                                                title="Contribution Form"
-                                                subGroup
-                                            >
-                                                <TextField
-                                                    label="Form Name"
-                                                    field="contributionForm"
-                                                    getter={() =>
-                                                        donor.contributions?.[0]
-                                                            ?.contributionForm
-                                                    }
-                                                />
                                             </FormGroup>
                                         </FormGroup>
                                     </Form>
