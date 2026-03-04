@@ -6,7 +6,6 @@ import {
     IOnboardingForm,
     JoiningStage,
     PhoneVerifyStage,
-    SupportNote,
     UnderageStage,
 } from '.'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
