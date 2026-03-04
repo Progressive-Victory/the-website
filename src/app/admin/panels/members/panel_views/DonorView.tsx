@@ -10,6 +10,7 @@ import {
 } from '@/components/common/forms'
 import {
     ActBlueContribution,
+    ActBlueContributionCustomField,
     ActBlueDonor,
     ActBlueLineitem,
     User,
@@ -46,6 +47,7 @@ export interface DonorViewProps {
 interface ContributionData {
     total: number
     hasActiveRecurring: boolean
+    customFields: ActBlueContributionCustomField[]
     lineitems: ActBlueLineitem[]
 }
 
@@ -70,9 +72,11 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
     const li: ActBlueLineitem[] = []
     let hasActiveRecurring = false
     let total = 0
+    let customFields: ActBlueContributionCustomField[] = []
 
     ;(donor.contributions ?? []).forEach(
         (contribution: ActBlueContribution) => {
+            customFields = contribution.customFields
             if (
                 contribution.isRecurring &&
                 ((contribution.recurringDuration ?? 1) < 0 ||
@@ -95,6 +99,7 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
     return {
         total,
         hasActiveRecurring,
+        customFields,
         lineitems: li,
     }
 }
@@ -239,9 +244,6 @@ export function DonorView({
                         {linkedDonors.map((donor) => {
                             const contributionData = calcContributionData(donor)
 
-                            const makeTitle = (d: ActBlueDonor) =>
-                                `${d.firstname} ${d.lastname}`
-
                             return (
                                 <div
                                     key={donor.email}
@@ -254,6 +256,7 @@ export function DonorView({
                                     </div>
 
                                     <Form<ActBlueDonor>
+                                        key={donor.userId}
                                         title=""
                                         readonly
                                         form={donor}
@@ -435,6 +438,31 @@ export function DonorView({
                                                                 `$${lineitem.amountLessAbFees}`
                                                             }
                                                         />
+                                                        <TextField
+                                                            label="Form Name"
+                                                            field="contributionForm"
+                                                            getter={() =>
+                                                                donor
+                                                                    .contributions?.[0]
+                                                                    ?.contributionForm
+                                                            }
+                                                        />
+                                                        <br />
+                                                        {contributionData.customFields?.map(
+                                                            (field) => (
+                                                                <TextField
+                                                                    key={
+                                                                        field.id
+                                                                    }
+                                                                    label={
+                                                                        field.label
+                                                                    }
+                                                                    getter={() =>
+                                                                        field.answer
+                                                                    }
+                                                                />
+                                                            )
+                                                        )}
                                                         <br />
                                                         <Link
                                                             href={{
@@ -450,7 +478,6 @@ export function DonorView({
                                                         </Link>
                                                     </FormGroup>
                                                 ))}
-
                                                 <br />
                                                 <Link
                                                     href={{
@@ -463,20 +490,6 @@ export function DonorView({
                                                 >
                                                     Open in Donors Panel
                                                 </Link>
-                                            </FormGroup>
-
-                                            <FormGroup
-                                                title="Contribution Form"
-                                                subGroup
-                                            >
-                                                <TextField
-                                                    label="Form Name"
-                                                    field="contributionForm"
-                                                />
-                                                <TextField
-                                                    label="Form Kind"
-                                                    field="kind"
-                                                />
                                             </FormGroup>
                                         </FormGroup>
                                     </Form>
