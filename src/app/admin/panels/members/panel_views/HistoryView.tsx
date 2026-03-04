@@ -106,7 +106,7 @@ export function HistoryView({
         )
     }
 
-    if (!sortedHistory.length || !sortedDonorHistory.length) {
+    if (!sortedHistory.length && !sortedDonorHistory.length) {
         return (
             <div className={styles.section}>
                 <div className={styles.historyContainer}>
