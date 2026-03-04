@@ -125,7 +125,7 @@ export function MemberView({
                         ...form,
                         address: {
                             ...form.address,
-                            addressLine1: field?.trim() ?? null,
+                            addressLine1: field ?? null,
                         },
                     })}
                 />
@@ -136,7 +136,7 @@ export function MemberView({
                         ...form,
                         address: {
                             ...form.address,
-                            addressLine2: field?.trim() ?? null,
+                            addressLine2: field ?? null,
                         },
                     })}
                 />
@@ -147,7 +147,7 @@ export function MemberView({
                         ...form,
                         address: {
                             ...form.address,
-                            city: field?.trim() ?? null,
+                            city: field ?? null,
                         },
                     })}
                 />
@@ -158,7 +158,7 @@ export function MemberView({
                         ...form,
                         address: {
                             ...form.address,
-                            county: field?.trim() ?? null,
+                            county: field ?? null,
                         },
                     })}
                 />
