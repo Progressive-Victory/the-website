@@ -244,9 +244,6 @@ export function DonorView({
                         {linkedDonors.map((donor) => {
                             const contributionData = calcContributionData(donor)
 
-                            const makeTitle = (d: ActBlueDonor) =>
-                                `${d.firstname} ${d.lastname}`
-
                             return (
                                 <div
                                     key={donor.email}
@@ -492,10 +489,10 @@ export function DonorView({
                                                 <TextField
                                                     label="Form Name"
                                                     field="contributionForm"
-                                                />
-                                                <TextField
-                                                    label="Form Kind"
-                                                    field="kind"
+                                                    getter={() =>
+                                                        donor.contributions?.[0]
+                                                            ?.contributionForm
+                                                    }
                                                 />
                                             </FormGroup>
                                         </FormGroup>
