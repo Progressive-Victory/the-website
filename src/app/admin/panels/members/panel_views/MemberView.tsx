@@ -18,8 +18,7 @@ export interface MemberViewProps {
     user: User
     selectedHistory: UpdateHistory<User> | null
 
-    formState: FormState<User> | null
-    setFormState: (next: FormState<User> | null) => void
+    setFormState?: (next: FormState<User> | null) => void
 
     saving: boolean
     isInvalid: boolean

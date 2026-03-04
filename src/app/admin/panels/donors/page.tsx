@@ -168,9 +168,7 @@ export default function Page() {
                         readonly={true}
                         saving={false}
                         isInvalid={false}
-                        onUpdate={() => {
-                            return
-                        }}
+                        onUpdate={setFormState}
                         onSave={() => {
                             return
                         }}

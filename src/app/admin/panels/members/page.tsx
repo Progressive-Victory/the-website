@@ -429,7 +429,6 @@ export default function Page() {
                                 selectedId={selectedId}
                                 user={userQuery.data}
                                 selectedHistory={null}
-                                formState={formState}
                                 setFormState={setFormState}
                                 saving={updateMutation.isPending}
                                 isInvalid={
