@@ -1,3 +1,4 @@
+import { zActBlueDonor } from './ActBlueDonor'
 import { zDiscordUser } from './DiscordUser'
 import { zLocation } from './Location'
 import { zOnboardingStage } from './OnboardingStage'
@@ -9,6 +10,19 @@ export enum UserStatus {
     Deleted = 0,
     Active = 1,
 }
+
+export enum MembershipDeliverableStatus {
+    NotEligible = 0,
+    NotStarted = 1,
+    Printed = 2,
+    InTransit = 3,
+    Recieved = 4,
+    Returned = 5,
+}
+
+export const zMembershipDeliverableStatus = z
+    .enum(MembershipDeliverableStatus)
+    .default(0)
 
 export const zUserStatus = z.enum(UserStatus)
 
@@ -33,13 +47,18 @@ const zBaseUser = z.object({
     joinedAtUtc: z.coerce.date().nullable(),
     completedIntakeUtc: z.coerce.date().nullable(),
 
+    membershipCardStatus: zMembershipDeliverableStatus,
+    membershipMerchStatus: zMembershipDeliverableStatus,
+
     aliases: z.array(z.string()).optional(),
     roles: z.array(zRole).optional(),
     discordUsers: z.array(zDiscordUser).optional(),
+    donors: z.array(zActBlueDonor).optional(),
 })
 
 export const zUser = zBaseUser.extend({
     history: z.array(zUpdateHistory(zBaseUser)).optional(),
+    donorHistory: z.array(zUpdateHistory(zActBlueDonor)).optional(),
 })
 
 export type User = z.infer<typeof zUser>

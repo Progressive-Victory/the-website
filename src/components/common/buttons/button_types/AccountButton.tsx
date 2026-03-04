@@ -1,29 +1,27 @@
 'use client'
 
+import { DiscordAvatar } from '../../DiscordAvatar'
 import { BaseButton } from '../Button'
 import type { BaseVisualProps } from '../Button'
 import styles from '@/components/common/buttons/Button.module.css'
 import cx from 'classnames'
-import Image from 'next/image'
 
 export type AccountButtonProps = BaseVisualProps & {
     href: string
-    avatarSrc?: string
-    avatarAlt?: string
+    discordUserId: string | undefined
+    imageId: string | undefined
 }
 
-export function AccountButton(props: AccountButtonProps) {
-    const {
-        avatarSrc,
-        avatarAlt,
-        buttonVariant = 'default',
-        className,
-        label,
-        ...rest
-    } = props
-
+export function AccountButton({
+    discordUserId,
+    imageId,
+    label,
+    buttonVariant = 'default',
+    className,
+    ...rest
+}: AccountButtonProps) {
     const isLongVariant = buttonVariant === 'long'
-    const hasAvatar = typeof avatarSrc === 'string' && avatarSrc.length > 0
+    const hasAvatar = discordUserId && imageId
     const isAccountCompact = !isLongVariant
 
     const mergedClassName = cx(
@@ -44,13 +42,11 @@ export function AccountButton(props: AccountButtonProps) {
                 if (isLongVariant) {
                     return (
                         <span className={styles.accountContent}>
-                            <Image
-                                src={avatarSrc}
-                                alt={avatarAlt ?? 'Account avatar'}
-                                width={40}
-                                height={40}
+                            <DiscordAvatar
+                                discordUserId={discordUserId}
+                                imageId={imageId}
+                                size={44}
                                 className={styles.accountAvatar}
-                                style={{ objectFit: 'cover' }}
                             />
                             <span>{label}</span>
                             {showNavChevron ? (
@@ -64,13 +60,11 @@ export function AccountButton(props: AccountButtonProps) {
                 }
 
                 return (
-                    <Image
-                        src={avatarSrc}
-                        alt={avatarAlt ?? 'Account avatar'}
-                        width={52}
-                        height={52}
+                    <DiscordAvatar
+                        discordUserId={discordUserId}
+                        imageId={imageId}
+                        size={52}
                         className={styles.accountAvatarSolo}
-                        style={{ objectFit: 'cover' }}
                     />
                 )
             }}

@@ -1,7 +1,5 @@
-import { LoginPage } from '@/app/login/LoginPage'
-import { auth } from '@/util/auth'
+import LoginPage from './LoginPage'
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
     title: 'PV - Login',
@@ -20,17 +18,6 @@ export const metadata: Metadata = {
  * with discord. The form is wrapped in a suspense boundary to avoid
  * a flash of unauthenticated content.
  */
-export default async function Login({
-    searchParams,
-}: {
-    searchParams: Promise<Record<string, string>>
-}) {
-    const session = await auth()
-    const redirect_uri = (await searchParams).redirect || '/account'
-
-    if (session) {
-        redirect(redirect_uri)
-    } else {
-        return <LoginPage redirect={redirect_uri} />
-    }
+export default function Login() {
+    return <LoginPage />
 }

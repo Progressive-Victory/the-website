@@ -1,13 +1,5 @@
-import VolunteerPage from '@/app/volunteer/page.client'
-import { auth } from '@/util/auth'
-import { redirect } from 'next/navigation'
+import VolunteerPage from './VolunteerPage'
 
-export default async function Page() {
-    const session = await auth()
-
-    if (!session) {
-        redirect('/login?redirect=/volunteer')
-    }
-
+export default function Page() {
     return <VolunteerPage />
 }
