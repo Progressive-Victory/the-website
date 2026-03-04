@@ -12,7 +12,7 @@ export interface DateFieldProps<T> extends FormFieldProps<
 }
 
 export function DateField<T>(props: DateFieldProps<T>) {
-    const { getter, validator, onChange } = useConfigure(
+    const { getter, validator, onChange, readonly, disabled } = useConfigure(
         props,
         useCallback(
             (field: Date | null | undefined) =>
@@ -22,8 +22,6 @@ export function DateField<T>(props: DateFieldProps<T>) {
         )
     )
 
-    const readonly = !!props.readonly || !props.dynamic?.editing
-    const disabled = !!props.disabled || !!props.dynamic?.saving
     const value = getter(props.dynamic!.form)
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {

@@ -71,7 +71,12 @@ export function MemberView({
                     getter={(form) => form.discordUsers?.[0]?.id}
                     readonly
                 />
-                <TextField label="Email" field="email" required />
+                <TextField
+                    label="Email"
+                    field="email"
+                    autocomplete="email"
+                    required
+                />
                 <PhoneField label="Phone Number" field="phone" required />
                 <TextField
                     label="Preferred Name"
