@@ -1,122 +1,149 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { Link, Message, TiltMessage } from '@/components/common'
+
+import styles from './map.module.css'
 import { StateMap } from '@/components/Map'
+import {
+    BBOX_AK,
+    BBOX_HI,
+    BBOX_PR,
+    BBOX_US,
+    US_STATES,
+} from '@/components/Map/constants'
 import { MapView, StateMapInteractionProps } from '@/components/Map/types'
-import { BBOX_AK, BBOX_HI, BBOX_PR, BBOX_US, US_STATES } from '@/components/Map/constants'
+import { Message } from '@/components/common'
+import { BaseButton } from '@/components/common/buttons/Button'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
+import {
+    MapMemberCountResponse,
+    zMapMemberCountResponse,
+} from '@/contracts/responses'
+import { useFetch } from '@/util/hooks'
+import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 
 export function VolunteerMap() {
-    /* States */
-    const [hoveredState, setHoveredState] = useState<string | null>(null);
-    const [selectedState, setSelectedState] = useState<string | null>(null);
-    const [totalMemberCount, setTotalMemberCount] = useState<number>(0);
-    const [stateMemberCount, setStateMemberCount] = useState<Record<string, number>>();
+    const [hoveredState, setHoveredState] = useState<string | null>(null)
+    const [selectedState, setSelectedState] = useState<string | null>(null)
+    const { ready, onGet } = useFetch()
 
-    useEffect(() => {
-        void (async () => {
-            const statesCount: Record<string, number> = {}
-            const smc = await (await fetch("/api/map/count")).json() as Record<string, number>
-            Object.entries(smc).forEach(([k, v]) => {
-                const state = US_STATES.find(s => s.code === k)?.name
-                if (typeof state === "string") {
-                    statesCount[state] = (typeof v === "number" ? v : 0)
-                }
-            })
+    const memberCountQuery = useQuery({
+        queryKey: ['/map/memberCounts'],
+        queryFn: ready
+            ? async ({ signal }) => {
+                  const data = await onGet<MapMemberCountResponse>(
+                      '/map/memberCounts',
+                      zMapMemberCountResponse,
+                      { signal }
+                  )
 
-            const total = await (await fetch("/api/map/users-count")).json() as number
+                  data.states = US_STATES.reduce((map, state) => {
+                      map[state.name] = map[state.code]
+                      return map
+                  }, data.states)
 
-            setStateMemberCount(statesCount)
-            setTotalMemberCount(total)
-        })()
-    }, [])
+                  return data
+              }
+            : skipToken,
+        placeholderData: keepPreviousData,
+    })
+
+    const stateMemberCounts = memberCountQuery.data?.states
+    const totalMemberCount = memberCountQuery.data?.total
 
     function onFeatureClick(state: string | null) {
-        setSelectedState(prev => prev === state ? null : state)
+        setSelectedState((prev) => (prev === state ? null : state))
     }
 
     return (
-        <div className="relative flex w-full flex-col items-center justify-center gap-[6vw] bg-black-pearl-dark py-10 2xl:grid 2xl:grid-cols-2">
-            {/* Text */}
-            <div className="z-10 flex max-w-[750px] flex-col items-center text-center text-white 2xl:order-last">
-                <h1 className="mb-8 text-4xl font-bold">
-                    Thousands of <span className="text-valencia">Volunteers</span>
+        <div className={styles.container}>
+            <div className={styles.textBlock}>
+                <h1 className={styles.title}>
+                    Thousands of{' '}
+                    <span className={styles.titleAccent}>Volunteers</span>
                     <br /> Across the US
                 </h1>
-                <p className="mb-8 px-4 text-lg font-[500] md:px-24 ">
-                    The PV community is constantly growing. Every new voice adds to the movement!
+
+                <p className={styles.subtitle}>
+                    The PV community is constantly growing. Every new voice adds
+                    to the movement!
                 </p>
-                <Link
-                    href={'/volunteer'}
-                    className="w-fit justify-self-center bg-valencia"
-                >
-                    Get Involved
-                </Link>
+
+                <BaseButton
+                    label="Get Involved"
+                    href="/volunteer"
+                    className={buttonStyles.prominent}
+                />
             </div>
 
-            {/* Map */}
-            <TiltMessage className="flex justify-center xl:justify-end">
-                <Message
-                    className="xl:w-[30vw]"
-                    avatar="/images/pv_pride.png"
-                    avatarRounded={false}
-                    nameColor="red"
-                    username="Progressive Victory"
-                    text={"Our members are organizing in their local communities, identifying campaigns in their area, and using the shared resources, tactics, and people power of Progressive Victory!"}
-                    botDivider={true}
-                    botLeftContent={
-                        <p className="font-medium">{selectedState
-                            ? `Members in ${selectedState}: ${stateMemberCount?.[selectedState]}`
-                            : `Total Members: ${totalMemberCount}`
-                        }</p>
-                    }
-                >
-                    <CombinedMap
-                        stateMemberCount={stateMemberCount}
-                        onFeatureClick={onFeatureClick}
-                        onFeatureHover={setHoveredState}
-                        hoveredState={hoveredState}
-                        selectedState={selectedState}
-                    />
-                </Message>
-            </TiltMessage>
+            <Message
+                className={styles.message}
+                tiltProps={{
+                    className: styles.tiltMessage,
+                    rotation: { z: 0 },
+                }}
+                avatar="/images/pv_pride.png"
+                avatarRounded={false}
+                nameColor="red"
+                username="Progressive Victory"
+                botDivider={true}
+                botLeftContent={
+                    <p className={styles.botLeftText}>
+                        {selectedState
+                            ? `Members in ${selectedState}: ${stateMemberCounts?.[selectedState]}`
+                            : `Total Members: ${totalMemberCount}`}
+                    </p>
+                }
+            >
+                <span>
+                    Our members are organizing in their local communities,
+                    identifying campaigns in their area, and using the shared
+                    resources, tactics, and people power of Progressive Victory!
+                </span>
+
+                <CombinedMap
+                    stateMemberCount={stateMemberCounts}
+                    onFeatureClick={onFeatureClick}
+                    onFeatureHover={setHoveredState}
+                    hoveredState={hoveredState}
+                    selectedState={selectedState}
+                />
+            </Message>
         </div>
     )
 }
 
 interface ExtraMap {
-    left: number;
-    h: number;
-    w: number;
-    mapView: MapView;
+    left: number
+    h: number
+    w: number
+    mapView: MapView
 }
 
 function CombinedMap(props: StateMapInteractionProps) {
     const extraMaps: Record<string, ExtraMap> = {
-        "AK": {
+        AK: {
             left: 0,
             h: 120,
             w: 140,
-            mapView: { bounds: BBOX_AK }
+            mapView: { bounds: BBOX_AK },
         },
-        "HI": {
+        HI: {
             left: 174,
             h: 75,
             w: 100,
-            mapView: { bounds: BBOX_HI }
+            mapView: { bounds: BBOX_HI },
         },
-        "PR": {
+        PR: {
             left: 298,
             h: 50,
             w: 70,
-            mapView: { bounds: BBOX_PR }
-        }
+            mapView: { bounds: BBOX_PR },
+        },
     }
 
     return (
-        <div
-            className="relative min-w-[350px] max-w-[750px] rounded-md border"
-        >
-            <div className="aspect-video md:aspect-[5/3]">
+        <div className={styles.mapShell}>
+            <div className={styles.mainMapAspect}>
                 <StateMap
                     mapView={{ bounds: BBOX_US }}
                     stateMemberCount={props.stateMemberCount}
@@ -127,15 +154,14 @@ function CombinedMap(props: StateMapInteractionProps) {
                 />
             </div>
 
-            <div className="pointer-events-none relative bottom-0 left-0 m-1 flex w-3/5 items-end gap-1 sm:absolute sm:w-2/5">
+            <div className={styles.extraMaps}>
                 {Object.entries(extraMaps).map(([, map], i) => (
                     <div
                         key={i}
-                        // className={`relative w-full rounded-md border`}
-                        className={`relative w-full`}
+                        className={styles.extraMapItem}
                         style={{
                             aspectRatio: map.w / map.h,
-                            maxWidth: map.w
+                            maxWidth: map.w,
                         }}
                     >
                         <StateMap

@@ -1,0 +1,185 @@
+.section {
+    width: 100%;
+    background: #ffffff;
+    padding: 4rem 1rem;
+}
+
+@media (min-width: 768px) {
+    .section {
+        padding: 6rem 2rem;
+    }
+}
+
+.container {
+    margin: 0 auto;
+    max-width: 72rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+}
+
+.heading {
+    text-align: center;
+    font-size: 2.25rem;
+    line-height: 2.75rem;
+    font-weight: 700;
+    color: var(--black-pearl-dark, #0b1b2b);
+}
+
+.headingAccent {
+    color: var(--valencia, #ce3728);
+}
+
+.contentRow {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+@media (min-width: 768px) {
+    .contentRow {
+        gap: 3rem;
+    }
+}
+
+@media (min-width: 1020px) {
+    .contentRow {
+        flex-direction: row-reverse;
+    }
+}
+
+.cardColumn {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    justify-content: center;
+}
+
+@media (min-width: 1020px) {
+    .cardColumn {
+        width: 55%;
+        max-width: none;
+    }
+}
+
+.cardColumnInner {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 2rem;
+}
+
+@media (min-width: 1020px) {
+    .cardColumnInner {
+        margin-top: 3.5rem;
+    }
+}
+
+.cardOuter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.cardStage {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    max-width: 500px;
+    cursor: pointer;
+}
+
+.cardInner {
+    width: 100%;
+    height: 100%;
+}
+
+.cardFace {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.cardImage {
+    object-fit: cover;
+}
+
+.cardOverlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 0.75rem;
+    pointer-events: none;
+}
+
+.cardBorder {
+    position: absolute;
+    inset: 0;
+    border-radius: 0.75rem;
+    border: 8px solid rgba(229, 231, 235, 0.5);
+}
+
+.ctaRow {
+    margin-top: 2.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.buttonHover:hover {
+    color: #ffffff;
+    background: #2986cc;
+}
+
+.bulletsColumn {
+    width: 100%;
+    padding: 0 1rem 3rem;
+}
+
+@media (min-width: 1020px) {
+    .bulletsColumn {
+        width: 45%;
+        padding-bottom: 0;
+    }
+}
+
+.bulletsOverflow {
+    overflow: hidden;
+}
+
+.bulletRow {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.bulletIcon {
+    margin-top: 3.5px;
+}
+
+.bulletText {
+    display: block;
+}
+
+.bulletTitle {
+    margin: 0 0 0.125rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--black-pearl-dark, #0b1b2b);
+}
+
+.bulletSub {
+    margin: 0 0 0.75rem 0;
+    font-weight: 600;
+    color: var(--valencia, #ce3728);
+}
+
+.bulletDescription {
+    margin: 0;
+    font-size: 1rem;
+    color: #4b5563;
+}

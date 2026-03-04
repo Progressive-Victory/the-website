@@ -1,53 +1,73 @@
-export const blue = {
-    500: '#10233A',
-    400: '#1D4668',
-    300: '#2B84B9',
-    200: '#9FC8E0',
-    100: '#D6E4E8',
-    DEFAULT: '#10233A',
+export const brandDarkBlue = {
+    200: '#09223A', //Core
+    100: '#1B4568', //Light
+    DEFAULT: '#09223A', //Black Pearl
 }
 
-export const orange = {
-    500: '#F7B514',
-    400: '#F7B514',
-    300: '#F7B514',
-    200: '#F7D67C',
-    100: '#F3EFE0',
-    DEFAULT: '#F7B514',
+export const brandLightBlue = {
+    400: '#2986CC', //Core
+    300: '#549ED6', //80%
+    200: '#9FC9E8', //40%
+    100: '#D4E7F5', //20%
+    DEFAULT: '#2986CC', //Curious Blue
 }
 
-export const red = {
-    500: '#CE3628',
-    400: '#CE3628',
-    300: '#CE3628',
-    200: '#E9AFA9',
-    100: '#E9AFA9',
-    DEFAULT: '#CE3628',
+export const brandRed = {
+    200: '#CE3728', //Core
+    100: '#EBAFA9', //40%
+    DEFAULT: '#CE3728', //Valencia
 }
 
-export const grey = {
-    500: '#313131',
-    400: '#313131',
-    300: '#313131',
-    200: '#313131',
+export const brandYellow = {
+    300: '#FDB515', //Core
+    200: '#FED67C', //50%
+    100: '#F5F0E0', //15%
+    DEFAULT: '#FDB515', //Selective Yellow
+}
+
+export const brandWhite = {
+    100: '#FFFFFF', //Core
+    DEFAULT: '#FFFFFF', //When In Doubt White
+}
+
+export const offBrandGrey = {
     100: '#313131',
     DEFAULT: '#313131',
 }
 
-export const white = {
-    500: '#FFFFFF',
-    400: '#FFFFFF',
-    300: '#FFFFFF',
-    200: '#FFFFFF',
-    100: '#FFFFFF',
-    DEFAULT: '#FFFFF',
+export const mapBlue = {
+    //was previous just labled blue
+    700: '#09223A', //prev: didn't exist
+    600: '#1B4568', //prev: didn't exist
+    500: '#2986CC', //prev: 10233A
+    400: '#549FD0', //prev: 1D4668
+    300: '#9FC9E8', //prev: 2B84B9
+    200: '#D4E7F5', //prev: 9FC8E0
+    100: '#D6E4E8', //prev: D6E4E8
+    DEFAULT: '#09223A', //prev: 10233A
 }
 
-const colors = { blue, orange, red, grey, white }
+const colors = {
+    brandDarkBlue,
+    brandLightBlue,
+    brandRed,
+    brandYellow,
+    brandWhite,
+    offBrandGrey,
+    mapBlue,
+}
 
-export type BrandColor = 'blue' | 'orange' | 'red' | 'grey' | 'white'
-export type ShadeIndex = 500 | 400 | 300 | 200 | 100
+export type BrandColor =
+    | 'brandDarkBlue'
+    | 'brandLightBlue'
+    | 'brandRed'
+    | 'brandYellow'
+    | 'brandWhite'
+    | 'offBrandGrey'
+    | 'mapBlue'
+export type ShadeIndex = 700 | 600 | 500 | 400 | 300 | 200 | 100 | 'DEFAULT'
 
 export const getBrandColor = (color: BrandColor, shade?: ShadeIndex) => {
-    return colors[color][shade ?? 'DEFAULT']
+    const shades = colors[color] as Record<ShadeIndex, string>
+    return shades?.[shade ?? 'DEFAULT'] ?? shades?.DEFAULT ?? '#FFFFFF'
 }

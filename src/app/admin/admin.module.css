@@ -1,0 +1,55 @@
+.root {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    min-height: 100dvh;
+
+    background:
+        radial-gradient(
+            1200px 800px at 20% -10%,
+            rgba(14, 165, 233, 0.18),
+            transparent 60%
+        ),
+        radial-gradient(
+            900px 700px at 110% 10%,
+            rgba(99, 102, 241, 0.14),
+            transparent 60%
+        ),
+        radial-gradient(
+            900px 800px at 60% 120%,
+            rgba(16, 185, 129, 0.1),
+            transparent 60%
+        ),
+        linear-gradient(180deg, #f8fafc 0%, #f3f4f6 100%);
+}
+
+.main {
+    display: flex;
+    flex: 1;
+    background: transparent;
+
+    /* gap: 0.75rem; */
+}
+
+.content {
+    display: flex;
+    flex: 1;
+
+    height: calc(100dvh - 7.75rem);
+    margin: 0.75rem;
+
+    border-radius: 1.25rem;
+
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 24px 60px rgba(15, 23, 42, 0.08);
+
+    overflow: hidden;
+}

@@ -1,0 +1,21 @@
+.memberBadge {
+    color: #ffffffda;
+    font-weight: 500;
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.infoIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.55rem;
+    opacity: 0.95;
+}
+
+.activeStatus {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    text-decoration-color: rgba(255, 255, 255, 0.9);
+}

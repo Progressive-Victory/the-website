@@ -1,27 +1,35 @@
 'use client'
 
+import styles from './events.module.css'
 import { Frame } from '@/app/events/Frame'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
+import { useHydration } from '@/util/hooks'
+import { Suspense } from 'react'
 
 export function ClientCalendar({ src }: Readonly<{ src: string }>) {
-    // Get client timezone and encode it to use in the URL
-    const timezoneParameter: string =
-        '&ctz=' + encodeURI(Intl.DateTimeFormat().resolvedOptions().timeZone)
-    return (
-        <div className="relative flex size-full flex-col items-center gap-y-10 bg-steel-blue p-4">
-            <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
+    const hydrated = useHydration()
 
-            <div className="relative mx-6 w-full rounded-lg bg-[#f0f4f9] py-4">
-                <p className="text-center text-3xl font-black lg:text-5xl">
-                    Progressive Victory Calendar
-                </p>
-                <Frame
-                    src={src + timezoneParameter}
-                    className="mx-auto mt-4 h-[800px] w-[95%] bg-[#f0f4f9]"
-                    type="calendar"
-                    title="Calendar"
-                >
-                    Loading…
-                </Frame>
+    // Get client timezone and encode it to use in the URL
+    const timezoneParameter =
+        '&ctz=' + encodeURI(Intl.DateTimeFormat().resolvedOptions().timeZone)
+
+    return (
+        <div className={styles.container}>
+            <HalftoneBackground />
+
+            <div className={styles.card}>
+                <p className={styles.title}>Progressive Victory Calendar</p>
+
+                <Suspense key={hydrated ? 'local' : 'utc'}>
+                    <Frame
+                        src={src + timezoneParameter}
+                        className={styles.frame}
+                        type="calendar"
+                        title="Calendar"
+                    >
+                        Loading…
+                    </Frame>
+                </Suspense>
             </div>
         </div>
     )

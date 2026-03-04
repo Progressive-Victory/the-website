@@ -14,7 +14,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url))
 }
 
-// Prevent blog access on live site before ready
 export const config = {
-    matcher: '/blog/:path*',
+    matcher: '/pathnotcurrentlyinuse/:path*',
 }

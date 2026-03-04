@@ -1,5 +1,6 @@
-module.exports = {
+const config = {
     siteUrl: 'https://www.progressivevictory.win',
-    generateRobotsTxt: true, // (optional)
-    // ...other options
+    generateRobotsTxt: true,
 }
+
+export default config

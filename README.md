@@ -1,6 +1,8 @@
+# The Progressive Victory Website
+
 ## Getting Started with Development
 
-Welcome to the PV Frontpage Redux repo! This is the source code of our website. Before contributing to the codebase you **MUST** read the following information. If you're a fullstack Next.js pro you can quickly skim this.
+Welcome to the PV Frontpage Redux repo! This is the source code of our website. Before contributing to the codebase you **MUST** read the following information. If you're a fullstack Next.js pro you can quickly skim this. **NOTE**: since migrating to sql and a centralized database, you now also require the api setup on your local machine, and running in concurrence with the website.
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
@@ -22,54 +24,43 @@ Check out a new branch from `main` before you begin working on any new feature. 
 
 The easiest way to install pnpm is via npm after installing Node.js. Otherwise visit the linked page above to install it on your machine.
 
-```
+```sh
 npm install -g pnpm@latest-10
 ```
 
 First, install the dependencies,
 
-```
+```sh
 pnpm install
 ```
 
 ### 3. Configure
 
-Next, check the .env.example file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to Brioche on Discord.
+Next, check the .env.example file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to Joops or sH3llH0und on discord.
 
-```bash
+```sh
 # $PROJECT_DIR/.env
 
-# These are the values for the development Discord bot
-# You can use your own Bot or request credentials for PV Bot Dev
-DISCORD_CLIENT_ID="1234"
-DISCORD_CLIENT_SECRET="abcdefg"
-DISCORD_BOT_TOKEN="mx213"
-
-# The auth secret and URL must stay these values for development
-NEXTAUTH_SECRET="abcdefg"
-NEXTAUTH_URL="http://localhost:3000"
-
-# The ID of the Discord server the bot is in (either your server or PV Dev Server)
-GUILD_ID="122"
-
-# Unless needed for you work the SMS API information is restricted
-NEUTRINO_USERID="pvuser"
-NEUTRINO_SECRET="123egh"
-
-# You can either use a local MongoDB instance or request a Dev DB user
-MONGODB_URI="mongodb://localhost:27017"
+# Does not need to change
 SITE_URL="https://example.com"
+
+# api vars
+PV_WEBSITE_API_URL="http://localhost:8080"
 ```
 
 ### 4. Run
 
 Finally, run the development server
 
-```
+```sh
 pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. Upon saving your work the server automatically (hot) reloads with your changes.
+
+## Deploy on Vercel
+
+Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @somejoops, a deputy, or assistant, or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.
 
 ## Learn More
 
@@ -80,7 +71,7 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Tests
+## Tests - Under Construction
 
 Make sure you run the setup steps first:
 
@@ -92,10 +83,6 @@ npx playwright install --with-deps
 
 ### Run tests
 
-```
+```sh
 pnpm run test
 ```
-
-## Deploy on Vercel
-
-Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @asoronow or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.

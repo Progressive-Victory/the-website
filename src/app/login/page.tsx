@@ -1,5 +1,4 @@
-import { Suspense } from 'react'
-import { LoginPage } from '@/app/login/LoginPage'
+import LoginPage from './LoginPage'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -20,9 +19,5 @@ export const metadata: Metadata = {
  * a flash of unauthenticated content.
  */
 export default function Login() {
-    return (
-        <Suspense>
-            <LoginPage />
-        </Suspense>
-    )
+    return <LoginPage />
 }

@@ -2,26 +2,27 @@
 import { useState } from 'react'
 import { motion, useTransform, useSpring } from 'motion/react'
 import { Link, Message } from '@/components/common'
-// Quick avatar changer
+import styles from './hero.module.css'
+import { BaseButton } from '@/components/common/buttons/Button'
+import buttonStyles from '@/components/common/buttons/Button.module.css'
+import cardStyles from '@/components/common/twitter_card_element/Card.module.css'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
+
 const avatarImage = '/images/PV_Pride_Logo.png'
 
 export function Hero() {
     return (
-        <div className="relative flex w-full flex-col items-center justify-start py-20">
-            {/* Background */}
-            <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
+        <div className={styles.hero}>
+            <HalftoneBackground />
+
             <div
-                className="z-1 absolute left-0 top-0 size-full lg:w-1/2 lg:-translate-x-1/2"
+                className={styles.blendPanel}
                 style={{
                     backgroundImage: "url('/images/blend_test.png')",
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'right',
-                    mixBlendMode: 'lighten',
                 }}
             />
 
-            {/* Content */}
-            <div className="z-2 relative left-0 top-0 flex flex-col items-center px-4 text-center md:w-2/3">
+            <div className={styles.content}>
                 <motion.div
                     style={{
                         willChange: 'opacity, transform',
@@ -31,9 +32,9 @@ export function Hero() {
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     transition={{ ease: 'backInOut', duration: 1, delay: 0.45 }}
                 >
-                    <h1 className="text-4xl font-bold text-white">
+                    <h1 className={styles.title}>
                         Welcome to{' '}
-                        <span className="text-black-pearl-dark">
+                        <span className={styles.titleEmphasis}>
                             Progressive Victory
                         </span>{' '}
                         the Online Community for Political Action.
@@ -49,7 +50,7 @@ export function Hero() {
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     transition={{ ease: 'backInOut', duration: 1, delay: 0.25 }}
                 >
-                    <p className="my-8 text-xl font-[500] text-white">
+                    <p className={styles.subtitle}>
                         Find like minded people, share ideas, and engage in
                         meaningful political action. Get involved today!
                     </p>
@@ -59,6 +60,8 @@ export function Hero() {
                     style={{
                         willChange: 'opacity, transform',
                         transform: 'translateZ(0)',
+                        display: 'flex',
+                        gap: '1rem',
                     }}
                     initial={{ y: 50, opacity: 0, scale: 0 }}
                     animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -68,63 +71,119 @@ export function Hero() {
                         delay: 0.15,
                     }}
                 >
-                    <Link href="/volunteer" className="bg-valencia">
-                        Get Involved
-                    </Link>
+                    <BaseButton
+                        label="Learn More"
+                        href="/about"
+                        className={buttonStyles.minimalProminent}
+                    />
+                    <BaseButton
+                        label="Join"
+                        href="/volunteer"
+                        className={styles.joinButton}
+                    />
                 </motion.div>
             </div>
 
-            {/* Message Blocks with Tilt Effect */}
-            <div className="mt-20 flex flex-wrap justify-center gap-6 px-4">
-                <TiltMessage className="order-last xl:order-first">
-                    <Message
-                        className="max-w-xl xl:w-[30vw]"
-                        motionProps={{
-                            initial: { rotate: 20, y: 50 },
-                            animate: { rotate: -5, y: 0 },
-                            transition: { delay: 0.15, duration: 0.65 },
-                        }}
-                        avatar={avatarImage}
-                        avatarRounded={false}
-                        username="Progressive Victory"
-                        nameColor="red"
-                        text="Progressive Victory is proud to support @benwikler for @DNC chair! 💙
-            We need more bold Democrats with track records of proven results leading the charge 💪"
-                        image="/images/ben.jpg"
-                    />
-                </TiltMessage>
+            <div className={styles.messages}>
+                <Message
+                    className={styles.messageCard}
+                    username="Progressive Victory"
+                    nameColor="red"
+                    avatar={avatarImage}
+                    avatarRounded={false}
+                    image="/images/PVKatieWilsonWatchParty.jpeg"
+                    motionProps={{
+                        initial: { rotate: 20, y: 50 },
+                        animate: { rotate: -5, y: 0 },
+                        transition: { delay: 0.15, duration: 0.65 },
+                    }}
+                    imageProps={{
+                        position: 'center center',
+                        zoom: 1.4,
+                        offsetX: -8.5,
+                        offsetY: 0,
+                    }}
+                    tiltProps={{
+                        className: styles.orderLastXlFirst,
+                        strength: { amount: 1 },
+                    }}
+                >
+                    <span className={cardStyles.textPart}>
+                        {
+                            "It's all fun and games w PV members at the Katie Wilson Watch Party tonight in Seattle! Congratulations to "
+                        }
+                    </span>
+                    <a
+                        className={cardStyles.textHighlight}
+                        href="https://x.com/wilsonformayor"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        @wilsonformayor
+                    </a>
+                    <span className={cardStyles.textPart}>
+                        {
+                            ' and all the volunteers who spent months working to help her win!'
+                        }
+                    </span>
+                </Message>
 
-                <TiltMessage className="h-fit lg:mt-24">
-                    <Message
-                        className="max-w-xl xl:w-[30vw]"
-                        motionProps={{
-                            initial: { rotate: 15, y: 50 },
-                            animate: { rotate: 1, y: 0 },
-                            transition: { delay: 0.65, duration: 0.65 },
-                        }}
-                        avatar={avatarImage}
-                        avatarRounded={false}
-                        username="Progressive Victory"
-                        nameColor="red"
-                        text="Built by the internet, for the internet! — Progressive Victory is a new kind of political community turning the tides of elections across the country."
-                    />
-                </TiltMessage>
+                <Message
+                    className={styles.messageCard}
+                    username="Progressive Victory"
+                    nameColor="red"
+                    avatar={avatarImage}
+                    avatarRounded={false}
+                    motionProps={{
+                        initial: { rotate: 15, y: 50 },
+                        animate: { rotate: 1, y: 0 },
+                        transition: { delay: 0.65, duration: 0.65 },
+                    }}
+                    tiltProps={{
+                        className: styles.messageMid,
+                        strength: { amount: 0.85 },
+                    }}
+                >
+                    <span className={cardStyles.textPart}>
+                        Built by the internet, for America. Progressive Victory
+                        is a new kind of political institution: seamlessly
+                        marrying the electoral impact and volunteer power of
+                        traditional progressive organizations with the culture
+                        and community of digital third places.
+                    </span>
+                </Message>
 
-                <TiltMessage className="order-first xl:order-last">
-                    <Message
-                        className="max-w-xl xl:w-[30vw]"
-                        motionProps={{
-                            initial: { rotate: 30, y: 50 },
-                            animate: { rotate: 6, y: 0 },
-                            transition: { delay: 0.3, duration: 0.9 },
-                        }}
-                        avatar="/images/sam_twitter_photo.jpeg"
-                        image="/images/sam.jpg"
-                        username="Sam Dryzmala"
-                        nameColor="purple"
-                        text="I founded Progressive Victory with the dream of creating a political action community that comes together to get progressive policies & candidates the attention they deserve!"
-                    />
-                </TiltMessage>
+                <Message
+                    className={styles.messageCard}
+                    username="Sam Dryzmala"
+                    nameColor="purple"
+                    avatar="/images/sam_twitter_photo.jpeg"
+                    avatarRounded={true}
+                    image="/images/sam.jpg"
+                    motionProps={{
+                        initial: { rotate: 30, y: 50 },
+                        animate: { rotate: 6, y: 0 },
+                        transition: { delay: 0.3, duration: 0.9 },
+                    }}
+                    imageProps={{
+                        position: 'center center',
+                        zoom: 1.2,
+                        offsetX: -5,
+                        offsetY: 10,
+                    }}
+                    tiltProps={{
+                        className: styles.orderFirstXlLast,
+                        strength: { amount: 1.1 },
+                    }}
+                >
+                    <span className={cardStyles.textPart}>
+                        I founded Progressive Victory with the dream of creating
+                        a political action community that comes together to get
+                        progressive policies &amp; candidates the attention they
+                        deserve!
+                    </span>
+                </Message>
             </div>
         </div>
     )
