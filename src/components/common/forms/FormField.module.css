@@ -1,9 +1,10 @@
 .field {
-    display: contents;
+    display: flex;
 }
 
 .fieldHeader {
     padding-left: 1.5rem;
+    flex: 0 2 50%;
 }
 
 .fieldLabel {
@@ -22,7 +23,6 @@
 }
 
 .readonly {
-    grid-column: span 2 / span 2;
     width: 100%;
 }
 
@@ -31,8 +31,11 @@
     border-width: 2px;
 }
 
+.fieldValue {
+    flex: 0 0 50%;
+}
+
 .textField {
-    grid-column: span 2 / span 2;
     width: 100%;
     max-width: 24rem;
     border-radius: 0.5rem;
@@ -45,21 +48,18 @@
 }
 
 .checkboxField {
-    grid-column: span 2 / span 2;
     width: 100%;
     display: flex;
     align-items: center;
 }
 
 .selectManyField {
-    grid-column: span 2 / span 2;
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
 }
 
 .phoneField {
-    grid-column: span 2 / span 2;
     width: 100%;
     max-width: 24rem;
     display: flex;

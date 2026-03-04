@@ -256,7 +256,7 @@ export function FormField<FormType, FieldType>({
                     )}
                 </label>
             </div>
-            {children}
+            <div className={styles.fieldValue}>{children}</div>
         </div>
     )
 }
