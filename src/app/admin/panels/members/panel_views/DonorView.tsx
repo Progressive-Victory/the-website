@@ -96,8 +96,6 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
         }
     )
 
-    console.log(customFields)
-
     return {
         total,
         hasActiveRecurring,
