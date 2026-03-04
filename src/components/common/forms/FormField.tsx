@@ -211,7 +211,10 @@ export function useConfigure<FormType, FieldType>(
         if (id) onConfigure?.(id, { getter, setter, validator })
     }, [id, onConfigure, getter, setter, validator])
 
-    return { getter, setter, validator, onChange }
+    const readonly = props.readonly == true || !props.dynamic?.editing
+    const disabled = props.disabled == true || props.dynamic?.saving == true
+
+    return { getter, setter, validator, onChange, readonly, disabled }
 }
 
 /**
@@ -229,34 +232,42 @@ export function useConfigure<FormType, FieldType>(
 export function FormField<FormType, FieldType>({
     id,
     label,
+    readonly,
     required,
     deprecated,
+    dynamic,
     children,
 }: FormFieldProps<FormType, FieldType>) {
-    return (
-        <div className={styles.field}>
-            <div className={styles.fieldHeader}>
-                <label key={id} htmlFor={id} className={styles.fieldLabel}>
-                    {label}
-                    {required && (
-                        <span
-                            className={styles.required}
-                            title="Required Field"
-                        >
-                            *
-                        </span>
-                    )}
-                    {deprecated && (
-                        <span
-                            className={styles.deprecated}
-                            title="Deprecated Field"
-                        >
-                            **
-                        </span>
-                    )}
-                </label>
-            </div>
+    const isEditing = !readonly && dynamic?.editing == true
+
+    const content = (
+        <>
+            <span className={styles.fieldLabel}>
+                {label}
+                {required && (
+                    <span className={styles.required} title="Required Field">
+                        *
+                    </span>
+                )}
+                {deprecated && (
+                    <span
+                        className={styles.deprecated}
+                        title="Deprecated Field"
+                    >
+                        **
+                    </span>
+                )}
+            </span>
             <div className={styles.fieldValue}>{children}</div>
-        </div>
+        </>
     )
+
+    if (isEditing)
+        return (
+            <label key={id} className={styles.fieldHeader}>
+                {content}
+            </label>
+        )
+
+    return <div className={styles.fieldHeader}>{content}</div>
 }

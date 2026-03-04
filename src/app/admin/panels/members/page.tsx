@@ -244,7 +244,7 @@ export default function Page() {
                 })
             )
         },
-        [onPost, queryClient]
+        [onPost, queryClient, loggedInUser.data?.id]
     )
 
     const handleSelectItem = (value: UserProfile | User) => {

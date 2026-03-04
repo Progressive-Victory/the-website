@@ -1,14 +1,11 @@
-.field {
-    display: flex;
-}
-
 .fieldHeader {
     padding-left: 1.5rem;
-    flex: 0 2 50%;
+    display: flex;
 }
 
 .fieldLabel {
     font-weight: 500;
+    flex: 0 2 50%;
 }
 
 .required {
