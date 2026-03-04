@@ -4,13 +4,7 @@ import styles from './HistoryView.module.css'
 import { MemberView } from './MemberView'
 import { CollapsibleSection } from '@/components/common'
 import { FormGroupProps } from '@/components/common/forms'
-import {
-    ActBlueDonor,
-    Location,
-    Role,
-    UpdateHistory,
-    User,
-} from '@/contracts/data'
+import { ActBlueDonor, Role, UpdateHistory, User } from '@/contracts/data'
 import cx from 'classnames'
 import { ReactNode, useMemo } from 'react'
 
@@ -29,7 +23,6 @@ export interface HistoryViewProps {
     roles: Role[]
     roleOptions: { value: number; label: string }[]
     makeFormTitle: (user: User) => string
-    getLocation: (form: User) => Location | null
 }
 
 export function HistoryView({
@@ -43,7 +36,6 @@ export function HistoryView({
     roles,
     roleOptions,
     makeFormTitle,
-    getLocation,
 }: HistoryViewProps) {
     const sortedHistory = useMemo(() => {
         return (user?.history ?? []).slice().sort((a, b) => {
@@ -145,10 +137,6 @@ export function HistoryView({
                             roles={roles}
                             roleOptions={roleOptions}
                             makeFormTitle={(u) => makeFormTitle(u)}
-                            handleSave={() => {
-                                return
-                            }}
-                            getLocation={getLocation}
                         />
                     </div>
                 ) : null}

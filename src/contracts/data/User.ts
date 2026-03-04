@@ -1,9 +1,9 @@
 import { zActBlueDonor } from './ActBlueDonor'
 import { zDiscordUser } from './DiscordUser'
-import { zLocation } from './Location'
 import { zOnboardingStage } from './OnboardingStage'
 import { zRole } from './Role'
 import { zUpdateHistory } from './UpdateHistory'
+import { zUserAddress } from './UserAddress'
 import z from 'zod'
 
 export enum UserStatus {
@@ -34,7 +34,7 @@ const zBaseUser = z.object({
     firstName: z.string().nullable(),
     lastName: z.string().nullable(),
     birthdate: z.coerce.date().nullable(),
-    location: zLocation.nullable(),
+    address: zUserAddress,
 
     acceptedAlerts: z.boolean(),
     verified: z.boolean(),

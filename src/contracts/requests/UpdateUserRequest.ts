@@ -1,15 +1,16 @@
-import { zOnboardingStage, zUserStatus } from '@/contracts/data'
+import { zOnboardingStage, zUserStatus } from '../data'
+import { zUpdateUserAddressRequest } from './UpdateUserAddressRequest'
 import z from 'zod'
 
 export const zUpdateUserRequest = z
     .object({
-        email: z.string().nullable().optional(),
-        phone: z.string().nullable().optional(),
-        preferredName: z.string().nullable().optional(),
-        firstName: z.string().nullable().optional(),
-        lastName: z.string().nullable().optional(),
+        email: z.string().max(100).nonempty().nullable().optional(),
+        phone: z.string().max(15).nonempty().nullable().optional(),
+        preferredName: z.string().max(100).nonempty().nullable().optional(),
+        firstName: z.string().max(100).nonempty().nullable().optional(),
+        lastName: z.string().max(100).nonempty().nullable().optional(),
         birthdate: z.coerce.date().nullable().optional(),
-        zipCode: z.number().nullable().optional(),
+        address: zUpdateUserAddressRequest.optional(),
 
         acceptedAlerts: z.boolean().optional(),
         verified: z.boolean().optional(),
@@ -21,7 +22,7 @@ export const zUpdateUserRequest = z
         joinedAtUtc: z.coerce.date().nullable().optional(),
         completedIntakeUtc: z.coerce.date().nullable().optional(),
 
-        aliases: z.array(z.string()).optional(),
+        aliases: z.array(z.string().max(100).nonempty()).optional(),
         roles: z.array(z.number()).optional(),
     })
     .strict()
