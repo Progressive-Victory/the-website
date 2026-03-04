@@ -125,7 +125,7 @@ export function MemberView({
                         ...form,
                         address: {
                             ...form.address,
-                            addressLine1: field ?? null,
+                            addressLine1: field?.slice(0, 100) ?? null,
                         },
                     })}
                 />
@@ -136,7 +136,7 @@ export function MemberView({
                         ...form,
                         address: {
                             ...form.address,
-                            addressLine2: field ?? null,
+                            addressLine2: field?.slice(0, 100) ?? null,
                         },
                     })}
                 />
@@ -147,7 +147,7 @@ export function MemberView({
                         ...form,
                         address: {
                             ...form.address,
-                            city: field ?? null,
+                            city: field?.slice(0, 50) ?? null,
                         },
                     })}
                 />
@@ -158,7 +158,7 @@ export function MemberView({
                         ...form,
                         address: {
                             ...form.address,
-                            county: field ?? null,
+                            county: field?.slice(0, 50) ?? null,
                         },
                     })}
                 />
@@ -169,7 +169,9 @@ export function MemberView({
                         ...form,
                         address: {
                             ...form.address,
-                            state: field?.trim()?.slice(0, 2) ?? null,
+                            state:
+                                field?.trim()?.toUpperCase()?.slice(0, 2) ??
+                                null,
                         },
                     })}
                     validator={(field) => field?.length == 2}
