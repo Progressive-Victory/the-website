@@ -1,10 +1,9 @@
 'use client'
 
-import { DonorView } from './DonorView'
 import styles from './HistoryView.module.css'
 import { MemberView } from './MemberView'
 import { CollapsibleSection } from '@/components/common'
-import { FormGroupProps, FormState } from '@/components/common/forms'
+import { FormGroupProps } from '@/components/common/forms'
 import {
     ActBlueDonor,
     Location,
@@ -12,12 +11,8 @@ import {
     UpdateHistory,
     User,
 } from '@/contracts/data'
-import { PaginatedResponse } from '@/contracts/responses'
-import { FetchError } from '@/models'
-import { usePaginatedSearch } from '@/util/hooks'
-import { useQuery, UseQueryResult } from '@tanstack/react-query'
 import cx from 'classnames'
-import { ReactNode, useMemo, useState } from 'react'
+import { ReactNode, useMemo } from 'react'
 
 export interface HistoryViewProps {
     selectedId: number
@@ -50,9 +45,6 @@ export function HistoryView({
     makeFormTitle,
     getLocation,
 }: HistoryViewProps) {
-    const [historyFormState, setHistoryFormState] =
-        useState<FormState<User> | null>(null)
-
     const sortedHistory = useMemo(() => {
         return (user?.history ?? []).slice().sort((a, b) => {
             return (
@@ -148,8 +140,6 @@ export function HistoryView({
                             selectedId={selectedId}
                             user={user}
                             selectedHistory={selectedHistory}
-                            formState={historyFormState}
-                            setFormState={setHistoryFormState}
                             saving={false}
                             isInvalid={false}
                             roles={roles}

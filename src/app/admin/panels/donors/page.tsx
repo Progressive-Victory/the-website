@@ -28,7 +28,7 @@ interface contributionData {
 }
 
 export default function Page() {
-    const { ready, onGet, onPatch } = useFetch()
+    const { ready, onGet } = useFetch()
     const navParams = useSearchParams()
     const navEmail = navParams.get('email')
 
@@ -169,9 +169,7 @@ export default function Page() {
                         readonly={true}
                         saving={false}
                         isInvalid={false}
-                        onUpdate={() => {
-                            return
-                        }}
+                        onUpdate={setFormState}
                         onSave={() => {
                             return
                         }}

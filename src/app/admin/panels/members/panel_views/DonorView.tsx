@@ -239,9 +239,6 @@ export function DonorView({
                         {linkedDonors.map((donor) => {
                             const contributionData = calcContributionData(donor)
 
-                            const makeTitle = (d: ActBlueDonor) =>
-                                `${d.firstname} ${d.lastname}`
-
                             return (
                                 <div
                                     key={donor.email}

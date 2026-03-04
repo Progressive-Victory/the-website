@@ -9,34 +9,22 @@ import {
     Form,
     DateField,
 } from '@/components/common/forms'
-import {
-    ActBlueDonationPacket,
-    UpdateHistory,
-    zActBlueDonationPacket,
-} from '@/contracts/data'
+import { ActBlueDonationPacket, zActBlueDonationPacket } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
-import {
-    keepPreviousData,
-    skipToken,
-    useQuery,
-    useQueryClient,
-} from '@tanstack/react-query'
+import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
 export default function Page() {
-    const queryClient = useQueryClient()
-    const { ready, onGet, onPatch } = useFetch()
+    const { ready, onGet } = useFetch()
     const navParams = useSearchParams()
     const navVal = navParams.get('lineitemId')
 
     const [selectedLineitemId, setSelectedLineitemId] = useState<number | null>(
         navVal ? +navVal : null
     )
-    const [selectedHistory, setSelectedHistory] =
-        useState<UpdateHistory<ActBlueDonationPacket> | null>(null)
     const [formState, setFormState] =
         useState<FormState<ActBlueDonationPacket> | null>(null)
 
@@ -143,9 +131,7 @@ export default function Page() {
                         readonly={true}
                         saving={false}
                         isInvalid={false}
-                        onUpdate={() => {
-                            return
-                        }}
+                        onUpdate={setFormState}
                         onSave={() => {
                             return
                         }}
