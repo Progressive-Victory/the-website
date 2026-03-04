@@ -9,6 +9,7 @@
         "postbuild": "next-sitemap",
         "start": "next start",
         "lint": "next lint",
+        "lint-ci": "next lint --max-warnings 0",
         "test": "vitest"
     },
     "dependencies": {
