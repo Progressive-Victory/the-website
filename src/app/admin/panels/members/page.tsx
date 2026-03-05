@@ -447,6 +447,7 @@ export default function Page() {
 
                         <Tab key="donorMatching" label="Donations">
                             <DonorView
+                                key={userQuery.data.id}
                                 selectedId={selectedId}
                                 user={userQuery.data}
                                 pickingDonor={pickingDonor}
