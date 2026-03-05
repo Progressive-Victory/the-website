@@ -65,7 +65,7 @@ export function useFetch() {
             const data = (await res.json()) as unknown
 
             if (!schema) return data as R
-            return z.parse(schema, data) as R
+            return schema.parse(data) as R
         } else {
             return {} as R
         }
