@@ -35,7 +35,9 @@ export default function Page() {
     const navEmail = navParams.get('email')
 
     const [selectedEmail, setSelectedEmail] = useState<string | null>(navEmail)
-    const [formState] = useState<FormState<ActBlueDonor> | null>(null)
+    const [formState, setFormState] = useState<FormState<ActBlueDonor> | null>(
+        null
+    )
 
     const {
         query: searchQuery,
