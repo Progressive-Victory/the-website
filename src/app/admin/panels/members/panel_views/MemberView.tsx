@@ -13,6 +13,41 @@ import {
 import { Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
 
+interface AddressShape {
+    addressLine1: string | null
+    addressLine2: string | null
+    city: string | null
+    county: string | null
+    state: string | null
+    zip: string | null
+}
+
+const EMPTY_ADDRESS: AddressShape = {
+    addressLine1: null,
+    addressLine2: null,
+    city: null,
+    county: null,
+    state: null,
+    zip: null,
+}
+
+const getAddress = (form: User): AddressShape =>
+    (form as { address?: AddressShape | null }).address ?? EMPTY_ADDRESS
+
+const setAddress = (
+    form: User,
+    next: Partial<AddressShape>
+): User & { address: AddressShape } => {
+    const current = getAddress(form)
+    return {
+        ...form,
+        address: {
+            ...current,
+            ...next,
+        },
+    }
+}
+
 export interface MemberViewProps {
     selectedId: number
     user: User
@@ -70,7 +105,6 @@ export function MemberView({
                 <TextField
                     label="Email"
                     field="email"
-                    autocomplete="email"
                     required
                 />
                 <PhoneField label="Phone Number" field="phone" required />
@@ -120,76 +154,64 @@ export function MemberView({
             <FormGroup title="Address">
                 <TextField<User>
                     label="Address Line 1"
-                    getter={(form) => form.address.addressLine1}
-                    setter={(form, field) => ({
-                        ...form,
-                        address: {
-                            ...form.address,
+                    getter={(form) => getAddress(form).addressLine1}
+                    setter={(form, field) =>
+                        setAddress(form, {
                             addressLine1: field?.slice(0, 100) ?? null,
-                        },
-                    })}
+                        })
+                    }
                 />
                 <TextField<User>
                     label="Address Line 2"
-                    getter={(form) => form.address.addressLine2}
-                    setter={(form, field) => ({
-                        ...form,
-                        address: {
-                            ...form.address,
+                    getter={(form) => getAddress(form).addressLine2}
+                    setter={(form, field) =>
+                        setAddress(form, {
                             addressLine2: field?.slice(0, 100) ?? null,
-                        },
-                    })}
+                        })
+                    }
                 />
                 <TextField<User>
                     label="City"
-                    getter={(form) => form.address.city}
-                    setter={(form, field) => ({
-                        ...form,
-                        address: {
-                            ...form.address,
+                    getter={(form) => getAddress(form).city}
+                    setter={(form, field) =>
+                        setAddress(form, {
                             city: field?.slice(0, 50) ?? null,
-                        },
-                    })}
+                        })
+                    }
                 />
                 <TextField<User>
                     label="County"
-                    getter={(form) => form.address.county}
-                    setter={(form, field) => ({
-                        ...form,
-                        address: {
-                            ...form.address,
+                    getter={(form) => getAddress(form).county}
+                    setter={(form, field) =>
+                        setAddress(form, {
                             county: field?.slice(0, 50) ?? null,
-                        },
-                    })}
+                        })
+                    }
                 />
                 <TextField<User>
                     label="State"
-                    getter={(form) => form.address.state}
-                    setter={(form, field) => ({
-                        ...form,
-                        address: {
-                            ...form.address,
+                    getter={(form) => getAddress(form).state}
+                    setter={(form, field) =>
+                        setAddress(form, {
                             state:
                                 field?.trim()?.toUpperCase()?.slice(0, 2) ??
                                 null,
-                        },
-                    })}
+                        })
+                    }
                     validator={(field) => field?.length == 2}
                 />
                 <TextField<User>
                     label="Zip Code"
-                    getter={(form) => form.address.zip}
-                    setter={(form, field) => ({
-                        ...form,
-                        address: {
-                            ...form.address,
+                    getter={(form) => getAddress(form).zip}
+                    setter={(form, field) =>
+                        setAddress(form, {
                             zip:
                                 field
                                     ?.replace(/[^\d]/, '')
                                     ?.padStart(5, '0')
                                     ?.slice(-5) ?? null,
-                        },
-                    })}
+                        })
+                    }
                     validator={(field) => field?.length == 5}
                 />
             </FormGroup>

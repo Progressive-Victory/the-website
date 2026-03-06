@@ -240,16 +240,31 @@ export default function Page() {
         setSelectedHistory(null)
     }
 
+    interface AddressShape {
+        addressLine1: string | null
+        addressLine2: string | null
+        city: string | null
+        county: string | null
+        state: string | null
+        zip: string | null
+    }
+
+    const formZip =
+        (
+            formState?.form as
+                | {
+                      address?: AddressShape | null
+                  }
+                | undefined
+        )?.address?.zip ?? null
+
     const locationQuery = useQuery({
-        queryKey: [`/locations/${formState?.form?.address?.zip}`],
+        queryKey: [`/locations/${formZip}`],
         queryFn:
-            ready && formState?.editing && formState.form.address?.zip
+            ready && formState?.editing && formZip
                 ? async () => {
                       try {
-                          return await onGet<Location>(
-                              `/locations/${formState.form.address?.zip}`,
-                              zLocation
-                          )
+                          return await onGet<Location>(`/locations/${formZip}`, zLocation)
                       } catch {
                           return null
                       }
@@ -262,23 +277,32 @@ export default function Page() {
         const orNull = (value: string | null | undefined) =>
             value?.length ? value : null
 
-        console.log(user.address, locationQuery.data)
+        const userAddress = (user as { address: AddressShape }).address
 
-        const address = {
-            addressLine1: orNull(user.address.addressLine1?.trim()),
-            addressLine2: orNull(user.address.addressLine2?.trim()),
-            city: orNull(user.address.city?.trim()) ?? locationQuery.data?.city,
+        console.log(userAddress, locationQuery.data)
+
+        const address: AddressShape = {
+            addressLine1: orNull(userAddress.addressLine1?.trim()),
+            addressLine2: orNull(userAddress.addressLine2?.trim()),
+            city:
+                orNull(userAddress.city?.trim()) ?? locationQuery.data?.city ?? null,
             county:
-                orNull(user.address.county?.trim()) ??
-                locationQuery.data?.county,
+                orNull(userAddress.county?.trim()) ??
+                locationQuery.data?.county ??
+                null,
             state:
-                orNull(user.address.state?.trim()) ?? locationQuery.data?.state,
+                orNull(userAddress.state?.trim()) ??
+                locationQuery.data?.state ??
+                null,
             zip:
-                orNull(user.address.zip?.trim()) ??
-                locationQuery.data?.zip?.toString().padStart(5, '0'),
+                orNull(userAddress.zip?.trim()) ??
+                locationQuery.data?.zip?.toString().padStart(5, '0') ??
+                null,
         }
 
-        const oldAddress = userQuery.data?.address ?? null
+        const oldAddress =
+            (userQuery.data as { address?: AddressShape | null } | undefined)
+                ?.address ?? null
         const addressIsDirty =
             address.addressLine1 != oldAddress?.addressLine1 ||
             address.addressLine2 != oldAddress?.addressLine2 ||
@@ -434,8 +458,7 @@ export default function Page() {
                                 setFormState={setFormState}
                                 saving={updateMutation.isPending}
                                 isInvalid={
-                                    (formState?.form?.address?.zip != null &&
-                                        locationQuery.data == null) ||
+                                    (formZip != null && locationQuery.data == null) ||
                                     locationQuery.isPending
                                 }
                                 roles={roles}
@@ -447,7 +470,6 @@ export default function Page() {
 
                         <Tab key="donorMatching" label="Donations">
                             <DonorView
-                                key={userQuery.data.id}
                                 selectedId={selectedId}
                                 user={userQuery.data}
                                 pickingDonor={pickingDonor}

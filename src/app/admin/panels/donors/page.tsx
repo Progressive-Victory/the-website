@@ -35,13 +35,19 @@ export default function Page() {
     const navEmail = navParams.get('email')
 
     const [selectedEmail, setSelectedEmail] = useState<string | null>(navEmail)
-    const [formState] = useState<FormState<ActBlueDonor> | null>(null)
+    const [formState, setFormState] = useState<FormState<ActBlueDonor> | null>(
+        null
+    )
 
     const {
         query: searchQuery,
         search,
         onSearch,
     } = usePaginatedSearch<ActBlueDonor>('/actblue/donors', zActBlueDonor)
+
+    useCallback(() => {
+        console.error(searchQuery.error)
+    }, [searchQuery.error])
 
     const donorQuery = useQuery({
         queryKey: [`/actblue/donors/${selectedEmail}`],
@@ -289,7 +295,7 @@ export default function Page() {
                                         />
                                         {contributionData.customFields?.map(
                                             (customField) => (
-                                                <TextField
+                                                <TextField<ActBlueContributionCustomField>
                                                     key={customField.id}
                                                     label={customField.label}
                                                     getter={() =>
