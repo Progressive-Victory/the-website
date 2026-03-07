@@ -238,6 +238,7 @@ export default function Page() {
         setSelectedId(value.id)
 
         setSelectedHistory(null)
+        setSelectedDonorHistory(null)
     }
 
     const locationQuery = useQuery({
@@ -309,10 +310,16 @@ export default function Page() {
         return user.email ?? ''
     }
 
+    const normalizeMeridiem = (value: string) => {
+        return value.replace(/\s*([AP])M\b/g, (_, period: string) => {
+            return `${period.toLowerCase()}m`
+        })
+    }
+
     const makeHistoryFormTitle = (user: User | UserProfile) => {
         const name = makeTitle(user)
         if (!selectedHistory) return name
-        return `${name} @ ${selectedHistory.historyWhenUpdatedUtc.toLocaleString()}`
+        return `${name} @ ${normalizeMeridiem(selectedHistory.historyWhenUpdatedUtc.toLocaleString())}`
     }
 
     const renderDonorItem = useCallback(
