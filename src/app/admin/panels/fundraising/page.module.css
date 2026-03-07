@@ -21,7 +21,7 @@
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
 }
 
-.heaederNavLabels {
+.breadcrumbs {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -33,17 +33,17 @@
     user-select: none;
 }
 
-.prominentLabel {
+.prominentBreadcrumb {
     font-weight: 700;
     color: rgba(15, 23, 42, 0.72);
 }
 
-.labelSeperator {
+.breadcrumbSeperator {
     color: rgba(15, 23, 42, 0.35);
     font-weight: 700;
 }
 
-.panelLabel {
+.panelBreadcrumb {
     font-weight: 650;
     color: rgba(15, 23, 42, 0.55);
 }
@@ -75,18 +75,6 @@
     gap: 1.1rem;
 
     grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-@media (max-width: 64rem) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 42rem) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 .card {
@@ -344,6 +332,18 @@
 
 .trackFillOneTime {
     background: linear-gradient(90deg, #ebafa9, #ce3728);
+}
+
+@media (max-width: 64rem) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 42rem) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 72rem) {

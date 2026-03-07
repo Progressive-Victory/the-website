@@ -25,18 +25,16 @@ function formatCurrency(value?: number) {
 function formatDateTime(value?: Date) {
     if (value == null) return '—'
 
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const target = new Date(
-        value.getFullYear(),
-        value.getMonth(),
-        value.getDate()
-    )
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const target = new Date(value)
+    target.setHours(0, 0, 0, 0)
 
     const diffMs = today.getTime() - target.getTime()
     const diffDays = Math.floor(diffMs / 86_400_000)
 
-    if (diffDays === 0) {
+    if (diffDays <= 0) {
         return Intl.DateTimeFormat('en-US', {
             timeStyle: 'short',
         }).format(value)
@@ -145,10 +143,10 @@ export default function Page() {
     return (
         <div className={styles.panelContents}>
             <div className={styles.panelHeader}>
-                <div className={styles.heaederNavLabels}>
-                    <span className={styles.prominentLabel}>Admin</span>
-                    <span className={styles.labelSeperator}>/</span>
-                    <span className={styles.panelLabel}>Fundraising</span>
+                <div className={styles.breadcrumbs}>
+                    <span className={styles.prominentBreadcrumb}>Admin</span>
+                    <span className={styles.breadcrumbSeperator}>/</span>
+                    <span className={styles.panelBreadcrumb}>Fundraising</span>
                 </div>
             </div>
 
@@ -167,7 +165,7 @@ export default function Page() {
                     <div className={styles.dashboardTimestamp}>
                         Last Updated:{' '}
                         {/* logic will eventually need to be reworked to show last api fetch and not most recent contribution date */}
-                        {formatDateTime(latestContributionAt ?? undefined)}
+                        {formatDateTime(latestContributionAt ?? undefined) ?? "n/a"}
                     </div>
                 </div>
 
