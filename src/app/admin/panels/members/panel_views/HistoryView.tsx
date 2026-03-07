@@ -47,7 +47,15 @@ function normalizeMeridiem(time: string) {
 }
 
 function formatHistoryTimestamp(value: Date, now = new Date()) {
-    const elapsedMs = now.getTime() - value.getTime()
+    const today = new Date(now)
+    today.setHours(0, 0, 0, 0)
+
+    const target = new Date(value)
+    target.setHours(0, 0, 0, 0)
+
+    const diffMs = today.getTime() - target.getTime()
+    const diffDays = Math.floor(diffMs / DAY_MS)
+
     const time = normalizeMeridiem(
         value.toLocaleTimeString([], {
             hour: 'numeric',
@@ -55,20 +63,15 @@ function formatHistoryTimestamp(value: Date, now = new Date()) {
         })
     )
 
-    const isToday =
-        value.getFullYear() === now.getFullYear() &&
-        value.getMonth() === now.getMonth() &&
-        value.getDate() === now.getDate()
-
-    if (isToday) {
+    if (diffDays === 0) {
         return `${time} · Today`
     }
 
-    if (elapsedMs >= 0 && elapsedMs < DAY_MS) {
+    if (diffDays < 0) {
         return time
     }
 
-    if (elapsedMs >= DAY_MS && elapsedMs < DAY_MS * 7) {
+    if (diffDays <= 6) {
         const weekday = value.toLocaleString([], { weekday: 'long' })
         return `${time} · ${weekday}`
     }
@@ -178,7 +181,7 @@ export function HistoryView({
         return map
     }, [updaterDiscordQueries, updaterIds])
 
-    const makeUpdaterLabel = (historyWhoUpdatedId: number | null) => {
+    const updateLabel = (historyWhoUpdatedId: number | null) => {
         if (historyWhoUpdatedId == null) return 'Unknown'
 
         const username = updaterUsernameById.get(historyWhoUpdatedId)
@@ -203,7 +206,7 @@ export function HistoryView({
     }
 
     const handleMakeHistoryLabel = (update: UpdateHistory<User>) => {
-        const who = makeUpdaterLabel(update.historyWhoUpdatedId)
+        const who = updateLabel(update.historyWhoUpdatedId)
         const source = update.historyDataSource ?? 'Unknown'
         return makeHistoryMessage(who, 'Account', source)
     }
@@ -211,7 +214,7 @@ export function HistoryView({
     const handleMakeDonorHistoryLabel = (
         update: UpdateHistory<ActBlueDonor>
     ) => {
-        const who = makeUpdaterLabel(update.historyWhoUpdatedId)
+        const who = updateLabel(update.historyWhoUpdatedId)
         const source = update.historyDataSource ?? 'Unknown'
         return makeHistoryMessage(who, 'Donor', source)
     }
