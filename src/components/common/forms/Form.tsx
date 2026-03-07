@@ -53,7 +53,7 @@ export interface FormProps<T> {
     onUpdate?: (state: FormState<T>) => void
 
     /** Callback to save form data. Should correspond to `saving`. */
-    onSave: (form: T) => void
+    onSave?: (form: T) => void
 }
 
 /**
@@ -115,7 +115,7 @@ export function Form<T>({
     // Called when 'Save' is pressed. Asks the parent component to save, and
     // then clears edit state.
     const handleSave = () => {
-        if (editForm) onSave(editForm)
+        if (editForm) onSave?.(editForm)
         setEditForm(null)
         setDirtyMap(new Set<string>())
         setInvalidMap(new Set<string>())

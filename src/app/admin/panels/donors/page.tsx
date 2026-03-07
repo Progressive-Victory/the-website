@@ -20,7 +20,7 @@ import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 
 interface contributionData {
     total: number
@@ -30,7 +30,7 @@ interface contributionData {
 }
 
 export default function Page() {
-    const { ready, onGet, onPatch } = useFetch()
+    const { ready, onGet } = useFetch()
     const navParams = useSearchParams()
     const navEmail = navParams.get('email')
 
@@ -170,9 +170,7 @@ export default function Page() {
                         readonly={true}
                         saving={false}
                         isInvalid={false}
-                        onUpdate={() => {
-                            return
-                        }}
+                        onUpdate={setFormState}
                         onSave={() => {
                             return
                         }}
