@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
-import { zActBlueDonationPacket } from '@/contracts/data'
+import { ActBlueDonationPacket, zActBlueDonationPacket } from '@/contracts/data'
 import { zActBlueDonor } from '@/contracts/data/ActBlueDonor'
 import { usePaginatedSearch } from '@/util/hooks'
 import Link from 'next/link'
@@ -11,6 +11,46 @@ import { FaDollarSign } from 'react-icons/fa6'
 function formatCount(value?: number) {
     if (value == null) return '—'
     return value.toLocaleString()
+}
+
+function formatCurrency(value?: number) {
+    if (value == null) return '—'
+    return value.toLocaleString(undefined, {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0,
+    })
+}
+
+function formatDateTime(value?: Date) {
+    if (value == null) return '—'
+
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const target = new Date(
+        value.getFullYear(),
+        value.getMonth(),
+        value.getDate()
+    )
+
+    const diffMs = today.getTime() - target.getTime()
+    const diffDays = Math.floor(diffMs / 86_400_000)
+
+    if (diffDays === 0) {
+        return Intl.DateTimeFormat('en-US', {
+            timeStyle: 'short',
+        }).format(value)
+    }
+
+    if (diffDays >= 1 && diffDays <= 6) {
+        return Intl.DateTimeFormat('en-US', {
+            weekday: 'long',
+        }).format(value)
+    }
+
+    return Intl.DateTimeFormat('en-US', {
+        dateStyle: 'medium',
+    }).format(value)
 }
 
 interface FundraisingCardProps {
@@ -52,29 +92,169 @@ export default function Page() {
         search: { limit: 0 },
     })
 
-    const contributions = usePaginatedSearch(
+    const contributions = usePaginatedSearch<ActBlueDonationPacket>(
         '/actblue/contributions',
         zActBlueDonationPacket,
         { search: { limit: 0 } }
     )
 
+    const contributionRecords = usePaginatedSearch<ActBlueDonationPacket>(
+        '/actblue/contributions',
+        zActBlueDonationPacket,
+        {
+            search: { limit: 200 },
+            all: true,
+        }
+    )
+
+    const allContributions = contributionRecords.query.data?.data
+
+    const totalRaised = allContributions?.reduce(
+        (sum, contribution) => sum + contribution.amount,
+        0
+    )
+
+    const recurringRaised = allContributions
+        ?.filter((contribution) => contribution.isRecurring)
+        .reduce((sum, contribution) => sum + contribution.amount, 0)
+
+    const oneTimeRaised = allContributions
+        ?.filter((contribution) => !contribution.isRecurring)
+        .reduce((sum, contribution) => sum + contribution.amount, 0)
+
+    const recurringPct =
+        totalRaised && recurringRaised != null
+            ? Math.round((recurringRaised / totalRaised) * 100)
+            : null
+    const oneTimePct =
+        totalRaised && oneTimeRaised != null
+            ? Math.round((oneTimeRaised / totalRaised) * 100)
+            : null
+
+    const latestContributionAt =
+        contributionRecords.query.data?.data.reduce<Date | null>(
+            (latest, contribution) => {
+                if (latest == null || contribution.paidAt > latest) {
+                    return contribution.paidAt
+                }
+                return latest
+            },
+            null
+        )
+
     return (
-        <div className={styles.root}>
-            <div className={styles.topBar}>
-                <div className={styles.breadcrumbs}>
-                    <span className={styles.crumbStrong}>Admin</span>
-                    <span className={styles.crumbSep}>/</span>
-                    <span className={styles.crumbWeak}>Fundraising</span>
+        <div className={styles.panelContents}>
+            <div className={styles.panelHeader}>
+                <div className={styles.heaederNavLabels}>
+                    <span className={styles.prominentLabel}>Admin</span>
+                    <span className={styles.labelSeperator}>/</span>
+                    <span className={styles.panelLabel}>Fundraising</span>
                 </div>
             </div>
 
-            <div className={styles.header}>
-                <h1 className={styles.heading}>Fundraising</h1>
-                <p className={styles.subheading}>
+            <div className={styles.galleryHeader}>
+                <h1 className={styles.galleryTitle}>Fundraising</h1>
+                <p className={styles.gallerySubTitle}>
                     Manage ActBlue donors and contribution records.
                 </p>
             </div>
+            <div className={styles.dashboard}>
+                <div className={styles.dashboardTopRow}>
+                    <div className={styles.dashboardKicker}>
+                        All-Time Performance
+                    </div>
 
+                    <div className={styles.dashboardTimestamp}>
+                        Last Updated:{' '}
+                        {/* logic will eventually need to be reworked to show last api fetch and not most recent contribution date */}
+                        {formatDateTime(latestContributionAt ?? undefined)}
+                    </div>
+                </div>
+
+                <div className={styles.dashboardHeroRow}>
+                    <div className={styles.heroValue}>
+                        {formatCurrency(totalRaised)}
+                    </div>
+                </div>
+
+                <div className={styles.metricGrid}>
+                    <article className={styles.metricCard}>
+                        <div className={styles.metricLabel}>Recurring</div>
+                        <div className={styles.metricValue}>
+                            {formatCurrency(recurringRaised)}
+                        </div>
+                        <div className={styles.metricMeta}>
+                            {recurringPct != null
+                                ? `${recurringPct}% of total`
+                                : '—'}
+                        </div>
+                    </article>
+
+                    <article className={styles.metricCard}>
+                        <div className={styles.metricLabel}>One-Time</div>
+                        <div className={styles.metricValue}>
+                            {formatCurrency(oneTimeRaised)}
+                        </div>
+                        <div className={styles.metricMeta}>
+                            {oneTimePct != null
+                                ? `${oneTimePct}% of total`
+                                : '—'}
+                        </div>
+                    </article>
+
+                    <article className={styles.metricCard}>
+                        <div className={styles.metricLabel}>Donors</div>
+                        <div className={styles.metricValue}>
+                            {formatCount(donors.query.data?.count)}
+                        </div>
+                        <div className={styles.metricMeta}>
+                            Total contributors
+                        </div>
+                    </article>
+
+                    <article className={styles.metricCard}>
+                        <div className={styles.metricLabel}>Contributions</div>
+                        <div className={styles.metricValue}>
+                            {formatCount(contributions.query.data?.count)}
+                        </div>
+                        <div className={styles.metricMeta}>
+                            All captured events
+                        </div>
+                    </article>
+                </div>
+
+                <div className={styles.splitTrack}>
+                    <div className={styles.splitRow}>
+                        <span>Recurring Share</span>
+                        <span>
+                            {recurringPct != null ? `${recurringPct}%` : '—'}
+                        </span>
+                    </div>
+                    <div className={styles.trackBar} aria-hidden="true">
+                        <span
+                            className={styles.trackFillRecurring}
+                            style={{
+                                width: `${Math.max(0, Math.min(100, recurringPct ?? 0))}%`,
+                            }}
+                        />
+                    </div>
+
+                    <div className={styles.splitRow}>
+                        <span>One-Time Share</span>
+                        <span>
+                            {oneTimePct != null ? `${oneTimePct}%` : '—'}
+                        </span>
+                    </div>
+                    <div className={styles.trackBar} aria-hidden="true">
+                        <span
+                            className={styles.trackFillOneTime}
+                            style={{
+                                width: `${Math.max(0, Math.min(100, oneTimePct ?? 0))}%`,
+                            }}
+                        />
+                    </div>
+                </div>
+            </div>
             <div className={styles.grid}>
                 <FundraisingCard
                     title="Donors"

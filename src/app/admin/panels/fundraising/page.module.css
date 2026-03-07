@@ -1,11 +1,11 @@
-.root {
+.panelContents {
     width: 100%;
     min-width: 0;
     height: 100%;
     padding: 0;
 }
 
-.topBar {
+.panelHeader {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -21,7 +21,7 @@
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
 }
 
-.breadcrumbs {
+.heaederNavLabels {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -33,34 +33,34 @@
     user-select: none;
 }
 
-.crumbStrong {
+.prominentLabel {
     font-weight: 700;
     color: rgba(15, 23, 42, 0.72);
 }
 
-.crumbSep {
+.labelSeperator {
     color: rgba(15, 23, 42, 0.35);
     font-weight: 700;
 }
 
-.crumbWeak {
+.panelLabel {
     font-weight: 650;
     color: rgba(15, 23, 42, 0.55);
 }
 
-.header {
+.galleryHeader {
     padding: 1.15rem 1.05rem 0.35rem;
 }
 
-.heading {
+.galleryTitle {
     margin: 0;
     font-size: 1.45rem;
     font-weight: 800;
     letter-spacing: -0.02em;
-    color: rgba(15, 23, 42, 0.9);
+    color: rgba(9, 34, 58, 0.9);
 }
 
-.subheading {
+.gallerySubTitle {
     margin: 0.35rem 0 0;
     font-size: 0.95rem;
     font-weight: 600;
@@ -162,9 +162,24 @@
     font-size: 1.2rem;
     font-weight: 800;
 
-    color: #09223a;
+    color: rgba(9, 34, 58, 0.9);
 
     text-align: right;
+}
+
+.cardCount {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.25rem 1rem;
+    border-radius: 1rem;
+
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.7);
+
+    font-size: 0.82rem;
+    font-weight: 800;
 }
 
 .cardDescription {
@@ -194,17 +209,162 @@
     opacity: 0.75;
 }
 
-.cardCount {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+.dashboard {
+    margin: 0.5rem 1.3rem 0;
+    padding: 1rem;
+    border-radius: 1.1rem;
 
-    padding: 0.25rem 1rem;
-    border-radius: 1rem;
+    border: 1px solid rgba(15, 23, 42, 0.12);
 
-    background: rgba(15, 23, 42, 0.06);
-    color: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+}
 
-    font-size: 0.82rem;
+.dashboardTopRow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.dashboardKicker {
+    font-size: 0.76rem;
     font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(206, 55, 40, 0.8);
+}
+
+.dashboardTimestamp {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.dashboardHeroRow {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.heroValue {
+    font-size: clamp(1.6rem, 3.8vw, 2.8rem);
+    font-weight: 900;
+    letter-spacing: -0.035em;
+    color: rgba(9, 34, 58, 0.9);
+    line-height: 1;
+}
+
+.heroLabel {
+    padding: 0.28rem 0.72rem;
+    border-radius: 99rem;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(9, 34, 58, 0.9);
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+.metricGrid {
+    margin-top: 0.95rem;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.metricCard {
+    padding: 0.72rem 0.8rem;
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+.metricLabel {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.52);
+}
+
+.metricValue {
+    margin-top: 0.25rem;
+    font-size: 1.16rem;
+    font-weight: 850;
+    letter-spacing: -0.025em;
+    color: rgba(9, 34, 58, 0.9);
+}
+
+.metricMeta {
+    margin-top: 0.18rem;
+    font-size: 0.73rem;
+    font-weight: 650;
+    color: rgba(15, 23, 42, 0.48);
+}
+
+.splitTrack {
+    margin-top: 0.88rem;
+    display: grid;
+    gap: 0.48rem;
+}
+
+.splitRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.74rem;
+    font-weight: 760;
+    letter-spacing: 0.01em;
+    color: rgba(15, 23, 42, 0.65);
+}
+
+.trackBar {
+    width: 100%;
+    height: 0.42rem;
+    border-radius: 99rem;
+    overflow: hidden;
+    background: rgba(15, 23, 42, 0.1);
+}
+
+.trackFillRecurring,
+.trackFillOneTime {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+}
+
+.trackFillRecurring {
+    background: linear-gradient(90deg, #9fc9e8, #549ed6);
+}
+
+.trackFillOneTime {
+    background: linear-gradient(90deg, #ebafa9, #ce3728);
+}
+
+@media (max-width: 72rem) {
+    .metricGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 42rem) {
+    .dashboard {
+        margin: 0.5rem 1rem 0;
+        padding: 0.88rem;
+    }
+
+    .dashboardTopRow,
+    .dashboardHeroRow {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .metricGrid {
+        grid-template-columns: 1fr;
+    }
 }
