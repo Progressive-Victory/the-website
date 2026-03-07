@@ -14,16 +14,18 @@ import {
     zActBlueDonor,
     ActBlueContribution,
     ActBlueLineitem,
+    ActBlueContributionCustomField,
 } from '@/contracts/data'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 
 interface contributionData {
     total: number
     hasActiveRecurring: boolean
+    customFields: ActBlueContributionCustomField[]
     lineitems: ActBlueLineitem[]
 }
 
@@ -42,10 +44,6 @@ export default function Page() {
         search,
         onSearch,
     } = usePaginatedSearch<ActBlueDonor>('/actblue/donors', zActBlueDonor)
-
-    useCallback(() => {
-        console.error(searchQuery.error)
-    }, [searchQuery.error])
 
     const donorQuery = useQuery({
         queryKey: [`/actblue/donors/${selectedEmail}`],
@@ -81,8 +79,10 @@ export default function Page() {
         const li: ActBlueLineitem[] = []
         let hasActiveRecurring = false
         let total = 0
+        let customFields: ActBlueContributionCustomField[] = []
         ;(donorQuery.data?.contributions ?? []).forEach(
             (contribution: ActBlueContribution) => {
+                customFields = contribution.customFields
                 if (
                     contribution.isRecurring &&
                     ((contribution.recurringDuration ?? 1) < 0 ||
@@ -107,6 +107,7 @@ export default function Page() {
         return {
             total,
             hasActiveRecurring,
+            customFields,
             lineitems: li,
         } satisfies contributionData
     }, [donorQuery.data])
@@ -288,6 +289,17 @@ export default function Page() {
                                                 `$${lineitem.amountLessAbFees}`
                                             }
                                         />
+                                        {contributionData.customFields?.map(
+                                            (customField) => (
+                                                <TextField
+                                                    key={customField.id}
+                                                    label={customField.label}
+                                                    getter={() =>
+                                                        customField.answer
+                                                    }
+                                                />
+                                            )
+                                        )}
                                         <br />
                                         <Link
                                             href={{
