@@ -1,8 +1,8 @@
 'use client'
 
-import cx from 'classnames'
+import styles from './ImageWithFallback.module.css'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export interface ImageWithFallbackProps {
     src: string
@@ -22,18 +22,59 @@ export function ImageWithFallback({
     className,
 }: ImageWithFallbackProps) {
     const [hasErrored, setHasErrored] = useState(false)
+    const withExternalClass = (baseClass: string) =>
+        [baseClass, className].filter(Boolean).join(' ')
+
+    useEffect(() => {
+        setHasErrored(false)
+    }, [src, useFallback])
+
+    const shouldUsePlaceholder = hasErrored || useFallback
+
+    if (shouldUsePlaceholder) {
+        const markSize = Math.max(
+            14,
+            Math.round(Math.min(width, height) * 0.52)
+        )
+
+        return (
+            <div
+                role="img"
+                aria-label={alt}
+                style={{
+                    width,
+                    height,
+                    aspectRatio: '1 / 1',
+                }}
+                className={withExternalClass(
+                    `${styles.circleBase} ${styles.placeholder}`
+                )}
+            >
+                <span
+                    aria-hidden="true"
+                    className={styles.placeholderMark}
+                    style={{
+                        fontSize: markSize,
+                    }}
+                >
+                    !
+                </span>
+            </div>
+        )
+    }
 
     return (
         <Image
-            src={
-                hasErrored || useFallback
-                    ? 'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
-                    : src
-            }
+            src={src}
             alt={alt}
             width={width}
             height={height}
-            className={cx('aspect-square max-h-[48px] rounded-full', className)}
+            style={{
+                aspectRatio: '1 / 1',
+            }}
+            className={withExternalClass(
+                `${styles.circleBase} ${styles.image}`
+            )}
             onError={() => setHasErrored(true)}
         />
     )

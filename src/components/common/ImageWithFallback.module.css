@@ -1,0 +1,27 @@
+.circleBase {
+    aspect-ratio: 1 / 1;
+    border-radius: 9999px;
+}
+
+.image {
+    object-fit: cover;
+}
+
+.placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(203, 213, 225, 0.7);
+    background-color: #f1f5f9;
+    color: #475569;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.78) inset,
+        0 26px 70px rgba(15, 23, 42, 0.16);
+}
+
+.placeholderMark {
+    font-weight: 500;
+    line-height: 1;
+    user-select: none;
+}
