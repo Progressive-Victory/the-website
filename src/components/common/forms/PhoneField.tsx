@@ -25,7 +25,7 @@ function formatPhoneDisplay(phoneNumber: string): string {
 export function PhoneField<T>(
     props: FormFieldProps<T, string | null | undefined>
 ) {
-    const { getter, validator, onChange } = useConfigure(
+    const { getter, validator, onChange, readonly, disabled } = useConfigure(
         props,
         useCallback(
             (field: string | null | undefined) => {
@@ -44,9 +44,9 @@ export function PhoneField<T>(
         )
     )
 
-    const readonly = !!props.readonly || !props.dynamic?.editing
-    const disabled = !!props.disabled || !!props.dynamic?.saving
-    const storedValue = props.dynamic?.form ? (getter(props.dynamic.form) ?? '') : ''
+    const storedValue = props.dynamic?.form
+        ? (getter(props.dynamic.form) ?? '')
+        : ''
     const displayValue = storedValue.replace(/^\+1/, '').replace(/\D/g, '')
 
     const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +55,8 @@ export function PhoneField<T>(
         const limitedDigits = digitsOnly.slice(0, 10)
 
         event.target.value = limitedDigits
-        const e164Value = limitedDigits.length === 10 ? `+1${limitedDigits}` : limitedDigits
+        const e164Value =
+            limitedDigits.length === 10 ? `+1${limitedDigits}` : limitedDigits
         onChange(e164Value)
     }
 
@@ -79,7 +80,9 @@ export function PhoneField<T>(
                         maxLength={10}
                         className={cx(
                             styles.textField,
-                            storedValue?.trim() && !validator(storedValue) && styles.invalid
+                            storedValue?.trim() &&
+                                !validator(storedValue) &&
+                                styles.invalid
                         )}
                     />
                     {storedValue?.trim() && !validator(storedValue) && (

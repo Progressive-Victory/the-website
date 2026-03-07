@@ -25,7 +25,8 @@ export default function Page() {
     const [selectedLineitemId, setSelectedLineitemId] = useState<number | null>(
         navVal ? +navVal : null
     )
-    const [formState] = useState<FormState<ActBlueDonationPacket> | null>(null)
+    const [formState, setFormState] =
+        useState<FormState<ActBlueDonationPacket> | null>(null)
 
     const {
         query: searchQuery,
@@ -130,9 +131,7 @@ export default function Page() {
                         readonly={true}
                         saving={false}
                         isInvalid={false}
-                        onUpdate={() => {
-                            return
-                        }}
+                        onUpdate={setFormState}
                         onSave={() => {
                             return
                         }}
@@ -195,15 +194,6 @@ export default function Page() {
                                 field="contributionForm"
                             />
                             <TextField label="Form Kind" field="kind" />
-                            {contributionQuery.data?.customFields?.map(
-                                (field) => (
-                                    <TextField
-                                        key={field.label}
-                                        label={field.label}
-                                        getter={() => field.answer}
-                                    />
-                                )
-                            )}
                         </FormGroup>
                     </Form>
                 )}

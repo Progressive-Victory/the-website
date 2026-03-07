@@ -484,6 +484,7 @@ function PageSelect({
                     }}
                 >
                     <input
+                        id="page"
                         type="text"
                         value={value}
                         disabled={disabled}
