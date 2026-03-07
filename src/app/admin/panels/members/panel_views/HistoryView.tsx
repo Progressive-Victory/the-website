@@ -3,16 +3,10 @@
 import styles from './HistoryView.module.css'
 import { MemberView } from './MemberView'
 import { CollapsibleSection } from '@/components/common'
-import { FormGroupProps, FormState } from '@/components/common/forms'
-import {
-    ActBlueDonor,
-    Location,
-    Role,
-    UpdateHistory,
-    User,
-} from '@/contracts/data'
+import { FormGroupProps } from '@/components/common/forms'
+import { ActBlueDonor, Role, UpdateHistory, User } from '@/contracts/data'
 import cx from 'classnames'
-import { ReactNode, useMemo, useState } from 'react'
+import { ReactNode, useMemo } from 'react'
 
 export interface HistoryViewProps {
     selectedId: number
@@ -29,7 +23,6 @@ export interface HistoryViewProps {
     roles: Role[]
     roleOptions: { value: number; label: string }[]
     makeFormTitle: (user: User) => string
-    getLocation: (form: User) => Location | null
 }
 
 export function HistoryView({
@@ -43,11 +36,7 @@ export function HistoryView({
     roles,
     roleOptions,
     makeFormTitle,
-    getLocation,
 }: HistoryViewProps) {
-    const [historyFormState, setHistoryFormState] =
-        useState<FormState<User> | null>(null)
-
     const sortedHistory = useMemo(() => {
         return (user?.history ?? []).slice().sort((a, b) => {
             return (
@@ -109,7 +98,7 @@ export function HistoryView({
         )
     }
 
-    if (!sortedHistory.length || !sortedDonorHistory.length) {
+    if (!sortedHistory.length && !sortedDonorHistory.length) {
         return (
             <div className={styles.section}>
                 <div className={styles.historyContainer}>
@@ -143,17 +132,11 @@ export function HistoryView({
                             selectedId={selectedId}
                             user={user}
                             selectedHistory={selectedHistory}
-                            formState={historyFormState}
-                            setFormState={setHistoryFormState}
                             saving={false}
                             isInvalid={false}
                             roles={roles}
                             roleOptions={roleOptions}
                             makeFormTitle={(u) => makeFormTitle(u)}
-                            handleSave={() => {
-                                return
-                            }}
-                            getLocation={getLocation}
                         />
                     </div>
                 ) : null}

@@ -1,25 +1,23 @@
 # (Bug|Feature|Task)/(Issue ID)
 
-## Short Description < Ex: Changed A Tweet Card Image>
+## Description
 
-Describe your changes to the code, and why you're making them.
-
-< Ex: Change photo in middle tweet card on homepage to `coolTweetPhoto.png` >
+(Describe your changes to the code, and why you're making them.)
 
 ## Details
 
 What is your discord username?
 
-- Answer here
+- (Answer here)
 
 Please link to the related github issue:
 
-- Answer here
+- (Answer here)
 
-Do your changes impact anything else or introduce any bugs?
+Do your changes impact anything else?
 
-- Answer here
+- (Answer here)
 
 Any extra notes:
 
-- (OPTIONAL) Answer here
+- (OPTIONAL: Answer here)

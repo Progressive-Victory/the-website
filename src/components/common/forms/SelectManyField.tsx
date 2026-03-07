@@ -11,7 +11,7 @@ export interface SelectManyFieldProps<T> extends FormFieldProps<
 }
 
 export function SelectManyField<T>(props: SelectManyFieldProps<T>) {
-    const { getter, onChange } = useConfigure(
+    const { getter, onChange, readonly, disabled } = useConfigure(
         props,
         useCallback(
             (field: (string | number)[] | null | undefined) =>
@@ -20,8 +20,6 @@ export function SelectManyField<T>(props: SelectManyFieldProps<T>) {
         )
     )
 
-    const readonly = !!props.readonly || !props.dynamic?.editing
-    const disabled = !!props.disabled || !!props.dynamic?.saving
     const value = getter(props.dynamic!.form) ?? []
 
     const handleUpdate = (selected: (string | number)[]) => {
