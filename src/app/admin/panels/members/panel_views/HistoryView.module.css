@@ -48,6 +48,14 @@
         transform 140ms ease;
 }
 
+.historyEntryMain {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
 .historyEntry:last-child {
     border-bottom: 0;
 }
@@ -69,9 +77,63 @@
     font-weight: 550;
 }
 
+.historyEntryActor {
+    color: rgba(9, 34, 58, 0.8);
+    font-weight: 650;
+}
+
 .historyEntryDate {
     font-weight: 650;
     color: rgba(15, 23, 42, 0.85);
+}
+
+.historyEntryDateTag {
+    position: relative;
+    margin-left: auto;
+    white-space: nowrap;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    padding-inline: 0.75rem;
+    padding-block: 0.15rem;
+    border-radius: 9999px;
+
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.historyEntryDateTag::after {
+    content: attr(data-full-date);
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.35rem);
+
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.45rem;
+    max-width: 20rem;
+
+    color: rgba(241, 245, 249, 0.95);
+    background: rgba(15, 23, 42, 0.92);
+    font-size: 0.72rem;
+    font-weight: 560;
+    line-height: 1.35;
+
+    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28);
+
+    opacity: 0;
+    transform: translateY(-3px);
+    transition:
+        opacity 100ms ease,
+        transform 100ms ease;
+    pointer-events: none;
+    z-index: 8;
+}
+
+.historyEntryDateTag:hover::after,
+.historyEntryDateTag:focus-visible::after {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .historyEntryCode {
