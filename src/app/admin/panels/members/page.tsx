@@ -7,8 +7,7 @@ import { MemberView } from './panel_views/MemberView'
 import { ListElement, List } from '@/app/admin/layout/List'
 import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
-import { Tab } from '@/components/common/tab_bar/Tab'
-import { TabBar } from '@/components/common/tab_bar/TabBar'
+import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ActBlueDonor,
     Location,
@@ -40,6 +39,8 @@ import {
 import { useCallback, useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
+type MemberTabKey = 'overview' | 'donorMatching' | 'history'
+
 export default function Page() {
     const queryClient = useQueryClient()
     const { ready, onGet, onPatch, onPost } = useFetch()
@@ -53,6 +54,7 @@ export default function Page() {
 
     const [formState, setFormState] = useState<FormState<User> | null>(null)
     const [pickingDonor, setPickingDonor] = useState<boolean>(false)
+    const [selectedTab, setSelectedTab] = useState<MemberTabKey>('overview')
 
     const loggedInUser = useCurrentUser()
 
@@ -79,7 +81,7 @@ export default function Page() {
         >['onSearch']
     }
 
-    const roles = rolesQuery.data?.data ?? []
+    const roles = useMemo(() => rolesQuery.data?.data ?? [], [rolesQuery.data])
     const roleOptions = useMemo(
         () =>
             (rolesQuery.data?.data ?? []).map((role) => ({
@@ -239,6 +241,7 @@ export default function Page() {
 
         setSelectedHistory(null)
         setSelectedDonorHistory(null)
+        setSelectedTab('overview')
     }
 
     const locationQuery = useQuery({
@@ -259,68 +262,75 @@ export default function Page() {
         placeholderData: keepPreviousData,
     })
 
-    const handleSave = (user: User) => {
-        const orNull = (value: string | null | undefined) =>
-            value?.length ? value : null
+    const handleSave = useCallback(
+        (user: User) => {
+            const orNull = (value: string | null | undefined) =>
+                value?.length ? value : null
 
-        console.log(user.address, locationQuery.data)
+            const address = {
+                addressLine1: orNull(user.address.addressLine1?.trim()),
+                addressLine2: orNull(user.address.addressLine2?.trim()),
+                city:
+                    orNull(user.address.city?.trim()) ??
+                    locationQuery.data?.city,
+                county:
+                    orNull(user.address.county?.trim()) ??
+                    locationQuery.data?.county,
+                state:
+                    orNull(user.address.state?.trim()) ??
+                    locationQuery.data?.state,
+                zip:
+                    orNull(user.address.zip?.trim()) ??
+                    locationQuery.data?.zip?.toString().padStart(5, '0'),
+            }
 
-        const address = {
-            addressLine1: orNull(user.address.addressLine1?.trim()),
-            addressLine2: orNull(user.address.addressLine2?.trim()),
-            city: orNull(user.address.city?.trim()) ?? locationQuery.data?.city,
-            county:
-                orNull(user.address.county?.trim()) ??
-                locationQuery.data?.county,
-            state:
-                orNull(user.address.state?.trim()) ?? locationQuery.data?.state,
-            zip:
-                orNull(user.address.zip?.trim()) ??
-                locationQuery.data?.zip?.toString().padStart(5, '0'),
-        }
+            const oldAddress = userQuery.data?.address ?? null
+            const addressIsDirty =
+                address.addressLine1 != oldAddress?.addressLine1 ||
+                address.addressLine2 != oldAddress?.addressLine2 ||
+                address.city != oldAddress?.city ||
+                address.county != oldAddress?.county ||
+                address.state != oldAddress?.state ||
+                address.zip != oldAddress?.zip
 
-        const oldAddress = userQuery.data?.address ?? null
-        const addressIsDirty =
-            address.addressLine1 != oldAddress?.addressLine1 ||
-            address.addressLine2 != oldAddress?.addressLine2 ||
-            address.city != oldAddress?.city ||
-            address.county != oldAddress?.county ||
-            address.state != oldAddress?.state ||
-            address.zip != oldAddress?.zip
+            const request: UpdateUserRequest = {
+                email: user.email,
+                phone: user.phone,
+                preferredName: user.preferredName,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                birthdate: user.birthdate,
+                roles: user.roles?.map((role) => role.id),
+            }
+            if (addressIsDirty) request.address = address
 
-        const request: UpdateUserRequest = {
-            email: user.email,
-            phone: user.phone,
-            preferredName: user.preferredName,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            birthdate: user.birthdate,
-            roles: user.roles?.map((role) => role.id),
-        }
-        if (addressIsDirty) request.address = address
+            updateMutation.mutate({ id: user.id, user, request })
+        },
+        [locationQuery.data, updateMutation, userQuery.data?.address]
+    )
 
-        updateMutation.mutate({ id: user.id, user, request })
-    }
-
-    const makeTitle = (user: User | UserProfile) => {
+    const makeTitle = useCallback((user: User | UserProfile) => {
         if (user.firstName && user.lastName)
             return `${user.firstName} ${user.lastName}`
         if (user.firstName) return user.firstName
         if (user.preferredName) return user.preferredName
         return user.email ?? ''
-    }
+    }, [])
 
-    const normalizeMeridiem = (value: string) => {
+    const normalizeMeridiem = useCallback((value: string) => {
         return value.replace(/\s*([AP])M\b/g, (_, period: string) => {
             return `${period.toLowerCase()}m`
         })
-    }
+    }, [])
 
-    const makeHistoryFormTitle = (user: User | UserProfile) => {
-        const name = makeTitle(user)
-        if (!selectedHistory) return name
-        return `${name} @ ${normalizeMeridiem(selectedHistory.historyWhenUpdatedUtc.toLocaleString())}`
-    }
+    const makeHistoryFormTitle = useCallback(
+        (user: User | UserProfile) => {
+            const name = makeTitle(user)
+            if (!selectedHistory) return name
+            return `${name} @ ${normalizeMeridiem(selectedHistory.historyWhenUpdatedUtc.toLocaleString())}`
+        },
+        [makeTitle, normalizeMeridiem, selectedHistory]
+    )
 
     const renderDonorItem = useCallback(
         (item: ActBlueDonor, userId: number) => {
@@ -360,6 +370,99 @@ export default function Page() {
             </ListElement>
         )
     }
+
+    const tabs: TabSpec[] = useMemo(
+        () => [
+            { key: 'overview', label: 'Overview' },
+            { key: 'donorMatching', label: 'Donations' },
+            { key: 'history', label: 'History' },
+        ],
+        []
+    )
+
+    const pane = useMemo(() => {
+        if (!selectedId || !userQuery.data) return null
+
+        switch (selectedTab) {
+            case 'overview':
+                return (
+                    <MemberView
+                        selectedId={selectedId}
+                        user={userQuery.data}
+                        selectedHistory={null}
+                        setFormState={setFormState}
+                        saving={updateMutation.isPending}
+                        isInvalid={
+                            (formState?.form?.address?.zip != null &&
+                                locationQuery.data == null) ||
+                            locationQuery.isPending
+                        }
+                        roles={roles}
+                        roleOptions={roleOptions}
+                        makeFormTitle={() => makeTitle(userQuery.data)}
+                        handleSave={handleSave}
+                    />
+                )
+
+            case 'donorMatching':
+                return (
+                    <DonorView
+                        key={userQuery.data.id}
+                        selectedId={selectedId}
+                        user={userQuery.data}
+                        pickingDonor={pickingDonor}
+                        setPickingDonor={setPickingDonor}
+                        isRefetching={userQuery.isRefetching}
+                        donorSearch={donorSearch}
+                        donorSearchQuery={donorSearchQuery}
+                        onDonorSearch={onDonorSearch}
+                        renderDonorItem={renderDonorItem}
+                        handleDeleteDonorItem={handleDeleteDonorItem}
+                    />
+                )
+
+            case 'history':
+                return (
+                    <HistoryView
+                        selectedId={selectedId}
+                        user={userQuery.data}
+                        selectedHistory={selectedHistory}
+                        onSelectHistory={setSelectedHistory}
+                        selectedDonorHistory={selectedDonorHistory}
+                        onSelectDonorHistory={setSelectedDonorHistory}
+                        isRefetching={userQuery.isRefetching}
+                        roles={roles}
+                        roleOptions={roleOptions}
+                        makeFormTitle={(u) => makeHistoryFormTitle(u)}
+                    />
+                )
+
+            default:
+                return null
+        }
+    }, [
+        selectedId,
+        userQuery.data,
+        userQuery.isRefetching,
+        selectedTab,
+        formState,
+        updateMutation.isPending,
+        locationQuery.data,
+        locationQuery.isPending,
+        roles,
+        roleOptions,
+        pickingDonor,
+        donorSearch,
+        donorSearchQuery,
+        onDonorSearch,
+        renderDonorItem,
+        handleDeleteDonorItem,
+        selectedHistory,
+        selectedDonorHistory,
+        handleSave,
+        makeTitle,
+        makeHistoryFormTitle,
+    ])
 
     return (
         <>
@@ -432,57 +535,52 @@ export default function Page() {
                 )}
 
                 {selectedId && userQuery.data && (
-                    <TabBar>
-                        <Tab key="overview" label="Overview">
-                            <MemberView
-                                selectedId={selectedId}
-                                user={userQuery.data}
-                                selectedHistory={null}
-                                setFormState={setFormState}
-                                saving={updateMutation.isPending}
-                                isInvalid={
-                                    (formState?.form?.address?.zip != null &&
-                                        locationQuery.data == null) ||
-                                    locationQuery.isPending
-                                }
-                                roles={roles}
-                                roleOptions={roleOptions}
-                                makeFormTitle={() => makeTitle(userQuery.data)}
-                                handleSave={handleSave}
-                            />
-                        </Tab>
-
-                        <Tab key="donorMatching" label="Donations">
-                            <DonorView
-                                key={userQuery.data.id}
-                                selectedId={selectedId}
-                                user={userQuery.data}
-                                pickingDonor={pickingDonor}
-                                setPickingDonor={setPickingDonor}
-                                isRefetching={userQuery.isRefetching}
-                                donorSearch={donorSearch}
-                                donorSearchQuery={donorSearchQuery}
-                                onDonorSearch={onDonorSearch}
-                                renderDonorItem={renderDonorItem}
-                                handleDeleteDonorItem={handleDeleteDonorItem}
-                            />
-                        </Tab>
-
-                        <Tab key="history" label="History">
-                            <HistoryView
-                                selectedId={selectedId}
-                                user={userQuery.data}
-                                selectedHistory={selectedHistory}
-                                onSelectHistory={setSelectedHistory}
-                                selectedDonorHistory={selectedDonorHistory}
-                                onSelectDonorHistory={setSelectedDonorHistory}
-                                isRefetching={userQuery.isRefetching}
-                                roles={roles}
-                                roleOptions={roleOptions}
-                                makeFormTitle={(u) => makeHistoryFormTitle(u)}
-                            />
-                        </Tab>
-                    </TabBar>
+                    <>
+                        <div className={styles.detailsHeader}>
+                            <div className={styles.headerTop}>
+                                <div className={styles.cardStyle}>
+                                    <div className={styles.cardAvatar}>
+                                        <DiscordAvatar
+                                            discordUserId={
+                                                userQuery.data.discordUsers?.[0]
+                                                    ?.id
+                                            }
+                                            imageId={
+                                                userQuery.data.discordUsers?.[0]
+                                                    ?.image
+                                            }
+                                            size={50}
+                                        />
+                                    </div>
+                                    <div className={styles.userInfo}>
+                                        <h1 className={styles.headerUserName}>
+                                            {makeTitle(userQuery.data)}
+                                        </h1>
+                                        <h2
+                                            className={
+                                                styles.headerUserUsername
+                                            }
+                                        >
+                                            {userQuery.data.discordUsers?.[0]
+                                                ?.username
+                                                ? `@${userQuery.data.discordUsers[0].username}`
+                                                : 'NOT FOUND'}
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className={styles.headerBottom}>
+                                <TabBar
+                                    tabs={tabs}
+                                    value={selectedTab}
+                                    onChange={(key) =>
+                                        setSelectedTab(key as MemberTabKey)
+                                    }
+                                />
+                            </div>
+                        </div>
+                        {pane}
+                    </>
                 )}
             </div>
         </>
