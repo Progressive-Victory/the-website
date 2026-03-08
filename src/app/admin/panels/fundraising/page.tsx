@@ -1,10 +1,17 @@
 'use client'
 
 import styles from './page.module.css'
+import { Form } from '@/components/common/forms'
 import { ActBlueDonationPacket, zActBlueDonationPacket } from '@/contracts/data'
 import { zActBlueDonor } from '@/contracts/data/ActBlueDonor'
-import { usePaginatedSearch } from '@/util/hooks'
+import {
+    ActBlueFundraisingStatsResponse,
+    zActBlueFundraisingStatsResponse,
+} from '@/contracts/responses/fundraisingStatsResponse'
+import { useFetch, usePaginatedSearch } from '@/util/hooks'
+import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
+import { useEffect, useMemo, useState } from 'react'
 import { FaDonate } from 'react-icons/fa'
 import { FaDollarSign } from 'react-icons/fa6'
 
@@ -59,6 +66,11 @@ interface FundraisingCardProps {
     count?: number
 }
 
+interface DatePickerProps {
+    startDate: Date
+    endDate: Date
+}
+
 function FundraisingCard({
     title,
     description,
@@ -86,59 +98,58 @@ function FundraisingCard({
 }
 
 export default function Page() {
-    const donors = usePaginatedSearch('/actblue/donors', zActBlueDonor, {
-        search: { limit: 0 },
+    const [startDate, setStartDate] = useState<Date | null>(null)
+    const [endDate, setEndDate] = useState<Date | null>(null)
+    const { onGet } = useFetch()
+
+    const statsQueryParams = useMemo(() => {
+        const response = new URLSearchParams()
+        if (startDate) response.append('startDate', startDate.toISOString())
+        if (endDate) response.append('endDate', endDate.toISOString())
+        return response
+    }, [startDate, endDate])
+
+    const statsQuery = useQuery({
+        queryKey: ['/actblue/fundraising/stats'],
+        queryFn: async () =>
+            onGet<ActBlueFundraisingStatsResponse>(
+                '/actblue/fundraising/stats',
+                zActBlueFundraisingStatsResponse,
+                {
+                    query: {
+                        ...(startDate && {
+                            startDate: startDate?.toISOString(),
+                        }),
+                        ...(endDate && { endDate: endDate?.toISOString() }),
+                    },
+                }
+            ),
+        placeholderData: keepPreviousData,
     })
 
-    const contributions = usePaginatedSearch<ActBlueDonationPacket>(
-        '/actblue/contributions',
-        zActBlueDonationPacket,
-        { search: { limit: 0 } }
-    )
+    useEffect(() => {
+        statsQuery.refetch().catch((err) => console.error(err))
+    }, [startDate, endDate, statsQuery])
 
-    const contributionRecords = usePaginatedSearch<ActBlueDonationPacket>(
-        '/actblue/contributions',
-        zActBlueDonationPacket,
-        {
-            search: { limit: 200 },
-            all: true,
-        }
-    )
-
-    const allContributions = contributionRecords.query.data?.data
-
-    const totalRaised = allContributions?.reduce(
-        (sum, contribution) => sum + contribution.amount,
-        0
-    )
-
-    const recurringRaised = allContributions
-        ?.filter((contribution) => contribution.isRecurring)
-        .reduce((sum, contribution) => sum + contribution.amount, 0)
-
-    const oneTimeRaised = allContributions
-        ?.filter((contribution) => !contribution.isRecurring)
-        .reduce((sum, contribution) => sum + contribution.amount, 0)
-
-    const recurringPct =
-        totalRaised && recurringRaised != null
-            ? Math.round((recurringRaised / totalRaised) * 100)
+    const recurringPct = useMemo(() => {
+        return statsQuery.data
+            ? Math.round(
+                  (statsQuery.data.recurringDollarsRaised /
+                      statsQuery.data.totalDollarsRaised) *
+                      100
+              )
             : null
-    const oneTimePct =
-        totalRaised && oneTimeRaised != null
-            ? Math.round((oneTimeRaised / totalRaised) * 100)
-            : null
+    }, [statsQuery.data])
 
-    const latestContributionAt =
-        contributionRecords.query.data?.data.reduce<Date | null>(
-            (latest, contribution) => {
-                if (latest == null || contribution.paidAt > latest) {
-                    return contribution.paidAt
-                }
-                return latest
-            },
-            null
-        )
+    const oneTimePct = useMemo(() => {
+        return statsQuery.data
+            ? Math.round(
+                  (statsQuery.data.oneTimeDollarsRaised /
+                      statsQuery.data.totalDollarsRaised) *
+                      100
+              )
+            : null
+    }, [statsQuery.data])
 
     return (
         <div className={styles.panelContents}>
@@ -162,16 +173,55 @@ export default function Page() {
                         All-Time Performance
                     </div>
 
-                    <div className={styles.dashboardTimestamp}>
-                        Last Updated:{' '}
-                        {/* logic will eventually need to be reworked to show last api fetch and not most recent contribution date */}
-                        {formatDateTime(latestContributionAt ?? undefined) ?? "n/a"}
+                    <div className={styles.dateContainer}>
+                        <div>
+                            <div>
+                                <label>Start Date</label>
+                                <input
+                                    type="date"
+                                    name="startDate"
+                                    onChange={(ev) =>
+                                        setStartDate(ev.target.valueAsDate)
+                                    }
+                                    value={
+                                        startDate
+                                            ?.toISOString()
+                                            .split('T')[0] ?? ''
+                                    }
+                                />
+                                <button onClick={() => setStartDate(null)}>
+                                    Clear
+                                </button>
+                            </div>
+                            <div>
+                                <label>End Date</label>
+                                <input
+                                    type="date"
+                                    name="endDate"
+                                    onChange={(ev) =>
+                                        setEndDate(ev.target.valueAsDate)
+                                    }
+                                    value={
+                                        endDate?.toISOString().split('T')[0] ??
+                                        ''
+                                    }
+                                />
+                                <button onClick={() => setEndDate(null)}>
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                        <div className={styles.dashboardTimestamp}>
+                            Last Updated:{' '}
+                            {/* logic will eventually need to be reworked to show last api fetch and not most recent contribution date */}
+                            {formatDateTime(undefined) ?? 'n/a'}
+                        </div>
                     </div>
                 </div>
 
                 <div className={styles.dashboardHeroRow}>
                     <div className={styles.heroValue}>
-                        {formatCurrency(totalRaised)}
+                        {formatCurrency(statsQuery.data?.totalDollarsRaised)}
                     </div>
                 </div>
 
@@ -179,7 +229,9 @@ export default function Page() {
                     <article className={styles.metricCard}>
                         <div className={styles.metricLabel}>Recurring</div>
                         <div className={styles.metricValue}>
-                            {formatCurrency(recurringRaised)}
+                            {formatCurrency(
+                                statsQuery.data?.recurringDollarsRaised
+                            )}
                         </div>
                         <div className={styles.metricMeta}>
                             {recurringPct != null
@@ -191,7 +243,9 @@ export default function Page() {
                     <article className={styles.metricCard}>
                         <div className={styles.metricLabel}>One-Time</div>
                         <div className={styles.metricValue}>
-                            {formatCurrency(oneTimeRaised)}
+                            {formatCurrency(
+                                statsQuery.data?.oneTimeDollarsRaised
+                            )}
                         </div>
                         <div className={styles.metricMeta}>
                             {oneTimePct != null
@@ -203,7 +257,7 @@ export default function Page() {
                     <article className={styles.metricCard}>
                         <div className={styles.metricLabel}>Donors</div>
                         <div className={styles.metricValue}>
-                            {formatCount(donors.query.data?.count)}
+                            {formatCount(statsQuery.data?.totalDonorCount)}
                         </div>
                         <div className={styles.metricMeta}>
                             Total contributors
@@ -213,7 +267,9 @@ export default function Page() {
                     <article className={styles.metricCard}>
                         <div className={styles.metricLabel}>Contributions</div>
                         <div className={styles.metricValue}>
-                            {formatCount(contributions.query.data?.count)}
+                            {formatCount(
+                                statsQuery.data?.totalContributionCount
+                            )}
                         </div>
                         <div className={styles.metricMeta}>
                             All captured events
@@ -259,7 +315,7 @@ export default function Page() {
                     description="ActBlue donors, totals, and donor records."
                     href="/admin/panels/donors"
                     icon={FaDonate}
-                    count={donors.query.data?.count}
+                    count={statsQuery.data?.totalDonorCount}
                 />
 
                 <FundraisingCard
@@ -267,7 +323,7 @@ export default function Page() {
                     description="Contribution lineitems, payment info, and details."
                     href="/admin/panels/contributions"
                     icon={FaDollarSign}
-                    count={contributions.query.data?.count}
+                    count={statsQuery.data?.totalContributionCount}
                 />
             </div>
         </div>

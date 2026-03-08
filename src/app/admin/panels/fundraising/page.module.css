@@ -5,6 +5,10 @@
     padding: 0;
 }
 
+.dateContainer {
+    
+}
+
 .panelHeader {
     display: flex;
     align-items: center;
