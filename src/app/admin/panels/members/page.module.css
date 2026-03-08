@@ -1,3 +1,43 @@
+.detailsHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem;
+    /* position: sticky;
+    top: 0;
+    z-index: 10; */
+
+    border-radius: 1rem;
+}
+
+.headerTop {
+    border-radius: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 0.75rem;
+    padding-inline: 1rem;
+
+    border: 1px solid rgba(15, 23, 42, 0.12);
+
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) inset;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.cardStyle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.userInfo {
+    display: flex;
+    flex-direction: column;
+}
+
 .detailsPane {
     flex: 1;
     overflow-y: auto;
@@ -6,6 +46,25 @@
 .userMeta {
     display: flex;
     flex-direction: column;
+}
+
+.headerUserName {
+    margin: 0;
+    font-weight: 500;
+    color: #000;
+}
+
+.headerUserUsername {
+    margin: 0;
+    padding: 0;
+    color: #6b7280;
+}
+
+.userMemberSince {
+    padding-top: 0.25rem;
+    color: #6b7280;
+    font-size: small;
+    font-weight: 500;
 }
 
 .userName {
