@@ -1,32 +1,36 @@
 'use client'
 
 import styles from './page.module.css'
-import { Form } from '@/components/common/forms'
-import { ActBlueDonationPacket, zActBlueDonationPacket } from '@/contracts/data'
-import { zActBlueDonor } from '@/contracts/data/ActBlueDonor'
 import {
     ActBlueFundraisingStatsResponse,
     zActBlueFundraisingStatsResponse,
 } from '@/contracts/responses/fundraisingStatsResponse'
-import { useFetch, usePaginatedSearch } from '@/util/hooks'
-import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
+import { useFetch } from '@/util/hooks'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FaDonate } from 'react-icons/fa'
 import { FaDollarSign } from 'react-icons/fa6'
+import { FiChevronDown } from 'react-icons/fi'
 
 function formatCount(value?: number) {
-    if (value == null) return '—'
+    if (value == null || !Number.isFinite(value)) return '—'
     return value.toLocaleString()
 }
 
 function formatCurrency(value?: number) {
-    if (value == null) return '—'
+    if (value == null || !Number.isFinite(value)) return '—'
     return value.toLocaleString(undefined, {
         style: 'currency',
         currency: 'USD',
-        maximumFractionDigits: 0,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
     })
+}
+
+function formatDonationCountLabel(value?: number) {
+    if (value == null || !Number.isFinite(value)) return '— donations'
+    return `${formatCount(value)} ${value === 1 ? 'donation' : 'donations'}`
 }
 
 function formatDateTime(value?: Date) {
@@ -58,6 +62,14 @@ function formatDateTime(value?: Date) {
     }).format(value)
 }
 
+function formatDateLabel(value: Date) {
+    return Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    }).format(value)
+}
+
 interface FundraisingCardProps {
     title: string
     description: string
@@ -66,9 +78,71 @@ interface FundraisingCardProps {
     count?: number
 }
 
-interface DatePickerProps {
-    startDate: Date
-    endDate: Date
+type DateRangePreset =
+    | 'all-time'
+    | 'month-to-date'
+    | 'last-month'
+    | 'today'
+    | 'custom'
+
+function toInputDateValue(value: Date | null) {
+    if (!value) return ''
+
+    const year = value.getFullYear()
+    const month = String(value.getMonth() + 1).padStart(2, '0')
+    const day = String(value.getDate()).padStart(2, '0')
+
+    return `${year}-${month}-${day}`
+}
+
+function fromInputDateValue(value: string) {
+    if (!value) return null
+
+    const [year, month, day] = value.split('-').map(Number)
+    if (!year || !month || !day) return null
+
+    return new Date(year, month - 1, day)
+}
+
+function isAfterDate(left: Date, right: Date) {
+    const leftDate = startOfDay(left)
+    const rightDate = startOfDay(right)
+    return leftDate.getTime() > rightDate.getTime()
+}
+
+function startOfDay(value: Date) {
+    const output = new Date(value)
+    output.setHours(0, 0, 0, 0)
+    return output
+}
+
+function endOfDay(value: Date) {
+    const output = new Date(value)
+    output.setHours(23, 59, 59, 999)
+    return output
+}
+
+function getDatesForPreset(preset: DateRangePreset) {
+    const now = new Date()
+
+    switch (preset) {
+        case 'month-to-date': {
+            const start = new Date(now.getFullYear(), now.getMonth(), 1)
+            return { startDate: startOfDay(start), endDate: now }
+        }
+        case 'last-month': {
+            const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+            const end = new Date(now.getFullYear(), now.getMonth(), 0)
+            return { startDate: startOfDay(start), endDate: endOfDay(end) }
+        }
+        case 'today': {
+            return { startDate: startOfDay(now), endDate: endOfDay(now) }
+        }
+        case 'all-time':
+        case 'custom':
+        default:
+            return { startDate: null, endDate: null }
+    }
 }
 
 function FundraisingCard({
@@ -98,16 +172,31 @@ function FundraisingCard({
 }
 
 export default function Page() {
+    const [dateRangePreset, setDateRangePreset] =
+        useState<DateRangePreset>('all-time')
+    const [isDateRangeOverlayOpen, setIsDateRangeOverlayOpen] = useState(false)
     const [startDate, setStartDate] = useState<Date | null>(null)
     const [endDate, setEndDate] = useState<Date | null>(null)
+    const [draftStartDate, setDraftStartDate] = useState<Date | null>(null)
+    const [draftEndDate, setDraftEndDate] = useState<Date | null>(null)
+    const dateRangeControlRef = useRef<HTMLDivElement | null>(null)
     const { onGet } = useFetch()
 
-    const statsQueryParams = useMemo(() => {
-        const response = new URLSearchParams()
-        if (startDate) response.append('startDate', startDate.toISOString())
-        if (endDate) response.append('endDate', endDate.toISOString())
-        return response
-    }, [startDate, endDate])
+    const handlePresetChange = (preset: DateRangePreset) => {
+        setDateRangePreset(preset)
+
+        if (preset === 'custom') {
+            setDraftStartDate(startDate)
+            setDraftEndDate(endDate)
+            setIsDateRangeOverlayOpen(true)
+            return
+        }
+
+        setIsDateRangeOverlayOpen(false)
+        const nextRange = getDatesForPreset(preset)
+        setStartDate(nextRange.startDate)
+        setEndDate(nextRange.endDate)
+    }
 
     const statsQuery = useQuery({
         queryKey: ['/actblue/fundraising/stats'],
@@ -131,25 +220,105 @@ export default function Page() {
         statsQuery.refetch().catch((err) => console.error(err))
     }, [startDate, endDate, statsQuery])
 
+    useEffect(() => {
+        const onDocumentMouseDown = (event: MouseEvent) => {
+            if (!isDateRangeOverlayOpen) return
+
+            const control = dateRangeControlRef.current
+            if (!control) return
+
+            if (!control.contains(event.target as Node)) {
+                setIsDateRangeOverlayOpen(false)
+                setDraftStartDate(startDate)
+                setDraftEndDate(endDate)
+            }
+        }
+
+        document.addEventListener('mousedown', onDocumentMouseDown)
+        return () => {
+            document.removeEventListener('mousedown', onDocumentMouseDown)
+        }
+    }, [isDateRangeOverlayOpen, startDate, endDate])
+
     const recurringPct = useMemo(() => {
-        return statsQuery.data
-            ? Math.round(
-                  (statsQuery.data.recurringDollarsRaised /
-                      statsQuery.data.totalDollarsRaised) *
-                      100
-              )
-            : null
+        if (!statsQuery.data) return null
+
+        const total = statsQuery.data.totalDollarsRaised
+        if (!Number.isFinite(total) || total <= 0) return null
+
+        const pct = Math.round(
+            (statsQuery.data.recurringDollarsRaised / total) * 100
+        )
+
+        return Number.isFinite(pct) ? pct : null
     }, [statsQuery.data])
 
     const oneTimePct = useMemo(() => {
-        return statsQuery.data
-            ? Math.round(
-                  (statsQuery.data.oneTimeDollarsRaised /
-                      statsQuery.data.totalDollarsRaised) *
-                      100
-              )
-            : null
+        if (!statsQuery.data) return null
+
+        const total = statsQuery.data.totalDollarsRaised
+        if (!Number.isFinite(total) || total <= 0) return null
+
+        const pct = Math.round(
+            (statsQuery.data.oneTimeDollarsRaised / total) * 100
+        )
+
+        return Number.isFinite(pct) ? pct : null
     }, [statsQuery.data])
+
+    const selectedRangeLabel = useMemo(() => {
+        if (dateRangePreset === 'all-time') return 'All Time'
+        if (dateRangePreset === 'month-to-date') return 'Month to Date'
+        if (dateRangePreset === 'last-month') return 'Last Month'
+        if (dateRangePreset === 'today') return 'Today'
+
+        if (startDate && endDate) {
+            return `${formatDateLabel(startDate)} - ${formatDateLabel(endDate)}`
+        }
+
+        if (startDate) {
+            return `From ${formatDateLabel(startDate)}`
+        }
+
+        if (endDate) {
+            return `Until ${formatDateLabel(endDate)}`
+        }
+
+        return 'Custom Range'
+    }, [dateRangePreset, endDate, startDate])
+
+    const todayInputValue = useMemo(() => toInputDateValue(new Date()), [])
+    const draftStartInputValue = useMemo(
+        () => toInputDateValue(draftStartDate),
+        [draftStartDate]
+    )
+    const draftEndInputValue = useMemo(
+        () => toInputDateValue(draftEndDate),
+        [draftEndDate]
+    )
+    const canApplyCustomRange = Boolean(draftStartDate && draftEndDate)
+
+    const raisedKickerLabel = useMemo(() => {
+        if (dateRangePreset === 'all-time') return 'Total Raised All Time'
+        if (dateRangePreset === 'month-to-date')
+            return 'Total Raised This Month'
+        if (dateRangePreset === 'last-month') return 'Total Raised Last Month'
+        if (dateRangePreset === 'today') return 'Total Raised Today'
+
+        if (startDate && endDate) {
+            return `Total Raised ${formatDateLabel(startDate)} - ${formatDateLabel(endDate)}`
+        }
+
+        if (startDate) {
+            return `Total Raised From ${formatDateLabel(startDate)}`
+        }
+
+        if (endDate) {
+            return `Total Raised Until ${formatDateLabel(endDate)}`
+        }
+
+        return 'Total Raised Custom Range'
+    }, [dateRangePreset, endDate, startDate])
 
     return (
         <div className={styles.panelContents}>
@@ -158,6 +327,12 @@ export default function Page() {
                     <span className={styles.prominentBreadcrumb}>Admin</span>
                     <span className={styles.breadcrumbSeperator}>/</span>
                     <span className={styles.panelBreadcrumb}>Fundraising</span>
+                </div>
+
+                <div className={styles.panelTimestamp}>
+                    Last Updated:{' '}
+                    {/* logic will eventually need to be reworked to show last api fetch and not most recent contribution date */}
+                    {formatDateTime(undefined) ?? 'n/a'}
                 </div>
             </div>
 
@@ -169,59 +344,283 @@ export default function Page() {
             </div>
             <div className={styles.dashboard}>
                 <div className={styles.dashboardTopRow}>
-                    <div className={styles.dashboardKicker}>
-                        All-Time Performance
-                    </div>
-
-                    <div className={styles.dateContainer}>
-                        <div>
-                            <div>
-                                <label>Start Date</label>
-                                <input
-                                    type="date"
-                                    name="startDate"
-                                    onChange={(ev) =>
-                                        setStartDate(ev.target.valueAsDate)
-                                    }
-                                    value={
-                                        startDate
-                                            ?.toISOString()
-                                            .split('T')[0] ?? ''
-                                    }
-                                />
-                                <button onClick={() => setStartDate(null)}>
-                                    Clear
-                                </button>
-                            </div>
-                            <div>
-                                <label>End Date</label>
-                                <input
-                                    type="date"
-                                    name="endDate"
-                                    onChange={(ev) =>
-                                        setEndDate(ev.target.valueAsDate)
-                                    }
-                                    value={
-                                        endDate?.toISOString().split('T')[0] ??
-                                        ''
-                                    }
-                                />
-                                <button onClick={() => setEndDate(null)}>
-                                    Clear
-                                </button>
-                            </div>
+                    <div className={styles.dashboardSummaryGroup}>
+                        <div className={styles.dashboardKicker}>
+                            {raisedKickerLabel}
                         </div>
-                        <div className={styles.dashboardTimestamp}>
-                            Last Updated:{' '}
-                            {/* logic will eventually need to be reworked to show last api fetch and not most recent contribution date */}
-                            {formatDateTime(undefined) ?? 'n/a'}
+
+                        <div className={styles.heroValue}>
+                            {formatCurrency(
+                                statsQuery.data?.totalDollarsRaised
+                            )}
                         </div>
                     </div>
-                </div>
 
-                <div className={styles.dashboardHeroRow}>
-                    <div className={styles.heroValue}>
-                        {formatCurrency(statsQuery.data?.totalDollarsRaised)}
+                    <div className={styles.dashboardDateGroup}>
+                        <div className={styles.dateContainer}>
+                            <div
+                                ref={dateRangeControlRef}
+                                className={styles.dateFilterControls}
+                            >
+                                <label
+                                    htmlFor="fundraising-date-range-trigger"
+                                    className={styles.dateFilterLabel}
+                                >
+                                    Date Range
+                                </label>
+
+                                <button
+                                    id="fundraising-date-range-trigger"
+                                    type="button"
+                                    className={styles.dateRangeTriggerButton}
+                                    onClick={() => {
+                                        if (!isDateRangeOverlayOpen) {
+                                            setDraftStartDate(startDate)
+                                            setDraftEndDate(endDate)
+                                        }
+
+                                        setIsDateRangeOverlayOpen(
+                                            (current) => !current
+                                        )
+                                    }}
+                                    aria-haspopup="dialog"
+                                    aria-expanded={isDateRangeOverlayOpen}
+                                >
+                                    <span>{selectedRangeLabel}</span>
+                                    <FiChevronDown
+                                        className={styles.dateRangeTriggerChevron}
+                                        aria-hidden="true"
+                                        size={14}
+                                    />
+                                </button>
+
+                                {isDateRangeOverlayOpen && (
+                                    <div className={styles.customDateRangeBox}>
+                                        <div
+                                            className={styles.customRangeLabel}
+                                        >
+                                            Select Range
+                                        </div>
+                                        <div
+                                            className={
+                                                styles.dateRangeOptionList
+                                            }
+                                        >
+                                            <button
+                                                type="button"
+                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'all-time' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                onClick={() =>
+                                                    handlePresetChange(
+                                                        'all-time'
+                                                    )
+                                                }
+                                            >
+                                                All Time
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'month-to-date' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                onClick={() =>
+                                                    handlePresetChange(
+                                                        'month-to-date'
+                                                    )
+                                                }
+                                            >
+                                                Month to Date
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'last-month' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                onClick={() =>
+                                                    handlePresetChange(
+                                                        'last-month'
+                                                    )
+                                                }
+                                            >
+                                                Last Month
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'today' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                onClick={() =>
+                                                    handlePresetChange('today')
+                                                }
+                                            >
+                                                Today
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'custom' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                onClick={() =>
+                                                    handlePresetChange('custom')
+                                                }
+                                            >
+                                                Custom Range
+                                            </button>
+                                        </div>
+
+                                        {dateRangePreset === 'custom' && (
+                                            <>
+                                                <div
+                                                    className={
+                                                        styles.customDateField
+                                                    }
+                                                >
+                                                    <label htmlFor="custom-start-date">
+                                                        Start Date
+                                                    </label>
+                                                    <input
+                                                        id="custom-start-date"
+                                                        type="date"
+                                                        name="startDate"
+                                                        max={
+                                                            draftEndInputValue
+                                                                ? draftEndInputValue <
+                                                                  todayInputValue
+                                                                    ? draftEndInputValue
+                                                                    : todayInputValue
+                                                                : todayInputValue
+                                                        }
+                                                        onChange={(ev) => {
+                                                            const value =
+                                                                fromInputDateValue(
+                                                                    ev.target
+                                                                        .value
+                                                                )
+
+                                                            if (
+                                                                value &&
+                                                                draftEndDate &&
+                                                                isAfterDate(
+                                                                    value,
+                                                                    draftEndDate
+                                                                )
+                                                            ) {
+                                                                return
+                                                            }
+
+                                                            setDraftStartDate(
+                                                                value
+                                                                    ? startOfDay(
+                                                                          value
+                                                                      )
+                                                                    : null
+                                                            )
+                                                        }}
+                                                        value={toInputDateValue(
+                                                            draftStartDate
+                                                        )}
+                                                    />
+                                                </div>
+
+                                                <div
+                                                    className={
+                                                        styles.customDateField
+                                                    }
+                                                >
+                                                    <label htmlFor="custom-end-date">
+                                                        End Date
+                                                    </label>
+                                                    <input
+                                                        id="custom-end-date"
+                                                        type="date"
+                                                        name="endDate"
+                                                        min={
+                                                            draftStartInputValue ||
+                                                            undefined
+                                                        }
+                                                        max={todayInputValue}
+                                                        onChange={(ev) => {
+                                                            const value =
+                                                                fromInputDateValue(
+                                                                    ev.target
+                                                                        .value
+                                                                )
+
+                                                            if (
+                                                                value &&
+                                                                draftStartDate &&
+                                                                isAfterDate(
+                                                                    draftStartDate,
+                                                                    value
+                                                                )
+                                                            ) {
+                                                                return
+                                                            }
+
+                                                            setDraftEndDate(
+                                                                value
+                                                                    ? endOfDay(
+                                                                          value
+                                                                      )
+                                                                    : null
+                                                            )
+                                                        }}
+                                                        value={toInputDateValue(
+                                                            draftEndDate
+                                                        )}
+                                                    />
+                                                </div>
+
+                                                <div
+                                                    className={
+                                                        styles.customDateActions
+                                                    }
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        className={
+                                                            styles.cancelRangeButton
+                                                        }
+                                                        onClick={() => {
+                                                            setDraftStartDate(
+                                                                startDate
+                                                            )
+                                                            setDraftEndDate(
+                                                                endDate
+                                                            )
+                                                            setIsDateRangeOverlayOpen(
+                                                                false
+                                                            )
+                                                        }}
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className={
+                                                            styles.setRangeButton
+                                                        }
+                                                        disabled={
+                                                            !canApplyCustomRange
+                                                        }
+                                                        onClick={() => {
+                                                            if (
+                                                                !canApplyCustomRange
+                                                            ) {
+                                                                return
+                                                            }
+
+                                                            setStartDate(
+                                                                draftStartDate
+                                                            )
+                                                            setEndDate(
+                                                                draftEndDate
+                                                            )
+                                                            setIsDateRangeOverlayOpen(
+                                                                false
+                                                            )
+                                                        }}
+                                                    >
+                                                        Set Range
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -234,8 +633,9 @@ export default function Page() {
                             )}
                         </div>
                         <div className={styles.metricMeta}>
-                            {recurringPct != null
-                                ? `${recurringPct}% of total`
+                            {recurringPct != null &&
+                            statsQuery.data?.recurringContributionCount != null
+                                ? `${recurringPct}% of total · ${formatDonationCountLabel(statsQuery.data.recurringContributionCount)}`
                                 : '—'}
                         </div>
                     </article>
@@ -248,8 +648,9 @@ export default function Page() {
                             )}
                         </div>
                         <div className={styles.metricMeta}>
-                            {oneTimePct != null
-                                ? `${oneTimePct}% of total`
+                            {oneTimePct != null &&
+                            statsQuery.data?.oneTimeContributionCount != null
+                                ? `${oneTimePct}% of total · ${formatDonationCountLabel(statsQuery.data.oneTimeContributionCount)}`
                                 : '—'}
                         </div>
                     </article>
@@ -260,7 +661,7 @@ export default function Page() {
                             {formatCount(statsQuery.data?.totalDonorCount)}
                         </div>
                         <div className={styles.metricMeta}>
-                            Total contributors
+                            {`${formatCount(statsQuery.data?.recurringDonorCount)} Recurring · ${formatCount(statsQuery.data?.oneTimeDonorCount)} One-Time`}
                         </div>
                     </article>
 
@@ -272,7 +673,7 @@ export default function Page() {
                             )}
                         </div>
                         <div className={styles.metricMeta}>
-                            All captured events
+                            {`${formatCount(statsQuery.data?.recurringContributionCount)} Recurring · ${formatCount(statsQuery.data?.oneTimeContributionCount)} One-Time`}
                         </div>
                     </article>
                 </div>
