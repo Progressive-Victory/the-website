@@ -20,7 +20,7 @@ function formatCount(value?: number) {
 
 function formatCurrency(value?: number) {
     if (value == null || !Number.isFinite(value)) return '—'
-    return value.toLocaleString(undefined, {
+    return value.toLocaleString('en-US', {
         style: 'currency',
         currency: 'USD',
         minimumFractionDigits: 2,
@@ -29,7 +29,6 @@ function formatCurrency(value?: number) {
 }
 
 function formatDonationCountLabel(value?: number) {
-    if (value == null || !Number.isFinite(value)) return '— donations'
     return `${formatCount(value)} ${value === 1 ? 'donation' : 'donations'}`
 }
 
@@ -95,7 +94,7 @@ function toInputDateValue(value: Date | null) {
     return `${year}-${month}-${day}`
 }
 
-function fromInputDateValue(value: string) {
+function fromInputGetDateValue(value: string) {
     if (!value) return null
 
     const [year, month, day] = value.split('-').map(Number)
@@ -388,7 +387,9 @@ export default function Page() {
                                 >
                                     <span>{selectedRangeLabel}</span>
                                     <FiChevronDown
-                                        className={styles.dateRangeTriggerChevron}
+                                        className={
+                                            styles.dateRangeTriggerChevron
+                                        }
                                         aria-hidden="true"
                                         size={14}
                                     />
@@ -483,7 +484,7 @@ export default function Page() {
                                                         }
                                                         onChange={(ev) => {
                                                             const value =
-                                                                fromInputDateValue(
+                                                                fromInputGetDateValue(
                                                                     ev.target
                                                                         .value
                                                                 )
@@ -532,7 +533,7 @@ export default function Page() {
                                                         max={todayInputValue}
                                                         onChange={(ev) => {
                                                             const value =
-                                                                fromInputDateValue(
+                                                                fromInputGetDateValue(
                                                                     ev.target
                                                                         .value
                                                                 )
