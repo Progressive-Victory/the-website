@@ -620,4 +620,17 @@ export const CANDIDATES: CandidateConfig[] = [
         showPvPledge: true,
         showPvMember: false,
     },
+    {
+        id: '48',
+        name: 'Hartzell Gray',
+        electionDate: new Date('08/04/26'),
+        handle: 'hartzellforkc',
+        handleHref: 'https://x.com/hartzellforkc',
+        bodyText: ' is a bold progressive proving that even in the deepest depths of Republican controlled Missouri, a platform of economic and social justice can make its mark.',
+        image: '/images/endorsement_images/2026/HARTZELL GRAY.png',
+        learnMoreHref: '',
+        initiativeType: '',
+        showPvPledge: true,
+        showPvMember: false,
+    },
 ]
