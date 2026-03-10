@@ -178,7 +178,13 @@ export default function Page() {
     const [endDate, setEndDate] = useState<Date | null>(null)
     const [draftStartDate, setDraftStartDate] = useState<Date | null>(null)
     const [draftEndDate, setDraftEndDate] = useState<Date | null>(null)
+    const [dateRangeOverlayMaxHeight, setDateRangeOverlayMaxHeight] =
+        useState<number>()
+    const [dateRangeOverlayOffset, setDateRangeOverlayOffset] = useState(0)
+    const dashboardRef = useRef<HTMLDivElement | null>(null)
     const dateRangeControlRef = useRef<HTMLDivElement | null>(null)
+    const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
+    const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
     const { onGet } = useFetch()
 
     const handlePresetChange = (preset: DateRangePreset) => {
@@ -238,6 +244,74 @@ export default function Page() {
             document.removeEventListener('mousedown', onDocumentMouseDown)
         }
     }, [isDateRangeOverlayOpen, startDate, endDate])
+
+    useEffect(() => {
+        if (!isDateRangeOverlayOpen) {
+            setDateRangeOverlayMaxHeight(undefined)
+            setDateRangeOverlayOffset(0)
+            return
+        }
+
+        const viewportPadding = 12
+        const panelTopPadding = 12
+        const constrainedBottomMargin = 16
+        const triggerGap = 6
+
+        const updateDateRangeOverlayPosition = () => {
+            const trigger = dateRangeTriggerRef.current
+            const overlay = dateRangeOverlayRef.current
+            if (!trigger || !overlay) return
+
+            const triggerRect = trigger.getBoundingClientRect()
+            const panelRect = dashboardRef.current?.getBoundingClientRect()
+            const viewportHeight = window.innerHeight
+            const naturalOverlayHeight = overlay.scrollHeight
+            const naturalTop = triggerRect.bottom + triggerGap
+            const naturalViewportBottom = viewportHeight - viewportPadding
+            const overlayTopBoundary = panelRect
+                ? panelRect.top + panelTopPadding
+                : viewportPadding
+
+            const naturalBottom = naturalTop + naturalOverlayHeight
+            const shouldUseConstrainedBottomMargin =
+                naturalBottom > naturalViewportBottom
+            const viewportBottom =
+                viewportHeight -
+                viewportPadding -
+                (shouldUseConstrainedBottomMargin
+                    ? constrainedBottomMargin
+                    : 0)
+
+            const overflowBelow = Math.max(0, naturalBottom - viewportBottom)
+            const maxUpwardShift = Math.max(0, naturalTop - overlayTopBoundary)
+            const upwardShift = Math.min(overflowBelow, maxUpwardShift)
+
+            const shiftedTop = naturalTop - upwardShift
+            const availableHeight = viewportBottom - shiftedTop
+
+            setDateRangeOverlayOffset(Math.floor(upwardShift))
+
+            if (availableHeight >= naturalOverlayHeight) {
+                setDateRangeOverlayMaxHeight(undefined)
+                return
+            }
+
+            setDateRangeOverlayMaxHeight(Math.max(0, Math.floor(availableHeight)))
+        }
+
+        updateDateRangeOverlayPosition()
+        window.addEventListener('resize', updateDateRangeOverlayPosition)
+        window.addEventListener('scroll', updateDateRangeOverlayPosition, true)
+
+        return () => {
+            window.removeEventListener('resize', updateDateRangeOverlayPosition)
+            window.removeEventListener(
+                'scroll',
+                updateDateRangeOverlayPosition,
+                true
+            )
+        }
+    }, [isDateRangeOverlayOpen, dateRangePreset])
 
     const recurringPct = useMemo(() => {
         if (!statsQuery.data) return null
@@ -341,7 +415,7 @@ export default function Page() {
                     Manage ActBlue donors and contribution records.
                 </p>
             </div>
-            <div className={styles.dashboard}>
+            <div ref={dashboardRef} className={styles.dashboard}>
                 <div className={styles.dashboardTopRow}>
                     <div className={styles.dashboardSummaryGroup}>
                         <div className={styles.dashboardKicker}>
@@ -371,6 +445,7 @@ export default function Page() {
                                 <button
                                     id="fundraising-date-range-trigger"
                                     type="button"
+                                    ref={dateRangeTriggerRef}
                                     className={styles.dateRangeTriggerButton}
                                     onClick={() => {
                                         if (!isDateRangeOverlayOpen) {
@@ -396,7 +471,18 @@ export default function Page() {
                                 </button>
 
                                 {isDateRangeOverlayOpen && (
-                                    <div className={styles.customDateRangeBox}>
+                                    <div
+                                        ref={dateRangeOverlayRef}
+                                        className={styles.customDateRangeBox}
+                                        style={{
+                                            maxHeight:
+                                                dateRangeOverlayMaxHeight !=
+                                                null
+                                                    ? `${dateRangeOverlayMaxHeight}px`
+                                                    : undefined,
+                                            transform: `translateY(-${dateRangeOverlayOffset}px)`,
+                                        }}
+                                    >
                                         <div
                                             className={styles.customRangeLabel}
                                         >

@@ -117,6 +117,7 @@
     right: 0;
     z-index: 120;
     box-shadow: 0 12px 34px rgba(15, 23, 42, 0.16);
+    overflow-y: auto;
 }
 
 .customDateField {
