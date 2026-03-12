@@ -24,6 +24,7 @@ import {
 } from '@/contracts/data'
 import {
     ActBlueDonorLinkRequest,
+    SortDirection,
     UpdateUserRequest,
 } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
@@ -63,7 +64,7 @@ export default function Page() {
     } = usePaginatedSearch<UserProfile>('/users', zUserProfile)
 
     const { query: rolesQuery } = usePaginatedSearch<Role>('/roles', zRole, {
-        search: { limit: 50 },
+        search: { limit: 50, sort: SortDirection.DESC },
         all: true,
     })
 
@@ -368,7 +369,7 @@ export default function Page() {
                 count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}
                 error={searchQuery.error}
-                fields={[
+                searchFields={[
                     { value: 'email', label: 'Email' },
                     { value: 'phone', label: 'Phone Number' },
                     { value: 'zip', label: 'Zip Code' },
@@ -392,6 +393,11 @@ export default function Page() {
                     },
                     { value: 'aliases', label: 'Aliases' },
                     { value: 'discord_usernames', label: 'Discord Usernames' },
+                ]}
+                sortFields={[
+                    { value: 'email', label: 'Email' },
+                    { value: 'first_name', label: 'First Name' },
+                    { value: 'last_name', label: 'Last Name' },
                 ]}
                 filters={[
                     {

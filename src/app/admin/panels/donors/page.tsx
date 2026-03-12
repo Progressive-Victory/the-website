@@ -20,7 +20,7 @@ import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 
 interface contributionData {
     total: number
@@ -44,6 +44,10 @@ export default function Page() {
         search,
         onSearch,
     } = usePaginatedSearch<ActBlueDonor>('/actblue/donors', zActBlueDonor)
+
+    useEffect(() => {
+        if (searchQuery.data) console.log(searchQuery.data)
+    }, [searchQuery.data])
 
     const donorQuery = useQuery({
         queryKey: [`/actblue/donors/${selectedEmail}`],
@@ -152,7 +156,12 @@ export default function Page() {
                 count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}
                 error={searchQuery.error}
-                fields={[{ value: 'email', label: 'Email' }]}
+                searchFields={[
+                    { value: '`d`.`email`', label: 'Email' },
+                    { value: '`d`.`first_name`', label: 'First Name' },
+                    { value: '`d`.`last_name`', label: 'Last Name' },
+                    { value: '`d`.`state`', label: 'State' },
+                ]}
                 onSearch={onSearch}
             >
                 {searchQuery.data?.data?.map((item) => renderItem(item))}
