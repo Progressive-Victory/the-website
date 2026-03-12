@@ -260,22 +260,22 @@ export default function Page() {
     })
 
     const handleSave = (user: User) => {
-        const orNull = (value: string | null | undefined) =>
-            value?.length ? value : null
-
-        console.log(user.address, locationQuery.data)
+        const orNullOrNonEmptyString = (str: string | null) => {
+            return str?.trim().length !== 0 ? str?.trim() : null
+        }
 
         const address = {
-            addressLine1: orNull(user.address.addressLine1?.trim()),
-            addressLine2: orNull(user.address.addressLine2?.trim()),
-            city: orNull(user.address.city?.trim()) ?? locationQuery.data?.city,
+            addressLine1: orNullOrNonEmptyString(user.address.addressLine1),
+            addressLine2: orNullOrNonEmptyString(user.address.addressLine2),
+            city: orNullOrNonEmptyString(user.address.city),
             county:
-                orNull(user.address.county?.trim()) ??
+                orNullOrNonEmptyString(user.address.county) ??
                 locationQuery.data?.county,
             state:
-                orNull(user.address.state?.trim()) ?? locationQuery.data?.state,
+                orNullOrNonEmptyString(user.address.state) ??
+                locationQuery.data?.state,
             zip:
-                orNull(user.address.zip?.trim()) ??
+                orNullOrNonEmptyString(user.address.zip) ??
                 locationQuery.data?.zip?.toString().padStart(5, '0'),
         }
 
