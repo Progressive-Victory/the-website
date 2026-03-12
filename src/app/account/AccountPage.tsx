@@ -6,6 +6,7 @@ import { User } from '@/contracts/data'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
 import { BaseButton } from '@/components/common/buttons/Button'
+import { DiscordAvatar } from '@/components/common'
 import { useMemo } from 'react'
 
 export function AccountPage() {
@@ -34,7 +35,14 @@ export function AccountPage() {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 birthdate: user.birthdate,
-                zipCode: user.location?.zip ?? null,
+                address: {
+                    addressLine1: user.address.addressLine1,
+                    addressLine2: user.address.addressLine2,
+                    city: user.address.city,
+                    county: user.address.county,
+                    state: user.address.state,
+                    zip: user.address.zip,
+                },
             },
         })
     }
@@ -79,7 +87,19 @@ export function AccountPage() {
 
                     <div className={styles.contentPanel}>
                         {loggedInUser.data && (
-                            <AccountInfoForm user={loggedInUser.data} onSave={onSave} />
+                            <AccountInfoForm
+                                user={loggedInUser.data}
+                                onSave={onSave}
+                                subtitle={loggedInUser.data.discordUsers?.[0]?.username ? `@${loggedInUser.data.discordUsers[0].username}` : undefined}
+                                avatar={
+                                    <DiscordAvatar
+                                        discordUserId={loggedInUser.data.discordUsers?.[0]?.id}
+                                        imageId={loggedInUser.data.discordUsers?.[0]?.image}
+                                        size={48}
+                                    />
+                                }
+                                title={`${loggedInUser.data.firstName ?? ''} ${loggedInUser.data.lastName ?? ''}`.trim() || 'Account'}
+                            />
                         )}
                     </div>
                 </section>
