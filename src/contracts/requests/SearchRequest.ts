@@ -1,3 +1,4 @@
+import { zIntQuery, zStringQuery } from '@/util'
 import z from 'zod'
 
 export enum SortDirection {
@@ -6,11 +7,11 @@ export enum SortDirection {
 }
 
 export const zSearchRequest = z.object({
-    page: z.int().optional(),
-    limit: z.int(),
-    searchField: z.string().optional(),
-    sortField: z.string().optional(),
-    query: z.string().optional(),
+    page: zIntQuery.optional(),
+    limit: zIntQuery,
+    searchField: zStringQuery.optional(),
+    sortField: zStringQuery.optional(),
+    query: zStringQuery.optional(),
     sort: z.enum(SortDirection).default(SortDirection.DESC),
 })
 

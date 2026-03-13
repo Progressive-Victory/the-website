@@ -398,6 +398,7 @@ export default function Page() {
                     { value: 'email', label: 'Email' },
                     { value: 'first_name', label: 'First Name' },
                     { value: 'last_name', label: 'Last Name' },
+                    { value: 'created_at_utc', label: 'Created At' },
                 ]}
                 filters={[
                     {
