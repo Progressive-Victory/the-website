@@ -104,21 +104,17 @@ function fromInputGetDateValue(value: string) {
 }
 
 function isAfterDate(left: Date, right: Date) {
-    const leftDate = startOfDay(left)
-    const rightDate = startOfDay(right)
-    return leftDate.getTime() > rightDate.getTime()
+    return startOfDay(left).getTime() > startOfDay(right).getTime()
 }
 
 function startOfDay(value: Date) {
-    const output = new Date(value)
-    output.setHours(0, 0, 0, 0)
-    return output
+    value.setHours(0, 0, 0, 0)
+    return value
 }
 
 function endOfDay(value: Date) {
-    const output = new Date(value)
-    output.setHours(23, 59, 59, 999)
-    return output
+    value.setHours(23, 59, 59, 999)
+    return value
 }
 
 function getDatesForPreset(preset: DateRangePreset) {
