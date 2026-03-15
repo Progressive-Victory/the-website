@@ -537,46 +537,70 @@ export default function Page() {
                 {selectedId && userQuery.data && (
                     <>
                         <div className={styles.detailsHeader}>
-                            <div className={styles.headerTop}>
-                                <div className={styles.cardStyle}>
-                                    <div className={styles.cardAvatar}>
-                                        <DiscordAvatar
-                                            discordUserId={
-                                                userQuery.data.discordUsers?.[0]
-                                                    ?.id
-                                            }
-                                            imageId={
-                                                userQuery.data.discordUsers?.[0]
-                                                    ?.image
-                                            }
-                                            size={50}
-                                        />
+                            <div className={styles.profileBanner}>
+                                <div className={styles.bannerCover} />
+                                <div className={styles.headerTop}>
+                                    <div className={styles.cardStyle}>
+                                        <div className={styles.cardAvatar}>
+                                            <DiscordAvatar
+                                                discordUserId={
+                                                    userQuery.data
+                                                        .discordUsers?.[0]?.id
+                                                }
+                                                imageId={
+                                                    userQuery.data
+                                                        .discordUsers?.[0]
+                                                        ?.image
+                                                }
+                                                size={64}
+                                            />
+                                        </div>
+                                        <div className={styles.userInfo}>
+                                            <h1 className={styles.headerUserName}>
+                                                {makeTitle(userQuery.data)}
+                                            </h1>
+                                            <h2
+                                                className={
+                                                    styles.headerUserUsername
+                                                }
+                                            >
+                                                {userQuery.data.discordUsers?.[0]
+                                                    ?.username
+                                                    ? `@${userQuery.data.discordUsers[0].username}`
+                                                    : 'NOT FOUND'}
+                                            </h2>
+                                            {/* <p className={styles.userContact}>
+                                                {userQuery.data.email}
+                                            </p> */}
+                                        </div>
                                     </div>
-                                    <div className={styles.userInfo}>
-                                        <h1 className={styles.headerUserName}>
-                                            {makeTitle(userQuery.data)}
-                                        </h1>
-                                        <h2
-                                            className={
-                                                styles.headerUserUsername
-                                            }
-                                        >
-                                            {userQuery.data.discordUsers?.[0]
-                                                ?.username
-                                                ? `@${userQuery.data.discordUsers[0].username}`
-                                                : 'NOT FOUND'}
-                                        </h2>
+                                    <div className={styles.roleList}>
+                                        {userQuery.data.roles?.length ? (
+                                            userQuery.data.roles.map((role) => (
+                                                <span
+                                                    key={role.id}
+                                                    className={styles.rolePill}
+                                                >
+                                                    {role.name}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className={styles.roleEmpty}>
+                                                No roles assigned
+                                            </span>
+                                        )}
                                     </div>
-                                </div>
-                            </div>
-                            <div className={styles.headerBottom}>
-                                <TabBar
+                                    <TabBar
                                     tabs={tabs}
                                     value={selectedTab}
                                     onChange={(key) =>
                                         setSelectedTab(key as MemberTabKey)
                                     }
                                 />
+                                </div>
+                            </div>
+                            <div className={styles.headerBottom}>
+                                
                             </div>
                         </div>
                         {pane}
