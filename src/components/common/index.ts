@@ -6,7 +6,6 @@ export { Button, Logo, Message }
 
 export * from './CollapsibleSection'
 export * from './DiscordAvatar'
-export * from './HoverTooltip'
 export * from './ImageWithFallback'
 export * from './Logo'
 export * from './MultiSelect'
