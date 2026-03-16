@@ -1,9 +1,15 @@
-import DepartmentBubble from '../bubbles/departmentBubble'
-import PositionBubble from '../bubbles/positionBubble'
-import PositionData from '../types/positionData'
-import styles from './nodes.module.css'
-import { Handle, Node, NodeProps, Position, useStore } from '@xyflow/react'
+import styles from './components.module.css'
+import { PositionData, PositionBubble } from './position'
+import { Handle, Node, NodeProps, Position } from '@xyflow/react'
 import { motion } from 'motion/react'
+import React, { useState } from 'react'
+
+export interface DepartmentData {
+    id: number
+    name: string
+    leads?: PositionData[]
+    members?: PositionData[]
+}
 
 export type DepartmentNodeData = Node<{
     id: number
@@ -12,14 +18,12 @@ export type DepartmentNodeData = Node<{
     members?: PositionData[]
 }>
 
-const zoomSelector = (s: { transform: number[] }) => s.transform[2] >= 1.1
-
-export default function DepartmentNode({
+export function DepartmentNode({
     data,
     sourcePosition,
     targetPosition,
 }: NodeProps<DepartmentNodeData>) {
-    const extraContent = useStore(zoomSelector)
+    const [contentEnabled, setContentEnabled] = useState(false)
 
     const DepartmentLeads = () => {
         return data.leads?.map(RenderLead)
@@ -28,8 +32,19 @@ export default function DepartmentNode({
         }
     }
 
+    const handlePointerEnter = (e: React.PointerEvent) => {
+        if (e.pointerType == 'mouse') {
+            setContentEnabled(true)
+        }
+    }
+
     return (
-        <div key={data.id} className={styles.container}>
+        <div
+            key={data.id}
+            className={styles.container}
+            onPointerEnter={handlePointerEnter}
+            onPointerLeave={() => setContentEnabled(false)}
+        >
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
@@ -42,10 +57,10 @@ export default function DepartmentNode({
                     willChange: 'max-height',
                 }}
                 initial={{
-                    maxHeight: `${extraContent ? '240' : '0'}px`,
+                    maxHeight: `${contentEnabled ? '240' : '0'}px`,
                 }}
                 animate={{
-                    maxHeight: `${extraContent ? '240' : '0'}px`,
+                    maxHeight: `${contentEnabled ? '240' : '0'}px`,
                     transition: {
                         type: 'tween',
                         duration: 0.5,
@@ -59,6 +74,14 @@ export default function DepartmentNode({
                 position={sourcePosition ?? Position.Right}
                 className={styles.sourceHandle}
             />
+        </div>
+    )
+}
+
+export function DepartmentBubble({ name }: { name: string }) {
+    return (
+        <div className={styles.yellowBubble}>
+            <p>{name.toUpperCase()}</p>
         </div>
     )
 }

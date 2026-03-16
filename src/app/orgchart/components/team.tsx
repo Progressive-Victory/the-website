@@ -1,9 +1,16 @@
-import PositionBubble from '../bubbles/positionBubble'
-import TeamBubble from '../bubbles/teamBubble'
-import PositionData from '../types/positionData'
-import styles from './nodes.module.css'
-import { Handle, Node, NodeProps, Position, useStore } from '@xyflow/react'
+import styles from './components.module.css'
+import { PositionData, PositionBubble } from './position'
+import { Handle, Node, NodeProps, Position } from '@xyflow/react'
 import { motion } from 'motion/react'
+import { useState } from 'react'
+
+export default interface TeamData {
+    id: number
+    name: string
+    desc?: string
+    leads?: PositionData[]
+    members?: PositionData[]
+}
 
 export type TeamNodeData = Node<{
     id: number
@@ -13,14 +20,12 @@ export type TeamNodeData = Node<{
     members?: PositionData[]
 }>
 
-const zoomSelector = (s: { transform: number[] }) => s.transform[2] >= 1.1
-
-export default function TeamNode({
+export function TeamNode({
     data,
     targetPosition,
     sourcePosition,
 }: NodeProps<TeamNodeData>) {
-    const extraContent = useStore(zoomSelector)
+    const [contentEnabled, setContentEnabled] = useState(false)
 
     const TeamLeads = () => {
         return data.leads?.map((lead) => {
@@ -28,8 +33,19 @@ export default function TeamNode({
         })
     }
 
+    const handlePointerEnter = (e: React.PointerEvent) => {
+        if (e.pointerType == 'mouse') {
+            setContentEnabled(true)
+        }
+    }
+
     return (
-        <div key={data.id} className={styles.container}>
+        <div
+            key={data.id}
+            className={styles.container}
+            onPointerEnter={handlePointerEnter}
+            onPointerLeave={() => setContentEnabled(false)}
+        >
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
@@ -42,10 +58,10 @@ export default function TeamNode({
                     willChange: 'max-height',
                 }}
                 initial={{
-                    maxHeight: `${extraContent ? '240' : '0'}px`,
+                    maxHeight: `${contentEnabled ? '240' : '0'}px`,
                 }}
                 animate={{
-                    maxHeight: `${extraContent ? '240' : '0'}px`,
+                    maxHeight: `${contentEnabled ? '240' : '0'}px`,
                 }}
             >
                 <TeamLeads />
@@ -55,6 +71,14 @@ export default function TeamNode({
                 position={sourcePosition ?? Position.Right}
                 className={styles.sourceHandle}
             />
+        </div>
+    )
+}
+
+export default function TeamBubble({ name }: { name: string }) {
+    return (
+        <div className={styles.yellowBubble}>
+            <p>{name.toUpperCase()}</p>
         </div>
     )
 }

@@ -1,12 +1,14 @@
 import '../../../tailwind.config'
 import styles from './app.module.css'
-import PositionBubble from './bubbles/positionBubble'
-import DepartmentNode, { DepartmentNodeData } from './nodes/departmentNode'
-import PositionNode from './nodes/positionNode'
-import TeamNode, { TeamNodeData } from './nodes/teamNode'
-import OrgChartEdge from './orgchartEdge'
-import Committee from './types/committee'
-import PositionData from './types/positionData'
+import Committee from './components/committee'
+import { DepartmentNode, DepartmentNodeData } from './components/department'
+import OrgChartEdge from './components/edge'
+import {
+    PositionData,
+    PositionNode,
+    PositionBubble,
+} from './components/position'
+import { TeamNode, TeamNodeData } from './components/team'
 import dagre from '@dagrejs/dagre'
 import {
     type Node,
@@ -19,6 +21,7 @@ import {
     XYPosition,
     Panel,
 } from '@xyflow/react'
+/* These work; they are just flagged as errors for some reason. */
 import '@xyflow/react/dist/base.css'
 import '@xyflow/react/dist/style.css'
 import React, { useState, useCallback } from 'react'
@@ -63,7 +66,7 @@ const defaultPos: XYPosition = { x: 0, y: 0 }
 
 const GetElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
     const isHorizontal = direction === 'LR'
-    dagreGraph.setGraph({ rankdir: direction, ranksep: 50, nodesep: 25 })
+    dagreGraph.setGraph({ rankdir: direction, ranksep: 80, nodesep: 25 })
     nodes.forEach((node) => {
         dagreGraph.setNode(node.id, { width: nWidth, height: nHeight })
     })
@@ -206,7 +209,7 @@ const initialNodes: Node[] = [
             },
             {
                 id: 4,
-                title: 'Community Mananger',
+                title: 'Community Manager',
                 name: 'Jenywlfersn',
                 leadership: 'Junior',
                 committees: [Committees[0], Committees[1]],
@@ -219,52 +222,162 @@ const initialNodes: Node[] = [
             },
         ],
     }),
-    CreateTeamNode({
+    CreateDepartmentNode({
         id: 6,
-        name: 'Welcome Team',
-        desc: "Welcome team gurantees... I'm not gonna copy all of that.",
+        name: 'Media Department',
         leads: [
             {
                 id: 7,
+                title: 'Media Director',
+                name: 'Aussy',
+                leadership: 'Senior',
+            },
+            {
+                id: 8,
+                title: 'Deputy Media Director',
+                name: 'Leeloo',
+                leadership: 'Senior',
+            },
+            {
+                id: 9,
+                title: 'Deputy Media Director',
+                leadership: 'Senior',
+            },
+        ],
+    }),
+    CreateTeamNode({
+        id: 26,
+        name: 'Welcome Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 27,
                 title: 'Welcome Team Lead',
                 name: 'Monarch',
                 leadership: 'Junior',
                 committees: [Committees[0]],
             },
             {
-                id: 8,
+                id: 28,
                 title: 'Welcome Team Lead',
                 leadership: 'Junior',
                 committees: [Committees[0]],
             },
-            {
-                id: 9,
-                title: 'Welcome Team Deputy',
-            },
+            { id: 29, title: 'Welcome Team Deputy' },
         ],
     }),
     CreateTeamNode({
-        id: 10,
+        id: 30,
         name: 'Events Team',
-        desc: "The Events Team... I'm also not gonna copy all of that.",
+        desc: 'Yada yada yada',
         leads: [
             {
-                id: 11,
+                id: 31,
                 title: 'Events Team Lead',
                 name: 'BrewMasterCraft',
                 leadership: 'Junior',
                 committees: [Committees[0]],
             },
             {
-                id: 12,
+                id: 32,
                 title: 'Events Team Lead',
                 leadership: 'Junior',
                 committees: [Committees[0]],
             },
+            { id: 33, title: 'Events Team Deputy', name: 'Em' },
+        ],
+    }),
+    CreateTeamNode({
+        id: 34,
+        name: 'Moderation Team',
+        desc: 'Yada yada yada',
+        members: [
+            { id: 35, name: 'Clementine' },
+            { id: 36, name: 'Finnegan' },
+            { id: 37, name: 'Jaxonmaxx' },
+            { id: 38, name: 'Natalie' },
+            { id: 39, name: 'Noelle' },
+            { id: 40, name: 'Onbi' },
+            { id: 41, name: 'Starry' },
+            { id: 42, name: 'TheSunKey' },
+            { id: 43, name: 'Victoria' },
+        ],
+    }),
+    CreateTeamNode({
+        id: 44,
+        name: 'Writing Team',
+        desc: 'Yada yada yada',
+        leads: [
             {
-                id: 13,
-                title: 'Events Team Deputy',
-                name: 'EM',
+                id: 45,
+                title: 'Writing Team Lead',
+                name: 'Dynas',
+                leadership: 'Junior',
+                committees: [Committees[0], Committees[1]],
+            },
+            {
+                id: 46,
+                title: 'Writing Team Lead',
+                name: 'AJ',
+                leadership: 'Junior',
+                committees: [Committees[0], Committees[1]],
+            },
+            {
+                id: 47,
+                title: 'Writing Team Deputy',
+                name: 'Jam',
+            },
+        ],
+    }),
+    CreateTeamNode({
+        id: 48,
+        name: 'This Week at PV Strike Team',
+        desc: 'Manages the weekly publication of the This Week at Progressive Victory newsletter.',
+    }),
+    CreateTeamNode({
+        id: 49,
+        name: 'Audio-Video Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 50,
+                title: 'Audio-Video Team Lead',
+                name: 'Vezanmatics',
+                leadership: 'Junior',
+                committees: [Committees[1]],
+            },
+            {
+                id: 51,
+                title: 'Audio-Video Team Lead',
+                leadership: 'Junior',
+                committees: [Committees[1]],
+            },
+            {
+                id: 52,
+                title: 'Audio-Video Team Deputy',
+            },
+        ],
+    }),
+    CreateTeamNode({
+        id: 53,
+        name: 'Design Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 54,
+                title: 'Design Team Lead',
+                leadership: 'Junior',
+                committees: [Committees[1]],
+            },
+            {
+                id: 55,
+                title: 'Design Team Lead',
+                leadership: 'Junior',
+                committees: [Committees[1]],
+            },
+            {
+                id: 56,
+                title: 'Design Team Deputy',
             },
         ],
     }),
@@ -272,10 +385,17 @@ const initialNodes: Node[] = [
 
 /* Changes to this do not hot refresh on save; must use F5*/
 const initialEdges: Edge[] = [
-    CreateEdge('e0', 0, 1),
-    CreateEdge('e1', 1, 2),
-    CreateEdge('e2', 2, 6),
-    CreateEdge('e3', 2, 10),
+    CreateEdge('0e1', 0, 1),
+    CreateEdge('1e2', 1, 2),
+    CreateEdge('1e6', 1, 6),
+    CreateEdge('2e26', 2, 26),
+    CreateEdge('2e30', 2, 30),
+    CreateEdge('2e34', 2, 34),
+    CreateEdge('2e44', 2, 44),
+    CreateEdge('6e44', 6, 44),
+    CreateEdge('44e48', 44, 48),
+    CreateEdge('6e49', 6, 49),
+    CreateEdge('6e53', 6, 53),
 ]
 
 const nodeTypes = {
