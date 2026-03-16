@@ -2,7 +2,7 @@ import styles from './Form.module.css'
 import { DynamicFormFieldProps, FieldConfiguration } from './FormField'
 import cx from 'classnames'
 import deepEqual from 'deep-equal'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 
 /**
@@ -95,11 +95,11 @@ export function Form<T>({
     // Stores a set of field ids which have invalid values.
     const [invalidMap, setInvalidMap] = useState(new Set<string>())
 
-    // Stores a map of field ids to configuration callbacks, including getters,
-    // setters, and validators.
-    const [configureMap, setConfigureMap] = useState<
-        Record<string, FieldConfiguration<T, unknown>>
-    >({})
+    // Stores field configuration callbacks without causing rerenders when
+    // fields re-register the same config during render/effect cycles.
+    const configureMapRef = useRef<Record<string, FieldConfiguration<T, unknown>>>(
+        {}
+    )
 
     // Current form state
     const form = editForm ?? initialForm
@@ -133,7 +133,7 @@ export function Form<T>({
         (id: string, field: unknown) => {
             // This shouldn't happen, but in case a field hasn't registered its
             // callbacks, we'll just ignore it.
-            const configuration = configureMap[id]
+            const configuration = configureMapRef.current[id]
             if (!configuration) return
 
             const { getter, setter, validator } = configuration
@@ -147,27 +147,29 @@ export function Form<T>({
             const curr = getter(currForm)
             const clean = (!init && !curr) || deepEqual(init, curr)
             setDirtyMap((prev) => {
-                if (clean) prev.delete(id)
-                else prev.add(id)
-                return prev
+                const next = new Set(prev)
+                if (clean) next.delete(id)
+                else next.add(id)
+                return next
             })
 
             // Use the field's validator to update whether the field is valid.
             const valid = validator(curr)
             setInvalidMap((prev) => {
-                if (valid) prev.delete(id)
-                else prev.add(id)
-                return prev
+                const next = new Set(prev)
+                if (valid) next.delete(id)
+                else next.add(id)
+                return next
             })
         },
-        [configureMap, form, initialForm]
+        [form, initialForm]
     )
 
     // Called whenever a field is configured (see `FormField`). Stores the
     // field's getter, setter, and validator for use during change events.
     const handleConfigure = useCallback(
         (id: string, configuration: FieldConfiguration<T, unknown>) => {
-            setConfigureMap((prev) => ({ ...prev, [id]: configuration }))
+            configureMapRef.current[id] = configuration
         },
         []
     )
