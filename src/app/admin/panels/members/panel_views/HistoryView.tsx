@@ -2,7 +2,7 @@
 
 import styles from './HistoryView.module.css'
 import { MemberView } from './MemberView'
-import { CollapsibleSection } from '@/components/common'
+import { CollapsibleSection, HoverTooltip } from '@/components/common'
 import {
     ActBlueDonor,
     DiscordUser,
@@ -370,16 +370,16 @@ function UnifiedHistoryField({
                                         : makeDonorLabel(item.update)}
                                 </span>
 
-                                <span
+                                <HoverTooltip
                                     className={styles.historyEntryDateTag}
-                                    data-full-date={formatFullHistoryTimestamp(
+                                    content={formatFullHistoryTimestamp(
                                         item.update.historyWhenUpdatedUtc
                                     )}
                                 >
                                     {formatHistoryTimestamp(
                                         item.update.historyWhenUpdatedUtc
                                     )}
-                                </span>
+                                </HoverTooltip>
                             </button>
                         </div>
                     )

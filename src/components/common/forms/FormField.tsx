@@ -20,6 +20,9 @@ export interface FormFieldProps<FormType, FieldType = unknown> {
     /** A label which will be displayed to the left of the field. */
     label: string
 
+    /** Optional tooltip text shown when hovering the field label. */
+    labelTooltip?: string
+
     /** Whether this field can be edited. */
     readonly?: boolean
 
@@ -232,6 +235,7 @@ export function useConfigure<FormType, FieldType>(
 export function FormField<FormType, FieldType>({
     id,
     label,
+    labelTooltip,
     readonly,
     required,
     deprecated,
@@ -243,7 +247,13 @@ export function FormField<FormType, FieldType>({
     const content = (
         <>
             <span className={styles.fieldLabel}>
-                {label}
+                <span
+                    className={styles.labelTooltipTrigger}
+                    data-label-tooltip={labelTooltip}
+                    tabIndex={labelTooltip ? 0 : undefined}
+                >
+                    {label}
+                </span>
                 {required && (
                     <span className={styles.required} title="Required Field">
                         *
