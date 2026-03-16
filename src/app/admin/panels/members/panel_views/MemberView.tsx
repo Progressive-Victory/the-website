@@ -1,7 +1,5 @@
 'use client'
 
-import historyStyles from './HistoryView.module.css'
-import { HoverTooltip } from '@/components/common'
 import {
     DynamicFormFieldProps,
     FormField,
@@ -15,44 +13,6 @@ import {
 } from '@/components/common/forms'
 import { OnboardingStage, Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
-
-const ONBOARDING_STAGE_CONTENT: Record<
-    OnboardingStage,
-    { label: string; description: string }
-> = {
-    [OnboardingStage.NOT_STARTED]: {
-        label: 'Signed In With Discord',
-        description:
-            'User has connected their Discord Account to PV, but has not begun the intake form.',
-    },
-    [OnboardingStage.AWAITING_VERIFY]: {
-        label: 'Not Verified',
-        description:
-            'User has either not completed the intake form or has yet to verify their phone number.',
-    },
-    [OnboardingStage.VERIFIED]: {
-        label: 'Intake Form Complete',
-        description:
-            'User has completed the intake form and verified their phone number.',
-    },
-    [OnboardingStage.UNDERAGE]: {
-        label: 'Underage',
-        description:
-            'User is under 18 and currently not eligible to join the server.',
-    },
-    [OnboardingStage.JOINED]: {
-        label: 'Joined Discord',
-        description:
-            'User has successfully completed the intake form and joined the server.',
-    },
-}
-
-const ONBOARDING_STAGE_LABEL_TOOLTIP = [
-    'Available stages:',
-    ...Object.entries(ONBOARDING_STAGE_CONTENT).map(
-        ([, details]) => `${details.label}: ${details.description}`
-    ),
-].join('\n')
 
 interface ReadonlyAddressFieldProps {
     id?: string
@@ -97,21 +57,22 @@ interface EditableAddressFieldsProps {
     dynamic?: DynamicFormFieldProps<User>
 }
 
+function formatOnboardingStage(stage: OnboardingStage | null | undefined) {
+    if (!stage) return null
+
+    return stage
+        .split('_')
+        .map((word) =>
+            word.length ? word.charAt(0).toUpperCase() + word.slice(1) : word
+        )
+        .join(' ')
+}
+
 interface PreferredNameFieldProps {
     dynamic?: DynamicFormFieldProps<User>
 }
 
 interface NameFieldsProps {
-    id?: string
-    dynamic?: DynamicFormFieldProps<User>
-}
-
-interface OnboardingStageFieldProps {
-    id?: string
-    dynamic?: DynamicFormFieldProps<User>
-}
-
-interface DiscordUsernameFieldProps {
     id?: string
     dynamic?: DynamicFormFieldProps<User>
 }
@@ -174,84 +135,6 @@ function NameFields({ id, dynamic }: NameFieldsProps) {
                 dynamic={textDynamic}
             />
         </>
-    )
-}
-
-function OnboardingStageField({ id, dynamic }: OnboardingStageFieldProps) {
-    const stage = dynamic?.form.onboardingStage ?? null
-    const details = stage ? ONBOARDING_STAGE_CONTENT[stage] : null
-    const value = details?.label ?? '-'
-    const description = details?.description ?? 'No onboarding stage set.'
-
-    return (
-        <FormField<User, unknown>
-            id={id}
-            label="Intake Form Status"
-            labelTooltip={ONBOARDING_STAGE_LABEL_TOOLTIP}
-            dynamic={dynamic}
-        >
-            <HoverTooltip
-                className={historyStyles.historyEntryDateTag}
-                triggerStyle={{
-                    marginLeft: 0,
-                    paddingInline: 0,
-                    paddingBlock: 0,
-                    borderRadius: 0,
-                    background: 'transparent',
-                    color: 'inherit',
-                    fontSize: 'inherit',
-                    fontWeight: 'inherit',
-                }}
-                content={description}
-                focusable
-            >
-                {value}
-            </HoverTooltip>
-        </FormField>
-    )
-}
-
-function DiscordUsernameField({ id, dynamic }: DiscordUsernameFieldProps) {
-    const discordUsers = dynamic?.form.discordUsers ?? []
-    const usernames = discordUsers
-        .map((discordUser) => discordUser.username?.trim())
-        .filter((username): username is string => !!username)
-        .map((username) => `@${username}`)
-
-    const value = usernames.length ? usernames.join(', ') : '-'
-    const tooltip = discordUsers.length
-        ? discordUsers
-              .map((discordUser) => {
-                  const idValue = discordUser.id ?? 'Unknown ID'
-                  return `Discord ID: @${idValue}`
-              })
-              .join('\n')
-        : 'No Discord account linked.'
-
-    return (
-        <FormField<User, unknown>
-            id={id}
-            label="Discord Username"
-            dynamic={dynamic}
-        >
-            <HoverTooltip
-                className={historyStyles.historyEntryDateTag}
-                triggerStyle={{
-                    marginLeft: 0,
-                    paddingInline: 0,
-                    paddingBlock: 0,
-                    borderRadius: 0,
-                    background: 'transparent',
-                    color: 'inherit',
-                    fontSize: 'inherit',
-                    fontWeight: 'inherit',
-                }}
-                content={tooltip}
-                focusable
-            >
-                {value}
-            </HoverTooltip>
-        </FormField>
     )
 }
 
@@ -382,7 +265,20 @@ export function MemberView({
         >
             <FormGroup title="Account Information">
                 <NameFields />
-                <DiscordUsernameField />
+                <TextField<User>
+                    label="Discord Username"
+                    getter={(form) =>
+                        (form.discordUsers ?? [])
+                            ?.map(({ username }) => `@${username}`)
+                            .join(', ')
+                    }
+                    readonly
+                />
+                <TextField<User>
+                    label="Discord ID"
+                    getter={(form) => form.discordUsers?.[0]?.id}
+                    readonly
+                />
                 <PhoneField label="Phone Number" field="phone" required />
                 <TextField
                     label="Email"
@@ -470,7 +366,13 @@ export function MemberView({
                     }
                     readonly
                 />
-                <OnboardingStageField />
+                <TextField<User>
+                    label="Inake Form Status"
+                    getter={(form) =>
+                        formatOnboardingStage(form.onboardingStage)
+                    }
+                    readonly
+                />
                 <DateField
                     label="Date Intake Done"
                     field="completedIntakeUtc"
