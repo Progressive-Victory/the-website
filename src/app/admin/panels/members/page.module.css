@@ -1,8 +1,16 @@
 .detailsHeader {
     --banner-cover-height: 3.5rem;
     --banner-cover-gradient:
-        radial-gradient(circle at 18% 30%, rgba(2, 132, 199, 0.24), transparent 35%),
-        radial-gradient(circle at 82% 20%, rgba(41, 134, 204, 0.28), transparent 40%),
+        radial-gradient(
+            circle at 18% 30%,
+            rgba(2, 132, 199, 0.24),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 82% 20%,
+            rgba(41, 134, 204, 0.28),
+            transparent 40%
+        ),
         linear-gradient(120deg, rgba(9, 34, 58, 0.96), rgba(27, 69, 104, 0.9));
 
     display: flex;
@@ -24,17 +32,16 @@
 .detailsHeader::before {
     content: '';
     position: absolute;
-    top: -200rem;
+    top: -100rem;
     left: 0;
     right: 0;
-    height: 200rem;
+    height: 100rem;
     background: var(--banner-cover-gradient);
     background-size: 100% var(--banner-cover-height);
     background-position: 0 100%;
     background-repeat: repeat-y;
     pointer-events: none;
     z-index: -1;
-    
 }
 
 .profileBanner {
@@ -82,7 +89,6 @@
     justify-content: space-between;
 }
 
-
 .cardStyle {
     display: flex;
     flex-direction: row;
@@ -111,7 +117,7 @@
 .detailsPane {
     flex: 1;
     overflow-y: auto;
-        background: linear-gradient(
+    background: linear-gradient(
         135deg,
         rgba(248, 250, 252, 0.98) 0%,
         rgba(241, 245, 249, 0.98) 38%,
@@ -121,7 +127,6 @@
 
 .detailsContent {
     margin: 1rem;
-    
 }
 
 .userMeta {
