@@ -37,7 +37,7 @@ export function TabBar({
 
     return (
         <div
-            className={styles.tabBar}
+            className={cx(styles.tabBar, className)}
             role="tablist"
             aria-label={ariaLabel}
             style={
