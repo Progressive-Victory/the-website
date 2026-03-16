@@ -8,6 +8,51 @@
     flex: 0 2 50%;
 }
 
+.labelTooltipTrigger {
+    position: relative;
+    display: inline-block;
+}
+
+.labelTooltipTrigger[data-label-tooltip] {
+    cursor: help;
+}
+
+.labelTooltipTrigger[data-label-tooltip]::after {
+    content: attr(data-label-tooltip);
+    position: absolute;
+    left: 0;
+    top: calc(100% + 0.35rem);
+
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.45rem;
+    min-width: 34rem;
+    max-width: 48rem;
+
+    color: rgba(241, 245, 249, 0.95);
+    background: rgba(15, 23, 42, 0.92);
+    font-size: 0.72rem;
+    font-weight: 560;
+    line-height: 1.35;
+    white-space: pre-line;
+
+    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28);
+
+    opacity: 0;
+    transform: translateY(-3px);
+    transition:
+        opacity 100ms ease,
+        transform 100ms ease;
+    pointer-events: none;
+    z-index: 8;
+}
+
+.labelTooltipTrigger[data-label-tooltip]:hover::after,
+.labelTooltipTrigger[data-label-tooltip]:focus-visible::after {
+    transition-delay: 320ms;
+    opacity: 1;
+    transform: translateY(0);
+}
+
 .required {
     margin-left: 0.25rem;
     color: #ef4444;

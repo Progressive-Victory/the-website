@@ -542,9 +542,9 @@ export default function Page() {
                 )}
 
                 {selectedId && userQuery.data && (
-                    <>
+                     <>
                         <div className={styles.detailsHeader}>
-                            <div className={styles.profileBanner}>
+                            
                                 <div className={styles.bannerCover} />
                                 <div className={styles.headerTop}>
                                     <div className={styles.cardStyle}>
@@ -605,13 +605,12 @@ export default function Page() {
                                     }
                                 />
                                 </div>
-                            </div>
-                            <div className={styles.headerBottom}>
-                                
-                            </div>
+                           
                         </div>
-                        {pane}
+                        <div className={styles.detailsContent}>{pane}</div>
+                   
                     </>
+                    
                 )}
             </div>
         </>
