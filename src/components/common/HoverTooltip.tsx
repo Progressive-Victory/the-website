@@ -25,11 +25,7 @@ export function HoverTooltip({
             tabIndex={focusable ? 0 : undefined}
         >
             {children}
-            <span
-                className={[styles.tooltip, tooltipClassName]
-                    .filter(Boolean)
-                    .join(' ')}
-            >
+            <span className={[styles.tooltip, tooltipClassName].filter(Boolean).join(' ')}>
                 {content}
             </span>
         </span>

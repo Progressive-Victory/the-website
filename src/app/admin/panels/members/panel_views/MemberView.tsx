@@ -1,6 +1,7 @@
 'use client'
 
 import historyStyles from './HistoryView.module.css'
+
 import { HoverTooltip } from '@/components/common'
 import {
     DynamicFormFieldProps,
@@ -22,8 +23,7 @@ const ONBOARDING_STAGE_CONTENT: Record<
 > = {
     [OnboardingStage.NOT_STARTED]: {
         label: 'Signed In With Discord',
-        description:
-            'User has connected their Discord Account to PV, but has not begun the intake form.',
+        description: "User has connected their Discord Account to PV, but has not begun the intake form.",
     },
     [OnboardingStage.AWAITING_VERIFY]: {
         label: 'Not Verified',
@@ -42,8 +42,7 @@ const ONBOARDING_STAGE_CONTENT: Record<
     },
     [OnboardingStage.JOINED]: {
         label: 'Joined Discord',
-        description:
-            'User has successfully completed the intake form and joined the server.',
+        description: 'User has successfully completed the intake form and joined the server.',
     },
 }
 
@@ -121,9 +120,10 @@ function PreferredNameField({ dynamic }: PreferredNameFieldProps) {
 
     if (!preferredName) return null
 
-    const textDynamic = dynamic as
-        | DynamicFormFieldProps<User, string | null | undefined>
-        | undefined
+    const textDynamic =
+        dynamic as
+            | DynamicFormFieldProps<User, string | null | undefined>
+            | undefined
 
     return (
         <TextField<User>
@@ -145,19 +145,16 @@ function NameFields({ id, dynamic }: NameFieldsProps) {
         const fullName = [firstName, lastName].filter(Boolean).join(' ')
 
         return (
-            <FormField<User, unknown>
-                id={id}
-                label="Full Name"
-                dynamic={dynamic}
-            >
+            <FormField<User, unknown> id={id} label="Full Name" dynamic={dynamic}>
                 <div>{fullName || '-'}</div>
             </FormField>
         )
     }
 
-    const textDynamic = dynamic as
-        | DynamicFormFieldProps<User, string | null | undefined>
-        | undefined
+    const textDynamic =
+        dynamic as
+            | DynamicFormFieldProps<User, string | null | undefined>
+            | undefined
 
     return (
         <>
@@ -229,11 +226,7 @@ function DiscordUsernameField({ id, dynamic }: DiscordUsernameFieldProps) {
         : 'No Discord account linked.'
 
     return (
-        <FormField<User, unknown>
-            id={id}
-            label="Discord Username"
-            dynamic={dynamic}
-        >
+        <FormField<User, unknown> id={id} label="Discord Username" dynamic={dynamic}>
             <HoverTooltip
                 className={historyStyles.historyEntryDateTag}
                 triggerStyle={{
@@ -258,10 +251,8 @@ function DiscordUsernameField({ id, dynamic }: DiscordUsernameFieldProps) {
 function EditableAddressFields({ dynamic }: EditableAddressFieldsProps) {
     if (dynamic?.editing != true) return null
 
-    const textDynamic = dynamic as DynamicFormFieldProps<
-        User,
-        string | null | undefined
-    >
+    const textDynamic =
+        dynamic as DynamicFormFieldProps<User, string | null | undefined>
 
     return (
         <>
@@ -313,7 +304,8 @@ function EditableAddressFields({ dynamic }: EditableAddressFieldsProps) {
                     address: {
                         ...form.address,
                         state:
-                            field?.trim()?.toUpperCase()?.slice(0, 2) ?? null,
+                            field?.trim()?.toUpperCase()?.slice(0, 2) ??
+                            null,
                     },
                 })}
                 validator={(field) => field?.length == 2}
@@ -415,11 +407,7 @@ export function MemberView({
                             : null
                     }
                 />
-                <DateField
-                    label="Account Created"
-                    field="createdAtUtc"
-                    readonly
-                />
+                <DateField label="Account Created" field="createdAtUtc" readonly />
                 <SelectManyField<User>
                     label="Aliases"
                     field="aliases"
@@ -494,12 +482,13 @@ export function MemberView({
                             field != null
                                 ? Array.from(
                                       new Map(
-                                          [...(form.roles ?? []), ...roles].map(
-                                              (role) => [
-                                                  role.id.toString(),
-                                                  role,
-                                              ]
-                                          )
+                                          [
+                                              ...(form.roles ?? []),
+                                              ...roles,
+                                          ].map((role) => [
+                                              role.id.toString(),
+                                              role,
+                                          ])
                                       ).values()
                                   ).filter((role) =>
                                       field.some(
