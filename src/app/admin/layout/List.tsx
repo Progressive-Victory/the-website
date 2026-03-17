@@ -175,17 +175,19 @@ export function ListTop({
                 <>
                     <div className={styles.searchPanelTop}>
                         <FieldSelect
+                            label="Search Field"
                             field={searchField}
                             options={searchFields ?? []}
                             onSelect={handleChangeSearchField}
                         />
                         <FieldSelect
+                            label="Sort Field"
                             field={sortField}
                             options={sortFields ?? []}
                             onSelect={handleChangeSortField}
                         />
                         <LimitSelect
-                            limit={limit}
+                            limit={limit ?? 25}
                             onSelect={handleChangeLimit}
                         />
                     </div>
@@ -258,7 +260,7 @@ export function ListBottom({
         <div className={styles.pageSelectContainer}>
             <PageSelect
                 page={page}
-                pageSize={limit}
+                pageSize={limit ?? 25}
                 count={count}
                 disabled={isPending}
                 onChange={handleChangePage}
@@ -327,12 +329,13 @@ function SearchInput({
 }
 
 interface FieldSelectProps {
+    label: string
     field: string | undefined
     options: FieldOption[]
     onSelect: (field: string | undefined) => void
 }
 
-function FieldSelect({ field, options, onSelect }: FieldSelectProps) {
+function FieldSelect({ label, field, options, onSelect }: FieldSelectProps) {
     if (!options.length) return null
 
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -342,7 +345,7 @@ function FieldSelect({ field, options, onSelect }: FieldSelectProps) {
 
     return (
         <label htmlFor="field" className={styles.select}>
-            <span>Filter:</span>
+            <span>{label}:</span>
             <select
                 name="field"
                 id="field"

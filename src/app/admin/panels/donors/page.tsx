@@ -157,10 +157,15 @@ export default function Page() {
                 isPending={searchQuery.isPending}
                 error={searchQuery.error}
                 searchFields={[
-                    { value: '`d`.`email`', label: 'Email' },
-                    { value: '`d`.`first_name`', label: 'First Name' },
-                    { value: '`d`.`last_name`', label: 'Last Name' },
-                    { value: '`d`.`state`', label: 'State' },
+                    { value: 'email', label: 'Email' },
+                    { value: 'first_name', label: 'First Name' },
+                    { value: 'last_name', label: 'Last Name' },
+                    { value: 'state', label: 'State' },
+                ]}
+                sortFields={[
+                    { value: 'email', label: 'Email' },
+                    { value: 'first_name', label: 'First Name' },
+                    { value: 'last_name', label: 'Last Name' },
                 ]}
                 onSearch={onSearch}
             >
