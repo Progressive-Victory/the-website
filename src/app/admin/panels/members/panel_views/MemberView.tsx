@@ -4,14 +4,205 @@ import {
     CheckboxField,
     DateField,
     Form,
+    FormField,
+    FormFieldProps,
     FormGroup,
     FormState,
     PhoneField,
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
+import formFieldStyles from '@/components/common/forms/FormField.module.css'
 import { Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
+import { ChangeEvent, useEffect, useState } from 'react'
+
+const membershipCardShipmentOptions = [
+    { value: 'not_started', label: 'Not Started' },
+    { value: 'card_printed', label: 'Card Printed' },
+    { value: 'card_packaged', label: 'Card Packaged' },
+    { value: 'card_shipped', label: 'Card Shipped' },
+]
+
+const membershipMerchShipmentOptions = [
+    { value: 'not_started', label: 'Not Started' },
+    { value: 'merch_packaged', label: 'Merch Packaged' },
+    { value: 'merch_shipped', label: 'Merch Shipped' },
+]
+
+const shirtSizeOptions = [
+    { value: 'small', label: 'Small' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'large', label: 'Large' },
+    { value: 'xl', label: 'XL' },
+    { value: '2xl', label: '2XL' },
+]
+
+const duesMemberOptions = [
+    { value: 'not_dues_paying_member', label: 'Not Dues Paying Member' },
+    { value: 'dues_paying_member', label: 'Dues Paying Member' },
+    { value: 'premium_member', label: 'Premium Member' },
+    { value: 'signature_member', label: 'Signature Member' },
+    { value: 'inner_circle_member', label: 'Inner Circle Member' },
+]
+
+const membershipFulfillmentStatusOptions = [
+    { value: 'not_eligible', label: 'Not Eligible' },
+    { value: 'roles_received', label: 'Roles Received' },
+    { value: 'card_shipped', label: 'Card Shipped' },
+    { value: 'merch_shipped', label: 'Merch Shipped' },
+    { value: 'benefits_fulfilled', label: 'Benefits Fulfilled' },
+    { value: 'fulfillment_issue', label: 'Fulfillment Issue' },
+]
+
+interface StaticSelectFieldProps extends Pick<
+    FormFieldProps<User, string>,
+    'id' | 'label' | 'readonly' | 'dynamic'
+> {
+    defaultValue: string
+    options: { value: string; label: string }[]
+}
+
+interface StaticCheckboxFieldProps extends Pick<
+    FormFieldProps<User, boolean>,
+    'id' | 'label' | 'readonly' | 'dynamic'
+> {
+    defaultValue: boolean
+}
+
+const calcFutureDate = (
+    initialTime: Date,
+    period: 'weekly' | 'monthly',
+    duration: number
+) => {
+    switch (period) {
+        case 'weekly':
+            return new Date(
+                initialTime.getTime() +
+                    new Date(duration * 7 * 24 * 60 * 60 * 1000).getTime()
+            )
+        case 'monthly':
+            initialTime.setMonth(initialTime.getMonth())
+            return initialTime
+    }
+}
+
+const getHasActiveRecurringValue = (form: User): string => {
+    const donors = form.donors ?? []
+    if (donors.length === 0) return 'No Donor Info'
+
+    const hasActiveRecurring = donors.some((donor) =>
+        (donor.contributions ?? []).some(
+            (contribution) =>
+                contribution.isRecurring &&
+                ((contribution.recurringDuration ?? 1) < 0 ||
+                    calcFutureDate(
+                        contribution.createdAt,
+                        contribution.recurringPeriod as 'weekly' | 'monthly',
+                        contribution.recurringDuration ?? 1
+                    ) > new Date())
+        )
+    )
+
+    return hasActiveRecurring ? 'Yes' : 'No'
+}
+
+function StaticSelectField({
+    id,
+    label,
+    readonly,
+    dynamic,
+    defaultValue,
+    options,
+}: StaticSelectFieldProps) {
+    const [value, setValue] = useState(defaultValue)
+
+    useEffect(() => {
+        if (dynamic?.editing !== true) setValue(defaultValue)
+    }, [defaultValue, dynamic?.editing])
+
+    const isReadonly = readonly == true || dynamic?.editing !== true
+    const selectedLabel =
+        options.find((option) => option.value === value)?.label ?? ''
+
+    const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        setValue(event.target.value)
+    }
+
+    return (
+        <FormField<User, string>
+            id={id}
+            label={label}
+            readonly={isReadonly}
+            dynamic={dynamic}
+        >
+            {isReadonly ? (
+                <div className={formFieldStyles.readonly}>{selectedLabel}</div>
+            ) : (
+                <select
+                    id={id}
+                    name={label}
+                    value={value}
+                    onChange={handleChange}
+                    disabled={dynamic?.saving == true}
+                    className={formFieldStyles.textField}
+                >
+                    {options.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
+            )}
+        </FormField>
+    )
+}
+
+function StaticCheckboxField({
+    id,
+    label,
+    readonly,
+    dynamic,
+    defaultValue,
+}: StaticCheckboxFieldProps) {
+    const [value, setValue] = useState(defaultValue)
+
+    useEffect(() => {
+        if (dynamic?.editing !== true) setValue(defaultValue)
+    }, [defaultValue, dynamic?.editing])
+
+    const isReadonly = readonly == true || dynamic?.editing !== true
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setValue(event.target.checked)
+    }
+
+    return (
+        <FormField<User, boolean>
+            id={id}
+            label={label}
+            readonly={isReadonly}
+            dynamic={dynamic}
+        >
+            {isReadonly ? (
+                <div className={formFieldStyles.readonly}>
+                    {value ? 'Yes' : 'No'}
+                </div>
+            ) : (
+                <div className={formFieldStyles.checkboxField}>
+                    <input
+                        type="checkbox"
+                        id={id}
+                        name={label}
+                        checked={value}
+                        onChange={handleChange}
+                        disabled={dynamic?.saving == true}
+                    />
+                </div>
+            )}
+        </FormField>
+    )
+}
 
 export interface MemberViewProps {
     selectedId: number
@@ -191,6 +382,47 @@ export function MemberView({
                         },
                     })}
                     validator={(field) => field?.length == 5}
+                />
+            </FormGroup>
+
+            <FormGroup title="Membership Fulfillment (Mock)">
+                <StaticSelectField
+                    label="Membership Card Shipped"
+                    defaultValue="not_started"
+                    options={membershipCardShipmentOptions}
+                />
+                <StaticSelectField
+                    label="Membership Merch Shipped"
+                    defaultValue="not_started"
+                    options={membershipMerchShipmentOptions}
+                />
+                <StaticSelectField
+                    label="Shirt Size"
+                    defaultValue="medium"
+                    options={shirtSizeOptions}
+                />
+                <StaticSelectField
+                    label="Dues Paying Member"
+                    defaultValue="not_dues_paying_member"
+                    options={duesMemberOptions}
+                />
+                <StaticSelectField
+                    label="Membership Fulfillment Status"
+                    defaultValue="not_eligible"
+                    options={membershipFulfillmentStatusOptions}
+                />
+                <StaticCheckboxField
+                    label="Name Confirmed"
+                    defaultValue={false}
+                />
+                <StaticCheckboxField
+                    label="Address Confirmed"
+                    defaultValue={false}
+                />
+                <TextField<User>
+                    label="Has Active Recurring"
+                    readonly
+                    getter={getHasActiveRecurringValue}
                 />
             </FormGroup>
 
