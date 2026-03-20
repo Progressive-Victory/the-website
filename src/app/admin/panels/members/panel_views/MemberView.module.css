@@ -1,0 +1,364 @@
+.memberView {
+    container-type: inline-size;
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    position: relative;
+    z-index: 1;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.infoBlock {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.11);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+}
+
+.infoBlockFullWidth {
+    grid-column: 1 / -1;
+}
+
+.infoBlockMenuOpen {
+    z-index: 60;
+}
+
+.infoBlockRoleList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding-top: 0.1rem;
+}
+
+.infoBlockRolePillRemovable {
+    cursor: pointer;
+    user-select: none;
+    background: none;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+}
+
+.infoBlockRolePillRemovable:hover {
+    color: #ce3728;
+    text-decoration: line-through;
+    border-color: rgba(206, 55, 40, 0.25);
+    background: rgba(206, 55, 40, 0.06);
+}
+
+.infoBlockRoleAddControl {
+    position: relative;
+    z-index: 30;
+}
+
+.infoBlockRoleAddButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    aspect-ratio: 1 / 1;
+    border-radius: 9999px;
+    border: 1px solid rgba(15, 23, 42, 0.18);
+    background: rgba(255, 255, 255, 0.8);
+    color: rgba(15, 23, 42, 0.6);
+    cursor: pointer;
+    transition:
+        background 120ms,
+        color 120ms;
+}
+
+.infoBlockRoleAddButton:hover {
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.9);
+}
+
+.infoBlockRoleAddButton:focus-visible {
+    outline: 2px solid #ce3728;
+    outline-offset: 2px;
+}
+
+.infoBlockRolePill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #09223a;
+    background: rgba(15, 23, 42, 0.07);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+}
+
+.infoBlockHeader {
+    display: flex;
+    min-height: 2rem;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 auto;
+}
+
+.infoBlockHeaderActions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.infoBlockActionButton {
+    border: 1px solid transparent;
+    border-radius: 0.52rem;
+    padding: 0.35rem 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.infoBlockActionButtonCancel {
+    color: #fff;
+    border-color: #ce3728;
+    background: #ce3728;
+}
+
+.infoBlockActionButtonCancel:hover {
+    background: #b83022;
+}
+
+.infoBlockActionButtonSave {
+    color: #fff;
+    border-color: #2986cc;
+    background: #2986cc;
+}
+
+.infoBlockActionButtonSave:hover {
+    background: #2176b6;
+}
+
+.infoBlockBody {
+    position: relative;
+    overflow: hidden;
+    height: 0;
+    transition: height 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    flex: 0 0 auto;
+    will-change: height;
+}
+
+.infoBlockBodyContent {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+}
+
+.infoBlockTitle {
+    margin: 0;
+    font-weight: 700;
+    color: #09223a;
+}
+
+.infoBlockMenuControl {
+    position: relative;
+    z-index: 30;
+}
+
+.infoBlockMenuOverlay {
+    width: min(20rem, 85vw);
+    padding: 0.62rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    background: rgba(255, 255, 255, 0.94);
+    display: grid;
+    gap: 0.5rem;
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    z-index: 220;
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.16);
+    overflow-y: auto;
+    will-change: transform;
+}
+
+.infoBlockMenuLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.infoBlockMenuOptionList {
+    display: grid;
+    gap: 0.34rem;
+}
+
+.infoBlockMenuDivider {
+    height: 1px;
+    margin-inline: 0.2rem;
+    background: rgba(15, 23, 42, 0.08);
+    border-radius: 9999px;
+    pointer-events: none;
+}
+
+.infoBlockMenuOptionButton {
+    border-radius: 0.54rem;
+    background: rgba(255, 255, 255, 0.78);
+    color: rgba(9, 34, 58, 0.9);
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.38rem 0.52rem;
+    cursor: pointer;
+}
+
+.infoBlockMenuOptionButton:hover {
+    background: rgba(15, 23, 42, 0.05);
+}
+
+.infoBlockFieldRow {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.15rem;
+}
+
+.infoBlockFieldRowMultiline {
+    align-items: flex-start;
+}
+
+.infoBlockFieldLabel {
+    margin: 0;
+    color: #1f2f3f;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.infoBlockFieldValue {
+    margin: 0;
+    color: #59687a;
+    font-size: 0.95rem;
+    font-weight: 400;
+    line-height: 1.35;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.infoBlockInfoButton {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    max-width: 68%;
+    min-width: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #a0aec0;
+    border-radius: 0.3rem;
+}
+
+.infoBlockInfoButtonMultiline {
+    align-items: flex-start;
+}
+
+.infoBlockInfoButton:hover {
+    color: #59687a;
+}
+
+.infoBlockInfoButton:hover .infoBlockFieldValue {
+    color: #1f2f3f;
+}
+
+.infoBlockFieldValueMultiline {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
+    max-width: 68%;
+    min-width: 0;
+    text-align: right;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.infoBlockFieldValueLine {
+    display: block;
+}
+
+.infoBlockInfoButton:focus-visible {
+    outline: 2px solid #ce3728;
+    outline-offset: 2px;
+}
+
+.infoBlockInfoButton:disabled {
+    cursor: default;
+    pointer-events: none;
+}
+
+.infoBlockInfoIcon {
+    width: 1.1rem;
+    height: 1.1rem;
+    display: block;
+    flex-shrink: 0;
+}
+
+.infoBlockFieldInput {
+    flex: 1;
+    min-width: 0;
+    max-width: 68%;
+    background: rgba(15, 23, 42, 0.04);
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    border-radius: 0.4rem;
+    padding: 0.2rem 0.45rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #1f2f3f;
+    text-align: right;
+    outline: none;
+}
+
+.infoBlockFieldInput:focus {
+    border-color: #ce3728;
+    background: #fff;
+}
+
+.infoBlockFieldInput::placeholder {
+    color: #a0aec0;
+    opacity: 1;
+}
+
+@container (max-width: 593px) {
+    .infoGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .infoBlockBody,
+    .infoBlockBodyContent {
+        transition: none;
+    }
+}

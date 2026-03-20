@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
+import { DropdownButton, DropdownMenu } from '@/components/common'
 import {
     ActBlueFundraisingStatsResponse,
     zActBlueFundraisingStatsResponse,
@@ -11,7 +12,6 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FaDonate } from 'react-icons/fa'
 import { FaDollarSign } from 'react-icons/fa6'
-import { FiChevronDown } from 'react-icons/fi'
 
 function formatCount(value?: number) {
     if (value == null || !Number.isFinite(value)) return '—'
@@ -174,13 +174,8 @@ export default function Page() {
     const [endDate, setEndDate] = useState<Date | null>(null)
     const [draftStartDate, setDraftStartDate] = useState<Date | null>(null)
     const [draftEndDate, setDraftEndDate] = useState<Date | null>(null)
-    const [dateRangeOverlayMaxHeight, setDateRangeOverlayMaxHeight] =
-        useState<number>()
-    const [dateRangeOverlayOffset, setDateRangeOverlayOffset] = useState(0)
     const dashboardRef = useRef<HTMLDivElement | null>(null)
-    const dateRangeControlRef = useRef<HTMLDivElement | null>(null)
     const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
-    const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
     const { onGet } = useFetch()
 
     const handlePresetChange = (preset: DateRangePreset) => {
@@ -220,94 +215,6 @@ export default function Page() {
     useEffect(() => {
         statsQuery.refetch().catch((err) => console.error(err))
     }, [startDate, endDate, statsQuery])
-
-    useEffect(() => {
-        const onDocumentMouseDown = (event: MouseEvent) => {
-            if (!isDateRangeOverlayOpen) return
-
-            const control = dateRangeControlRef.current
-            if (!control) return
-
-            if (!control.contains(event.target as Node)) {
-                setIsDateRangeOverlayOpen(false)
-                setDraftStartDate(startDate)
-                setDraftEndDate(endDate)
-            }
-        }
-
-        document.addEventListener('mousedown', onDocumentMouseDown)
-        return () => {
-            document.removeEventListener('mousedown', onDocumentMouseDown)
-        }
-    }, [isDateRangeOverlayOpen, startDate, endDate])
-
-    useEffect(() => {
-        if (!isDateRangeOverlayOpen) {
-            setDateRangeOverlayMaxHeight(undefined)
-            setDateRangeOverlayOffset(0)
-            return
-        }
-
-        const viewportPadding = 12
-        const panelTopPadding = 12
-        const constrainedBottomMargin = 16
-        const triggerGap = 6
-
-        const updateDateRangeOverlayPosition = () => {
-            const trigger = dateRangeTriggerRef.current
-            const overlay = dateRangeOverlayRef.current
-            if (!trigger || !overlay) return
-
-            const triggerRect = trigger.getBoundingClientRect()
-            const panelRect = dashboardRef.current?.getBoundingClientRect()
-            const viewportHeight = window.innerHeight
-            const naturalOverlayHeight = overlay.scrollHeight
-            const naturalTop = triggerRect.bottom + triggerGap
-            const naturalViewportBottom = viewportHeight - viewportPadding
-            const overlayTopBoundary = panelRect
-                ? panelRect.top + panelTopPadding
-                : viewportPadding
-
-            const naturalBottom = naturalTop + naturalOverlayHeight
-            const shouldUseConstrainedBottomMargin =
-                naturalBottom > naturalViewportBottom
-            const viewportBottom =
-                viewportHeight -
-                viewportPadding -
-                (shouldUseConstrainedBottomMargin
-                    ? constrainedBottomMargin
-                    : 0)
-
-            const overflowBelow = Math.max(0, naturalBottom - viewportBottom)
-            const maxUpwardShift = Math.max(0, naturalTop - overlayTopBoundary)
-            const upwardShift = Math.min(overflowBelow, maxUpwardShift)
-
-            const shiftedTop = naturalTop - upwardShift
-            const availableHeight = viewportBottom - shiftedTop
-
-            setDateRangeOverlayOffset(Math.floor(upwardShift))
-
-            if (availableHeight >= naturalOverlayHeight) {
-                setDateRangeOverlayMaxHeight(undefined)
-                return
-            }
-
-            setDateRangeOverlayMaxHeight(Math.max(0, Math.floor(availableHeight)))
-        }
-
-        updateDateRangeOverlayPosition()
-        window.addEventListener('resize', updateDateRangeOverlayPosition)
-        window.addEventListener('scroll', updateDateRangeOverlayPosition, true)
-
-        return () => {
-            window.removeEventListener('resize', updateDateRangeOverlayPosition)
-            window.removeEventListener(
-                'scroll',
-                updateDateRangeOverlayPosition,
-                true
-            )
-        }
-    }, [isDateRangeOverlayOpen, dateRangePreset])
 
     const recurringPct = useMemo(() => {
         if (!statsQuery.data) return null
@@ -427,10 +334,7 @@ export default function Page() {
 
                     <div className={styles.dashboardDateGroup}>
                         <div className={styles.dateContainer}>
-                            <div
-                                ref={dateRangeControlRef}
-                                className={styles.dateFilterControls}
-                            >
+                            <div className={styles.dateFilterControls}>
                                 <label
                                     htmlFor="fundraising-date-range-trigger"
                                     className={styles.dateFilterLabel}
@@ -438,270 +342,231 @@ export default function Page() {
                                     Date Range
                                 </label>
 
-                                <button
+                                <DropdownButton
                                     id="fundraising-date-range-trigger"
-                                    type="button"
                                     ref={dateRangeTriggerRef}
-                                    className={styles.dateRangeTriggerButton}
+                                    isOpen={isDateRangeOverlayOpen}
+                                    label={selectedRangeLabel}
                                     onClick={() => {
                                         if (!isDateRangeOverlayOpen) {
                                             setDraftStartDate(startDate)
                                             setDraftEndDate(endDate)
                                         }
-
                                         setIsDateRangeOverlayOpen(
                                             (current) => !current
                                         )
                                     }}
-                                    aria-haspopup="dialog"
-                                    aria-expanded={isDateRangeOverlayOpen}
-                                >
-                                    <span>{selectedRangeLabel}</span>
-                                    <FiChevronDown
-                                        className={
-                                            styles.dateRangeTriggerChevron
-                                        }
-                                        aria-hidden="true"
-                                        size={14}
-                                    />
-                                </button>
-
-                                {isDateRangeOverlayOpen && (
-                                    <div
-                                        ref={dateRangeOverlayRef}
-                                        className={styles.customDateRangeBox}
-                                        style={{
-                                            maxHeight:
-                                                dateRangeOverlayMaxHeight !=
-                                                null
-                                                    ? `${dateRangeOverlayMaxHeight}px`
-                                                    : undefined,
-                                            transform: `translateY(-${dateRangeOverlayOffset}px)`,
-                                        }}
-                                    >
-                                        <div
-                                            className={styles.customRangeLabel}
-                                        >
-                                            Select Range
-                                        </div>
-                                        <div
-                                            className={
-                                                styles.dateRangeOptionList
-                                            }
-                                        >
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'all-time' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange(
-                                                        'all-time'
-                                                    )
-                                                }
-                                            >
-                                                All Time
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'month-to-date' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange(
-                                                        'month-to-date'
-                                                    )
-                                                }
-                                            >
-                                                Month to Date
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'last-month' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange(
-                                                        'last-month'
-                                                    )
-                                                }
-                                            >
-                                                Last Month
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'today' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange('today')
-                                                }
-                                            >
-                                                Today
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'custom' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange('custom')
-                                                }
-                                            >
-                                                Custom Range
-                                            </button>
-                                        </div>
-
-                                        {dateRangePreset === 'custom' && (
-                                            <>
-                                                <div
-                                                    className={
-                                                        styles.customDateField
-                                                    }
-                                                >
-                                                    <label htmlFor="custom-start-date">
-                                                        Start Date
-                                                    </label>
-                                                    <input
-                                                        id="custom-start-date"
-                                                        type="date"
-                                                        name="startDate"
-                                                        max={
-                                                            draftEndInputValue
-                                                                ? draftEndInputValue <
-                                                                  todayInputValue
-                                                                    ? draftEndInputValue
-                                                                    : todayInputValue
-                                                                : todayInputValue
-                                                        }
-                                                        onChange={(ev) => {
-                                                            const value =
-                                                                fromInputGetDateValue(
-                                                                    ev.target
-                                                                        .value
+                                    menu={
+                                        <DropdownMenu
+                                            triggerRef={dateRangeTriggerRef}
+                                            onClose={() => {
+                                                setIsDateRangeOverlayOpen(false)
+                                                setDraftStartDate(startDate)
+                                                setDraftEndDate(endDate)
+                                            }}
+                                            boundaryRef={dashboardRef}
+                                            label="Select Range"
+                                            footer={
+                                                dateRangePreset === 'custom' ? (
+                                                    <>
+                                                        <button
+                                                            type="button"
+                                                            className={
+                                                                styles.cancelRangeButton
+                                                            }
+                                                            onClick={() => {
+                                                                setDraftStartDate(
+                                                                    startDate
                                                                 )
-
-                                                            if (
-                                                                value &&
-                                                                draftEndDate &&
-                                                                isAfterDate(
-                                                                    value,
+                                                                setDraftEndDate(
+                                                                    endDate
+                                                                )
+                                                                setIsDateRangeOverlayOpen(
+                                                                    false
+                                                                )
+                                                            }}
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className={
+                                                                styles.setRangeButton
+                                                            }
+                                                            disabled={
+                                                                !canApplyCustomRange
+                                                            }
+                                                            onClick={() => {
+                                                                if (
+                                                                    !canApplyCustomRange
+                                                                )
+                                                                    return
+                                                                setStartDate(
+                                                                    draftStartDate
+                                                                )
+                                                                setEndDate(
                                                                     draftEndDate
                                                                 )
-                                                            ) {
-                                                                return
-                                                            }
-
-                                                            setDraftStartDate(
-                                                                value
-                                                                    ? startOfDay(
-                                                                          value
-                                                                      )
-                                                                    : null
-                                                            )
-                                                        }}
-                                                        value={toInputDateValue(
-                                                            draftStartDate
-                                                        )}
-                                                    />
-                                                </div>
-
-                                                <div
-                                                    className={
-                                                        styles.customDateField
-                                                    }
-                                                >
-                                                    <label htmlFor="custom-end-date">
-                                                        End Date
-                                                    </label>
-                                                    <input
-                                                        id="custom-end-date"
-                                                        type="date"
-                                                        name="endDate"
-                                                        min={
-                                                            draftStartInputValue ||
-                                                            undefined
-                                                        }
-                                                        max={todayInputValue}
-                                                        onChange={(ev) => {
-                                                            const value =
-                                                                fromInputGetDateValue(
-                                                                    ev.target
-                                                                        .value
+                                                                setIsDateRangeOverlayOpen(
+                                                                    false
                                                                 )
+                                                            }}
+                                                        >
+                                                            Set Range
+                                                        </button>
+                                                    </>
+                                                ) : undefined
+                                            }
+                                        >
+                                            <div
+                                                className={
+                                                    styles.dateRangeOptionList
+                                                }
+                                            >
+                                                {(
+                                                    [
+                                                        [
+                                                            'all-time',
+                                                            'All Time',
+                                                        ],
+                                                        [
+                                                            'month-to-date',
+                                                            'Month to Date',
+                                                        ],
+                                                        [
+                                                            'last-month',
+                                                            'Last Month',
+                                                        ],
+                                                        ['today', 'Today'],
+                                                        [
+                                                            'custom',
+                                                            'Custom Range',
+                                                        ],
+                                                    ] as const
+                                                ).map(([preset, label]) => (
+                                                    <DropdownMenu.Button
+                                                        key={preset}
+                                                        label={label}
+                                                        active={
+                                                            dateRangePreset ===
+                                                            preset
+                                                        }
+                                                        onClick={() =>
+                                                            handlePresetChange(
+                                                                preset
+                                                            )
+                                                        }
+                                                    />
+                                                ))}
+                                            </div>
 
-                                                            if (
-                                                                value &&
-                                                                draftStartDate &&
-                                                                isAfterDate(
-                                                                    draftStartDate,
+                                            {dateRangePreset === 'custom' && (
+                                                <>
+                                                    <div
+                                                        className={
+                                                            styles.customDateField
+                                                        }
+                                                    >
+                                                        <label htmlFor="custom-start-date">
+                                                            Start Date
+                                                        </label>
+                                                        <input
+                                                            id="custom-start-date"
+                                                            type="date"
+                                                            name="startDate"
+                                                            max={
+                                                                draftEndInputValue
+                                                                    ? draftEndInputValue <
+                                                                      todayInputValue
+                                                                        ? draftEndInputValue
+                                                                        : todayInputValue
+                                                                    : todayInputValue
+                                                            }
+                                                            onChange={(ev) => {
+                                                                const value =
+                                                                    fromInputGetDateValue(
+                                                                        ev
+                                                                            .target
+                                                                            .value
+                                                                    )
+                                                                if (
+                                                                    value &&
+                                                                    draftEndDate &&
+                                                                    isAfterDate(
+                                                                        value,
+                                                                        draftEndDate
+                                                                    )
+                                                                ) {
+                                                                    return
+                                                                }
+                                                                setDraftStartDate(
                                                                     value
+                                                                        ? startOfDay(
+                                                                              value
+                                                                          )
+                                                                        : null
                                                                 )
-                                                            ) {
-                                                                return
-                                                            }
-
-                                                            setDraftEndDate(
-                                                                value
-                                                                    ? endOfDay(
-                                                                          value
-                                                                      )
-                                                                    : null
-                                                            )
-                                                        }}
-                                                        value={toInputDateValue(
-                                                            draftEndDate
-                                                        )}
-                                                    />
-                                                </div>
-
-                                                <div
-                                                    className={
-                                                        styles.customDateActions
-                                                    }
-                                                >
-                                                    <button
-                                                        type="button"
-                                                        className={
-                                                            styles.cancelRangeButton
-                                                        }
-                                                        onClick={() => {
-                                                            setDraftStartDate(
-                                                                startDate
-                                                            )
-                                                            setDraftEndDate(
-                                                                endDate
-                                                            )
-                                                            setIsDateRangeOverlayOpen(
-                                                                false
-                                                            )
-                                                        }}
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className={
-                                                            styles.setRangeButton
-                                                        }
-                                                        disabled={
-                                                            !canApplyCustomRange
-                                                        }
-                                                        onClick={() => {
-                                                            if (
-                                                                !canApplyCustomRange
-                                                            ) {
-                                                                return
-                                                            }
-
-                                                            setStartDate(
+                                                            }}
+                                                            value={toInputDateValue(
                                                                 draftStartDate
-                                                            )
-                                                            setEndDate(
-                                                                draftEndDate
-                                                            )
-                                                            setIsDateRangeOverlayOpen(
-                                                                false
-                                                            )
-                                                        }}
+                                                            )}
+                                                        />
+                                                    </div>
+
+                                                    <div
+                                                        className={
+                                                            styles.customDateField
+                                                        }
                                                     >
-                                                        Set Range
-                                                    </button>
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                )}
+                                                        <label htmlFor="custom-end-date">
+                                                            End Date
+                                                        </label>
+                                                        <input
+                                                            id="custom-end-date"
+                                                            type="date"
+                                                            name="endDate"
+                                                            min={
+                                                                draftStartInputValue ||
+                                                                undefined
+                                                            }
+                                                            max={
+                                                                todayInputValue
+                                                            }
+                                                            onChange={(ev) => {
+                                                                const value =
+                                                                    fromInputGetDateValue(
+                                                                        ev
+                                                                            .target
+                                                                            .value
+                                                                    )
+                                                                if (
+                                                                    value &&
+                                                                    draftStartDate &&
+                                                                    isAfterDate(
+                                                                        draftStartDate,
+                                                                        value
+                                                                    )
+                                                                ) {
+                                                                    return
+                                                                }
+                                                                setDraftEndDate(
+                                                                    value
+                                                                        ? endOfDay(
+                                                                              value
+                                                                          )
+                                                                        : null
+                                                                )
+                                                            }}
+                                                            value={toInputDateValue(
+                                                                draftEndDate
+                                                            )}
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
+                                        </DropdownMenu>
+                                    }
+                                />
                             </div>
                         </div>
                     </div>

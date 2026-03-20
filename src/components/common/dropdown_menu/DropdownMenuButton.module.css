@@ -1,0 +1,24 @@
+.button {
+    border-radius: 0.54rem;
+    background: rgba(255, 255, 255, 0.78);
+    color: rgba(9, 34, 58, 0.9);
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.38rem 0.52rem;
+    cursor: pointer;
+}
+
+.button:hover {
+    background: rgba(15, 23, 42, 0.05);
+}
+
+.buttonActive {
+    color: rgba(2, 132, 199, 1);
+    background: rgba(14, 165, 233, 0.14);
+}
+
+.buttonActive:hover {
+    color: rgba(2, 132, 199, 1);
+    background: rgba(84, 158, 214, 0.14);
+}

@@ -8,7 +8,7 @@ import { ChangeEvent, useCallback } from 'react'
  * Formats a phone number string for display in readonly mode.
  * Accepts various formats and normalizes to "(XXX) XXX-XXXX" format.
  */
-function formatPhoneDisplay(phoneNumber: string): string {
+export function formatPhoneDisplay(phoneNumber: string): string {
     if (!phoneNumber) return ''
 
     const parsed = phone(phoneNumber, { country: 'US' })
