@@ -192,7 +192,10 @@ export function ListTop({
                         />
                     </div>
 
-                    <SortSelect sort={sort} onSelect={handleChangeSort} />
+                    <SortSelect
+                        sort={sort ?? SortDirection.DESC}
+                        onSelect={handleChangeSort}
+                    />
 
                     <FilterSelect
                         filters={filter as Record<string, (string | number)[]>}
