@@ -1,0 +1,118 @@
+.infoBlockFieldRow {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.15rem;
+}
+
+.infoBlockFieldRowMultiline {
+    align-items: flex-start;
+}
+
+.infoBlockFieldLabel {
+    margin: 0;
+    color: #1f2f3f;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.infoBlockFieldValue {
+    margin: 0;
+    color: #59687a;
+    font-size: 0.95rem;
+    font-weight: 400;
+    line-height: 1.35;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.infoBlockInfoButton {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    max-width: 68%;
+    min-width: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #a0aec0;
+    border-radius: 0.3rem;
+}
+
+.infoBlockInfoButtonMultiline {
+    align-items: flex-start;
+}
+
+.infoBlockInfoButton:hover {
+    color: #59687a;
+}
+
+.infoBlockInfoButton:hover .infoBlockFieldValue {
+    color: #1f2f3f;
+}
+
+.infoBlockFieldValueMultiline {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
+    max-width: 68%;
+    min-width: 0;
+    text-align: right;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.infoBlockFieldValueLine {
+    display: block;
+}
+
+.infoBlockInfoButton:focus-visible {
+    outline: 2px solid #ce3728;
+    outline-offset: 2px;
+}
+
+.infoBlockInfoButton:disabled {
+    cursor: default;
+    pointer-events: none;
+}
+
+.infoBlockInfoIcon {
+    width: 1.1rem;
+    height: 1.1rem;
+    display: block;
+    flex-shrink: 0;
+}
+
+.infoBlockFieldInput {
+    flex: 1;
+    min-width: 0;
+    max-width: 68%;
+    background: rgba(15, 23, 42, 0.04);
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    border-radius: 0.4rem;
+    padding: 0.2rem 0.45rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #1f2f3f;
+    text-align: right;
+    outline: none;
+}
+
+.infoBlockFieldInput:focus {
+    border-color: #ce3728;
+    background: #fff;
+}
+
+.infoBlockFieldInput::placeholder {
+    color: #a0aec0;
+    opacity: 1;
+}

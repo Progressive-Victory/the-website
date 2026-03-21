@@ -1,59 +1,48 @@
-import styles from './MemberView.module.css'
+import { useInfoBlockContext } from '../Block'
+import styles from './BlockField.module.css'
+import { User } from '@/contracts/data'
 import { InformationCircleIcon } from '@heroicons/react/24/outline'
 import type React from 'react'
-
-export interface BlockFieldEditConfig {
-    inputType?: React.HTMLInputTypeAttribute
-    value: string
-    placeholder?: string
-    onFocus?: () => void
-    onBlur?: () => void
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-}
 
 export interface BlockFieldProps {
     label: string
     ariaLabel?: string
-    /** Whether the parent block is currently in edit mode. */
-    editing?: boolean
-    /**
-     * Controls visibility per mode.
-     * - 'both'  (default): visible in both view and edit mode
-     * - 'view':  only visible when not editing
-     * - 'edit':  only visible when editing
-     */
     showIn?: 'both' | 'view' | 'edit'
-    /** Value shown in view mode, or as a readonly display when editing without an edit config. */
-    value?: React.ReactNode
-    /** When provided and editing=true, renders an editable input. Omit to make the field readonly in edit mode. */
-    edit?: BlockFieldEditConfig
+    getter: (user: User) => React.ReactNode
+    editGetter?: (user: User) => string
+    setter?: (user: User, value: string) => User
+    inputType?: React.HTMLInputTypeAttribute
 }
 
 export function BlockField({
     label,
     ariaLabel,
-    editing = false,
     showIn = 'both',
-    value,
-    edit,
+    getter,
+    editGetter,
+    setter,
+    inputType,
 }: BlockFieldProps) {
+    const { user, draft, editing, onDraftChange } = useInfoBlockContext()
+    const displayValue = getter(editing ? draft : user)
     if (showIn === 'view' && editing) return null
     if (showIn === 'edit' && !editing) return null
 
-    const isReadonlyInEdit = editing && edit == null
+    const isEditable = editing && setter != null
+    const isReadonlyInEdit = editing && !isEditable
 
     return (
         <div className={styles.infoBlockFieldRow}>
             <span className={styles.infoBlockFieldLabel}>{label}</span>
-            {editing && edit != null ? (
+            {isEditable ? (
                 <input
-                    type={edit.inputType ?? 'text'}
+                    type={inputType ?? 'text'}
                     className={styles.infoBlockFieldInput}
-                    value={edit.value}
-                    placeholder={edit.placeholder}
-                    onFocus={edit.onFocus}
-                    onBlur={edit.onBlur}
-                    onChange={edit.onChange}
+                    value={editGetter ? editGetter(draft) : ''}
+                    placeholder="Empty"
+                    onChange={(e) =>
+                        onDraftChange((u) => setter(u, e.target.value))
+                    }
                     aria-label={ariaLabel}
                 />
             ) : (
@@ -64,7 +53,7 @@ export function BlockField({
                     disabled={isReadonlyInEdit}
                 >
                     <span className={styles.infoBlockFieldValue}>
-                        {value ?? '-'}
+                        {displayValue ?? '-'}
                     </span>
                     {!isReadonlyInEdit && (
                         <InformationCircleIcon

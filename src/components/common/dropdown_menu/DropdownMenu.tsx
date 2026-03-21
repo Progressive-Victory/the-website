@@ -5,11 +5,8 @@ import { DropdownMenuButton } from './DropdownMenuButton'
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 
 export interface DropdownMenuProps extends React.HTMLAttributes<HTMLDivElement> {
-    /** Ref to the trigger element that opened this menu. Used for positioning and click-outside detection. */
     triggerRef: React.RefObject<HTMLElement | null>
-    /** Called when a click outside both the menu and trigger is detected, or when Escape is pressed. */
     onClose: () => void
-    /** Optional boundary element — the menu will not shift upward past its top edge, and stays within its horizontal edges. */
     boundaryRef?: React.RefObject<HTMLElement | null>
     label?: React.ReactNode
     footer?: React.ReactNode
@@ -37,20 +34,16 @@ export const DropdownMenu = Object.assign(
         externalRef
     ) {
         const internalRef = useRef<HTMLDivElement | null>(null)
-        // Always-fresh ref so event handlers never close over stale state
         const onCloseRef = useRef(onClose)
         const [maxHeight, setMaxHeight] = useState<number | undefined>()
         const [offset, setOffset] = useState(0)
         const [offsetX, setOffsetX] = useState(0)
-        // Tracks the currently-applied X shift so we can compute the natural
-        // (untransformed) menu rect without creating a measurement feedback loop.
         const offsetXRef = useRef(0)
 
         useEffect(() => {
             onCloseRef.current = onClose
         })
 
-        // Merge forwarded external ref with our internal ref
         const setRef = useCallback(
             (node: HTMLDivElement | null) => {
                 internalRef.current = node
@@ -63,8 +56,6 @@ export const DropdownMenu = Object.assign(
             [externalRef]
         )
 
-        // Viewport-aware positioning: slides the menu upward / horizontally and
-        // caps its height so it is always fully visible within the viewport.
         useEffect(() => {
             const VIEWPORT_PADDING = 12
             const BOUNDARY_TOP_PADDING = 12
@@ -77,7 +68,6 @@ export const DropdownMenu = Object.assign(
                 const menu = internalRef.current
                 if (!trigger || !menu) return
 
-                // --- Vertical positioning ---
                 const triggerRect = trigger.getBoundingClientRect()
                 const viewportHeight = window.innerHeight
                 const naturalHeight = menu.scrollHeight
@@ -114,9 +104,6 @@ export const DropdownMenu = Object.assign(
                         : Math.max(0, Math.floor(availableHeight))
                 )
 
-                // --- Horizontal positioning ---
-                // Subtract the currently-applied X transform to recover the
-                // menu's natural (CSS-determined) viewport position.
                 const menuRect = menu.getBoundingClientRect()
                 const naturalLeft = menuRect.left - offsetXRef.current
                 const naturalRight = menuRect.right - offsetXRef.current
@@ -141,7 +128,6 @@ export const DropdownMenu = Object.assign(
 
             update()
 
-            // Re-run whenever the menu content resizes (e.g. expanding custom fields)
             const ro = new ResizeObserver(update)
             if (internalRef.current) ro.observe(internalRef.current)
             window.addEventListener('resize', update)
@@ -154,7 +140,6 @@ export const DropdownMenu = Object.assign(
             }
         }, [triggerRef, boundaryRef])
 
-        // Click-outside and Escape key to close
         useEffect(() => {
             const handleMouseDown = (e: MouseEvent) => {
                 const menu = internalRef.current

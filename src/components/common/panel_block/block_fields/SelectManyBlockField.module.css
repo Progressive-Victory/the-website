@@ -1,0 +1,64 @@
+.list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding-top: 0.1rem;
+}
+
+.addControl {
+    position: relative;
+    z-index: 30;
+}
+
+.addButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    aspect-ratio: 1 / 1;
+    border-radius: 9999px;
+    border: 1px solid rgba(15, 23, 42, 0.18);
+    background: rgba(255, 255, 255, 0.8);
+    color: rgba(15, 23, 42, 0.6);
+    cursor: pointer;
+    transition:
+        background 120ms,
+        color 120ms;
+}
+
+.addButton:hover {
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.9);
+}
+
+.addButton:focus-visible {
+    outline: 2px solid #ce3728;
+    outline-offset: 2px;
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #09223a;
+    background: rgba(15, 23, 42, 0.07);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+}
+
+.pillRemovable {
+    cursor: pointer;
+    user-select: none;
+    background: none;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+}
+
+.pillRemovable:hover {
+    color: #ce3728;
+    text-decoration: line-through;
+    border-color: rgba(206, 55, 40, 0.25);
+    background: rgba(206, 55, 40, 0.06);
+}

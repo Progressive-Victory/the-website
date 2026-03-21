@@ -7,10 +7,8 @@ import { FiChevronDown } from 'react-icons/fi'
 
 export interface DropdownButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     isOpen: boolean
-    /** Visual text label shown in the `long` variant. Not used in `short`. */
     label?: string
     menu?: React.ReactNode
-    /** `long` (default) — text + chevron button. `short` — compact ellipsis icon button. */
     buttonVariant?: 'long' | 'short'
 }
 
