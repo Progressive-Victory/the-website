@@ -1,5 +1,5 @@
 import { useFetch } from './useFetch'
-import { SearchRequest, SortDirection } from '@/contracts/requests'
+import { SearchRequest } from '@/contracts/requests'
 import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import {
     keepPreviousData,
