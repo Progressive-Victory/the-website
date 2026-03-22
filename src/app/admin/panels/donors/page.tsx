@@ -45,10 +45,6 @@ export default function Page() {
         onSearch,
     } = usePaginatedSearch<ActBlueDonor>('/actblue/donors', zActBlueDonor)
 
-    useEffect(() => {
-        if (searchQuery.data) console.log(searchQuery.data)
-    }, [searchQuery.data])
-
     const donorQuery = useQuery({
         queryKey: [`/actblue/donors/${selectedEmail}`],
         queryFn:
