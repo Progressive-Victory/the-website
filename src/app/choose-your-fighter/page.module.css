@@ -1,14 +1,404 @@
 .pageWrap {
     width: 100%;
     min-height: 100dvh;
-    height: 100dvh;
-    display: grid;
-    place-items: stretch;
-    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 40%, #0c1422 0%, #050810 100%);
+    padding: 1.5rem;
+}
+
+.tv {
+    position: relative;
+    width: min(98vw, calc((88dvh - 5rem) * 1.55));
+    background: linear-gradient(
+        168deg,
+        #909aa4 0%,
+        #808890 38%,
+        #737980 68%,
+        #696e75 100%
+    );
+    border-radius: 0.85rem;
+    padding: 2.6rem 1.9rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.32),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.38),
+        inset 3px 0 4px rgba(255, 255, 255, 0.06),
+        inset -3px 0 6px rgba(0, 0, 0, 0.3),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+        0 7px 0 #16191c,
+        0 12px 38px rgba(5, 10, 20, 0.78),
+        0 24px 68px rgba(5, 10, 20, 0.48);
+}
+
+.tv::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 0.85rem;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        radial-gradient(
+            ellipse at 2% 3%,
+            rgba(20, 18, 14, 0.55) 0%,
+            transparent 14%
+        ),
+        radial-gradient(
+            ellipse at 97% 2%,
+            rgba(20, 18, 14, 0.42) 0%,
+            transparent 10%
+        ),
+        radial-gradient(
+            ellipse at 3% 97%,
+            rgba(15, 12, 10, 0.5) 0%,
+            transparent 12%
+        ),
+        radial-gradient(
+            ellipse at 97% 96%,
+            rgba(20, 16, 12, 0.58) 0%,
+            transparent 16%
+        ),
+        radial-gradient(
+            ellipse at 0% 52%,
+            rgba(0, 0, 0, 0.28) 0%,
+            transparent 8%
+        ),
+        radial-gradient(
+            ellipse at 100% 48%,
+            rgba(0, 0, 0, 0.24) 0%,
+            transparent 8%
+        ),
+        linear-gradient(
+            180deg,
+            transparent 18%,
+            rgba(255, 255, 240, 0.05) 18.4%,
+            rgba(255, 255, 240, 0.05) 18.7%,
+            transparent 19%
+        ),
+        linear-gradient(
+            182deg,
+            transparent 44%,
+            rgba(0, 0, 0, 0.09) 44.3%,
+            rgba(0, 0, 0, 0.09) 44.55%,
+            transparent 44.8%
+        ),
+        linear-gradient(
+            112deg,
+            transparent 28%,
+            rgba(255, 255, 240, 0.04) 28.3%,
+            rgba(255, 255, 240, 0.04) 28.55%,
+            transparent 28.85%
+        );
+}
+
+.tv::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 0.85rem;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.55;
+    background-image:
+        repeating-linear-gradient(
+            97deg,
+            transparent 0px,
+            transparent 3px,
+            rgba(0, 0, 0, 0.035) 3px,
+            rgba(0, 0, 0, 0.035) 4px
+        ),
+        repeating-linear-gradient(
+            7deg,
+            transparent 0px,
+            transparent 5px,
+            rgba(255, 255, 255, 0.018) 5px,
+            rgba(255, 255, 255, 0.018) 6px
+        );
+}
+
+.tvScreenBezel {
+    background: linear-gradient(172deg, #28303e 0%, #1c2430 100%);
+    border-radius: 0.45rem;
+    padding: 0.9rem;
+    box-shadow:
+        inset 0 3px 10px rgba(0, 0, 0, 0.7),
+        inset 0 -1px 3px rgba(0, 0, 0, 0.32),
+        0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.tvScreen {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 0.3rem;
+    background: #000;
+    box-shadow:
+        inset 0 0 0 2px #12181e,
+        inset 0 0 30px rgba(0, 0, 0, 0.92),
+        0 0 22px rgba(75, 150, 225, 0.14);
+    animation:
+        crtPhosphor 8s ease-in-out infinite,
+        tvFlicker 0.18s steps(1, end) infinite;
+}
+
+.scanlines {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0, 0, 0, 0.38) 3px,
+        rgba(0, 0, 0, 0.38) 4px
+    );
+    animation: scanlineShift 9s linear infinite;
+}
+
+.screenReflection {
+    position: absolute;
+    inset: 0;
+    z-index: 11;
+    pointer-events: none;
+    border-radius: 0.5rem;
+    background:
+        radial-gradient(
+            ellipse at 50% 50%,
+            transparent 52%,
+            rgba(0, 0, 0, 0.72) 100%
+        ),
+        radial-gradient(
+            ellipse at 28% 18%,
+            rgba(255, 255, 255, 0.055) 0%,
+            transparent 45%
+        );
+}
+
+.rollBand {
+    position: absolute;
+    inset: 0;
+    z-index: 12;
+    pointer-events: none;
+    background: linear-gradient(
+        0deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.03) 40%,
+        rgba(255, 255, 255, 0.06) 50%,
+        rgba(255, 255, 255, 0.03) 60%,
+        transparent 100%
+    );
+    background-size: 100% 30%;
+    animation: rollBand 6s linear infinite;
+}
+
+.phosphorFringe {
+    position: absolute;
+    inset: 0;
+    z-index: 13;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    animation: rgbFringe 3s steps(1, end) infinite;
+}
+
+.tvLowerFace {
+    display: flex;
+    align-items: stretch;
+    gap: 0.65rem;
+    height: 2.8rem;
+}
+
+.tvSpeakerGrille {
+    flex: 1;
+    border-radius: 0.25rem;
+    background: repeating-linear-gradient(
+        180deg,
+        #252e3c 0px,
+        #252e3c 3px,
+        #161c28 3px,
+        #161c28 5.5px
+    );
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.58),
+        0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.tvRightControls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 0.18rem 0.12rem;
+}
+
+.tvBrand {
+    font-size: 0.52rem;
+    font-weight: 900;
+    letter-spacing: 0.22em;
+    color: #cc2200;
+    font-family: 'Arial', Helvetica, sans-serif;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.tvTunerKnob {
+    width: 1.7rem;
+    height: 1.7rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, #8898a8, #2a3848);
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    position: relative;
+}
+
+.tvTunerKnob::after {
+    content: '';
+    position: absolute;
+    top: 18%;
+    left: 50%;
+    width: 2px;
+    height: 28%;
+    background: rgba(255, 255, 255, 0.38);
+    transform: translateX(-50%);
+    border-radius: 1px;
+}
+
+.tvPowerLight {
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: 50%;
+    background: #b02818;
+    flex-shrink: 0;
+    box-shadow:
+        0 0 4px rgba(180, 40, 24, 0.9),
+        0 0 8px rgba(180, 40, 24, 0.45);
+}
+
+.tvFeet {
+    width: min(98vw, calc((88dvh - 5rem) * 1.55));
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2rem;
+}
+
+.tvFeet::before,
+.tvFeet::after {
+    content: '';
+    display: block;
+    width: 3.5rem;
+    height: 0.55rem;
+    background: linear-gradient(180deg, #283040 0%, #181e2c 100%);
+    border-radius: 0 0 0.35rem 0.35rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes crtPhosphor {
+    0%,
+    100% {
+        box-shadow:
+            inset 0 0 0 2px #12181e,
+            inset 0 0 30px rgba(0, 0, 0, 0.92),
+            0 0 22px rgba(75, 150, 225, 0.1);
+    }
+
+    50% {
+        box-shadow:
+            inset 0 0 0 2px #12181e,
+            inset 0 0 30px rgba(0, 0, 0, 0.92),
+            0 0 44px rgba(75, 150, 225, 0.3);
+    }
+}
+
+@keyframes tvFlicker {
+    0%,
+    19%,
+    21%,
+    23%,
+    100% {
+        opacity: 1;
+    }
+    20%,
+    22% {
+        opacity: 0.88;
+    }
+}
+
+@keyframes scanlineShift {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: 0 80px;
+    }
+}
+
+@keyframes rollBand {
+    from {
+        background-position: 0 120%;
+    }
+    to {
+        background-position: 0 -200%;
+    }
+}
+
+@keyframes rgbFringe {
+    0%,
+    82%,
+    100% {
+        background: none;
+        transform: translate(0, 0);
+    }
+
+    84% {
+        background: linear-gradient(
+            90deg,
+            rgba(206, 55, 40, 0.12) 0%,
+            transparent 40%,
+            transparent 60%,
+            rgba(75, 150, 225, 0.12) 100%
+        );
+        transform: translate(-2px, 0);
+    }
+
+    87% {
+        background: linear-gradient(
+            90deg,
+            rgba(75, 150, 225, 0.14) 0%,
+            transparent 40%,
+            transparent 60%,
+            rgba(206, 55, 40, 0.14) 100%
+        );
+        transform: translate(3px, 0);
+    }
+
+    90% {
+        background: none;
+        transform: translate(-1px, 1px);
+    }
+
+    93% {
+        background: linear-gradient(
+            90deg,
+            rgba(206, 55, 40, 0.1) 0%,
+            transparent 35%,
+            transparent 65%,
+            rgba(75, 150, 225, 0.1) 100%
+        );
+        transform: translate(2px, -1px);
+    }
 }
 
 .banner {
-    position: relative;
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -17,7 +407,11 @@
     height: 100%;
     text-align: center;
     border: 2px solid #fdb515;
-    background: linear-gradient(130deg, rgb(206 55 40 / 96%), rgb(9 34 58 / 98%));
+    background: linear-gradient(
+        130deg,
+        rgb(206 55 40 / 96%),
+        rgb(9 34 58 / 98%)
+    );
     box-shadow:
         0 0 0 2px rgb(253 181 21 / 30%),
         0 1.4rem 3rem rgb(9 34 58 / 55%);
@@ -147,7 +541,11 @@
     gap: 0.72rem;
 }
 
-
+.block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
 .value {
     position: relative;
@@ -201,6 +599,55 @@
     font-weight: 900;
     color: #ffffff;
     animation: chromaticAberration 3s steps(1, end) infinite;
+}
+
+.statusLink {
+    display: inline-block;
+    color: #ffffff;
+    background: #ce3728;
+    text-decoration: none;
+    padding: 0.35em 0.9em;
+    border-radius: 0.25em;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    cursor: pointer;
+    box-shadow:
+        0 2px 0 #7e1e14,
+        0 4px 12px rgba(206, 55, 40, 0.35);
+    transition:
+        background 120ms ease,
+        box-shadow 120ms ease,
+        transform 120ms ease;
+    animation: ctaPulse 2s ease-in-out infinite;
+}
+
+.statusLink:hover {
+    background: #e84535;
+    box-shadow:
+        0 2px 0 #7e1e14,
+        0 6px 22px rgba(206, 55, 40, 0.55);
+    transform: translateY(-1px);
+}
+
+.statusLink:active {
+    transform: translateY(1px);
+    box-shadow:
+        0 1px 0 #7e1e14,
+        0 2px 6px rgba(206, 55, 40, 0.3);
+}
+
+@keyframes ctaPulse {
+    0%,
+    100% {
+        box-shadow:
+            0 2px 0 #7e1e14,
+            0 4px 12px rgba(206, 55, 40, 0.35);
+    }
+    50% {
+        box-shadow:
+            0 2px 0 #7e1e14,
+            0 4px 28px rgba(206, 55, 40, 0.7);
+    }
 }
 
 @keyframes alertPulse {
@@ -601,17 +1048,33 @@
     .banner,
     .banner::before,
     .banner::after,
-    .bannerHalftone {
+    .bannerHalftone,
+    .tvScreen {
         animation: none;
     }
 }
 
 @media (max-width: 44rem) {
-    .ticker {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .tv {
+        width: min(99vw, calc((88dvh - 4rem) * 1.55));
+        padding: 2.1rem 1.25rem 1.1rem;
+        gap: 0.55rem;
     }
 
-    .title {
-        font-size: clamp(2rem, 12vw, 3.7rem);
+    .tvFeet {
+        width: min(99vw, calc((88dvh - 4rem) * 1.55));
+    }
+
+    .tvTunerKnob {
+        width: 1.3rem;
+        height: 1.3rem;
+    }
+
+    .tvBrand {
+        font-size: 0.46rem;
+    }
+
+    .tvScreen {
+        aspect-ratio: 1 / 1;
     }
 }
