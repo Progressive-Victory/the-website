@@ -36,7 +36,7 @@
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    max-width: 68%;
+    max-width: 100%;
     min-width: 0;
     padding: 0;
     background: none;
@@ -71,6 +71,13 @@
     text-overflow: clip;
 }
 
+.infoBlockFieldValueWrap {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    text-align: right;
+}
+
 .infoBlockFieldValueLine {
     display: block;
 }
@@ -83,6 +90,12 @@
 .infoBlockInfoButton:disabled {
     cursor: default;
     pointer-events: none;
+}
+
+.infoBlockButtonWrapper {
+    position: relative;
+    max-width: 68%;
+    min-width: 0;
 }
 
 .infoBlockInfoIcon {

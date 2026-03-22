@@ -23,6 +23,7 @@ interface InfoBlockContextValue {
     closeMenu: () => void
     startEdit: () => void
     onDraftChange: (updater: (prev: User) => User) => void
+    setFieldMenuOpen: (open: boolean) => void
 }
 
 const InfoBlockContext = createContext<InfoBlockContextValue | null>(null)
@@ -83,10 +84,18 @@ export function InfoBlock({
     const [editDraft, setEditDraft] = useState<User | null>(null)
     const [isCollapsed, setIsCollapsed] = useState(false)
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const [isFieldMenuOpen, setIsFieldMenuOpen] = useState(false)
     const [bodyHeight, setBodyHeight] = useState(0)
 
     const menuButtonRef = useRef<HTMLButtonElement | null>(null)
+    const bodyRef = useRef<HTMLDivElement | null>(null)
     const bodyContentRef = useRef<HTMLDivElement | null>(null)
+
+    useEffect(() => {
+        if (isCollapsed && bodyRef.current) {
+            bodyRef.current.style.overflow = 'hidden'
+        }
+    }, [isCollapsed])
 
     useEffect(() => {
         const el = bodyContentRef.current
@@ -122,6 +131,7 @@ export function InfoBlock({
         closeMenu: () => setIsMenuOpen(false),
         startEdit,
         onDraftChange,
+        setFieldMenuOpen: setIsFieldMenuOpen,
     }
 
     return (
@@ -129,7 +139,7 @@ export function InfoBlock({
             <div
                 className={[
                     styles.block,
-                    isMenuOpen ? styles.blockMenuOpen : '',
+                    isMenuOpen || isFieldMenuOpen ? styles.blockMenuOpen : '',
                     className,
                 ]
                     .filter(Boolean)
@@ -182,8 +192,18 @@ export function InfoBlock({
                     )}
                 </div>
                 <div
+                    ref={bodyRef}
                     className={styles.body}
                     style={{ height: isCollapsed ? '0px' : `${bodyHeight}px` }}
+                    onTransitionEnd={(e) => {
+                        if (
+                            e.propertyName === 'height' &&
+                            !isCollapsed &&
+                            bodyRef.current
+                        ) {
+                            bodyRef.current.style.overflow = 'visible'
+                        }
+                    }}
                     aria-hidden={isCollapsed}
                 >
                     <div ref={bodyContentRef} className={styles.bodyContent}>

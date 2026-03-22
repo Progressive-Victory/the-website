@@ -1,8 +1,12 @@
+'use client'
+
 import { useInfoBlockContext } from '../Block'
 import styles from './BlockField.module.css'
+import { DropdownMenu } from '@/components/common/dropdown_menu/DropdownMenu'
 import { User } from '@/contracts/data'
 import { InformationCircleIcon } from '@heroicons/react/24/outline'
 import type React from 'react'
+import { useRef, useState } from 'react'
 
 export interface BlockFieldProps {
     label: string
@@ -12,6 +16,7 @@ export interface BlockFieldProps {
     editGetter?: (user: User) => string
     setter?: (user: User, value: string) => User
     inputType?: React.HTMLInputTypeAttribute
+    children?: React.ReactNode
 }
 
 export function BlockField({
@@ -22,9 +27,14 @@ export function BlockField({
     editGetter,
     setter,
     inputType,
+    children,
 }: BlockFieldProps) {
-    const { user, draft, editing, onDraftChange } = useInfoBlockContext()
+    const { user, draft, editing, onDraftChange, setFieldMenuOpen } =
+        useInfoBlockContext()
     const displayValue = getter(editing ? draft : user)
+    const triggerRef = useRef<HTMLButtonElement | null>(null)
+    const [menuOpen, setMenuOpen] = useState(false)
+
     if (showIn === 'view' && editing) return null
     if (showIn === 'edit' && !editing) return null
 
@@ -46,21 +56,42 @@ export function BlockField({
                     aria-label={ariaLabel}
                 />
             ) : (
-                <button
-                    type="button"
-                    className={styles.infoBlockInfoButton}
-                    aria-label={ariaLabel}
-                    disabled={isReadonlyInEdit}
-                >
-                    <span className={styles.infoBlockFieldValue}>
-                        {displayValue ?? '-'}
-                    </span>
-                    {!isReadonlyInEdit && (
-                        <InformationCircleIcon
-                            className={styles.infoBlockInfoIcon}
-                        />
+                <div className={styles.infoBlockButtonWrapper}>
+                    <button
+                        ref={triggerRef}
+                        type="button"
+                        className={styles.infoBlockInfoButton}
+                        aria-label={ariaLabel}
+                        aria-expanded={menuOpen}
+                        disabled={isReadonlyInEdit}
+                        onClick={() => {
+                            const next = !menuOpen
+                            setMenuOpen(next)
+                            setFieldMenuOpen(next)
+                        }}
+                    >
+                        <span className={styles.infoBlockFieldValue}>
+                            {displayValue ?? '-'}
+                        </span>
+                        {!isReadonlyInEdit && (
+                            <InformationCircleIcon
+                                className={styles.infoBlockInfoIcon}
+                            />
+                        )}
+                    </button>
+                    {menuOpen && (
+                        <DropdownMenu
+                            triggerRef={triggerRef}
+                            onClose={() => {
+                                setMenuOpen(false)
+                                setFieldMenuOpen(false)
+                            }}
+                            label={`${label} options`}
+                        >
+                            {children}
+                        </DropdownMenu>
                     )}
-                </button>
+                </div>
             )}
         </div>
     )

@@ -88,7 +88,9 @@ export function DateBlockField({
                     aria-label={ariaLabel}
                     disabled={isReadonlyInEdit}
                 >
-                    <span className={styles.infoBlockFieldValue}>
+                    <span
+                        className={`${styles.infoBlockFieldValue} ${styles.infoBlockFieldValueWrap}`}
+                    >
                         {displayValue}
                     </span>
                     {!isReadonlyInEdit && (

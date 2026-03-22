@@ -10,6 +10,7 @@ export interface DropdownMenuProps extends React.HTMLAttributes<HTMLDivElement> 
     boundaryRef?: React.RefObject<HTMLElement | null>
     label?: React.ReactNode
     footer?: React.ReactNode
+    closeOnScroll?: boolean
 }
 
 function DropdownMenuDivider() {
@@ -26,6 +27,7 @@ export const DropdownMenu = Object.assign(
             boundaryRef,
             label,
             footer,
+            closeOnScroll = true,
             style,
             className,
             children,
@@ -139,6 +141,18 @@ export const DropdownMenu = Object.assign(
                 window.removeEventListener('scroll', update, true)
             }
         }, [triggerRef, boundaryRef])
+
+        useEffect(() => {
+            if (!closeOnScroll) return
+            const handleScroll = (e: Event) => {
+                const menu = internalRef.current
+                if (menu?.contains(e.target as Node)) return
+                onCloseRef.current()
+            }
+            window.addEventListener('scroll', handleScroll, true)
+            return () =>
+                window.removeEventListener('scroll', handleScroll, true)
+        }, [closeOnScroll])
 
         useEffect(() => {
             const handleMouseDown = (e: MouseEvent) => {
