@@ -9,9 +9,9 @@ export const zActBlueContribution = z
         contributionForm: z.string(),
         refcodes: z
             .object({
-                refcode: z.string().optional(),
-                refcode2: z.string().optional(),
-                refcodeCustom: z.string().optional(),
+                refcode: z.string().nullish(),
+                refcode2: z.string().nullish(),
+                refcodeCustom: z.string().nullish(),
             })
             .optional(),
         abTestName: z.string().nullable(),
