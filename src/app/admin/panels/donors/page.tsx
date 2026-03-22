@@ -152,7 +152,17 @@ export default function Page() {
                 count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}
                 error={searchQuery.error}
-                fields={[{ value: 'email', label: 'Email' }]}
+                searchFields={[
+                    { value: 'email', label: 'Email' },
+                    { value: 'first_name', label: 'First Name' },
+                    { value: 'last_name', label: 'Last Name' },
+                    { value: 'state', label: 'State' },
+                ]}
+                sortFields={[
+                    { value: 'email', label: 'Email' },
+                    { value: 'first_name', label: 'First Name' },
+                    { value: 'last_name', label: 'Last Name' },
+                ]}
                 onSearch={onSearch}
             >
                 {searchQuery.data?.data?.map((item) => renderItem(item))}
