@@ -1,3 +1,11 @@
+.nodeContainer {
+    display: flex;
+    width: 360px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 .yellowBubble {
     width: 360px;
     border-radius: 0rem 1rem 1rem 0rem;
@@ -12,12 +20,11 @@
     font-weight: 800;
 }
 
-.container {
-    display: flex;
-    width: 360px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.nodeContainer:hover > .yellowBubble {
+    color: #1b4568;
+    background-color: white;
+    border-width: 2px 2px 4px 2px;
+    margin: 2px 2px 0px 2px;
 }
 
 .dropdownContainer {
