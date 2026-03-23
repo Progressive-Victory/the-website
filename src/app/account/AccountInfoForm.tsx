@@ -10,19 +10,21 @@ import { User } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useState } from 'react'
 
+interface AccountInfoFormProps {
+    user: User
+    onSave: (user: User) => void
+    subtitle?: string
+    avatar?: React.ReactNode
+    title?: string
+}
+
 export const AccountInfoForm = ({
     user,
     onSave,
     subtitle,
     avatar,
     title = 'Account Information',
-}: {
-    user: User
-    onSave: (user: User) => void
-    subtitle?: string
-    avatar?: React.ReactNode
-    title?: string
-}) => {
+}: AccountInfoFormProps) => {
     const [updatedUser, setUpdatedUser] = useState<User>(user)
     const [isEditing, setIsEditing] = useState(false)
 
