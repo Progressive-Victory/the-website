@@ -100,9 +100,9 @@ export function InfoBlock({
     useEffect(() => {
         const el = bodyContentRef.current
         if (!el) return
-        setBodyHeight(el.scrollHeight)
+        setBodyHeight(el.offsetHeight)
         const observer = new ResizeObserver(() =>
-            setBodyHeight(el.scrollHeight)
+            setBodyHeight(el.offsetHeight)
         )
         observer.observe(el)
         return () => observer.disconnect()

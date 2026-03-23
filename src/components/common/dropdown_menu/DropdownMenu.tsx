@@ -2,7 +2,13 @@
 
 import styles from './DropdownMenu.module.css'
 import { DropdownMenuButton } from './DropdownMenuButton'
-import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
+import {
+    forwardRef,
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useRef,
+} from 'react'
 
 export interface DropdownMenuProps extends React.HTMLAttributes<HTMLDivElement> {
     triggerRef: React.RefObject<HTMLElement | null>
@@ -37,10 +43,6 @@ export const DropdownMenu = Object.assign(
     ) {
         const internalRef = useRef<HTMLDivElement | null>(null)
         const onCloseRef = useRef(onClose)
-        const [maxHeight, setMaxHeight] = useState<number | undefined>()
-        const [offset, setOffset] = useState(0)
-        const [offsetX, setOffsetX] = useState(0)
-        const offsetXRef = useRef(0)
 
         useEffect(() => {
             onCloseRef.current = onClose
@@ -58,7 +60,7 @@ export const DropdownMenu = Object.assign(
             [externalRef]
         )
 
-        useEffect(() => {
+        useLayoutEffect(() => {
             const VIEWPORT_PADDING = 12
             const BOUNDARY_TOP_PADDING = 12
             const CONSTRAINED_BOTTOM_MARGIN = 16
@@ -70,8 +72,12 @@ export const DropdownMenu = Object.assign(
                 const menu = internalRef.current
                 if (!trigger || !menu) return
 
+                menu.style.transform = ''
+                menu.style.maxHeight = ''
+
                 const triggerRect = trigger.getBoundingClientRect()
                 const viewportHeight = window.innerHeight
+
                 const naturalHeight = menu.scrollHeight
                 const naturalTop = triggerRect.bottom + TRIGGER_GAP
                 const naturalViewportBottom = viewportHeight - VIEWPORT_PADDING
@@ -99,33 +105,26 @@ export const DropdownMenu = Object.assign(
                 const shiftedTop = naturalTop - upwardShift
                 const availableHeight = viewportBottom - shiftedTop
 
-                setOffset(Math.floor(upwardShift))
-                setMaxHeight(
-                    availableHeight >= naturalHeight
-                        ? undefined
-                        : Math.max(0, Math.floor(availableHeight))
-                )
+                if (availableHeight < naturalHeight) {
+                    menu.style.maxHeight = `${Math.max(0, Math.floor(availableHeight))}px`
+                }
 
+                // Read horizontal position with no transform applied (reset above),
+                // so this always reflects the true layout position.
                 const menuRect = menu.getBoundingClientRect()
-                const naturalLeft = menuRect.left - offsetXRef.current
-                const naturalRight = menuRect.right - offsetXRef.current
-
                 const boundary = boundaryRef?.current?.getBoundingClientRect()
                 const hBoundaryLeft = (boundary?.left ?? 0) + HORIZONTAL_PADDING
                 const hBoundaryRight =
                     (boundary?.right ?? window.innerWidth) - HORIZONTAL_PADDING
 
-                let newOffsetX = 0
-                if (naturalLeft < hBoundaryLeft) {
-                    newOffsetX = Math.round(hBoundaryLeft - naturalLeft)
-                } else if (naturalRight > hBoundaryRight) {
-                    newOffsetX = Math.round(hBoundaryRight - naturalRight)
+                let offsetX = 0
+                if (menuRect.left < hBoundaryLeft) {
+                    offsetX = Math.round(hBoundaryLeft - menuRect.left)
+                } else if (menuRect.right > hBoundaryRight) {
+                    offsetX = Math.round(hBoundaryRight - menuRect.right)
                 }
 
-                if (newOffsetX !== offsetXRef.current) {
-                    offsetXRef.current = newOffsetX
-                    setOffsetX(newOffsetX)
-                }
+                menu.style.transform = `translateY(-${Math.floor(upwardShift)}px) translateX(${offsetX}px)`
             }
 
             update()
@@ -181,11 +180,7 @@ export const DropdownMenu = Object.assign(
             <div
                 ref={setRef}
                 className={[styles.menu, className].filter(Boolean).join(' ')}
-                style={{
-                    maxHeight: maxHeight != null ? `${maxHeight}px` : undefined,
-                    transform: `translateY(-${offset}px) translateX(${offsetX}px)`,
-                    ...style,
-                }}
+                style={style}
                 {...props}
             >
                 {label != null && <div className={styles.label}>{label}</div>}

@@ -3,10 +3,18 @@
 import { useInfoBlockContext } from '../Block'
 import styles from './BlockField.module.css'
 import { DropdownMenu } from '@/components/common/dropdown_menu/DropdownMenu'
-import { User } from '@/contracts/data'
+import {
+    DiscordUser,
+    UpdateHistory,
+    User,
+    zDiscordUser,
+} from '@/contracts/data'
+import { useFetch } from '@/util/hooks'
 import { InformationCircleIcon } from '@heroicons/react/24/outline'
+import { useQueries } from '@tanstack/react-query'
 import type React from 'react'
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import z from 'zod'
 
 export interface BlockFieldProps {
     label: string
@@ -16,6 +24,7 @@ export interface BlockFieldProps {
     editGetter?: (user: User) => string
     setter?: (user: User, value: string) => User
     inputType?: React.HTMLInputTypeAttribute
+    showHistory?: boolean
     children?: React.ReactNode
 }
 
@@ -27,13 +36,72 @@ export function BlockField({
     editGetter,
     setter,
     inputType,
+    showHistory = true,
     children,
 }: BlockFieldProps) {
     const { user, draft, editing, onDraftChange, setFieldMenuOpen } =
         useInfoBlockContext()
+    const { ready, onGet } = useFetch()
     const displayValue = getter(editing ? draft : user)
     const triggerRef = useRef<HTMLButtonElement | null>(null)
     const [menuOpen, setMenuOpen] = useState(false)
+
+    const fieldHistory = (() => {
+        if (!showHistory || !user.history?.length) return []
+        return [...user.history]
+            .sort(
+                (a, b) =>
+                    new Date(b.historyWhenUpdatedUtc).getTime() -
+                    new Date(a.historyWhenUpdatedUtc).getTime()
+            )
+            .reduce<{ entry: UpdateHistory<User>; value: React.ReactNode }[]>(
+                (acc, entry) => {
+                    const value = getter(entry as User)
+                    if (
+                        acc.length === 0 ||
+                        value !== acc[acc.length - 1].value
+                    ) {
+                        acc.push({ entry, value })
+                    }
+                    return acc
+                },
+                []
+            )
+    })()
+
+    const updaterIds = useMemo(
+        () =>
+            Array.from(
+                new Set(
+                    fieldHistory
+                        .map((h) => h.entry.historyWhoUpdatedId)
+                        .filter((id): id is number => id != null)
+                )
+            ),
+        [fieldHistory]
+    )
+
+    const updaterQueries = useQueries({
+        queries: updaterIds.map((id) => ({
+            queryKey: [`/discordUsers/${id}`],
+            queryFn: () =>
+                onGet<DiscordUser[]>(
+                    `/discordUsers/${id}`,
+                    z.array(zDiscordUser)
+                ),
+            enabled: ready,
+        })),
+    })
+
+    const usernameById = useMemo(() => {
+        const map = new Map<number, string>()
+        updaterQueries.forEach((query, i) => {
+            const id = updaterIds[i]
+            const username = query.data?.[0]?.username
+            if (id != null && username) map.set(id, username)
+        })
+        return map
+    }, [updaterQueries, updaterIds])
 
     if (showIn === 'view' && editing) return null
     if (showIn === 'edit' && !editing) return null
@@ -86,9 +154,72 @@ export function BlockField({
                                 setMenuOpen(false)
                                 setFieldMenuOpen(false)
                             }}
-                            label={`${label} options`}
+                            label={`${label} Information`}
                         >
                             {children}
+                            {fieldHistory.length > 0 && (
+                                <>
+                                    {children != null && (
+                                        <DropdownMenu.Divider />
+                                    )}
+                                    <div className={styles.historyLabel}>
+                                        Update History
+                                    </div>
+                                    {fieldHistory.map(({ entry, value }, i) => {
+                                        const prevValue =
+                                            fieldHistory[i + 1]?.value
+                                        const actor =
+                                            entry.historyWhoUpdatedId != null
+                                                ? `@${
+                                                      usernameById.get(
+                                                          entry.historyWhoUpdatedId
+                                                      ) ??
+                                                      `User #${entry.historyWhoUpdatedId}`
+                                                  }`
+                                                : 'System'
+                                        const date = new Intl.DateTimeFormat(
+                                            'en-US',
+                                            {
+                                                dateStyle: 'short',
+                                                timeStyle: 'short',
+                                            }
+                                        ).format(
+                                            new Date(
+                                                entry.historyWhenUpdatedUtc
+                                            )
+                                        )
+                                        return (
+                                            <div
+                                                key={entry.historyId}
+                                                className={styles.historyEntry}
+                                            >
+                                                <span
+                                                    className={
+                                                        styles.historyEntryValue
+                                                    }
+                                                >
+                                                    {label} updated
+                                                </span>
+                                                <span
+                                                    className={
+                                                        styles.historyEntryMeta
+                                                    }
+                                                >
+                                                    {actor}
+                                                    {' updated '}
+                                                    {label}
+                                                    {' from '}
+                                                    {prevValue ?? '-'}
+                                                    {' to '}
+                                                    {value ?? '-'}
+                                                    {' · '}
+                                                    {date}
+                                                </span>
+                                            </div>
+                                        )
+                                    })}
+                                </>
+                            )}
                         </DropdownMenu>
                     )}
                 </div>

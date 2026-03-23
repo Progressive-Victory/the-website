@@ -30,7 +30,8 @@ export function SelectManyBlockField<T extends string | number = number>({
     boundaryRef,
     emptyMessage = 'None',
 }: SelectManyBlockFieldProps<T>) {
-    const { user, draft, editing, onDraftChange } = useInfoBlockContext()
+    const { user, draft, editing, onDraftChange, setFieldMenuOpen } =
+        useInfoBlockContext()
     const [menuOpen, setMenuOpen] = useState(false)
     const addButtonRef = useRef<HTMLButtonElement | null>(null)
 
@@ -54,14 +55,21 @@ export function SelectManyBlockField<T extends string | number = number>({
                             aria-label="Add"
                             aria-haspopup="menu"
                             aria-expanded={menuOpen}
-                            onClick={() => setMenuOpen((o) => !o)}
+                            onClick={() => {
+                                const next = !menuOpen
+                                setMenuOpen(next)
+                                setFieldMenuOpen(next)
+                            }}
                         >
                             <FaPlus size={11} />
                         </button>
                         {menuOpen && (
                             <DropdownMenu
                                 triggerRef={addButtonRef}
-                                onClose={() => setMenuOpen(false)}
+                                onClose={() => {
+                                    setMenuOpen(false)
+                                    setFieldMenuOpen(false)
+                                }}
                                 boundaryRef={boundaryRef}
                                 label="Add"
                                 role="menu"
@@ -78,6 +86,7 @@ export function SelectManyBlockField<T extends string | number = number>({
                                                 ])
                                             )
                                             setMenuOpen(false)
+                                            setFieldMenuOpen(false)
                                         }}
                                     />
                                 ))}

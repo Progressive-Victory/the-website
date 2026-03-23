@@ -129,3 +129,30 @@
     color: #a0aec0;
     opacity: 1;
 }
+
+.historyLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.5);
+    padding: 0 0.2rem;
+}
+
+.historyEntry {
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+    padding: 0.3rem 0.4rem;
+    border-radius: 0.4rem;
+    background: rgba(15, 23, 42, 0.03);
+}
+
+.historyEntryValue {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #1f2f3f;
+}
+
+.historyEntryMeta {
+    font-size: 0.74rem;
+    color: rgba(15, 23, 42, 0.45);
+}
