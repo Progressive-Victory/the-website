@@ -32,7 +32,8 @@ export interface ListProps {
     isPending: boolean
     error: Error | null
 
-    fields?: FieldOption[]
+    searchFields?: FieldOption[]
+    sortFields?: FieldOption[]
     filters?: FilterOption[]
 
     pinnedContent?: ReactNode
@@ -67,7 +68,13 @@ export type ListTopMode = 'full' | 'compact'
 
 export interface ListTopProps extends Pick<
     ListProps,
-    'search' | 'fields' | 'filters' | 'onSearch' | 'backHref' | 'backLabel'
+    | 'search'
+    | 'searchFields'
+    | 'sortFields'
+    | 'filters'
+    | 'onSearch'
+    | 'backHref'
+    | 'backLabel'
 > {
     searchPanelOpen?: boolean
     setSearchPanelOpen?: (next: boolean) => void
@@ -79,7 +86,8 @@ export interface ListTopProps extends Pick<
 
 export function ListTop({
     search,
-    fields,
+    searchFields,
+    sortFields,
     filters,
     onSearch,
     searchPanelOpen,
@@ -98,7 +106,8 @@ export function ListTop({
     const panelOpen = isControlled ? searchPanelOpen : uncontrolledOpen
     const setPanelOpen = isControlled ? setSearchPanelOpen : setUncontrolledOpen
 
-    const { query, field, limit, sort, page, ...filter } = search
+    const { query, searchField, sortField, limit, sort, page, ...filter } =
+        search
 
     const handleToggleSearchPanel = () => {
         setPanelOpen(!panelOpen)
@@ -108,22 +117,34 @@ export function ListTop({
         onSearch({ ...search, query })
     }
 
-    const handleChangeField = (field: string | undefined) => {
-        onSearch({ ...search, field })
+    const handleChangeSearchField = (searchField: string | undefined) => {
+        onSearch({ ...search, searchField })
+    }
+
+    const handleChangeSortField = (sortField: string | undefined) => {
+        onSearch({ ...search, sortField })
     }
 
     const handleChangeLimit = (limit: number) => {
         onSearch({ ...search, limit })
     }
 
-    const handleChangeSort = (sort: SortDirection | undefined) => {
+    const handleChangeSort = (sort: SortDirection) => {
         onSearch({ ...search, sort })
     }
 
     const handleChangeFilter = (
         nextFilters: Record<string, (number | string)[] | undefined>
     ) => {
-        onSearch({ query, field, limit, sort, page, ...nextFilters })
+        onSearch({
+            query,
+            searchField,
+            sortField,
+            limit,
+            sort,
+            page,
+            ...nextFilters,
+        })
     }
 
     return (
@@ -154,17 +175,27 @@ export function ListTop({
                 <>
                     <div className={styles.searchPanelTop}>
                         <FieldSelect
-                            field={field}
-                            options={fields ?? []}
-                            onSelect={handleChangeField}
+                            label="Search Field"
+                            field={searchField}
+                            options={searchFields ?? []}
+                            onSelect={handleChangeSearchField}
+                        />
+                        <FieldSelect
+                            label="Sort Field"
+                            field={sortField}
+                            options={sortFields ?? []}
+                            onSelect={handleChangeSortField}
                         />
                         <LimitSelect
-                            limit={limit}
+                            limit={limit ?? 25}
                             onSelect={handleChangeLimit}
                         />
                     </div>
 
-                    <SortSelect sort={sort} onSelect={handleChangeSort} />
+                    <SortSelect
+                        sort={sort ?? SortDirection.DESC}
+                        onSelect={handleChangeSort}
+                    />
 
                     <FilterSelect
                         filters={filter as Record<string, (string | number)[]>}
@@ -232,7 +263,7 @@ export function ListBottom({
         <div className={styles.pageSelectContainer}>
             <PageSelect
                 page={page}
-                pageSize={limit}
+                pageSize={limit ?? 25}
                 count={count}
                 disabled={isPending}
                 onChange={handleChangePage}
@@ -301,12 +332,13 @@ function SearchInput({
 }
 
 interface FieldSelectProps {
+    label: string
     field: string | undefined
     options: FieldOption[]
     onSelect: (field: string | undefined) => void
 }
 
-function FieldSelect({ field, options, onSelect }: FieldSelectProps) {
+function FieldSelect({ label, field, options, onSelect }: FieldSelectProps) {
     if (!options.length) return null
 
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -316,7 +348,7 @@ function FieldSelect({ field, options, onSelect }: FieldSelectProps) {
 
     return (
         <label htmlFor="field" className={styles.select}>
-            <span>Filter:</span>
+            <span>{label}:</span>
             <select
                 name="field"
                 id="field"
@@ -360,14 +392,14 @@ function LimitSelect({ limit, onSelect }: LimitSelectProps) {
 }
 
 interface SortSelectProps {
-    sort: SortDirection | undefined
-    onSelect: (sort: SortDirection | undefined) => void
+    sort: SortDirection
+    onSelect: (sort: SortDirection) => void
 }
 
 function SortSelect({ sort, onSelect }: SortSelectProps) {
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value as SortDirection | 'none'
-        onSelect(value == 'none' ? undefined : value)
+        const value = e.target.value as SortDirection
+        onSelect(value)
     }
 
     return (
@@ -376,12 +408,11 @@ function SortSelect({ sort, onSelect }: SortSelectProps) {
             <select
                 name="sort"
                 id="sort"
-                defaultValue={sort ?? 'none'}
+                defaultValue={sort ?? SortDirection.DESC}
                 onChange={handleChange}
             >
-                <option value="none">None</option>
-                <option value={SortDirection.ASC}>Ascending</option>
                 <option value={SortDirection.DESC}>Descending</option>
+                <option value={SortDirection.ASC}>Ascending</option>
             </select>
         </label>
     )
