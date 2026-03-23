@@ -1,12 +1,17 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import cx from 'classnames'
-import { ChangeEvent, useCallback } from 'react'
+import { ChangeEvent, HTMLInputAutoCompleteAttribute, useCallback } from 'react'
 
-export function TextField<T>(
-    props: FormFieldProps<T, string | null | undefined>
-) {
-    const { getter, validator, onChange } = useConfigure(
+export interface TextFieldProps<T> extends FormFieldProps<
+    T,
+    string | null | undefined
+> {
+    autocomplete?: HTMLInputAutoCompleteAttribute
+}
+
+export function TextField<T>(props: TextFieldProps<T>) {
+    const { getter, validator, onChange, readonly, disabled } = useConfigure(
         props,
         useCallback(
             (field: string | null | undefined) =>
@@ -15,8 +20,6 @@ export function TextField<T>(
         )
     )
 
-    const readonly = !!props.readonly || !props.dynamic?.editing
-    const disabled = !!props.disabled || !!props.dynamic?.saving
     const value = getter(props.dynamic!.form) ?? ''
 
     const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
@@ -32,6 +35,7 @@ export function TextField<T>(
                     type="text"
                     id={props?.id}
                     name={props.label}
+                    autoComplete={props?.autocomplete}
                     disabled={disabled}
                     required={props.required}
                     value={value}

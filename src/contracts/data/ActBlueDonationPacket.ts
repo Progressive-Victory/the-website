@@ -1,3 +1,4 @@
+import { zActBlueContributionCustomField } from './ActBlueContributionCustomField'
 import z from 'zod'
 
 export const zActBlueDonationPacket = z.object({
@@ -20,6 +21,7 @@ export const zActBlueDonationPacket = z.object({
     state: z.string().nullable(),
     email: z.string(),
     kind: z.string(),
+    customFields: z.array(zActBlueContributionCustomField).optional(),
 })
 
 export type ActBlueDonationPacket = z.infer<typeof zActBlueDonationPacket>

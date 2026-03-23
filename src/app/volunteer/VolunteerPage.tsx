@@ -162,7 +162,7 @@ export default function VolunteerPage() {
             (!user.data?.firstName ||
                 !user.data?.lastName ||
                 !user.data?.birthdate ||
-                !user.data?.location ||
+                !user.data?.address?.zip ||
                 !user.data?.phone)
         ) {
             setOverrideStage(OnboardingStage.NOT_STARTED)
@@ -206,9 +206,7 @@ export default function VolunteerPage() {
                                         user.data?.birthdate
                                             ?.toISOString()
                                             ?.split('T')?.[0] ?? '',
-                                    zipCode:
-                                        user.data?.location?.zip.toString() ??
-                                        '',
+                                    zipCode: user.data?.address?.zip ?? '',
                                     phoneNumber: user.data?.phone ?? '',
                                     getAlerts:
                                         user.data?.acceptedAlerts ?? false,
