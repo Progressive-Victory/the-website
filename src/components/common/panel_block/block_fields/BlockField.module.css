@@ -98,6 +98,131 @@
     min-width: 0;
 }
 
+/* ── FieldInfoPanel ──────────────────────────────────────── */
+
+.fieldDesc {
+    font-size: 0.8rem;
+    line-height: 1.52;
+    color: rgba(15, 23, 42, 0.68);
+    margin: 0;
+    padding: 0.52rem 0.62rem;
+    background: rgba(15, 23, 42, 0.03);
+    border-radius: 0.45rem;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.fieldMeta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1rem;
+}
+
+.fieldMetaItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+    padding: 0 0.1rem;
+}
+
+.fieldMetaLabel {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.38);
+}
+
+.fieldMetaSkel {
+    display: block;
+    height: 0.68rem;
+    width: 72%;
+    border-radius: 9999px;
+    background: linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.07),
+        rgba(15, 23, 42, 0.13),
+        rgba(15, 23, 42, 0.07)
+    );
+    background-size: 200% 100%;
+    animation: fip-shimmer 2s ease-in-out infinite;
+}
+
+.fieldHistorySection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.fieldHistoryLabel {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.38);
+    padding: 0 0.1rem;
+}
+
+.fieldHistoryList {
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.45rem;
+    border: 1px solid rgba(15, 23, 42, 0.07);
+    background: rgba(15, 23, 42, 0.025);
+    overflow: hidden;
+}
+
+.fieldHistoryRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.38rem 0.62rem;
+}
+
+.fieldHistoryRow + .fieldHistoryRow {
+    border-top: 1px solid rgba(15, 23, 42, 0.05);
+}
+
+.fieldHistorySkel {
+    display: block;
+    height: 0.58rem;
+    border-radius: 9999px;
+    background: linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.06),
+        rgba(15, 23, 42, 0.1),
+        rgba(15, 23, 42, 0.06)
+    );
+    background-size: 200% 100%;
+    animation: fip-shimmer 2s ease-in-out infinite;
+    flex: 1;
+}
+
+.fieldHistorySkelDate {
+    display: block;
+    height: 0.58rem;
+    width: 4rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background: linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.05),
+        rgba(15, 23, 42, 0.09),
+        rgba(15, 23, 42, 0.05)
+    );
+    background-size: 200% 100%;
+    animation: fip-shimmer 2.4s ease-in-out infinite;
+}
+
+@keyframes fip-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
 .infoBlockInfoIcon {
     width: 1.1rem;
     height: 1.1rem;

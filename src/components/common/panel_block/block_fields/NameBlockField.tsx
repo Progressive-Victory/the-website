@@ -5,7 +5,7 @@ import { BlockField } from './BlockField'
 import blockFieldStyles from './BlockField.module.css'
 import { useState } from 'react'
 
-export function NameBlockField() {
+export function NameBlockField({ description }: { description?: string } = {}) {
     const { user, draft, editing, onDraftChange } = useInfoBlockContext()
     const [focusedField, setFocusedField] = useState<
         'firstName' | 'lastName' | null
@@ -68,6 +68,7 @@ export function NameBlockField() {
         <BlockField
             label="Name"
             ariaLabel="Name info"
+            description={description}
             getter={(u) => {
                 const full = [u.firstName?.trim(), u.lastName?.trim()]
                     .filter(Boolean)

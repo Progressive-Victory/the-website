@@ -21,3 +21,151 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ─── MemberView skeleton ───────────────────────────────────── */
+
+@keyframes skel-pulse {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Base shimmer bar */
+.skelShim {
+    display: block;
+    border-radius: 9999px;
+    background: linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.055),
+        rgba(15, 23, 42, 0.11),
+        rgba(15, 23, 42, 0.055)
+    );
+    background-size: 200% 100%;
+    animation: skel-pulse 1.8s ease-in-out infinite;
+}
+
+/* Header skeleton — mirrors .detailsHeader / .bannerCover / .headerTop */
+.skelHeader {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.95) 72%,
+        rgba(255, 255, 255, 0)
+    );
+    border-radius: 1rem;
+}
+
+.skelBannerCover {
+    height: 3.5rem;
+    border-radius: 1rem 1rem 0 0;
+    background: linear-gradient(
+        120deg,
+        rgba(15, 23, 42, 0.07) 0%,
+        rgba(15, 23, 42, 0.04) 100%
+    );
+}
+
+.skelHeaderCard {
+    border-radius: 0.75rem;
+    margin: -1.4rem 0.9rem 0.9rem;
+    padding: 0.8rem 1rem 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.11);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: space-between;
+}
+
+.skelAvatarRow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.skelAvatar {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 9999px;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    background: rgba(15, 23, 42, 0.08);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.14);
+    flex-shrink: 0;
+}
+
+.skelNameCol {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skelRolePillRow {
+    display: flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.skelTabRow {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Grid content area — mirrors .detailsContent { margin: 1rem } */
+.skelContent {
+    margin: 1rem;
+}
+
+/* InfoBlock card skeleton — mirrors .block */
+.skelBlock {
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.11);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.skelBlockHeader {
+    display: flex;
+    min-height: 2rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.skelBlockBody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+}
+
+.skelFieldRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.15rem;
+}
+
+.skelPillsWrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding-top: 0.1rem;
+}

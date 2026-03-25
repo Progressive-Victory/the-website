@@ -3,7 +3,7 @@
 import styles from './page.module.css'
 import { DonorView } from './panel_views/DonorView'
 import { HistoryView } from './panel_views/HistoryView'
-import { MemberView } from './panel_views/MemberView'
+import { MemberView, MemberViewSkeleton } from './panel_views/MemberView'
 import { ListElement, List } from '@/app/admin/layout/List'
 import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
@@ -539,6 +539,10 @@ export default function Page() {
             <div className={styles.detailsPane}>
                 {selectedId == null && (
                     <div className={styles.emptyState}>No user selected</div>
+                )}
+
+                {selectedId != null && !userQuery.data && (
+                    <MemberViewSkeleton />
                 )}
 
                 {selectedId && userQuery.data && (

@@ -25,6 +25,25 @@ function DropdownMenuDivider() {
     )
 }
 
+function DropdownMenuInfoSection({ children }: { children: React.ReactNode }) {
+    return <div className={styles.infoSection}>{children}</div>
+}
+
+function DropdownMenuInfoRow({
+    label,
+    value,
+}: {
+    label: string
+    value: React.ReactNode
+}) {
+    return (
+        <div className={styles.infoRow}>
+            <span className={styles.infoRowKey}>{label}</span>
+            <span className={styles.infoRowValue}>{value}</span>
+        </div>
+    )
+}
+
 export const DropdownMenu = Object.assign(
     forwardRef<HTMLDivElement, DropdownMenuProps>(function DropdownMenu(
         {
@@ -191,5 +210,10 @@ export const DropdownMenu = Object.assign(
             </div>
         )
     }),
-    { Button: DropdownMenuButton, Divider: DropdownMenuDivider }
+    {
+        Button: DropdownMenuButton,
+        Divider: DropdownMenuDivider,
+        InfoSection: DropdownMenuInfoSection,
+        InfoRow: DropdownMenuInfoRow,
+    }
 )

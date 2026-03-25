@@ -2,6 +2,7 @@
 
 import styles from './MemberView.module.css'
 import { DropdownMenu } from '@/components/common'
+import { DropdownMenuButton } from '@/components/common/dropdown_menu/DropdownMenuButton'
 import {
     DateField,
     Form,
@@ -32,6 +33,159 @@ function formatOnboardingStage(stage: OnboardingStage | null | undefined) {
         )
         .join(' ')
 }
+
+interface SkelBlockSpec {
+    rows?: [labelW: string, valueW: string][]
+    pills?: string[]
+    fullWidth?: boolean
+}
+
+// Matches real block layout: row widths approximate actual label/value text lengths
+const SKEL_BLOCKS: SkelBlockSpec[] = [
+    // Contact Info — Name, Discord, Phone, Email
+    { rows: [['3rem', '5rem'], ['4rem', '5.5rem'], ['3rem', '6.5rem'], ['3rem', '8rem']] },
+    // Address Info — Address, County
+    { rows: [['4rem', '7rem'], ['3.5rem', '3rem']] },
+    // Personal Info — Date of Birth, Age, Account Created
+    { rows: [['5.5rem', '6rem'], ['2rem', '1.5rem'], ['6rem', '7rem']] },
+    // Account Status — Accepted Alerts, Verified, Intake Status, Date Intake, Date Joined
+    {
+        rows: [
+            ['6rem', '2rem'],
+            ['3.5rem', '2rem'],
+            ['6.5rem', '3.5rem'],
+            ['6rem', '7rem'],
+            ['6.5rem', '7rem'],
+        ],
+    },
+    // Roles
+    { fullWidth: true, pills: ['4.5rem', '3.5rem', '5.5rem', '3rem', '4rem'] },
+    // Aliases
+    { fullWidth: true, pills: ['3.5rem', '4.5rem'] },
+]
+
+function SkelInfoBlock({ spec }: { spec: SkelBlockSpec }) {
+    return (
+        <div
+            className={[
+                styles.skelBlock,
+                spec.fullWidth ? styles.infoBlockFullWidth : '',
+            ]
+                .filter(Boolean)
+                .join(' ')}
+        >
+            <div className={styles.skelBlockHeader}>
+                <div
+                    className={styles.skelShim}
+                    style={{ height: '0.7rem', width: '5.5rem' }}
+                />
+                <div
+                    className={styles.skelShim}
+                    style={{
+                        height: '1.5rem',
+                        width: '1.5rem',
+                        borderRadius: '0.3rem',
+                    }}
+                />
+            </div>
+            <div className={styles.skelBlockBody}>
+                {spec.rows?.map(([labelW, valueW], i) => (
+                    <div key={i} className={styles.skelFieldRow}>
+                        <div
+                            className={styles.skelShim}
+                            style={{ height: '0.6rem', width: labelW }}
+                        />
+                        <div
+                            className={styles.skelShim}
+                            style={{ height: '0.6rem', width: valueW }}
+                        />
+                    </div>
+                ))}
+                {spec.pills && (
+                    <div className={styles.skelPillsWrap}>
+                        {spec.pills.map((w, i) => (
+                            <div
+                                key={i}
+                                className={styles.skelShim}
+                                style={{
+                                    height: '1.5rem',
+                                    width: w,
+                                    borderRadius: '9999px',
+                                }}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
+
+export function MemberViewSkeleton() {
+    return (
+        <div className={styles.memberView}>
+            {/* Sticky header skeleton — mirrors detailsHeader */}
+            <div className={styles.skelHeader}>
+                <div className={styles.skelBannerCover} />
+                <div className={styles.skelHeaderCard}>
+                    {/* Avatar + name */}
+                    <div className={styles.skelAvatarRow}>
+                        <div className={styles.skelAvatar} />
+                        <div className={styles.skelNameCol}>
+                            <div
+                                className={styles.skelShim}
+                                style={{ height: '0.95rem', width: '8rem' }}
+                            />
+                            <div
+                                className={styles.skelShim}
+                                style={{ height: '0.72rem', width: '5.5rem' }}
+                            />
+                        </div>
+                    </div>
+                    {/* Role pills */}
+                    <div className={styles.skelRolePillRow}>
+                        {(['4.5rem', '3.5rem', '5rem'] as const).map(
+                            (w, i) => (
+                                <div
+                                    key={i}
+                                    className={styles.skelShim}
+                                    style={{
+                                        height: '1.5rem',
+                                        width: w,
+                                        borderRadius: '9999px',
+                                    }}
+                                />
+                            )
+                        )}
+                    </div>
+                    {/* Tab bar */}
+                    <div className={styles.skelTabRow}>
+                        {(['5rem', '4.5rem', '4rem'] as const).map((w, i) => (
+                            <div
+                                key={i}
+                                className={styles.skelShim}
+                                style={{
+                                    height: '2rem',
+                                    width: w,
+                                    borderRadius: '0.4rem',
+                                }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+            {/* Info grid skeleton */}
+            <div className={styles.skelContent}>
+                <div className={styles.infoGrid}>
+                    {SKEL_BLOCKS.map((spec, i) => (
+                        <SkelInfoBlock key={i} spec={spec} />
+                    ))}
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export interface MemberViewProps {
     selectedId: number
     user: User
@@ -92,25 +246,43 @@ export function MemberView({
                     menu={blockDropDownMenu()}
                     onSave={handleSave}
                 >
-                    <NameBlockField />
+                    <NameBlockField description="The member's registered first and last name as stored in their profile." />
                     <BlockField
                         label="Discord"
                         ariaLabel="Discord info"
+                        description="Discord account(s) linked to this member. Used for server access, identification, and outreach."
                         getter={(u) =>
                             (u.discordUsers ?? [])
                                 .map(({ username }) => `@${username}`)
                                 .join(', ') || '-'
                         }
-                    />
+                    >
+                        <DropdownMenu.InfoSection>
+                            {(user.discordUsers ?? []).map(({ id }) => (
+                                <DropdownMenu.InfoRow
+                                    key={id}
+                                    label="Discord ID"
+                                    value={`@${id}`}
+                                />
+                            ))}
+                        </DropdownMenu.InfoSection>
+                        <DropdownMenu.Divider />
+                        <DropdownMenuButton
+                            label="Open Discord"
+                            onClick={() => void 0}
+                        />
+                    </BlockField>
                     <PhoneBlockField
                         label="Phone"
                         ariaLabel="Phone info"
+                        description="Primary phone number on file. Used for text alerts and direct organizer contact."
                         getter={(u) => u.phone}
                         setter={(u, v) => ({ ...u, phone: v.trim() || null })}
                     />
                     <BlockField
                         label="Email"
                         ariaLabel="Email info"
+                        description="Email address used for notifications, outreach, and account access."
                         getter={(u) => u.email?.trim() ?? '-'}
                         editGetter={(u) => u.email ?? ''}
                         setter={(u, v) => ({ ...u, email: v.trim() || null })}
@@ -128,6 +300,7 @@ export function MemberView({
                     <BlockField
                         label="County"
                         ariaLabel="County info"
+                        description="The member's county of residence within their state, used for district-level targeting."
                         getter={(u) => u.address.county ?? undefined}
                         editGetter={(u) => u.address.county ?? ''}
                         setter={(u, v) => ({
@@ -146,6 +319,7 @@ export function MemberView({
                     <DateBlockField
                         label="Date of Birth"
                         ariaLabel="Date of birth info"
+                        description="Member's date of birth. Used to verify eligibility and calculate age."
                         getter={(u) => u.birthdate}
                         setter={(u, date) => ({ ...u, birthdate: date })}
                         displayFormat="date-long"
@@ -153,6 +327,7 @@ export function MemberView({
                     <BlockField
                         label="Age"
                         ariaLabel="Age info"
+                        description="Derived from date of birth. Not stored independently — updates automatically."
                         getter={(u) =>
                             dateService.isValid(u.birthdate)
                                 ? (dateService
@@ -164,6 +339,7 @@ export function MemberView({
                     <DateBlockField
                         label="Account Created"
                         ariaLabel="Account created info"
+                        description="Timestamp when this account was first registered in the system."
                         getter={(u) => u.createdAtUtc}
                         displayFormat="datetime"
                     />
@@ -177,27 +353,32 @@ export function MemberView({
                     <BlockField
                         label="Accepted Alerts"
                         ariaLabel="Accepted alerts info"
+                        description="Whether this member has opted in to receive text and email alerts from the organization."
                         getter={() => acceptedAlertsText}
                     />
                     <BlockField
                         label="Verified"
                         ariaLabel="Verified info"
+                        description="Indicates whether an organizer has manually reviewed and verified this account."
                         getter={() => verifiedText}
                     />
                     <BlockField
                         label="Intake Form Status"
                         ariaLabel="Intake form status info"
+                        description="The member's current stage within the onboarding intake flow."
                         getter={() => intakeFormStatus}
                     />
                     <DateBlockField
                         label="Date Intake Done"
                         ariaLabel="Date intake done info"
+                        description="Timestamp when the member completed their onboarding intake form."
                         getter={(u) => u.completedIntakeUtc}
                         displayFormat="datetime"
                     />
                     <DateBlockField
                         label="Date Server Joined"
                         ariaLabel="Date server joined info"
+                        description="Timestamp when the member joined the organization's Discord server."
                         getter={(u) => u.joinedAtUtc}
                         displayFormat="datetime"
                     />
