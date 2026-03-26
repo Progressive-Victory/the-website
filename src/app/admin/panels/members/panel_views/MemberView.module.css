@@ -22,8 +22,6 @@
     }
 }
 
-/* ─── MemberView skeleton ───────────────────────────────────── */
-
 @keyframes skel-pulse {
     0% {
         background-position: 200% 0;
@@ -33,7 +31,6 @@
     }
 }
 
-/* Base shimmer bar */
 .skelShim {
     display: block;
     border-radius: 9999px;
@@ -47,7 +44,6 @@
     animation: skel-pulse 1.8s ease-in-out infinite;
 }
 
-/* Header skeleton — mirrors .detailsHeader / .bannerCover / .headerTop */
 .skelHeader {
     position: sticky;
     top: 0;
@@ -57,12 +53,11 @@
         rgba(255, 255, 255, 0.95) 72%,
         rgba(255, 255, 255, 0)
     );
-    border-radius: 1rem;
 }
 
 .skelBannerCover {
     height: 3.5rem;
-    border-radius: 1rem 1rem 0 0;
+
     background: linear-gradient(
         120deg,
         rgba(15, 23, 42, 0.07) 0%,
@@ -72,8 +67,8 @@
 
 .skelHeaderCard {
     border-radius: 0.75rem;
-    margin: -1.4rem 0.9rem 0.9rem;
-    padding: 0.8rem 1rem 0.9rem;
+    margin: -1.25rem 0.9rem 0.9rem;
+    padding: 0.8rem 1rem 1.2rem;
     border: 1px solid rgba(255, 255, 255, 0.72);
     background: rgba(255, 255, 255, 0.84);
     backdrop-filter: blur(16px) saturate(145%);
@@ -115,18 +110,18 @@
 }
 
 .skelTabRow {
-    width: 100%;
     display: flex;
-    gap: 0.5rem;
     align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+    padding: 0.25rem;
+    border-radius: 9999px;
 }
 
-/* Grid content area — mirrors .detailsContent { margin: 1rem } */
 .skelContent {
     margin: 1rem;
 }
 
-/* InfoBlock card skeleton — mirrors .block */
 .skelBlock {
     border-radius: 0.75rem;
     padding: 1rem;
@@ -168,4 +163,40 @@
     flex-wrap: wrap;
     gap: 0.4rem;
     padding-top: 0.1rem;
+}
+
+.skelBlockTitle {
+    height: 0.7rem;
+    width: 5.5rem;
+}
+
+.skelBlockIcon {
+    height: 1.5rem;
+    width: 1.5rem;
+    border-radius: 0.3rem;
+}
+
+.skelFieldShim {
+    height: 0.6rem;
+}
+
+.skelPillShim {
+    height: 1.5rem;
+}
+
+.skelTabShim {
+    flex: 1;
+    height: 1rem;
+    margin-top: 0.475rem;
+    border-radius: 9999px;
+}
+
+.skelUserName {
+    height: 0.95rem;
+    width: 8rem;
+}
+
+.skelUserHandle {
+    height: 0.72rem;
+    width: 5.5rem;
 }

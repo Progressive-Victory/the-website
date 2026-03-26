@@ -1,80 +1,8 @@
 .section {
-    padding: 1rem;
-}
 
-.historyContainer {
     display: flex;
     flex-direction: column;
-    width: 100%;
-
-    border-radius: 1rem;
-
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-
-    border: 1px solid rgba(17, 24, 39, 0.1);
-
-    box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.75) inset,
-        0 18px 45px rgba(15, 23, 42, 0.03);
-
-    overflow: hidden;
-}
-
-.historyEntry {
-    width: 100%;
-    text-align: left;
-
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-
-    padding: 0.75rem 0.9rem;
-
-    background: transparent;
-
-    border: 0;
-    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
-
-    color: rgba(15, 23, 42, 0.85);
-    font-weight: 550;
-    letter-spacing: -0.01em;
-
-    cursor: pointer;
-
-    transition:
-        background 140ms ease,
-        transform 140ms ease;
-}
-
-.historyEntryMain {
-    min-width: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    flex-wrap: wrap;
-}
-
-.historyEntry:last-child {
-    border-bottom: 0;
-}
-
-.historyEntry:hover {
-    background: rgba(15, 23, 42, 0.06);
-}
-
-.historyEntrySelected {
-    background: rgba(15, 23, 42, 0.08);
-}
-
-.historyEntrySelected:hover {
-    background: rgba(15, 23, 42, 0.1);
-}
-
-.historyEntryPrefix {
-    color: rgba(15, 23, 42, 0.62);
-    font-weight: 550;
+    gap: 1rem;
 }
 
 .historyEntryActor {
@@ -82,82 +10,52 @@
     font-weight: 650;
 }
 
-.historyEntryDate {
-    font-weight: 650;
-    color: rgba(15, 23, 42, 0.85);
-}
-
-.historyEntryDateTag {
-    position: relative;
-    margin-left: auto;
-    white-space: nowrap;
-
-    font-size: 0.75rem;
-    font-weight: 600;
-
-    padding-inline: 0.75rem;
-    padding-block: 0.15rem;
-    border-radius: 9999px;
-
-    color: rgba(15, 23, 42, 0.72);
-    background: rgba(15, 23, 42, 0.06);
-}
-
-.historyEntryDateTag::after {
-    content: attr(data-full-date);
-    position: absolute;
-    right: 0;
-    top: calc(100% + 0.35rem);
-
-    padding: 0.35rem 0.5rem;
-    border-radius: 0.45rem;
-    max-width: 20rem;
-
-    color: rgba(241, 245, 249, 0.95);
-    background: rgba(15, 23, 42, 0.92);
-    font-size: 0.72rem;
-    font-weight: 560;
-    line-height: 1.35;
-
-    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28);
-
-    opacity: 0;
-    transform: translateY(-3px);
-    transition:
-        opacity 100ms ease,
-        transform 100ms ease;
-    pointer-events: none;
-    z-index: 8;
-}
-
-.historyEntryDateTag:hover::after,
-.historyEntryDateTag:focus-visible::after {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.historyEntryCode {
-    font-size: 0.92em;
-    color: rgba(15, 23, 42, 0.72);
-    font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        Liberation Mono,
-        Courier New,
-        monospace;
-}
-
-.historyEntryUi {
-    cursor: default;
-}
-
-.historyEntryUi:hover {
-    background: transparent;
+.historyEntryPrefix {
+    color: rgba(15, 23, 42, 0.62);
+    font-weight: 550;
 }
 
 .snapshotWrap {
-    margin-top: 1rem;
+}
+
+.donorSnapshotCard {
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.11);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.donorSnapshotTitle {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #09223a;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0 0 0.25rem;
+}
+
+.donorSnapshotName {
+    font-size: 1rem;
+    font-weight: 650;
+    color: rgba(15, 23, 42, 0.9);
+    letter-spacing: -0.01em;
+}
+
+.donorSnapshotStatusPill {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    font-size: 0.72rem;
+    font-weight: 650;
+    padding-inline: 0.6rem;
+    padding-block: 0.2rem;
+    border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.64);
 }

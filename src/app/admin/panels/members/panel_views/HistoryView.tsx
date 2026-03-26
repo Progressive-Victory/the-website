@@ -2,7 +2,11 @@
 
 import styles from './HistoryView.module.css'
 import { MemberView } from './MemberView'
-import { CollapsibleSection } from '@/components/common'
+import {
+    BlockList,
+    BlockListTag,
+    type BlockListItem,
+} from '@/components/common/panel_block/BlockList'
 import {
     ActBlueDonor,
     DiscordUser,
@@ -13,8 +17,7 @@ import {
 } from '@/contracts/data'
 import { useFetch } from '@/util/hooks'
 import { useQueries } from '@tanstack/react-query'
-import cx from 'classnames'
-import { ReactNode, useMemo } from 'react'
+import { useMemo } from 'react'
 import z from 'zod'
 
 export interface HistoryViewProps {
@@ -33,10 +36,6 @@ export interface HistoryViewProps {
     roleOptions: { value: number; label: string }[]
     makeFormTitle: (user: User) => string
 }
-
-type UnifiedHistoryItem =
-    | { kind: 'account'; update: UpdateHistory<User> }
-    | { kind: 'donor'; update: UpdateHistory<ActBlueDonor> }
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -224,16 +223,7 @@ export function HistoryView({
     if (isRefetching) {
         return (
             <div className={styles.section}>
-                <div className={styles.historyContainer}>
-                    <div
-                        className={cx(
-                            styles.historyEntry,
-                            styles.historyEntryUi
-                        )}
-                    >
-                        Refreshing…
-                    </div>
-                </div>
+                <BlockList title="History" items={[]} emptyMessage="Refreshing…" />
             </div>
         )
     }
@@ -241,32 +231,52 @@ export function HistoryView({
     if (!mergedHistory.length) {
         return (
             <div className={styles.section}>
-                <div className={styles.historyContainer}>
-                    <div
-                        className={cx(
-                            styles.historyEntry,
-                            styles.historyEntryUi
-                        )}
-                    >
-                        No history found
-                    </div>
-                </div>
+                <BlockList title="History" items={[]} emptyMessage="No history found" />
             </div>
         )
     }
 
+    const historyItems: BlockListItem[] = mergedHistory.map((item, i) => {
+        const isSelected =
+            item.kind === 'account'
+                ? selectedHistory?.historyId === item.update.historyId
+                : selectedDonorHistory?.historyId === item.update.historyId
+
+        const handleSelect = () => {
+            if (item.kind === 'account') {
+                if (isSelected) { onSelectHistory(null); return }
+                onSelectHistory(item.update)
+                onSelectDonorHistory(null)
+                return
+            }
+            if (isSelected) { onSelectDonorHistory(null); return }
+            onSelectDonorHistory(item.update)
+            onSelectHistory(null)
+        }
+
+        return {
+            key: item.update.historyId ?? i,
+            selected: isSelected,
+            onClick: handleSelect,
+            label:
+                item.kind === 'account'
+                    ? handleMakeHistoryLabel(item.update)
+                    : handleMakeDonorHistoryLabel(item.update),
+            tag: (
+                <BlockListTag
+                    tooltip={formatFullHistoryTimestamp(
+                        item.update.historyWhenUpdatedUtc
+                    )}
+                >
+                    {formatHistoryTimestamp(item.update.historyWhenUpdatedUtc)}
+                </BlockListTag>
+            ),
+        }
+    })
+
     return (
         <div className={styles.section}>
-            <UnifiedHistoryField
-                title="History"
-                history={mergedHistory}
-                selectedAccountHistory={selectedHistory}
-                selectedDonorHistory={selectedDonorHistory}
-                onSelectAccountHistory={onSelectHistory}
-                onSelectDonorHistory={onSelectDonorHistory}
-                makeAccountLabel={handleMakeHistoryLabel}
-                makeDonorLabel={handleMakeDonorHistoryLabel}
-            />
+            <BlockList title="History" items={historyItems} pageSize={5} />
 
             {selectedHistory ? (
                 <div className={styles.snapshotWrap}>
@@ -285,106 +295,17 @@ export function HistoryView({
 
             {!selectedHistory && selectedDonorHistory ? (
                 <div className={styles.snapshotWrap}>
-                    <span>
-                        Donor:{' '}
-                        {`${selectedDonorHistory.firstname} ${selectedDonorHistory.lastname}`}
-                    </span>
-                    <br />
-                    <span>
-                        {selectedDonorHistory.userId ? 'Linked' : 'Unlinked'}
-                    </span>
+                    <div className={styles.donorSnapshotCard}>
+                        <p className={styles.donorSnapshotTitle}>Donor Snapshot</p>
+                        <span className={styles.donorSnapshotName}>
+                            {`${selectedDonorHistory.firstname} ${selectedDonorHistory.lastname}`}
+                        </span>
+                        <span className={styles.donorSnapshotStatusPill}>
+                            {selectedDonorHistory.userId ? 'Linked' : 'Unlinked'}
+                        </span>
+                    </div>
                 </div>
             ) : null}
         </div>
-    )
-}
-
-interface UnifiedHistoryFieldProps {
-    title: string
-    defaultCollapsed?: boolean
-    history: UnifiedHistoryItem[]
-    selectedAccountHistory: UpdateHistory<User> | null
-    selectedDonorHistory: UpdateHistory<ActBlueDonor> | null
-    onSelectAccountHistory: (update: UpdateHistory<User> | null) => void
-    onSelectDonorHistory: (update: UpdateHistory<ActBlueDonor> | null) => void
-    makeAccountLabel: (update: UpdateHistory<User>) => ReactNode
-    makeDonorLabel: (update: UpdateHistory<ActBlueDonor>) => ReactNode
-}
-
-function UnifiedHistoryField({
-    title,
-    defaultCollapsed,
-    history,
-    selectedAccountHistory,
-    selectedDonorHistory,
-    onSelectAccountHistory,
-    onSelectDonorHistory,
-    makeAccountLabel,
-    makeDonorLabel,
-}: UnifiedHistoryFieldProps) {
-    return (
-        <CollapsibleSection title={title} initialOpenState={!defaultCollapsed}>
-            <div className={styles.historyContainer}>
-                {history.map((item, i) => {
-                    const isSelected =
-                        item.kind == 'account'
-                            ? selectedAccountHistory?.historyId ===
-                              item.update.historyId
-                            : selectedDonorHistory?.historyId ===
-                              item.update.historyId
-
-                    const handleSelect = () => {
-                        if (item.kind == 'account') {
-                            if (isSelected) {
-                                onSelectAccountHistory(null)
-                                return
-                            }
-
-                            onSelectAccountHistory(item.update)
-                            onSelectDonorHistory(null)
-                            return
-                        }
-
-                        if (isSelected) {
-                            onSelectDonorHistory(null)
-                            return
-                        }
-
-                        onSelectDonorHistory(item.update)
-                        onSelectAccountHistory(null)
-                    }
-
-                    return (
-                        <div key={item.update.historyId ?? i}>
-                            <button
-                                type="button"
-                                onClick={handleSelect}
-                                className={cx(
-                                    styles.historyEntry,
-                                    isSelected && styles.historyEntrySelected
-                                )}
-                            >
-                                <span className={styles.historyEntryMain}>
-                                    {item.kind == 'account'
-                                        ? makeAccountLabel(item.update)
-                                        : makeDonorLabel(item.update)}
-                                </span>
-
-                                <span
-                                    className={styles.historyEntryDateTag}
-                                    data-full-date={formatFullHistoryTimestamp(
-                                        item.update.historyWhenUpdatedUtc
-                                    )}
-                                >
-                                    {formatHistoryTimestamp(
-                                        item.update.historyWhenUpdatedUtc
-                                    )}
-                                </span>
-                            </button>
-                        </div>
-                    )
-                })}
-            </div>
-        </CollapsibleSection>
     )
 }

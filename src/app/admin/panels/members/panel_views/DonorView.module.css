@@ -7,6 +7,44 @@
     width: 100%;
     min-width: 0;
     height: 100%;
+    container-type: inline-size;
+}
+
+.infoGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.infoRow {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.infoRowLeft {
+    flex: 3;
+    min-width: 0;
+}
+
+.infoRowRight {
+    flex: 2;
+    min-width: 0;
+}
+
+@container (max-width: 593px) {
+    .infoRow {
+        flex-direction: column;
+    }
+
+    .infoRowLeft,
+    .infoRowRight {
+        width: 100%;
+        flex: none;
+    }
 }
 
 .emptyStage {

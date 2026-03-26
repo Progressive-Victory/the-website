@@ -27,10 +27,23 @@
     flex: 0 0 auto;
 }
 
+.titleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
 .title {
     margin: 0;
     font-weight: 700;
     color: #09223a;
+}
+
+.subtitle {
+    margin: 0;
+    font-size: 0.78rem;
+    color: #5a7a99;
+    font-weight: 400;
 }
 
 .headerActions {

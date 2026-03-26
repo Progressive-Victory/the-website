@@ -541,76 +541,84 @@ export default function Page() {
                     <div className={styles.emptyState}>No user selected</div>
                 )}
 
-                {selectedId != null && !userQuery.data && (
-                    <MemberViewSkeleton />
-                )}
+                {selectedId != null &&
+                    (!userQuery.data || userQuery.isPlaceholderData) && (
+                        <MemberViewSkeleton />
+                    )}
 
-                {selectedId && userQuery.data && (
-                    <>
-                        <div className={styles.detailsHeader}>
-                            <div className={styles.bannerCover} />
-                            <div className={styles.headerTop}>
-                                <div className={styles.cardStyle}>
-                                    <div className={styles.cardAvatar}>
-                                        <DiscordAvatar
-                                            discordUserId={
-                                                userQuery.data.discordUsers?.[0]
-                                                    ?.id
-                                            }
-                                            imageId={
-                                                userQuery.data.discordUsers?.[0]
-                                                    ?.image
-                                            }
-                                            size={64}
-                                        />
-                                    </div>
-                                    <div className={styles.userInfo}>
-                                        <h1 className={styles.headerUserName}>
-                                            {makeTitle(userQuery.data)}
-                                        </h1>
-                                        <h2
-                                            className={
-                                                styles.headerUserUsername
-                                            }
-                                        >
-                                            {userQuery.data.discordUsers?.[0]
-                                                ?.username
-                                                ? `@${userQuery.data.discordUsers[0].username}`
-                                                : 'NOT FOUND'}
-                                        </h2>
-                                        {/* <p className={styles.userContact}>
+                {selectedId &&
+                    userQuery.data &&
+                    !userQuery.isPlaceholderData && (
+                        <>
+                            <div className={styles.detailsHeader}>
+                                <div className={styles.bannerCover} />
+                                <div className={styles.headerTop}>
+                                    <div className={styles.cardStyle}>
+                                        <div className={styles.cardAvatar}>
+                                            <DiscordAvatar
+                                                discordUserId={
+                                                    userQuery.data
+                                                        .discordUsers?.[0]?.id
+                                                }
+                                                imageId={
+                                                    userQuery.data
+                                                        .discordUsers?.[0]
+                                                        ?.image
+                                                }
+                                                size={64}
+                                            />
+                                        </div>
+                                        <div className={styles.userInfo}>
+                                            <h1
+                                                className={
+                                                    styles.headerUserName
+                                                }
+                                            >
+                                                {makeTitle(userQuery.data)}
+                                            </h1>
+                                            <h2
+                                                className={
+                                                    styles.headerUserUsername
+                                                }
+                                            >
+                                                {userQuery.data
+                                                    .discordUsers?.[0]?.username
+                                                    ? `@${userQuery.data.discordUsers[0].username}`
+                                                    : 'NOT FOUND'}
+                                            </h2>
+                                            {/* <p className={styles.userContact}>
                                                 {userQuery.data.email}
                                             </p> */}
+                                        </div>
                                     </div>
-                                </div>
-                                <div className={styles.roleList}>
-                                    {userQuery.data.roles?.length ? (
-                                        userQuery.data.roles.map((role) => (
-                                            <span
-                                                key={role.id}
-                                                className={styles.rolePill}
-                                            >
-                                                {role.name}
+                                    <div className={styles.roleList}>
+                                        {userQuery.data.roles?.length ? (
+                                            userQuery.data.roles.map((role) => (
+                                                <span
+                                                    key={role.id}
+                                                    className={styles.rolePill}
+                                                >
+                                                    {role.name}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className={styles.roleEmpty}>
+                                                No roles assigned
                                             </span>
-                                        ))
-                                    ) : (
-                                        <span className={styles.roleEmpty}>
-                                            No roles assigned
-                                        </span>
-                                    )}
+                                        )}
+                                    </div>
+                                    <TabBar
+                                        tabs={tabs}
+                                        value={selectedTab}
+                                        onChange={(key) =>
+                                            setSelectedTab(key as MemberTabKey)
+                                        }
+                                    />
                                 </div>
-                                <TabBar
-                                    tabs={tabs}
-                                    value={selectedTab}
-                                    onChange={(key) =>
-                                        setSelectedTab(key as MemberTabKey)
-                                    }
-                                />
                             </div>
-                        </div>
-                        <div className={styles.detailsContent}>{pane}</div>
-                    </>
-                )}
+                            <div className={styles.detailsContent}>{pane}</div>
+                        </>
+                    )}
             </div>
         </>
     )

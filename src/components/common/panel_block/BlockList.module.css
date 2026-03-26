@@ -1,0 +1,317 @@
+/* Override: entries bleed to the card edge */
+.root {
+    padding: 0;
+}
+
+/* Give the header its own padding since the parent padding is zeroed */
+.header {
+    padding: 0.75rem 1rem;
+}
+
+/* List rows sit flush inside the animated body */
+.listContent {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.entry {
+    width: 100%;
+    text-align: left;
+
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    padding: 0.75rem 0.9rem;
+
+    background: transparent;
+
+    border: 0;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+
+    color: rgba(15, 23, 42, 0.85);
+    font-weight: 550;
+    letter-spacing: -0.01em;
+
+    cursor: pointer;
+
+    transition:
+        background 140ms ease,
+        transform 140ms ease;
+}
+
+.entryMain {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.entry:last-child {
+    border-bottom: 0;
+}
+
+.entry:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.entrySelected {
+    background: rgba(15, 23, 42, 0.08);
+}
+
+.entrySelected:hover {
+    background: rgba(15, 23, 42, 0.1);
+}
+
+.entryUi {
+    cursor: default;
+}
+
+.entryUi:hover {
+    background: transparent;
+}
+
+/* Round bottom corners of last entry when no pagination footer follows */
+.entryLastRound:last-child {
+    border-bottom-left-radius: calc(0.75rem - 1px);
+    border-bottom-right-radius: calc(0.75rem - 1px);
+}
+
+/* ── Pagination footer ──────────────────────────────────────────── */
+
+.footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    padding: 0.4rem 0.75rem;
+    border-top: 1px solid rgba(17, 24, 39, 0.08);
+    border-bottom-left-radius: calc(0.75rem - 1px);
+    border-bottom-right-radius: calc(0.75rem - 1px);
+}
+
+.footerPageLabel {
+    font-size: 0.775rem;
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.72);
+    padding-inline: 0.5rem;
+    letter-spacing: -0.01em;
+    user-select: none;
+}
+
+.footerPageOf {
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    border-radius: 0.5rem;
+    padding: 0.3rem;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+    user-select: none;
+}
+
+.arrowEnabled {
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.arrowEnabled:hover {
+    background: rgba(15, 23, 42, 0.07);
+    color: rgba(15, 23, 42, 0.8);
+}
+
+.arrowDisabled {
+    color: rgba(15, 23, 42, 0.22);
+    cursor: not-allowed;
+}
+
+/* ── Trailing tag pill ──────────────────────────────────────────── */
+
+.entryTag {
+    position: relative;
+    margin-left: auto;
+    white-space: nowrap;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    padding-inline: 0.75rem;
+    padding-block: 0.15rem;
+    border-radius: 9999px;
+
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+/* Tooltip — reads from data-tooltip attribute */
+.entryTag::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.35rem);
+
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.45rem;
+    max-width: 20rem;
+
+    color: rgba(241, 245, 249, 0.95);
+    background: rgba(15, 23, 42, 0.92);
+    font-size: 0.72rem;
+    font-weight: 560;
+    line-height: 1.35;
+
+    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28);
+
+    opacity: 0;
+    transform: translateY(-3px);
+    transition:
+        opacity 100ms ease,
+        transform 100ms ease;
+    pointer-events: none;
+    z-index: 8;
+}
+
+.entryTag:hover::after,
+.entryTag:focus-visible::after {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* Give the header its own padding since the parent padding is zeroed */
+.header {
+    padding: 0.75rem 1rem;
+}
+
+/* List rows sit flush inside the animated body */
+.listContent {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.entry {
+    width: 100%;
+    text-align: left;
+
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    padding: 0.75rem 0.9rem;
+
+    background: transparent;
+
+    border: 0;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+
+    color: rgba(15, 23, 42, 0.85);
+    font-weight: 550;
+    letter-spacing: -0.01em;
+
+    cursor: pointer;
+
+    transition:
+        background 140ms ease,
+        transform 140ms ease;
+}
+
+.entryMain {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.entry:last-child {
+    border-bottom: 0;
+}
+
+.entry:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.entrySelected {
+    background: rgba(15, 23, 42, 0.08);
+}
+
+.entrySelected:hover {
+    background: rgba(15, 23, 42, 0.1);
+}
+
+.entryUi {
+    cursor: default;
+}
+
+.entryUi:hover {
+    background: transparent;
+}
+
+/* ── Trailing tag pill ──────────────────────────────────────────── */
+
+.entryTag {
+    position: relative;
+    margin-left: auto;
+    white-space: nowrap;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    padding-inline: 0.75rem;
+    padding-block: 0.15rem;
+    border-radius: 9999px;
+
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+/* Tooltip — reads from data-tooltip attribute */
+.entryTag::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.35rem);
+
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.45rem;
+    max-width: 20rem;
+
+    color: rgba(241, 245, 249, 0.95);
+    background: rgba(15, 23, 42, 0.92);
+    font-size: 0.72rem;
+    font-weight: 560;
+    line-height: 1.35;
+
+    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28);
+
+    opacity: 0;
+    transform: translateY(-3px);
+    transition:
+        opacity 100ms ease,
+        transform 100ms ease;
+    pointer-events: none;
+    z-index: 8;
+}
+
+.entryTag:hover::after,
+.entryTag:focus-visible::after {
+    opacity: 1;
+    transform: translateY(0);
+}

@@ -40,27 +40,38 @@ interface SkelBlockSpec {
     fullWidth?: boolean
 }
 
-// Matches real block layout: row widths approximate actual label/value text lengths
 const SKEL_BLOCKS: SkelBlockSpec[] = [
-    // Contact Info — Name, Discord, Phone, Email
-    { rows: [['3rem', '5rem'], ['4rem', '5.5rem'], ['3rem', '6.5rem'], ['3rem', '8rem']] },
-    // Address Info — Address, County
-    { rows: [['4rem', '7rem'], ['3.5rem', '3rem']] },
-    // Personal Info — Date of Birth, Age, Account Created
-    { rows: [['5.5rem', '6rem'], ['2rem', '1.5rem'], ['6rem', '7rem']] },
-    // Account Status — Accepted Alerts, Verified, Intake Status, Date Intake, Date Joined
     {
         rows: [
-            ['6rem', '2rem'],
-            ['3.5rem', '2rem'],
-            ['6.5rem', '3.5rem'],
-            ['6rem', '7rem'],
-            ['6.5rem', '7rem'],
+            ['3rem', '5rem'], // Name
+            ['4rem', '5.5rem'], // Discord
+            ['3rem', '6.5rem'], // Phone
+            ['3rem', '8rem'], // Email
         ],
     },
-    // Roles
+    {
+        rows: [
+            ['4rem', '7rem'], // Address
+            ['3.5rem', '3rem'], // County
+        ],
+    },
+    {
+        rows: [
+            ['5.5rem', '6rem'], // Date of Birth
+            ['2rem', '1.5rem'], // Age
+            ['6rem', '7rem'], // Account Created
+        ],
+    },
+    {
+        rows: [
+            ['6rem', '2rem'], // Accepted Alerts
+            ['3.5rem', '2rem'], // Verified
+            ['6.5rem', '3.5rem'], // Intake Status
+            ['6rem', '7rem'], // Date Intake
+            ['6.5rem', '7rem'], // Date Joined
+        ],
+    },
     { fullWidth: true, pills: ['4.5rem', '3.5rem', '5.5rem', '3rem', '4rem'] },
-    // Aliases
     { fullWidth: true, pills: ['3.5rem', '4.5rem'] },
 ]
 
@@ -76,28 +87,20 @@ function SkelInfoBlock({ spec }: { spec: SkelBlockSpec }) {
         >
             <div className={styles.skelBlockHeader}>
                 <div
-                    className={styles.skelShim}
-                    style={{ height: '0.7rem', width: '5.5rem' }}
+                    className={`${styles.skelShim} ${styles.skelBlockTitle}`}
                 />
-                <div
-                    className={styles.skelShim}
-                    style={{
-                        height: '1.5rem',
-                        width: '1.5rem',
-                        borderRadius: '0.3rem',
-                    }}
-                />
+                <div className={`${styles.skelShim} ${styles.skelBlockIcon}`} />
             </div>
             <div className={styles.skelBlockBody}>
                 {spec.rows?.map(([labelW, valueW], i) => (
                     <div key={i} className={styles.skelFieldRow}>
                         <div
-                            className={styles.skelShim}
-                            style={{ height: '0.6rem', width: labelW }}
+                            className={`${styles.skelShim} ${styles.skelFieldShim}`}
+                            style={{ width: labelW }}
                         />
                         <div
-                            className={styles.skelShim}
-                            style={{ height: '0.6rem', width: valueW }}
+                            className={`${styles.skelShim} ${styles.skelFieldShim}`}
+                            style={{ width: valueW }}
                         />
                     </div>
                 ))}
@@ -106,12 +109,8 @@ function SkelInfoBlock({ spec }: { spec: SkelBlockSpec }) {
                         {spec.pills.map((w, i) => (
                             <div
                                 key={i}
-                                className={styles.skelShim}
-                                style={{
-                                    height: '1.5rem',
-                                    width: w,
-                                    borderRadius: '9999px',
-                                }}
+                                className={`${styles.skelShim} ${styles.skelPillShim}`}
+                                style={{ width: w }}
                             />
                         ))}
                     </div>
@@ -124,57 +123,39 @@ function SkelInfoBlock({ spec }: { spec: SkelBlockSpec }) {
 export function MemberViewSkeleton() {
     return (
         <div className={styles.memberView}>
-            {/* Sticky header skeleton — mirrors detailsHeader */}
             <div className={styles.skelHeader}>
                 <div className={styles.skelBannerCover} />
                 <div className={styles.skelHeaderCard}>
-                    {/* Avatar + name */}
                     <div className={styles.skelAvatarRow}>
                         <div className={styles.skelAvatar} />
                         <div className={styles.skelNameCol}>
                             <div
-                                className={styles.skelShim}
-                                style={{ height: '0.95rem', width: '8rem' }}
+                                className={`${styles.skelShim} ${styles.skelUserName}`}
                             />
                             <div
-                                className={styles.skelShim}
-                                style={{ height: '0.72rem', width: '5.5rem' }}
+                                className={`${styles.skelShim} ${styles.skelUserHandle}`}
                             />
                         </div>
                     </div>
-                    {/* Role pills */}
                     <div className={styles.skelRolePillRow}>
-                        {(['4.5rem', '3.5rem', '5rem'] as const).map(
-                            (w, i) => (
-                                <div
-                                    key={i}
-                                    className={styles.skelShim}
-                                    style={{
-                                        height: '1.5rem',
-                                        width: w,
-                                        borderRadius: '9999px',
-                                    }}
-                                />
-                            )
-                        )}
-                    </div>
-                    {/* Tab bar */}
-                    <div className={styles.skelTabRow}>
-                        {(['5rem', '4.5rem', '4rem'] as const).map((w, i) => (
+                        {(['4.5rem', '3.5rem', '5rem'] as const).map((w, i) => (
                             <div
                                 key={i}
-                                className={styles.skelShim}
-                                style={{
-                                    height: '2rem',
-                                    width: w,
-                                    borderRadius: '0.4rem',
-                                }}
+                                className={`${styles.skelShim} ${styles.skelPillShim}`}
+                                style={{ width: w }}
+                            />
+                        ))}
+                    </div>
+                    <div className={styles.skelTabRow}>
+                        {[0, 1, 2].map((i) => (
+                            <div
+                                key={i}
+                                className={`${styles.skelShim} ${styles.skelTabShim}`}
                             />
                         ))}
                     </div>
                 </div>
             </div>
-            {/* Info grid skeleton */}
             <div className={styles.skelContent}>
                 <div className={styles.infoGrid}>
                     {SKEL_BLOCKS.map((spec, i) => (

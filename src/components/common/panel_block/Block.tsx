@@ -62,6 +62,7 @@ function EditButton() {
 
 export interface InfoBlockProps {
     title: string
+    subtitle?: string
     user: User
     boundaryRef?: RefObject<HTMLElement | null>
     menu?: ReactNode
@@ -73,6 +74,7 @@ export interface InfoBlockProps {
 
 export function InfoBlock({
     title,
+    subtitle,
     user,
     boundaryRef,
     menu,
@@ -146,7 +148,12 @@ export function InfoBlock({
                     .join(' ')}
             >
                 <div className={styles.header}>
-                    <h1 className={styles.title}>{title}</h1>
+                    <div className={styles.titleGroup}>
+                        <h1 className={styles.title}>{title}</h1>
+                        {subtitle && (
+                            <p className={styles.subtitle}>{subtitle}</p>
+                        )}
+                    </div>
                     {editing ? (
                         <div className={styles.headerActions}>
                             {editActionsPrefix}

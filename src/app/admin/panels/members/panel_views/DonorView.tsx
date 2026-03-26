@@ -8,6 +8,10 @@ import {
     FormGroup,
     TextField,
 } from '@/components/common/forms'
+import { InfoBlock } from '@/components/common/panel_block/Block'
+import { BlockField } from '@/components/common/panel_block/block_fields/BlockField'
+import blockFieldStyles from '@/components/common/panel_block/block_fields/BlockField.module.css'
+import { PhoneBlockField } from '@/components/common/panel_block/block_fields/PhoneBlockField'
 import {
     ActBlueContribution,
     ActBlueContributionCustomField,
@@ -18,6 +22,7 @@ import {
 import type { SearchRequest } from '@/contracts/requests'
 import type { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
+import { InformationCircleIcon } from '@heroicons/react/24/outline'
 import type { UseQueryResult } from '@tanstack/react-query'
 import cx from 'classnames'
 import { motion } from 'motion/react'
@@ -186,26 +191,148 @@ export function DonorView({
     return (
         <div className={styles.root}>
             {!hasLinked && (
-                <div className={styles.emptyStage}>
-                    <div className={styles.emptyCard}>
-                        <div className={styles.emptyCardHeader}>
-                            <div className={styles.emptyTitle}>
-                                No Donors Found
-                            </div>
-                            <div className={styles.emptySubtitle}>
-                                Automatic donor matching not implemented yet.
-                            </div>
-                        </div>
+                <InfoBlock
+                    title="No Donors Found"
+                    subtitle="Automatic donor matching not implemented yet."
+                    user={user}
+                >
+                    <button
+                        type="button"
+                        className={styles.ghostButton}
+                        onClick={openPicker}
+                    >
+                        Search Donors
+                    </button>
+                </InfoBlock>
+            )}
 
-                        <div className={styles.emptyActions}>
-                            <button
-                                type="button"
-                                className={styles.ghostButton}
-                                onClick={openPicker}
+            {hasLinked && (
+                <div className={styles.infoRow}>
+                    <div className={styles.infoRowLeft}>
+                        {linkedDonors.map((donor) => (
+                            <InfoBlock
+                                key={`contact-${donor.email}`}
+                                title="Donor Information"
+                                user={user}
                             >
-                                Search Donors
-                            </button>
-                        </div>
+                                <BlockField
+                                    label="Donor Name"
+                                    getter={() =>
+                                        [donor.firstname, donor.lastname]
+                                            .filter(Boolean)
+                                            .join(' ') || '-'
+                                    }
+                                />
+                                <BlockField
+                                    label="Donor Email"
+                                    getter={() => donor.email ?? '-'}
+                                />
+                                <PhoneBlockField
+                                    label="Donor Phone Number"
+                                    getter={() => donor.phone}
+                                />
+                                <div
+                                    className={`${blockFieldStyles.infoBlockFieldRow} ${blockFieldStyles.infoBlockFieldRowMultiline}`}
+                                >
+                                    <span
+                                        className={
+                                            blockFieldStyles.infoBlockFieldLabel
+                                        }
+                                    >
+                                        Donor Address
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className={`${blockFieldStyles.infoBlockInfoButton} ${blockFieldStyles.infoBlockInfoButtonMultiline}`}
+                                        aria-label="Full address info"
+                                    >
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'flex-end',
+                                                gap: '0.1rem',
+                                            }}
+                                        >
+                                            {(() => {
+                                                const cityState = [
+                                                    donor.city,
+                                                    donor.state,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(', ')
+                                                const cityStateZip = [
+                                                    cityState,
+                                                    donor.zip,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(' ')
+                                                const lines = [
+                                                    donor.addr1,
+                                                    cityStateZip,
+                                                    donor.country,
+                                                ].filter(Boolean)
+                                                return lines.length > 0 ? (
+                                                    lines.map((line, index) => (
+                                                        <span
+                                                            key={`${line}-${index}`}
+                                                            className={`${blockFieldStyles.infoBlockFieldValue} ${blockFieldStyles.infoBlockFieldValueLine}`}
+                                                        >
+                                                            {line}
+                                                        </span>
+                                                    ))
+                                                ) : (
+                                                    <span
+                                                        className={
+                                                            blockFieldStyles.infoBlockFieldValue
+                                                        }
+                                                    >
+                                                        -
+                                                    </span>
+                                                )
+                                            })()}
+                                        </div>
+                                        <InformationCircleIcon
+                                            className={
+                                                blockFieldStyles.infoBlockInfoIcon
+                                            }
+                                        />
+                                    </button>
+                                </div>
+                            </InfoBlock>
+                        ))}
+                    </div>
+
+                    <div className={styles.infoRowRight}>
+                        {linkedDonors.map((donor) => {
+                            const contributionData = calcContributionData(donor)
+                            return (
+                                <InfoBlock
+                                    key={`stats-${donor.email}`}
+                                    title="All Time Stats"
+                                    user={user}
+                                >
+                                    <BlockField
+                                        label="Total Donated"
+                                        getter={() =>
+                                            `$${contributionData.total.toFixed(2)}`
+                                        }
+                                    />
+                                    <BlockField
+                                        label="Active Recurring"
+                                        getter={() =>
+                                            `${contributionData.hasActiveRecurring}`
+                                        }
+                                    />
+                                    <BlockField
+                                        label="Contributions"
+                                        getter={() =>
+                                            `${contributionData.lineitems.length}`
+                                        }
+                                    />
+                                </InfoBlock>
+                            )
+                        })}
                     </div>
                 </div>
             )}
@@ -379,7 +506,7 @@ export function DonorView({
                                                     <TextField<ActBlueDonor>
                                                         label="Total Dollar Donations"
                                                         getter={() =>
-                                                            `$${contributionData.total}`
+                                                            `$${contributionData.total.toFixed(2)}`
                                                         }
                                                     />
                                                     <TextField<ActBlueDonor>
