@@ -1,7 +1,6 @@
 /* A number of committees can be defined up to the number of icons. */
 import Committee from '../types/committee'
-import PositionData from '../types/positionData'
-import { type Node, type Edge, XYPosition } from '@xyflow/react'
+import { type Node } from '@xyflow/react'
 
 export const Committees: Committee[] = [
     {
@@ -33,23 +32,6 @@ export const Committees: Committee[] = [
         alt: 'S',
     },
 ]
-
-export const departments = [
-    {
-        depName: 'Community',
-        teams: ['Welcome', 'Events', 'Moderation', 'Writing'],
-    },
-    { depName: 'Media', teams: ['Writing', 'Audio-Video', 'Design'] },
-    { depName: 'Operations', teams: ['Fundraising', 'Documentation'] },
-    { depName: 'Infrastructure', teams: ['Documentation', 'Research'] },
-    {
-        depName: 'Organizing',
-        teams: ['Recruitment', 'Mobilization'],
-        coalitions: ['Western', 'Midwest', 'Northwestern', 'Southern'],
-    },
-    { depName: 'Technology', teams: ['Discord', 'Database', 'Website'] },
-]
-
 /*export const testNodes: Node[] = [
     {
         id: 0,
@@ -146,7 +128,7 @@ export const departments = [
     },
 ]*/
 
-export const testNodes: Node[] = [
+export const orgchartData: Node[] = [
     {
         id: 0,
         title: 'Executive Director',

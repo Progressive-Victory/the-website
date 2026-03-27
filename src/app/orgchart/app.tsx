@@ -1,18 +1,16 @@
 import '../../../tailwind.config'
 import styles from './app.module.css'
-import PositionBubble from './bubbles/positionBubble'
+import { DepartmentNode, DepartmentNodeData } from './components/department'
+import OrgChartEdge from './components/edge'
+import {
+    PositionData,
+    PositionNode,
+    PositionBubble,
+} from './components/position'
+import { TeamNode, TeamNodeData } from './components/team'
 import { BuildGraphNodes } from './data/constructOrgGraph'
-import { Committees, testNodes } from './data/orgchartGraphData'
-import DepartmentNode, { DepartmentNodeData } from './nodes/departmentNode'
-import PositionNode from './nodes/positionNode'
-import TeamNode, { TeamNodeData } from './nodes/teamNode'
-import OrgChartEdge from './orgchartEdge'
-import Committee from './types/committee'
-import PositionData from './types/positionData'
-import { User, zUser } from '@/contracts/data'
-import { useFetch } from '@/util/hooks'
+import { Committees, orgchartData } from './data/orgchartGraphData'
 import dagre from '@dagrejs/dagre'
-import { keepPreviousData, useQuery, skipToken } from '@tanstack/react-query'
 import {
     type Node,
     type Edge,
@@ -24,9 +22,12 @@ import {
     XYPosition,
     Panel,
 } from '@xyflow/react'
+/* These work; they are just flagged as errors for some reason. */
 import '@xyflow/react/dist/base.css'
 import '@xyflow/react/dist/style.css'
 import React, { useState, useCallback } from 'react'
+
+/* A number of committees can be defined up to the number of icons. */
 
 const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
 
@@ -36,7 +37,7 @@ const defaultPos: XYPosition = { x: 0, y: 0 }
 
 const GetElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
     const isHorizontal = direction === 'LR'
-    dagreGraph.setGraph({ rankdir: direction, ranksep: 50, nodesep: 25 })
+    dagreGraph.setGraph({ rankdir: direction, ranksep: 80, nodesep: 25 })
     nodes.forEach((node) => {
         dagreGraph.setNode(node.id, { width: nWidth, height: nHeight })
     })
@@ -60,7 +61,7 @@ const GetElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
     return { nodes: newNodes, edges }
 }
 
-const { initialNodes, initialEdges } = BuildGraphNodes(testNodes)
+const { initialNodes, initialEdges } = BuildGraphNodes(orgchartData)
 
 const nodeTypes = {
     pos: PositionNode,
