@@ -42,7 +42,7 @@ export function TeamNode({
     return (
         <div
             key={data.id}
-            className={styles.container}
+            className={styles.nodeContainer}
             onPointerEnter={handlePointerEnter}
             onPointerLeave={() => setContentEnabled(false)}
         >

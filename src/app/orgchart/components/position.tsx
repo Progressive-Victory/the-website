@@ -39,7 +39,7 @@ export function PositionNode({
     }
 
     return (
-        <div key={data.id} className={styles.container}>
+        <div key={data.id} className={styles.nodeContainer}>
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
