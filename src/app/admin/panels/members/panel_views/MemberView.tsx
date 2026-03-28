@@ -11,56 +11,55 @@ import {
     PhoneField,
     SelectManyField,
     TextField,
+    useConfigure,
 } from '@/components/common/forms'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import { Role, UpdateHistory, User } from '@/contracts/data'
+import {
+    MembershipDeliverableStatus,
+    Role,
+    UpdateHistory,
+    User,
+} from '@/contracts/data'
 import { dateService } from '@/services'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { pascalToNormal } from '@/util'
+import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 
 const membershipCardShipmentOptions = [
-    { value: 'not_started', label: 'Not Started' },
-    { value: 'card_printed', label: 'Card Printed' },
-    { value: 'card_packaged', label: 'Card Packaged' },
-    { value: 'card_shipped', label: 'Card Shipped' },
+    { value: 0, label: 'Not Eligible' },
+    { value: 1, label: 'Not Started' },
+    { value: 2, label: 'Printed' },
+    { value: 3, label: 'In Transit' },
+    { value: 4, label: 'Recieved' },
+    { value: 5, label: 'Returned' },
 ]
 
 const membershipMerchShipmentOptions = [
-    { value: 'not_started', label: 'Not Started' },
-    { value: 'merch_packaged', label: 'Merch Packaged' },
-    { value: 'merch_shipped', label: 'Merch Shipped' },
+    { value: 0, label: 'Not Eligible' },
+    { value: 1, label: 'Not Started' },
+    { value: 2, label: 'Printed' },
+    { value: 3, label: 'In Transit' },
+    { value: 4, label: 'Recieved' },
+    { value: 5, label: 'Returned' },
 ]
 
 const shirtSizeOptions = [
-    { value: 'small', label: 'Small' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'large', label: 'Large' },
-    { value: 'xl', label: 'XL' },
-    { value: '2xl', label: '2XL' },
-]
-
-const duesMemberOptions = [
-    { value: 'not_dues_paying_member', label: 'Not Dues Paying Member' },
-    { value: 'dues_paying_member', label: 'Dues Paying Member' },
-    { value: 'premium_member', label: 'Premium Member' },
-    { value: 'signature_member', label: 'Signature Member' },
-    { value: 'inner_circle_member', label: 'Inner Circle Member' },
+    { value: 'XS', label: 'Extra Small' },
+    { value: 'S', label: 'Small' },
+    { value: 'M', label: 'Medium' },
+    { value: 'L', label: 'Large' },
+    { value: 'XL', label: 'Extra Large' },
+    { value: '2XL', label: 'Double XL' },
 ]
 
 const membershipFulfillmentStatusOptions = [
-    { value: 'not_eligible', label: 'Not Eligible' },
-    { value: 'roles_received', label: 'Roles Received' },
-    { value: 'card_shipped', label: 'Card Shipped' },
-    { value: 'merch_shipped', label: 'Merch Shipped' },
-    { value: 'benefits_fulfilled', label: 'Benefits Fulfilled' },
-    { value: 'fulfillment_issue', label: 'Fulfillment Issue' },
+    { value: 0, label: 'Not Eligible' },
+    { value: 1, label: 'Not Fulfilled' },
+    { value: 2, label: 'Fulfilled' },
 ]
 
-interface StaticSelectFieldProps extends Pick<
-    FormFieldProps<User, string>,
-    'id' | 'label' | 'readonly' | 'dynamic'
-> {
-    defaultValue: string
-    options: { value: string; label: string }[]
+interface StaticSelectFieldProps<T> extends FormFieldProps<T, number> {
+    defaultValue: string | number
+    options: { value: string | number; label: string }[]
 }
 
 interface StaticCheckboxFieldProps extends Pick<
@@ -107,47 +106,40 @@ const getHasActiveRecurringValue = (form: User): string => {
     return hasActiveRecurring ? 'Yes' : 'No'
 }
 
-function StaticSelectField({
-    id,
-    label,
-    readonly,
-    dynamic,
-    defaultValue,
-    options,
-}: StaticSelectFieldProps) {
-    const [value, setValue] = useState(defaultValue)
+function StaticSelectField<T>(props: StaticSelectFieldProps<T>) {
+    const { getter, onChange, readonly } = useConfigure(
+        props,
+        useCallback(
+            (field: string | number | null | undefined) =>
+                !props.required || !!field,
+            [props.required]
+        )
+    )
 
-    useEffect(() => {
-        if (dynamic?.editing !== true) setValue(defaultValue)
-    }, [defaultValue, dynamic?.editing])
+    const value = getter(props.dynamic!.form) ?? 0
 
-    const isReadonly = readonly == true || dynamic?.editing !== true
+    const isReadonly = readonly == true || props.dynamic?.editing !== true
     const selectedLabel =
-        options.find((option) => option.value === value)?.label ?? ''
+        props.options.find((option) => option.value === value)?.label ?? ''
 
     const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        setValue(event.target.value)
+        onChange(+event.target.value)
     }
 
     return (
-        <FormField<User, string>
-            id={id}
-            label={label}
-            readonly={isReadonly}
-            dynamic={dynamic}
-        >
+        <FormField {...props}>
             {isReadonly ? (
                 <div className={formFieldStyles.readonly}>{selectedLabel}</div>
             ) : (
                 <select
-                    id={id}
-                    name={label}
+                    id={props?.id}
+                    name={props.label}
                     value={value}
                     onChange={handleChange}
-                    disabled={dynamic?.saving == true}
+                    disabled={props.dynamic?.saving == true}
                     className={formFieldStyles.textField}
                 >
-                    {options.map((option) => (
+                    {props.options.map((option) => (
                         <option key={option.value} value={option.value}>
                             {option.label}
                         </option>
@@ -232,6 +224,15 @@ export function MemberView({
     makeFormTitle,
     handleSave,
 }: MemberViewProps) {
+    useEffect(() =>
+        console.log(
+            pascalToNormal(
+                MembershipDeliverableStatus[
+                    MembershipDeliverableStatus.NotStarted
+                ]
+            )
+        )
+    )
     return (
         <Form<User>
             key={selectedId}
@@ -386,29 +387,33 @@ export function MemberView({
             </FormGroup>
 
             <FormGroup title="Membership Fulfillment (Mock)">
-                <StaticSelectField
+                <StaticSelectField<User>
                     label="Membership Card Shipped"
-                    defaultValue="not_started"
+                    defaultValue={0}
+                    getter={(form) => form.membershipCardStatus}
+                    setter={(form, field) => ({
+                        ...form,
+                        membershipCardStatus: field,
+                    })}
                     options={membershipCardShipmentOptions}
                 />
                 <StaticSelectField
                     label="Membership Merch Shipped"
-                    defaultValue="not_started"
+                    defaultValue={0}
                     options={membershipMerchShipmentOptions}
                 />
                 <StaticSelectField
                     label="Shirt Size"
-                    defaultValue="medium"
+                    defaultValue="M"
                     options={shirtSizeOptions}
                 />
-                <StaticSelectField
+                <StaticCheckboxField
                     label="Dues Paying Member"
-                    defaultValue="not_dues_paying_member"
-                    options={duesMemberOptions}
+                    defaultValue={false}
                 />
                 <StaticSelectField
                     label="Membership Fulfillment Status"
-                    defaultValue="not_eligible"
+                    defaultValue={0}
                     options={membershipFulfillmentStatusOptions}
                 />
                 <StaticCheckboxField
