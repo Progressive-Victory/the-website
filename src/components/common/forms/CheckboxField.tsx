@@ -1,7 +1,7 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import cx from 'classnames'
-import { ChangeEvent, useCallback, useEffect } from 'react'
+import { ChangeEvent, useCallback } from 'react'
 
 export function CheckboxField<T>(
     props: FormFieldProps<T, boolean | null | undefined>

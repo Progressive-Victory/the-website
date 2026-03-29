@@ -5,25 +5,14 @@ import {
     DateField,
     DropDownField,
     Form,
-    FormField,
-    FormFieldProps,
     FormGroup,
     FormState,
     PhoneField,
     SelectManyField,
     TextField,
-    useConfigure,
 } from '@/components/common/forms'
-import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import {
-    MembershipDeliverableStatus,
-    Role,
-    UpdateHistory,
-    User,
-} from '@/contracts/data'
+import { Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
-import { pascalToNormal } from '@/util'
-import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 
 const membershipCardShipmentOptions = [
     { value: 0, label: 'Not Eligible' },
@@ -57,18 +46,6 @@ const membershipFulfillmentStatusOptions = [
     { value: 1, label: 'Not Fulfilled' },
     { value: 2, label: 'Fulfilled' },
 ]
-
-interface StaticSelectFieldProps<T> extends FormFieldProps<T, number> {
-    defaultValue: string | number
-    options: { value: string | number; label: string }[]
-}
-
-interface StaticCheckboxFieldProps extends Pick<
-    FormFieldProps<User, boolean>,
-    'id' | 'label' | 'readonly' | 'dynamic'
-> {
-    defaultValue: boolean
-}
 
 const calcFutureDate = (
     initialTime: Date,
@@ -106,97 +83,6 @@ const getHasActiveRecurringValue = (form: User): string => {
 
     return hasActiveRecurring ? 'Yes' : 'No'
 }
-
-function StaticSelectField<T>(props: StaticSelectFieldProps<T>) {
-    const { getter, onChange, readonly } = useConfigure(
-        props,
-        useCallback(
-            (field: string | number | null | undefined) =>
-                !props.required || !!field,
-            [props.required]
-        )
-    )
-
-    const value = getter(props.dynamic!.form) ?? 0
-
-    const isReadonly = readonly == true || props.dynamic?.editing !== true
-    const selectedLabel =
-        props.options.find((option) => option.value === value)?.label ?? ''
-
-    const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        onChange(+event.target.value)
-    }
-
-    return (
-        <FormField {...props}>
-            {isReadonly ? (
-                <div className={formFieldStyles.readonly}>{selectedLabel}</div>
-            ) : (
-                <select
-                    id={props?.id}
-                    name={props.label}
-                    value={value}
-                    onChange={handleChange}
-                    disabled={props.dynamic?.saving == true}
-                    className={formFieldStyles.textField}
-                >
-                    {props.options.map((option) => (
-                        <option key={option.value} value={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
-            )}
-        </FormField>
-    )
-}
-
-function StaticCheckboxField({
-    id,
-    label,
-    readonly,
-    dynamic,
-    defaultValue,
-}: StaticCheckboxFieldProps) {
-    const [value, setValue] = useState(defaultValue)
-
-    useEffect(() => {
-        if (dynamic?.editing !== true) setValue(defaultValue)
-    }, [defaultValue, dynamic?.editing])
-
-    const isReadonly = readonly == true || dynamic?.editing !== true
-
-    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setValue(event.target.checked)
-    }
-
-    return (
-        <FormField<User, boolean>
-            id={id}
-            label={label}
-            readonly={isReadonly}
-            dynamic={dynamic}
-        >
-            {isReadonly ? (
-                <div className={formFieldStyles.readonly}>
-                    {value ? 'Yes' : 'No'}
-                </div>
-            ) : (
-                <div className={formFieldStyles.checkboxField}>
-                    <input
-                        type="checkbox"
-                        id={id}
-                        name={label}
-                        checked={value}
-                        onChange={handleChange}
-                        disabled={dynamic?.saving == true}
-                    />
-                </div>
-            )}
-        </FormField>
-    )
-}
-
 export interface MemberViewProps {
     selectedId: number
     user: User

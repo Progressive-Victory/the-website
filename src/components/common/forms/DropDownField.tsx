@@ -1,7 +1,6 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import cx from 'classnames'
 import { ChangeEvent, useCallback, useMemo } from 'react'
 
 export interface DropDownProps<T, F> extends FormFieldProps<T, F> {
@@ -11,7 +10,7 @@ export interface DropDownProps<T, F> extends FormFieldProps<T, F> {
 export function DropDownField<T>(
     props: DropDownProps<T, string | number | null | undefined>
 ) {
-    const { getter, validator, onChange, readonly, disabled } = useConfigure(
+    const { getter, onChange, readonly } = useConfigure(
         props,
         useCallback(
             (field: string | number | null | undefined) =>
