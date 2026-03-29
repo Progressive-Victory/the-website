@@ -48,9 +48,27 @@
 .entryMain {
     min-width: 0;
     display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    flex: 1;
+}
+
+.entryLabel {
+    display: inline-flex;
     align-items: center;
     gap: 0.25rem;
     flex-wrap: wrap;
+}
+
+.entrySubtitle {
+    font-size: 0.75rem;
+    font-weight: 450;
+    color: rgba(15, 23, 42, 0.5);
+    letter-spacing: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
 }
 
 .entry:last-child {
@@ -189,6 +207,12 @@
     transform: translateY(0);
 }
 
+/* Suppress tooltip when no data-tooltip is set or is empty */
+.entryTag:not([data-tooltip])::after,
+.entryTag[data-tooltip='']::after {
+    display: none;
+}
+
 
 /* Give the header its own padding since the parent padding is zeroed */
 .header {
@@ -235,9 +259,27 @@
 .entryMain {
     min-width: 0;
     display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    flex: 1;
+}
+
+.entryLabel {
+    display: inline-flex;
     align-items: center;
     gap: 0.25rem;
     flex-wrap: wrap;
+}
+
+.entrySubtitle {
+    font-size: 0.75rem;
+    font-weight: 450;
+    color: rgba(15, 23, 42, 0.5);
+    letter-spacing: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
 }
 
 .entry:last-child {
@@ -314,4 +356,10 @@
 .entryTag:focus-visible::after {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* Suppress tooltip when no data-tooltip is set or is empty */
+.entryTag:not([data-tooltip])::after,
+.entryTag[data-tooltip='']::after {
+    display: none;
 }

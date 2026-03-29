@@ -13,6 +13,10 @@ export interface BlockFieldProps {
     ariaLabel?: string
     showIn?: 'both' | 'view' | 'edit'
     description?: string
+    sourceLabel?: string
+    sourceValue?: React.ReactNode
+    lastUpdatedLabel?: string
+    lastUpdatedValue?: React.ReactNode
     getter: (user: User) => React.ReactNode
     editGetter?: (user: User) => string
     setter?: (user: User, value: string) => User
@@ -22,18 +26,34 @@ export interface BlockFieldProps {
 
 const HISTORY_SKEL_WIDTHS = ['62%', '51%', '70%', '57%', '65%'] as const
 
-export function FieldInfoPanel({ description }: { description?: string }) {
+export function FieldInfoPanel({
+    description,
+    sourceLabel,
+    sourceValue,
+    lastUpdatedLabel,
+    lastUpdatedValue,
+}: {
+    description?: string
+    sourceLabel?: string
+    sourceValue?: React.ReactNode
+    lastUpdatedLabel?: string
+    lastUpdatedValue?: React.ReactNode
+}) {
     return (
         <>
             {description && <p className={styles.fieldDesc}>{description}</p>}
             <div className={styles.fieldMeta}>
                 <div className={styles.fieldMetaItem}>
-                    <span className={styles.fieldMetaLabel}>Source</span>
-                    <span className={styles.fieldMetaSkel} />
+                    <span className={styles.fieldMetaLabel}>{sourceLabel ?? 'Source'}</span>
+                    {sourceValue != null
+                        ? <span className={styles.fieldMetaValue}>{sourceValue}</span>
+                        : <span className={styles.fieldMetaSkel} />}
                 </div>
                 <div className={styles.fieldMetaItem}>
-                    <span className={styles.fieldMetaLabel}>Last updated</span>
-                    <span className={styles.fieldMetaSkel} />
+                    <span className={styles.fieldMetaLabel}>{lastUpdatedLabel ?? 'Last updated'}</span>
+                    {lastUpdatedValue != null
+                        ? <span className={styles.fieldMetaValue}>{lastUpdatedValue}</span>
+                        : <span className={styles.fieldMetaSkel} />}
                 </div>
             </div>
             <div className={styles.fieldHistorySection}>
@@ -59,6 +79,10 @@ export function BlockField({
     ariaLabel,
     showIn = 'both',
     description,
+    sourceLabel,
+    sourceValue,
+    lastUpdatedLabel,
+    lastUpdatedValue,
     getter,
     editGetter,
     setter,
@@ -124,7 +148,13 @@ export function BlockField({
                             }}
                             label={`${label} Information`}
                         >
-                            <FieldInfoPanel description={description} />
+                            <FieldInfoPanel
+                                description={description}
+                                sourceLabel={sourceLabel}
+                                sourceValue={sourceValue}
+                                lastUpdatedLabel={lastUpdatedLabel}
+                                lastUpdatedValue={lastUpdatedValue}
+                            />
                             {children && (
                                 <>
                                     <DropdownMenu.Divider />

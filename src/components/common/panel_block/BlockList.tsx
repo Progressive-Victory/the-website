@@ -21,6 +21,7 @@ import {
 export interface BlockListItem {
     key: string | number
     label: ReactNode
+    subtitle?: ReactNode
     tag?: ReactNode
     selected?: boolean
     onClick?: () => void
@@ -211,7 +212,14 @@ export function BlockList({
                                 )}
                             >
                                 <span className={styles.entryMain}>
-                                    {item.label}
+                                    <span className={styles.entryLabel}>
+                                        {item.label}
+                                    </span>
+                                    {item.subtitle && (
+                                        <span className={styles.entrySubtitle}>
+                                            {item.subtitle}
+                                        </span>
+                                    )}
                                 </span>
                                 {item.tag}
                             </button>

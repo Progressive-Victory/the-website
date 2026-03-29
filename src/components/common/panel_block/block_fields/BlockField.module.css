@@ -147,6 +147,13 @@
     animation: fip-shimmer 2s ease-in-out infinite;
 }
 
+.fieldMetaValue {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.72);
+    line-height: 1.35;
+}
+
 .fieldHistorySection {
     display: flex;
     flex-direction: column;

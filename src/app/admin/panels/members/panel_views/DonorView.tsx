@@ -9,6 +9,11 @@ import {
     TextField,
 } from '@/components/common/forms'
 import { InfoBlock } from '@/components/common/panel_block/Block'
+import {
+    BlockList,
+    BlockListTag,
+    type BlockListItem,
+} from '@/components/common/panel_block/BlockList'
 import { BlockField } from '@/components/common/panel_block/block_fields/BlockField'
 import blockFieldStyles from '@/components/common/panel_block/block_fields/BlockField.module.css'
 import { PhoneBlockField } from '@/components/common/panel_block/block_fields/PhoneBlockField'
@@ -23,6 +28,7 @@ import type { SearchRequest } from '@/contracts/requests'
 import type { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { InformationCircleIcon } from '@heroicons/react/24/outline'
+import { useRouter } from 'next/navigation'
 import type { UseQueryResult } from '@tanstack/react-query'
 import cx from 'classnames'
 import { motion } from 'motion/react'
@@ -51,6 +57,9 @@ export interface DonorViewProps {
 
 interface ContributionData {
     total: number
+    largestContribution: number
+    largestContributionForm?: string
+    largestContributionDate?: Date
     hasActiveRecurring: boolean
     customFields: ActBlueContributionCustomField[]
     lineitems: ActBlueLineitem[]
@@ -74,7 +83,7 @@ const calcFutureDate = (
 }
 
 const calcContributionData = (donor: ActBlueDonor): ContributionData => {
-    const li: ActBlueLineitem[] = []
+    const li: { lineitem: ActBlueLineitem; form: string }[] = []
     let hasActiveRecurring = false
     let total = 0
     let customFields: ActBlueContributionCustomField[] = []
@@ -95,17 +104,28 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
             ;(contribution.lineitems ?? []).forEach(
                 (lineitem: ActBlueLineitem) => {
                     total += lineitem.amount
-                    li.push(lineitem)
+                    li.push({ lineitem, form: contribution.contributionForm })
                 }
             )
         }
     )
 
+    const largestEntry = li.reduce<{ lineitem: ActBlueLineitem; form: string } | null>(
+        (max, entry) =>
+            max === null || entry.lineitem.amount > max.lineitem.amount
+                ? entry
+                : max,
+        null
+    )
+
     return {
         total,
+        largestContribution: largestEntry?.lineitem.amount ?? 0,
+        largestContributionForm: largestEntry?.form,
+        largestContributionDate: largestEntry?.lineitem.paidAt,
         hasActiveRecurring,
         customFields,
-        lineitems: li,
+        lineitems: li.map((e) => e.lineitem),
     }
 }
 
@@ -121,6 +141,7 @@ export function DonorView({
     renderDonorItem,
     handleDeleteDonorItem,
 }: DonorViewProps) {
+    const router = useRouter()
     const linkedDonors = user.donors ?? []
     const hasLinked = linkedDonors.length > 0
 
@@ -209,128 +230,178 @@ export function DonorView({
             {hasLinked && (
                 <div className={styles.infoRow}>
                     <div className={styles.infoRowLeft}>
-                        {linkedDonors.map((donor) => (
-                            <InfoBlock
-                                key={`contact-${donor.email}`}
-                                title="Donor Information"
-                                user={user}
-                            >
-                                <BlockField
-                                    label="Donor Name"
-                                    getter={() =>
-                                        [donor.firstname, donor.lastname]
-                                            .filter(Boolean)
-                                            .join(' ') || '-'
-                                    }
-                                />
-                                <BlockField
-                                    label="Donor Email"
-                                    getter={() => donor.email ?? '-'}
-                                />
-                                <PhoneBlockField
-                                    label="Donor Phone Number"
-                                    getter={() => donor.phone}
-                                />
-                                <div
-                                    className={`${blockFieldStyles.infoBlockFieldRow} ${blockFieldStyles.infoBlockFieldRowMultiline}`}
-                                >
-                                    <span
-                                        className={
-                                            blockFieldStyles.infoBlockFieldLabel
-                                        }
+                        {linkedDonors.map((donor) => {
+                            const contributionData = calcContributionData(donor)
+                            return (
+                                <React.Fragment key={`left-${donor.email}`}>
+                                    <InfoBlock
+                                        title="All Time Stats"
+                                        user={user}
                                     >
-                                        Donor Address
-                                    </span>
-                                    <button
-                                        type="button"
-                                        className={`${blockFieldStyles.infoBlockInfoButton} ${blockFieldStyles.infoBlockInfoButtonMultiline}`}
-                                        aria-label="Full address info"
-                                    >
-                                        <div
-                                            style={{
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'flex-end',
-                                                gap: '0.1rem',
-                                            }}
-                                        >
-                                            {(() => {
-                                                const cityState = [
-                                                    donor.city,
-                                                    donor.state,
-                                                ]
-                                                    .filter(Boolean)
-                                                    .join(', ')
-                                                const cityStateZip = [
-                                                    cityState,
-                                                    donor.zip,
-                                                ]
-                                                    .filter(Boolean)
-                                                    .join(' ')
-                                                const lines = [
-                                                    donor.addr1,
-                                                    cityStateZip,
-                                                    donor.country,
-                                                ].filter(Boolean)
-                                                return lines.length > 0 ? (
-                                                    lines.map((line, index) => (
-                                                        <span
-                                                            key={`${line}-${index}`}
-                                                            className={`${blockFieldStyles.infoBlockFieldValue} ${blockFieldStyles.infoBlockFieldValueLine}`}
-                                                        >
-                                                            {line}
-                                                        </span>
-                                                    ))
-                                                ) : (
-                                                    <span
-                                                        className={
-                                                            blockFieldStyles.infoBlockFieldValue
-                                                        }
-                                                    >
-                                                        -
-                                                    </span>
-                                                )
-                                            })()}
-                                        </div>
-                                        <InformationCircleIcon
-                                            className={
-                                                blockFieldStyles.infoBlockInfoIcon
+                                        <BlockField
+                                            label="Total Donated"
+                                            getter={() =>
+                                                `$${contributionData.total.toFixed(2)}`
                                             }
                                         />
-                                    </button>
-                                </div>
-                            </InfoBlock>
-                        ))}
+                                        <BlockField
+                                            label="Active Recurring"
+                                            getter={() =>
+                                                `${contributionData.hasActiveRecurring}`
+                                            }
+                                        />
+                                        <BlockField
+                                            label="Contributions"
+                                            getter={() =>
+                                                `${contributionData.lineitems.length}`
+                                            }
+                                        />
+                                        <BlockField
+                                            label="Largest Contribution"
+                                            getter={() =>
+                                                `$${contributionData.largestContribution.toFixed(2)}`
+                                            }
+                                            sourceLabel="Contribution Form"
+                                            sourceValue={contributionData.largestContributionForm}
+                                            lastUpdatedLabel="Date"
+                                            lastUpdatedValue={contributionData.largestContributionDate?.toLocaleString([], {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: 'numeric',
+                                                minute: '2-digit',
+                                            })}
+                                        />
+                                    </InfoBlock>
+                                    <InfoBlock
+                                        title="Donor Information"
+                                        user={user}
+                                    >
+                                        <BlockField
+                                            label="Donor Name"
+                                            getter={() =>
+                                                [donor.firstname, donor.lastname]
+                                                    .filter(Boolean)
+                                                    .join(' ') || '-'
+                                            }
+                                        />
+                                        <BlockField
+                                            label="Donor Email"
+                                            getter={() => donor.email ?? '-'}
+                                        />
+                                        <PhoneBlockField
+                                            label="Donor Phone Number"
+                                            getter={() => donor.phone}
+                                        />
+                                        <div
+                                            className={`${blockFieldStyles.infoBlockFieldRow} ${blockFieldStyles.infoBlockFieldRowMultiline}`}
+                                        >
+                                            <span
+                                                className={
+                                                    blockFieldStyles.infoBlockFieldLabel
+                                                }
+                                            >
+                                                Donor Address
+                                            </span>
+                                            <button
+                                                type="button"
+                                                className={`${blockFieldStyles.infoBlockInfoButton} ${blockFieldStyles.infoBlockInfoButtonMultiline}`}
+                                                aria-label="Full address info"
+                                            >
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'flex-end',
+                                                        gap: '0.1rem',
+                                                    }}
+                                                >
+                                                    {(() => {
+                                                        const cityState = [
+                                                            donor.city,
+                                                            donor.state,
+                                                        ]
+                                                            .filter(Boolean)
+                                                            .join(', ')
+                                                        const cityStateZip = [
+                                                            cityState,
+                                                            donor.zip,
+                                                        ]
+                                                            .filter(Boolean)
+                                                            .join(' ')
+                                                        const lines = [
+                                                            donor.addr1,
+                                                            cityStateZip,
+                                                            donor.country,
+                                                        ].filter(Boolean)
+                                                        return lines.length > 0 ? (
+                                                            lines.map((line, index) => (
+                                                                <span
+                                                                    key={`${line}-${index}`}
+                                                                    className={`${blockFieldStyles.infoBlockFieldValue} ${blockFieldStyles.infoBlockFieldValueLine}`}
+                                                                >
+                                                                    {line}
+                                                                </span>
+                                                            ))
+                                                        ) : (
+                                                            <span
+                                                                className={
+                                                                    blockFieldStyles.infoBlockFieldValue
+                                                                }
+                                                            >
+                                                                -
+                                                            </span>
+                                                        )
+                                                    })()}
+                                                </div>
+                                                <InformationCircleIcon
+                                                    className={
+                                                        blockFieldStyles.infoBlockInfoIcon
+                                                    }
+                                                />
+                                            </button>
+                                        </div>
+                                    </InfoBlock>
+                                </React.Fragment>
+                            )
+                        })}
                     </div>
 
                     <div className={styles.infoRowRight}>
                         {linkedDonors.map((donor) => {
-                            const contributionData = calcContributionData(donor)
+                            const contributionItems: BlockListItem[] = (
+                                donor.contributions ?? []
+                            ).flatMap((contribution) =>
+                                (contribution.lineitems ?? []).map(
+                                    (lineitem) => ({
+                                        key: lineitem.lineitemId,
+                                        label: `$${lineitem.amount.toFixed(2)}`,
+                                        subtitle: (
+                                            <>
+                                                <span>{lineitem.paidAt.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
+                                                <span>{contribution.contributionForm}</span>
+                                            </>
+                                        ),
+                                        tag: (
+                                            <BlockListTag>
+                                                {contribution.isRecurring
+                                                    ? 'Recurring'
+                                                    : 'One-Time'}
+                                            </BlockListTag>
+                                        ),
+                                        onClick: () => router.push(`/admin/panels/contributions?lineitemId=${lineitem.lineitemId}`),
+                                        _paidAt: lineitem.paidAt,
+                                    })
+                                )
+                            ).sort((a, b) => b._paidAt.getTime() - a._paidAt.getTime())
                             return (
-                                <InfoBlock
-                                    key={`stats-${donor.email}`}
-                                    title="All Time Stats"
-                                    user={user}
-                                >
-                                    <BlockField
-                                        label="Total Donated"
-                                        getter={() =>
-                                            `$${contributionData.total.toFixed(2)}`
-                                        }
-                                    />
-                                    <BlockField
-                                        label="Active Recurring"
-                                        getter={() =>
-                                            `${contributionData.hasActiveRecurring}`
-                                        }
-                                    />
-                                    <BlockField
-                                        label="Contributions"
-                                        getter={() =>
-                                            `${contributionData.lineitems.length}`
-                                        }
-                                    />
-                                </InfoBlock>
+                                <BlockList
+                                    key={`contributions-${donor.email}`}
+                                    title="Contributions"
+                                    items={contributionItems}
+                                    pageSize={5}
+                                    emptyMessage="No contributions found"
+                                />
                             )
                         })}
                     </div>
