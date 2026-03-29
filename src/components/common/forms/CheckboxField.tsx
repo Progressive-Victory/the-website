@@ -15,10 +15,8 @@ export function CheckboxField<T>(
     )
 
     const value = getter(props.dynamic!.form) ?? false
-    useEffect(() => console.log('checkbox value', value), [value])
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-        console.log(event.target.checked)
         onChange(event.target.checked)
     }
 

@@ -263,11 +263,8 @@ export default function Page() {
     })
 
     const handleSave = (user: User) => {
-        console.log('saving')
         const orNull = (value: string | null | undefined) =>
             value?.length ? value : null
-
-        console.log(user.address, locationQuery.data)
 
         const address = {
             addressLine1: orNull(user.address.addressLine1?.trim()),
@@ -292,8 +289,6 @@ export default function Page() {
             address.state != oldAddress?.state ||
             address.zip != oldAddress?.zip
 
-        console.log('duespayingmember save', user.duesPayingMember)
-
         const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
             email: user.email,
             phone: user.phone,
@@ -313,8 +308,6 @@ export default function Page() {
             roles: user.roles?.map((role) => role.id),
         } satisfies UpdateUserRequest)
         if (addressIsDirty) request.address = address
-
-        console.log('full request', request)
 
         updateMutation.mutate({ id: user.id, user, request })
     }
