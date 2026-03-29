@@ -3,6 +3,7 @@
 import {
     CheckboxField,
     DateField,
+    DropDownField,
     Form,
     FormField,
     FormFieldProps,
@@ -224,15 +225,6 @@ export function MemberView({
     makeFormTitle,
     handleSave,
 }: MemberViewProps) {
-    useEffect(() =>
-        console.log(
-            pascalToNormal(
-                MembershipDeliverableStatus[
-                    MembershipDeliverableStatus.NotStarted
-                ]
-            )
-        )
-    )
     return (
         <Form<User>
             key={selectedId}
@@ -387,42 +379,34 @@ export function MemberView({
             </FormGroup>
 
             <FormGroup title="Membership Fulfillment (Mock)">
-                <StaticSelectField<User>
+                <DropDownField<User>
                     label="Membership Card Shipped"
-                    defaultValue={0}
-                    getter={(form) => form.membershipCardStatus}
-                    setter={(form, field) => ({
-                        ...form,
-                        membershipCardStatus: field,
-                    })}
+                    field="membershipCardStatus"
                     options={membershipCardShipmentOptions}
                 />
-                <StaticSelectField
+                <DropDownField<User>
                     label="Membership Merch Shipped"
-                    defaultValue={0}
+                    field="membershipMerchStatus"
                     options={membershipMerchShipmentOptions}
                 />
-                <StaticSelectField
+                <DropDownField<User>
                     label="Shirt Size"
-                    defaultValue="M"
+                    field="shirtSize"
                     options={shirtSizeOptions}
                 />
-                <StaticCheckboxField
+                <CheckboxField<User>
                     label="Dues Paying Member"
-                    defaultValue={false}
+                    field="duesPayingMember"
                 />
-                <StaticSelectField
+                <DropDownField<User>
                     label="Membership Fulfillment Status"
-                    defaultValue={0}
+                    field="membershipFulfillmentOptions"
                     options={membershipFulfillmentStatusOptions}
                 />
-                <StaticCheckboxField
-                    label="Name Confirmed"
-                    defaultValue={false}
-                />
-                <StaticCheckboxField
+                <CheckboxField label="Name Confirmed" field="nameConfirmed" />
+                <CheckboxField
                     label="Address Confirmed"
-                    defaultValue={false}
+                    field="addressConfirmed"
                 />
                 <TextField<User>
                     label="Has Active Recurring"

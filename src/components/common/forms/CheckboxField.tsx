@@ -1,7 +1,7 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import cx from 'classnames'
-import { ChangeEvent, useCallback } from 'react'
+import { ChangeEvent, useCallback, useEffect } from 'react'
 
 export function CheckboxField<T>(
     props: FormFieldProps<T, boolean | null | undefined>
@@ -15,15 +15,17 @@ export function CheckboxField<T>(
     )
 
     const value = getter(props.dynamic!.form) ?? false
+    useEffect(() => console.log('checkbox value', value), [value])
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        console.log(event.target.checked)
         onChange(event.target.checked)
     }
 
     return (
         <FormField {...props}>
             {readonly ? (
-                <div className={styles.readonly}>{value}</div>
+                <div className={styles.readonly}>{`${value}`}</div>
             ) : (
                 <div className={styles.checkboxField}>
                     <input

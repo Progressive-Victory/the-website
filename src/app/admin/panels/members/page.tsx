@@ -26,6 +26,7 @@ import {
     ActBlueDonorLinkRequest,
     SortDirection,
     UpdateUserRequest,
+    zUpdateUserRequest,
 } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
@@ -40,6 +41,7 @@ import {
 } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
+import z from 'zod'
 
 export default function Page() {
     const queryClient = useQueryClient()
@@ -261,6 +263,7 @@ export default function Page() {
     })
 
     const handleSave = (user: User) => {
+        console.log('saving')
         const orNull = (value: string | null | undefined) =>
             value?.length ? value : null
 
@@ -289,16 +292,29 @@ export default function Page() {
             address.state != oldAddress?.state ||
             address.zip != oldAddress?.zip
 
-        const request: UpdateUserRequest = {
+        console.log('duespayingmember save', user.duesPayingMember)
+
+        const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
             email: user.email,
             phone: user.phone,
             preferredName: user.preferredName,
             firstName: user.firstName,
             lastName: user.lastName,
             birthdate: user.birthdate,
+            membershipCardStatus: +user.membershipCardStatus,
+            membershipMerchStatus: +user.membershipMerchStatus,
+            shirtSize: user.shirtSize,
+            duesPayingMember: user.duesPayingMember,
+            membershipFulfillmentStatus: user.membershipFulfillmentStatus
+                ? +user.membershipFulfillmentStatus
+                : null,
+            nameConfirmed: user.nameConfirmed,
+            addressConfirmed: user.addressConfirmed,
             roles: user.roles?.map((role) => role.id),
-        }
+        } satisfies UpdateUserRequest)
         if (addressIsDirty) request.address = address
+
+        console.log('full request', request)
 
         updateMutation.mutate({ id: user.id, user, request })
     }

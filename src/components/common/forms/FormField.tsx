@@ -202,6 +202,7 @@ export function useConfigure<FormType, FieldType>(
 
     // Let the fields use a simpler onChange by baking in the id.
     const onChange = (field: FieldType) => {
+        console.log('field', field)
         if (id) props.dynamic?.onChange?.(id, field)
     }
 
