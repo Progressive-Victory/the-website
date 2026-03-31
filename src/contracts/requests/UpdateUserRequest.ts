@@ -1,6 +1,13 @@
 import { zOnboardingStage, zUserStatus } from '../data'
 import { zMutationRequest } from './MutationRequest'
 import { zUpdateUserAddressRequest } from './UpdateUserAddressRequest'
+import {
+    zOnboardingStage,
+    zUserStatus,
+    zShirtSize,
+    zMembershipDeliverableStatus,
+    zMembershipFulfillmentStatus,
+} from '@/contracts/data'
 import z from 'zod'
 
 export const zUpdateUserRequest = zMutationRequest
@@ -16,12 +23,20 @@ export const zUpdateUserRequest = zMutationRequest
         acceptedAlerts: z.boolean().optional(),
         verified: z.boolean().optional(),
         onboardingStage: zOnboardingStage.optional(),
-        lastSmsCode: z.number().nullable().optional(),
-        lastSmsCodeSendTimeUtc: z.coerce.date().nullable().optional(),
+        lastSmsCode: z.number().nullish(),
+        lastSmsCodeSendTimeUtc: z.coerce.date().nullish(),
         status: zUserStatus.optional(),
 
-        joinedAtUtc: z.coerce.date().nullable().optional(),
-        completedIntakeUtc: z.coerce.date().nullable().optional(),
+        joinedAtUtc: z.coerce.date().nullish(),
+        completedIntakeUtc: z.coerce.date().nullish(),
+
+        membershipCardStatus: zMembershipDeliverableStatus.optional(),
+        membershipMerchStatus: zMembershipDeliverableStatus.optional(),
+        shirtSize: zShirtSize.nullish(),
+        duesPayingMember: z.boolean().optional(),
+        membershipFulfillmentStatus: zMembershipFulfillmentStatus.nullish(),
+        nameConfirmed: z.boolean().optional(),
+        addressConfirmed: z.boolean().optional(),
 
         aliases: z.array(z.string().max(100).nonempty()).optional(),
         roles: z.array(z.number()).optional(),
