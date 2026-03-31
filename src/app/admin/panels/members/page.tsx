@@ -264,8 +264,6 @@ export default function Page() {
         const orNull = (value: string | null | undefined) =>
             value?.length ? value : null
 
-        console.log(user.address, locationQuery.data)
-
         const address = {
             addressLine1: orNull(user.address.addressLine1?.trim()),
             addressLine2: orNull(user.address.addressLine2?.trim()),
@@ -290,6 +288,10 @@ export default function Page() {
             address.zip != oldAddress?.zip
 
         const request: UpdateUserRequest = {
+            metaData: {
+                userWhoUpdatedId: loggedInUser.data?.id,
+                dataSource: 'Member Panel',
+            },
             email: user.email,
             phone: user.phone,
             preferredName: user.preferredName,

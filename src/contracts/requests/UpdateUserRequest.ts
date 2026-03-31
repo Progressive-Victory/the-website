@@ -1,9 +1,10 @@
 import { zOnboardingStage, zUserStatus } from '../data'
+import { zMutationRequest } from './MutationRequest'
 import { zUpdateUserAddressRequest } from './UpdateUserAddressRequest'
 import z from 'zod'
 
-export const zUpdateUserRequest = z
-    .object({
+export const zUpdateUserRequest = zMutationRequest
+    .extend({
         email: z.string().max(100).nonempty().nullable().optional(),
         phone: z.string().max(15).nonempty().nullable().optional(),
         preferredName: z.string().max(100).nonempty().nullable().optional(),
