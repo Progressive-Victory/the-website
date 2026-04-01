@@ -292,6 +292,10 @@ export default function Page() {
         const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
             email: user.email,
             phone: user.phone,
+            metaData: {
+                userWhoUpdatedId: loggedInUser.data?.id,
+                dataSource: 'Member Panel',
+            },
             preferredName: user.preferredName,
             firstName: user.firstName,
             lastName: user.lastName,

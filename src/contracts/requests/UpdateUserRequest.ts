@@ -1,3 +1,4 @@
+import { zMutationRequest } from './MutationRequest'
 import { zUpdateUserAddressRequest } from './UpdateUserAddressRequest'
 import {
     zOnboardingStage,
@@ -8,15 +9,14 @@ import {
 } from '@/contracts/data'
 import z from 'zod'
 
-export const zUpdateUserRequest = z
-    .object({
-        email: z.string().max(100).nonempty().nullish(),
-        phone: z.string().max(15).nonempty().nullish(),
-        preferredName: z.string().max(100).nonempty().nullish(),
-        firstName: z.string().max(100).nonempty().nullish(),
-        lastName: z.string().max(100).nonempty().nullish(),
-        birthdate: z.coerce.date().nullish(),
-        zipCode: z.number().nullish(),
+export const zUpdateUserRequest = zMutationRequest
+    .extend({
+        email: z.string().max(100).nonempty().nullable().optional(),
+        phone: z.string().max(15).nonempty().nullable().optional(),
+        preferredName: z.string().max(100).nonempty().nullable().optional(),
+        firstName: z.string().max(100).nonempty().nullable().optional(),
+        lastName: z.string().max(100).nonempty().nullable().optional(),
+        birthdate: z.coerce.date().nullable().optional(),
         address: zUpdateUserAddressRequest.optional(),
 
         acceptedAlerts: z.boolean().optional(),
