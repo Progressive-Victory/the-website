@@ -354,8 +354,10 @@ function UnifiedHistoryField({
                         onSelectAccountHistory(null)
                     }
 
+                    console.log(item.update.historyId ?? i)
+
                     return (
-                        <div key={item.update.historyId ?? i}>
+                        <div key={`${item.kind}-${item.update.historyId ?? i}`}>
                             <button
                                 type="button"
                                 onClick={handleSelect}
