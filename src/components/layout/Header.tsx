@@ -94,7 +94,7 @@ const navitems: NavItem[] = [
     },
     {
         name: 'More',
-        href: '/home',
+        href: '/',
         subnav: {
             columns: [
                 {
@@ -345,7 +345,11 @@ function NavDrawer({
                                                         rotateChevronOnHover={
                                                             false
                                                         }
-                                                        href={item.href}
+                                                        href={
+                                                            item.name == 'More'
+                                                                ? '#'
+                                                                : 'item.href'
+                                                        }
                                                         renderContent={({
                                                             showNavChevron,
                                                         }) => (
@@ -754,6 +758,7 @@ export function Header() {
                                     label={item.name}
                                     href={item.href}
                                     showChevron={item.name === 'More'}
+                                    disabled={item.name === 'More'}
                                     isSubnavOpen={isActive}
                                     onOpenSubnav={() => openSubnav(item)}
                                     className={
