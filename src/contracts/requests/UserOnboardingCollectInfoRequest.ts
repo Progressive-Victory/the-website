@@ -1,6 +1,7 @@
+import { zMutationRequest } from './MutationRequest'
 import z from 'zod'
 
-export const zUserOnboardingCollectInfoRequest = z.object({
+export const zUserOnboardingCollectInfoRequest = zMutationRequest.extend({
     firstName: z.string(),
     lastName: z.string(),
     phone: z.string(),

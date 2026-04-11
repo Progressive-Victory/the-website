@@ -14,6 +14,7 @@ import { OnboardingStage } from '@/contracts/data'
 import {
     UserOnboardingCollectInfoRequest,
     UserOnboardingVerifyRequest,
+    zUserOnboardingCollectInfoRequest,
 } from '@/contracts/requests'
 import {
     DiscordUserIsInServerResponse,
@@ -28,6 +29,7 @@ import {
     useQueryClient,
 } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import z from 'zod'
 
 export default function VolunteerPage() {
     const queryClient = useQueryClient()
@@ -60,7 +62,12 @@ export default function VolunteerPage() {
             if (!user.data) return
             await onPut(
                 `/users/${user.data?.id}/onboardingStages/collectInfo`,
-                obj
+                z.parse(zUserOnboardingCollectInfoRequest, {
+                    ...obj,
+                    metaData: {
+                        dataSource: 'Intake Form',
+                    },
+                } satisfies UserOnboardingCollectInfoRequest)
             )
         },
         onSettled: () => {
