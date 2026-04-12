@@ -4,10 +4,11 @@ import { NavItem } from './types'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
 import { AccountButton } from '@/components/common/buttons/button_types/AccountButton'
-import { DonateButton } from '@/components/common/buttons/button_types/DonateButton'
 import { LoginButton } from '@/components/common/buttons/button_types/LoginButton'
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
+import { DonateButton } from '@/components/common/buttons/button_types/donate_button/DonateButton'
+import { OverlayBackdrop } from '@/components/common/overlay/OverlayBackdrop'
 import styles from '@/components/layout/header.module.css'
 import { DiscordUser, TokenClaims, zDiscordUser } from '@/contracts/data'
 import { useAuth, useFetch } from '@/util/hooks'
@@ -863,27 +864,13 @@ export function Header() {
                 ) : null}
             </AnimatePresence>
 
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        key="nav-backdrop"
-                        aria-hidden="true"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2, ease: 'easeOut' }}
-                        style={{
-                            position: 'fixed',
-                            inset: 0,
-                            zIndex: 30,
-                            backdropFilter: 'blur(10px)',
-                            WebkitBackdropFilter: 'blur(10px)',
-                            backgroundColor: 'rgba(0, 0, 0, 0.18)',
-                        }}
-                        onClick={() => setIsOpen(false)}
-                    />
-                )}
-            </AnimatePresence>
+            <OverlayBackdrop
+                open={isOpen}
+                onClick={() => setIsOpen(false)}
+                zIndex={30}
+                blurPx={10}
+                tintColor="rgba(0, 0, 0, 0.18)"
+            />
 
             <NavDrawer
                 isOpen={isOpen}
