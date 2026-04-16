@@ -67,22 +67,45 @@ describe('dateService', () => {
     })
 
     describe('fromISODateString', () => {
-        it('should return null if the string is invalid', () => {
-            const string = '06a20a05'
-            
-            const result = dateService.fromISODateString(string)
+        it('should return null if the input string is invalid', () => {
+            const input = '06a20a05'
+
+            const result = dateService.fromISODateString(input)
 
             expect(result).toBeNull()
         })
 
-        it('should strip time component and return midnight UTC', () => {
-            const string = '2005-06-20T14:30:00.000Z'
+        it('should return null if input is null', () => {
+            const input = null
 
-            const result = dateService.fromISODateString(string)
+            const result = dateService.fromISODateString(input)
+
+            expect(result).toBeNull()
+        })
+
+        it('should return null if date is invalid', () => {
+            const input = new Date('abc')
+
+            const result = dateService.fromISODateString(input)
+
+            expect(result).toBeNull()
+        })
+
+        it('should return a normalized Date object if date is valid', () => {
+            const input = new Date('2005-06-20T14:30:00.000Z')
+
+            const result = dateService.fromISODateString(input)
 
             expect(result).toEqual(new Date('2005-06-20'))
         })
 
+        it('should strip time component and return midnight UTC', () => {
+            const input = '2005-06-20T14:30:00.000Z'
+
+            const result = dateService.fromISODateString(input)
+
+            expect(result).toEqual(new Date('2005-06-20'))
+        })
     })
 
     describe('getAge', () => {
