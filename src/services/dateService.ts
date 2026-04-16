@@ -15,9 +15,7 @@ class DateService {
 
     fromISODateString(date: Date | string | null | undefined) {
         const isoString = this.toISODateString(date)
-        return isoString 
-            ? new Date(isoString) 
-            : null
+        return isoString ? new Date(isoString) : null
     }
 
     formatDate(date: Date) {
