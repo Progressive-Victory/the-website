@@ -48,6 +48,24 @@ describe('dateService', () => {
         })
     })
 
+    describe('toISODateString', () => {
+        it('should return null if the date is invalid', () => {
+            const date = '06a20a05'
+
+            const result = dateService.toISODateString(date)
+
+            expect(result).toBeNull()
+        })
+
+        it('should return yyyy-mm-dd if the date is valid', () => {
+            const date = '6/20/05'
+
+            const result = dateService.toISODateString(date)
+
+            expect(result).toBe('2005-06-20')
+        })
+    })
+
     describe('fromISODateString', () => {
         it('should return null if the string is invalid', () => {
             const string = '06a20a05'
@@ -65,24 +83,6 @@ describe('dateService', () => {
             expect(result).toEqual(new Date('2005-06-20'))
         })
 
-    })
-
-    describe('toISODateString', () => {
-        it('should return null if the date is invalid', () => {
-            const date = '06a20a05'
-
-            const result = dateService.toISODateString(date)
-
-            expect(result).toBeNull()
-        })
-
-        it('should return yyyy-mm-dd if the date is valid', () => {
-            const date = '6/20/05'
-
-            const result = dateService.toISODateString(date)
-
-            expect(result).toBe('2005-06-20')
-        })
     })
 
     describe('getAge', () => {
