@@ -153,13 +153,7 @@ export function MemberView({
                 <TextField label="Last Name" field="lastName" />
                 <DateField<User>
                     label="Date of Birth"
-                    getter={(form) =>
-                        dateService.isValid(form.birthdate)
-                            ? new Date(
-                                  dateService.toISODateString(form.birthdate)!
-                              )
-                            : null
-                    }
+                    getter={(form) => dateService.fromISODateString(form.birthdate)}
                     field="birthdate"
                     format={{
                         timeZone: 'UTC',
