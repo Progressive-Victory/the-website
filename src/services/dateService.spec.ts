@@ -48,6 +48,25 @@ describe('dateService', () => {
         })
     })
 
+    describe('fromISODateString', () => {
+        it('should return null if the string is invalid', () => {
+            const string = '06a20a05'
+            
+            const result = dateService.fromISODateString(string)
+
+            expect(result).toBeNull()
+        })
+
+        it('should strip time component and return midnight UTC', () => {
+            const string = '2005-06-20T14:30:00.000Z'
+
+            const result = dateService.fromISODateString(string)
+
+            expect(result).toEqual(new Date('2005-06-20'))
+        })
+
+    })
+
     describe('toISODateString', () => {
         it('should return null if the date is invalid', () => {
             const date = '06a20a05'

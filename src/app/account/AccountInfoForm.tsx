@@ -76,15 +76,7 @@ export const AccountInfoForm = ({
                     <TextField label="Email" field="email" readonly />
                     <DateField<User>
                         label="Date of Birth"
-                        getter={(user) =>
-                            dateService.isValid(user.birthdate)
-                                ? new Date(
-                                      dateService.toISODateString(
-                                          user.birthdate
-                                      )!
-                                  )
-                                : null
-                        }
+                        getter={(user) => dateService.fromISODateString(user.birthdate)}
                         field="birthdate"
                         format={{
                             timeZone: 'UTC',
