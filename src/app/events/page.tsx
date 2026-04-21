@@ -1,6 +1,6 @@
-import { Metadata } from 'next'
-import { MainLayout } from '@/components/layout'
 import { ClientCalendar } from './Calendar'
+import { MainLayout } from '@/components/layout/MainLayout'
+import { Metadata } from 'next'
 
 export const metadata: Metadata = {
     title: 'PV - Events',
@@ -16,25 +16,29 @@ export const metadata: Metadata = {
 // Map calendar src embed to their RGB color
 const calendarMap = new Map<string, string>([
     [
-        '27d041938d95e549e529dcfa46f1989c1fde36c9acd31d07829872ef08e4961d@group.calendar.google.com',
-        'b09e00',
-    ], // Organizing Meetings
+        'Nzc0NDI1MWUxMjQwZTQxNWUzNWE0NDAzMDE0OGZjM2VmODQwMmI4MmMzNDI4OTliNWFhNDUwM2M1M2ExNTJiYkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t',
+        'ba7525',
+    ], // State Team Meetings was #b09e00
     [
-        'c_c92baa7ee2cd5e3a35a54b8a558a7bfec3cb0067c2eeaf63db81331340801b8e@group.calendar.google.com',
-        '009949',
-    ], // Event Planning
+        'MDE1MWIxYWUyN2MwMDFkOTEyMjYzNDk3MjBkZDQ4NmViNmMzN2E4YzY0OTgwN2FkNjhkMGFhZTI4ODE3ZDdjMUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t',
+        '0099e1',
+    ], // Dept Team Meetings was #009949
+    [
+        'Y2Q3OWY0OGFkZTM1NDIzZTBhMjMyY2ZjZjE0NmU2MTlkMDZhZTgxNDNjMDRmYWU5MzI3ODc4OGJjZGMxOWIxZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t',
+        '9802b3',
+    ], // Special Events was #ba7525
+    [
+        'NjA4ZDRiYzU4NDA3YjhlMjcwNzQ1ZWUyMjI2YTI4OGU2NDZkNDMwMDExY2E3MTYyMjk1NGFjYmI2N2I5YTJjNUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t',
+        'fc035e',
+    ], // Staff Meetings was #0099e1
+    [
+        'MjdkMDQxOTM4ZDk1ZTU0OWU1MjlkY2ZhNDZmMTk4OWMxZmRlMzZjOWFjZDMxZDA3ODI5ODcyZWYwOGU0OTYxZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t',
+        'b09e00',
+    ], // State Meetings was #9802b3
     [
         'Y185NDhjMzI5OWU3OTQ2N2M3MjBkNWQzMTY0YjEzOGU4OGRiM2FjNTFiNmUxMmM0ZTc2ZjAzZjY0NThjMTA2OGYzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20',
-        'ba7525',
-    ], // Primary Calendar
-    [
-        '0151b1ae27c001d91226349720dd486eb6c37a8c649807ad68d0aae28817d7c1@group.calendar.google.com',
-        '0099e1',
-    ], // Skill team meetings
-    [
-        'cd79f48ade35423e0a232cfcf146e619d06ae8143c04fae93278788bcdc19b1d@group.calendar.google.com',
-        '9802b3',
-    ], // PV Special Events
+        '009949',
+    ], // Volunteeer Initiatives was #fc035e
 ])
 export default function Events() {
     const calendarUri = new URL('https://calendar.google.com/calendar/embed')

@@ -1,0 +1,44 @@
+'use client'
+
+import cx from 'classnames'
+import Image from 'next/image'
+import { useEffect, useState } from 'react'
+
+export interface ImageWithFallbackProps {
+    src: string
+    alt: string
+    width: number
+    height: number
+    useFallback?: boolean
+    className?: string
+}
+
+export function ImageWithFallback({
+    src,
+    alt,
+    width,
+    height,
+    useFallback = false,
+    className,
+}: ImageWithFallbackProps) {
+    const [hasErrored, setHasErrored] = useState(false)
+
+    useEffect(() => {
+        setHasErrored(false)
+    }, [src, useFallback])
+
+    return (
+        <Image
+            src={
+                hasErrored || useFallback
+                    ? 'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
+                    : src
+            }
+            alt={alt}
+            width={width}
+            height={height}
+            className={cx('aspect-square rounded-full object-cover', className)}
+            onError={() => setHasErrored(true)}
+        />
+    )
+}

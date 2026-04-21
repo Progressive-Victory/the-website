@@ -1,34 +1,13 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { InformationCircleIcon } from '@heroicons/react/24/solid'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { useSession, signIn } from 'next-auth/react'
-import Link from 'next/link'
+
+import { LoginCard } from './LoginCard'
+import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
-import { LoginCard } from '@/app/login/LoginCard'
+import { InformationCircleIcon } from '@heroicons/react/24/solid'
+import Link from 'next/link'
+import { Suspense } from 'react'
 
-// We have to do this to comply with Next.js
-export function LoginPage() {
-    const { data: session } = useSession()
-    const [redirect, setRedirect] = useState<string>('/account')
-    const params = useSearchParams()
-    const router = useRouter()
-    // If we had some redirect, e.g. to volunteer form we should handle it with next-auth
-    useEffect(() => {
-        console.log(session)
-        if (
-            params.get('redirect') &&
-            params.get('redirect')?.startsWith('/') &&
-            !params.get('redirect')?.includes('?')
-        ) {
-            setRedirect(params.get('redirect') ?? '/')
-        }
-
-        if (session) {
-            router.push('/account')
-        }
-    }, [params, router, session])
-
+export default function Login() {
     return (
         <MainLayout>
             <div
@@ -40,15 +19,12 @@ export function LoginPage() {
                     mixBlendMode: 'lighten',
                 }}
             />
-            <div className="halftone z-1 absolute left-0 top-0 size-full opacity-10" />
+            <HalftoneBackground />
 
-            <div className="z-2 relative flex h-screen w-full flex-col items-center justify-center">
-                <LoginCard
-                    signIn={(provider, options, params) =>
-                        void signIn(provider, options, params)
-                    }
-                    redirect={redirect}
-                />                
+            <div className="z-2 relative flex h-screen w-full flex-col items-center justify-center px-2">
+                <Suspense>
+                    <LoginCard />
+                </Suspense>
                 <div className="mt-4 flex flex-row items-center rounded-lg bg-black-pearl-dark p-4 text-xs text-white shadow-lg">
                     <InformationCircleIcon className="mr-1 size-4 rounded-full bg-white text-steel-blue" />
                     By signing in you agree to our{' '}

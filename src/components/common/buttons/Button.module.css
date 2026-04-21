@@ -1,0 +1,272 @@
+.buttonBase {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9999px;
+    border: none;
+    cursor: pointer;
+
+    text-align: center;
+    line-height: 1.3rem;
+    white-space: nowrap;
+
+    transition: all 0.2s ease-in-out;
+    margin-block: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.prominent {
+    background-color: #ce3728;
+    color: #ffffff;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}
+.prominent:hover {
+    background-color: #ffffff;
+    color: #ce3728;
+    transform: translateY(-2px);
+}
+
+.primary {
+    background-color: #2986cc;
+    color: #ffffff;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}
+.primary:hover {
+    background-color: #ffffff;
+    color: #ce3728;
+    transform: translateY(-2px);
+}
+
+.secondary {
+    background-color: #1b4568;
+    color: #ffffff;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}
+.secondary:hover {
+    background-color: #ffffff;
+    color: #ce3728;
+}
+
+.plain {
+    background-color: transparent;
+    color: #ffffff;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}
+.plain:hover {
+    background-color: #ffffff;
+    color: #ce3728;
+}
+
+.minimal {
+    background-color: #09223a;
+    color: #d4d4d4;
+    border-color: #0f2f4c;
+    border-width: 0.01rem;
+    border-style: solid;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}
+.minimal:hover {
+    background-color: #ffffff;
+    color: #ce3728;
+}
+
+.minimalProminent {
+    background-color: #09223a;
+    color: #ffffff;
+    padding-inline: 1.25rem;
+    padding-block: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    min-height: 2.75rem;
+}
+.minimalProminent:hover {
+    background-color: #ffffff;
+    color: #ce3728;
+    transform: translateY(-2px);
+}
+
+.longVariant {
+    width: 100%;
+    justify-content: center;
+    padding-inline: 2rem;
+    padding-block: 1rem;
+    min-height: 3.75rem;
+    height: 3.75rem;
+}
+
+.longVariant:hover {
+    transform: translateY(0px);
+}
+
+.buttonContent {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.buttonLabel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navButton {
+    padding-inline-end: 0.5rem;
+}
+
+.longNavButton .buttonContent {
+    justify-content: space-between;
+}
+
+.navAffordance {
+    width: 0.45rem;
+    height: 0.45rem;
+    margin-right: 0.3rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+
+    transform: rotate(-45deg);
+    opacity: 0.4;
+
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+}
+
+.navButton:hover .navAffordance,
+.navButton:focus-visible .navAffordance {
+    opacity: 0.85;
+    transform: rotate(45deg);
+}
+
+.noChevronRotate:hover .navAffordance,
+.noChevronRotate:focus-visible .navAffordance {
+    opacity: 0.85;
+    transform: rotate(-45deg);
+}
+
+.navItemActive .navAffordance {
+    opacity: 1;
+    transform: rotate(45deg);
+}
+
+.activeNavItem .navAffordance {
+    opacity: 1;
+    transform: rotate(45deg);
+}
+
+.accountContent {
+    display: inline-flex;
+    align-items: center;
+    column-gap: 0.75rem;
+}
+
+.accountAvatar {
+    border-radius: 9999px;
+    border: 2px solid #ffffff;
+    object-fit: cover;
+}
+
+.accountCompact {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 9999px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: transform 0.25s ease-in-out;
+}
+
+.accountAvatarSolo {
+    border-radius: 9999px;
+    object-fit: cover;
+    display: block;
+
+    border: 4px solid #ffffff;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.accountCompact:hover {
+    transform: scale(1.07);
+}
+
+.accountCompact:hover .accountAvatarSolo {
+    border-color: #ce3728;
+}
+
+.embeddedChevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 5rem;
+    height: 3rem;
+
+    border: none;
+    border-radius: 9999px;
+
+    background-color: #1b4568;
+    opacity: 0.5;
+
+    cursor: pointer;
+}
+
+.embeddedChevron:hover {
+    background-color: #ce3728;
+    color: #ffffff;
+}
+
+.embeddedChevron:hover .navAffordance {
+    opacity: 1;
+}
+
+.mobileRowContent {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.mobileRowLabel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+}
+
+.mobileRowLabelText {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mobileRowRightSpacer {
+    width: 5rem;
+    height: 3rem;
+    flex-shrink: 0;
+}

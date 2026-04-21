@@ -1,0 +1,53 @@
+name: '[PV Website] Feature Request'
+description: Submit a feature request
+title: '[Feature]: '
+labels: ['feature']
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Thanks for taking the time to fill out this feature request! Before creating a GitHub issue, create a post in the `concepts-of-a-feature` Discord channel and get the go-ahead from a team lead.
+    - type: input
+      id: contact
+      attributes:
+          label: Discord Username
+          description: How can we get in touch with you if we need more info?
+          placeholder: ex. wumpus
+      validations:
+          required: false
+    - type: textarea
+      id: desired-outcome
+      attributes:
+          label: Feature Description
+          description: What feature would you like to suggest?
+          placeholder: Tell us what you would like to see!
+          value: 'My awesome feature!'
+      validations:
+          required: true
+    - type: textarea
+      id: suggested-implementation
+      attributes:
+          label: '[Optional] Suggested Implementation'
+          description: Suggest an approach to implement the feature
+          placeholder: How can we implement the feature?
+          value: |
+              This feature can be implemented by:
+                * [Code link]
+                * [Design document]
+                * [Step by step approach]
+      validations:
+          required: false
+    - type: textarea
+      id: acceptance-criteria
+      attributes:
+          label: Acceptance Criteria
+          description: When can we call this feature "shipped"?
+          placeholder: What are the acceptance criteria for the feature?
+          value: |
+              This feature must:
+                * [Have regression tests]
+                * [When a user visits this page, ...]
+                * [When a user submits this form, ...]
+                * [etc.]
+      validations:
+          required: true
