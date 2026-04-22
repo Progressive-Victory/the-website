@@ -1,5 +1,5 @@
 import InteractiveThreeCard from '@/app/home/MemberBanner'
-import styles from '@/app/initiative/Initiative.module.css'
+import styles from '@/app/initiatives/Initiative.module.css'
 import {
     ContentPageFrame,
     ContentSection,
@@ -10,10 +10,10 @@ import type { Metadata } from 'next'
 import type React from 'react'
 
 export const metadata: Metadata = {
-    title: 'PV - Initiative',
-    description: 'Learn more about our initiatives.',
+    title: 'PV - Section 230 Initiative',
+    description: 'Learn more about our Section 230 initiative.',
     openGraph: {
-        title: 'PV - Initiative',
+        title: 'PV - Section 230 Initiative',
         url: 'https://www.progressivevictory.win/',
         siteName: 'Progressive Victory',
         images: [
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     },
 }
 
-function InitiativeContent() {
+function Section230InitiativeContent() {
     return (
         <ContentPageFrame
             heading={
@@ -134,12 +134,12 @@ function InitiativeContent() {
     )
 }
 
-export default function InitiativePage() {
+export default function Section230InitiativePage() {
     return (
         <MainLayout>
             <div className="container">
                 <HalftoneBackground />
-                <InitiativeContent />
+                <Section230InitiativeContent />
             </div>
         </MainLayout>
     )
