@@ -10,6 +10,7 @@ import {
     PhoneField,
     SelectManyField,
     TextField,
+    CreatableMulti,
 } from '@/components/common/forms'
 import { Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
@@ -176,14 +177,13 @@ export function MemberView({
                     }
                 />
                 <DateField label="Date Created" field="createdAtUtc" readonly />
-                <SelectManyField<User>
+                <CreatableMulti<User>
                     label="Aliases"
                     field="aliases"
                     options={(user.aliases ?? []).map((alias) => ({
                         value: alias,
                         label: alias,
                     }))}
-                    readonly
                 />
             </FormGroup>
 
