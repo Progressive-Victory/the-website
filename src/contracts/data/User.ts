@@ -1,5 +1,6 @@
 import { zActBlueDonor } from './ActBlueDonor'
 import { zDiscordUser } from './DiscordUser'
+import { zLocation } from './Location'
 import { zOnboardingStage } from './OnboardingStage'
 import { zRole } from './Role'
 import { zUpdateHistory } from './UpdateHistory'
@@ -20,9 +21,26 @@ export enum MembershipDeliverableStatus {
     Returned = 5,
 }
 
-export const zMembershipDeliverableStatus = z
-    .enum(MembershipDeliverableStatus)
-    .default(0)
+export enum MembershipFulfillmentStatus {
+    NotEligible = 0,
+    NotFulfilled = 1,
+    Fulfilled = 2,
+}
+
+export enum ShirtSize {
+    ExtraSmall = 'XS',
+    Small = 'S',
+    Medium = 'M',
+    Large = 'L',
+    ExtraLarge = 'XL',
+    DoubleExtraLarge = '2XL',
+}
+
+export const zShirtSize = z.enum(ShirtSize)
+
+export const zMembershipFulfillmentStatus = z.enum(MembershipFulfillmentStatus)
+
+export const zMembershipDeliverableStatus = z.enum(MembershipDeliverableStatus)
 
 export const zUserStatus = z.enum(UserStatus)
 
@@ -34,6 +52,7 @@ const zBaseUser = z.object({
     firstName: z.string().nullable(),
     lastName: z.string().nullable(),
     birthdate: z.coerce.date().nullable(),
+    location: zLocation.nullable(),
     address: zUserAddress,
 
     acceptedAlerts: z.boolean(),
@@ -47,8 +66,13 @@ const zBaseUser = z.object({
     joinedAtUtc: z.coerce.date().nullable(),
     completedIntakeUtc: z.coerce.date().nullable(),
 
-    membershipCardStatus: zMembershipDeliverableStatus,
-    membershipMerchStatus: zMembershipDeliverableStatus,
+    membershipCardStatus: zMembershipDeliverableStatus.default(0),
+    membershipMerchStatus: zMembershipDeliverableStatus.default(0),
+    shirtSize: zShirtSize.nullable(),
+    duesPayingMember: z.boolean(),
+    membershipFulfillmentStatus: zMembershipFulfillmentStatus.nullable(),
+    nameConfirmed: z.boolean(),
+    addressConfirmed: z.boolean(),
 
     aliases: z.array(z.string()).optional(),
     roles: z.array(zRole).optional(),

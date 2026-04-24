@@ -23,7 +23,7 @@ export function CheckboxField<T>(
     return (
         <FormField {...props}>
             {readonly ? (
-                <div className={styles.readonly}>{value}</div>
+                <div className={styles.readonly}>{`${value}`}</div>
             ) : (
                 <div className={styles.checkboxField}>
                     <input

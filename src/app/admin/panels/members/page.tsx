@@ -26,6 +26,7 @@ import {
     ActBlueDonorLinkRequest,
     SortDirection,
     UpdateUserRequest,
+    zUpdateUserRequest,
 } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
@@ -40,6 +41,7 @@ import {
 } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
+import z from 'zod'
 
 export default function Page() {
     const queryClient = useQueryClient()
@@ -264,8 +266,6 @@ export default function Page() {
         const orNull = (value: string | null | undefined) =>
             value?.length ? value : null
 
-        console.log(user.address, locationQuery.data)
-
         const address = {
             addressLine1: orNull(user.address.addressLine1?.trim()),
             addressLine2: orNull(user.address.addressLine2?.trim()),
@@ -289,15 +289,28 @@ export default function Page() {
             address.state != oldAddress?.state ||
             address.zip != oldAddress?.zip
 
-        const request: UpdateUserRequest = {
+        const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
             email: user.email,
             phone: user.phone,
+            metaData: {
+                userWhoUpdatedId: loggedInUser.data?.id,
+                dataSource: 'Member Panel',
+            },
             preferredName: user.preferredName,
             firstName: user.firstName,
             lastName: user.lastName,
             birthdate: user.birthdate,
+            membershipCardStatus: +user.membershipCardStatus,
+            membershipMerchStatus: +user.membershipMerchStatus,
+            shirtSize: user.shirtSize,
+            duesPayingMember: user.duesPayingMember,
+            membershipFulfillmentStatus: user.membershipFulfillmentStatus
+                ? +user.membershipFulfillmentStatus
+                : null,
+            nameConfirmed: user.nameConfirmed,
+            addressConfirmed: user.addressConfirmed,
             roles: user.roles?.map((role) => role.id),
-        }
+        } satisfies UpdateUserRequest)
         if (addressIsDirty) request.address = address
 
         updateMutation.mutate({ id: user.id, user, request })
