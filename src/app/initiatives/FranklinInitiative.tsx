@@ -63,7 +63,7 @@ function FranklinInitiativeContent() {
                     Sign Up to Phonebank:
                     <li className={styles.bulletListItem}>
                         <a
-                            href="https://progressive-victory.solidarity.tech/call-your-representative"
+                            href="https://www.mobilize.us/progressivevictory/event/944252/"
                             className={styles.actionLink}
                         >
                             Click Here to Schedule your Phonebank Time
