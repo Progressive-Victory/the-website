@@ -3,10 +3,19 @@
 import styles from './HistoryView.module.css'
 import { MemberView } from './MemberView'
 import { CollapsibleSection } from '@/components/common'
-import { FormGroupProps, FormState } from '@/components/common/forms'
-import { Location, Role, UpdateHistory, User } from '@/contracts/data'
+import {
+    ActBlueDonor,
+    DiscordUser,
+    Role,
+    UpdateHistory,
+    User,
+    zDiscordUser,
+} from '@/contracts/data'
+import { useFetch } from '@/util/hooks'
+import { useQueries } from '@tanstack/react-query'
 import cx from 'classnames'
-import { useMemo, useState } from 'react'
+import { ReactNode, useMemo } from 'react'
+import z from 'zod'
 
 export interface HistoryViewProps {
     selectedId: number
@@ -15,12 +24,77 @@ export interface HistoryViewProps {
     selectedHistory: UpdateHistory<User> | null
     onSelectHistory: (update: UpdateHistory<User> | null) => void
 
+    selectedDonorHistory: UpdateHistory<ActBlueDonor> | null
+    onSelectDonorHistory: (update: UpdateHistory<ActBlueDonor> | null) => void
+
     isRefetching: boolean
 
     roles: Role[]
     roleOptions: { value: number; label: string }[]
     makeFormTitle: (user: User) => string
-    getLocation: (form: User) => Location | null
+}
+
+type UnifiedHistoryItem =
+    | { kind: 'account'; update: UpdateHistory<User> }
+    | { kind: 'donor'; update: UpdateHistory<ActBlueDonor> }
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
+function normalizeMeridiem(time: string) {
+    return time.replace(/\s*([AP])M\b/g, (_, period: string) => {
+        return `${period.toLowerCase()}m`
+    })
+}
+
+function formatHistoryTimestamp(value: Date, now = new Date()) {
+    const today = new Date(now)
+    today.setHours(0, 0, 0, 0)
+
+    const target = new Date(value)
+    target.setHours(0, 0, 0, 0)
+
+    const diffMs = today.getTime() - target.getTime()
+    const diffDays = Math.floor(diffMs / DAY_MS)
+
+    const time = normalizeMeridiem(
+        value.toLocaleTimeString([], {
+            hour: 'numeric',
+            minute: '2-digit',
+        })
+    )
+
+    if (diffDays === 0) {
+        return `${time} · Today`
+    }
+
+    if (diffDays < 0) {
+        return time
+    }
+
+    if (diffDays <= 6) {
+        const weekday = value.toLocaleString([], { weekday: 'long' })
+        return `${time} · ${weekday}`
+    }
+
+    const month = value
+        .toLocaleString([], { month: 'short' })
+        .replace(/\.$/, '')
+    const day = value.getDate()
+    const year = value.getFullYear()
+
+    return `${time} · ${month}. ${day}, ${year}`
+}
+
+function formatFullHistoryTimestamp(value: Date) {
+    return normalizeMeridiem(
+        value.toLocaleString([], {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+        })
+    )
 }
 
 export function HistoryView({
@@ -28,14 +102,14 @@ export function HistoryView({
     user,
     selectedHistory,
     onSelectHistory,
+    selectedDonorHistory,
+    onSelectDonorHistory,
     isRefetching,
     roles,
     roleOptions,
     makeFormTitle,
-    getLocation,
 }: HistoryViewProps) {
-    const [historyFormState, setHistoryFormState] =
-        useState<FormState<User> | null>(null)
+    const { ready, onGet } = useFetch()
 
     const sortedHistory = useMemo(() => {
         return (user?.history ?? []).slice().sort((a, b) => {
@@ -45,6 +119,105 @@ export function HistoryView({
             )
         })
     }, [user?.history])
+
+    const sortedDonorHistory = useMemo(() => {
+        return (user?.donorHistory ?? []).slice().sort((a, b) => {
+            return (
+                b.historyWhenUpdatedUtc.getTime() -
+                a.historyWhenUpdatedUtc.getTime()
+            )
+        })
+    }, [user?.donorHistory])
+
+    const mergedHistory = useMemo(() => {
+        return [
+            ...sortedHistory.map((update) => ({
+                kind: 'account' as const,
+                update,
+            })),
+            ...sortedDonorHistory.map((update) => ({
+                kind: 'donor' as const,
+                update,
+            })),
+        ].sort(
+            (a, b) =>
+                b.update.historyWhenUpdatedUtc.getTime() -
+                a.update.historyWhenUpdatedUtc.getTime()
+        )
+    }, [sortedHistory, sortedDonorHistory])
+
+    const updaterIds = useMemo(() => {
+        return Array.from(
+            new Set(
+                mergedHistory
+                    .map((item) => item.update.historyWhoUpdatedId)
+                    .filter((id): id is number => id != null)
+            )
+        )
+    }, [mergedHistory])
+
+    const updaterDiscordQueries = useQueries({
+        queries: updaterIds.map((id) => ({
+            queryKey: [`/discordUsers/${id}`],
+            queryFn: () =>
+                onGet<DiscordUser[]>(
+                    `/discordUsers/${id}`,
+                    z.array(zDiscordUser)
+                ),
+            enabled: ready,
+        })),
+    })
+
+    const updaterUsernameById = useMemo(() => {
+        const map = new Map<number, string>()
+
+        updaterDiscordQueries.forEach((query, index) => {
+            const id = updaterIds[index]
+            const username = query.data?.[0]?.username
+
+            if (id != null && username) map.set(id, username)
+        })
+
+        return map
+    }, [updaterDiscordQueries, updaterIds])
+
+    const updateLabel = (historyWhoUpdatedId: number | null) => {
+        if (historyWhoUpdatedId == null) return 'Unknown'
+
+        const username = updaterUsernameById.get(historyWhoUpdatedId)
+        if (username) return `@${username}`
+
+        return `User #${historyWhoUpdatedId}`
+    }
+
+    const makeHistoryMessage = (
+        who: string,
+        place: 'Account' | 'Donor',
+        source: string
+    ) => {
+        return (
+            <>
+                <span className={styles.historyEntryActor}>{who}</span>
+                <span
+                    className={styles.historyEntryPrefix}
+                >{` updated ${place} via ${source}`}</span>
+            </>
+        )
+    }
+
+    const handleMakeHistoryLabel = (update: UpdateHistory<User>) => {
+        const who = updateLabel(update.historyWhoUpdatedId)
+        const source = update.historyDataSource ?? 'Unknown'
+        return makeHistoryMessage(who, 'Account', source)
+    }
+
+    const handleMakeDonorHistoryLabel = (
+        update: UpdateHistory<ActBlueDonor>
+    ) => {
+        const who = updateLabel(update.historyWhoUpdatedId)
+        const source = update.historyDataSource ?? 'Unknown'
+        return makeHistoryMessage(who, 'Donor', source)
+    }
 
     if (selectedId == null) return null
 
@@ -65,7 +238,7 @@ export function HistoryView({
         )
     }
 
-    if (!sortedHistory.length) {
+    if (!mergedHistory.length) {
         return (
             <div className={styles.section}>
                 <div className={styles.historyContainer}>
@@ -84,11 +257,15 @@ export function HistoryView({
 
     return (
         <div className={styles.section}>
-            <AccountHistoryField
-                title="Account History"
-                history={sortedHistory}
-                selected={selectedHistory}
-                onSelect={onSelectHistory}
+            <UnifiedHistoryField
+                title="History"
+                history={mergedHistory}
+                selectedAccountHistory={selectedHistory}
+                selectedDonorHistory={selectedDonorHistory}
+                onSelectAccountHistory={onSelectHistory}
+                onSelectDonorHistory={onSelectDonorHistory}
+                makeAccountLabel={handleMakeHistoryLabel}
+                makeDonorLabel={handleMakeDonorHistoryLabel}
             />
 
             {selectedHistory ? (
@@ -97,69 +274,112 @@ export function HistoryView({
                         selectedId={selectedId}
                         user={user}
                         selectedHistory={selectedHistory}
-                        formState={historyFormState}
-                        setFormState={setHistoryFormState}
                         saving={false}
                         isInvalid={false}
                         roles={roles}
                         roleOptions={roleOptions}
                         makeFormTitle={(u) => makeFormTitle(u)}
-                        handleSave={() => {
-                            return
-                        }}
-                        getLocation={getLocation}
                     />
+                </div>
+            ) : null}
+
+            {!selectedHistory && selectedDonorHistory ? (
+                <div className={styles.snapshotWrap}>
+                    <span>
+                        Donor:{' '}
+                        {`${selectedDonorHistory.firstname} ${selectedDonorHistory.lastname}`}
+                    </span>
+                    <br />
+                    <span>
+                        {selectedDonorHistory.userId ? 'Linked' : 'Unlinked'}
+                    </span>
                 </div>
             ) : null}
         </div>
     )
 }
 
-interface AccountHistoryFieldProps extends FormGroupProps<User> {
-    history: UpdateHistory<User>[]
-    selected: UpdateHistory<User> | null
-    onSelect: (update: UpdateHistory<User> | null) => void
+interface UnifiedHistoryFieldProps {
+    title: string
+    defaultCollapsed?: boolean
+    history: UnifiedHistoryItem[]
+    selectedAccountHistory: UpdateHistory<User> | null
+    selectedDonorHistory: UpdateHistory<ActBlueDonor> | null
+    onSelectAccountHistory: (update: UpdateHistory<User> | null) => void
+    onSelectDonorHistory: (update: UpdateHistory<ActBlueDonor> | null) => void
+    makeAccountLabel: (update: UpdateHistory<User>) => ReactNode
+    makeDonorLabel: (update: UpdateHistory<ActBlueDonor>) => ReactNode
 }
 
-function AccountHistoryField({
+function UnifiedHistoryField({
     title,
     defaultCollapsed,
     history,
-    selected,
-    onSelect,
-}: AccountHistoryFieldProps) {
+    selectedAccountHistory,
+    selectedDonorHistory,
+    onSelectAccountHistory,
+    onSelectDonorHistory,
+    makeAccountLabel,
+    makeDonorLabel,
+}: UnifiedHistoryFieldProps) {
     return (
         <CollapsibleSection title={title} initialOpenState={!defaultCollapsed}>
             <div className={styles.historyContainer}>
-                {history.map((update, i) => {
-                    const isSelected = selected?.historyId === update.historyId
+                {history.map((item, i) => {
+                    const isSelected =
+                        item.kind == 'account'
+                            ? selectedAccountHistory?.historyId ===
+                              item.update.historyId
+                            : selectedDonorHistory?.historyId ===
+                              item.update.historyId
+
+                    const handleSelect = () => {
+                        if (item.kind == 'account') {
+                            if (isSelected) {
+                                onSelectAccountHistory(null)
+                                return
+                            }
+
+                            onSelectAccountHistory(item.update)
+                            onSelectDonorHistory(null)
+                            return
+                        }
+
+                        if (isSelected) {
+                            onSelectDonorHistory(null)
+                            return
+                        }
+
+                        onSelectDonorHistory(item.update)
+                        onSelectAccountHistory(null)
+                    }
 
                     return (
-                        <div key={update.historyId ?? i}>
+                        <div key={item.update.historyId ?? i}>
                             <button
                                 type="button"
-                                onClick={() => onSelect(update)}
+                                onClick={handleSelect}
                                 className={cx(
                                     styles.historyEntry,
                                     isSelected && styles.historyEntrySelected
                                 )}
                             >
+                                <span className={styles.historyEntryMain}>
+                                    {item.kind == 'account'
+                                        ? makeAccountLabel(item.update)
+                                        : makeDonorLabel(item.update)}
+                                </span>
+
                                 <span
-                                    className={styles.historyEntryPrefix}
-                                >{`${update.historyType == 'I' ? 'Created' : 'Updated'} at `}</span>
-
-                                <span className={styles.historyEntryDate}>
-                                    {update.historyWhenUpdatedUtc.toLocaleString()}
+                                    className={styles.historyEntryDateTag}
+                                    data-full-date={formatFullHistoryTimestamp(
+                                        item.update.historyWhenUpdatedUtc
+                                    )}
+                                >
+                                    {formatHistoryTimestamp(
+                                        item.update.historyWhenUpdatedUtc
+                                    )}
                                 </span>
-
-                                <span className={styles.historyEntryPrefix}>
-                                    {' by '}
-                                </span>
-
-                                <code className={styles.historyEntryCode}>
-                                    {update.email ?? 'deleted user'}#
-                                    {update.id.toString()}
-                                </code>
                             </button>
                         </div>
                     )

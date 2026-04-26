@@ -2,7 +2,7 @@ import styles from './components.module.css'
 import { PositionData, PositionBubble } from './position'
 import { Handle, Node, NodeProps, Position, XYPosition } from '@xyflow/react'
 import { motion } from 'motion/react'
-import { useState } from 'react'
+import { useState, ReactNode } from 'react'
 
 export default interface TeamData {
     id: number
@@ -51,21 +51,14 @@ export function TeamNode({
                 position={targetPosition ?? Position.Left}
                 className={styles.targetHandle}
             />
-            <TeamBubble name={data.name} />
-            <motion.div
-                className={styles.dropdownContainer}
-                style={{
-                    willChange: 'max-height',
-                }}
-                initial={{
-                    maxHeight: `${contentEnabled ? '240' : '0'}px`,
-                }}
-                animate={{
-                    maxHeight: `${contentEnabled ? '240' : '0'}px`,
-                }}
-            >
+            <TeamBubble
+                name={data.name}
+                members={data.members}
+                contentEnabled={contentEnabled}
+            />
+            <MotionDiv contentEnabled={contentEnabled} maxHeight={240}>
                 <TeamLeads />
-            </motion.div>
+            </MotionDiv>
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}
@@ -75,11 +68,60 @@ export function TeamNode({
     )
 }
 
-export default function TeamBubble({ name }: { name: string }) {
+export default function TeamBubble({
+    name,
+    members,
+    contentEnabled,
+}: {
+    name: string
+    members?: PositionData[]
+    contentEnabled: boolean
+}) {
     return (
         <div className={styles.yellowBubble}>
             <p>{name.toUpperCase()}</p>
+            {members === null ? (
+                <div></div>
+            ) : (
+                <MotionDiv contentEnabled={contentEnabled} maxHeight={260}>
+                    <ul className={styles.modList}>
+                        {members?.map((member) => (
+                            <li key={member.id}>
+                                <em>{member.name}</em>
+                            </li>
+                        ))}
+                    </ul>
+                </MotionDiv>
+            )}
         </div>
+    )
+}
+
+function MotionDiv({
+    contentEnabled,
+    maxHeight,
+    children,
+}: {
+    contentEnabled: boolean
+    maxHeight: Number
+    children: ReactNode
+}) {
+    //
+    return (
+        <motion.div
+            className={styles.dropdownContainer}
+            style={{
+                willChange: 'max-height',
+            }}
+            initial={{
+                maxHeight: `${contentEnabled ? `${maxHeight}` : '0'}px`,
+            }}
+            animate={{
+                maxHeight: `${contentEnabled ? `${maxHeight}` : '0'}px`,
+            }}
+        >
+            {children}
+        </motion.div>
     )
 }
 

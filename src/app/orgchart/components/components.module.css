@@ -90,3 +90,11 @@
     background-color: #1b4568;
     opacity: 0;
 }
+
+.modList {
+    list-style-position: inside;
+    list-style-type: disc;
+    text-align: left;
+    padding-top: 10px;
+    padding-left: 25px;
+}

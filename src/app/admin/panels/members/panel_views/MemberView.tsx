@@ -1,6 +1,5 @@
 'use client'
 
-import styles from './MemberView.module.css'
 import {
     CheckboxField,
     DateField,
@@ -11,7 +10,7 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
-import { Location, Role, UpdateHistory, User } from '@/contracts/data'
+import { Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
 
 export interface MemberViewProps {
@@ -19,8 +18,7 @@ export interface MemberViewProps {
     user: User
     selectedHistory: UpdateHistory<User> | null
 
-    formState: FormState<User> | null
-    setFormState: (next: FormState<User> | null) => void
+    setFormState?: (next: FormState<User> | null) => void
 
     saving: boolean
     isInvalid: boolean
@@ -28,16 +26,13 @@ export interface MemberViewProps {
     roleOptions: { value: number; label: string }[]
 
     makeFormTitle: (user: User) => string
-    handleSave: (user: User) => void
-
-    getLocation: (form: User) => Location | null
+    handleSave?: (user: User) => void
 }
 
 export function MemberView({
     selectedId,
     user,
     selectedHistory,
-    formState,
     setFormState,
     saving,
     isInvalid,
@@ -45,7 +40,6 @@ export function MemberView({
     roleOptions,
     makeFormTitle,
     handleSave,
-    getLocation,
 }: MemberViewProps) {
     return (
         <Form<User>
@@ -73,7 +67,12 @@ export function MemberView({
                     getter={(form) => form.discordUsers?.[0]?.id}
                     readonly
                 />
-                <TextField label="Email" field="email" required />
+                <TextField
+                    label="Email"
+                    field="email"
+                    autocomplete="email"
+                    required
+                />
                 <PhoneField label="Phone Number" field="phone" required />
                 <TextField
                     label="Preferred Name"
@@ -120,46 +119,78 @@ export function MemberView({
 
             <FormGroup title="Address">
                 <TextField<User>
-                    label="Zip Code"
-                    getter={(form) =>
-                        form.location?.zip
-                            ? form.location?.zip
-                                  .toString()
-                                  .padStart(5, '0')
-                                  .slice(-5)
-                            : null
-                    }
+                    label="Address Line 1"
+                    getter={(form) => form.address.addressLine1}
                     setter={(form, field) => ({
                         ...form,
-                        location: field
-                            ? {
-                                  ...(user?.location ?? {
-                                      city: '',
-                                      county: '',
-                                      state: '',
-                                  }),
-                                  zip: +field
-                                      .replace(/[^\d]/, '')
-                                      .padStart(5, '0')
-                                      .slice(-5),
-                              }
-                            : null,
+                        address: {
+                            ...form.address,
+                            addressLine1: field?.slice(0, 100) ?? null,
+                        },
+                    })}
+                />
+                <TextField<User>
+                    label="Address Line 2"
+                    getter={(form) => form.address.addressLine2}
+                    setter={(form, field) => ({
+                        ...form,
+                        address: {
+                            ...form.address,
+                            addressLine2: field?.slice(0, 100) ?? null,
+                        },
                     })}
                 />
                 <TextField<User>
                     label="City"
-                    getter={(form) => getLocation(form)?.city}
-                    readonly
+                    getter={(form) => form.address.city}
+                    setter={(form, field) => ({
+                        ...form,
+                        address: {
+                            ...form.address,
+                            city: field?.slice(0, 50) ?? null,
+                        },
+                    })}
                 />
                 <TextField<User>
                     label="County"
-                    getter={(form) => getLocation(form)?.county}
-                    readonly
+                    getter={(form) => form.address.county}
+                    setter={(form, field) => ({
+                        ...form,
+                        address: {
+                            ...form.address,
+                            county: field?.slice(0, 50) ?? null,
+                        },
+                    })}
                 />
                 <TextField<User>
                     label="State"
-                    getter={(form) => getLocation(form)?.state}
-                    readonly
+                    getter={(form) => form.address.state}
+                    setter={(form, field) => ({
+                        ...form,
+                        address: {
+                            ...form.address,
+                            state:
+                                field?.trim()?.toUpperCase()?.slice(0, 2) ??
+                                null,
+                        },
+                    })}
+                    validator={(field) => field?.length == 2}
+                />
+                <TextField<User>
+                    label="Zip Code"
+                    getter={(form) => form.address.zip}
+                    setter={(form, field) => ({
+                        ...form,
+                        address: {
+                            ...form.address,
+                            zip:
+                                field
+                                    ?.replace(/[^\d]/, '')
+                                    ?.padStart(5, '0')
+                                    ?.slice(-5) ?? null,
+                        },
+                    })}
+                    validator={(field) => field?.length == 5}
                 />
             </FormGroup>
 

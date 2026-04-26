@@ -3,6 +3,7 @@ import { CreateDepartmentNode } from '../components/department'
 import { CreateEdge } from '../components/edge'
 import { CreatePositionNode } from '../components/position'
 import { CreateTeamNode } from '../components/team'
+import Committee from '../types/committee'
 import { type Node, type Edge } from '@xyflow/react'
 
 export const departments = [
@@ -19,6 +20,37 @@ export const departments = [
         coalitions: ['Western', 'Midwest', 'Northwestern', 'Southern'],
     },
     { depName: 'Technology', teams: ['Discord', 'Database', 'Website'] },
+]
+
+export const Committees: Committee[] = [
+    {
+        id: 101,
+        name: 'Community Team',
+        desc: 'The community management team...',
+        icon: '/images/cir.png',
+        alt: 'C',
+    },
+    {
+        id: 102,
+        name: 'Media Team',
+        desc: 'The media team...',
+        icon: '/images/tri.png',
+        alt: 'M',
+    },
+    {
+        id: 103,
+        name: 'Engineering Committee',
+        desc: "PV's engineering teams...",
+        icon: '/images/sqr.png',
+        alt: 'E',
+    },
+    {
+        id: 104,
+        name: 'State Organizing Committee',
+        desc: 'The state organizing committee...',
+        icon: '/images/dia.png',
+        alt: 'S',
+    },
 ]
 
 export function BuildGraphNodes(inputNodes: Node[]) {
