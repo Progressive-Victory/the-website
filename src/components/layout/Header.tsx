@@ -94,15 +94,19 @@ const navitems: NavItem[] = [
     },
     {
         name: 'More',
-        href: '/home',
+        href: '/',
         subnav: {
             columns: [
                 {
                     title: 'Initiatives',
                     items: [
                         {
-                            name: 'Save Section 230',
-                            href: '/initiative',
+                            name: 'Section 230 Initiative',
+                            href: '/initiatives/section-230',
+                        },
+                        {
+                            name: 'Jackson Franklin Initiative',
+                            href: '/initiatives/franklin',
                         },
                     ],
                 },
@@ -345,7 +349,11 @@ function NavDrawer({
                                                         rotateChevronOnHover={
                                                             false
                                                         }
-                                                        href={item.href}
+                                                        href={
+                                                            item.name == 'More'
+                                                                ? '#'
+                                                                : 'item.href'
+                                                        }
                                                         renderContent={({
                                                             showNavChevron,
                                                         }) => (
@@ -754,6 +762,7 @@ export function Header() {
                                     label={item.name}
                                     href={item.href}
                                     showChevron={item.name === 'More'}
+                                    disabled={item.name === 'More'}
                                     isSubnavOpen={isActive}
                                     onOpenSubnav={() => openSubnav(item)}
                                     className={
