@@ -15,7 +15,7 @@ export enum OnboardingStage {
     UNDERAGE = 'underage',
 
     // The user is neither a US citizen nor resident and isn't allowed to join the server.
-    NOT_CITIZEN = 'not_citizen'
+    NOT_CITIZEN = 'not_citizen',
 
     // The user has joined the server successfully.
     JOINED = 'joined',
