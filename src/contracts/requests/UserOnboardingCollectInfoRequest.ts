@@ -8,6 +8,7 @@ export const zUserOnboardingCollectInfoRequest = zMutationRequest.extend({
     zipCode: z.number(),
     birthdate: z.coerce.date(),
     acceptedAlerts: z.boolean(),
+    usCitizen: z.boolean(),
 })
 
 export type UserOnboardingCollectInfoRequest = z.infer<
