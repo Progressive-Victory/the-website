@@ -274,9 +274,7 @@ export default function Page() {
             const viewportBottom =
                 viewportHeight -
                 viewportPadding -
-                (shouldUseConstrainedBottomMargin
-                    ? constrainedBottomMargin
-                    : 0)
+                (shouldUseConstrainedBottomMargin ? constrainedBottomMargin : 0)
 
             const overflowBelow = Math.max(0, naturalBottom - viewportBottom)
             const maxUpwardShift = Math.max(0, naturalTop - overlayTopBoundary)
@@ -292,7 +290,9 @@ export default function Page() {
                 return
             }
 
-            setDateRangeOverlayMaxHeight(Math.max(0, Math.floor(availableHeight)))
+            setDateRangeOverlayMaxHeight(
+                Math.max(0, Math.floor(availableHeight))
+            )
         }
 
         updateDateRangeOverlayPosition()
