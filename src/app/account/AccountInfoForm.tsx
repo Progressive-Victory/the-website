@@ -4,8 +4,8 @@ import {
     DateField,
     FormGroup,
     PhoneField,
-    DropDownField,
     TextField,
+    DropDownField
 } from '@/components/common/forms'
 import { User } from '@/contracts/data'
 import { dateService } from '@/services'
@@ -19,7 +19,17 @@ interface AccountInfoFormProps {
     title?: string
 }
 
-const stateOptions = [
+export const AccountInfoForm = ({
+    user,
+    onSave,
+    subtitle,
+    avatar,
+    title = 'Account Information',
+}: AccountInfoFormProps) => {
+    const [updatedUser, setUpdatedUser] = useState<User>(user)
+    const [isEditing, setIsEditing] = useState(false)
+
+    const stateOptions = [
     { value: '', label: 'Select state', disabled: true },
     { value: 'AL', label: 'Alabama' },
     { value: 'AK', label: 'Alaska' },
@@ -73,16 +83,6 @@ const stateOptions = [
     { value: 'WI', label: 'Wisconsin' },
     { value: 'WY', label: 'Wyoming' },
 ]
-
-export const AccountInfoForm = ({
-    user,
-    onSave,
-    subtitle,
-    avatar,
-    title = 'Account Information',
-}: AccountInfoFormProps) => {
-    const [updatedUser, setUpdatedUser] = useState<User>(user)
-    const [isEditing, setIsEditing] = useState(false)
 
     const handleFormSave = (user: User) => {
         setUpdatedUser(user)
@@ -194,10 +194,20 @@ export const AccountInfoForm = ({
                             },
                         })}
                     />
-                    <DropDownField<User>
+                    <TextField<User>
                         label="State"
-                        field="state"
-                        options = {stateOptions}
+                        getter={(user) => user.address.state}
+                        setter={(user, field) => ({
+                            ...user,
+                            address: {
+                                ...user.address,
+                                state:
+                                    field?.trim()?.toUpperCase()?.slice(0, 2) ??
+                                    null,
+                            },
+                        })}
+                        //options={stateOptions}
+                        validator={(field) => field?.length == 2}
                     />
                 </FormGroup>
             </Form>
