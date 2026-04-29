@@ -352,7 +352,7 @@ function NavDrawer({
                                                         href={
                                                             item.name == 'More'
                                                                 ? '#'
-                                                                : 'item.href'
+                                                                : item.href
                                                         }
                                                         renderContent={({
                                                             showNavChevron,
