@@ -39,7 +39,7 @@ import {
     useQueryClient,
     UseQueryResult,
 } from '@tanstack/react-query'
-import { useCallback, useMemo, useState, useEffect } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 import z from 'zod'
 
