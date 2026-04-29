@@ -92,6 +92,13 @@ export default function Sidebar({
                     count={2}
                     open={open}
                 />
+                <NavLink
+                    title="Fundraising Two"
+                    href="/admin/panels/fundraising-two"
+                    icon={FaDonate}
+                    count={2}
+                    open={open}
+                />
             </ul>
 
             <button

@@ -79,10 +79,25 @@ interface FundraisingCardProps {
 
 type DateRangePreset =
     | 'all-time'
+    | 'year-to-date'
     | 'month-to-date'
     | 'last-month'
+    | 'week-to-date'
+    | 'last-7-days'
     | 'today'
     | 'custom'
+
+const MATCHABLE_DATE_RANGE_PRESETS: Exclude<
+    DateRangePreset,
+    'all-time' | 'custom'
+>[] = [
+    'year-to-date',
+    'month-to-date',
+    'last-month',
+    'week-to-date',
+    'last-7-days',
+    'today',
+]
 
 function toInputDateValue(value: Date | null) {
     if (!value) return ''
@@ -108,27 +123,45 @@ function isAfterDate(left: Date, right: Date) {
 }
 
 function startOfDay(value: Date) {
-    value.setHours(0, 0, 0, 0)
-    return value
+    const nextValue = new Date(value)
+    nextValue.setHours(0, 0, 0, 0)
+    return nextValue
 }
 
 function endOfDay(value: Date) {
-    value.setHours(23, 59, 59, 999)
-    return value
+    const nextValue = new Date(value)
+    nextValue.setHours(23, 59, 59, 999)
+    return nextValue
 }
 
 function getDatesForPreset(preset: DateRangePreset) {
     const now = new Date()
 
     switch (preset) {
+        case 'year-to-date': {
+            const start = new Date(now.getFullYear(), 0, 1)
+            return { startDate: startOfDay(start), endDate: endOfDay(now) }
+        }
         case 'month-to-date': {
             const start = new Date(now.getFullYear(), now.getMonth(), 1)
-            return { startDate: startOfDay(start), endDate: now }
+            return { startDate: startOfDay(start), endDate: endOfDay(now) }
         }
         case 'last-month': {
             const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
             const end = new Date(now.getFullYear(), now.getMonth(), 0)
             return { startDate: startOfDay(start), endDate: endOfDay(end) }
+        }
+        case 'week-to-date': {
+            const day = now.getDay()
+            const diff = day === 0 ? 6 : day - 1
+            const start = new Date(now)
+            start.setDate(now.getDate() - diff)
+            return { startDate: startOfDay(start), endDate: endOfDay(now) }
+        }
+        case 'last-7-days': {
+            const start = new Date(now)
+            start.setDate(now.getDate() - 6)
+            return { startDate: startOfDay(start), endDate: endOfDay(now) }
         }
         case 'today': {
             return { startDate: startOfDay(now), endDate: endOfDay(now) }
@@ -138,6 +171,28 @@ function getDatesForPreset(preset: DateRangePreset) {
         default:
             return { startDate: null, endDate: null }
     }
+}
+
+function findMatchingPreset(
+    startDate: Date | null,
+    endDate: Date | null
+): Exclude<DateRangePreset, 'all-time' | 'custom'> | null {
+    if (!startDate || !endDate) return null
+
+    const startKey = toInputDateValue(startDate)
+    const endKey = toInputDateValue(endDate)
+
+    for (const preset of MATCHABLE_DATE_RANGE_PRESETS) {
+        const range = getDatesForPreset(preset)
+        if (
+            toInputDateValue(range.startDate) === startKey &&
+            toInputDateValue(range.endDate) === endKey
+        ) {
+            return preset
+        }
+    }
+
+    return null
 }
 
 function FundraisingCard({
@@ -200,7 +255,11 @@ export default function Page() {
     }
 
     const statsQuery = useQuery({
-        queryKey: ['/actblue/fundraising/stats'],
+        queryKey: [
+            '/actblue/fundraising/stats',
+            startDate?.toISOString() ?? null,
+            endDate?.toISOString() ?? null,
+        ],
         queryFn: async () =>
             onGet<ActBlueFundraisingStatsResponse>(
                 '/actblue/fundraising/stats',
@@ -216,10 +275,6 @@ export default function Page() {
             ),
         placeholderData: keepPreviousData,
     })
-
-    useEffect(() => {
-        statsQuery.refetch().catch((err) => console.error(err))
-    }, [startDate, endDate, statsQuery])
 
     useEffect(() => {
         const onDocumentMouseDown = (event: MouseEvent) => {
@@ -335,10 +390,18 @@ export default function Page() {
         return Number.isFinite(pct) ? pct : null
     }, [statsQuery.data])
 
+    const matchedDraftPreset = useMemo(() => {
+        if (dateRangePreset !== 'custom') return dateRangePreset
+        return findMatchingPreset(draftStartDate, draftEndDate) ?? 'custom'
+    }, [dateRangePreset, draftEndDate, draftStartDate])
+
     const selectedRangeLabel = useMemo(() => {
         if (dateRangePreset === 'all-time') return 'All Time'
+        if (dateRangePreset === 'year-to-date') return 'Year to Date'
         if (dateRangePreset === 'month-to-date') return 'Month to Date'
         if (dateRangePreset === 'last-month') return 'Last Month'
+        if (dateRangePreset === 'week-to-date') return 'Week to Date'
+        if (dateRangePreset === 'last-7-days') return 'Last 7 Days'
         if (dateRangePreset === 'today') return 'Today'
 
         if (startDate && endDate) {
@@ -369,9 +432,14 @@ export default function Page() {
 
     const raisedKickerLabel = useMemo(() => {
         if (dateRangePreset === 'all-time') return 'Total Raised All Time'
+        if (dateRangePreset === 'year-to-date')
+            return 'Total Raised Year to Date'
         if (dateRangePreset === 'month-to-date')
             return 'Total Raised This Month'
         if (dateRangePreset === 'last-month') return 'Total Raised Last Month'
+        if (dateRangePreset === 'week-to-date')
+            return 'Total Raised Week to Date'
+        if (dateRangePreset === 'last-7-days') return 'Total Raised Last 7 Days'
         if (dateRangePreset === 'today') return 'Total Raised Today'
 
         if (startDate && endDate) {
@@ -491,7 +559,7 @@ export default function Page() {
                                         >
                                             <button
                                                 type="button"
-                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'all-time' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'all-time' ? styles.dateRangeOptionButtonActive : ''}`}
                                                 onClick={() =>
                                                     handlePresetChange(
                                                         'all-time'
@@ -502,7 +570,18 @@ export default function Page() {
                                             </button>
                                             <button
                                                 type="button"
-                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'month-to-date' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'year-to-date' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                onClick={() =>
+                                                    handlePresetChange(
+                                                        'year-to-date'
+                                                    )
+                                                }
+                                            >
+                                                Year to Date
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'month-to-date' ? styles.dateRangeOptionButtonActive : ''}`}
                                                 onClick={() =>
                                                     handlePresetChange(
                                                         'month-to-date'
@@ -513,7 +592,7 @@ export default function Page() {
                                             </button>
                                             <button
                                                 type="button"
-                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'last-month' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'last-month' ? styles.dateRangeOptionButtonActive : ''}`}
                                                 onClick={() =>
                                                     handlePresetChange(
                                                         'last-month'
@@ -524,7 +603,7 @@ export default function Page() {
                                             </button>
                                             <button
                                                 type="button"
-                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'today' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'today' ? styles.dateRangeOptionButtonActive : ''}`}
                                                 onClick={() =>
                                                     handlePresetChange('today')
                                                 }
@@ -533,7 +612,29 @@ export default function Page() {
                                             </button>
                                             <button
                                                 type="button"
-                                                className={`${styles.dateRangeOptionButton} ${dateRangePreset === 'custom' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'week-to-date' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                onClick={() =>
+                                                    handlePresetChange(
+                                                        'week-to-date'
+                                                    )
+                                                }
+                                            >
+                                                Week to Date
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'last-7-days' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                onClick={() =>
+                                                    handlePresetChange(
+                                                        'last-7-days'
+                                                    )
+                                                }
+                                            >
+                                                Last 7 Days
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'custom' ? styles.dateRangeOptionButtonActive : ''}`}
                                                 onClick={() =>
                                                     handlePresetChange('custom')
                                                 }
@@ -689,6 +790,12 @@ export default function Page() {
                                                             )
                                                             setEndDate(
                                                                 draftEndDate
+                                                            )
+                                                            setDateRangePreset(
+                                                                findMatchingPreset(
+                                                                    draftStartDate,
+                                                                    draftEndDate
+                                                                ) ?? 'custom'
                                                             )
                                                             setIsDateRangeOverlayOpen(
                                                                 false
