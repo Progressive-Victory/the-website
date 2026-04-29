@@ -60,7 +60,6 @@ export default function VolunteerPage() {
 
     const collectInfoMutation = useMutation({
         mutationFn: async (obj: UserOnboardingCollectInfoRequest) => {
-            console.log(user.data);
             if (!user.data) return
             await onPut(
                 `/users/${user.data?.id}/onboardingStages/collectInfo`,
@@ -235,7 +234,7 @@ export default function VolunteerPage() {
                             />
                         )}
 
-                        {currentStage === OnboardingStage.UNDERAGE && (
+                        {currentStage === OnboardingStage.NOT_CITIZEN && (
                             <NotCitizenStage />
                         )}
 
