@@ -2,21 +2,21 @@ name: Lint
 on: [push]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    environment: Preview
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    lint:
+        runs-on: ubuntu-latest
+        environment: Preview
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
 
-      - name: Run Eslint
-        run: pnpm lint-ci
+            - name: Run Eslint
+              run: pnpm lint-ci
 
-      - name: Run Prettier
-        run: pnpm prettier-ci
+            - name: Run Prettier
+              run: pnpm prettier-ci
