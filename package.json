@@ -8,7 +8,8 @@
         "build": "next build",
         "postbuild": "next-sitemap",
         "start": "next start",
-        "lint": "next lint --max-warnings 0",
+        "lint": "next lint --fix",
+        "lint-ci": "next lint --max-warnings 0",
         "test": "vitest",
         "prettier": "prettier --write --ignore-path .prettierignore .",
         "prettier-ci": "prettier --check --ignore-path .prettierignore ."
