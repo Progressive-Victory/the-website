@@ -7,6 +7,7 @@ import {
     JoiningStage,
     PhoneVerifyStage,
     UnderageStage,
+    NotCitizenStage,
 } from '.'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
@@ -59,6 +60,7 @@ export default function VolunteerPage() {
 
     const collectInfoMutation = useMutation({
         mutationFn: async (obj: UserOnboardingCollectInfoRequest) => {
+            console.log(user.data);
             if (!user.data) return
             await onPut(
                 `/users/${user.data?.id}/onboardingStages/collectInfo`,
@@ -145,6 +147,7 @@ export default function VolunteerPage() {
             zipCode: +form.zipCode,
             acceptedAlerts: form.getAlerts,
             birthdate: new Date(form.dateOfBirth),
+            usCitizen: form.usCitizen,
         })
     }
 
@@ -230,6 +233,10 @@ export default function VolunteerPage() {
                                 isPending={ageUpMutation.isPending}
                                 onAgeUp={ageUpMutation.mutate}
                             />
+                        )}
+
+                        {currentStage === OnboardingStage.UNDERAGE && (
+                            <NotCitizenStage />
                         )}
 
                         {currentStage === OnboardingStage.AWAITING_VERIFY && (
