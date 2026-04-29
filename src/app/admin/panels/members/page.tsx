@@ -44,6 +44,12 @@ import z from 'zod'
 
 type MemberTabKey = 'overview' | 'donorMatching' | 'history'
 
+const tabs: TabSpec[] = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'donorMatching', label: 'Donations' },
+    { key: 'history', label: 'History' },
+]
+
 export default function Page() {
     const queryClient = useQueryClient()
     const { ready, onGet, onPatch, onPost } = useFetch()
@@ -383,16 +389,7 @@ export default function Page() {
         )
     }
 
-    const tabs: TabSpec[] = useMemo(
-        () => [
-            { key: 'overview', label: 'Overview' },
-            { key: 'donorMatching', label: 'Donations' },
-            { key: 'history', label: 'History' },
-        ],
-        []
-    )
-
-    const pane = useMemo(() => {
+    const pane = (() => {
         if (!selectedId || !userQuery.data) return null
 
         switch (selectedTab) {
@@ -452,29 +449,7 @@ export default function Page() {
             default:
                 return null
         }
-    }, [
-        selectedId,
-        userQuery.data,
-        userQuery.isRefetching,
-        selectedTab,
-        formState,
-        updateMutation.isPending,
-        locationQuery.data,
-        locationQuery.isPending,
-        roles,
-        roleOptions,
-        pickingDonor,
-        donorSearch,
-        donorSearchQuery,
-        onDonorSearch,
-        renderDonorItem,
-        handleDeleteDonorItem,
-        selectedHistory,
-        selectedDonorHistory,
-        handleSave,
-        makeTitle,
-        makeHistoryFormTitle,
-    ])
+    })()
 
     return (
         <>

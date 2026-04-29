@@ -47,7 +47,7 @@
 .profileBanner {
     position: relative;
     overflow: visible;
-    /* border-radius: 1rem; */
+
     border-bottom: 1px solid rgba(15, 23, 42, 0.12);
     background: linear-gradient(
         135deg,
@@ -62,7 +62,6 @@
 
 .bannerCover {
     height: var(--banner-cover-height);
-    /* height: 2.5rem; */
     background: var(--banner-cover-gradient);
     background-size: 100% var(--banner-cover-height);
     background-position: 0 100%;
