@@ -13,11 +13,6 @@ import { FaDonate } from 'react-icons/fa'
 import { FaDollarSign } from 'react-icons/fa6'
 import { FiChevronDown } from 'react-icons/fi'
 
-function formatCount(value?: number) {
-    if (value == null || !Number.isFinite(value)) return '—'
-    return value.toLocaleString()
-}
-
 function formatCurrency(value?: number) {
     if (value == null || !Number.isFinite(value)) return '—'
     return value.toLocaleString('en-US', {
@@ -28,45 +23,126 @@ function formatCurrency(value?: number) {
     })
 }
 
+function formatCount(value?: number) {
+    if (value == null || !Number.isFinite(value)) return '—'
+    return value.toLocaleString('en-US')
+}
+
 function formatDonationCountLabel(value?: number) {
     return `${formatCount(value)} ${value === 1 ? 'donation' : 'donations'}`
 }
 
-function formatDateTime(value?: Date) {
-    if (value == null) return '—'
-
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    const target = new Date(value)
-    target.setHours(0, 0, 0, 0)
-
-    const diffMs = today.getTime() - target.getTime()
-    const diffDays = Math.floor(diffMs / 86_400_000)
-
-    if (diffDays <= 0) {
-        return Intl.DateTimeFormat('en-US', {
-            timeStyle: 'short',
-        }).format(value)
-    }
-
-    if (diffDays >= 1 && diffDays <= 6) {
-        return Intl.DateTimeFormat('en-US', {
-            weekday: 'long',
-        }).format(value)
-    }
-
-    return Intl.DateTimeFormat('en-US', {
-        dateStyle: 'medium',
-    }).format(value)
+function startOfDayISO(d: Date): string {
+    return new Date(
+        d.getFullYear(),
+        d.getMonth(),
+        d.getDate(),
+        0,
+        0,
+        0
+    ).toISOString()
 }
 
-function formatDateLabel(value: Date) {
-    return Intl.DateTimeFormat('en-US', {
+function endOfDayISO(d: Date): string {
+    return new Date(
+        d.getFullYear(),
+        d.getMonth(),
+        d.getDate(),
+        23,
+        59,
+        59
+    ).toISOString()
+}
+
+function getPresetRange(preset: string): [string, string] {
+    const today = new Date()
+
+    switch (preset) {
+        case 'All Time':
+            return ['', '']
+        case 'Year To Date':
+            return [
+                startOfDayISO(new Date(today.getFullYear(), 0, 1)),
+                endOfDayISO(today),
+            ]
+        case 'Month To Date':
+            return [
+                startOfDayISO(
+                    new Date(today.getFullYear(), today.getMonth(), 1)
+                ),
+                endOfDayISO(today),
+            ]
+        case 'Last Month': {
+            const start = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+            const end = new Date(today.getFullYear(), today.getMonth(), 0)
+            return [startOfDayISO(start), endOfDayISO(end)]
+        }
+        case 'Week To Date': {
+            const day = today.getDay()
+            const diff = day === 0 ? 6 : day - 1
+            const start = new Date(today)
+            start.setDate(today.getDate() - diff)
+            return [startOfDayISO(start), endOfDayISO(today)]
+        }
+        case 'Last 7 Days': {
+            const start = new Date(today)
+            start.setDate(today.getDate() - 6)
+            return [startOfDayISO(start), endOfDayISO(today)]
+        }
+        case 'Today':
+            return [startOfDayISO(today), endOfDayISO(today)]
+        default:
+            return ['', '']
+    }
+}
+
+const PRESETS = [
+    'All Time',
+    'Year To Date',
+    'Month To Date',
+    'Last Month',
+    'Week To Date',
+    'Last 7 Days',
+    'Today',
+] as const
+type Preset = (typeof PRESETS)[number]
+type DateRangeOption = Preset | 'Custom Range'
+
+function findMatchingPreset(start: string, end: string): Preset | null {
+    for (const preset of PRESETS) {
+        const [ps, pe] = getPresetRange(preset)
+        if (ps === start && pe === end) return preset
+    }
+    return null
+}
+
+function isoToDateInput(iso: string): string {
+    if (!iso) return ''
+    const d = new Date(iso)
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+}
+
+function dateInputToStartISO(value: string): string {
+    if (!value) return ''
+    const [y, mo, d] = value.split('-').map(Number)
+    return new Date(y, mo - 1, d, 0, 0, 0).toISOString()
+}
+
+function dateInputToEndISO(value: string): string {
+    if (!value) return ''
+    const [y, mo, d] = value.split('-').map(Number)
+    return new Date(y, mo - 1, d, 23, 59, 59).toISOString()
+}
+
+function formatRangeDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
-    }).format(value)
+    })
 }
 
 interface FundraisingCardProps {
@@ -75,124 +151,6 @@ interface FundraisingCardProps {
     href: string
     icon: React.ComponentType<{ size?: number }>
     count?: number
-}
-
-type DateRangePreset =
-    | 'all-time'
-    | 'year-to-date'
-    | 'month-to-date'
-    | 'last-month'
-    | 'week-to-date'
-    | 'last-7-days'
-    | 'today'
-    | 'custom'
-
-const MATCHABLE_DATE_RANGE_PRESETS: Exclude<
-    DateRangePreset,
-    'all-time' | 'custom'
->[] = [
-    'year-to-date',
-    'month-to-date',
-    'last-month',
-    'week-to-date',
-    'last-7-days',
-    'today',
-]
-
-function toInputDateValue(value: Date | null) {
-    if (!value) return ''
-
-    const year = value.getFullYear()
-    const month = String(value.getMonth() + 1).padStart(2, '0')
-    const day = String(value.getDate()).padStart(2, '0')
-
-    return `${year}-${month}-${day}`
-}
-
-function fromInputGetDateValue(value: string) {
-    if (!value) return null
-
-    const [year, month, day] = value.split('-').map(Number)
-    if (!year || !month || !day) return null
-
-    return new Date(year, month - 1, day)
-}
-
-function isAfterDate(left: Date, right: Date) {
-    return startOfDay(left).getTime() > startOfDay(right).getTime()
-}
-
-function startOfDay(value: Date) {
-    const nextValue = new Date(value)
-    nextValue.setHours(0, 0, 0, 0)
-    return nextValue
-}
-
-function endOfDay(value: Date) {
-    const nextValue = new Date(value)
-    nextValue.setHours(23, 59, 59, 999)
-    return nextValue
-}
-
-function getDatesForPreset(preset: DateRangePreset) {
-    const now = new Date()
-
-    switch (preset) {
-        case 'year-to-date': {
-            const start = new Date(now.getFullYear(), 0, 1)
-            return { startDate: startOfDay(start), endDate: endOfDay(now) }
-        }
-        case 'month-to-date': {
-            const start = new Date(now.getFullYear(), now.getMonth(), 1)
-            return { startDate: startOfDay(start), endDate: endOfDay(now) }
-        }
-        case 'last-month': {
-            const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-            const end = new Date(now.getFullYear(), now.getMonth(), 0)
-            return { startDate: startOfDay(start), endDate: endOfDay(end) }
-        }
-        case 'week-to-date': {
-            const day = now.getDay()
-            const diff = day === 0 ? 6 : day - 1
-            const start = new Date(now)
-            start.setDate(now.getDate() - diff)
-            return { startDate: startOfDay(start), endDate: endOfDay(now) }
-        }
-        case 'last-7-days': {
-            const start = new Date(now)
-            start.setDate(now.getDate() - 6)
-            return { startDate: startOfDay(start), endDate: endOfDay(now) }
-        }
-        case 'today': {
-            return { startDate: startOfDay(now), endDate: endOfDay(now) }
-        }
-        case 'all-time':
-        case 'custom':
-        default:
-            return { startDate: null, endDate: null }
-    }
-}
-
-function findMatchingPreset(
-    startDate: Date | null,
-    endDate: Date | null
-): Exclude<DateRangePreset, 'all-time' | 'custom'> | null {
-    if (!startDate || !endDate) return null
-
-    const startKey = toInputDateValue(startDate)
-    const endKey = toInputDateValue(endDate)
-
-    for (const preset of MATCHABLE_DATE_RANGE_PRESETS) {
-        const range = getDatesForPreset(preset)
-        if (
-            toInputDateValue(range.startDate) === startKey &&
-            toInputDateValue(range.endDate) === endKey
-        ) {
-            return preset
-        }
-    }
-
-    return null
 }
 
 function FundraisingCard({
@@ -222,59 +180,52 @@ function FundraisingCard({
 }
 
 export default function Page() {
-    const [dateRangePreset, setDateRangePreset] =
-        useState<DateRangePreset>('all-time')
+    const [startDate, setStartDate] = useState(() => getPresetRange('Today')[0])
+    const [endDate, setEndDate] = useState(() => getPresetRange('Today')[1])
+    const [activePreset, setActivePreset] = useState<Preset | null>('Today')
     const [isDateRangeOverlayOpen, setIsDateRangeOverlayOpen] = useState(false)
-    const [startDate, setStartDate] = useState<Date | null>(null)
-    const [endDate, setEndDate] = useState<Date | null>(null)
-    const [draftStartDate, setDraftStartDate] = useState<Date | null>(null)
-    const [draftEndDate, setDraftEndDate] = useState<Date | null>(null)
     const [dateRangeOverlayMaxHeight, setDateRangeOverlayMaxHeight] =
         useState<number>()
     const [dateRangeOverlayOffset, setDateRangeOverlayOffset] = useState(0)
-    const dashboardRef = useRef<HTMLDivElement | null>(null)
+    const [draftStartDate, setDraftStartDate] = useState(startDate)
+    const [draftEndDate, setDraftEndDate] = useState(endDate)
     const dateRangeControlRef = useRef<HTMLDivElement | null>(null)
     const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
     const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
-    const { onGet } = useFetch()
 
-    const handlePresetChange = (preset: DateRangePreset) => {
-        setDateRangePreset(preset)
-
-        if (preset === 'custom') {
-            setDraftStartDate(startDate)
-            setDraftEndDate(endDate)
-            setIsDateRangeOverlayOpen(true)
-            return
-        }
-
-        setIsDateRangeOverlayOpen(false)
-        const nextRange = getDatesForPreset(preset)
-        setStartDate(nextRange.startDate)
-        setEndDate(nextRange.endDate)
+    function applyPreset(preset: Preset) {
+        const [start, end] = getPresetRange(preset)
+        setStartDate(start)
+        setEndDate(end)
+        setActivePreset(preset)
     }
 
-    const statsQuery = useQuery({
-        queryKey: [
-            '/actblue/fundraising/stats',
-            startDate?.toISOString() ?? null,
-            endDate?.toISOString() ?? null,
-        ],
-        queryFn: async () =>
-            onGet<ActBlueFundraisingStatsResponse>(
-                '/actblue/fundraising/stats',
-                zActBlueFundraisingStatsResponse,
-                {
-                    query: {
-                        ...(startDate && {
-                            startDate: startDate?.toISOString(),
-                        }),
-                        ...(endDate && { endDate: endDate?.toISOString() }),
-                    },
-                }
-            ),
-        placeholderData: keepPreviousData,
-    })
+    const selectedRangeLabel = useMemo(() => {
+        if (activePreset) return activePreset
+        if (!startDate && !endDate) return 'All Time'
+        if (startDate && endDate) {
+            return `${formatRangeDate(startDate)} - ${formatRangeDate(endDate)}`
+        }
+        if (startDate) return `From ${formatRangeDate(startDate)}`
+        if (endDate) return `Until ${formatRangeDate(endDate)}`
+        return 'Custom Range'
+    }, [activePreset, startDate, endDate])
+
+    const todayInputValue = useMemo(
+        () => isoToDateInput(new Date().toISOString()),
+        []
+    )
+    const draftStartInputValue = useMemo(
+        () => isoToDateInput(draftStartDate),
+        [draftStartDate]
+    )
+    const draftEndInputValue = useMemo(
+        () => isoToDateInput(draftEndDate),
+        [draftEndDate]
+    )
+    const canApplyCustomRange = Boolean(draftStartDate && draftEndDate)
+
+    const activeDateOption: DateRangeOption = activePreset ?? 'Custom Range'
 
     useEffect(() => {
         const onDocumentMouseDown = (event: MouseEvent) => {
@@ -304,7 +255,6 @@ export default function Page() {
         }
 
         const viewportPadding = 12
-        const panelTopPadding = 12
         const constrainedBottomMargin = 16
         const triggerGap = 6
 
@@ -314,14 +264,10 @@ export default function Page() {
             if (!trigger || !overlay) return
 
             const triggerRect = trigger.getBoundingClientRect()
-            const panelRect = dashboardRef.current?.getBoundingClientRect()
             const viewportHeight = window.innerHeight
             const naturalOverlayHeight = overlay.scrollHeight
             const naturalTop = triggerRect.bottom + triggerGap
             const naturalViewportBottom = viewportHeight - viewportPadding
-            const overlayTopBoundary = panelRect
-                ? panelRect.top + panelTopPadding
-                : viewportPadding
 
             const naturalBottom = naturalTop + naturalOverlayHeight
             const shouldUseConstrainedBottomMargin =
@@ -332,7 +278,7 @@ export default function Page() {
                 (shouldUseConstrainedBottomMargin ? constrainedBottomMargin : 0)
 
             const overflowBelow = Math.max(0, naturalBottom - viewportBottom)
-            const maxUpwardShift = Math.max(0, naturalTop - overlayTopBoundary)
+            const maxUpwardShift = Math.max(0, naturalTop - viewportPadding)
             const upwardShift = Math.min(overflowBelow, maxUpwardShift)
 
             const shiftedTop = naturalTop - upwardShift
@@ -362,7 +308,33 @@ export default function Page() {
                 true
             )
         }
-    }, [isDateRangeOverlayOpen, dateRangePreset])
+    }, [isDateRangeOverlayOpen, activeDateOption])
+
+    const { onGet } = useFetch()
+
+    const isAllTime = !startDate && !endDate
+
+    const statsQuery = useQuery({
+        queryKey: [
+            '/actblue/fundraising/stats',
+            startDate || null,
+            endDate || null,
+        ],
+        queryFn: () =>
+            onGet<ActBlueFundraisingStatsResponse>(
+                '/actblue/fundraising/stats',
+                zActBlueFundraisingStatsResponse,
+                isAllTime
+                    ? undefined
+                    : {
+                          query: {
+                              ...(startDate && { startDate }),
+                              ...(endDate && { endDate }),
+                          },
+                      }
+            ),
+        placeholderData: keepPreviousData,
+    })
 
     const recurringPct = useMemo(() => {
         if (!statsQuery.data) return null
@@ -390,72 +362,23 @@ export default function Page() {
         return Number.isFinite(pct) ? pct : null
     }, [statsQuery.data])
 
-    const matchedDraftPreset = useMemo(() => {
-        if (dateRangePreset !== 'custom') return dateRangePreset
-        return findMatchingPreset(draftStartDate, draftEndDate) ?? 'custom'
-    }, [dateRangePreset, draftEndDate, draftStartDate])
-
-    const selectedRangeLabel = useMemo(() => {
-        if (dateRangePreset === 'all-time') return 'All Time'
-        if (dateRangePreset === 'year-to-date') return 'Year to Date'
-        if (dateRangePreset === 'month-to-date') return 'Month to Date'
-        if (dateRangePreset === 'last-month') return 'Last Month'
-        if (dateRangePreset === 'week-to-date') return 'Week to Date'
-        if (dateRangePreset === 'last-7-days') return 'Last 7 Days'
-        if (dateRangePreset === 'today') return 'Today'
-
-        if (startDate && endDate) {
-            return `${formatDateLabel(startDate)} - ${formatDateLabel(endDate)}`
-        }
-
-        if (startDate) {
-            return `From ${formatDateLabel(startDate)}`
-        }
-
-        if (endDate) {
-            return `Until ${formatDateLabel(endDate)}`
-        }
-
-        return 'Custom Range'
-    }, [dateRangePreset, endDate, startDate])
-
-    const todayInputValue = useMemo(() => toInputDateValue(new Date()), [])
-    const draftStartInputValue = useMemo(
-        () => toInputDateValue(draftStartDate),
-        [draftStartDate]
-    )
-    const draftEndInputValue = useMemo(
-        () => toInputDateValue(draftEndDate),
-        [draftEndDate]
-    )
-    const canApplyCustomRange = Boolean(draftStartDate && draftEndDate)
-
     const raisedKickerLabel = useMemo(() => {
-        if (dateRangePreset === 'all-time') return 'Total Raised All Time'
-        if (dateRangePreset === 'year-to-date')
-            return 'Total Raised Year to Date'
-        if (dateRangePreset === 'month-to-date')
-            return 'Total Raised This Month'
-        if (dateRangePreset === 'last-month') return 'Total Raised Last Month'
-        if (dateRangePreset === 'week-to-date')
-            return 'Total Raised Week to Date'
-        if (dateRangePreset === 'last-7-days') return 'Total Raised Last 7 Days'
-        if (dateRangePreset === 'today') return 'Total Raised Today'
+        if (activePreset) return `Total Raised ${activePreset}`
 
         if (startDate && endDate) {
-            return `Total Raised ${formatDateLabel(startDate)} - ${formatDateLabel(endDate)}`
+            return `Total Raised ${formatRangeDate(startDate)} - ${formatRangeDate(endDate)}`
         }
 
         if (startDate) {
-            return `Total Raised From ${formatDateLabel(startDate)}`
+            return `Total Raised From ${formatRangeDate(startDate)}`
         }
 
         if (endDate) {
-            return `Total Raised Until ${formatDateLabel(endDate)}`
+            return `Total Raised Until ${formatRangeDate(endDate)}`
         }
 
         return 'Total Raised Custom Range'
-    }, [dateRangePreset, endDate, startDate])
+    }, [activePreset, endDate, startDate])
 
     return (
         <div className={styles.panelContents}>
@@ -466,11 +389,8 @@ export default function Page() {
                     <span className={styles.panelBreadcrumb}>Fundraising</span>
                 </div>
 
-                <div className={styles.panelTimestamp}>
-                    Last Updated:{' '}
-                    {/* logic will eventually need to be reworked to show last api fetch and not most recent contribution date */}
-                    {formatDateTime(undefined) ?? 'n/a'}
-                </div>
+                {/* logic will eventually need to be reworked to show last api fetch and not most recent contribution date */}
+                <div className={styles.panelTimestamp}>Last Updated: N/A</div>
             </div>
 
             <div className={styles.galleryHeader}>
@@ -479,13 +399,13 @@ export default function Page() {
                     Manage ActBlue donors and contribution records.
                 </p>
             </div>
-            <div ref={dashboardRef} className={styles.dashboard}>
+
+            <div className={styles.dashboard}>
                 <div className={styles.dashboardTopRow}>
                     <div className={styles.dashboardSummaryGroup}>
                         <div className={styles.dashboardKicker}>
                             {raisedKickerLabel}
                         </div>
-
                         <div className={styles.heroValue}>
                             {formatCurrency(
                                 statsQuery.data?.totalDollarsRaised
@@ -500,14 +420,14 @@ export default function Page() {
                                 className={styles.dateFilterControls}
                             >
                                 <label
-                                    htmlFor="fundraising-date-range-trigger"
+                                    htmlFor="fundraising-two-date-range-trigger"
                                     className={styles.dateFilterLabel}
                                 >
                                     Date Range
                                 </label>
 
                                 <button
-                                    id="fundraising-date-range-trigger"
+                                    id="fundraising-two-date-range-trigger"
                                     type="button"
                                     ref={dateRangeTriggerRef}
                                     className={styles.dateRangeTriggerButton}
@@ -552,98 +472,57 @@ export default function Page() {
                                         >
                                             Select Range
                                         </div>
+
                                         <div
                                             className={
                                                 styles.dateRangeOptionList
                                             }
                                         >
+                                            {PRESETS.map((preset) => (
+                                                <button
+                                                    key={preset}
+                                                    type="button"
+                                                    className={`${styles.dateRangeOptionButton} ${activeDateOption === preset ? styles.dateRangeOptionButtonActive : ''}`}
+                                                    onClick={() => {
+                                                        applyPreset(preset)
+                                                        setDraftStartDate(
+                                                            getPresetRange(
+                                                                preset
+                                                            )[0]
+                                                        )
+                                                        setDraftEndDate(
+                                                            getPresetRange(
+                                                                preset
+                                                            )[1]
+                                                        )
+                                                        setIsDateRangeOverlayOpen(
+                                                            false
+                                                        )
+                                                    }}
+                                                >
+                                                    {preset}
+                                                </button>
+                                            ))}
+
                                             <button
                                                 type="button"
-                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'all-time' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange(
-                                                        'all-time'
-                                                    )
-                                                }
-                                            >
-                                                All Time
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'year-to-date' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange(
-                                                        'year-to-date'
-                                                    )
-                                                }
-                                            >
-                                                Year to Date
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'month-to-date' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange(
-                                                        'month-to-date'
-                                                    )
-                                                }
-                                            >
-                                                Month to Date
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'last-month' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange(
-                                                        'last-month'
-                                                    )
-                                                }
-                                            >
-                                                Last Month
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'today' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange('today')
-                                                }
-                                            >
-                                                Today
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'week-to-date' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange(
-                                                        'week-to-date'
-                                                    )
-                                                }
-                                            >
-                                                Week to Date
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'last-7-days' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange(
-                                                        'last-7-days'
-                                                    )
-                                                }
-                                            >
-                                                Last 7 Days
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${matchedDraftPreset === 'custom' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() =>
-                                                    handlePresetChange('custom')
-                                                }
+                                                className={`${styles.dateRangeOptionButton} ${activeDateOption === 'Custom Range' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                onClick={() => {
+                                                    setActivePreset(null)
+                                                    if (!draftStartDate)
+                                                        setDraftStartDate(
+                                                            startDate
+                                                        )
+                                                    if (!draftEndDate)
+                                                        setDraftEndDate(endDate)
+                                                }}
                                             >
                                                 Custom Range
                                             </button>
                                         </div>
 
-                                        {dateRangePreset === 'custom' && (
+                                        {activeDateOption ===
+                                            'Custom Range' && (
                                             <>
                                                 <div
                                                     className={
@@ -666,32 +545,30 @@ export default function Page() {
                                                                 : todayInputValue
                                                         }
                                                         onChange={(ev) => {
-                                                            const value =
-                                                                fromInputGetDateValue(
+                                                            const next =
+                                                                dateInputToStartISO(
                                                                     ev.target
                                                                         .value
                                                                 )
 
                                                             if (
-                                                                value &&
+                                                                next &&
                                                                 draftEndDate &&
-                                                                isAfterDate(
-                                                                    value,
-                                                                    draftEndDate
-                                                                )
+                                                                new Date(
+                                                                    next
+                                                                ).getTime() >
+                                                                    new Date(
+                                                                        draftEndDate
+                                                                    ).getTime()
                                                             ) {
                                                                 return
                                                             }
 
                                                             setDraftStartDate(
-                                                                value
-                                                                    ? startOfDay(
-                                                                          value
-                                                                      )
-                                                                    : null
+                                                                next
                                                             )
                                                         }}
-                                                        value={toInputDateValue(
+                                                        value={isoToDateInput(
                                                             draftStartDate
                                                         )}
                                                     />
@@ -715,32 +592,30 @@ export default function Page() {
                                                         }
                                                         max={todayInputValue}
                                                         onChange={(ev) => {
-                                                            const value =
-                                                                fromInputGetDateValue(
+                                                            const next =
+                                                                dateInputToEndISO(
                                                                     ev.target
                                                                         .value
                                                                 )
 
                                                             if (
-                                                                value &&
+                                                                next &&
                                                                 draftStartDate &&
-                                                                isAfterDate(
-                                                                    draftStartDate,
-                                                                    value
-                                                                )
+                                                                new Date(
+                                                                    draftStartDate
+                                                                ).getTime() >
+                                                                    new Date(
+                                                                        next
+                                                                    ).getTime()
                                                             ) {
                                                                 return
                                                             }
 
                                                             setDraftEndDate(
-                                                                value
-                                                                    ? endOfDay(
-                                                                          value
-                                                                      )
-                                                                    : null
+                                                                next
                                                             )
                                                         }}
-                                                        value={toInputDateValue(
+                                                        value={isoToDateInput(
                                                             draftEndDate
                                                         )}
                                                     />
@@ -763,6 +638,12 @@ export default function Page() {
                                                             setDraftEndDate(
                                                                 endDate
                                                             )
+                                                            setActivePreset(
+                                                                findMatchingPreset(
+                                                                    startDate,
+                                                                    endDate
+                                                                )
+                                                            )
                                                             setIsDateRangeOverlayOpen(
                                                                 false
                                                             )
@@ -781,9 +662,8 @@ export default function Page() {
                                                         onClick={() => {
                                                             if (
                                                                 !canApplyCustomRange
-                                                            ) {
+                                                            )
                                                                 return
-                                                            }
 
                                                             setStartDate(
                                                                 draftStartDate
@@ -791,11 +671,11 @@ export default function Page() {
                                                             setEndDate(
                                                                 draftEndDate
                                                             )
-                                                            setDateRangePreset(
+                                                            setActivePreset(
                                                                 findMatchingPreset(
                                                                     draftStartDate,
                                                                     draftEndDate
-                                                                ) ?? 'custom'
+                                                                )
                                                             )
                                                             setIsDateRangeOverlayOpen(
                                                                 false
@@ -900,6 +780,7 @@ export default function Page() {
                     </div>
                 </div>
             </div>
+
             <div className={styles.grid}>
                 <FundraisingCard
                     title="Donors"
