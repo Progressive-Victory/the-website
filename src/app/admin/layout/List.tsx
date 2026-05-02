@@ -106,15 +106,8 @@ export function ListTop({
     const panelOpen = isControlled ? searchPanelOpen : uncontrolledOpen
     const setPanelOpen = isControlled ? setSearchPanelOpen : setUncontrolledOpen
 
-    const {
-        query,
-        searchField,
-        sortField,
-        limit,
-        sort,
-        page: _page,
-        ...filter
-    } = search
+    const { query, searchField, sortField, limit, sort, page, ...filter } =
+        search
 
     const handleToggleSearchPanel = () => {
         setPanelOpen(!panelOpen)
@@ -149,7 +142,7 @@ export function ListTop({
             sortField,
             limit,
             sort,
-            page: 0,
+            page,
             ...nextFilters,
         })
     }
