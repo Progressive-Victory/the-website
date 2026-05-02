@@ -106,8 +106,15 @@ export function ListTop({
     const panelOpen = isControlled ? searchPanelOpen : uncontrolledOpen
     const setPanelOpen = isControlled ? setSearchPanelOpen : setUncontrolledOpen
 
-    const { query, searchField, sortField, limit, sort, page, ...filter } =
-        search
+    const {
+        query,
+        searchField,
+        sortField,
+        limit,
+        sort,
+        page: _page,
+        ...filter
+    } = search
 
     const handleToggleSearchPanel = () => {
         setPanelOpen(!panelOpen)
@@ -521,6 +528,11 @@ function PageSelect({
                         disabled={disabled}
                         onBlur={handleSubmit}
                         onChange={(e) => handleChangeValue(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.currentTarget.blur()
+                            }
+                        }}
                         className={styles.pageSelectInput}
                     />
                     <input type="submit" hidden />
