@@ -91,6 +91,11 @@ function getPresetRange(preset: string): [string, string] {
         }
         case 'Today':
             return [startOfDayISO(today), endOfDayISO(today)]
+        case 'Yesterday': {
+            const yesterday = new Date(today)
+            yesterday.setDate(today.getDate() - 1)
+            return [startOfDayISO(yesterday), endOfDayISO(yesterday)]
+        }
         default:
             return ['', '']
     }
@@ -104,6 +109,7 @@ const PRESETS = [
     'Week To Date',
     'Last 7 Days',
     'Today',
+    'Yesterday',
 ] as const
 type Preset = (typeof PRESETS)[number]
 type DateRangeOption = Preset | 'Custom Range'
