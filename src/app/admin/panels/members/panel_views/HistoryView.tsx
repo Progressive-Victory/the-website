@@ -355,7 +355,7 @@ function UnifiedHistoryField({
                     }
 
                     return (
-                        <div key={item.update.historyId ?? i}>
+                        <div key={`${item.kind}-${item.update.historyId ?? i}`}>
                             <button
                                 type="button"
                                 onClick={handleSelect}

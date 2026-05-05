@@ -101,8 +101,12 @@ const navitems: NavItem[] = [
                     title: 'Initiatives',
                     items: [
                         {
-                            name: 'Save Section 230',
-                            href: '/initiative',
+                            name: 'Section 230 Initiative',
+                            href: '/initiatives/section-230',
+                        },
+                        {
+                            name: 'Jackson Franklin Initiative',
+                            href: '/initiatives/franklin',
                         },
                     ],
                 },
@@ -348,7 +352,11 @@ function NavDrawer({
                                                         href={
                                                             item.name == 'More'
                                                                 ? '#'
+<<<<<<< HEAD
                                                                 : 'item.href'
+=======
+                                                                : item.href
+>>>>>>> dev
                                                         }
                                                         renderContent={({
                                                             showNavChevron,

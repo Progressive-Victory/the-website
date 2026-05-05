@@ -1,15 +1,15 @@
-import {
-	useFetch,
-	usePaginatedSearch,
-} from '@/util/hooks'
-import { FetchError } from '@/models'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Role, User, zUser, zUserProfile, UserProfile } from '@/contracts/data'
 import { UpdateUserRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
+import { FetchError } from '@/models'
+import { useFetch, usePaginatedSearch } from '@/util/hooks'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-
-export function useUpdatedUser({ loggedInUser }: { loggedInUser : User | undefined }) {
+export function useUpdatedUser({
+    loggedInUser,
+}: {
+    loggedInUser: User | undefined
+}) {
     const queryClient = useQueryClient()
 
     const { onPatch } = useFetch()
@@ -89,8 +89,7 @@ export function useUpdatedUser({ loggedInUser }: { loggedInUser : User | undefin
                     queryKey: [`/users/${id}`],
                 }),
             ]),
-	})
+    })
 
-	return updateUser
+    return updateUser
 }
-
