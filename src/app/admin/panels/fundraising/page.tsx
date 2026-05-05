@@ -336,6 +336,15 @@ export default function Page() {
         placeholderData: keepPreviousData,
     })
 
+    const allTimeStatsQuery = useQuery({
+        queryKey: ['/actblue/fundraising/stats', 'all-time-cards'],
+        queryFn: () =>
+            onGet<ActBlueFundraisingStatsResponse>(
+                '/actblue/fundraising/stats',
+                zActBlueFundraisingStatsResponse
+            ),
+    })
+
     const recurringPct = useMemo(() => {
         if (!statsQuery.data) return null
 
@@ -780,7 +789,7 @@ export default function Page() {
                     description="ActBlue donors, totals, and donor records."
                     href="/admin/panels/donors"
                     icon={FaDonate}
-                    count={statsQuery.data?.totalDonorCount}
+                    count={allTimeStatsQuery.data?.totalDonorCount}
                 />
 
                 <FundraisingCard
@@ -788,7 +797,7 @@ export default function Page() {
                     description="Contribution lineitems, payment info, and details."
                     href="/admin/panels/contributions"
                     icon={FaDollarSign}
-                    count={statsQuery.data?.totalContributionCount}
+                    count={allTimeStatsQuery.data?.totalContributionCount}
                 />
             </div>
         </div>
