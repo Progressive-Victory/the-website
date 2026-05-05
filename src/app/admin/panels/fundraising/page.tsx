@@ -114,14 +114,6 @@ const PRESETS = [
 type Preset = (typeof PRESETS)[number]
 type DateRangeOption = Preset | 'Custom Range'
 
-function findMatchingPreset(start: string, end: string): Preset | null {
-    for (const preset of PRESETS) {
-        const [ps, pe] = getPresetRange(preset)
-        if (ps === start && pe === end) return preset
-    }
-    return null
-}
-
 function isoToDateInput(iso: string): string {
     if (!iso) return ''
     const d = new Date(iso)
@@ -189,6 +181,7 @@ export default function Page() {
     const [startDate, setStartDate] = useState(() => getPresetRange('Today')[0])
     const [endDate, setEndDate] = useState(() => getPresetRange('Today')[1])
     const [activePreset, setActivePreset] = useState<Preset | null>('Today')
+    const [previousPreset, setPreviousPreset] = useState<Preset | null>('Today')
     const [isDateRangeOverlayOpen, setIsDateRangeOverlayOpen] = useState(false)
     const [dateRangeOverlayMaxHeight, setDateRangeOverlayMaxHeight] =
         useState<number>()
@@ -204,6 +197,7 @@ export default function Page() {
         setStartDate(start)
         setEndDate(end)
         setActivePreset(preset)
+        setPreviousPreset(preset)
     }
 
     const selectedRangeLabel = useMemo(() => {
@@ -426,14 +420,14 @@ export default function Page() {
                                 className={styles.dateFilterControls}
                             >
                                 <label
-                                    htmlFor="fundraising-two-date-range-trigger"
+                                    htmlFor="fundraising-date-range-trigger"
                                     className={styles.dateFilterLabel}
                                 >
                                     Date Range
                                 </label>
 
                                 <button
-                                    id="fundraising-two-date-range-trigger"
+                                    id="fundraising-date-range-trigger"
                                     type="button"
                                     ref={dateRangeTriggerRef}
                                     className={styles.dateRangeTriggerButton}
@@ -514,6 +508,7 @@ export default function Page() {
                                                 type="button"
                                                 className={`${styles.dateRangeOptionButton} ${activeDateOption === 'Custom Range' ? styles.dateRangeOptionButtonActive : ''}`}
                                                 onClick={() => {
+                                                    setPreviousPreset(activePreset)
                                                     setActivePreset(null)
                                                     if (!draftStartDate)
                                                         setDraftStartDate(
@@ -645,10 +640,7 @@ export default function Page() {
                                                                 endDate
                                                             )
                                                             setActivePreset(
-                                                                findMatchingPreset(
-                                                                    startDate,
-                                                                    endDate
-                                                                )
+                                                                previousPreset
                                                             )
                                                             setIsDateRangeOverlayOpen(
                                                                 false
@@ -677,12 +669,7 @@ export default function Page() {
                                                             setEndDate(
                                                                 draftEndDate
                                                             )
-                                                            setActivePreset(
-                                                                findMatchingPreset(
-                                                                    draftStartDate,
-                                                                    draftEndDate
-                                                                )
-                                                            )
+                                                            setActivePreset(null)
                                                             setIsDateRangeOverlayOpen(
                                                                 false
                                                             )
