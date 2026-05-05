@@ -517,7 +517,9 @@ export default function Page() {
                                                 type="button"
                                                 className={`${styles.dateRangeOptionButton} ${activeDateOption === 'Custom Range' ? styles.dateRangeOptionButtonActive : ''}`}
                                                 onClick={() => {
-                                                    setPreviousPreset(activePreset)
+                                                    setPreviousPreset(
+                                                        activePreset
+                                                    )
                                                     setActivePreset(null)
                                                     if (!draftStartDate)
                                                         setDraftStartDate(
@@ -678,7 +680,9 @@ export default function Page() {
                                                             setEndDate(
                                                                 draftEndDate
                                                             )
-                                                            setActivePreset(null)
+                                                            setActivePreset(
+                                                                null
+                                                            )
                                                             setIsDateRangeOverlayOpen(
                                                                 false
                                                             )
