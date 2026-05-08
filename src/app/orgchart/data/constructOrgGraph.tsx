@@ -1,8 +1,11 @@
 //Name for file - constructGraph.tsx
-import { CreateDepartmentNode } from '../components/department'
+import {
+    CreateDepartmentNode,
+    DepartmentNodeData,
+} from '../components/department'
 import { CreateEdge } from '../components/edge'
-import { CreatePositionNode } from '../components/position'
-import { CreateTeamNode } from '../components/team'
+import { CreatePositionNode, PositionData } from '../components/position'
+import { CreateTeamNode, TeamNodeData } from '../components/team'
 import Committee from '../types/committee'
 import { type Node, type Edge } from '@xyflow/react'
 
@@ -16,8 +19,15 @@ export const departments = [
     { depName: 'Infrastructure', teams: ['Documentation', 'Research'] },
     {
         depName: 'Organizing',
-        teams: ['Recruitment', 'Mobilization'],
-        coalitions: ['Western', 'Midwest', 'Northwestern', 'Southern'],
+        teams: [
+            'Recruitment',
+            'Mobilization',
+            'Western Coalition',
+            'Midwest Coalition',
+            'Northeastern Coalition',
+            'Southern Coalition',
+        ],
+        coalitions: ['Western', 'Midwest', 'Northeastern', 'Southern'],
     },
     { depName: 'Technology', teams: ['Discord', 'Database', 'Website'] },
 ]
@@ -53,92 +63,150 @@ export const Committees: Committee[] = [
     },
 ]
 
-export function BuildGraphNodes(inputNodes: Node[]) {
-    const nodes: Node[] = []
-    const edges: Edge[] = []
+export type OrgchartObjectData = {
+    id: number
+    title: string
+    name: string
+    leadership?: string
+    department?: string
+    team?: string
+    committees?: Committee[]
+}
 
-    const EXEC_DIR = 'Executive Director'
-    const DEP_EXEC_DIR = 'Deputy Executive Director'
+const sharedNodes = ['Writing', 'Documentation']
 
-    const EXEC_DIR_ID = 0
-    const DEP_EXEC_DIR_ID = 1
+class TeamNodeManager {
+    sharedTeamNodes = new Map<string, number>()
 
-    let id = inputNodes.length
+    registerSharedTeam(teamName, nodeId) {
+        if (sharedNodes.find((e) => e === teamName))
+            //find((e) => e?.title === EXEC_DIR)
+            this.sharedTeamNodes.set(teamName, nodeId)
+    }
+    getSharedTeamId(teamName) {
+        return this.sharedTeamNodes.get(teamName) ?? null
+    }
+}
 
-    const execDir = inputNodes.find((e) => e?.title === EXEC_DIR)
-    const depExecDir = inputNodes.find((e) => e?.title === DEP_EXEC_DIR)
+class GraphBuilder {
+    nodes: Node[]
+    edges: Edge[]
+    edgeId: number
+    graphNodeId: number
+    posId: number
+    depId: number
+    teamId: number
 
-    nodes.push(CreatePositionNode(execDir))
-    nodes.push(CreatePositionNode(depExecDir))
+    teamNodeManager = new TeamNodeManager()
 
-    let departmentId = 0
-    let teamId = 0
-    let edgeId = 0
+    constructor() {
+        this.nodes = []
+        this.edges = []
+        this.edgeId = 0
+        this.graphNodeId = 0
+        this.posId = 0
+        this.depId = 0
+        this.teamId = 0
+    }
+    addNode(inputNode: Node) {
+        this.nodes.push(inputNode)
+    }
+    addPosNode(inputNode: OrgchartObjectData) {
+        this.posId = this.graphNodeId++
 
-    edges.push(CreateEdge(`e${edgeId}`, EXEC_DIR_ID, DEP_EXEC_DIR_ID))
-    edgeId++
+        const { title, name, leadership } = inputNode
+
+        this.nodes.push(
+            CreatePositionNode({
+                id: this.posId,
+                title,
+                name,
+                leadership,
+            })
+        )
+    }
+    addDepNode(inputNode: DepartmentNodeData) {
+        this.depId = this.graphNodeId++
+        const { name, leads } = inputNode
+
+        this.nodes.push(
+            CreateDepartmentNode({
+                id: this.depId,
+                name,
+                leads,
+            })
+        )
+    }
+    addTeamNode(inputNode: TeamNodeData) {
+        this.teamId = this.graphNodeId++
+        const { name, desc, members, leads } = inputNode
+
+        const sharedTeamId = this.teamNodeManager.getSharedTeamId(name)
+
+        if (sharedNodes.find((e) => e === name) && !sharedTeamId) {
+            this.teamNodeManager.registerSharedTeam(name, this.teamId)
+        }
+
+        if (sharedTeamId) this.teamId = sharedTeamId
+
+        this.nodes.push(
+            CreateTeamNode({
+                id: this.teamId,
+                name: name,
+                desc: desc,
+                members: members,
+                leads: leads,
+            })
+        )
+    }
+    addEdge(source: number, target: number) {
+        this.edges.push(CreateEdge(`e${this.edgeId}`, source, target))
+        this.edgeId++
+    }
+}
+
+const obj = {
+    EXEC_DIR: 'Executive Director',
+    EXEC_DIR_ID: 0,
+    DEP_EXEC_DIR: 'Deputy Executive Director',
+    DEP_EXEC_DIR_ID: 1,
+}
+
+export function BuildGraphNodes(inputNodes: OrgchartObjectData[]) {
+    const graphBuilder = new GraphBuilder()
+
+    const execDir = inputNodes.find((e) => e?.title === obj.EXEC_DIR)
+    const depExecDir = inputNodes.find((e) => e?.title === obj.DEP_EXEC_DIR)
+
+    graphBuilder.addPosNode(execDir) //addPosNode(execDir)
+    graphBuilder.addPosNode(depExecDir) //addPosNode(depExecDir)
+
+    graphBuilder.addEdge(obj.EXEC_DIR_ID, obj.DEP_EXEC_DIR_ID)
 
     departments.forEach((dep) => {
         const depLeads = inputNodes.filter(
             (d) => d.department == dep.depName && !d.team
         )
-        departmentId = id++
-        nodes.push(
-            CreateDepartmentNode({
-                id: departmentId,
-                name: dep.depName,
-                leads: depLeads,
-            })
-        )
+        graphBuilder.addDepNode({ name: dep.depName, leads: depLeads })
 
-        edges.push(CreateEdge(`e${edgeId}`, DEP_EXEC_DIR_ID, departmentId))
-        edgeId++
+        graphBuilder.addEdge(obj.DEP_EXEC_DIR_ID, graphBuilder.depId)
 
         dep?.teams.forEach((team) => {
             const teamLeads = inputNodes.filter((t) => t.team === team)
 
-            console.log('teamLeads')
-            console.log(teamLeads)
+            graphBuilder.addTeamNode({
+                name: team,
+                desc: 'Description',
+                members: team === 'Moderation' ? teamLeads : undefined,
+                leads: team === 'Moderation' ? undefined : teamLeads,
+            })
 
-            function shareTeamNode(teamName) {
-                const sharedNode =
-                    team === teamName
-                        ? nodes.find((node) => node.data.name === teamName)
-                        : null
-
-                if (sharedNode) {
-                    edges.push(CreateEdge(`e${edgeId}`, departmentId, teamId))
-                    edgeId++
-                }
-                return sharedNode
-            }
-
-            const writingTeamNode = shareTeamNode('Writing')
-
-            const docTeamNode = shareTeamNode('Documentation')
-
-            if (writingTeamNode || docTeamNode) return
-
-            teamId = id++
-
-            nodes.push(
-                CreateTeamNode({
-                    id: teamId,
-                    name: team,
-                    desc: 'Description',
-                    members: team === 'Moderation' ? teamLeads : null,
-                    leads: team === 'Moderation' ? null : teamLeads,
-                })
-            )
-            //initial edges
-
-            edges.push(CreateEdge(`e${edgeId}`, departmentId, teamId))
-
-            edgeId++
+            graphBuilder.addEdge(graphBuilder.depId, graphBuilder.teamId)
         })
     })
 
-    console.log(nodes)
-
-    return { initialNodes: nodes, initialEdges: edges }
+    return {
+        initialNodes: graphBuilder.nodes,
+        initialEdges: graphBuilder.edges,
+    }
 }
