@@ -1,6 +1,6 @@
-import { MockUser, MockData, MockDataFactory } from './mockData'
 import usersData from './users.json'
-import { OnboardingStage } from '@/contracts/data'
+import { zUser } from '@/contracts/data'
+import { MockUser, MockData, MockDataFactory } from '@/test/fixtures/mockData'
 
 /**
  * Service for managing mock data across tests
@@ -10,24 +10,13 @@ export class MockDataService {
     private static instance: MockDataService
     private mockData: MockData
 
+    public static DEFAULT_USER_ID = 1
+    public static VERIFIED_USER_ID = 1
+    public static NEW_USER_ID = 2
+
     private constructor() {
         // Load static fixtures
-        this.mockData = {
-            users: usersData.users.map((user) => ({
-                ...user,
-                birthdate: user.birthdate ? new Date(user.birthdate) : null,
-                createdAtUtc: user.createdAtUtc
-                    ? new Date(user.createdAtUtc)
-                    : null,
-                joinedAtUtc: user.joinedAtUtc
-                    ? new Date(user.joinedAtUtc)
-                    : null,
-                completedIntakeUtc: user.completedIntakeUtc
-                    ? new Date(user.completedIntakeUtc)
-                    : null,
-                onboardingStage: user.onboardingStage as OnboardingStage,
-            })),
-        }
+        this.mockData = this.loadFixtures()
     }
 
     static getInstance(): MockDataService {
@@ -43,56 +32,36 @@ export class MockDataService {
     }
 
     // Get user by ID
-    getUserById(id: number): MockUser | undefined {
-        return this.mockData.users.find((user) => user.id === id)
-    }
-
-    // Get users by onboarding stage
-    getUsersByStage(stage: string): MockUser[] {
-        return this.mockData.users.filter(
-            (user) => user.onboardingStage === stage
-        )
+    getUserById(id: number): MockUser {
+        const user = this.mockData.users.find((user) => user.id === id)
+        if (!user) {
+            throw new Error(`User with ID ${id} not found`)
+        }
+        return user
     }
 
     // Create a new user dynamically
-    createUser(overrides: Partial<MockUser> = {}): MockUser {
-        return MockDataFactory.createUser(overrides)
-    }
-
-    // Create user with specific stage
-    createUserWithStage(
-        stage: OnboardingStage,
-        overrides: Partial<MockUser> = {}
-    ): MockUser {
-        return MockDataFactory.createUserWithStage(stage, overrides)
+    createUser(overrides: Partial<MockUser> = {}, id = 1): MockUser {
+        return MockDataFactory.createUser(this.getUserById(id), overrides)
     }
 
     // Add a user to the mock database
     addUser(user: MockUser): void {
-        // Ensure unique ID
-        const maxId = Math.max(...this.mockData.users.map((u) => u.id), 0)
-        user.id = maxId + 1
+        if (this.mockData.users.some((u) => u.id === user.id)) {
+            throw new Error(`User with ID ${user.id} already exists`)
+        }
         this.mockData.users.push(user)
+    }
+
+    loadFixtures(): MockData {
+        return {
+            users: usersData.users.map((user) => zUser.parse(user)),
+        }
     }
 
     // Reset to original fixture data
     reset(): void {
-        this.mockData = {
-            users: usersData.users.map((user) => ({
-                ...user,
-                birthdate: user.birthdate ? new Date(user.birthdate) : null,
-                createdAtUtc: user.createdAtUtc
-                    ? new Date(user.createdAtUtc)
-                    : null,
-                joinedAtUtc: user.joinedAtUtc
-                    ? new Date(user.joinedAtUtc)
-                    : null,
-                completedIntakeUtc: user.completedIntakeUtc
-                    ? new Date(user.completedIntakeUtc)
-                    : null,
-                onboardingStage: user.onboardingStage as OnboardingStage,
-            })),
-        }
+        this.mockData = this.loadFixtures()
     }
 }
 

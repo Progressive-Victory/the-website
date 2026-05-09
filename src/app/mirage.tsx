@@ -1,7 +1,14 @@
-import { mockDataService } from '@/test/fixtures'
-import { createServer, Server } from 'miragejs'
+import { User } from '@/contracts/data'
+import { MockDataService, mockDataService } from '@/test/fixtures'
+import { createServer, Model, Registry, Request, Server } from 'miragejs'
+import Schema from 'miragejs/orm/schema'
 
 const MIRAGE_API_BASE_URL = 'http://somewhere.over.the.rainbow'
+
+const UserModel = Model.extend<Partial<User>>({})
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+type AppRegistry = Registry<{ user: typeof UserModel }, {}>
+type AppSchema = Schema<AppRegistry>
 
 function registerDefaultRoutes(server: Server) {
     server.get('/api/settings', () => ({
@@ -18,14 +25,15 @@ function registerDefaultRoutes(server: Server) {
 
     server.get(`${MIRAGE_API_BASE_URL}/users/current`, () => {
         // Use mock data service to get a user
-        const user =
-            mockDataService.getUserById(1) ?? mockDataService.createUser()
+        const user = mockDataService.getUserById(
+            MockDataService.VERIFIED_USER_ID
+        )
         return user
     })
 
     server.get(
         `${MIRAGE_API_BASE_URL}/discordUsers/:discordUserId/isInServer`,
-        (schema: any, request: any) => {
+        (schema: AppSchema, request: Request) => {
             // Access the dynamic parameter from the request
             const discordUserId = request.params.discordUserId
             console.log('Mocking isInServer for:', discordUserId)
@@ -36,7 +44,7 @@ function registerDefaultRoutes(server: Server) {
 
     server.put(
         `${MIRAGE_API_BASE_URL}/users/:userId/onboardingStages/ageUp`,
-        (schema: any, request: any) => {
+        (schema: AppSchema, request: Request) => {
             const userId = request.params.userId
             console.log('Mocking ageUp for user:', userId)
 
@@ -45,7 +53,7 @@ function registerDefaultRoutes(server: Server) {
     )
     server.post(
         `${MIRAGE_API_BASE_URL}/users/:userId/onboardingStages/collectInfo`,
-        (schema: any, request: any) => {
+        (schema: AppSchema, request: Request) => {
             const userId = request.params.userId
             console.log('Mocking collectInfo for user:', userId)
 
@@ -54,7 +62,7 @@ function registerDefaultRoutes(server: Server) {
     )
     server.put(
         `${MIRAGE_API_BASE_URL}/users/:userId/onboardingStages/verify`,
-        (schema: any, request: any) => {
+        (schema: AppSchema, request: Request) => {
             const userId = request.params.userId
             console.log('Mocking verify for user:', userId)
 
@@ -64,7 +72,7 @@ function registerDefaultRoutes(server: Server) {
 
     server.post(
         `${MIRAGE_API_BASE_URL}/users/:userId/onboardingStages/join`,
-        (schema: any, request: any) => {
+        (schema: AppSchema, request: Request) => {
             const userId = request.params.userId
             console.log('Mocking join for user:', userId)
 
@@ -77,6 +85,9 @@ function startMirage() {
     return createServer({
         routes() {
             registerDefaultRoutes(this)
+        },
+        models: {
+            user: UserModel,
         },
     })
 }

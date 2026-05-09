@@ -4,10 +4,9 @@ import {
     MIRAGE_API_BASE_URL,
     registerDefaultRoutes,
 } from '@/app/mirage'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createQueryWrapper, clearQueryClient } from '@/test/fixtures/testUtils'
 import { renderHook, waitFor } from '@testing-library/react'
-import Response from 'miragejs'
-import { ReactNode } from 'react'
+import { Response } from 'miragejs'
 import {
     describe,
     it,
@@ -30,25 +29,11 @@ afterAll(() => {
 
 afterEach(() => {
     registerDefaultRoutes(server)
+    clearQueryClient()
 })
 
 function createWrapper() {
-    const queryClient = new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-            },
-            mutations: {
-                retry: false,
-            },
-        },
-    })
-
-    return ({ children }: { children: ReactNode }) => (
-        <QueryClientProvider client={queryClient}>
-            {children}
-        </QueryClientProvider>
-    )
+    return createQueryWrapper()
 }
 
 describe('useAuth', () => {
@@ -84,6 +69,10 @@ describe('useAuth', () => {
         it('should set isSessionLoading to true while loading', async () => {
             const { result } = renderHook(() => useAuth(), {
                 wrapper: createWrapper(),
+            })
+
+            await waitFor(() => {
+                expect(result.current.isSessionLoading).toBeDefined()
             })
 
             expect(
@@ -133,6 +122,28 @@ describe('useAuth', () => {
             expect(typeof result.current.onLogin).toBe('function')
         })
 
+        it('should throw error when login fetch fails', async () => {
+            // Mock a failed login endpoint
+            server.get(`${MIRAGE_API_BASE_URL}/auth/discord/login`, () => {
+                return new Response(500, {
+                    errors: 'Internal Server Error',
+                })
+            })
+
+            const { result } = renderHook(() => useAuth(), {
+                wrapper: createWrapper(),
+            })
+
+            await waitFor(() => {
+                expect(result.current.apiBaseUrl).toBeDefined()
+            })
+
+            // Invoke login and expect it to throw
+            await expect(result.current.onLogin()).rejects.toThrow(
+                'Failed to get login url from the API'
+            )
+        })
+
         it('should handle login with custom redirect', async () => {
             const originalLocation = window.location.href
             const locationSpy = vi
@@ -141,7 +152,7 @@ describe('useAuth', () => {
                     ...window.location,
                     href: originalLocation,
                     origin: 'http://localhost:3000',
-                } as any)
+                } as Location)
 
             // Mock the login endpoint to return a redirect URL
             server.get(
@@ -178,11 +189,14 @@ describe('useAuth', () => {
         })
 
         it('should make POST request to logout endpoint', async () => {
-            const logoutSpy = vi.fn()
-            server.post(`${MIRAGE_API_BASE_URL}/auth/logout`, () => {
-                logoutSpy()
-                return {}
-            })
+            let postBody: string | undefined
+            server.post(
+                `${MIRAGE_API_BASE_URL}/auth/logout`,
+                (schema, request) => {
+                    postBody = request.requestBody
+                    return {}
+                }
+            )
 
             const { result } = renderHook(() => useAuth(), {
                 wrapper: createWrapper(),
@@ -192,9 +206,11 @@ describe('useAuth', () => {
                 expect(result.current.apiBaseUrl).toBeDefined()
             })
 
-            // Note: logout mutations are triggered by side effects in real usage
-            // Testing the actual logout flow requires more complex setup
-            expect(result.current.onLogout).toBeDefined()
+            // Actually invoke the mutation
+            await result.current.onLogout()
+
+            // Verify the POST was made
+            expect(postBody).toBeDefined()
         })
     })
 
@@ -222,9 +238,9 @@ describe('useAuth', () => {
         })
 
         it('should call refresh endpoint with credentials', async () => {
-            const refreshSpy = vi.fn(() => true)
+            let requestMade = false
             server.post(`${MIRAGE_API_BASE_URL}/auth/refresh`, () => {
-                refreshSpy()
+                requestMade = true
                 return true
             })
 
@@ -236,9 +252,57 @@ describe('useAuth', () => {
                 expect(result.current.session).not.toBeNull()
             })
 
-            // Wait for the automatic 5-minute interval refresh to potentially trigger
-            // In tests, we just verify the handler is registered
-            expect(result.current.onRefresh).toBeDefined()
+            // Invoke refresh and verify the endpoint was called
+            await result.current.onRefresh()
+
+            expect(requestMade).toBe(true)
+        })
+
+        it('should actually invoke onRefresh and return success', async () => {
+            server.post(`${MIRAGE_API_BASE_URL}/auth/refresh`, () => true)
+
+            const { result } = renderHook(() => useAuth(), {
+                wrapper: createWrapper(),
+            })
+
+            await waitFor(() => {
+                expect(result.current.session).not.toBeNull()
+            })
+
+            const initialSession = result.current.session
+
+            // Actually invoke the refresh query
+            const refreshResult = await result.current.onRefresh()
+
+            expect(refreshResult.data).toBe(true)
+            // Session should still be present after successful refresh
+            expect(result.current.session).toEqual(initialSession)
+        })
+
+        it('should trigger logout when refresh fails', async () => {
+            server.post(
+                `${MIRAGE_API_BASE_URL}/auth/refresh`,
+                () => new Response(401)
+            )
+
+            // Spy on the logout endpoint to verify it's called
+            const logoutSpy = vi.fn(() => ({}))
+            server.post(`${MIRAGE_API_BASE_URL}/auth/logout`, logoutSpy)
+
+            const { result } = renderHook(() => useAuth(), {
+                wrapper: createWrapper(),
+            })
+
+            await waitFor(() => {
+                expect(result.current.session).not.toBeNull()
+            })
+
+            const refreshResult = await result.current.onRefresh()
+
+            // Query succeeds but returns false data
+            expect(refreshResult.data).toBe(false)
+            // Verify logout endpoint was called
+            expect(logoutSpy).toHaveBeenCalled()
         })
     })
 
@@ -246,6 +310,10 @@ describe('useAuth', () => {
         it('should return all expected properties', async () => {
             const { result } = renderHook(() => useAuth(), {
                 wrapper: createWrapper(),
+            })
+
+            await waitFor(() => {
+                expect(result.current.isSessionLoading).toBe(false)
             })
 
             expect(result.current).toHaveProperty('apiBaseUrl')
