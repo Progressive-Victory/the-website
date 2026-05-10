@@ -189,8 +189,7 @@ export function CollectInfoStage({
                 <Toggle
                     name="us-citizen"
                     value={form.usCitizen}
-                    placeholder="I swear that I am a resident (or citizen living abroad) of the United States of America"
-                    tooltip="Only US residents and citizens may participate in Progressive Victory"
+                    placeholder="I am a resident (or citizen living abroad) of the United States of America"
                     onChange={() => {
                         setForm({ ...form, usCitizen: !form.usCitizen })
                     }}
