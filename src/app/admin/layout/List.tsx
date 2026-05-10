@@ -114,23 +114,23 @@ export function ListTop({
     }
 
     const handleChangeQuery = (query: string) => {
-        onSearch({ ...search, query, page: 0 })
+        onSearch({ ...search, query })
     }
 
     const handleChangeSearchField = (searchField: string | undefined) => {
-        onSearch({ ...search, searchField, page: 0 })
+        onSearch({ ...search, searchField })
     }
 
     const handleChangeSortField = (sortField: string | undefined) => {
-        onSearch({ ...search, sortField, page: 0 })
+        onSearch({ ...search, sortField })
     }
 
     const handleChangeLimit = (limit: number) => {
-        onSearch({ ...search, limit, page: 0 })
+        onSearch({ ...search, limit })
     }
 
     const handleChangeSort = (sort: SortDirection) => {
-        onSearch({ ...search, sort, page: 0 })
+        onSearch({ ...search, sort })
     }
 
     const handleChangeFilter = (
@@ -521,11 +521,6 @@ function PageSelect({
                         disabled={disabled}
                         onBlur={handleSubmit}
                         onChange={(e) => handleChangeValue(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                e.currentTarget.blur()
-                            }
-                        }}
                         className={styles.pageSelectInput}
                     />
                     <input type="submit" hidden />

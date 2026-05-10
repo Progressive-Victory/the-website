@@ -25,6 +25,7 @@
 .titleContent {
     display: flex;
     flex-direction: column;
+
 }
 
 .title {

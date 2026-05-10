@@ -8,7 +8,7 @@ export const zActBlueDonor = z
         addr1: z.string().nullable(),
         city: z.string().nullable(),
         state: z.string().nullable(),
-        zip: z.string().nullable(),
+        zip: z.number().nullable(),
         country: z.string().nullable(),
         isEligibleForExpressLane: z.boolean(),
         employerData: z
@@ -18,7 +18,7 @@ export const zActBlueDonor = z
                 employerAddr1: z.string().nullable(),
                 employerCity: z.string().nullable(),
                 employerState: z.string().nullable(),
-                employerZip: z.string().nullable(),
+                employerZip: z.number().nullable(),
                 employerCountry: z.string().nullable(),
             })
             .nullable(),

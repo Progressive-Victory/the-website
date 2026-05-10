@@ -155,7 +155,11 @@ export function MemberView({
                 <DateField<User>
                     label="Date of Birth"
                     getter={(form) =>
-                        dateService.fromISODateString(form.birthdate)
+                        dateService.isValid(form.birthdate)
+                            ? new Date(
+                                  dateService.toISODateString(form.birthdate)!
+                              )
+                            : null
                     }
                     field="birthdate"
                     format={{

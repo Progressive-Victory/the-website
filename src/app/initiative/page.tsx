@@ -1,5 +1,5 @@
 import InteractiveThreeCard from '@/app/home/MemberBanner'
-import styles from '@/app/initiatives/Initiative.module.css'
+import styles from '@/app/initiative/Initiative.module.css'
 import {
     ContentPageFrame,
     ContentSection,
@@ -10,10 +10,10 @@ import type { Metadata } from 'next'
 import type React from 'react'
 
 export const metadata: Metadata = {
-    title: 'PV - Franklin Initiative',
-    description: 'Learn more about our Jackson Franklin initiatives.',
+    title: 'PV - Initiative',
+    description: 'Learn more about our initiatives.',
     openGraph: {
-        title: 'PV - Franklin Initiative',
+        title: 'PV - Initiative',
         url: 'https://www.progressivevictory.win/',
         siteName: 'Progressive Victory',
         images: [
@@ -22,15 +22,16 @@ export const metadata: Metadata = {
     },
 }
 
-function FranklinInitiativeContent() {
+function InitiativeContent() {
     return (
         <ContentPageFrame
             heading={
                 <p className={styles.initiativeHeading}>
-                    Jackson Franklin{' '}
+                    Save{' '}
                     <span className={styles.initiativeHeadingHighlight}>
-                        Initiative
+                        Section 230{' '}
                     </span>
+                    Initiative
                 </p>
             }
         >
@@ -38,8 +39,8 @@ function FranklinInitiativeContent() {
                 <p className={styles.initiativeBody}>
                     Join the PV Discord to get started with the call campaign.
                     PV Leadership will be in Organizing VC 1 hosting the
-                    phonebank and providing training and material on how best to
-                    conduct your call.
+                    legislature phonebank and providing training and material on
+                    how best to conduct your call.
                     <br />
                     <br />
                     Click the link to:{' '}
@@ -52,34 +53,64 @@ function FranklinInitiativeContent() {
                 </p>
             </ContentSection>
 
-            <ContentSection title="Step 2 - Get Started Phonebanking">
+            <ContentSection title="Step 2 - Call YOUR Representatives">
                 <p className={styles.initiativeBody}>
-                    Sign up for the phonebank on mobilize and select which
-                    phonebank shifts you want to attend. The phonebanks will be
-                    in the Discord every day from 5pm-8pm ET.
+                    After recieving training and materials in the Discord, you
+                    can start by making three calls to your House Rep and
+                    Senators.
                 </p>
 
                 <ul className={styles.bulletList}>
-                    Sign Up to Phonebank:
+                    Links to call your local representatives:
                     <li className={styles.bulletListItem}>
                         <a
-                            href="https://www.mobilize.us/progressivevictory/event/944252/"
+                            href="https://progressive-victory.solidarity.tech/call-your-representative"
                             className={styles.actionLink}
                         >
-                            Click Here to Schedule your Phonebank Time
+                            Click Here to call your House Rep
+                        </a>
+                    </li>
+                    <li className={styles.bulletListItem}>
+                        <a
+                            href="https://progressive-victory.solidarity.tech/call-your-senator"
+                            className={styles.actionLink}
+                        >
+                            Click Here to call your Senators
                         </a>
                     </li>
                 </ul>
             </ContentSection>
 
-            <ContentSection title="Step 3 - Get your PV Membership Card">
+            <ContentSection title="Step 3 - Call the FIVE Key Congresspeople">
+                <p className={styles.initiativeBody}>
+                    After calling your representatives, join the second
+                    phonebank to call the FIVE congresspeople who we have
+                    determined to be the most valuable to reach. (Make sure to
+                    join the Discord to learn why we are targeting these five.)
+                    The five key congresspeople are: Ro Khanna, Thomas Massie,
+                    Frank Pallone, Doris Matsui, Amy Klobuchar.
+                </p>
+                <ul className={styles.bulletList}>
+                    Link to start dialing:
+                    <li className={styles.bulletListItem}>
+                        <a
+                            href="https://progressive-victory.solidarity.tech/keep-section-230-call-congress"
+                            className={styles.actionLink}
+                        >
+                            {'Click Here to Call 5 Key Congresspeople'}
+                        </a>
+                    </li>
+                </ul>
+            </ContentSection>
+
+            <ContentSection title="Step 4 - Get your PV Membership Card">
                 <div className={styles.cardContainer}>
                     <div>
                         <p className={styles.initiativeBody}>
                             Become a Dues Paying Member of Progressive Victory
                             for just $5/month and get your PV Membership Card
-                            and help us have the necessary funds to accomplish
-                            initiatives like this one.
+                            and help us have the necessary funds to navigate
+                            opperating on a hostile platform like Discord.
                             <br />
                             <br />
                             Click this link to become a member:{' '}
@@ -103,12 +134,12 @@ function FranklinInitiativeContent() {
     )
 }
 
-export default function FranklinInitiativePage() {
+export default function InitiativePage() {
     return (
         <MainLayout>
             <div className="container">
                 <HalftoneBackground />
-                <FranklinInitiativeContent />
+                <InitiativeContent />
             </div>
         </MainLayout>
     )

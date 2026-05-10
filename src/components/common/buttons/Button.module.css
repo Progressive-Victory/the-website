@@ -17,38 +17,6 @@
     flex-shrink: 0;
 }
 
-.glass {
-    padding: 0.38rem 0.72rem;
-    border-radius: 0.54rem;
-    border: 1px solid rgba(15, 23, 42, 0.1);
-    background: rgba(255, 255, 255, 0.88);
-    color: rgba(9, 34, 58, 0.85);
-    font-size: 0.8rem;
-    font-weight: 650;
-    cursor: pointer;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset;
-    transition:
-        border-color 140ms ease,
-        background-color 140ms ease;
-    white-space: nowrap;
-}
-
-.glass:hover {
-    background: rgba(15, 23, 42, 0.05);
-    border-color: rgba(15, 23, 42, 0.18);
-}
-
-.glassActive {
-    background: rgba(14, 165, 233, 0.12);
-    border-color: rgba(14, 165, 233, 0.5);
-    color: rgba(2, 132, 199, 1);
-}
-
-.glassActive:hover {
-    background: rgba(14, 165, 233, 0.18);
-    border-color: rgba(14, 165, 233, 0.65);
-}
-
 .prominent {
     background-color: #ce3728;
     color: #ffffff;

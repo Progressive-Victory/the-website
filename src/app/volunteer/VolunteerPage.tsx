@@ -8,7 +8,6 @@ import {
     PhoneVerifyStage,
     UnderageStage,
 } from '.'
-import { NotCitizenStage } from './NotCitizenStage'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import { OnboardingStage } from '@/contracts/data'
@@ -146,7 +145,6 @@ export default function VolunteerPage() {
             zipCode: +form.zipCode,
             acceptedAlerts: form.getAlerts,
             birthdate: new Date(form.dateOfBirth),
-            usCitizen: form.usCitizen,
         })
     }
 
@@ -232,10 +230,6 @@ export default function VolunteerPage() {
                                 isPending={ageUpMutation.isPending}
                                 onAgeUp={ageUpMutation.mutate}
                             />
-                        )}
-
-                        {currentStage === OnboardingStage.NOT_CITIZEN && (
-                            <NotCitizenStage />
                         )}
 
                         {currentStage === OnboardingStage.AWAITING_VERIFY && (
