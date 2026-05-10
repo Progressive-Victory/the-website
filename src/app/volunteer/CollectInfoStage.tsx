@@ -90,7 +90,6 @@ export function CollectInfoStage({
         dateOfBirthIsValid &&
         zipCodeIsValid &&
         parsedPhone.isValid &&
-        form.usCitizen &&
         form.privacyPolicy
 
     useInit(() => setFormattedPhoneNumber(initialForm.phoneNumber))
@@ -190,18 +189,11 @@ export function CollectInfoStage({
                 <Toggle
                     name="us-citizen"
                     value={form.usCitizen}
-                    placeholder={
-                        <span>
-                            <span className="text-red-500">*</span> I swear that
-                            I am a resident (or citizen living abroad) of the
-                            United States of America
-                        </span>
-                    }
+                    placeholder="I swear that I am a resident (or citizen living abroad) of the United States of America"
                     tooltip="Only US residents and citizens may participate in Progressive Victory"
                     onChange={() => {
                         setForm({ ...form, usCitizen: !form.usCitizen })
                     }}
-                    required
                 />
                 <Toggle
                     name="accept-privacy"
