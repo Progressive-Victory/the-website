@@ -36,7 +36,7 @@ export const zActBlueContribution = z
         shippingAddr1: z.string().nullable(),
         shippingCity: z.string().nullable(),
         shippingState: z.string().nullable(),
-        shippingZip: z.number().nullable(),
+        shippingZip: z.string().nullable(),
         shippingCountry: z.string().nullable(),
         smartBoostAmount: z.coerce.number().nullable(),
         customFields: z.array(zActBlueContributionCustomField),

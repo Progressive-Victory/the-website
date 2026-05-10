@@ -13,7 +13,7 @@ export const zUpdateHistoryType = z.enum(UpdateHistoryType)
 const zUpdateHistoryBase = z.object({
     historyId: z.int(),
     historyType: zUpdateHistoryType,
-    historyDataSource: z.string().optional(),
+    historyDataSource: z.string().nullish(),
     historyWhoUpdatedId: z.int().nullable(),
     historyWhenUpdatedUtc: z.coerce.date(),
 })
