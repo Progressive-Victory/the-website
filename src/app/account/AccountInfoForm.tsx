@@ -77,13 +77,7 @@ export const AccountInfoForm = ({
                     <DateField<User>
                         label="Date of Birth"
                         getter={(user) =>
-                            dateService.isValid(user.birthdate)
-                                ? new Date(
-                                      dateService.toISODateString(
-                                          user.birthdate
-                                      )!
-                                  )
-                                : null
+                            dateService.fromISODateString(user.birthdate)
                         }
                         field="birthdate"
                         format={{
