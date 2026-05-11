@@ -8,12 +8,14 @@ import {
     PhoneVerifyStage,
     UnderageStage,
 } from '.'
+import { NotCitizenStage } from './NotCitizenStage'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import { OnboardingStage } from '@/contracts/data'
 import {
     UserOnboardingCollectInfoRequest,
     UserOnboardingVerifyRequest,
+    zUserOnboardingCollectInfoRequest,
 } from '@/contracts/requests'
 import {
     DiscordUserIsInServerResponse,
@@ -28,6 +30,7 @@ import {
     useQueryClient,
 } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import z from 'zod'
 
 export default function VolunteerPage() {
     const queryClient = useQueryClient()
@@ -60,7 +63,12 @@ export default function VolunteerPage() {
             if (!user.data) return
             await onPut(
                 `/users/${user.data?.id}/onboardingStages/collectInfo`,
-                obj
+                z.parse(zUserOnboardingCollectInfoRequest, {
+                    ...obj,
+                    metaData: {
+                        dataSource: 'Intake Form',
+                    },
+                } satisfies UserOnboardingCollectInfoRequest)
             )
         },
         onSettled: () => {
@@ -138,6 +146,7 @@ export default function VolunteerPage() {
             zipCode: +form.zipCode,
             acceptedAlerts: form.getAlerts,
             birthdate: new Date(form.dateOfBirth),
+            usCitizen: form.usCitizen,
         })
     }
 
@@ -162,7 +171,7 @@ export default function VolunteerPage() {
             (!user.data?.firstName ||
                 !user.data?.lastName ||
                 !user.data?.birthdate ||
-                !user.data?.location ||
+                !user.data?.address?.zip ||
                 !user.data?.phone)
         ) {
             setOverrideStage(OnboardingStage.NOT_STARTED)
@@ -176,25 +185,7 @@ export default function VolunteerPage() {
         return null
     }
 
-    if (!user.data)
-        return (
-            <MainLayout>
-                <div className="flex min-h-[200px] flex-col items-center justify-center p-4">
-                    <p className="mt-6 text-center text-lg font-bold text-white">
-                        Unfortunately, we were not able to load your user data.
-                        <br /> Please refresh the page, and if the issue
-                        persists, contact support at:
-                        <br />{' '}
-                        <a
-                            href="mailto:support@progress.win"
-                            className="text-yellow-500"
-                        >
-                            support@progress.win
-                        </a>
-                    </p>
-                </div>
-            </MainLayout>
-        )
+    if (!user.data) return <MainLayout />
 
     return (
         <MainLayout>
@@ -224,9 +215,7 @@ export default function VolunteerPage() {
                                         user.data?.birthdate
                                             ?.toISOString()
                                             ?.split('T')?.[0] ?? '',
-                                    zipCode:
-                                        user.data?.location?.zip.toString() ??
-                                        '',
+                                    zipCode: user.data?.address?.zip ?? '',
                                     phoneNumber: user.data?.phone ?? '',
                                     getAlerts:
                                         user.data?.acceptedAlerts ?? false,
@@ -243,6 +232,10 @@ export default function VolunteerPage() {
                                 isPending={ageUpMutation.isPending}
                                 onAgeUp={ageUpMutation.mutate}
                             />
+                        )}
+
+                        {currentStage === OnboardingStage.NOT_CITIZEN && (
+                            <NotCitizenStage />
                         )}
 
                         {currentStage === OnboardingStage.AWAITING_VERIFY && (

@@ -24,7 +24,9 @@ import {
 } from '@/contracts/data'
 import {
     ActBlueDonorLinkRequest,
+    SortDirection,
     UpdateUserRequest,
+    zUpdateUserRequest,
 } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
@@ -39,6 +41,7 @@ import {
 } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
+import z from 'zod'
 
 export default function Page() {
     const queryClient = useQueryClient()
@@ -63,7 +66,7 @@ export default function Page() {
     } = usePaginatedSearch<UserProfile>('/users', zUserProfile)
 
     const { query: rolesQuery } = usePaginatedSearch<Role>('/roles', zRole, {
-        search: { limit: 50 },
+        search: { limit: 50, sort: SortDirection.DESC },
         all: true,
     })
 
@@ -101,28 +104,6 @@ export default function Page() {
                               includeDonors: true,
                           },
                       })
-                : skipToken,
-        placeholderData: keepPreviousData,
-    })
-
-    const formZip = formState?.editing
-        ? formState?.form?.location?.zip
-        : userQuery.data?.location?.zip
-
-    const locationQuery = useQuery({
-        queryKey: [`/locations/${formZip}`],
-        queryFn:
-            ready && formZip != null
-                ? async () => {
-                      try {
-                          return await onGet<Location>(
-                              `/locations/${formZip}`,
-                              zLocation
-                          )
-                      } catch {
-                          return null
-                      }
-                  }
                 : skipToken,
         placeholderData: keepPreviousData,
     })
@@ -244,7 +225,7 @@ export default function Page() {
                 })
             )
         },
-        [onPost, queryClient]
+        [onPost, queryClient, loggedInUser.data?.id]
     )
 
     const handleSelectItem = (value: UserProfile | User) => {
@@ -260,23 +241,79 @@ export default function Page() {
         setSelectedId(value.id)
 
         setSelectedHistory(null)
+        setSelectedDonorHistory(null)
     }
 
+    const locationQuery = useQuery({
+        queryKey: [`/locations/${formState?.form?.address?.zip}`],
+        queryFn:
+            ready && formState?.editing && formState.form.address?.zip
+                ? async () => {
+                      try {
+                          return await onGet<Location>(
+                              `/locations/${formState.form.address?.zip}`,
+                              zLocation
+                          )
+                      } catch {
+                          return null
+                      }
+                  }
+                : skipToken,
+        placeholderData: keepPreviousData,
+    })
+
     const handleSave = (user: User) => {
-        updateMutation.mutate({
-            id: user.id,
-            user,
-            request: {
-                email: user.email,
-                phone: user.phone,
-                preferredName: user.preferredName,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                birthdate: user.birthdate,
-                zipCode: user.location?.zip ?? null,
-                roles: user.roles?.map((role) => role.id),
+        const orNull = (value: string | null | undefined) =>
+            value?.length ? value : null
+
+        const address = {
+            addressLine1: orNull(user.address.addressLine1?.trim()),
+            addressLine2: orNull(user.address.addressLine2?.trim()),
+            city: orNull(user.address.city?.trim()) ?? locationQuery.data?.city,
+            county:
+                orNull(user.address.county?.trim()) ??
+                locationQuery.data?.county,
+            state:
+                orNull(user.address.state?.trim()) ?? locationQuery.data?.state,
+            zip:
+                orNull(user.address.zip?.trim()) ??
+                locationQuery.data?.zip?.toString().padStart(5, '0'),
+        }
+
+        const oldAddress = userQuery.data?.address ?? null
+        const addressIsDirty =
+            address.addressLine1 != oldAddress?.addressLine1 ||
+            address.addressLine2 != oldAddress?.addressLine2 ||
+            address.city != oldAddress?.city ||
+            address.county != oldAddress?.county ||
+            address.state != oldAddress?.state ||
+            address.zip != oldAddress?.zip
+
+        const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
+            email: user.email,
+            phone: user.phone,
+            metaData: {
+                userWhoUpdatedId: loggedInUser.data?.id,
+                dataSource: 'Member Panel',
             },
-        })
+            preferredName: user.preferredName,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            birthdate: user.birthdate,
+            membershipCardStatus: +user.membershipCardStatus,
+            membershipMerchStatus: +user.membershipMerchStatus,
+            shirtSize: user.shirtSize,
+            duesPayingMember: user.duesPayingMember,
+            membershipFulfillmentStatus: user.membershipFulfillmentStatus
+                ? +user.membershipFulfillmentStatus
+                : null,
+            nameConfirmed: user.nameConfirmed,
+            addressConfirmed: user.addressConfirmed,
+            roles: user.roles?.map((role) => role.id),
+        } satisfies UpdateUserRequest)
+        if (addressIsDirty) request.address = address
+
+        updateMutation.mutate({ id: user.id, user, request })
     }
 
     const makeTitle = (user: User | UserProfile) => {
@@ -287,14 +324,16 @@ export default function Page() {
         return user.email ?? ''
     }
 
-    const makeOverviewFormTitle = (user: User | UserProfile) => {
-        return makeTitle(user)
+    const normalizeMeridiem = (value: string) => {
+        return value.replace(/\s*([AP])M\b/g, (_, period: string) => {
+            return `${period.toLowerCase()}m`
+        })
     }
 
     const makeHistoryFormTitle = (user: User | UserProfile) => {
         const name = makeTitle(user)
         if (!selectedHistory) return name
-        return `${name} @ ${selectedHistory.historyWhenUpdatedUtc.toLocaleString()}`
+        return `${name} @ ${normalizeMeridiem(selectedHistory.historyWhenUpdatedUtc.toLocaleString())}`
     }
 
     const renderDonorItem = useCallback(
@@ -336,22 +375,6 @@ export default function Page() {
         )
     }
 
-    const getLocation = (form: User) => {
-        if (!formState?.editing) return form.location
-        if (form.location?.zip) return locationQuery.data ?? null
-        return null
-    }
-
-    const handleSelectHistory = (history: UpdateHistory<User> | null) => {
-        setSelectedHistory(history)
-    }
-
-    const handleSelectDonorHistory = (
-        history: UpdateHistory<ActBlueDonor> | null
-    ) => {
-        setSelectedDonorHistory(history)
-    }
-
     return (
         <>
             <List
@@ -359,7 +382,7 @@ export default function Page() {
                 count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}
                 error={searchQuery.error}
-                fields={[
+                searchFields={[
                     { value: 'email', label: 'Email' },
                     { value: 'phone', label: 'Phone Number' },
                     { value: 'zip', label: 'Zip Code' },
@@ -383,6 +406,12 @@ export default function Page() {
                     },
                     { value: 'aliases', label: 'Aliases' },
                     { value: 'discord_usernames', label: 'Discord Usernames' },
+                ]}
+                sortFields={[
+                    { value: 'email', label: 'Email' },
+                    { value: 'first_name', label: 'First Name' },
+                    { value: 'last_name', label: 'Last Name' },
+                    { value: 'created_at_utc', label: 'Created At' },
                 ]}
                 filters={[
                     {
@@ -429,25 +458,23 @@ export default function Page() {
                                 selectedId={selectedId}
                                 user={userQuery.data}
                                 selectedHistory={null}
-                                formState={formState}
                                 setFormState={setFormState}
                                 saving={updateMutation.isPending}
                                 isInvalid={
-                                    !!formState?.form?.location?.zip &&
-                                    locationQuery.data == null
+                                    (formState?.form?.address?.zip != null &&
+                                        locationQuery.data == null) ||
+                                    locationQuery.isPending
                                 }
                                 roles={roles}
                                 roleOptions={roleOptions}
-                                makeFormTitle={() =>
-                                    makeOverviewFormTitle(userQuery.data)
-                                }
+                                makeFormTitle={() => makeTitle(userQuery.data)}
                                 handleSave={handleSave}
-                                getLocation={getLocation}
                             />
                         </Tab>
 
                         <Tab key="donorMatching" label="Donations">
                             <DonorView
+                                key={userQuery.data.id}
                                 selectedId={selectedId}
                                 user={userQuery.data}
                                 pickingDonor={pickingDonor}
@@ -466,14 +493,13 @@ export default function Page() {
                                 selectedId={selectedId}
                                 user={userQuery.data}
                                 selectedHistory={selectedHistory}
-                                onSelectHistory={handleSelectHistory}
+                                onSelectHistory={setSelectedHistory}
                                 selectedDonorHistory={selectedDonorHistory}
-                                onSelectDonorHistory={handleSelectDonorHistory}
+                                onSelectDonorHistory={setSelectedDonorHistory}
                                 isRefetching={userQuery.isRefetching}
                                 roles={roles}
                                 roleOptions={roleOptions}
                                 makeFormTitle={(u) => makeHistoryFormTitle(u)}
-                                getLocation={getLocation}
                             />
                         </Tab>
                     </TabBar>

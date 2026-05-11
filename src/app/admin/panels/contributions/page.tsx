@@ -9,34 +9,22 @@ import {
     Form,
     DateField,
 } from '@/components/common/forms'
-import {
-    ActBlueDonationPacket,
-    UpdateHistory,
-    zActBlueDonationPacket,
-} from '@/contracts/data'
+import { ActBlueDonationPacket, zActBlueDonationPacket } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
-import {
-    keepPreviousData,
-    skipToken,
-    useQuery,
-    useQueryClient,
-} from '@tanstack/react-query'
+import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
 export default function Page() {
-    const queryClient = useQueryClient()
-    const { ready, onGet, onPatch } = useFetch()
+    const { ready, onGet } = useFetch()
     const navParams = useSearchParams()
     const navVal = navParams.get('lineitemId')
 
     const [selectedLineitemId, setSelectedLineitemId] = useState<number | null>(
         navVal ? +navVal : null
     )
-    const [selectedHistory, setSelectedHistory] =
-        useState<UpdateHistory<ActBlueDonationPacket> | null>(null)
     const [formState, setFormState] =
         useState<FormState<ActBlueDonationPacket> | null>(null)
 
@@ -116,13 +104,19 @@ export default function Page() {
                 count={searchQuery.data?.count}
                 isPending={searchQuery.isPending}
                 error={searchQuery.error}
-                fields={[
+                searchFields={[
                     { label: 'State', value: 'state' },
                     { label: 'Email', value: 'email' },
                     { label: 'First Name', value: 'first_name' },
                     { label: 'Last Name', value: 'last_name' },
                     { label: 'Order Number', value: 'order_number' },
                     { label: 'Lineitem Id', value: 'lineitem_id' },
+                    { label: 'Paid At', value: 'paid_at' },
+                ]}
+                sortFields={[
+                    { label: 'First Name', value: 'first_name' },
+                    { label: 'Last Name', value: 'last_name' },
+                    { label: 'Paid At', value: 'paid_at' },
                 ]}
                 onSearch={onSearch}
             >
@@ -143,9 +137,7 @@ export default function Page() {
                         readonly={true}
                         saving={false}
                         isInvalid={false}
-                        onUpdate={() => {
-                            return
-                        }}
+                        onUpdate={setFormState}
                         onSave={() => {
                             return
                         }}
@@ -208,6 +200,15 @@ export default function Page() {
                                 field="contributionForm"
                             />
                             <TextField label="Form Kind" field="kind" />
+                            {contributionQuery.data?.customFields?.map(
+                                (field) => (
+                                    <TextField
+                                        key={field.label}
+                                        label={field.label}
+                                        getter={() => field.answer}
+                                    />
+                                )
+                            )}
                         </FormGroup>
                     </Form>
                 )}

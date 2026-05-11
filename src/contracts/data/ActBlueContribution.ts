@@ -9,9 +9,9 @@ export const zActBlueContribution = z
         contributionForm: z.string(),
         refcodes: z
             .object({
-                refcode: z.string().optional(),
-                refcode2: z.string().optional(),
-                refcodeCustom: z.string().optional(),
+                refcode: z.string().nullish(),
+                refcode2: z.string().nullish(),
+                refcodeCustom: z.string().nullish(),
             })
             .optional(),
         abTestName: z.string().nullable(),
@@ -36,7 +36,7 @@ export const zActBlueContribution = z
         shippingAddr1: z.string().nullable(),
         shippingCity: z.string().nullable(),
         shippingState: z.string().nullable(),
-        shippingZip: z.number().nullable(),
+        shippingZip: z.string().nullable(),
         shippingCountry: z.string().nullable(),
         smartBoostAmount: z.coerce.number().nullable(),
         customFields: z.array(zActBlueContributionCustomField),

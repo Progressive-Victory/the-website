@@ -8,7 +8,6 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { useEffect } from 'react'
 
 export function useAuth() {
     const queryClient = useQueryClient()
@@ -26,30 +25,6 @@ export function useAuth() {
     })
 
     const apiBaseUrl = settingsQuery.data?.apiBaseUrl
-
-    const sessionQuery = useQuery({
-        queryKey: ['/auth'],
-        queryFn: apiBaseUrl
-            ? async () => {
-                  const res = await fetch(new URL('/auth', apiBaseUrl), {
-                      credentials: 'include',
-                  })
-
-                  if (!res.ok) {
-                      if (res.status == 404) return null
-
-                      const error = (await res.json()) as ApiError
-                      throw new FetchError(
-                          error.message,
-                          res.status,
-                          error.error
-                      )
-                  }
-
-                  return (await res.json()) as TokenClaims
-              }
-            : skipToken,
-    })
 
     const loginMutation = useMutation<void, Error, { redirect?: string }>({
         mutationKey: ['/auth/discord/login'],
@@ -75,20 +50,6 @@ export function useAuth() {
         },
     })
 
-    const refreshMutation = useMutation({
-        mutationKey: ['/auth/refresh'],
-        async mutationFn() {
-            if (!apiBaseUrl) return
-            await fetch(new URL('/auth/refresh', apiBaseUrl), {
-                method: 'POST',
-                credentials: 'include',
-            })
-        },
-        async onSuccess() {
-            await queryClient.invalidateQueries({ queryKey: ['/auth'] })
-        },
-    })
-
     const logoutMutation = useMutation<void, Error, { redirect?: string }>({
         mutationKey: ['/auth/logout'],
         mutationFn: async () => {
@@ -106,22 +67,71 @@ export function useAuth() {
 
     const onLogin = (redirect?: string) =>
         loginMutation.mutateAsync({ redirect })
-    const onRefresh = refreshMutation.mutateAsync
     const onLogout = (redirect?: string) =>
         logoutMutation.mutateAsync({ redirect })
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            void onRefresh()
-        }, 60000)
+    const sessionQuery = useQuery({
+        queryKey: ['/auth'],
+        queryFn: apiBaseUrl
+            ? async () => {
+                  const res = await fetch(new URL('/auth', apiBaseUrl), {
+                      credentials: 'include',
+                  })
 
-        return () => clearInterval(interval)
-    }, [onRefresh])
+                  if (!res.ok) {
+                      if (res.status == 404) return null
+
+                      await onLogout()
+
+                      const error = (await res.json()) as ApiError
+                      throw new FetchError(
+                          error.message,
+                          res.status,
+                          error.error
+                      )
+                  }
+
+                  return (await res.json()) as TokenClaims
+              }
+            : skipToken,
+    })
+
+    const isSessionLoading = sessionQuery.isLoading || sessionQuery.isPending
+    const session = sessionQuery.data ?? null
+
+    const refreshQuery = useQuery({
+        queryKey: ['/auth/refresh'],
+        queryFn:
+            apiBaseUrl && session
+                ? async () => {
+                      const res = await fetch(
+                          new URL('/auth/refresh', apiBaseUrl),
+                          {
+                              method: 'POST',
+                              credentials: 'include',
+                          }
+                      )
+
+                      if (res.ok) {
+                          await queryClient.invalidateQueries({
+                              queryKey: ['/auth'],
+                          })
+                          return true
+                      }
+
+                      await onLogout()
+                      return false
+                  }
+                : skipToken,
+        refetchInterval: 5 * 60 * 1000,
+    })
+
+    const onRefresh = refreshQuery.refetch
 
     return {
         apiBaseUrl,
-        isSessionLoading: sessionQuery.isLoading || sessionQuery.isPending,
-        session: sessionQuery.data ?? null,
+        isSessionLoading,
+        session,
         onLogin,
         onRefresh,
         onLogout,
