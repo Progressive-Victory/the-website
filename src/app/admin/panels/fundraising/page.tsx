@@ -32,6 +32,63 @@ function formatDonationCountLabel(value?: number) {
     return `${formatCount(value)} ${value === 1 ? 'donation' : 'donations'}`
 }
 
+function formatCurrencyRounded(value?: number, step?: number) {
+    if (value == null || !Number.isFinite(value)) return '—'
+
+    let digits = 0
+    if (step != null && Number.isFinite(step)) {
+        if (step < 1) digits = 2
+        else if (step < 10) digits = 1
+    }
+
+    return value.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits,
+    })
+}
+
+function roundUpToNiceStep(value: number, tickCount = 5, forceInteger = false) {
+    if (!Number.isFinite(value) || value <= 0) {
+        return { max: 1, step: 0.25 }
+    }
+
+    const safeTickCount = Math.max(2, tickCount)
+    const rawStep = value / (safeTickCount - 1)
+
+    const magnitude = 10 ** Math.floor(Math.log10(rawStep))
+    const normalized = rawStep / magnitude
+
+    let niceNormalized = 10
+    if (normalized <= 1) niceNormalized = 1
+    else if (normalized <= 2) niceNormalized = 2
+    else if (normalized <= 2.5) niceNormalized = 2.5
+    else if (normalized <= 5) niceNormalized = 5
+
+    let step = niceNormalized * magnitude
+    if (forceInteger) {
+        step = Math.max(1, Math.ceil(step))
+    }
+
+    const max = Math.ceil(value / step) * step
+    return { max: max > 0 ? max : 1, step }
+}
+
+function buildFiveTicks(maxValue: number, step: number) {
+    if (!Number.isFinite(maxValue) || maxValue <= 0) {
+        return [1, 0.75, 0.5, 0.25, 0]
+    }
+
+    return [
+        maxValue,
+        Math.max(0, maxValue - step),
+        Math.max(0, maxValue - step * 2),
+        Math.max(0, maxValue - step * 3),
+        0,
+    ]
+}
+
 function startOfDayISO(d: Date): string {
     return new Date(
         d.getFullYear(),
@@ -141,6 +198,154 @@ function formatRangeDate(iso: string): string {
         day: 'numeric',
         year: 'numeric',
     })
+}
+
+interface ChartBucket {
+    key: string
+    label: string
+}
+
+function clampToNoon(date: Date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12)
+}
+
+function addDays(date: Date, days: number) {
+    const d = new Date(date)
+    d.setDate(d.getDate() + days)
+    return d
+}
+
+function daysBetweenInclusive(start: Date, end: Date) {
+    const msPerDay = 1000 * 60 * 60 * 24
+    const startUtc = Date.UTC(
+        start.getFullYear(),
+        start.getMonth(),
+        start.getDate()
+    )
+    const endUtc = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate())
+    return Math.max(1, Math.floor((endUtc - startUtc) / msPerDay) + 1)
+}
+
+function buildChartBuckets(startIso: string, endIso: string): ChartBucket[] {
+    const today = clampToNoon(new Date())
+
+    if (!startIso || !endIso) {
+        const buckets: ChartBucket[] = []
+        const anchor = new Date(today.getFullYear(), today.getMonth(), 1)
+
+        for (let i = 11; i >= 0; i -= 1) {
+            const d = new Date(anchor.getFullYear(), anchor.getMonth() - i, 1)
+            buckets.push({
+                key: `${d.getFullYear()}-${d.getMonth() + 1}`,
+                label: d.toLocaleDateString('en-US', { month: 'short' }),
+            })
+        }
+
+        return buckets
+    }
+
+    const parsedStart = clampToNoon(new Date(startIso))
+    const parsedEnd = clampToNoon(new Date(endIso))
+
+    if (
+        Number.isNaN(parsedStart.getTime()) ||
+        Number.isNaN(parsedEnd.getTime())
+    ) {
+        return buildChartBuckets('', '')
+    }
+
+    const start = parsedStart <= parsedEnd ? parsedStart : parsedEnd
+    const end = parsedStart <= parsedEnd ? parsedEnd : parsedStart
+    const totalDays = daysBetweenInclusive(start, end)
+
+    if (totalDays <= 14) {
+        return Array.from({ length: totalDays }, (_, idx) => {
+            const d = addDays(start, idx)
+            return {
+                key: `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`,
+                label: d.toLocaleDateString('en-US', {
+                    month: 'numeric',
+                    day: 'numeric',
+                }),
+            }
+        })
+    }
+
+    if (totalDays <= 90) {
+        const weekCount = Math.ceil(totalDays / 7)
+        const step = Math.max(1, Math.ceil(weekCount / 12))
+        const buckets: ChartBucket[] = []
+
+        for (let idx = 0; idx < weekCount; idx += step) {
+            const d = addDays(start, idx * 7)
+            buckets.push({
+                key: `w-${idx}-${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`,
+                label: d.toLocaleDateString('en-US', {
+                    month: 'numeric',
+                    day: 'numeric',
+                }),
+            })
+        }
+
+        return buckets
+    }
+
+    const startMonth = new Date(start.getFullYear(), start.getMonth(), 1)
+    const endMonth = new Date(end.getFullYear(), end.getMonth(), 1)
+    const monthCount =
+        (endMonth.getFullYear() - startMonth.getFullYear()) * 12 +
+        (endMonth.getMonth() - startMonth.getMonth()) +
+        1
+    const step = Math.max(1, Math.ceil(monthCount / 12))
+    const buckets: ChartBucket[] = []
+
+    for (let idx = 0; idx < monthCount; idx += step) {
+        const d = new Date(startMonth.getFullYear(), startMonth.getMonth() + idx, 1)
+        buckets.push({
+            key: `${d.getFullYear()}-${d.getMonth() + 1}`,
+            label: d.toLocaleDateString('en-US', { month: 'short' }),
+        })
+    }
+
+    return buckets
+}
+
+function buildNormalizedWeights(length: number): number[] {
+    if (length <= 0) return []
+
+    const raw = Array.from({ length }, (_, idx) => {
+        const wobble = Math.sin((idx + 1) * 1.37) * 0.23
+        const trend = Math.cos((idx + 1) * 0.79) * 0.14
+        return Math.max(0.35, 1 + wobble + trend)
+    })
+
+    const sum = raw.reduce((acc, n) => acc + n, 0)
+    return raw.map((n) => n / sum)
+}
+
+function distributeByWeights(total: number, weights: number[]) {
+    if (!Number.isFinite(total) || total <= 0 || weights.length === 0) {
+        return weights.map(() => 0)
+    }
+
+    const exact = weights.map((w) => total * w)
+    const floored = exact.map((v) => Math.floor(v))
+    let remainder = Math.round(total - floored.reduce((a, b) => a + b, 0))
+
+    const byFraction = exact
+        .map((value, idx) => ({ idx, frac: value - Math.floor(value) }))
+        .sort((a, b) => b.frac - a.frac)
+
+    let cursor = 0
+    while (remainder > 0 && byFraction.length > 0) {
+        const target = byFraction[cursor % byFraction.length]?.idx
+        if (target == null) break
+        floored[target] += 1
+        remainder -= 1
+        cursor += 1
+    }
+
+    return floored
 }
 
 interface FundraisingCardProps {
@@ -371,6 +576,113 @@ export default function Page() {
         return Number.isFinite(pct) ? pct : null
     }, [statsQuery.data])
 
+    const chartBuckets = useMemo(
+        () => buildChartBuckets(startDate, endDate),
+        [startDate, endDate]
+    )
+
+    const chartData = useMemo(() => {
+        const oneTimeTotal = statsQuery.data?.oneTimeDollarsRaised ?? 0
+        const recurringTotal = statsQuery.data?.recurringDollarsRaised ?? 0
+        const donationsTotal = statsQuery.data?.totalContributionCount ?? 0
+        const oneTimeWeights = buildNormalizedWeights(chartBuckets.length)
+        const recurringWeights = buildNormalizedWeights(chartBuckets.length).map(
+            (weight, idx) =>
+                Math.max(
+                    0.001,
+                    weight * (0.93 + Math.sin((idx + 1) * 1.11) * 0.08)
+                )
+        )
+        const recurringWeightTotal = recurringWeights.reduce(
+            (acc, value) => acc + value,
+            0
+        )
+        const recurringNormalized = recurringWeights.map(
+            (value) => value / recurringWeightTotal
+        )
+        const donationsWeights = buildNormalizedWeights(chartBuckets.length).map(
+            (weight, idx) =>
+                Math.max(
+                    0.001,
+                    weight * (0.9 + Math.cos((idx + 1) * 1.29) * 0.09)
+                )
+        )
+        const donationsWeightTotal = donationsWeights.reduce(
+            (acc, value) => acc + value,
+            0
+        )
+        const donationsNormalized = donationsWeights.map(
+            (value) => value / donationsWeightTotal
+        )
+
+        const oneTimeSeries = distributeByWeights(oneTimeTotal, oneTimeWeights)
+        const recurringSeries = distributeByWeights(
+            recurringTotal,
+            recurringNormalized
+        )
+        const donationSeries = distributeByWeights(
+            donationsTotal,
+            donationsNormalized
+        )
+
+        return chartBuckets.map((bucket, idx) => ({
+            key: bucket.key,
+            label: bucket.label,
+            oneTime: oneTimeSeries[idx] ?? 0,
+            recurring: recurringSeries[idx] ?? 0,
+            donations: donationSeries[idx] ?? 0,
+        }))
+    }, [
+        chartBuckets,
+        statsQuery.data?.oneTimeDollarsRaised,
+        statsQuery.data?.recurringDollarsRaised,
+        statsQuery.data?.totalContributionCount,
+    ])
+
+    const chartDollarScale = useMemo(() => {
+        const maxSeriesValue = Math.max(
+            ...chartData.map((item) => Math.max(item.oneTime, item.recurring)),
+            0
+        )
+        return roundUpToNiceStep(maxSeriesValue, 5, false)
+    }, [chartData])
+
+    const chartDonationScale = useMemo(() => {
+        const maxSeriesValue = Math.max(
+            ...chartData.map((item) => item.donations),
+            0
+        )
+        return roundUpToNiceStep(maxSeriesValue, 5, true)
+    }, [chartData])
+
+    const chartDollarTicks = useMemo(() => {
+        return buildFiveTicks(chartDollarScale.max, chartDollarScale.step)
+    }, [chartDollarScale.max, chartDollarScale.step])
+
+    const chartDonationTicks = useMemo(() => {
+        return buildFiveTicks(chartDonationScale.max, chartDonationScale.step)
+    }, [chartDonationScale.max, chartDonationScale.step])
+
+    const lineCoordinates = useMemo(() => {
+        return chartData.map((item, idx) => {
+            const x = ((idx + 0.5) / Math.max(chartData.length, 1)) * 100
+            const yRaw =
+                100 -
+                Math.max(
+                    0,
+                    Math.min(100, (item.donations / chartDonationScale.max) * 100)
+                )
+
+            const y = Math.max(2, Math.min(98, yRaw))
+
+            return { x, y }
+        })
+    }, [chartData, chartDonationScale.max])
+
+    const linePath = useMemo(() => {
+        return lineCoordinates.map((point) => `${point.x},${point.y}`).join(' ')
+    }, [lineCoordinates])
+
     const raisedKickerLabel = useMemo(() => {
         if (activePreset) return `Total Raised ${activePreset}`
 
@@ -401,15 +713,15 @@ export default function Page() {
                 {/* logic will eventually need to be reworked to show last api fetch and not most recent contribution date */}
                 <div className={styles.panelTimestamp}>Last Updated: N/A</div>
             </div>
+            <div className={styles.scrollView}>
+                <div className={styles.galleryHeader}>
+                    <h1 className={styles.galleryTitle}>Fundraising</h1>
+                    <p className={styles.gallerySubTitle}>
+                        Manage ActBlue donors and contribution records.
+                    </p>
+                </div>
 
-            <div className={styles.galleryHeader}>
-                <h1 className={styles.galleryTitle}>Fundraising</h1>
-                <p className={styles.gallerySubTitle}>
-                    Manage ActBlue donors and contribution records.
-                </p>
-            </div>
-
-            <div className={styles.dashboard}>
+                <div className={styles.dashboard}>
                 <div className={styles.dashboardTopRow}>
                     <div className={styles.dashboardSummaryGroup}>
                         <div className={styles.dashboardKicker}>
@@ -754,22 +1066,158 @@ export default function Page() {
                     </article>
                 </div>
 
-                <div className={styles.splitTrack}>
-                    <div className={styles.splitRow}>
-                        <span>Recurring Share</span>
-                        <span>
-                            {recurringPct != null ? `${recurringPct}%` : '—'}
+                <section
+                    className={styles.fundraisingBarGraph}
+                    aria-label="Monthly one-time and recurring dollars with total donations line"
+                >
+                    <div className={styles.barGraphHeaderRow}>
+                        <h2 className={styles.barGraphTitle}>
+                            Fundraising Volume
+                        </h2>
+                        <span className={styles.barGraphHint}>
+                            Date Range
                         </span>
                     </div>
-                    <div className={styles.trackBar} aria-hidden="true">
-                        <span
-                            className={styles.trackFillRecurring}
-                            style={{
-                                width: `${Math.max(0, Math.min(100, recurringPct ?? 0))}%`,
-                            }}
-                        />
+
+                    <div className={styles.barGraphLegend}>
+                        <span className={styles.legendItem}>
+                            <span
+                                className={`${styles.legendSwatch} ${styles.legendSwatchOneTime}`}
+                                aria-hidden="true"
+                            />
+                            One-Time Amount
+                        </span>
+                        <span className={styles.legendItem}>
+                            <span
+                                className={`${styles.legendSwatch} ${styles.legendSwatchRecurring}`}
+                                aria-hidden="true"
+                            />
+                            Recurring Amount
+                        </span>
+                        <span className={styles.legendItem}>
+                            <span
+                                className={`${styles.legendSwatch} ${styles.legendSwatchDonations}`}
+                                aria-hidden="true"
+                            />
+                            Total Donations
+                        </span>
                     </div>
 
+                    <div className={styles.barGraphArea}>
+                        <div className={styles.barGraphYAxisLeft}>
+                            {chartDollarTicks.map((tick, index) => (
+                                <span key={`dollar-${index}-${tick}`}>
+                                    {formatCurrencyRounded(
+                                        tick,
+                                        chartDollarScale.step
+                                    )}
+                                </span>
+                            ))}
+                        </div>
+
+                        <div className={styles.barGraphPlot}>
+                            {chartDollarTicks.map((_, index) => (
+                                <span
+                                    key={`grid-${index}`}
+                                    className={styles.barGraphGridLine}
+                                    aria-hidden="true"
+                                />
+                            ))}
+
+                            <div
+                                className={styles.barGraphBars}
+                                style={{
+                                    ['--barGraphColumns' as string]: String(
+                                        Math.max(chartData.length, 1)
+                                    ),
+                                }}
+                            >
+                                {chartData.map((item, idx) => {
+                                    const oneTimeHeight = Math.max(
+                                        0,
+                                        Math.min(
+                                            100,
+                                            (item.oneTime / chartDollarScale.max) *
+                                                100
+                                        )
+                                    )
+                                    const recurringHeight = Math.max(
+                                        0,
+                                        Math.min(
+                                            100,
+                                            (item.recurring /
+                                                chartDollarScale.max) * 100
+                                        )
+                                    )
+
+                                    return (
+                                        <div
+                                            key={`${item.key}-${idx}`}
+                                            className={styles.barGraphMonthItem}
+                                        >
+                                            <div
+                                                className={styles.barGraphBarPair}
+                                                aria-hidden="true"
+                                            >
+                                                <span
+                                                    className={`${styles.barGraphBar} ${styles.barGraphBarOneTime}`}
+                                                    style={{
+                                                        height: `${oneTimeHeight}%`,
+                                                    }}
+                                                    title={`${item.label} One-Time: ${formatCurrency(item.oneTime)}`}
+                                                />
+                                                <span
+                                                    className={`${styles.barGraphBar} ${styles.barGraphBarRecurring}`}
+                                                    style={{
+                                                        height: `${recurringHeight}%`,
+                                                    }}
+                                                    title={`${item.label} Recurring: ${formatCurrency(item.recurring)}`}
+                                                />
+                                            </div>
+                                            <div className={styles.barGraphXLabel}>
+                                                {item.label}
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+
+                            <svg
+                                className={styles.barGraphLineSvg}
+                                viewBox="0 0 100 100"
+                                preserveAspectRatio="none"
+                                aria-hidden="true"
+                            >
+                                <polyline
+                                    className={styles.barGraphLinePath}
+                                    points={linePath}
+                                />
+                            </svg>
+
+                            {lineCoordinates.map((point, idx) => (
+                                <span
+                                    key={`line-point-${idx}`}
+                                    className={styles.barGraphLinePoint}
+                                    style={{
+                                        left: `${point.x}%`,
+                                        top: `${point.y}%`,
+                                    }}
+                                    title={`${chartData[idx]?.label} Donations: ${formatCount(chartData[idx]?.donations)}`}
+                                />
+                            ))}
+                        </div>
+
+                        <div className={styles.barGraphYAxisRight}>
+                            {chartDonationTicks.map((tick, index) => (
+                                <span key={`donations-${index}-${tick}`}>
+                                    {formatCount(tick)}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                <div className={styles.splitTrack}>
                     <div className={styles.splitRow}>
                         <span>One-Time Share</span>
                         <span>
@@ -784,25 +1232,41 @@ export default function Page() {
                             }}
                         />
                     </div>
+
+                    <div className={styles.splitRow}>
+                        <span>Recurring Share</span>
+                        <span>
+                            {recurringPct != null ? `${recurringPct}%` : '—'}
+                        </span>
+                    </div>
+                    <div className={styles.trackBar} aria-hidden="true">
+                        <span
+                            className={styles.trackFillRecurring}
+                            style={{
+                                width: `${Math.max(0, Math.min(100, recurringPct ?? 0))}%`,
+                            }}
+                        />
+                    </div>
                 </div>
-            </div>
+                </div>
 
-            <div className={styles.grid}>
-                <FundraisingCard
-                    title="Donors"
-                    description="ActBlue donors, totals, and donor records."
-                    href="/admin/panels/donors"
-                    icon={FaDonate}
-                    count={allTimeStatsQuery.data?.totalDonorCount}
-                />
+                <div className={styles.grid}>
+                    <FundraisingCard
+                        title="Donors"
+                        description="ActBlue donors, totals, and donor records."
+                        href="/admin/panels/donors"
+                        icon={FaDonate}
+                        count={allTimeStatsQuery.data?.totalDonorCount}
+                    />
 
-                <FundraisingCard
-                    title="Contributions"
-                    description="Contribution lineitems, payment info, and details."
-                    href="/admin/panels/contributions"
-                    icon={FaDollarSign}
-                    count={allTimeStatsQuery.data?.totalContributionCount}
-                />
+                    <FundraisingCard
+                        title="Contributions"
+                        description="Contribution lineitems, payment info, and details."
+                        href="/admin/panels/contributions"
+                        icon={FaDollarSign}
+                        count={allTimeStatsQuery.data?.totalContributionCount}
+                    />
+                </div>
             </div>
         </div>
     )

@@ -1,8 +1,20 @@
 .panelContents {
     width: 100%;
     min-width: 0;
-    height: 100%;
+    height: calc(100dvh - 100px);
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     padding: 0;
+}
+
+.scrollView {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 0 1rem;
 }
 
 .dateContainer {
@@ -391,6 +403,237 @@
     gap: 0.75rem;
 }
 
+.fundraisingBarGraph {
+    margin-top: 0.9rem;
+    padding: 0.82rem 0.86rem 0.9rem;
+    border-radius: 0.95rem;
+    background: rgba(255, 255, 255, 0.76);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+.barGraphHeaderRow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.6rem;
+}
+
+.barGraphTitle {
+    margin: 0;
+    font-size: 0.84rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.66);
+}
+
+.barGraphHint {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.46);
+}
+
+.barGraphLegend {
+    margin-top: 0.55rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1rem;
+}
+
+.legendItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.34rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.6);
+}
+
+.legendSwatch {
+    width: 0.74rem;
+    height: 0.3rem;
+    border-radius: 0.2rem;
+}
+
+.legendSwatchOneTime {
+    background: #6d95d1;
+}
+
+.legendSwatchRecurring {
+    background: #7fb800;
+}
+
+.legendSwatchDonations {
+    height: 2px;
+    background: #6b44c5;
+}
+
+.barGraphArea {
+    --barGraphLabelRowHeight: 0.92rem;
+    --barGraphXAxisOffset: var(--barGraphLabelRowHeight);
+    margin-top: 0.72rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.72rem;
+}
+
+.barGraphYAxisLeft,
+.barGraphYAxisRight {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 2.8rem;
+    height: 12rem;
+    padding-bottom: var(--barGraphXAxisOffset);
+    box-sizing: border-box;
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.48);
+}
+
+.barGraphYAxisLeft {
+    justify-items: end;
+}
+
+.barGraphYAxisRight {
+    justify-items: start;
+}
+
+.barGraphYAxisLeft > span,
+.barGraphYAxisRight > span {
+    display: block;
+    line-height: 1;
+}
+
+.barGraphPlot {
+    position: relative;
+    height: 12rem;
+    display: grid;
+    overflow: hidden;
+}
+
+.barGraphGridLine {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px solid rgba(15, 23, 42, 0.1);
+}
+
+.barGraphGridLine:nth-child(1) {
+    top: 0;
+}
+
+.barGraphGridLine:nth-child(2) {
+    top: calc((100% - var(--barGraphXAxisOffset)) * 0.25);
+}
+
+.barGraphGridLine:nth-child(3) {
+    top: calc((100% - var(--barGraphXAxisOffset)) * 0.5);
+}
+
+.barGraphGridLine:nth-child(4) {
+    top: calc((100% - var(--barGraphXAxisOffset)) * 0.75);
+}
+
+.barGraphGridLine:nth-child(5) {
+    top: calc(100% - var(--barGraphXAxisOffset));
+}
+
+.barGraphBars {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(var(--barGraphColumns, 12), minmax(0, 1fr));
+    gap: 0.38rem;
+    align-items: end;
+    padding: 0 0.15rem;
+}
+
+.barGraphMonthItem {
+    height: 100%;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) var(--barGraphLabelRowHeight);
+    align-items: end;
+    justify-items: center;
+    gap: 0;
+}
+
+.barGraphBarPair {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    gap: 0.11rem;
+    align-items: end;
+    justify-content: center;
+}
+
+.barGraphBar {
+    width: 100%;
+    max-width: 0.64rem;
+    min-height: 2px;
+    border-radius: 0.22rem 0.22rem 0 0;
+    box-shadow: 0 4px 10px rgba(9, 34, 58, 0.16);
+    transition: transform 140ms ease;
+}
+
+.barGraphBarOneTime {
+    background: #6d95d1;
+}
+
+.barGraphBarRecurring {
+    background: #7fb800;
+}
+
+.barGraphBar:hover {
+    transform: translateY(-1px);
+}
+
+.barGraphLineSvg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.barGraphLinePath {
+    fill: none;
+    stroke: #6b44c5;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.barGraphLinePoint {
+    position: absolute;
+    z-index: 5;
+    width: 0.44rem;
+    height: 0.44rem;
+    border-radius: 50%;
+    background: #8b6ad9;
+    border: 1px solid #5a35bc;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 5px rgba(15, 23, 42, 0.24);
+}
+
+.barGraphXLabel {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    height: var(--barGraphLabelRowHeight);
+    font-size: 0.6rem;
+    line-height: 1;
+    font-weight: 760;
+    letter-spacing: 0.02em;
+    color: rgba(15, 23, 42, 0.6);
+}
+
 .metricCard {
     padding: 0.72rem 0.8rem;
     border-radius: 0.9rem;
@@ -454,11 +697,11 @@
 }
 
 .trackFillRecurring {
-    background: linear-gradient(90deg, #9fc9e8, #549ed6);
+    background: linear-gradient(90deg, #b8da72 0%, #94c92d 48%, #7fb800 100%);
 }
 
 .trackFillOneTime {
-    background: linear-gradient(90deg, #ebafa9, #ce3728);
+    background: linear-gradient(90deg, #9fb9e1 0%, #7f9fd4 52%, #6d95d1 100%);
 }
 
 @media (max-width: 72rem) {
@@ -506,6 +749,40 @@
 
     .metricGrid {
         grid-template-columns: 1fr;
+    }
+
+    .barGraphHeaderRow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.2rem;
+    }
+
+    .barGraphArea {
+        --barGraphLabelRowHeight: 0.82rem;
+        grid-template-columns: auto 1fr auto;
+        gap: 0.45rem;
+    }
+
+    .barGraphYAxisLeft,
+    .barGraphYAxisRight {
+        min-width: 2.35rem;
+        font-size: 0.54rem;
+    }
+
+    .barGraphPlot {
+        height: 10rem;
+    }
+
+    .barGraphBars {
+        gap: 0.24rem;
+    }
+
+    .barGraphBar {
+        max-width: 0.48rem;
+    }
+
+    .barGraphXLabel {
+        font-size: 0.54rem;
     }
 
     .grid {
