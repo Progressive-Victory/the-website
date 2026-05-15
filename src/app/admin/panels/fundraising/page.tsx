@@ -1,17 +1,27 @@
 'use client'
 
 import styles from './page.module.css'
+import { FundraisingChart, FundraisingChartPoint } from './FundraisingChart'
+import {
+    ActBlueDonationPacket,
+    zActBlueDonationPacket,
+} from '@/contracts/data'
+import {
+    PaginatedResponse,
+    zPaginatedResponse,
+} from '@/contracts/responses'
 import {
     ActBlueFundraisingStatsResponse,
     zActBlueFundraisingStatsResponse,
 } from '@/contracts/responses/fundraisingStatsResponse'
+import { SortDirection } from '@/contracts/requests'
 import { useFetch } from '@/util/hooks'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FaDonate } from 'react-icons/fa'
 import { FaDollarSign } from 'react-icons/fa6'
-import { FiChevronDown } from 'react-icons/fi'
+import { FiCheck, FiChevronDown, FiChevronLeft, FiChevronRight, FiX } from 'react-icons/fi'
 
 function formatCurrency(value?: number) {
     if (value == null || !Number.isFinite(value)) return '—'
@@ -30,63 +40,6 @@ function formatCount(value?: number) {
 
 function formatDonationCountLabel(value?: number) {
     return `${formatCount(value)} ${value === 1 ? 'donation' : 'donations'}`
-}
-
-function formatCurrencyRounded(value?: number, step?: number) {
-    if (value == null || !Number.isFinite(value)) return '—'
-
-    let digits = 0
-    if (step != null && Number.isFinite(step)) {
-        if (step < 1) digits = 2
-        else if (step < 10) digits = 1
-    }
-
-    return value.toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: digits,
-        maximumFractionDigits: digits,
-    })
-}
-
-function roundUpToNiceStep(value: number, tickCount = 5, forceInteger = false) {
-    if (!Number.isFinite(value) || value <= 0) {
-        return { max: 1, step: 0.25 }
-    }
-
-    const safeTickCount = Math.max(2, tickCount)
-    const rawStep = value / (safeTickCount - 1)
-
-    const magnitude = 10 ** Math.floor(Math.log10(rawStep))
-    const normalized = rawStep / magnitude
-
-    let niceNormalized = 10
-    if (normalized <= 1) niceNormalized = 1
-    else if (normalized <= 2) niceNormalized = 2
-    else if (normalized <= 2.5) niceNormalized = 2.5
-    else if (normalized <= 5) niceNormalized = 5
-
-    let step = niceNormalized * magnitude
-    if (forceInteger) {
-        step = Math.max(1, Math.ceil(step))
-    }
-
-    const max = Math.ceil(value / step) * step
-    return { max: max > 0 ? max : 1, step }
-}
-
-function buildFiveTicks(maxValue: number, step: number) {
-    if (!Number.isFinite(maxValue) || maxValue <= 0) {
-        return [1, 0.75, 0.5, 0.25, 0]
-    }
-
-    return [
-        maxValue,
-        Math.max(0, maxValue - step),
-        Math.max(0, maxValue - step * 2),
-        Math.max(0, maxValue - step * 3),
-        0,
-    ]
 }
 
 function startOfDayISO(d: Date): string {
@@ -169,27 +122,32 @@ const PRESETS = [
     'Yesterday',
 ] as const
 type Preset = (typeof PRESETS)[number]
-type DateRangeOption = Preset | 'Custom Range'
 
 function isoToDateInput(iso: string): string {
     if (!iso) return ''
     const d = new Date(iso)
-    const y = d.getFullYear()
+    const y = String(d.getFullYear()).padStart(4, '0')
     const m = String(d.getMonth() + 1).padStart(2, '0')
     const day = String(d.getDate()).padStart(2, '0')
     return `${y}-${m}-${day}`
 }
 
-function dateInputToStartISO(value: string): string {
+function dateInputToStartISO(value: string): string | null {
     if (!value) return ''
     const [y, mo, d] = value.split('-').map(Number)
-    return new Date(y, mo - 1, d, 0, 0, 0).toISOString()
+    if (!y || !mo || !d) return null
+    const date = new Date(2000, mo - 1, d, 0, 0, 0)
+    date.setFullYear(y, mo - 1, d)
+    return date.toISOString()
 }
 
-function dateInputToEndISO(value: string): string {
+function dateInputToEndISO(value: string): string | null {
     if (!value) return ''
     const [y, mo, d] = value.split('-').map(Number)
-    return new Date(y, mo - 1, d, 23, 59, 59).toISOString()
+    if (!y || !mo || !d) return null
+    const date = new Date(2000, mo - 1, d, 23, 59, 59)
+    date.setFullYear(y, mo - 1, d)
+    return date.toISOString()
 }
 
 function formatRangeDate(iso: string): string {
@@ -200,13 +158,37 @@ function formatRangeDate(iso: string): string {
     })
 }
 
+type ChartGranularityMode = 'auto' | 'year' | 'month' | 'week' | 'day'
+
 interface ChartBucket {
     key: string
     label: string
+    anchorIso: string
+    startIso: string
+    endIso: string
+    granularity: 'day' | 'week' | 'month' | 'year'
 }
 
 function clampToNoon(date: Date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12)
+}
+
+function startOfDayDate(d: Date) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0)
+}
+
+function endOfDayDate(d: Date) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59)
+}
+
+function clampMin(d: Date, lower?: Date) {
+    if (lower && d.getTime() < lower.getTime()) return new Date(lower)
+    return d
+}
+
+function clampMax(d: Date, upper?: Date) {
+    if (upper && d.getTime() > upper.getTime()) return new Date(upper)
+    return d
 }
 
 function addDays(date: Date, days: number) {
@@ -226,126 +208,175 @@ function daysBetweenInclusive(start: Date, end: Date) {
     return Math.max(1, Math.floor((endUtc - startUtc) / msPerDay) + 1)
 }
 
-function buildChartBuckets(startIso: string, endIso: string): ChartBucket[] {
-    const today = clampToNoon(new Date())
-
-    if (!startIso || !endIso) {
-        const buckets: ChartBucket[] = []
-        const anchor = new Date(today.getFullYear(), today.getMonth(), 1)
-
-        for (let i = 11; i >= 0; i -= 1) {
-            const d = new Date(anchor.getFullYear(), anchor.getMonth() - i, 1)
-            buckets.push({
-                key: `${d.getFullYear()}-${d.getMonth() + 1}`,
-                label: d.toLocaleDateString('en-US', { month: 'short' }),
-            })
-        }
-
-        return buckets
-    }
-
-    const parsedStart = clampToNoon(new Date(startIso))
-    const parsedEnd = clampToNoon(new Date(endIso))
-
-    if (
-        Number.isNaN(parsedStart.getTime()) ||
-        Number.isNaN(parsedEnd.getTime())
-    ) {
-        return buildChartBuckets('', '')
-    }
-
-    const start = parsedStart <= parsedEnd ? parsedStart : parsedEnd
-    const end = parsedStart <= parsedEnd ? parsedEnd : parsedStart
+function buildDayBuckets(
+    start: Date,
+    end: Date,
+    maxBuckets = 365
+): ChartBucket[] {
+    const rangeStart = startOfDayDate(start)
+    const rangeEnd = endOfDayDate(end)
     const totalDays = daysBetweenInclusive(start, end)
-
-    if (totalDays <= 14) {
-        return Array.from({ length: totalDays }, (_, idx) => {
-            const d = addDays(start, idx)
-            return {
-                key: `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`,
-                label: d.toLocaleDateString('en-US', {
-                    month: 'numeric',
-                    day: 'numeric',
-                }),
-            }
+    const count = Math.min(totalDays, maxBuckets)
+    const effectiveStart =
+        count < totalDays ? addDays(end, -(count - 1)) : start
+    const buckets: ChartBucket[] = []
+    for (let idx = 0; idx < count; idx += 1) {
+        const d = addDays(effectiveStart, idx)
+        const bStart = clampMin(startOfDayDate(d), rangeStart)
+        const bEnd = clampMax(endOfDayDate(d), rangeEnd)
+        buckets.push({
+            key: `d-${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`,
+            label: d.toLocaleDateString('en-US', {
+                month: 'numeric',
+                day: 'numeric',
+            }),
+            anchorIso: bStart.toISOString(),
+            startIso: bStart.toISOString(),
+            endIso: bEnd.toISOString(),
+            granularity: 'day',
         })
     }
+    return buckets
+}
 
-    if (totalDays <= 90) {
-        const weekCount = Math.ceil(totalDays / 7)
-        const step = Math.max(1, Math.ceil(weekCount / 12))
-        const buckets: ChartBucket[] = []
-
-        for (let idx = 0; idx < weekCount; idx += step) {
-            const d = addDays(start, idx * 7)
-            buckets.push({
-                key: `w-${idx}-${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`,
-                label: d.toLocaleDateString('en-US', {
-                    month: 'numeric',
-                    day: 'numeric',
-                }),
-            })
-        }
-
-        return buckets
+function buildWeekBuckets(
+    start: Date,
+    end: Date,
+    maxBuckets = 104
+): ChartBucket[] {
+    const rangeStart = startOfDayDate(start)
+    const rangeEnd = endOfDayDate(end)
+    const totalDays = daysBetweenInclusive(start, end)
+    const weekCount = Math.ceil(totalDays / 7)
+    const count = Math.min(weekCount, maxBuckets)
+    const effectiveStart =
+        count < weekCount ? addDays(end, -(count * 7 - 1)) : start
+    const buckets: ChartBucket[] = []
+    for (let idx = 0; idx < count; idx += 1) {
+        const d = addDays(effectiveStart, idx * 7)
+        const lastDay = addDays(effectiveStart, (idx + 1) * 7 - 1)
+        const bStart = clampMin(startOfDayDate(d), rangeStart)
+        const bEnd = clampMax(endOfDayDate(lastDay), rangeEnd)
+        buckets.push({
+            key: `w-${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`,
+            label: d.toLocaleDateString('en-US', {
+                month: 'numeric',
+                day: 'numeric',
+            }),
+            anchorIso: bStart.toISOString(),
+            startIso: bStart.toISOString(),
+            endIso: bEnd.toISOString(),
+            granularity: 'week',
+        })
     }
+    return buckets
+}
 
+function buildMonthBuckets(
+    start: Date,
+    end: Date,
+    maxBuckets = 60
+): ChartBucket[] {
+    const rangeStart = startOfDayDate(start)
+    const rangeEnd = endOfDayDate(end)
     const startMonth = new Date(start.getFullYear(), start.getMonth(), 1)
     const endMonth = new Date(end.getFullYear(), end.getMonth(), 1)
     const monthCount =
         (endMonth.getFullYear() - startMonth.getFullYear()) * 12 +
         (endMonth.getMonth() - startMonth.getMonth()) +
         1
-    const step = Math.max(1, Math.ceil(monthCount / 12))
+    const count = Math.min(monthCount, maxBuckets)
+    const offsetStart = monthCount - count 
     const buckets: ChartBucket[] = []
-
-    for (let idx = 0; idx < monthCount; idx += step) {
-        const d = new Date(startMonth.getFullYear(), startMonth.getMonth() + idx, 1)
+    for (let idx = 0; idx < count; idx += 1) {
+        const d = new Date(
+            startMonth.getFullYear(),
+            startMonth.getMonth() + offsetStart + idx,
+            1
+        )
+        const bucketEndDay = new Date(d.getFullYear(), d.getMonth() + 1, 0)
+        const bStart = clampMin(startOfDayDate(d), rangeStart)
+        const bEnd = clampMax(endOfDayDate(bucketEndDay), rangeEnd)
         buckets.push({
-            key: `${d.getFullYear()}-${d.getMonth() + 1}`,
+            key: `m-${d.getFullYear()}-${d.getMonth() + 1}`,
             label: d.toLocaleDateString('en-US', { month: 'short' }),
+            anchorIso: bStart.toISOString(),
+            startIso: bStart.toISOString(),
+            endIso: bEnd.toISOString(),
+            granularity: 'month',
         })
     }
-
     return buckets
 }
 
-function buildNormalizedWeights(length: number): number[] {
-    if (length <= 0) return []
-
-    const raw = Array.from({ length }, (_, idx) => {
-        const wobble = Math.sin((idx + 1) * 1.37) * 0.23
-        const trend = Math.cos((idx + 1) * 0.79) * 0.14
-        return Math.max(0.35, 1 + wobble + trend)
-    })
-
-    const sum = raw.reduce((acc, n) => acc + n, 0)
-    return raw.map((n) => n / sum)
+function buildYearBuckets(start: Date, end: Date): ChartBucket[] {
+    const rangeStart = startOfDayDate(start)
+    const rangeEnd = endOfDayDate(end)
+    const startYear = start.getFullYear()
+    const endYear = end.getFullYear()
+    const buckets: ChartBucket[] = []
+    for (let yr = startYear; yr <= endYear; yr += 1) {
+        const d = new Date(yr, 0, 1)
+        const last = new Date(yr, 11, 31)
+        const bStart = clampMin(startOfDayDate(d), rangeStart)
+        const bEnd = clampMax(endOfDayDate(last), rangeEnd)
+        buckets.push({
+            key: `y-${yr}`,
+            label: String(yr),
+            anchorIso: bStart.toISOString(),
+            startIso: bStart.toISOString(),
+            endIso: bEnd.toISOString(),
+            granularity: 'year',
+        })
+    }
+    return buckets
 }
 
-function distributeByWeights(total: number, weights: number[]) {
-    if (!Number.isFinite(total) || total <= 0 || weights.length === 0) {
-        return weights.map(() => 0)
+function buildChartBuckets(
+    startIso: string,
+    endIso: string,
+    allTimeFirstIso?: string,
+    mode: ChartGranularityMode = 'auto'
+): ChartBucket[] {
+    const today = clampToNoon(new Date())
+
+    let start: Date
+    let end: Date
+
+    if (!startIso || !endIso) {
+        const firstDate = allTimeFirstIso
+            ? clampToNoon(new Date(allTimeFirstIso))
+            : null
+        const useFirst =
+            firstDate &&
+            !Number.isNaN(firstDate.getTime()) &&
+            firstDate.getTime() <= today.getTime()
+        start = useFirst
+            ? new Date(firstDate.getFullYear(), firstDate.getMonth(), 1)
+            : new Date(today.getFullYear(), today.getMonth() - 11, 1)
+        end = today
+    } else {
+        const parsedStart = clampToNoon(new Date(startIso))
+        const parsedEnd = clampToNoon(new Date(endIso))
+        if (
+            Number.isNaN(parsedStart.getTime()) ||
+            Number.isNaN(parsedEnd.getTime())
+        ) {
+            return buildChartBuckets('', '', allTimeFirstIso, mode)
+        }
+        start = parsedStart <= parsedEnd ? parsedStart : parsedEnd
+        end = parsedStart <= parsedEnd ? parsedEnd : parsedStart
     }
 
-    const exact = weights.map((w) => total * w)
-    const floored = exact.map((v) => Math.floor(v))
-    let remainder = Math.round(total - floored.reduce((a, b) => a + b, 0))
+    if (mode === 'day') return buildDayBuckets(start, end)
+    if (mode === 'week') return buildWeekBuckets(start, end)
+    if (mode === 'month') return buildMonthBuckets(start, end)
+    if (mode === 'year') return buildYearBuckets(start, end)
 
-    const byFraction = exact
-        .map((value, idx) => ({ idx, frac: value - Math.floor(value) }))
-        .sort((a, b) => b.frac - a.frac)
-
-    let cursor = 0
-    while (remainder > 0 && byFraction.length > 0) {
-        const target = byFraction[cursor % byFraction.length]?.idx
-        if (target == null) break
-        floored[target] += 1
-        remainder -= 1
-        cursor += 1
-    }
-
-    return floored
+    const totalDays = daysBetweenInclusive(start, end)
+    if (totalDays <= 14) return buildDayBuckets(start, end, 14)
+    if (totalDays <= 90) return buildWeekBuckets(start, end, 13)
+    return buildMonthBuckets(start, end, 14)
 }
 
 interface FundraisingCardProps {
@@ -382,11 +413,171 @@ function FundraisingCard({
     )
 }
 
+const WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+
+interface FundraisingMiniCalendarProps {
+    month: Date
+    onMonthChange: (next: Date) => void
+    startDate: Date | null
+    endDate: Date | null
+    maxDate?: Date
+    onDayClick: (day: Date) => void
+}
+
+function isSameDay(a: Date, b: Date) {
+    return (
+        a.getFullYear() === b.getFullYear() &&
+        a.getMonth() === b.getMonth() &&
+        a.getDate() === b.getDate()
+    )
+}
+
+function FundraisingMiniCalendar({
+    month,
+    onMonthChange,
+    startDate,
+    endDate,
+    maxDate,
+    onDayClick,
+}: FundraisingMiniCalendarProps) {
+    const year = month.getFullYear()
+    const monthIdx = month.getMonth()
+    const firstOfMonth = new Date(year, monthIdx, 1)
+    const startWeekday = firstOfMonth.getDay()
+    const gridStart = new Date(year, monthIdx, 1 - startWeekday)
+
+    const cells: Date[] = []
+    for (let i = 0; i < 42; i += 1) {
+        cells.push(
+            new Date(
+                gridStart.getFullYear(),
+                gridStart.getMonth(),
+                gridStart.getDate() + i
+            )
+        )
+    }
+
+    const startTs = startDate
+        ? new Date(
+              startDate.getFullYear(),
+              startDate.getMonth(),
+              startDate.getDate()
+          ).getTime()
+        : null
+    const endTs = endDate
+        ? new Date(
+              endDate.getFullYear(),
+              endDate.getMonth(),
+              endDate.getDate()
+          ).getTime()
+        : null
+    const maxTs = maxDate
+        ? new Date(
+              maxDate.getFullYear(),
+              maxDate.getMonth(),
+              maxDate.getDate(),
+              23,
+              59,
+              59
+          ).getTime()
+        : null
+
+    const monthLabel = firstOfMonth.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric',
+    })
+
+    return (
+        <div className={styles.miniCalendar}>
+            <div className={styles.miniCalendarHeader}>
+                <button
+                    type="button"
+                    className={styles.miniCalendarNavButton}
+                    onClick={() =>
+                        onMonthChange(new Date(year, monthIdx - 1, 1))
+                    }
+                    aria-label="Previous month"
+                >
+                    <FiChevronLeft size={16} />
+                </button>
+                <div className={styles.miniCalendarMonthLabel}>
+                    {monthLabel}
+                </div>
+                <button
+                    type="button"
+                    className={styles.miniCalendarNavButton}
+                    onClick={() =>
+                        onMonthChange(new Date(year, monthIdx + 1, 1))
+                    }
+                    aria-label="Next month"
+                >
+                    <FiChevronRight size={16} />
+                </button>
+            </div>
+            <div className={styles.miniCalendarWeekRow}>
+                {WEEKDAY_LABELS.map((d) => (
+                    <div
+                        key={d}
+                        className={styles.miniCalendarWeekday}
+                        aria-hidden="true"
+                    >
+                        {d}
+                    </div>
+                ))}
+            </div>
+            <div className={styles.miniCalendarGrid}>
+                {cells.map((day, idx) => {
+                    const dayStart = new Date(
+                        day.getFullYear(),
+                        day.getMonth(),
+                        day.getDate()
+                    ).getTime()
+                    const inMonth = day.getMonth() === monthIdx
+                    const disabled = maxTs != null && dayStart > maxTs
+                    const isStart = startTs != null && dayStart === startTs
+                    const isEnd = endTs != null && dayStart === endTs
+                    const inRange =
+                        startTs != null &&
+                        endTs != null &&
+                        dayStart > startTs &&
+                        dayStart < endTs
+                    const isToday = isSameDay(day, new Date())
+
+                    const classNames = [styles.miniCalendarDay]
+                    if (!inMonth) classNames.push(styles.miniCalendarDayMuted)
+                    if (disabled)
+                        classNames.push(styles.miniCalendarDayDisabled)
+                    if (isStart || isEnd)
+                        classNames.push(styles.miniCalendarDaySelected)
+                    if (inRange) classNames.push(styles.miniCalendarDayInRange)
+                    if (isToday && !isStart && !isEnd)
+                        classNames.push(styles.miniCalendarDayToday)
+
+                    return (
+                        <button
+                            key={idx}
+                            type="button"
+                            className={classNames.join(' ')}
+                            disabled={disabled}
+                            onClick={() => onDayClick(day)}
+                            tabIndex={inMonth ? 0 : -1}
+                        >
+                            {day.getDate()}
+                        </button>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
 export default function Page() {
     const [startDate, setStartDate] = useState(() => getPresetRange('Today')[0])
     const [endDate, setEndDate] = useState(() => getPresetRange('Today')[1])
-    const [activePreset, setActivePreset] = useState<Preset | null>('Today')
-    const [previousPreset, setPreviousPreset] = useState<Preset | null>('Today')
+    const [committedPreset, setCommittedPreset] = useState<Preset | null>(
+        'Today'
+    )
+    const [draftPreset, setDraftPreset] = useState<Preset | null>('Today')
     const [isDateRangeOverlayOpen, setIsDateRangeOverlayOpen] = useState(false)
     const [dateRangeOverlayMaxHeight, setDateRangeOverlayMaxHeight] =
         useState<number>()
@@ -397,24 +588,25 @@ export default function Page() {
     const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
     const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
 
-    function applyPreset(preset: Preset) {
-        const [start, end] = getPresetRange(preset)
-        setStartDate(start)
-        setEndDate(end)
-        setActivePreset(preset)
-        setPreviousPreset(preset)
-    }
+    // Chart display options
+    const [smoothLine, setSmoothLine] = useState(true)
+    const [showAreaFill, setShowAreaFill] = useState(true)
+    const [showDonationsLine, setShowDonationsLine] = useState(true)
+    const [granularityMode, setGranularityMode] =
+        useState<ChartGranularityMode>('auto')
+    const [isChartOptionsOpen, setIsChartOptionsOpen] = useState(false)
+    const chartOptionsControlRef = useRef<HTMLDivElement | null>(null)
 
     const selectedRangeLabel = useMemo(() => {
-        if (activePreset) return activePreset
+        if (committedPreset) return committedPreset
         if (!startDate && !endDate) return 'All Time'
         if (startDate && endDate) {
             return `${formatRangeDate(startDate)} - ${formatRangeDate(endDate)}`
         }
         if (startDate) return `From ${formatRangeDate(startDate)}`
         if (endDate) return `Until ${formatRangeDate(endDate)}`
-        return 'Custom Range'
-    }, [activePreset, startDate, endDate])
+        return 'All Time'
+    }, [committedPreset, startDate, endDate])
 
     const todayInputValue = useMemo(
         () => isoToDateInput(new Date().toISOString()),
@@ -428,9 +620,28 @@ export default function Page() {
         () => isoToDateInput(draftEndDate),
         [draftEndDate]
     )
-    const canApplyCustomRange = Boolean(draftStartDate && draftEndDate)
+    const hasValidDraft = Boolean(draftStartDate && draftEndDate)
+    const isDraftUnchanged =
+        draftStartDate === startDate &&
+        draftEndDate === endDate &&
+        draftPreset === committedPreset
+    const canApplyCustomRange = hasValidDraft && !isDraftUnchanged
 
-    const activeDateOption: DateRangeOption = activePreset ?? 'Custom Range'
+    const draftStartDateObj = useMemo(
+        () => (draftStartDate ? new Date(draftStartDate) : null),
+        [draftStartDate]
+    )
+    const draftEndDateObj = useMemo(
+        () => (draftEndDate ? new Date(draftEndDate) : null),
+        [draftEndDate]
+    )
+
+    const [calendarMonth, setCalendarMonth] = useState(() => {
+        const anchor = draftStartDate
+            ? new Date(draftStartDate)
+            : new Date()
+        return new Date(anchor.getFullYear(), anchor.getMonth(), 1)
+    })
 
     useEffect(() => {
         const onDocumentMouseDown = (event: MouseEvent) => {
@@ -443,6 +654,7 @@ export default function Page() {
                 setIsDateRangeOverlayOpen(false)
                 setDraftStartDate(startDate)
                 setDraftEndDate(endDate)
+                setDraftPreset(committedPreset)
             }
         }
 
@@ -450,7 +662,22 @@ export default function Page() {
         return () => {
             document.removeEventListener('mousedown', onDocumentMouseDown)
         }
-    }, [isDateRangeOverlayOpen, startDate, endDate])
+    }, [isDateRangeOverlayOpen, startDate, endDate, committedPreset])
+
+    useEffect(() => {
+        if (!isChartOptionsOpen) return
+        const onDocumentMouseDown = (event: MouseEvent) => {
+            const control = chartOptionsControlRef.current
+            if (!control) return
+            if (!control.contains(event.target as Node)) {
+                setIsChartOptionsOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', onDocumentMouseDown)
+        return () => {
+            document.removeEventListener('mousedown', onDocumentMouseDown)
+        }
+    }, [isChartOptionsOpen])
 
     useEffect(() => {
         if (!isDateRangeOverlayOpen) {
@@ -513,7 +740,7 @@ export default function Page() {
                 true
             )
         }
-    }, [isDateRangeOverlayOpen, activeDateOption])
+    }, [isDateRangeOverlayOpen])
 
     const { onGet } = useFetch()
 
@@ -550,6 +777,31 @@ export default function Page() {
             ),
     })
 
+    const earliestContributionQuery = useQuery({
+        queryKey: ['/actblue/contributions', 'earliest'],
+        queryFn: () =>
+            onGet<PaginatedResponse<ActBlueDonationPacket>>(
+                '/actblue/contributions',
+                zPaginatedResponse(zActBlueDonationPacket),
+                {
+                    query: {
+                        page: 0,
+                        limit: 1,
+                        sortField: 'paidAt',
+                        sort: SortDirection.ASC,
+                    },
+                }
+            ),
+        staleTime: 5 * 60_000,
+    })
+
+    const allTimeFirstIso = useMemo(() => {
+        const first = earliestContributionQuery.data?.data?.[0]?.paidAt
+        if (!first) return undefined
+        const d = first instanceof Date ? first : new Date(first)
+        return Number.isNaN(d.getTime()) ? undefined : d.toISOString()
+    }, [earliestContributionQuery.data])
+
     const recurringPct = useMemo(() => {
         if (!statsQuery.data) return null
 
@@ -577,114 +829,96 @@ export default function Page() {
     }, [statsQuery.data])
 
     const chartBuckets = useMemo(
-        () => buildChartBuckets(startDate, endDate),
-        [startDate, endDate]
+        () =>
+            buildChartBuckets(
+                startDate,
+                endDate,
+                allTimeFirstIso,
+                granularityMode
+            ),
+        [startDate, endDate, allTimeFirstIso, granularityMode]
     )
 
+    const chartBucketQueries = useQueries({
+        queries: chartBuckets.map((bucket) => ({
+            queryKey: [
+                '/actblue/fundraising/stats',
+                'bucket',
+                bucket.startIso,
+                bucket.endIso,
+            ],
+            queryFn: () =>
+                onGet<ActBlueFundraisingStatsResponse>(
+                    '/actblue/fundraising/stats',
+                    zActBlueFundraisingStatsResponse,
+                    {
+                        query: {
+                            startDate: bucket.startIso,
+                            endDate: bucket.endIso,
+                        },
+                    }
+                ),
+            staleTime: 60_000,
+            placeholderData: keepPreviousData,
+        })),
+    })
+
     const chartData = useMemo(() => {
-        const oneTimeTotal = statsQuery.data?.oneTimeDollarsRaised ?? 0
-        const recurringTotal = statsQuery.data?.recurringDollarsRaised ?? 0
-        const donationsTotal = statsQuery.data?.totalContributionCount ?? 0
-        const oneTimeWeights = buildNormalizedWeights(chartBuckets.length)
-        const recurringWeights = buildNormalizedWeights(chartBuckets.length).map(
-            (weight, idx) =>
-                Math.max(
-                    0.001,
-                    weight * (0.93 + Math.sin((idx + 1) * 1.11) * 0.08)
-                )
-        )
-        const recurringWeightTotal = recurringWeights.reduce(
-            (acc, value) => acc + value,
-            0
-        )
-        const recurringNormalized = recurringWeights.map(
-            (value) => value / recurringWeightTotal
-        )
-        const donationsWeights = buildNormalizedWeights(chartBuckets.length).map(
-            (weight, idx) =>
-                Math.max(
-                    0.001,
-                    weight * (0.9 + Math.cos((idx + 1) * 1.29) * 0.09)
-                )
-        )
-        const donationsWeightTotal = donationsWeights.reduce(
-            (acc, value) => acc + value,
-            0
-        )
-        const donationsNormalized = donationsWeights.map(
-            (value) => value / donationsWeightTotal
-        )
-
-        const oneTimeSeries = distributeByWeights(oneTimeTotal, oneTimeWeights)
-        const recurringSeries = distributeByWeights(
-            recurringTotal,
-            recurringNormalized
-        )
-        const donationSeries = distributeByWeights(
-            donationsTotal,
-            donationsNormalized
-        )
-
-        return chartBuckets.map((bucket, idx) => ({
-            key: bucket.key,
-            label: bucket.label,
-            oneTime: oneTimeSeries[idx] ?? 0,
-            recurring: recurringSeries[idx] ?? 0,
-            donations: donationSeries[idx] ?? 0,
-        }))
-    }, [
-        chartBuckets,
-        statsQuery.data?.oneTimeDollarsRaised,
-        statsQuery.data?.recurringDollarsRaised,
-        statsQuery.data?.totalContributionCount,
-    ])
-
-    const chartDollarScale = useMemo(() => {
-        const maxSeriesValue = Math.max(
-            ...chartData.map((item) => Math.max(item.oneTime, item.recurring)),
-            0
-        )
-        return roundUpToNiceStep(maxSeriesValue, 5, false)
-    }, [chartData])
-
-    const chartDonationScale = useMemo(() => {
-        const maxSeriesValue = Math.max(
-            ...chartData.map((item) => item.donations),
-            0
-        )
-        return roundUpToNiceStep(maxSeriesValue, 5, true)
-    }, [chartData])
-
-    const chartDollarTicks = useMemo(() => {
-        return buildFiveTicks(chartDollarScale.max, chartDollarScale.step)
-    }, [chartDollarScale.max, chartDollarScale.step])
-
-    const chartDonationTicks = useMemo(() => {
-        return buildFiveTicks(chartDonationScale.max, chartDonationScale.step)
-    }, [chartDonationScale.max, chartDonationScale.step])
-
-    const lineCoordinates = useMemo(() => {
-        return chartData.map((item, idx) => {
-            const x = ((idx + 0.5) / Math.max(chartData.length, 1)) * 100
-            const yRaw =
-                100 -
-                Math.max(
-                    0,
-                    Math.min(100, (item.donations / chartDonationScale.max) * 100)
-                )
-
-            const y = Math.max(2, Math.min(98, yRaw))
-
-            return { x, y }
+        return chartBuckets.map((bucket, idx) => {
+            const data = chartBucketQueries[idx]?.data
+            return {
+                key: bucket.key,
+                label: bucket.label,
+                oneTime: data?.oneTimeDollarsRaised ?? 0,
+                recurring: data?.recurringDollarsRaised ?? 0,
+                donations: data?.totalContributionCount ?? 0,
+            }
         })
-    }, [chartData, chartDonationScale.max])
+    }, [chartBuckets, chartBucketQueries])
 
-    const linePath = useMemo(() => {
-        return lineCoordinates.map((point) => `${point.x},${point.y}`).join(' ')
-    }, [lineCoordinates])
+    const chartPoints = useMemo<FundraisingChartPoint[]>(() => {
+        return chartBuckets.map((bucket, idx) => {
+            const item = chartData[idx]
+            const anchor = new Date(bucket.anchorIso)
+
+            let fullLabel: string
+            if (bucket.granularity === 'year') {
+                fullLabel = String(anchor.getFullYear())
+            } else if (bucket.granularity === 'month') {
+                fullLabel = anchor.toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric',
+                })
+            } else if (bucket.granularity === 'week') {
+                fullLabel = `Week of ${anchor.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                })}`
+            } else {
+                fullLabel = anchor.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric',
+                })
+            }
+
+            return {
+                key: bucket.key,
+                anchorIso: bucket.anchorIso,
+                granularity: bucket.granularity,
+                label: bucket.label,
+                fullLabel,
+                oneTime: item?.oneTime ?? 0,
+                recurring: item?.recurring ?? 0,
+                donations: item?.donations ?? 0,
+            }
+        })
+    }, [chartBuckets, chartData])
 
     const raisedKickerLabel = useMemo(() => {
-        if (activePreset) return `Total Raised ${activePreset}`
+        if (committedPreset) return `Total Raised ${committedPreset}`
 
         if (startDate && endDate) {
             return `Total Raised ${formatRangeDate(startDate)} - ${formatRangeDate(endDate)}`
@@ -699,7 +933,7 @@ export default function Page() {
         }
 
         return 'Total Raised Custom Range'
-    }, [activePreset, endDate, startDate])
+    }, [committedPreset, endDate, startDate])
 
     return (
         <div className={styles.panelContents}>
@@ -756,6 +990,7 @@ export default function Page() {
                                         if (!isDateRangeOverlayOpen) {
                                             setDraftStartDate(startDate)
                                             setDraftEndDate(endDate)
+                                            setDraftPreset(committedPreset)
                                         }
 
                                         setIsDateRangeOverlayOpen(
@@ -789,77 +1024,168 @@ export default function Page() {
                                         }}
                                     >
                                         <div
-                                            className={styles.customRangeLabel}
-                                        >
-                                            Select Range
-                                        </div>
-
-                                        <div
                                             className={
-                                                styles.dateRangeOptionList
+                                                styles.dateRangePopHeader
                                             }
                                         >
-                                            {PRESETS.map((preset) => (
-                                                <button
-                                                    key={preset}
-                                                    type="button"
-                                                    className={`${styles.dateRangeOptionButton} ${activeDateOption === preset ? styles.dateRangeOptionButtonActive : ''}`}
-                                                    onClick={() => {
-                                                        applyPreset(preset)
-                                                        setDraftStartDate(
-                                                            getPresetRange(
-                                                                preset
-                                                            )[0]
-                                                        )
-                                                        setDraftEndDate(
-                                                            getPresetRange(
-                                                                preset
-                                                            )[1]
-                                                        )
-                                                        setIsDateRangeOverlayOpen(
-                                                            false
-                                                        )
-                                                    }}
-                                                >
-                                                    {preset}
-                                                </button>
-                                            ))}
-
+                                            <span
+                                                className={
+                                                    styles.dateRangePopTitle
+                                                }
+                                            >
+                                                Select date range
+                                            </span>
                                             <button
                                                 type="button"
-                                                className={`${styles.dateRangeOptionButton} ${activeDateOption === 'Custom Range' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                className={
+                                                    styles.dateRangePopClose
+                                                }
                                                 onClick={() => {
-                                                    setPreviousPreset(
-                                                        activePreset
+                                                    setIsDateRangeOverlayOpen(
+                                                        false
                                                     )
-                                                    setActivePreset(null)
-                                                    if (!draftStartDate)
-                                                        setDraftStartDate(
-                                                            startDate
-                                                        )
-                                                    if (!draftEndDate)
-                                                        setDraftEndDate(endDate)
+                                                    setDraftStartDate(
+                                                        startDate
+                                                    )
+                                                    setDraftEndDate(endDate)
+                                                    setDraftPreset(
+                                                        committedPreset
+                                                    )
                                                 }}
+                                                aria-label="Close date range picker"
                                             >
-                                                Custom Range
+                                                <FiX size={16} aria-hidden="true" />
                                             </button>
                                         </div>
+                                        <div
+                                            className={styles.dateRangePopBody}
+                                        >
+                                            <div
+                                                className={
+                                                    styles.dateRangePresetCol
+                                                }
+                                            >
+                                                {PRESETS.map((preset) => {
+                                                    const isCommitted =
+                                                        committedPreset ===
+                                                        preset
+                                                    const isDraft =
+                                                        draftPreset === preset
+                                                    const classes = [
+                                                        styles.dateRangePresetButton,
+                                                    ]
+                                                    if (isCommitted)
+                                                        classes.push(
+                                                            styles.dateRangePresetButtonCommitted
+                                                        )
+                                                    if (isDraft)
+                                                        classes.push(
+                                                            styles.dateRangePresetButtonDraft
+                                                        )
+                                                    return (
+                                                        <button
+                                                            key={preset}
+                                                            type="button"
+                                                            className={classes.join(
+                                                                ' '
+                                                            )}
+                                                            onClick={() => {
+                                                                let [s, e] =
+                                                                    getPresetRange(
+                                                                        preset
+                                                                    )
+                                             
+                                                                if (
+                                                                    preset ===
+                                                                    'All Time'
+                                                                ) {
+                                                                    const today =
+                                                                        new Date()
+                                                                    e =
+                                                                        endOfDayISO(
+                                                                            today
+                                                                        )
+                                                                    s = allTimeFirstIso
+                                                                        ? startOfDayISO(
+                                                                              new Date(
+                                                                                  allTimeFirstIso
+                                                                              )
+                                                                          )
+                                                                        : startOfDayISO(
+                                                                              today
+                                                                          )
+                                                                }
+                                                                setDraftStartDate(
+                                                                    s
+                                                                )
+                                                                setDraftEndDate(
+                                                                    e
+                                                                )
+                                                                setDraftPreset(
+                                                                    preset
+                                                                )
+                                                                if (s) {
+                                                                    const d =
+                                                                        new Date(
+                                                                            s
+                                                                        )
+                                                                    setCalendarMonth(
+                                                                        new Date(
+                                                                            d.getFullYear(),
+                                                                            d.getMonth(),
+                                                                            1
+                                                                        )
+                                                                    )
+                                                                }
+                                                            }}
+                                                            aria-pressed={
+                                                                isDraft
+                                                            }
+                                                            aria-current={
+                                                                isCommitted
+                                                                    ? 'true'
+                                                                    : undefined
+                                                            }
+                                                        >
+                                                            <span>
+                                                                {preset}
+                                                            </span>
+                                                            <span
+                                                                className={
+                                                                    styles.dateRangePresetCheck
+                                                                }
+                                                                aria-hidden="true"
+                                                            >
+                                                                {isCommitted ? (
+                                                                    <FiCheck
+                                                                        size={
+                                                                            14
+                                                                        }
+                                                                    />
+                                                                ) : null}
+                                                            </span>
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
 
-                                        {activeDateOption ===
-                                            'Custom Range' && (
-                                            <>
+                                            <div
+                                                className={
+                                                    styles.dateRangeCalendarCol
+                                                }
+                                            >
                                                 <div
                                                     className={
-                                                        styles.customDateField
+                                                        styles.dateRangeInputsRow
                                                     }
                                                 >
-                                                    <label htmlFor="custom-start-date">
-                                                        Start Date
-                                                    </label>
                                                     <input
                                                         id="custom-start-date"
                                                         type="date"
                                                         name="startDate"
+                                                        className={
+                                                            styles.dateRangeInput
+                                                        }
                                                         max={
                                                             draftEndInputValue
                                                                 ? draftEndInputValue <
@@ -874,7 +1200,9 @@ export default function Page() {
                                                                     ev.target
                                                                         .value
                                                                 )
-
+                                          
+                                                            if (next === null)
+                                                                return
                                                             if (
                                                                 next &&
                                                                 draftEndDate &&
@@ -887,29 +1215,45 @@ export default function Page() {
                                                             ) {
                                                                 return
                                                             }
-
                                                             setDraftStartDate(
                                                                 next
                                                             )
+                                                            setDraftPreset(
+                                                                null
+                                                            )
+                                                            if (next) {
+                                                                const d =
+                                                                    new Date(
+                                                                        next
+                                                                    )
+                                                                setCalendarMonth(
+                                                                    new Date(
+                                                                        d.getFullYear(),
+                                                                        d.getMonth(),
+                                                                        1
+                                                                    )
+                                                                )
+                                                            }
                                                         }}
                                                         value={isoToDateInput(
                                                             draftStartDate
                                                         )}
+                                                        aria-label="Start date"
                                                     />
-                                                </div>
-
-                                                <div
-                                                    className={
-                                                        styles.customDateField
-                                                    }
-                                                >
-                                                    <label htmlFor="custom-end-date">
-                                                        End Date
-                                                    </label>
+                                                    <span
+                                                        className={
+                                                            styles.dateRangeInputSeparator
+                                                        }
+                                                    >
+                                                        to
+                                                    </span>
                                                     <input
                                                         id="custom-end-date"
                                                         type="date"
                                                         name="endDate"
+                                                        className={
+                                                            styles.dateRangeInput
+                                                        }
                                                         min={
                                                             draftStartInputValue ||
                                                             undefined
@@ -921,7 +1265,8 @@ export default function Page() {
                                                                     ev.target
                                                                         .value
                                                                 )
-
+                                                            if (next === null)
+                                                                return
                                                             if (
                                                                 next &&
                                                                 draftStartDate &&
@@ -934,77 +1279,121 @@ export default function Page() {
                                                             ) {
                                                                 return
                                                             }
-
                                                             setDraftEndDate(
                                                                 next
+                                                            )
+                                                            setDraftPreset(
+                                                                null
                                                             )
                                                         }}
                                                         value={isoToDateInput(
                                                             draftEndDate
                                                         )}
+                                                        aria-label="End date"
                                                     />
                                                 </div>
 
-                                                <div
-                                                    className={
-                                                        styles.customDateActions
+                                                <FundraisingMiniCalendar
+                                                    month={calendarMonth}
+                                                    onMonthChange={
+                                                        setCalendarMonth
                                                     }
-                                                >
-                                                    <button
-                                                        type="button"
-                                                        className={
-                                                            styles.cancelRangeButton
-                                                        }
-                                                        onClick={() => {
-                                                            setDraftStartDate(
-                                                                startDate
+                                                    startDate={
+                                                        draftStartDateObj
+                                                    }
+                                                    endDate={draftEndDateObj}
+                                                    maxDate={new Date()}
+                                                    onDayClick={(day) => {
+                                                        const startOfDay =
+                                                            new Date(
+                                                                day.getFullYear(),
+                                                                day.getMonth(),
+                                                                day.getDate(),
+                                                                0,
+                                                                0,
+                                                                0
                                                             )
-                                                            setDraftEndDate(
-                                                                endDate
+                                                        const endOfDay =
+                                                            new Date(
+                                                                day.getFullYear(),
+                                                                day.getMonth(),
+                                                                day.getDate(),
+                                                                23,
+                                                                59,
+                                                                59
                                                             )
-                                                            setActivePreset(
-                                                                previousPreset
-                                                            )
-                                                            setIsDateRangeOverlayOpen(
-                                                                false
-                                                            )
-                                                        }}
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className={
-                                                            styles.setRangeButton
-                                                        }
-                                                        disabled={
-                                                            !canApplyCustomRange
-                                                        }
-                                                        onClick={() => {
-                                                            if (
-                                                                !canApplyCustomRange
-                                                            )
-                                                                return
 
-                                                            setStartDate(
-                                                                draftStartDate
+                                                        const hasStart =
+                                                            !!draftStartDate
+                                                        const hasEnd =
+                                                            !!draftEndDate
+
+                                                        if (
+                                                            !hasStart ||
+                                                            (hasStart && hasEnd)
+                                                        ) {
+                                                            setDraftStartDate(
+                                                                startOfDay.toISOString()
                                                             )
-                                                            setEndDate(
-                                                                draftEndDate
-                                                            )
-                                                            setActivePreset(
+                                                            setDraftEndDate('')
+                                                            setDraftPreset(
                                                                 null
                                                             )
-                                                            setIsDateRangeOverlayOpen(
-                                                                false
+                                                            return
+                                                        }
+
+                                                        const startTs =
+                                                            draftStartDateObj?.getTime() ??
+                                                            0
+                                                        if (
+                                                            startOfDay.getTime() <
+                                                            startTs
+                                                        ) {
+                                                            setDraftStartDate(
+                                                                startOfDay.toISOString()
                                                             )
-                                                        }}
-                                                    >
-                                                        Set Range
-                                                    </button>
-                                                </div>
-                                            </>
-                                        )}
+                                                        } else {
+                                                            setDraftEndDate(
+                                                                endOfDay.toISOString()
+                                                            )
+                                                        }
+                                                        setDraftPreset(null)
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            className={
+                                                styles.customDateActions
+                                            }
+                                        >
+                                            <button
+                                                type="button"
+                                                className={
+                                                    styles.setRangeButton
+                                                }
+                                                disabled={
+                                                    !canApplyCustomRange
+                                                }
+                                                onClick={() => {
+                                                    if (!canApplyCustomRange)
+                                                        return
+                                                    setStartDate(
+                                                        draftStartDate
+                                                    )
+                                                    setEndDate(draftEndDate)
+                                                    setCommittedPreset(
+                                                        draftPreset
+                                                    )
+                                                    setIsDateRangeOverlayOpen(
+                                                        false
+                                                    )
+                                                }}
+                                            >
+                                                Select
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -1066,156 +1455,307 @@ export default function Page() {
                     </article>
                 </div>
 
-                <section
-                    className={styles.fundraisingBarGraph}
-                    aria-label="Monthly one-time and recurring dollars with total donations line"
-                >
-                    <div className={styles.barGraphHeaderRow}>
-                        <h2 className={styles.barGraphTitle}>
-                            Fundraising Volume
-                        </h2>
-                        <span className={styles.barGraphHint}>
-                            Date Range
-                        </span>
-                    </div>
-
-                    <div className={styles.barGraphLegend}>
-                        <span className={styles.legendItem}>
-                            <span
-                                className={`${styles.legendSwatch} ${styles.legendSwatchOneTime}`}
-                                aria-hidden="true"
-                            />
-                            One-Time Amount
-                        </span>
-                        <span className={styles.legendItem}>
-                            <span
-                                className={`${styles.legendSwatch} ${styles.legendSwatchRecurring}`}
-                                aria-hidden="true"
-                            />
-                            Recurring Amount
-                        </span>
-                        <span className={styles.legendItem}>
-                            <span
-                                className={`${styles.legendSwatch} ${styles.legendSwatchDonations}`}
-                                aria-hidden="true"
-                            />
-                            Total Donations
-                        </span>
-                    </div>
-
-                    <div className={styles.barGraphArea}>
-                        <div className={styles.barGraphYAxisLeft}>
-                            {chartDollarTicks.map((tick, index) => (
-                                <span key={`dollar-${index}-${tick}`}>
-                                    {formatCurrencyRounded(
-                                        tick,
-                                        chartDollarScale.step
-                                    )}
-                                </span>
-                            ))}
-                        </div>
-
-                        <div className={styles.barGraphPlot}>
-                            {chartDollarTicks.map((_, index) => (
-                                <span
-                                    key={`grid-${index}`}
-                                    className={styles.barGraphGridLine}
-                                    aria-hidden="true"
-                                />
-                            ))}
-
-                            <div
-                                className={styles.barGraphBars}
-                                style={{
-                                    ['--barGraphColumns' as string]: String(
-                                        Math.max(chartData.length, 1)
-                                    ),
-                                }}
+                <FundraisingChart
+                    points={chartPoints}
+                    smoothLine={smoothLine}
+                    showAreaFill={showAreaFill}
+                    showDonationsLine={showDonationsLine}
+                    headerRight={
+                        <div
+                            ref={chartOptionsControlRef}
+                            className={styles.chartOptionsControl}
+                        >
+                            <button
+                                type="button"
+                                className={styles.chartOptionsTrigger}
+                                onClick={() =>
+                                    setIsChartOptionsOpen(
+                                        (current) => !current
+                                    )
+                                }
+                                aria-haspopup="dialog"
+                                aria-expanded={isChartOptionsOpen}
                             >
-                                {chartData.map((item, idx) => {
-                                    const oneTimeHeight = Math.max(
-                                        0,
-                                        Math.min(
-                                            100,
-                                            (item.oneTime / chartDollarScale.max) *
-                                                100
-                                        )
-                                    )
-                                    const recurringHeight = Math.max(
-                                        0,
-                                        Math.min(
-                                            100,
-                                            (item.recurring /
-                                                chartDollarScale.max) * 100
-                                        )
-                                    )
+                                <span>Chart Options</span>
+                                <FiChevronDown
+                                    aria-hidden="true"
+                                    size={12}
+                                />
+                            </button>
 
-                                    return (
-                                        <div
-                                            key={`${item.key}-${idx}`}
-                                            className={styles.barGraphMonthItem}
+                            {isChartOptionsOpen && (
+                                <div
+                                    className={styles.chartOptionsBox}
+                                    role="dialog"
+                                    aria-label="Chart options"
+                                >
+                                    <div
+                                        className={styles.chartOptionsHeader}
+                                    >
+                                        <span
+                                            className={
+                                                styles.chartOptionsTitle
+                                            }
                                         >
-                                            <div
-                                                className={styles.barGraphBarPair}
+                                            Chart Options
+                                        </span>
+                                        <button
+                                            type="button"
+                                            className={styles.dateRangePopClose}
+                                            onClick={() =>
+                                                setIsChartOptionsOpen(false)
+                                            }
+                                            aria-label="Close chart options"
+                                        >
+                                            <FiX
+                                                size={16}
                                                 aria-hidden="true"
+                                            />
+                                        </button>
+                                    </div>
+
+                                    <div className={styles.chartOptionRow}>
+                                        <span
+                                            className={
+                                                styles.chartOptionLabel
+                                            }
+                                        >
+                                            Time scale
+                                        </span>
+                                        <div
+                                            className={
+                                                styles.chartOptionToggle
+                                            }
+                                            role="group"
+                                            aria-label="Time scale"
+                                        >
+                                            {(
+                                                [
+                                                    'auto',
+                                                    'year',
+                                                    'month',
+                                                    'week',
+                                                    'day',
+                                                ] as ChartGranularityMode[]
+                                            ).map((mode) => {
+                                                const labelByMode: Record<
+                                                    ChartGranularityMode,
+                                                    string
+                                                > = {
+                                                    auto: 'Auto',
+                                                    year: 'Years',
+                                                    month: 'Months',
+                                                    week: 'Weeks',
+                                                    day: 'Days',
+                                                }
+                                                return (
+                                                    <button
+                                                        key={mode}
+                                                        type="button"
+                                                        className={[
+                                                            styles.chartOptionToggleButton,
+                                                            granularityMode ===
+                                                            mode
+                                                                ? styles.chartOptionToggleButtonActive
+                                                                : '',
+                                                        ].join(' ')}
+                                                        aria-pressed={
+                                                            granularityMode ===
+                                                            mode
+                                                        }
+                                                        onClick={() =>
+                                                            setGranularityMode(
+                                                                mode
+                                                            )
+                                                        }
+                                                    >
+                                                        {labelByMode[mode]}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.chartOptionRow}>
+                                        <span
+                                            className={
+                                                styles.chartOptionLabel
+                                            }
+                                        >
+                                            Contributions line
+                                        </span>
+                                        <div
+                                            className={
+                                                styles.chartOptionToggle
+                                            }
+                                            role="group"
+                                            aria-label="Contributions line"
+                                        >
+                                            <button
+                                                type="button"
+                                                className={[
+                                                    styles.chartOptionToggleButton,
+                                                    showDonationsLine
+                                                        ? styles.chartOptionToggleButtonActive
+                                                        : '',
+                                                ].join(' ')}
+                                                aria-pressed={
+                                                    showDonationsLine
+                                                }
+                                                onClick={() =>
+                                                    setShowDonationsLine(true)
+                                                }
+                                            >
+                                                Show
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={[
+                                                    styles.chartOptionToggleButton,
+                                                    !showDonationsLine
+                                                        ? styles.chartOptionToggleButtonActive
+                                                        : '',
+                                                ].join(' ')}
+                                                aria-pressed={
+                                                    !showDonationsLine
+                                                }
+                                                onClick={() =>
+                                                    setShowDonationsLine(
+                                                        false
+                                                    )
+                                                }
+                                            >
+                                                Hide
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {showDonationsLine && (
+                                        <>
+                                            <div
+                                                className={
+                                                    styles.chartOptionRow
+                                                }
                                             >
                                                 <span
-                                                    className={`${styles.barGraphBar} ${styles.barGraphBarOneTime}`}
-                                                    style={{
-                                                        height: `${oneTimeHeight}%`,
-                                                    }}
-                                                    title={`${item.label} One-Time: ${formatCurrency(item.oneTime)}`}
-                                                />
+                                                    className={
+                                                        styles.chartOptionLabel
+                                                    }
+                                                >
+                                                    Line style
+                                                </span>
+                                                <div
+                                                    className={
+                                                        styles.chartOptionToggle
+                                                    }
+                                                    role="group"
+                                                    aria-label="Line style"
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        className={[
+                                                            styles.chartOptionToggleButton,
+                                                            smoothLine
+                                                                ? styles.chartOptionToggleButtonActive
+                                                                : '',
+                                                        ].join(' ')}
+                                                        aria-pressed={
+                                                            smoothLine
+                                                        }
+                                                        onClick={() =>
+                                                            setSmoothLine(true)
+                                                        }
+                                                    >
+                                                        Curved
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className={[
+                                                            styles.chartOptionToggleButton,
+                                                            !smoothLine
+                                                                ? styles.chartOptionToggleButtonActive
+                                                                : '',
+                                                        ].join(' ')}
+                                                        aria-pressed={
+                                                            !smoothLine
+                                                        }
+                                                        onClick={() =>
+                                                            setSmoothLine(
+                                                                false
+                                                            )
+                                                        }
+                                                    >
+                                                        Straight
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div
+                                                className={
+                                                    styles.chartOptionRow
+                                                }
+                                            >
                                                 <span
-                                                    className={`${styles.barGraphBar} ${styles.barGraphBarRecurring}`}
-                                                    style={{
-                                                        height: `${recurringHeight}%`,
-                                                    }}
-                                                    title={`${item.label} Recurring: ${formatCurrency(item.recurring)}`}
-                                                />
+                                                    className={
+                                                        styles.chartOptionLabel
+                                                    }
+                                                >
+                                                    Area fill
+                                                </span>
+                                                <div
+                                                    className={
+                                                        styles.chartOptionToggle
+                                                    }
+                                                    role="group"
+                                                    aria-label="Area fill"
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        className={[
+                                                            styles.chartOptionToggleButton,
+                                                            showAreaFill
+                                                                ? styles.chartOptionToggleButtonActive
+                                                                : '',
+                                                        ].join(' ')}
+                                                        aria-pressed={
+                                                            showAreaFill
+                                                        }
+                                                        onClick={() =>
+                                                            setShowAreaFill(
+                                                                true
+                                                            )
+                                                        }
+                                                    >
+                                                        Show
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className={[
+                                                            styles.chartOptionToggleButton,
+                                                            !showAreaFill
+                                                                ? styles.chartOptionToggleButtonActive
+                                                                : '',
+                                                        ].join(' ')}
+                                                        aria-pressed={
+                                                            !showAreaFill
+                                                        }
+                                                        onClick={() =>
+                                                            setShowAreaFill(
+                                                                false
+                                                            )
+                                                        }
+                                                    >
+                                                        Hide
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div className={styles.barGraphXLabel}>
-                                                {item.label}
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-
-                            <svg
-                                className={styles.barGraphLineSvg}
-                                viewBox="0 0 100 100"
-                                preserveAspectRatio="none"
-                                aria-hidden="true"
-                            >
-                                <polyline
-                                    className={styles.barGraphLinePath}
-                                    points={linePath}
-                                />
-                            </svg>
-
-                            {lineCoordinates.map((point, idx) => (
-                                <span
-                                    key={`line-point-${idx}`}
-                                    className={styles.barGraphLinePoint}
-                                    style={{
-                                        left: `${point.x}%`,
-                                        top: `${point.y}%`,
-                                    }}
-                                    title={`${chartData[idx]?.label} Donations: ${formatCount(chartData[idx]?.donations)}`}
-                                />
-                            ))}
+                                        </>
+                                    )}
+                                </div>
+                            )}
                         </div>
-
-                        <div className={styles.barGraphYAxisRight}>
-                            {chartDonationTicks.map((tick, index) => (
-                                <span key={`donations-${index}-${tick}`}>
-                                    {formatCount(tick)}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                </section>
+                    }
+                />
 
                 <div className={styles.splitTrack}>
                     <div className={styles.splitRow}>
