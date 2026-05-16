@@ -103,6 +103,10 @@
     transition: opacity 90ms ease;
 }
 
+.tooltipRight {
+    transform: translate(0, 0);
+}
+
 .tooltipVisible {
     opacity: 1;
 }

@@ -111,6 +111,43 @@ function getPresetRange(preset: string): [string, string] {
     }
 }
 
+function getResolvedPresetRange(
+    preset: Preset,
+    allTimeFirstIso?: string
+): [string, string] {
+    let [startIso, endIso] = getPresetRange(preset)
+
+    if (preset === 'All Time') {
+        const today = new Date()
+        endIso = endOfDayISO(today)
+        startIso = allTimeFirstIso
+            ? startOfDayISO(new Date(allTimeFirstIso))
+            : startOfDayISO(today)
+    }
+
+    return [startIso, endIso]
+}
+
+function inferPresetFromRange(
+    startIso: string,
+    endIso: string,
+    allTimeFirstIso?: string
+): Preset | null {
+    if (!startIso || !endIso) return null
+
+    for (const preset of PRESETS) {
+        const [presetStart, presetEnd] = getResolvedPresetRange(
+            preset,
+            allTimeFirstIso
+        )
+        if (startIso === presetStart && endIso === presetEnd) {
+            return preset
+        }
+    }
+
+    return null
+}
+
 const PRESETS = [
     'All Time',
     'Year To Date',
@@ -122,6 +159,57 @@ const PRESETS = [
     'Yesterday',
 ] as const
 type Preset = (typeof PRESETS)[number]
+
+function isXToDatePreset(preset: Preset | null): preset is
+    | 'Year To Date'
+    | 'Month To Date'
+    | 'Week To Date'
+    | 'Today' {
+    return (
+        preset === 'Year To Date' ||
+        preset === 'Month To Date' ||
+        preset === 'Week To Date' ||
+        preset === 'Today'
+    )
+}
+
+function getXToDatePeriodName(preset: Preset | null, granularityMode: ChartGranularityMode): string {
+    if (preset === 'Year To Date') return 'Year'
+    if (preset === 'Month To Date') return 'Month'
+    if (preset === 'Week To Date') return 'Week'
+    if (preset === 'Today' && granularityMode === 'hour') return 'Hour'
+    return 'Date'
+}
+
+function getExtendedEndForXToDatePreset(
+    preset: 'Year To Date' | 'Month To Date' | 'Week To Date' | 'Today',
+    startIso: string,
+    endIso: string
+): string {
+    if (!startIso || !endIso) return endIso
+
+    if (preset === 'Today') {
+        const d = new Date(startIso)
+        return endOfDayISO(d)
+    }
+
+    if (preset === 'Year To Date') {
+        const d = new Date(startIso)
+        return endOfDayISO(new Date(d.getFullYear(), 11, 31))
+    }
+
+    if (preset === 'Month To Date') {
+        const d = new Date(startIso)
+        return endOfDayISO(new Date(d.getFullYear(), d.getMonth() + 1, 0))
+    }
+
+    const start = new Date(startIso)
+    const weekEnd = addDays(
+        new Date(start.getFullYear(), start.getMonth(), start.getDate()),
+        6
+    )
+    return endOfDayISO(weekEnd)
+}
 
 function isoToDateInput(iso: string): string {
     if (!iso) return ''
@@ -158,7 +246,14 @@ function formatRangeDate(iso: string): string {
     })
 }
 
-type ChartGranularityMode = 'auto' | 'year' | 'month' | 'week' | 'day'
+type ChartGranularityMode =
+    | 'auto'
+    | 'year'
+    | 'quarter'
+    | 'month'
+    | 'week'
+    | 'day'
+    | 'hour'
 
 interface ChartBucket {
     key: string
@@ -166,7 +261,7 @@ interface ChartBucket {
     anchorIso: string
     startIso: string
     endIso: string
-    granularity: 'day' | 'week' | 'month' | 'year'
+    granularity: 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'
 }
 
 function clampToNoon(date: Date) {
@@ -179,6 +274,21 @@ function startOfDayDate(d: Date) {
 
 function endOfDayDate(d: Date) {
     return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59)
+}
+
+function startOfHourDate(d: Date) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), 0, 0)
+}
+
+function endOfHourDate(d: Date) {
+    return new Date(
+        d.getFullYear(),
+        d.getMonth(),
+        d.getDate(),
+        d.getHours(),
+        59,
+        59
+    )
 }
 
 function clampMin(d: Date, lower?: Date) {
@@ -206,6 +316,43 @@ function daysBetweenInclusive(start: Date, end: Date) {
     )
     const endUtc = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate())
     return Math.max(1, Math.floor((endUtc - startUtc) / msPerDay) + 1)
+}
+
+function buildHourBuckets(start: Date, end: Date): ChartBucket[] {
+    const rangeStart = startOfDayDate(start)
+    const rangeEnd = endOfDayDate(end)
+    const buckets: ChartBucket[] = []
+
+    const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate())
+    let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate())
+
+    while (currentDay.getTime() <= endDay.getTime()) {
+        for (let hour = 0; hour < 24; hour += 1) {
+            const hourDate = new Date(
+                currentDay.getFullYear(),
+                currentDay.getMonth(),
+                currentDay.getDate(),
+                hour,
+                0,
+                0
+            )
+            const bStart = clampMin(startOfHourDate(hourDate), rangeStart)
+            const bEnd = clampMax(endOfHourDate(hourDate), rangeEnd)
+
+            buckets.push({
+                key: `h-${currentDay.getFullYear()}-${currentDay.getMonth() + 1}-${currentDay.getDate()}-${hour}`,
+                label: hourDate.toLocaleDateString('en-US', { hour: 'numeric' }),
+                anchorIso: bStart.toISOString(),
+                startIso: bStart.toISOString(),
+                endIso: bEnd.toISOString(),
+                granularity: 'hour',
+            })
+        }
+
+        currentDay = new Date(currentDay.getFullYear(), currentDay.getMonth(), currentDay.getDate() + 1)
+    }
+
+    return buckets
 }
 
 function buildDayBuckets(
@@ -309,6 +456,55 @@ function buildMonthBuckets(
     return buckets
 }
 
+function buildQuarterBuckets(
+    start: Date,
+    end: Date,
+    maxBuckets = 40
+): ChartBucket[] {
+    const rangeStart = startOfDayDate(start)
+    const rangeEnd = endOfDayDate(end)
+
+    const startQuarterMonth = Math.floor(start.getMonth() / 3) * 3
+    const startQuarter = new Date(start.getFullYear(), startQuarterMonth, 1)
+
+    const endQuarterMonth = Math.floor(end.getMonth() / 3) * 3
+    const endQuarter = new Date(end.getFullYear(), endQuarterMonth, 1)
+
+    const quarterCount =
+        Math.floor(
+            ((endQuarter.getFullYear() - startQuarter.getFullYear()) * 12 +
+                (endQuarter.getMonth() - startQuarter.getMonth())) /
+                3
+        ) + 1
+
+    const count = Math.min(quarterCount, maxBuckets)
+    const offsetStart = quarterCount - count
+    const buckets: ChartBucket[] = []
+
+    for (let idx = 0; idx < count; idx += 1) {
+        const d = new Date(
+            startQuarter.getFullYear(),
+            startQuarter.getMonth() + (offsetStart + idx) * 3,
+            1
+        )
+        const quarterEndDay = new Date(d.getFullYear(), d.getMonth() + 3, 0)
+        const bStart = clampMin(startOfDayDate(d), rangeStart)
+        const bEnd = clampMax(endOfDayDate(quarterEndDay), rangeEnd)
+        const q = Math.floor(d.getMonth() / 3) + 1
+
+        buckets.push({
+            key: `q-${d.getFullYear()}-Q${q}`,
+            label: `Q${q}`,
+            anchorIso: bStart.toISOString(),
+            startIso: bStart.toISOString(),
+            endIso: bEnd.toISOString(),
+            granularity: 'quarter',
+        })
+    }
+
+    return buckets
+}
+
 function buildYearBuckets(start: Date, end: Date): ChartBucket[] {
     const rangeStart = startOfDayDate(start)
     const rangeEnd = endOfDayDate(end)
@@ -336,7 +532,8 @@ function buildChartBuckets(
     startIso: string,
     endIso: string,
     allTimeFirstIso?: string,
-    mode: ChartGranularityMode = 'auto'
+    mode: ChartGranularityMode = 'auto',
+    isAllTimeSelection = false
 ): ChartBucket[] {
     const today = clampToNoon(new Date())
 
@@ -362,21 +559,44 @@ function buildChartBuckets(
             Number.isNaN(parsedStart.getTime()) ||
             Number.isNaN(parsedEnd.getTime())
         ) {
-            return buildChartBuckets('', '', allTimeFirstIso, mode)
+            return buildChartBuckets(
+                '',
+                '',
+                allTimeFirstIso,
+                mode,
+                isAllTimeSelection
+            )
         }
         start = parsedStart <= parsedEnd ? parsedStart : parsedEnd
         end = parsedStart <= parsedEnd ? parsedEnd : parsedStart
     }
 
+    const totalDays = daysBetweenInclusive(start, end)
+
+    if (mode === 'hour') return buildHourBuckets(start, end)
+    if (totalDays === 1 && mode === 'auto') {
+        return buildHourBuckets(start, end)
+    }
+
     if (mode === 'day') return buildDayBuckets(start, end)
     if (mode === 'week') return buildWeekBuckets(start, end)
     if (mode === 'month') return buildMonthBuckets(start, end)
+    if (mode === 'quarter') return buildQuarterBuckets(start, end)
     if (mode === 'year') return buildYearBuckets(start, end)
 
-    const totalDays = daysBetweenInclusive(start, end)
-    if (totalDays <= 14) return buildDayBuckets(start, end, 14)
-    if (totalDays <= 90) return buildWeekBuckets(start, end, 13)
-    return buildMonthBuckets(start, end, 14)
+    if (isAllTimeSelection) {
+        if (totalDays <= 90)
+            return buildDayBuckets(start, end, Number.MAX_SAFE_INTEGER)
+        if (totalDays <= 366 * 5)
+            return buildMonthBuckets(start, end, Number.MAX_SAFE_INTEGER)
+        return buildYearBuckets(start, end)
+    }
+
+    if (totalDays <= 90)
+        return buildDayBuckets(start, end, Number.MAX_SAFE_INTEGER)
+    if (totalDays <= 366 * 5)
+        return buildMonthBuckets(start, end, Number.MAX_SAFE_INTEGER)
+    return buildYearBuckets(start, end)
 }
 
 interface FundraisingCardProps {
@@ -440,6 +660,7 @@ function FundraisingMiniCalendar({
     maxDate,
     onDayClick,
 }: FundraisingMiniCalendarProps) {
+    const [hoveredDayTs, setHoveredDayTs] = useState<number | null>(null)
     const year = month.getFullYear()
     const monthIdx = month.getMonth()
     const firstOfMonth = new Date(year, monthIdx, 1)
@@ -456,7 +677,6 @@ function FundraisingMiniCalendar({
             )
         )
     }
-
     const startTs = startDate
         ? new Date(
               startDate.getFullYear(),
@@ -471,6 +691,15 @@ function FundraisingMiniCalendar({
               endDate.getDate()
           ).getTime()
         : null
+    const hasPreviewSelection = startTs != null && endTs == null
+    const previewRangeStartTs =
+        hasPreviewSelection && hoveredDayTs != null
+            ? Math.min(startTs, hoveredDayTs)
+            : null
+    const previewRangeEndTs =
+        hasPreviewSelection && hoveredDayTs != null
+            ? Math.max(startTs, hoveredDayTs)
+            : null
     const maxTs = maxDate
         ? new Date(
               maxDate.getFullYear(),
@@ -525,7 +754,10 @@ function FundraisingMiniCalendar({
                     </div>
                 ))}
             </div>
-            <div className={styles.miniCalendarGrid}>
+            <div
+                className={styles.miniCalendarGrid}
+                onMouseLeave={() => setHoveredDayTs(null)}
+            >
                 {cells.map((day, idx) => {
                     const dayStart = new Date(
                         day.getFullYear(),
@@ -536,17 +768,56 @@ function FundraisingMiniCalendar({
                     const disabled = maxTs != null && dayStart > maxTs
                     const isStart = startTs != null && dayStart === startTs
                     const isEnd = endTs != null && dayStart === endTs
+                    const hasConfirmedRange =
+                        startTs != null && endTs != null && startTs !== endTs
                     const inRange =
                         startTs != null &&
                         endTs != null &&
                         dayStart > startTs &&
                         dayStart < endTs
+                    const inPreviewRange =
+                        previewRangeStartTs != null &&
+                        previewRangeEndTs != null &&
+                        dayStart > previewRangeStartTs &&
+                        dayStart < previewRangeEndTs
+                    const isHoverAfterStart =
+                        hoveredDayTs != null &&
+                        startTs != null &&
+                        hoveredDayTs > startTs
+                    const isPreviewEdge =
+                        hasPreviewSelection &&
+                        hoveredDayTs != null &&
+                        dayStart === hoveredDayTs &&
+                        dayStart !== startTs
+                    const isPreviewStartEdge =
+                        hasPreviewSelection &&
+                        hoveredDayTs != null &&
+                        isStart &&
+                        hoveredDayTs !== startTs
                     const isToday = isSameDay(day, new Date())
 
                     const classNames = [styles.miniCalendarDay]
                     if (!inMonth) classNames.push(styles.miniCalendarDayMuted)
                     if (disabled)
                         classNames.push(styles.miniCalendarDayDisabled)
+                    if (inPreviewRange)
+                        classNames.push(styles.miniCalendarDayHoverRange)
+                    if (hasConfirmedRange && isStart)
+                        classNames.push(styles.miniCalendarDayRangeStart)
+                    if (hasConfirmedRange && isEnd)
+                        classNames.push(styles.miniCalendarDayRangeEnd)
+                    if (isPreviewStartEdge)
+                        classNames.push(
+                            isHoverAfterStart
+                                ? styles.miniCalendarDayHoverStartLeft
+                                : styles.miniCalendarDayHoverStartRight
+                        )
+                    if (isPreviewEdge)
+                        classNames.push(
+                            isHoverAfterStart
+                                ? styles.miniCalendarDayHoverEdgeRight
+                                : styles.miniCalendarDayHoverEdgeLeft
+                        )
                     if (isStart || isEnd)
                         classNames.push(styles.miniCalendarDaySelected)
                     if (inRange) classNames.push(styles.miniCalendarDayInRange)
@@ -559,6 +830,13 @@ function FundraisingMiniCalendar({
                             type="button"
                             className={classNames.join(' ')}
                             disabled={disabled}
+                            onMouseEnter={() => {
+                                if (!hasPreviewSelection || disabled) {
+                                    setHoveredDayTs(null)
+                                    return
+                                }
+                                setHoveredDayTs(dayStart)
+                            }}
                             onClick={() => onDayClick(day)}
                             tabIndex={inMonth ? 0 : -1}
                         >
@@ -588,10 +866,10 @@ export default function Page() {
     const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
     const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
 
-    // Chart display options
     const [smoothLine, setSmoothLine] = useState(true)
     const [showAreaFill, setShowAreaFill] = useState(true)
     const [showDonationsLine, setShowDonationsLine] = useState(true)
+    const [showFullXToDateSpan, setShowFullXToDateSpan] = useState(false)
     const [granularityMode, setGranularityMode] =
         useState<ChartGranularityMode>('auto')
     const [isChartOptionsOpen, setIsChartOptionsOpen] = useState(false)
@@ -601,6 +879,9 @@ export default function Page() {
         if (committedPreset) return committedPreset
         if (!startDate && !endDate) return 'All Time'
         if (startDate && endDate) {
+            if (isSameDay(new Date(startDate), new Date(endDate))) {
+                return formatRangeDate(startDate)
+            }
             return `${formatRangeDate(startDate)} - ${formatRangeDate(endDate)}`
         }
         if (startDate) return `From ${formatRangeDate(startDate)}`
@@ -621,6 +902,7 @@ export default function Page() {
         [draftEndDate]
     )
     const hasValidDraft = Boolean(draftStartDate && draftEndDate)
+    const isAwaitingDraftEndDate = Boolean(draftStartDate && !draftEndDate)
     const isDraftUnchanged =
         draftStartDate === startDate &&
         draftEndDate === endDate &&
@@ -828,15 +1110,49 @@ export default function Page() {
         return Number.isFinite(pct) ? pct : null
     }, [statsQuery.data])
 
+    const chartEndDate = useMemo(() => {
+        if (!showFullXToDateSpan) return endDate
+        if (!isXToDatePreset(committedPreset)) return endDate
+        return getExtendedEndForXToDatePreset(committedPreset, startDate, endDate)
+    }, [showFullXToDateSpan, committedPreset, startDate, endDate])
+
+    const validGranularityModes = useMemo(() => {
+        const totalDays = daysBetweenInclusive(
+            clampToNoon(new Date(startDate)),
+            clampToNoon(new Date(chartEndDate))
+        )
+        
+        const modes: ChartGranularityMode[] = ['auto', 'day']
+        if (totalDays <= 7) modes.push('hour')
+        if (totalDays >= 7) modes.push('week')
+        if (totalDays >= 30) modes.push('month')
+        if (totalDays >= 90) modes.push('quarter')
+        if (totalDays >= 365) modes.push('year')
+        
+        return modes
+    }, [startDate, chartEndDate])
+
+    const isXToDateSpanOptionRelevant = useMemo(
+        () => isXToDatePreset(committedPreset),
+        [committedPreset]
+    )
+
     const chartBuckets = useMemo(
         () =>
             buildChartBuckets(
                 startDate,
-                endDate,
+                chartEndDate,
                 allTimeFirstIso,
-                granularityMode
+                granularityMode,
+                committedPreset === 'All Time'
             ),
-        [startDate, endDate, allTimeFirstIso, granularityMode]
+        [
+            startDate,
+            chartEndDate,
+            allTimeFirstIso,
+            granularityMode,
+            committedPreset,
+        ]
     )
 
     const chartBucketQueries = useQueries({
@@ -876,6 +1192,12 @@ export default function Page() {
         })
     }, [chartBuckets, chartBucketQueries])
 
+    useEffect(() => {
+        if (!validGranularityModes.includes(granularityMode)) {
+            setGranularityMode('auto')
+        }
+    }, [validGranularityModes, granularityMode])
+
     const chartPoints = useMemo<FundraisingChartPoint[]>(() => {
         return chartBuckets.map((bucket, idx) => {
             const item = chartData[idx]
@@ -884,6 +1206,18 @@ export default function Page() {
             let fullLabel: string
             if (bucket.granularity === 'year') {
                 fullLabel = String(anchor.getFullYear())
+            } else if (bucket.granularity === 'hour') {
+                fullLabel = anchor.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                })
+            } else if (bucket.granularity === 'quarter') {
+                const quarter = Math.floor(anchor.getMonth() / 3) + 1
+                fullLabel = `Q${quarter} ${anchor.getFullYear()}`
             } else if (bucket.granularity === 'month') {
                 fullLabel = anchor.toLocaleDateString('en-US', {
                     month: 'long',
@@ -1090,31 +1424,11 @@ export default function Page() {
                                                                 ' '
                                                             )}
                                                             onClick={() => {
-                                                                let [s, e] =
-                                                                    getPresetRange(
-                                                                        preset
+                                                                const [s, e] =
+                                                                    getResolvedPresetRange(
+                                                                        preset,
+                                                                        allTimeFirstIso
                                                                     )
-                                             
-                                                                if (
-                                                                    preset ===
-                                                                    'All Time'
-                                                                ) {
-                                                                    const today =
-                                                                        new Date()
-                                                                    e =
-                                                                        endOfDayISO(
-                                                                            today
-                                                                        )
-                                                                    s = allTimeFirstIso
-                                                                        ? startOfDayISO(
-                                                                              new Date(
-                                                                                  allTimeFirstIso
-                                                                              )
-                                                                          )
-                                                                        : startOfDayISO(
-                                                                              today
-                                                                          )
-                                                                }
                                                                 setDraftStartDate(
                                                                     s
                                                                 )
@@ -1219,7 +1533,11 @@ export default function Page() {
                                                                 next
                                                             )
                                                             setDraftPreset(
-                                                                null
+                                                                inferPresetFromRange(
+                                                                    next,
+                                                                    draftEndDate,
+                                                                    allTimeFirstIso
+                                                                )
                                                             )
                                                             if (next) {
                                                                 const d =
@@ -1277,13 +1595,42 @@ export default function Page() {
                                                                         next
                                                                     ).getTime()
                                                             ) {
+                                                                const nextStartIso =
+                                                                    startOfDayISO(
+                                                                        new Date(
+                                                                            next
+                                                                        )
+                                                                    )
+                                                                const nextEndIso =
+                                                                    endOfDayISO(
+                                                                        new Date(
+                                                                            draftStartDate
+                                                                        )
+                                                                    )
+                                                                setDraftStartDate(
+                                                                    nextStartIso
+                                                                )
+                                                                setDraftEndDate(
+                                                                    nextEndIso
+                                                                )
+                                                                setDraftPreset(
+                                                                    inferPresetFromRange(
+                                                                        nextStartIso,
+                                                                        nextEndIso,
+                                                                        allTimeFirstIso
+                                                                    )
+                                                                )
                                                                 return
                                                             }
                                                             setDraftEndDate(
                                                                 next
                                                             )
                                                             setDraftPreset(
-                                                                null
+                                                                inferPresetFromRange(
+                                                                    draftStartDate,
+                                                                    next,
+                                                                    allTimeFirstIso
+                                                                )
                                                             )
                                                         }}
                                                         value={isoToDateInput(
@@ -1332,6 +1679,33 @@ export default function Page() {
                                                             !hasStart ||
                                                             (hasStart && hasEnd)
                                                         ) {
+                                                            if (
+                                                                !hasStart &&
+                                                                isSameDay(
+                                                                    day,
+                                                                    new Date()
+                                                                )
+                                                            ) {
+                                                                const nextStartIso =
+                                                                    startOfDay.toISOString()
+                                                                const nextEndIso =
+                                                                    endOfDay.toISOString()
+                                                                setDraftStartDate(
+                                                                    nextStartIso
+                                                                )
+                                                                setDraftEndDate(
+                                                                    nextEndIso
+                                                                )
+                                                                setDraftPreset(
+                                                                    inferPresetFromRange(
+                                                                        nextStartIso,
+                                                                        nextEndIso,
+                                                                        allTimeFirstIso
+                                                                    )
+                                                                )
+                                                                return
+                                                            }
+
                                                             setDraftStartDate(
                                                                 startOfDay.toISOString()
                                                             )
@@ -1349,15 +1723,55 @@ export default function Page() {
                                                             startOfDay.getTime() <
                                                             startTs
                                                         ) {
-                                                            setDraftStartDate(
+                                                            const nextStartIso =
                                                                 startOfDay.toISOString()
+                                                            const priorStartDate =
+                                                                draftStartDateObj ??
+                                                                (draftStartDate
+                                                                    ? new Date(
+                                                                          draftStartDate
+                                                                      )
+                                                                    : null)
+                                                            if (!priorStartDate) {
+                                                                setDraftStartDate(
+                                                                    nextStartIso
+                                                                )
+                                                                setDraftPreset(
+                                                                    null
+                                                                )
+                                                                return
+                                                            }
+                                                            const nextEndIso =
+                                                                endOfDayISO(
+                                                                    priorStartDate
+                                                                )
+                                                            setDraftStartDate(
+                                                                nextStartIso
+                                                            )
+                                                            setDraftEndDate(
+                                                                nextEndIso
+                                                            )
+                                                            setDraftPreset(
+                                                                inferPresetFromRange(
+                                                                    nextStartIso,
+                                                                    nextEndIso,
+                                                                    allTimeFirstIso
+                                                                )
                                                             )
                                                         } else {
-                                                            setDraftEndDate(
+                                                            const nextEndIso =
                                                                 endOfDay.toISOString()
+                                                            setDraftEndDate(
+                                                                nextEndIso
+                                                            )
+                                                            setDraftPreset(
+                                                                inferPresetFromRange(
+                                                                    draftStartDate,
+                                                                    nextEndIso,
+                                                                    allTimeFirstIso
+                                                                )
                                                             )
                                                         }
-                                                        setDraftPreset(null)
                                                     }}
                                                 />
                                             </div>
@@ -1391,7 +1805,9 @@ export default function Page() {
                                                     )
                                                 }}
                                             >
-                                                Select
+                                                {isAwaitingDraftEndDate
+                                                    ? 'Select End Date'
+                                                    : 'Select'}
                                             </button>
                                         </div>
                                     </div>
@@ -1533,20 +1949,26 @@ export default function Page() {
                                                 [
                                                     'auto',
                                                     'year',
+                                                    'quarter',
                                                     'month',
                                                     'week',
                                                     'day',
+                                                    'hour',
                                                 ] as ChartGranularityMode[]
-                                            ).map((mode) => {
+                                            )
+                                                .filter((mode) => validGranularityModes.includes(mode))
+                                                .map((mode) => {
                                                 const labelByMode: Record<
                                                     ChartGranularityMode,
                                                     string
                                                 > = {
                                                     auto: 'Auto',
                                                     year: 'Years',
+                                                    quarter: 'Quarters',
                                                     month: 'Months',
                                                     week: 'Weeks',
                                                     day: 'Days',
+                                                    hour: 'Hours',
                                                 }
                                                 return (
                                                     <button
@@ -1575,6 +1997,64 @@ export default function Page() {
                                             })}
                                         </div>
                                     </div>
+
+                                    {isXToDateSpanOptionRelevant && (
+                                        <div className={styles.chartOptionRow}>
+                                            <span
+                                                className={
+                                                    styles.chartOptionLabel
+                                                }
+                                            >
+                                                Show {getXToDatePeriodName(committedPreset, granularityMode)} To Date
+                                            </span>
+                                            <div
+                                                className={
+                                                    styles.chartOptionToggle
+                                                }
+                                                role="group"
+                                                aria-label="X-to-date span"
+                                            >
+                                                <button
+                                                    type="button"
+                                                    className={[
+                                                        styles.chartOptionToggleButton,
+                                                        showFullXToDateSpan
+                                                            ? styles.chartOptionToggleButtonActive
+                                                            : '',
+                                                    ].join(' ')}
+                                                    aria-pressed={
+                                                        showFullXToDateSpan
+                                                    }
+                                                    onClick={() =>
+                                                        setShowFullXToDateSpan(
+                                                            true
+                                                        )
+                                                    }
+                                                >
+                                                    Hide
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className={[
+                                                        styles.chartOptionToggleButton,
+                                                        !showFullXToDateSpan
+                                                            ? styles.chartOptionToggleButtonActive
+                                                            : '',
+                                                    ].join(' ')}
+                                                    aria-pressed={
+                                                        !showFullXToDateSpan
+                                                    }
+                                                    onClick={() =>
+                                                        setShowFullXToDateSpan(
+                                                            false
+                                                        )
+                                                    }
+                                                >
+                                                    Show
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <div className={styles.chartOptionRow}>
                                         <span

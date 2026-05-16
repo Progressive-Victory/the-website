@@ -1,9 +1,15 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import styles from './FundraisingChart.module.css'
 
-export type ChartGranularity = 'hour' | 'day' | 'week' | 'month' | 'year'
+export type ChartGranularity =
+    | 'hour'
+    | 'day'
+    | 'week'
+    | 'month'
+    | 'quarter'
+    | 'year'
 
 export interface FundraisingChartPoint {
     key: string
@@ -87,15 +93,16 @@ function formatCurrencyAxis(value: number, step: number): string {
 
 function formatCountAxis(value: number): string {
     if (!Number.isFinite(value)) return ''
-    if (value >= 1_000_000) {
-        return `${(value / 1_000_000).toLocaleString('en-US', {
+    const rounded = Math.round(value)
+    if (rounded >= 1_000_000) {
+        return `${(rounded / 1_000_000).toLocaleString('en-US', {
             maximumFractionDigits: 1,
         })}M`
     }
-    if (value >= 10_000) {
-        return `${Math.round(value / 1000).toLocaleString('en-US')}k`
+    if (rounded >= 10_000) {
+        return `${Math.round(rounded / 1000).toLocaleString('en-US')}k`
     }
-    return value.toLocaleString('en-US')
+    return rounded.toLocaleString('en-US')
 }
 
 function niceScale(maxValue: number, tickCount = 6, forceInteger = false) {
@@ -136,10 +143,12 @@ function pickLabel(
     spansYears: boolean,
     perColumnWidth: number,
     idx: number,
-    stride: number
+    stride: number,
+    totalCount: number
 ): string {
     const widthsByG: Record<ChartGranularity, [number, number, number]> = {
         year: [60, 40, 24],
+        quarter: [74, 48, 30],
         month: [78, 44, 26],
         week: [90, 56, 38],
         day: [98, 62, 38],
@@ -166,6 +175,10 @@ function pickLabel(
             : ''
     }
     if (granularity === 'month') {
+        const isFirst = idx === 0
+        const isLast = idx === totalCount - 1
+        const isQuarterStart = date.getMonth() % 3 === 0
+
         if (level === 0)
             return date.toLocaleDateString('en-US', {
                 month: 'long',
@@ -176,10 +189,23 @@ function pickLabel(
                 month: 'short',
                 ...(spansYears ? { year: '2-digit' } : {}),
             })
-        if (level === 2) return date.toLocaleDateString('en-US', { month: 'short' })
-        return idx % stride === 0
-            ? date.toLocaleDateString('en-US', { month: 'short' })
-            : ''
+        if (level === 2) {
+            return date.toLocaleDateString('en-US', { month: 'short' })
+        }
+        if (isFirst || isLast || isQuarterStart) {
+            return date.toLocaleDateString('en-US', { month: 'short' })
+        }
+        return ''
+    }
+    if (granularity === 'quarter') {
+        const quarter = Math.floor(date.getMonth() / 3) + 1
+        const yearFull = date.getFullYear()
+        const yearShort = String(yearFull).slice(-2)
+
+        if (level === 0) return `Q${quarter} ${yearFull}`
+        if (level === 1) return `Q${quarter} '${yearShort}`
+        if (level === 2) return `Q${quarter}`
+        return idx % stride === 0 ? `Q${quarter}` : ''
     }
     if (granularity === 'week') {
         if (level === 0)
@@ -252,9 +278,12 @@ export function FundraisingChart({
 }: FundraisingChartProps) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const wrapRef = useRef<HTMLDivElement | null>(null)
+    const tooltipRef = useRef<HTMLDivElement | null>(null)
     const [size, setSize] = useState({ width: 0, height: 0 })
     const [hoverIdx, setHoverIdx] = useState<number | null>(null)
     const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null)
+    const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null)
+    const [tooltipSide, setTooltipSide] = useState<'left' | 'right'>('left')
 
     useEffect(() => {
         const node = wrapRef.current
@@ -286,6 +315,44 @@ export function FundraisingChart({
             window.removeEventListener('resize', update)
         }
     }, [])
+
+    useLayoutEffect(() => {
+        if (hoverIdx == null || !hoverPos) {
+            setTooltipPos(null)
+            return
+        }
+
+        const wrapNode = wrapRef.current
+        const tooltipNode = tooltipRef.current
+        if (!wrapNode || !tooltipNode) return
+
+        const padding = 8
+        const wrapRect = wrapNode.getBoundingClientRect()
+        const tooltipRect = tooltipNode.getBoundingClientRect()
+
+        const leftSpace = hoverPos.x - padding
+        const rightSpace = wrapRect.width - hoverPos.x - padding
+        const shouldFlipRight =
+            leftSpace < tooltipRect.width + 12 && rightSpace > leftSpace
+
+        const side: 'left' | 'right' = shouldFlipRight ? 'right' : 'left'
+        const x = side === 'right'
+            ? Math.min(hoverPos.x + 12, wrapRect.width - tooltipRect.width - padding)
+            : Math.max(hoverPos.x - 12, tooltipRect.width + padding)
+        const y = Math.min(
+            Math.max(hoverPos.y, padding),
+            wrapRect.height - tooltipRect.height - padding
+        )
+
+        setTooltipPos((prev) => {
+            if (prev && Math.abs(prev.x - x) < 0.5 && Math.abs(prev.y - y) < 0.5) {
+                setTooltipSide((prevSide) => (prevSide === side ? prevSide : side))
+                return prev
+            }
+            setTooltipSide(side)
+            return { x, y }
+        })
+    }, [hoverIdx, hoverPos, size])
 
     const dollarScale = useMemo(() => {
         const max = Math.max(
@@ -561,6 +628,15 @@ export function FundraisingChart({
         ctx.fillStyle = COLOR_X_LABEL
         ctx.textBaseline = 'top'
         const stride = Math.max(1, Math.ceil(32 / Math.max(g.columnWidth, 1)))
+        const labelCandidates: {
+            idx: number
+            text: string
+            x: number
+            align: CanvasTextAlign
+            left: number
+            right: number
+        }[] = []
+
         for (let i = 0; i < points.length; i += 1) {
             const p = points[i]
             const cx = getColumnCenter(g, i, points.length)
@@ -574,7 +650,8 @@ export function FundraisingChart({
                     spansYears,
                     g.columnWidth,
                     i,
-                    stride
+                    stride,
+                    points.length
                 )
                 if (!label && isEnd) {
                     if (p.granularity === 'year')
@@ -585,6 +662,8 @@ export function FundraisingChart({
                         label = date.toLocaleDateString('en-US', {
                             month: 'short',
                         })
+                    else if (p.granularity === 'quarter')
+                        label = `Q${Math.floor(date.getMonth() / 3) + 1}`
                     else if (p.granularity === 'hour')
                         label = formatHour(date)
                     else
@@ -600,17 +679,70 @@ export function FundraisingChart({
             }
             if (!label) continue
 
-
-            if (i === 0) ctx.textAlign = 'left'
-            else if (i === points.length - 1) ctx.textAlign = 'right'
-            else ctx.textAlign = 'center'
+            let align: CanvasTextAlign = 'center'
+            if (i === 0) align = 'left'
+            else if (i === points.length - 1) align = 'right'
 
             let lx = cx
             if (i === 0) lx = Math.max(cx - g.columnWidth / 2, g.plotLeft)
             else if (i === points.length - 1)
                 lx = Math.min(cx + g.columnWidth / 2, g.plotRight)
 
-            ctx.fillText(label, lx, g.plotBottom + 6)
+            const width = ctx.measureText(label).width
+            let left = lx - width / 2
+            let right = lx + width / 2
+            if (align === 'left') {
+                left = lx
+                right = lx + width
+            } else if (align === 'right') {
+                left = lx - width
+                right = lx
+            }
+
+            labelCandidates.push({
+                idx: i,
+                text: label,
+                x: lx,
+                align,
+                left,
+                right,
+            })
+        }
+
+        const placedRanges: { left: number; right: number }[] = []
+        const placementPadding = 6
+
+        const placeLabel = (
+            candidate: (typeof labelCandidates)[number],
+            force = false
+        ) => {
+            const candidateLeft = candidate.left - placementPadding
+            const candidateRight = candidate.right + placementPadding
+            const overlaps = placedRanges.some(
+                (range) =>
+                    candidateLeft <= range.right &&
+                    candidateRight >= range.left
+            )
+
+            if (overlaps && !force) return
+
+            ctx.textAlign = candidate.align
+            ctx.fillText(candidate.text, candidate.x, g.plotBottom + 6)
+            placedRanges.push({ left: candidateLeft, right: candidateRight })
+        }
+
+        const firstIdx = 0
+        const lastIdx = points.length - 1
+        const firstCandidate = labelCandidates.find((c) => c.idx === firstIdx)
+        const lastCandidate = labelCandidates.find((c) => c.idx === lastIdx)
+
+        if (firstCandidate) placeLabel(firstCandidate, true)
+        if (lastCandidate && lastCandidate !== firstCandidate)
+            placeLabel(lastCandidate, true)
+
+        for (const candidate of labelCandidates) {
+            if (candidate.idx === firstIdx || candidate.idx === lastIdx) continue
+            placeLabel(candidate)
         }
     }, [
         size,
@@ -650,7 +782,7 @@ export function FundraisingChart({
         )
         setHoverIdx(idx)
         const cx = getColumnCenter(g, idx, points.length)
-        setHoverPos({ x: cx, y: Math.max(g.plotTop, y) })
+        setHoverPos({ x: cx, y })
     }
 
     function onPointerLeave() {
@@ -711,10 +843,13 @@ export function FundraisingChart({
 
                 {hoverPoint && hoverPos && (
                     <div
-                        className={`${styles.tooltip} ${styles.tooltipVisible}`}
+                        ref={tooltipRef}
+                        className={`${styles.tooltip} ${styles.tooltipVisible} ${
+                            tooltipSide === 'right' ? styles.tooltipRight : ''
+                        }`}
                         style={{
-                            left: `${hoverPos.x - 12}px`,
-                            top: `${hoverPos.y + 16}px`,
+                            left: `${tooltipPos?.x ?? hoverPos.x}px`,
+                            top: `${tooltipPos?.y ?? hoverPos.y}px`,
                         }}
                         role="tooltip"
                     >
