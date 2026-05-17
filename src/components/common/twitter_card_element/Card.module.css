@@ -262,3 +262,8 @@
     background-color: #ebafa9;
     color: #ce3728;
 }
+
+.innerBox:hover {
+    padding: 3rem 1.5rem 3rem 1.5rem;
+    margin: -3rem -1.5rem -3rem -1.5rem;
+}
