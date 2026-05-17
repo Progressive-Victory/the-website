@@ -1,0 +1,39 @@
+.column {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 0.34rem;
+    min-width: 0;
+    padding-top: 0.1rem;
+}
+
+.inputsRow {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    justify-self: start;
+}
+
+.input {
+    width: 100%;
+    padding: 0.4rem 0.45rem;
+    border-radius: 0.45rem;
+    border: 1px solid rgba(15, 23, 42, 0.18);
+    background: #fff;
+    font-size: 0.78rem;
+    color: rgba(9, 34, 58, 0.92);
+    font-family: inherit;
+    text-align: center;
+}
+
+.input:focus-visible {
+    outline: 2px solid rgba(14, 165, 233, 0.45);
+    outline-offset: 1px;
+}
+
+.separator {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.55);
+}

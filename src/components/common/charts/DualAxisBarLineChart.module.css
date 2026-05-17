@@ -58,17 +58,8 @@
     border-radius: 0.2rem;
 }
 
-.swatchOneTime {
-    background: #6d95d1;
-}
-
-.swatchRecurring {
-    background: #7fb800;
-}
-
-.swatchDonations {
+.lineSwatch {
     height: 2px;
-    background: #6b44c5;
 }
 
 .canvasWrap {

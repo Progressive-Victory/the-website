@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import styles from './FundraisingChart.module.css'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import styles from './DualAxisBarLineChart.module.css'
 
 export type ChartGranularity =
     | 'hour'
@@ -11,33 +11,77 @@ export type ChartGranularity =
     | 'quarter'
     | 'year'
 
-export interface FundraisingChartPoint {
+export interface ChartPoint {
     key: string
     anchorIso?: string
     granularity?: ChartGranularity
     label?: string
     fullLabel: string
-    oneTime: number
-    recurring: number
-    donations: number
+    primaryBarValue: number
+    secondaryBarValue: number
+    lineValue: number
 }
 
-interface FundraisingChartProps {
+interface DualAxisBarLineChartSeriesLabels {
+    primaryBar: string
+    secondaryBar: string
+    line: string
+}
+
+interface DualAxisBarLineChartValueFormatters {
+    primaryBar?: (value: number) => string
+    secondaryBar?: (value: number) => string
+    line?: (value: number) => string
+}
+
+interface DualAxisBarLineChartAxisFormatters {
+    left?: (value: number, step: number) => string
+    right?: (value: number, step: number) => string
+}
+
+interface DualAxisBarLineChartColors {
+    primaryBar: string
+    secondaryBar: string
+    line: string
+    lineFill: string
+    linePointFill: string
+    linePointStroke: string
+}
+
+interface DualAxisBarLineTableConfig {
+    caption: string
+    periodHeader: string
+    primaryBarHeader: string
+    secondaryBarHeader: string
+    lineHeader: string
+}
+
+interface ChartProps {
     title?: string
     hint?: string
-    points: FundraisingChartPoint[]
+    points: ChartPoint[]
     smoothLine?: boolean
     showAreaFill?: boolean
-    showDonationsLine?: boolean
-    headerRight?: React.ReactNode
+    showLine?: boolean
+    headerRight?: ReactNode
+    seriesLabels?: Partial<DualAxisBarLineChartSeriesLabels>
+    valueFormatters?: DualAxisBarLineChartValueFormatters
+    axisFormatters?: DualAxisBarLineChartAxisFormatters
+    colors?: Partial<DualAxisBarLineChartColors>
+    ariaLabel?: string
+    chartAriaLabel?: string
+    tableConfig?: Partial<DualAxisBarLineTableConfig>
 }
 
-const COLOR_ONE_TIME = '#6d95d1'
-const COLOR_RECURRING = '#7fb800'
-const COLOR_LINE = '#6b44c5'
-const COLOR_LINE_FILL = 'rgba(107, 68, 197, 0.10)'
-const COLOR_LINE_POINT_FILL = '#8b6ad9'
-const COLOR_LINE_POINT_STROKE = '#5a35bc'
+const DEFAULT_COLORS: DualAxisBarLineChartColors = {
+    primaryBar: '#6d95d1',
+    secondaryBar: '#7fb800',
+    line: '#6b44c5',
+    lineFill: 'rgba(107, 68, 197, 0.10)',
+    linePointFill: '#8b6ad9',
+    linePointStroke: '#5a35bc',
+}
+
 const COLOR_GRID = 'rgba(15, 23, 42, 0.10)'
 const COLOR_AXIS_TEXT = 'rgba(15, 23, 42, 0.48)'
 const COLOR_X_LABEL = 'rgba(15, 23, 42, 0.6)'
@@ -51,44 +95,13 @@ const PADDING_RIGHT = 52
 const PADDING_TOP = 12
 const PADDING_BOTTOM = 26
 const BAR_GAP = 2
-const BAR_MAX_WIDTH = 18 
-const BAR_MIN_WIDTH = 2 
-const GROUP_GAP_RATIO = 0.28 
-
-function formatCurrency(value: number): string {
-    if (!Number.isFinite(value)) return '—'
-    return value.toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    })
-}
+const BAR_MAX_WIDTH = 18
+const BAR_MIN_WIDTH = 2
+const GROUP_GAP_RATIO = 0.28
 
 function formatCount(value: number): string {
     if (!Number.isFinite(value)) return '—'
     return value.toLocaleString('en-US')
-}
-
-function formatCurrencyAxis(value: number, step: number): string {
-    if (!Number.isFinite(value)) return ''
-    let digits = 0
-    if (step < 1) digits = 2
-    else if (step < 10 && !Number.isInteger(step)) digits = 1
-    if (value >= 1_000_000) {
-        return `$${(value / 1_000_000).toLocaleString('en-US', {
-            maximumFractionDigits: 1,
-        })}M`
-    }
-    if (value >= 10_000) {
-        return `$${Math.round(value / 1000).toLocaleString('en-US')}k`
-    }
-    return value.toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: digits,
-        maximumFractionDigits: digits,
-    })
 }
 
 function formatCountAxis(value: number): string {
@@ -267,15 +280,50 @@ function getColumnCenter(geom: PlotGeometry, idx: number, count: number): number
     return geom.plotLeft + ((idx + 0.5) / Math.max(count, 1)) * geom.plotWidth
 }
 
-export function FundraisingChart({
-    title = 'Fundraising Volume',
-    hint = 'Date Range',
+export function Chart({
+    title = 'Chart',
+    hint,
     points,
     smoothLine = true,
     showAreaFill = true,
-    showDonationsLine = true,
+    showLine = true,
     headerRight,
-}: FundraisingChartProps) {
+    seriesLabels,
+    valueFormatters,
+    axisFormatters,
+    colors,
+    ariaLabel,
+    chartAriaLabel,
+    tableConfig,
+}: ChartProps) {
+    const labels: DualAxisBarLineChartSeriesLabels = {
+        primaryBar: seriesLabels?.primaryBar ?? 'Primary Series',
+        secondaryBar: seriesLabels?.secondaryBar ?? 'Secondary Series',
+        line: seriesLabels?.line ?? 'Line Series',
+    }
+
+    const palette = useMemo<DualAxisBarLineChartColors>(
+        () => ({
+            ...DEFAULT_COLORS,
+            ...colors,
+        }),
+        [colors]
+    )
+
+    const tooltipFormatPrimary = valueFormatters?.primaryBar ?? formatCount
+    const tooltipFormatSecondary = valueFormatters?.secondaryBar ?? formatCount
+    const tooltipFormatLine = valueFormatters?.line ?? formatCount
+    const leftAxisFormatter = axisFormatters?.left ?? formatCountAxis
+    const rightAxisFormatter = axisFormatters?.right ?? formatCountAxis
+
+    const table: DualAxisBarLineTableConfig = {
+        caption: tableConfig?.caption ?? `${title} by period`,
+        periodHeader: tableConfig?.periodHeader ?? 'Period',
+        primaryBarHeader: tableConfig?.primaryBarHeader ?? labels.primaryBar,
+        secondaryBarHeader: tableConfig?.secondaryBarHeader ?? labels.secondaryBar,
+        lineHeader: tableConfig?.lineHeader ?? labels.line,
+    }
+
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const wrapRef = useRef<HTMLDivElement | null>(null)
     const tooltipRef = useRef<HTMLDivElement | null>(null)
@@ -354,16 +402,16 @@ export function FundraisingChart({
         })
     }, [hoverIdx, hoverPos, size])
 
-    const dollarScale = useMemo(() => {
+    const barScale = useMemo(() => {
         const max = Math.max(
-            ...points.map((p) => Math.max(p.oneTime, p.recurring)),
+            ...points.map((p) => Math.max(p.primaryBarValue, p.secondaryBarValue)),
             0
         )
         return niceScale(Math.max(max, 5), 6, false)
     }, [points])
 
-    const donationScale = useMemo(() => {
-        const max = Math.max(...points.map((p) => p.donations), 0)
+    const lineScale = useMemo(() => {
+        const max = Math.max(...points.map((p) => p.lineValue), 0)
         return niceScale(Math.max(max, 5), 6, true)
     }, [points])
 
@@ -444,10 +492,10 @@ export function FundraisingChart({
         ctx.font = `700 10px ${fontFamily}`
         ctx.textBaseline = 'middle'
 
-        const dollarTicks = dollarScale.ticks
-        for (const tick of dollarTicks) {
+        const barTicks = barScale.ticks
+        for (const tick of barTicks) {
             const y = Math.round(
-                g.plotBottom - (tick / dollarScale.max) * g.plotHeight
+                g.plotBottom - (tick / barScale.max) * g.plotHeight
             ) + 0.5
             ctx.beginPath()
             ctx.moveTo(g.plotLeft, y)
@@ -456,19 +504,19 @@ export function FundraisingChart({
 
             ctx.textAlign = 'right'
             ctx.fillText(
-                formatCurrencyAxis(tick, dollarScale.step),
+                leftAxisFormatter(tick, barScale.step),
                 g.plotLeft - 8,
                 y
             )
         }
 
-        if (showDonationsLine) {
-            for (const tick of dollarTicks) {
-                const ratio = tick / dollarScale.max
+        if (showLine) {
+            for (const tick of barTicks) {
+                const ratio = tick / barScale.max
                 const y = Math.round(g.plotBottom - ratio * g.plotHeight) + 0.5
-                const donationsValue = ratio * donationScale.max
+                const lineValue = ratio * lineScale.max
                 ctx.textAlign = 'left'
-                ctx.fillText(formatCountAxis(donationsValue), g.plotRight + 8, y)
+                ctx.fillText(rightAxisFormatter(lineValue, lineScale.step), g.plotRight + 8, y)
             }
         }
 
@@ -522,51 +570,51 @@ export function FundraisingChart({
         for (let i = 0; i < points.length; i += 1) {
             const p = points[i]
             const cx = getColumnCenter(g, i, points.length)
-            const oneTimeRatio =
-                dollarScale.max > 0 ? p.oneTime / dollarScale.max : 0
-            const recurringRatio =
-                dollarScale.max > 0 ? p.recurring / dollarScale.max : 0
-            const oneTimeH = Math.max(
-                p.oneTime > 0 ? 2 : 0,
-                oneTimeRatio * g.plotHeight
+            const primaryRatio =
+                barScale.max > 0 ? p.primaryBarValue / barScale.max : 0
+            const secondaryRatio =
+                barScale.max > 0 ? p.secondaryBarValue / barScale.max : 0
+            const primaryHeight = Math.max(
+                p.primaryBarValue > 0 ? 2 : 0,
+                primaryRatio * g.plotHeight
             )
-            const recurringH = Math.max(
-                p.recurring > 0 ? 2 : 0,
-                recurringRatio * g.plotHeight
+            const secondaryHeight = Math.max(
+                p.secondaryBarValue > 0 ? 2 : 0,
+                secondaryRatio * g.plotHeight
             )
 
-            const oneTimeX = cx - barWidth - BAR_GAP / 2
-            const recurringX = cx + BAR_GAP / 2
+            const primaryX = cx - barWidth - BAR_GAP / 2
+            const secondaryX = cx + BAR_GAP / 2
             const baseY = g.plotBottom
 
-            ctx.fillStyle = COLOR_ONE_TIME
+            ctx.fillStyle = palette.primaryBar
             roundRect(
                 ctx,
-                oneTimeX,
-                baseY - oneTimeH,
+                primaryX,
+                baseY - primaryHeight,
                 barWidth,
-                oneTimeH,
+                primaryHeight,
                 Math.min(3, barWidth / 2),
                 true
             )
             ctx.fill()
 
-            ctx.fillStyle = COLOR_RECURRING
+            ctx.fillStyle = palette.secondaryBar
             roundRect(
                 ctx,
-                recurringX,
-                baseY - recurringH,
+                secondaryX,
+                baseY - secondaryHeight,
                 barWidth,
-                recurringH,
+                secondaryHeight,
                 Math.min(3, barWidth / 2),
                 true
             )
             ctx.fill()
         }
 
-        if (showDonationsLine && points.length > 0 && donationScale.max > 0) {
+        if (showLine && points.length > 0 && lineScale.max > 0) {
             const linePts = points.map((p, i) => {
-                const ratio = p.donations / donationScale.max
+                const ratio = p.lineValue / lineScale.max
                 return {
                     x: getColumnCenter(g, i, points.length),
                     y: g.plotBottom - ratio * g.plotHeight,
@@ -589,7 +637,7 @@ export function FundraisingChart({
                 }
                 ctx.lineTo(linePts[linePts.length - 1].x, g.plotBottom)
                 ctx.closePath()
-                ctx.fillStyle = COLOR_LINE_FILL
+                ctx.fillStyle = palette.lineFill
                 ctx.fill()
             }
 
@@ -605,7 +653,7 @@ export function FundraisingChart({
                     ctx.lineTo(curr.x, curr.y)
                 }
             }
-            ctx.strokeStyle = COLOR_LINE
+            ctx.strokeStyle = palette.line
             ctx.lineWidth = 2.4
             ctx.lineCap = 'round'
             ctx.lineJoin = 'round'
@@ -616,10 +664,10 @@ export function FundraisingChart({
                 const r = i === hoverIdx ? 4.5 : 3.2
                 ctx.beginPath()
                 ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2)
-                ctx.fillStyle = COLOR_LINE_POINT_FILL
+                ctx.fillStyle = palette.linePointFill
                 ctx.fill()
                 ctx.lineWidth = 1
-                ctx.strokeStyle = COLOR_LINE_POINT_STROKE
+                ctx.strokeStyle = palette.linePointStroke
                 ctx.stroke()
             }
         }
@@ -673,7 +721,6 @@ export function FundraisingChart({
                         })
                 }
             } else {
-
                 label =
                     isEnd || i % stride === 0 ? (p.label ?? '') : ''
             }
@@ -748,14 +795,17 @@ export function FundraisingChart({
         size,
         geometry,
         points,
-        dollarScale,
-        donationScale,
+        barScale,
+        lineScale,
         yearDividers,
         spansYears,
         hoverIdx,
         smoothLine,
         showAreaFill,
-        showDonationsLine,
+        showLine,
+        leftAxisFormatter,
+        rightAxisFormatter,
+        palette,
     ])
 
     function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -794,39 +844,40 @@ export function FundraisingChart({
     return (
         <section
             className={styles.chart}
-            aria-label="Fundraising volume by period: one-time and recurring dollars with total donations"
+            aria-label={ariaLabel ?? `${title} chart`}
         >
             <div className={styles.headerRow}>
                 <h2 className={styles.title}>{title}</h2>
                 <div className={styles.headerRight}>
-                    {headerRight ?? (
-                        <span className={styles.hint}>{hint}</span>
-                    )}
+                    {headerRight ?? (hint ? <span className={styles.hint}>{hint}</span> : null)}
                 </div>
             </div>
 
             <div className={styles.legend}>
                 <span className={styles.legendItem}>
                     <span
-                        className={`${styles.swatch} ${styles.swatchOneTime}`}
+                        className={styles.swatch}
+                        style={{ background: palette.primaryBar }}
                         aria-hidden="true"
                     />
-                    One-Time Amount
+                    {labels.primaryBar}
                 </span>
                 <span className={styles.legendItem}>
                     <span
-                        className={`${styles.swatch} ${styles.swatchRecurring}`}
+                        className={styles.swatch}
+                        style={{ background: palette.secondaryBar }}
                         aria-hidden="true"
                     />
-                    Recurring Amount
+                    {labels.secondaryBar}
                 </span>
-                {showDonationsLine && (
+                {showLine && (
                     <span className={styles.legendItem}>
                         <span
-                            className={`${styles.swatch} ${styles.swatchDonations}`}
+                            className={`${styles.swatch} ${styles.lineSwatch}`}
+                            style={{ background: palette.line }}
                             aria-hidden="true"
                         />
-                        Total Donations
+                        {labels.line}
                     </span>
                 )}
             </div>
@@ -836,7 +887,7 @@ export function FundraisingChart({
                     ref={canvasRef}
                     className={styles.canvas}
                     role="img"
-                    aria-label={`Fundraising volume across ${points.length} periods`}
+                    aria-label={chartAriaLabel ?? `${title} across ${points.length} periods`}
                     onPointerMove={onPointerMove}
                     onPointerLeave={onPointerLeave}
                 />
@@ -859,48 +910,50 @@ export function FundraisingChart({
                         <div className={styles.tooltipRow}>
                             <span
                                 className={styles.tooltipDot}
-                                style={{ background: COLOR_ONE_TIME }}
+                                style={{ background: palette.primaryBar }}
                                 aria-hidden="true"
                             />
-                            One-Time: {formatCurrency(hoverPoint.oneTime)}
+                            {labels.primaryBar}: {tooltipFormatPrimary(hoverPoint.primaryBarValue)}
                         </div>
                         <div className={styles.tooltipRow}>
                             <span
                                 className={styles.tooltipDot}
-                                style={{ background: COLOR_RECURRING }}
+                                style={{ background: palette.secondaryBar }}
                                 aria-hidden="true"
                             />
-                            Recurring: {formatCurrency(hoverPoint.recurring)}
+                            {labels.secondaryBar}: {tooltipFormatSecondary(hoverPoint.secondaryBarValue)}
                         </div>
-                        <div className={styles.tooltipRow}>
-                            <span
-                                className={styles.tooltipDot}
-                                style={{ background: COLOR_LINE }}
-                                aria-hidden="true"
-                            />
-                            Donations: {formatCount(hoverPoint.donations)}
-                        </div>
+                        {showLine && (
+                            <div className={styles.tooltipRow}>
+                                <span
+                                    className={styles.tooltipDot}
+                                    style={{ background: palette.line }}
+                                    aria-hidden="true"
+                                />
+                                {labels.line}: {tooltipFormatLine(hoverPoint.lineValue)}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
 
             <table className={styles.srOnly}>
-                <caption>Fundraising volume per period</caption>
+                <caption>{table.caption}</caption>
                 <thead>
                     <tr>
-                        <th scope="col">Period</th>
-                        <th scope="col">One-Time</th>
-                        <th scope="col">Recurring</th>
-                        <th scope="col">Donations</th>
+                        <th scope="col">{table.periodHeader}</th>
+                        <th scope="col">{table.primaryBarHeader}</th>
+                        <th scope="col">{table.secondaryBarHeader}</th>
+                        <th scope="col">{table.lineHeader}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {points.map((p) => (
                         <tr key={p.key}>
                             <th scope="row">{p.fullLabel}</th>
-                            <td>{formatCurrency(p.oneTime)}</td>
-                            <td>{formatCurrency(p.recurring)}</td>
-                            <td>{formatCount(p.donations)}</td>
+                            <td>{tooltipFormatPrimary(p.primaryBarValue)}</td>
+                            <td>{tooltipFormatSecondary(p.secondaryBarValue)}</td>
+                            <td>{tooltipFormatLine(p.lineValue)}</td>
                         </tr>
                     ))}
                 </tbody>

@@ -1,0 +1,185 @@
+.miniCalendar {
+    display: grid;
+    gap: 0.45rem;
+    padding: 0.55rem;
+    border-radius: 0.8rem;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    min-width: 15.6rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.miniCalendarStretch {
+    height: 100%;
+}
+
+.miniCalendarHeader {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.miniCalendarHeaderRight {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.miniCalendarMonthLabel {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: rgba(9, 34, 58, 0.9);
+    text-align: center;
+}
+
+.miniCalendarNavButton,
+.miniCalendarSetTodayBtn {
+    border: none;
+    border-radius: 0.45rem;
+    background: transparent;
+    color: rgba(15, 23, 42, 0.68);
+    cursor: pointer;
+    transition:
+        background-color 140ms ease,
+        color 140ms ease;
+}
+
+.miniCalendarNavButton:hover,
+.miniCalendarSetTodayBtn:hover {
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.92);
+}
+
+.miniCalendarNavButton:focus-visible,
+.miniCalendarSetTodayBtn:focus-visible {
+    outline: 2px solid rgba(14, 165, 233, 0.5);
+    outline-offset: 1px;
+}
+
+.miniCalendarNavButton {
+    width: 1.75rem;
+    height: 1.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.miniCalendarSetTodayBtn {
+    width: 1.75rem;
+    height: 1.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.miniCalendarWeekRow {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.15rem;
+}
+
+.miniCalendarWeekday {
+    text-align: center;
+    font-size: 0.67rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.miniCalendarGrid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.15rem;
+}
+
+.miniCalendarDay {
+    aspect-ratio: 1;
+    min-height: 1.95rem;
+    border: none;
+    border-radius: 0.45rem;
+    background: transparent;
+    color: rgba(9, 34, 58, 0.9);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background-color 140ms ease,
+        color 140ms ease,
+        box-shadow 140ms ease,
+        transform 140ms ease;
+}
+
+.miniCalendarDay:hover:not(:disabled) {
+    background: rgba(14, 165, 233, 0.12);
+}
+
+.miniCalendarDay:focus-visible {
+    outline: 2px solid rgba(14, 165, 233, 0.5);
+    outline-offset: 1px;
+}
+
+.miniCalendarDayMuted {
+    color: rgba(15, 23, 42, 0.28);
+}
+
+.miniCalendarDayDisabled {
+    color: rgba(15, 23, 42, 0.2);
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.miniCalendarDaySelected {
+    background: rgba(14, 165, 233, 1);
+    color: white;
+    box-shadow: 0 2px 10px rgba(14, 165, 233, 0.3);
+}
+
+.miniCalendarDayRangeStart,
+.miniCalendarDayRangeEnd {
+    background: rgba(14, 165, 233, 0.95);
+    color: white;
+}
+
+.miniCalendarDayRangeStart {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.miniCalendarDayRangeEnd {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.miniCalendarDayInRange {
+    background: rgba(14, 165, 233, 0.18);
+    color: rgba(9, 34, 58, 0.9);
+}
+
+.miniCalendarDayHoverRange {
+    background: rgba(14, 165, 233, 0.11);
+}
+
+.miniCalendarDayHoverStartLeft,
+.miniCalendarDayHoverStartRight,
+.miniCalendarDayHoverEdgeLeft,
+.miniCalendarDayHoverEdgeRight {
+    position: relative;
+}
+
+.miniCalendarDayHoverStartLeft::after,
+.miniCalendarDayHoverStartRight::after,
+.miniCalendarDayHoverEdgeLeft::after,
+.miniCalendarDayHoverEdgeRight::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(14, 165, 233, 0.08);
+    pointer-events: none;
+}
+
+.miniCalendarDayToday {
+    box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.5);
+}
