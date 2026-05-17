@@ -1,12 +1,12 @@
 'use client'
-import { useState } from 'react'
-import { motion, useTransform, useSpring } from 'motion/react'
-import { Link, Message } from '@/components/common'
+
 import styles from './hero.module.css'
+import { Message } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
 import cardStyles from '@/components/common/twitter_card_element/Card.module.css'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
+import { motion } from 'motion/react'
 
 const avatarImage = '/images/PV_Pride_Logo.png'
 
@@ -186,96 +186,5 @@ export function Hero() {
                 </Message>
             </div>
         </div>
-    )
-}
-
-function useMousePosition() {
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        setMousePosition({ x: e.clientX, y: e.clientY })
-    }
-
-    return { mousePosition, handleMouseMove }
-}
-
-function TiltMessage({
-    children,
-    className,
-}: {
-    children: React.ReactNode
-    className?: string
-}) {
-    const [isHovered, setIsHovered] = useState(false)
-    const [canTilt, setCanTilt] = useState(false)
-    const [elementPosition, setElementPosition] = useState({
-        left: 0,
-        top: 0,
-        width: 0,
-        height: 0,
-    })
-    const { mousePosition, handleMouseMove: handlePointerMove } =
-        useMousePosition()
-
-    // tilt
-    const tiltX = useSpring(0, { stiffness: 300, damping: 50 })
-    const tiltY = useSpring(0, { stiffness: 300, damping: 50 })
-
-    const rotateX = useTransform(tiltY, [-1, 1], [-10, 10])
-    const rotateY = useTransform(tiltX, [-1, 1], [-10, 10])
-
-    const handlePointerEnter = (e: React.PointerEvent) => {
-        if (e.pointerType == 'mouse') {
-            setIsHovered(true)
-            const rect = e.currentTarget.getBoundingClientRect()
-            setElementPosition({
-                left: rect.left,
-                top: rect.top,
-                width: rect.width,
-                height: rect.height,
-            })
-        }
-    }
-
-    const stopHoverAnimations = () => {
-        setIsHovered(false)
-        setCanTilt(false)
-        tiltX.set(0)
-        tiltY.set(0)
-    }
-
-    // tilt when rotation is done
-    if (isHovered && canTilt) {
-        const x =
-            (mousePosition.x - elementPosition.left) / elementPosition.width
-        const y =
-            (mousePosition.y - elementPosition.top) / elementPosition.height
-
-        tiltX.set((x - 0.5) * 0.5)
-        tiltY.set((y - 0.5) * -0.5)
-    }
-
-    return (
-        <motion.div
-            className={className}
-            style={{
-                rotateX,
-                rotateY,
-                transformPerspective: 1000,
-            }}
-            animate={{
-                rotateZ: isHovered ? -2.5 : 0,
-                scale: isHovered ? 1.02 : 1,
-            }}
-            transition={{ duration: 0.2 }}
-            onAnimationComplete={() => {
-                if (isHovered) setCanTilt(true) // tilt after rotation
-            }}
-            onPointerEnter={handlePointerEnter}
-            onPointerLeave={stopHoverAnimations}
-            onPointerMove={handlePointerMove}
-        >
-            {children}
-        </motion.div>
     )
 }
