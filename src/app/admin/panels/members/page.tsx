@@ -587,7 +587,9 @@ export default function Page() {
                                 />
                             </div>
                         </div>
-                        <div className={styles.detailsContent}>{renderPage()}</div>
+                        <div className={styles.detailsContent}>
+                            {renderPage()}
+                        </div>
                     </>
                 )}
             </div>
