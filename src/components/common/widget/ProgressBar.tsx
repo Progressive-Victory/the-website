@@ -1,16 +1,6 @@
 'use client'
 
-import styles from './ShareTracks.module.css'
-
-export interface ShareTracksProps
-    extends React.HTMLAttributes<HTMLDivElement> {
-    label: string
-    value: number | null | undefined
-    fill: string
-    valueText?: string
-    trackBackground?: string
-    valueFormatter?: (value: number | null | undefined) => string
-}
+import styles from './ProgressBar.module.css'
 
 function clampPercent(value: number | null | undefined) {
     return Math.max(0, Math.min(100, value ?? 0))
@@ -21,7 +11,16 @@ function defaultValueFormatter(value: number | null | undefined) {
     return `${value}%`
 }
 
-export function ShareTracks({
+export interface ProgressBarProps extends React.HTMLAttributes<HTMLDivElement> {
+    label: string
+    value: number | null | undefined
+    fill: string
+    valueText?: string
+    trackBackground?: string
+    valueFormatter?: (value: number | null | undefined) => string
+}
+
+export function ProgressBar({
     label,
     value,
     fill,
@@ -30,7 +29,7 @@ export function ShareTracks({
     valueFormatter = defaultValueFormatter,
     className,
     ...props
-}: ShareTracksProps) {
+}: ProgressBarProps) {
     return (
         <div
             className={[styles.container, className].filter(Boolean).join(' ')}

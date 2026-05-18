@@ -1,8 +1,4 @@
 .shell {
-    --presetColMin: 12.5rem;
-    --presetColMax: 14rem;
-    --calendarWidth: 15.5rem;
-    --popBodyGap: 0.85rem;
     width: max-content;
     max-width: 92dvw;
     padding: 0.62rem;
@@ -46,7 +42,9 @@
     background: transparent;
     color: rgba(15, 23, 42, 0.6);
     cursor: pointer;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
 }
 
 .closeButton:hover {
@@ -56,8 +54,7 @@
 
 .body {
     display: grid;
-    grid-template-columns: minmax(var(--presetColMin), var(--presetColMax)) var(--calendarWidth);
-    gap: var(--popBodyGap);
+    gap: 0.55rem;
     align-items: stretch;
 }
 

@@ -1,7 +1,21 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import styles from './DualAxisBarLineChart.module.css'
+import { formatHour, pickLabel } from './chartLabel.helpers'
+import {
+    getColumnCenter,
+    niceScale,
+    roundRect,
+    type PlotGeometry,
+} from './chartMath.helpers'
+import {
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+    type ReactNode,
+} from 'react'
 
 export type ChartGranularity =
     | 'hour'
@@ -118,168 +132,6 @@ function formatCountAxis(value: number): string {
     return rounded.toLocaleString('en-US')
 }
 
-function niceScale(maxValue: number, tickCount = 6, forceInteger = false) {
-    if (!Number.isFinite(maxValue) || maxValue <= 0) {
-        return { max: 1, step: forceInteger ? 1 : 0.25, ticks: [0, 0.25, 0.5, 0.75, 1] }
-    }
-    const safe = Math.max(2, tickCount)
-    const rawStep = maxValue / (safe - 1)
-    const magnitude = 10 ** Math.floor(Math.log10(rawStep))
-    const normalized = rawStep / magnitude
-    let nice = 10
-    if (normalized <= 1) nice = 1
-    else if (normalized <= 2) nice = 2
-    else if (normalized <= 2.5) nice = 2.5
-    else if (normalized <= 5) nice = 5
-    let step = nice * magnitude
-    if (forceInteger) step = Math.max(1, Math.ceil(step))
-    const max = Math.ceil(maxValue / step) * step
-    const ticks: number[] = []
-    for (let v = 0; v <= max + 1e-9; v += step) ticks.push(v)
-    return { max: max > 0 ? max : 1, step, ticks }
-}
-
-function formatHour(date: Date, includeMinute = false): string {
-    const hours = date.getHours()
-    const suffix = hours >= 12 ? 'pm' : 'am'
-    const display = hours % 12 === 0 ? 12 : hours % 12
-    if (includeMinute) {
-        const minutes = date.getMinutes().toString().padStart(2, '0')
-        return `${display}:${minutes}${suffix}`
-    }
-    return `${display}${suffix}`
-}
-
-function pickLabel(
-    granularity: ChartGranularity,
-    date: Date,
-    spansYears: boolean,
-    perColumnWidth: number,
-    idx: number,
-    stride: number,
-    totalCount: number
-): string {
-    const widthsByG: Record<ChartGranularity, [number, number, number]> = {
-        year: [60, 40, 24],
-        quarter: [74, 48, 30],
-        month: [78, 44, 26],
-        week: [90, 56, 38],
-        day: [98, 62, 38],
-        hour: [62, 36, 24],
-    }
-    const widths = widthsByG[granularity]
-    let level: 0 | 1 | 2 | 3
-    if (perColumnWidth >= widths[0]) level = 0
-    else if (perColumnWidth >= widths[1]) level = 1
-    else if (perColumnWidth >= widths[2]) level = 2
-    else level = 3
-
-    if (granularity === 'year') {
-        if (level <= 1)
-            return date.toLocaleDateString('en-US', { year: 'numeric' })
-        if (level === 2)
-            return date
-                .toLocaleDateString('en-US', { year: '2-digit' })
-                .replace(/^/, "'")
-        return idx % stride === 0
-            ? date
-                  .toLocaleDateString('en-US', { year: '2-digit' })
-                  .replace(/^/, "'")
-            : ''
-    }
-    if (granularity === 'month') {
-        const isFirst = idx === 0
-        const isLast = idx === totalCount - 1
-        const isQuarterStart = date.getMonth() % 3 === 0
-
-        if (level === 0)
-            return date.toLocaleDateString('en-US', {
-                month: 'long',
-                ...(spansYears ? { year: 'numeric' } : {}),
-            })
-        if (level === 1)
-            return date.toLocaleDateString('en-US', {
-                month: 'short',
-                ...(spansYears ? { year: '2-digit' } : {}),
-            })
-        if (level === 2) {
-            return date.toLocaleDateString('en-US', { month: 'short' })
-        }
-        if (isFirst || isLast || isQuarterStart) {
-            return date.toLocaleDateString('en-US', { month: 'short' })
-        }
-        return ''
-    }
-    if (granularity === 'quarter') {
-        const quarter = Math.floor(date.getMonth() / 3) + 1
-        const yearFull = date.getFullYear()
-        const yearShort = String(yearFull).slice(-2)
-
-        if (level === 0) return `Q${quarter} ${yearFull}`
-        if (level === 1) return `Q${quarter} '${yearShort}`
-        if (level === 2) return `Q${quarter}`
-        return idx % stride === 0 ? `Q${quarter}` : ''
-    }
-    if (granularity === 'week') {
-        if (level === 0)
-            return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
-        if (level === 1)
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        if (level === 2)
-            return date.toLocaleDateString('en-US', {
-                month: 'numeric',
-                day: 'numeric',
-            })
-        return idx % stride === 0
-            ? date.toLocaleDateString('en-US', {
-                  month: 'numeric',
-                  day: 'numeric',
-              })
-            : ''
-    }
-    if (granularity === 'day') {
-        if (level === 0)
-            return date.toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-            })
-        if (level === 1)
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        if (level === 2)
-            return date.toLocaleDateString('en-US', {
-                month: 'numeric',
-                day: 'numeric',
-            })
-        return idx % stride === 0
-            ? date.toLocaleDateString('en-US', {
-                  month: 'numeric',
-                  day: 'numeric',
-              })
-            : ''
-    }
-    if (level === 0) return formatHour(date, true)
-    if (level === 1) return formatHour(date)
-    if (level === 2) return idx % 2 === 0 ? formatHour(date) : ''
-    return idx % stride === 0 ? formatHour(date) : ''
-}
-
-interface PlotGeometry {
-    width: number
-    height: number
-    plotLeft: number
-    plotRight: number
-    plotTop: number
-    plotBottom: number
-    plotWidth: number
-    plotHeight: number
-    columnWidth: number
-}
-
-function getColumnCenter(geom: PlotGeometry, idx: number, count: number): number {
-    return geom.plotLeft + ((idx + 0.5) / Math.max(count, 1)) * geom.plotWidth
-}
-
 export function Chart({
     title = 'Chart',
     hint,
@@ -320,7 +172,8 @@ export function Chart({
         caption: tableConfig?.caption ?? `${title} by period`,
         periodHeader: tableConfig?.periodHeader ?? 'Period',
         primaryBarHeader: tableConfig?.primaryBarHeader ?? labels.primaryBar,
-        secondaryBarHeader: tableConfig?.secondaryBarHeader ?? labels.secondaryBar,
+        secondaryBarHeader:
+            tableConfig?.secondaryBarHeader ?? labels.secondaryBar,
         lineHeader: tableConfig?.lineHeader ?? labels.line,
     }
 
@@ -329,8 +182,13 @@ export function Chart({
     const tooltipRef = useRef<HTMLDivElement | null>(null)
     const [size, setSize] = useState({ width: 0, height: 0 })
     const [hoverIdx, setHoverIdx] = useState<number | null>(null)
-    const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null)
-    const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null)
+    const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(
+        null
+    )
+    const [tooltipPos, setTooltipPos] = useState<{
+        x: number
+        y: number
+    } | null>(null)
     const [tooltipSide, setTooltipSide] = useState<'left' | 'right'>('left')
 
     useEffect(() => {
@@ -384,17 +242,27 @@ export function Chart({
             leftSpace < tooltipRect.width + 12 && rightSpace > leftSpace
 
         const side: 'left' | 'right' = shouldFlipRight ? 'right' : 'left'
-        const x = side === 'right'
-            ? Math.min(hoverPos.x + 12, wrapRect.width - tooltipRect.width - padding)
-            : Math.max(hoverPos.x - 12, tooltipRect.width + padding)
+        const x =
+            side === 'right'
+                ? Math.min(
+                      hoverPos.x + 12,
+                      wrapRect.width - tooltipRect.width - padding
+                  )
+                : Math.max(hoverPos.x - 12, tooltipRect.width + padding)
         const y = Math.min(
             Math.max(hoverPos.y, padding),
             wrapRect.height - tooltipRect.height - padding
         )
 
         setTooltipPos((prev) => {
-            if (prev && Math.abs(prev.x - x) < 0.5 && Math.abs(prev.y - y) < 0.5) {
-                setTooltipSide((prevSide) => (prevSide === side ? prevSide : side))
+            if (
+                prev &&
+                Math.abs(prev.x - x) < 0.5 &&
+                Math.abs(prev.y - y) < 0.5
+            ) {
+                setTooltipSide((prevSide) =>
+                    prevSide === side ? prevSide : side
+                )
                 return prev
             }
             setTooltipSide(side)
@@ -404,7 +272,9 @@ export function Chart({
 
     const barScale = useMemo(() => {
         const max = Math.max(
-            ...points.map((p) => Math.max(p.primaryBarValue, p.secondaryBarValue)),
+            ...points.map((p) =>
+                Math.max(p.primaryBarValue, p.secondaryBarValue)
+            ),
             0
         )
         return niceScale(Math.max(max, 5), 6, false)
@@ -457,8 +327,7 @@ export function Chart({
         const lastIso = points[points.length - 1].anchorIso
         if (!firstIso || !lastIso) return false
         return (
-            new Date(firstIso).getFullYear() !==
-            new Date(lastIso).getFullYear()
+            new Date(firstIso).getFullYear() !== new Date(lastIso).getFullYear()
         )
     }, [points])
 
@@ -494,9 +363,10 @@ export function Chart({
 
         const barTicks = barScale.ticks
         for (const tick of barTicks) {
-            const y = Math.round(
-                g.plotBottom - (tick / barScale.max) * g.plotHeight
-            ) + 0.5
+            const y =
+                Math.round(
+                    g.plotBottom - (tick / barScale.max) * g.plotHeight
+                ) + 0.5
             ctx.beginPath()
             ctx.moveTo(g.plotLeft, y)
             ctx.lineTo(g.plotRight, y)
@@ -516,7 +386,11 @@ export function Chart({
                 const y = Math.round(g.plotBottom - ratio * g.plotHeight) + 0.5
                 const lineValue = ratio * lineScale.max
                 ctx.textAlign = 'left'
-                ctx.fillText(rightAxisFormatter(lineValue, lineScale.step), g.plotRight + 8, y)
+                ctx.fillText(
+                    rightAxisFormatter(lineValue, lineScale.step),
+                    g.plotRight + 8,
+                    y
+                )
             }
         }
 
@@ -526,7 +400,8 @@ export function Chart({
         ctx.lineWidth = 1
         yearDividers.forEach((d) => {
             const x =
-                Math.round(g.plotLeft + (d.idx / points.length) * g.plotWidth) + 0.5
+                Math.round(g.plotLeft + (d.idx / points.length) * g.plotWidth) +
+                0.5
             ctx.beginPath()
             ctx.moveTo(x, g.plotTop)
             ctx.lineTo(x, g.plotBottom)
@@ -561,7 +436,10 @@ export function Chart({
             ctx.fillRect(cx - bandW / 2, g.plotTop, bandW, g.plotHeight)
         }
 
-        const groupAvailable = Math.max(0, g.columnWidth * (1 - GROUP_GAP_RATIO))
+        const groupAvailable = Math.max(
+            0,
+            g.columnWidth * (1 - GROUP_GAP_RATIO)
+        )
         const barWidth = Math.max(
             BAR_MIN_WIDTH,
             Math.min(BAR_MAX_WIDTH, (groupAvailable - BAR_GAP) / 2)
@@ -630,7 +508,14 @@ export function Chart({
                     const curr = linePts[i]
                     if (smoothLine) {
                         const mx = (prev.x + curr.x) / 2
-                        ctx.bezierCurveTo(mx, prev.y, mx, curr.y, curr.x, curr.y)
+                        ctx.bezierCurveTo(
+                            mx,
+                            prev.y,
+                            mx,
+                            curr.y,
+                            curr.x,
+                            curr.y
+                        )
                     } else {
                         ctx.lineTo(curr.x, curr.y)
                     }
@@ -712,8 +597,7 @@ export function Chart({
                         })
                     else if (p.granularity === 'quarter')
                         label = `Q${Math.floor(date.getMonth() / 3) + 1}`
-                    else if (p.granularity === 'hour')
-                        label = formatHour(date)
+                    else if (p.granularity === 'hour') label = formatHour(date)
                     else
                         label = date.toLocaleDateString('en-US', {
                             month: 'numeric',
@@ -721,8 +605,7 @@ export function Chart({
                         })
                 }
             } else {
-                label =
-                    isEnd || i % stride === 0 ? (p.label ?? '') : ''
+                label = isEnd || i % stride === 0 ? (p.label ?? '') : ''
             }
             if (!label) continue
 
@@ -767,8 +650,7 @@ export function Chart({
             const candidateRight = candidate.right + placementPadding
             const overlaps = placedRanges.some(
                 (range) =>
-                    candidateLeft <= range.right &&
-                    candidateRight >= range.left
+                    candidateLeft <= range.right && candidateRight >= range.left
             )
 
             if (overlaps && !force) return
@@ -788,7 +670,8 @@ export function Chart({
             placeLabel(lastCandidate, true)
 
         for (const candidate of labelCandidates) {
-            if (candidate.idx === firstIdx || candidate.idx === lastIdx) continue
+            if (candidate.idx === firstIdx || candidate.idx === lastIdx)
+                continue
             placeLabel(candidate)
         }
     }, [
@@ -849,7 +732,10 @@ export function Chart({
             <div className={styles.headerRow}>
                 <h2 className={styles.title}>{title}</h2>
                 <div className={styles.headerRight}>
-                    {headerRight ?? (hint ? <span className={styles.hint}>{hint}</span> : null)}
+                    {headerRight ??
+                        (hint ? (
+                            <span className={styles.hint}>{hint}</span>
+                        ) : null)}
                 </div>
             </div>
 
@@ -887,7 +773,10 @@ export function Chart({
                     ref={canvasRef}
                     className={styles.canvas}
                     role="img"
-                    aria-label={chartAriaLabel ?? `${title} across ${points.length} periods`}
+                    aria-label={
+                        chartAriaLabel ??
+                        `${title} across ${points.length} periods`
+                    }
                     onPointerMove={onPointerMove}
                     onPointerLeave={onPointerLeave}
                 />
@@ -913,7 +802,8 @@ export function Chart({
                                 style={{ background: palette.primaryBar }}
                                 aria-hidden="true"
                             />
-                            {labels.primaryBar}: {tooltipFormatPrimary(hoverPoint.primaryBarValue)}
+                            {labels.primaryBar}:{' '}
+                            {tooltipFormatPrimary(hoverPoint.primaryBarValue)}
                         </div>
                         <div className={styles.tooltipRow}>
                             <span
@@ -921,7 +811,10 @@ export function Chart({
                                 style={{ background: palette.secondaryBar }}
                                 aria-hidden="true"
                             />
-                            {labels.secondaryBar}: {tooltipFormatSecondary(hoverPoint.secondaryBarValue)}
+                            {labels.secondaryBar}:{' '}
+                            {tooltipFormatSecondary(
+                                hoverPoint.secondaryBarValue
+                            )}
                         </div>
                         {showLine && (
                             <div className={styles.tooltipRow}>
@@ -930,7 +823,8 @@ export function Chart({
                                     style={{ background: palette.line }}
                                     aria-hidden="true"
                                 />
-                                {labels.line}: {tooltipFormatLine(hoverPoint.lineValue)}
+                                {labels.line}:{' '}
+                                {tooltipFormatLine(hoverPoint.lineValue)}
                             </div>
                         )}
                     </div>
@@ -952,7 +846,9 @@ export function Chart({
                         <tr key={p.key}>
                             <th scope="row">{p.fullLabel}</th>
                             <td>{tooltipFormatPrimary(p.primaryBarValue)}</td>
-                            <td>{tooltipFormatSecondary(p.secondaryBarValue)}</td>
+                            <td>
+                                {tooltipFormatSecondary(p.secondaryBarValue)}
+                            </td>
                             <td>{tooltipFormatLine(p.lineValue)}</td>
                         </tr>
                     ))}
@@ -960,32 +856,4 @@ export function Chart({
             </table>
         </section>
     )
-}
-
-function roundRect(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    r: number,
-    topOnly = false
-) {
-    const radius = Math.max(0, Math.min(r, Math.min(w, h) / 2))
-    ctx.beginPath()
-    ctx.moveTo(x + radius, y)
-    ctx.lineTo(x + w - radius, y)
-    ctx.quadraticCurveTo(x + w, y, x + w, y + radius)
-    if (topOnly) {
-        ctx.lineTo(x + w, y + h)
-        ctx.lineTo(x, y + h)
-    } else {
-        ctx.lineTo(x + w, y + h - radius)
-        ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h)
-        ctx.lineTo(x + radius, y + h)
-        ctx.quadraticCurveTo(x, y + h, x, y + h - radius)
-    }
-    ctx.lineTo(x, y + radius)
-    ctx.quadraticCurveTo(x, y, x + radius, y)
-    ctx.closePath()
 }

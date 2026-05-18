@@ -1,8 +1,15 @@
 'use client'
 
+import styles from './MiniCalendar.module.css'
+import {
+    createCalendarCells,
+    getDayStartTs,
+    getMiniCalendarDayState,
+    normalizeMaxDateTs,
+    normalizeMinDateTs,
+} from './miniCalendar.helpers'
 import { useState } from 'react'
 import { FiCalendar, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
-import styles from './MiniCalendar.module.css'
 
 const WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
@@ -43,19 +50,7 @@ export function MiniCalendar({
     const year = month.getFullYear()
     const monthIdx = month.getMonth()
     const firstOfMonth = new Date(year, monthIdx, 1)
-    const startWeekday = firstOfMonth.getDay()
-    const gridStart = new Date(year, monthIdx, 1 - startWeekday)
-
-    const cells: Date[] = []
-    for (let i = 0; i < 42; i += 1) {
-        cells.push(
-            new Date(
-                gridStart.getFullYear(),
-                gridStart.getMonth(),
-                gridStart.getDate() + i
-            )
-        )
-    }
+    const cells = createCalendarCells(month)
 
     const startTs = startDate
         ? new Date(
@@ -83,26 +78,8 @@ export function MiniCalendar({
             ? Math.max(startTs, hoveredDayTs)
             : null
 
-    const maxTs = maxDate
-        ? new Date(
-              maxDate.getFullYear(),
-              maxDate.getMonth(),
-              maxDate.getDate(),
-              23,
-              59,
-              59
-          ).getTime()
-        : null
-    const minTs = minDate
-        ? new Date(
-              minDate.getFullYear(),
-              minDate.getMonth(),
-              minDate.getDate(),
-              0,
-              0,
-              0
-          ).getTime()
-        : null
+    const maxTs = normalizeMaxDateTs(maxDate)
+    const minTs = normalizeMinDateTs(minDate)
 
     const monthLabel = firstOfMonth.toLocaleDateString('en-US', {
         month: 'long',
@@ -174,75 +151,48 @@ export function MiniCalendar({
                 onMouseLeave={() => setHoveredDayTs(null)}
             >
                 {cells.map((day, idx) => {
-                    const dayStart = new Date(
-                        day.getFullYear(),
-                        day.getMonth(),
-                        day.getDate()
-                    ).getTime()
-                    const inMonth = day.getMonth() === monthIdx
-                    const disabled =
-                        (maxTs != null && dayStart > maxTs) ||
-                        (minTs != null && dayStart < minTs)
-                    const isStart = startTs != null && dayStart === startTs
-                    const isEnd = endTs != null && dayStart === endTs
-                    const hasConfirmedRange =
-                        isRangeMode &&
-                        startTs != null &&
-                        endTs != null &&
-                        startTs !== endTs
-                    const inRange =
-                        isRangeMode &&
-                        startTs != null &&
-                        endTs != null &&
-                        dayStart > startTs &&
-                        dayStart < endTs
-                    const inPreviewRange =
-                        previewRangeStartTs != null &&
-                        previewRangeEndTs != null &&
-                        dayStart > previewRangeStartTs &&
-                        dayStart < previewRangeEndTs
-                    const isHoverAfterStart =
-                        hoveredDayTs != null &&
-                        startTs != null &&
-                        hoveredDayTs > startTs
-                    const isPreviewEdge =
-                        hasPreviewSelection &&
-                        hoveredDayTs != null &&
-                        dayStart === hoveredDayTs &&
-                        dayStart !== startTs
-                    const isPreviewStartEdge =
-                        hasPreviewSelection &&
-                        hoveredDayTs != null &&
-                        isStart &&
-                        hoveredDayTs !== startTs
-                    const isToday = isSameDay(day, new Date())
+                    const state = getMiniCalendarDayState({
+                        day,
+                        currentMonthIdx: monthIdx,
+                        startTs,
+                        endTs,
+                        hoveredDayTs,
+                        isRangeMode,
+                        previewRangeStartTs,
+                        previewRangeEndTs,
+                        maxTs,
+                        minTs,
+                        isToday: (value) => isSameDay(value, new Date()),
+                    })
 
                     const classNames = [styles.miniCalendarDay]
-                    if (!inMonth) classNames.push(styles.miniCalendarDayMuted)
-                    if (disabled)
+                    if (!state.inMonth)
+                        classNames.push(styles.miniCalendarDayMuted)
+                    if (state.disabled)
                         classNames.push(styles.miniCalendarDayDisabled)
-                    if (inPreviewRange)
+                    if (state.inPreviewRange)
                         classNames.push(styles.miniCalendarDayHoverRange)
-                    if (hasConfirmedRange && isStart)
+                    if (state.hasConfirmedRange && state.isStart)
                         classNames.push(styles.miniCalendarDayRangeStart)
-                    if (hasConfirmedRange && isEnd)
+                    if (state.hasConfirmedRange && state.isEnd)
                         classNames.push(styles.miniCalendarDayRangeEnd)
-                    if (isPreviewStartEdge)
+                    if (state.isPreviewStartEdge)
                         classNames.push(
-                            isHoverAfterStart
+                            state.isHoverAfterStart
                                 ? styles.miniCalendarDayHoverStartLeft
                                 : styles.miniCalendarDayHoverStartRight
                         )
-                    if (isPreviewEdge)
+                    if (state.isPreviewEdge)
                         classNames.push(
-                            isHoverAfterStart
+                            state.isHoverAfterStart
                                 ? styles.miniCalendarDayHoverEdgeRight
                                 : styles.miniCalendarDayHoverEdgeLeft
                         )
-                    if (isStart || isEnd)
+                    if (state.isStart || state.isEnd)
                         classNames.push(styles.miniCalendarDaySelected)
-                    if (inRange) classNames.push(styles.miniCalendarDayInRange)
-                    if (isToday && !isStart && !isEnd)
+                    if (state.inRange)
+                        classNames.push(styles.miniCalendarDayInRange)
+                    if (state.isToday && !state.isStart && !state.isEnd)
                         classNames.push(styles.miniCalendarDayToday)
 
                     return (
@@ -250,16 +200,16 @@ export function MiniCalendar({
                             key={idx}
                             type="button"
                             className={classNames.join(' ')}
-                            disabled={disabled}
+                            disabled={state.disabled}
                             onMouseEnter={() => {
-                                if (!hasPreviewSelection || disabled) {
+                                if (!hasPreviewSelection || state.disabled) {
                                     setHoveredDayTs(null)
                                     return
                                 }
-                                setHoveredDayTs(dayStart)
+                                setHoveredDayTs(getDayStartTs(day))
                             }}
                             onClick={() => onDayClick(day)}
-                            tabIndex={inMonth ? 0 : -1}
+                            tabIndex={state.inMonth ? 0 : -1}
                         >
                             {day.getDate()}
                         </button>

@@ -1,8 +1,16 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { MiniCalendar } from './MiniCalendar'
 import styles from './DateRangePicker.module.css'
+import { MiniCalendar } from './MiniCalendar'
+import {
+    dateInputToEndISO,
+    dateInputToStartISO,
+    endOfDayISO,
+    isoToDateInput,
+    startOfDayISO,
+} from './dateRange.helpers'
+import { useDateRangeSelectionController } from './useDateRangeSelectionController'
+import { useEffect, useMemo, useState } from 'react'
 
 interface DateRangePickerProps {
     startDate: string
@@ -10,63 +18,6 @@ interface DateRangePickerProps {
     onRangeChange: (startDate: string, endDate: string) => void
     maxDate?: Date
     stretch?: boolean
-}
-
-function isSameDay(a: Date, b: Date) {
-    return (
-        a.getFullYear() === b.getFullYear() &&
-        a.getMonth() === b.getMonth() &&
-        a.getDate() === b.getDate()
-    )
-}
-
-function isoToDateInput(iso: string): string {
-    if (!iso) return ''
-    const d = new Date(iso)
-    const y = String(d.getFullYear()).padStart(4, '0')
-    const m = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    return `${y}-${m}-${day}`
-}
-
-function dateInputToStartISO(value: string): string | null {
-    if (!value) return ''
-    const [y, mo, d] = value.split('-').map(Number)
-    if (!y || !mo || !d) return null
-    const date = new Date(2000, mo - 1, d, 0, 0, 0)
-    date.setFullYear(y, mo - 1, d)
-    return date.toISOString()
-}
-
-function dateInputToEndISO(value: string): string | null {
-    if (!value) return ''
-    const [y, mo, d] = value.split('-').map(Number)
-    if (!y || !mo || !d) return null
-    const date = new Date(2000, mo - 1, d, 23, 59, 59)
-    date.setFullYear(y, mo - 1, d)
-    return date.toISOString()
-}
-
-function startOfDayISO(date: Date): string {
-    return new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        0,
-        0,
-        0
-    ).toISOString()
-}
-
-function endOfDayISO(date: Date): string {
-    return new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        23,
-        59,
-        59
-    ).toISOString()
 }
 
 export function DateRangePicker({
@@ -92,19 +43,17 @@ export function DateRangePicker({
         () => isoToDateInput(new Date().toISOString()),
         []
     )
-    const startInputValue = useMemo(() => isoToDateInput(startDate), [startDate])
-    const endInputValue = useMemo(() => isoToDateInput(endDate), [endDate])
-    const startDateObj = useMemo(
-        () => (startDate ? new Date(startDate) : null),
+    const startInputValue = useMemo(
+        () => isoToDateInput(startDate),
         [startDate]
     )
-    const endDateObj = useMemo(
-        () => (endDate ? new Date(endDate) : null),
-        [endDate]
-    )
-
-    const hasStart = Boolean(startDate)
-    const hasEnd = Boolean(endDate)
+    const endInputValue = useMemo(() => isoToDateInput(endDate), [endDate])
+    const { startDateObj, endDateObj, onDayClick, onSetEndDateToToday } =
+        useDateRangeSelectionController({
+            startDate,
+            endDate,
+            onRangeChange,
+        })
 
     return (
         <div className={styles.column}>
@@ -127,7 +76,8 @@ export function DateRangePicker({
                         if (
                             next &&
                             endDate &&
-                            new Date(next).getTime() > new Date(endDate).getTime()
+                            new Date(next).getTime() >
+                                new Date(endDate).getTime()
                         ) {
                             return
                         }
@@ -150,7 +100,8 @@ export function DateRangePicker({
                         if (
                             next &&
                             startDate &&
-                            new Date(startDate).getTime() > new Date(next).getTime()
+                            new Date(startDate).getTime() >
+                                new Date(next).getTime()
                         ) {
                             const nextStartIso = startOfDayISO(new Date(next))
                             const nextEndIso = endOfDayISO(new Date(startDate))
@@ -171,56 +122,8 @@ export function DateRangePicker({
                 startDate={startDateObj}
                 endDate={endDateObj}
                 maxDate={maxDate}
-                onDayClick={(day) => {
-                    const dayStart = new Date(
-                        day.getFullYear(),
-                        day.getMonth(),
-                        day.getDate(),
-                        0,
-                        0,
-                        0
-                    )
-                    const dayEnd = new Date(
-                        day.getFullYear(),
-                        day.getMonth(),
-                        day.getDate(),
-                        23,
-                        59,
-                        59
-                    )
-
-                    if (!hasStart || (hasStart && hasEnd)) {
-                        if (!hasStart && isSameDay(day, new Date())) {
-                            onRangeChange(dayStart.toISOString(), dayEnd.toISOString())
-                            return
-                        }
-
-                        onRangeChange(dayStart.toISOString(), '')
-                        return
-                    }
-
-                    const startTs = startDateObj?.getTime() ?? 0
-                    if (dayStart.getTime() < startTs) {
-                        const priorStartDate =
-                            startDateObj ?? (startDate ? new Date(startDate) : null)
-                        if (!priorStartDate) {
-                            onRangeChange(dayStart.toISOString(), '')
-                            return
-                        }
-
-                        onRangeChange(
-                            dayStart.toISOString(),
-                            endOfDayISO(priorStartDate)
-                        )
-                        return
-                    }
-
-                    onRangeChange(startDate, dayEnd.toISOString())
-                }}
-                onSetEndDateToToday={() => {
-                    if (!startDate) return
-                    onRangeChange(startDate, endOfDayISO(new Date()))
-                }}
+                onDayClick={onDayClick}
+                onSetEndDateToToday={onSetEndDateToToday}
             />
         </div>
     )
