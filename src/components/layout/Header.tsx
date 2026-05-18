@@ -94,9 +94,22 @@ const navitems: NavItem[] = [
     },
     {
         name: 'More',
-        href: '/home',
+        href: '/',
         subnav: {
             columns: [
+                {
+                    title: 'Initiatives',
+                    items: [
+                        {
+                            name: 'Section 230 Initiative',
+                            href: '/initiatives/section-230',
+                        },
+                        {
+                            name: 'Jackson Franklin Initiative',
+                            href: '/initiatives/franklin',
+                        },
+                    ],
+                },
                 {
                     title: 'Join',
                     items: [
@@ -256,6 +269,7 @@ interface NavDrawerProps {
     navitems: NavItem[]
     mobileSubnavItem: NavItem | null
     setMobileSubnavItem: (item: NavItem | null) => void
+    isSessionLoading: boolean
     session: TokenClaims | null
     discordUserId: string | undefined
     avatarImageId: string | undefined
@@ -267,6 +281,7 @@ function NavDrawer({
     navitems,
     mobileSubnavItem,
     setMobileSubnavItem,
+    isSessionLoading,
     session,
     discordUserId,
     avatarImageId,
@@ -336,7 +351,11 @@ function NavDrawer({
                                                         rotateChevronOnHover={
                                                             false
                                                         }
-                                                        href={item.href}
+                                                        href={
+                                                            item.name == 'More'
+                                                                ? '#'
+                                                                : item.href
+                                                        }
                                                         renderContent={({
                                                             showNavChevron,
                                                         }) => (
@@ -421,7 +440,24 @@ function NavDrawer({
                                             />
                                         </motion.div>
 
-                                        {!session ? (
+                                        {isSessionLoading ? (
+                                            <motion.div
+                                                variants={itemVariants}
+                                                animate="visible"
+                                                exit="exit"
+                                            >
+                                                <AccountButton
+                                                    label="Account"
+                                                    href="/account"
+                                                    discordUserId={
+                                                        discordUserId
+                                                    }
+                                                    imageId={avatarImageId}
+                                                    buttonVariant="long"
+                                                    disabled
+                                                />
+                                            </motion.div>
+                                        ) : !session ? (
                                             <motion.div
                                                 variants={itemVariants}
                                                 animate="visible"
@@ -562,7 +598,7 @@ function NavDrawer({
 }
 
 export function Header() {
-    const { session, onLogin } = useAuth()
+    const { session, onLogin, isSessionLoading } = useAuth()
     const { ready, onGet } = useFetch()
 
     const [isOpen, setIsOpen] = useState(false)
@@ -745,6 +781,7 @@ export function Header() {
                                     label={item.name}
                                     href={item.href}
                                     showChevron={item.name === 'More'}
+                                    disabled={item.name === 'More'}
                                     isSubnavOpen={isActive}
                                     onOpenSubnav={() => openSubnav(item)}
                                     className={
@@ -769,7 +806,15 @@ export function Header() {
                 <div className={styles.headerRightActions}>
                     <DonateButton label="Donate" />
 
-                    {!session ? (
+                    {isSessionLoading ? (
+                        <AccountButton
+                            label="Account"
+                            href="/account"
+                            discordUserId={discordUsers?.[0]?.id}
+                            imageId={discordUsers?.[0]?.image}
+                            disabled
+                        />
+                    ) : !session ? (
                         <LoginButton
                             label="Log In"
                             onClick={() => void onLogin()}
@@ -876,6 +921,7 @@ export function Header() {
                 navitems={navitems}
                 mobileSubnavItem={mobileSubnavItem}
                 setMobileSubnavItem={setMobileSubnavItem}
+                isSessionLoading={isSessionLoading}
                 session={session}
                 discordUserId={discordUsers?.[0]?.id}
                 avatarImageId={discordUsers?.[0]?.image}

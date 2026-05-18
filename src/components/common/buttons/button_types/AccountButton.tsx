@@ -21,7 +21,6 @@ export function AccountButton({
     ...rest
 }: AccountButtonProps) {
     const isLongVariant = buttonVariant === 'long'
-    const hasAvatar = discordUserId && imageId
     const isAccountCompact = !isLongVariant
 
     const mergedClassName = cx(
@@ -37,8 +36,6 @@ export function AccountButton({
             buttonVariant={buttonVariant}
             className={mergedClassName}
             renderContent={({ showNavChevron }) => {
-                if (!hasAvatar) return undefined
-
                 if (isLongVariant) {
                     return (
                         <span className={styles.accountContent}>

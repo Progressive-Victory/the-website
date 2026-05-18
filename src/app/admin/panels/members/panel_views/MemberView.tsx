@@ -1,9 +1,9 @@
 'use client'
 
-import styles from './MemberView.module.css'
 import {
     CheckboxField,
     DateField,
+    DropDownField,
     Form,
     FormGroup,
     FormState,
@@ -11,16 +11,84 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
-import { Location, Role, UpdateHistory, User } from '@/contracts/data'
+import { Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
 
+const membershipCardShipmentOptions = [
+    { value: 0, label: 'Not Eligible' },
+    { value: 1, label: 'Not Started' },
+    { value: 2, label: 'Printed' },
+    { value: 3, label: 'In Transit' },
+    { value: 4, label: 'Recieved' },
+    { value: 5, label: 'Returned' },
+]
+
+const membershipMerchShipmentOptions = [
+    { value: 0, label: 'Not Eligible' },
+    { value: 1, label: 'Not Started' },
+    { value: 2, label: 'Printed' },
+    { value: 3, label: 'In Transit' },
+    { value: 4, label: 'Recieved' },
+    { value: 5, label: 'Returned' },
+]
+
+const shirtSizeOptions = [
+    { value: 'XS', label: 'Extra Small' },
+    { value: 'S', label: 'Small' },
+    { value: 'M', label: 'Medium' },
+    { value: 'L', label: 'Large' },
+    { value: 'XL', label: 'Extra Large' },
+    { value: '2XL', label: 'Double XL' },
+]
+
+const membershipFulfillmentStatusOptions = [
+    { value: 0, label: 'Not Eligible' },
+    { value: 1, label: 'Not Fulfilled' },
+    { value: 2, label: 'Fulfilled' },
+]
+
+const calcFutureDate = (
+    initialTime: Date,
+    period: 'weekly' | 'monthly',
+    duration: number
+) => {
+    switch (period) {
+        case 'weekly':
+            return new Date(
+                initialTime.getTime() +
+                    new Date(duration * 7 * 24 * 60 * 60 * 1000).getTime()
+            )
+        case 'monthly':
+            initialTime.setMonth(initialTime.getMonth())
+            return initialTime
+    }
+}
+
+const getHasActiveRecurringValue = (form: User): string => {
+    const donors = form.donors ?? []
+    if (donors.length === 0) return 'No Donor Info'
+
+    const hasActiveRecurring = donors.some((donor) =>
+        (donor.contributions ?? []).some(
+            (contribution) =>
+                contribution.isRecurring &&
+                ((contribution.recurringDuration ?? 1) < 0 ||
+                    calcFutureDate(
+                        contribution.createdAt,
+                        contribution.recurringPeriod as 'weekly' | 'monthly',
+                        contribution.recurringDuration ?? 1
+                    ) > new Date())
+        )
+    )
+
+    return hasActiveRecurring ? 'Yes' : 'No'
+}
 export interface MemberViewProps {
     selectedId: number
     user: User
     selectedHistory: UpdateHistory<User> | null
 
-    formState: FormState<User> | null
-    setFormState: (next: FormState<User> | null) => void
+    setFormState?: (next: FormState<User> | null) => void
 
     saving: boolean
     isInvalid: boolean
@@ -28,16 +96,13 @@ export interface MemberViewProps {
     roleOptions: { value: number; label: string }[]
 
     makeFormTitle: (user: User) => string
-    handleSave: (user: User) => void
-
-    getLocation: (form: User) => Location | null
+    handleSave?: (user: User) => void
 }
 
 export function MemberView({
     selectedId,
     user,
     selectedHistory,
-    formState,
     setFormState,
     saving,
     isInvalid,
@@ -45,7 +110,6 @@ export function MemberView({
     roleOptions,
     makeFormTitle,
     handleSave,
-    getLocation,
 }: MemberViewProps) {
     return (
         <Form<User>
@@ -73,7 +137,12 @@ export function MemberView({
                     getter={(form) => form.discordUsers?.[0]?.id}
                     readonly
                 />
-                <TextField label="Email" field="email" required />
+                <TextField
+                    label="Email"
+                    field="email"
+                    autocomplete="email"
+                    required
+                />
                 <PhoneField label="Phone Number" field="phone" required />
                 <TextField
                     label="Preferred Name"
@@ -85,11 +154,7 @@ export function MemberView({
                 <DateField<User>
                     label="Date of Birth"
                     getter={(form) =>
-                        dateService.isValid(form.birthdate)
-                            ? new Date(
-                                  dateService.toISODateString(form.birthdate)!
-                              )
-                            : null
+                        dateService.fromISODateString(form.birthdate)
                     }
                     field="birthdate"
                     format={{
@@ -120,46 +185,115 @@ export function MemberView({
 
             <FormGroup title="Address">
                 <TextField<User>
-                    label="Zip Code"
-                    getter={(form) =>
-                        form.location?.zip
-                            ? form.location?.zip
-                                  .toString()
-                                  .padStart(5, '0')
-                                  .slice(-5)
-                            : null
-                    }
+                    label="Address Line 1"
+                    getter={(form) => form.address.addressLine1}
                     setter={(form, field) => ({
                         ...form,
-                        location: field
-                            ? {
-                                  ...(user?.location ?? {
-                                      city: '',
-                                      county: '',
-                                      state: '',
-                                  }),
-                                  zip: +field
-                                      .replace(/[^\d]/, '')
-                                      .padStart(5, '0')
-                                      .slice(-5),
-                              }
-                            : null,
+                        address: {
+                            ...form.address,
+                            addressLine1: field?.slice(0, 100) ?? null,
+                        },
+                    })}
+                />
+                <TextField<User>
+                    label="Address Line 2"
+                    getter={(form) => form.address.addressLine2}
+                    setter={(form, field) => ({
+                        ...form,
+                        address: {
+                            ...form.address,
+                            addressLine2: field?.slice(0, 100) ?? null,
+                        },
                     })}
                 />
                 <TextField<User>
                     label="City"
-                    getter={(form) => getLocation(form)?.city}
-                    readonly
+                    getter={(form) => form.address.city}
+                    setter={(form, field) => ({
+                        ...form,
+                        address: {
+                            ...form.address,
+                            city: field?.slice(0, 50) ?? null,
+                        },
+                    })}
                 />
                 <TextField<User>
                     label="County"
-                    getter={(form) => getLocation(form)?.county}
-                    readonly
+                    getter={(form) => form.address.county}
+                    setter={(form, field) => ({
+                        ...form,
+                        address: {
+                            ...form.address,
+                            county: field?.slice(0, 50) ?? null,
+                        },
+                    })}
                 />
                 <TextField<User>
                     label="State"
-                    getter={(form) => getLocation(form)?.state}
+                    getter={(form) => form.address.state}
+                    setter={(form, field) => ({
+                        ...form,
+                        address: {
+                            ...form.address,
+                            state:
+                                field?.trim()?.toUpperCase()?.slice(0, 2) ??
+                                null,
+                        },
+                    })}
+                    validator={(field) => field?.length == 2}
+                />
+                <TextField<User>
+                    label="Zip Code"
+                    getter={(form) => form.address.zip}
+                    setter={(form, field) => ({
+                        ...form,
+                        address: {
+                            ...form.address,
+                            zip:
+                                field
+                                    ?.replace(/[^\d]/, '')
+                                    ?.padStart(5, '0')
+                                    ?.slice(-5) ?? null,
+                        },
+                    })}
+                    validator={(field) => field?.length == 5}
+                />
+            </FormGroup>
+
+            <FormGroup title="Membership Fulfillment (Mock)">
+                <DropDownField<User>
+                    label="Membership Card Shipped"
+                    field="membershipCardStatus"
+                    options={membershipCardShipmentOptions}
+                />
+                <DropDownField<User>
+                    label="Membership Merch Shipped"
+                    field="membershipMerchStatus"
+                    options={membershipMerchShipmentOptions}
+                />
+                <DropDownField<User>
+                    label="Shirt Size"
+                    field="shirtSize"
+                    options={shirtSizeOptions}
+                />
+                <CheckboxField<User>
+                    label="Dues Paying Member"
+                    field="duesPayingMember"
+                />
+                <DropDownField<User>
+                    label="Membership Fulfillment Status"
+                    field="membershipFulfillmentOptions"
+                    options={membershipFulfillmentStatusOptions}
+                />
+                <CheckboxField label="Name Confirmed" field="nameConfirmed" />
+                <CheckboxField
+                    label="Address Confirmed"
+                    field="addressConfirmed"
+                />
+                <TextField<User>
+                    label="Has Active Recurring"
                     readonly
+                    getter={getHasActiveRecurringValue}
                 />
             </FormGroup>
 

@@ -2,7 +2,7 @@
 
 import cx from 'classnames'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export interface ImageWithFallbackProps {
     src: string
@@ -23,6 +23,10 @@ export function ImageWithFallback({
 }: ImageWithFallbackProps) {
     const [hasErrored, setHasErrored] = useState(false)
 
+    useEffect(() => {
+        setHasErrored(false)
+    }, [src, useFallback])
+
     return (
         <Image
             src={
@@ -33,7 +37,7 @@ export function ImageWithFallback({
             alt={alt}
             width={width}
             height={height}
-            className={cx('aspect-square max-h-[48px] rounded-full', className)}
+            className={cx('aspect-square rounded-full object-cover', className)}
             onError={() => setHasErrored(true)}
         />
     )

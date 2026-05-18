@@ -31,6 +31,12 @@ export interface FormProps<T> {
     /** A title heading, listed above the form groups. */
     title: string
 
+    /** An optional subtitle displayed below the title. */
+    subtitle?: string
+
+    /** An optional avatar element displayed in the header. */
+    avatar?: React.ReactNode
+
     /** If this is true, no 'Edit' button will be displayed. */
     readonly?: boolean
 
@@ -53,7 +59,7 @@ export interface FormProps<T> {
     onUpdate?: (state: FormState<T>) => void
 
     /** Callback to save form data. Should correspond to `saving`. */
-    onSave: (form: T) => void
+    onSave?: (form: T) => void
 }
 
 /**
@@ -78,6 +84,8 @@ export interface FormProps<T> {
 export function Form<T>({
     form: initialForm,
     title,
+    subtitle,
+    avatar,
     readonly = false,
     isInvalid = false,
     saving = false,
@@ -115,7 +123,7 @@ export function Form<T>({
     // Called when 'Save' is pressed. Asks the parent component to save, and
     // then clears edit state.
     const handleSave = () => {
-        if (editForm) onSave(editForm)
+        if (editForm) onSave?.(editForm)
         setEditForm(null)
         setDirtyMap(new Set<string>())
         setInvalidMap(new Set<string>())
@@ -210,7 +218,15 @@ export function Form<T>({
     return (
         <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
             <header className={styles.header}>
-                <h1 className={styles.title}>{title}</h1>
+                <div className={styles.titleSection}>
+                    {avatar && <div className={styles.avatar}>{avatar}</div>}
+                    <div className={styles.titleContent}>
+                        <h1 className={styles.title}>{title}</h1>
+                        {subtitle && (
+                            <p className={styles.subtitle}>{subtitle}</p>
+                        )}
+                    </div>
+                </div>
 
                 {!readonly && (
                     <div className={styles.buttonRow}>

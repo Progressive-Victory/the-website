@@ -1,0 +1,514 @@
+.panelContents {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+}
+
+.dateContainer {
+    display: grid;
+    justify-items: end;
+    gap: 0.4rem;
+}
+
+.dateFilterControls {
+    display: grid;
+    justify-items: end;
+    gap: 0.4rem;
+    position: relative;
+    z-index: 30;
+}
+
+.dateFilterLabel {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.58);
+}
+
+.dateRangeTriggerButton {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    min-width: 12rem;
+    padding: 0.45rem 0.68rem;
+    border-radius: 0.62rem;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    background: rgba(255, 255, 255, 0.88);
+    color: rgba(9, 34, 58, 0.9);
+    font-size: 0.86rem;
+    font-weight: 650;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset;
+    transition:
+        border-color 140ms ease,
+        background-color 140ms ease,
+        box-shadow 140ms ease,
+        transform 140ms ease;
+}
+
+.dateRangeTriggerButton > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dateRangeTriggerChevron {
+    flex-shrink: 0;
+    color: rgba(15, 23, 42, 0.58);
+    stroke-width: 2.6;
+    transition: transform 140ms ease;
+}
+
+.dateRangeTriggerButton[aria-expanded='true'] .dateRangeTriggerChevron {
+    transform: rotate(180deg);
+}
+
+.dateRangeOptionList {
+    display: grid;
+    gap: 0.34rem;
+}
+
+.customRangeLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.dateRangeOptionButton {
+    border-radius: 0.54rem;
+    background: rgba(255, 255, 255, 0.78);
+    color: rgba(9, 34, 58, 0.9);
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.38rem 0.52rem;
+    cursor: pointer;
+}
+
+.dateRangeOptionButton:hover {
+    background: rgba(15, 23, 42, 0.05);
+}
+
+.dateRangeOptionButtonActive {
+    color: rgba(2, 132, 199, 1);
+    background: rgba(14, 165, 233, 0.14);
+}
+
+.dateRangeOptionButtonActive:hover {
+    color: rgba(2, 132, 199, 1);
+    background: rgba(84, 158, 214, 0.14);
+}
+
+.customDateRangeBox {
+    width: min(20rem, 85vw);
+    padding: 0.62rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    background: rgba(255, 255, 255, 0.94);
+    display: grid;
+    gap: 0.5rem;
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    z-index: 120;
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.16);
+    overflow-y: auto;
+}
+
+.customDateField {
+    display: grid;
+    gap: 0.24rem;
+}
+
+.customDateField label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.customDateField input {
+    width: 100%;
+    padding: 0.34rem 0.46rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(15, 23, 42, 0.16);
+    background: rgba(255, 255, 255, 0.8);
+    font-size: 0.84rem;
+}
+
+.customDateActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.42rem;
+}
+
+.setRangeButton {
+    margin-left: auto;
+}
+
+.cancelRangeButton,
+.setRangeButton {
+    border: none;
+    border-radius: 0.54rem;
+    padding: 0.34rem 0.56rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cancelRangeButton {
+    background: rgba(15, 23, 42, 0.08);
+    color: rgba(15, 23, 42, 0.7);
+}
+
+.cancelRangeButton:hover {
+    background: rgba(15, 23, 42, 0.12);
+}
+
+.setRangeButton {
+    background: rgba(9, 34, 58, 0.9);
+    color: #fff;
+}
+
+.setRangeButton:hover {
+    background: rgba(9, 34, 58, 0.98);
+}
+
+.setRangeButton:disabled {
+    background: rgba(9, 34, 58, 0.34);
+    cursor: not-allowed;
+}
+
+.panelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.35rem 1.25rem;
+    background-color: #f9fafb;
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    border-bottom: 2px solid #e5e7eb;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
+}
+
+.panelTimestamp {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.breadcrumbs {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.86rem;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.72);
+    user-select: none;
+}
+
+.prominentBreadcrumb {
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.72);
+}
+
+.breadcrumbSeperator {
+    color: rgba(15, 23, 42, 0.35);
+    font-weight: 700;
+}
+
+.panelBreadcrumb {
+    font-weight: 650;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.galleryHeader {
+    padding: 1.15rem 1.05rem 0.35rem;
+}
+
+.galleryTitle {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: rgba(9, 34, 58, 0.9);
+}
+
+.gallerySubTitle {
+    margin: 0.35rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.grid {
+    padding: 1.05rem 1.25rem 1.5rem;
+    display: grid;
+    gap: 1.1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    position: relative;
+    z-index: 1;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.74);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 22px 55px rgba(15, 23, 42, 0.12);
+    transition:
+        transform 160ms ease,
+        box-shadow 160ms ease,
+        background-color 160ms ease;
+}
+
+.card:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.78) inset,
+        0 26px 70px rgba(15, 23, 42, 0.16);
+}
+
+.card:active {
+    transform: translateY(0) scale(0.995);
+}
+
+.cardTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.cardLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.iconPill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.85rem;
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.72);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+.cardTitle {
+    margin-left: auto;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: rgba(9, 34, 58, 0.9);
+    text-align: right;
+}
+
+.cardCount {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 1rem;
+    border-radius: 1rem;
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.7);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.cardDescription {
+    font-size: 0.93rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.52);
+    line-height: 1.35;
+}
+
+.dashboard {
+    margin: 0.5rem 1.3rem 0;
+    padding: 1rem;
+    border-radius: 1.1rem;
+    position: relative;
+    z-index: 20;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+}
+
+.dashboardTopRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.dashboardSummaryGroup {
+    display: grid;
+    gap: 0.32rem;
+    min-width: 0;
+}
+
+.dashboardDateGroup {
+    min-width: 0;
+}
+
+.dashboardKicker {
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(206, 55, 40, 0.8);
+}
+
+.heroValue {
+    font-size: clamp(1.6rem, 3.8vw, 2.8rem);
+    font-weight: 900;
+    letter-spacing: -0.035em;
+    color: rgba(9, 34, 58, 0.9);
+    line-height: 1;
+}
+
+.metricGrid {
+    margin-top: 0.95rem;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.metricCard {
+    padding: 0.72rem 0.8rem;
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+.metricLabel {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.52);
+}
+
+.metricValue {
+    margin-top: 0.25rem;
+    font-size: 1.16rem;
+    font-weight: 850;
+    letter-spacing: -0.025em;
+    color: rgba(9, 34, 58, 0.9);
+}
+
+.metricMeta {
+    margin-top: 0.18rem;
+    font-size: 0.73rem;
+    font-weight: 650;
+    color: rgba(15, 23, 42, 0.48);
+}
+
+.splitTrack {
+    margin-top: 0.88rem;
+    display: grid;
+    gap: 0.48rem;
+}
+
+.splitRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.74rem;
+    font-weight: 760;
+    letter-spacing: 0.01em;
+    color: rgba(15, 23, 42, 0.65);
+}
+
+.trackBar {
+    width: 100%;
+    height: 0.42rem;
+    border-radius: 99rem;
+    overflow: hidden;
+    background: rgba(15, 23, 42, 0.1);
+}
+
+.trackFillRecurring,
+.trackFillOneTime {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+}
+
+.trackFillRecurring {
+    background: linear-gradient(90deg, #9fc9e8, #549ed6);
+}
+
+.trackFillOneTime {
+    background: linear-gradient(90deg, #ebafa9, #ce3728);
+}
+
+@media (max-width: 72rem) {
+    .metricGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 42rem) {
+    .panelHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+
+    .dashboard {
+        margin: 0.5rem 1rem 0;
+        padding: 0.88rem;
+    }
+
+    .dashboardTopRow {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dashboardDateGroup {
+        width: 100%;
+    }
+
+    .dateContainer,
+    .dateFilterControls {
+        width: 100%;
+        justify-items: stretch;
+    }
+
+    .dateRangeTriggerButton {
+        min-width: 0;
+    }
+
+    .customDateRangeBox {
+        width: 100%;
+        right: auto;
+        left: 0;
+    }
+
+    .metricGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
