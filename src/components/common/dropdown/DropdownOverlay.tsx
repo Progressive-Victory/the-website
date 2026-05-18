@@ -4,8 +4,7 @@ import styles from './DropdownOverlay.module.css'
 import { forwardRef } from 'react'
 import { FiX } from 'react-icons/fi'
 
-export interface DropdownOverlayProps
-    extends React.HTMLAttributes<HTMLDivElement> {
+export interface DropdownOverlayProps extends React.HTMLAttributes<HTMLDivElement> {
     header?: React.ReactNode
     label?: React.ReactNode
     onClose?: () => void
@@ -43,11 +42,15 @@ export const DropdownOverlay = forwardRef<HTMLDivElement, DropdownOverlayProps>(
         },
         ref
     ) {
-        const shellClassName = [styles.shell, className].filter(Boolean).join(' ')
+        const shellClassName = [styles.shell, className]
+            .filter(Boolean)
+            .join(' ')
         const headerClasses = [styles.header, headerClassName]
             .filter(Boolean)
             .join(' ')
-        const bodyClasses = [styles.body, bodyClassName].filter(Boolean).join(' ')
+        const bodyClasses = [styles.body, bodyClassName]
+            .filter(Boolean)
+            .join(' ')
         const footerClasses = [styles.footer, footerClassName]
             .filter(Boolean)
             .join(' ')

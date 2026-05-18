@@ -24,7 +24,14 @@ function endOfDayDate(d: Date) {
 }
 
 function startOfHourDate(d: Date) {
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), 0, 0)
+    return new Date(
+        d.getFullYear(),
+        d.getMonth(),
+        d.getDate(),
+        d.getHours(),
+        0,
+        0
+    )
 }
 
 function endOfHourDate(d: Date) {
@@ -71,7 +78,11 @@ function buildHourBuckets(start: Date, end: Date): ChartBucket[] {
     const buckets: ChartBucket[] = []
 
     const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate())
-    let currentDay = new Date(start.getFullYear(), start.getMonth(), start.getDate())
+    let currentDay = new Date(
+        start.getFullYear(),
+        start.getMonth(),
+        start.getDate()
+    )
 
     while (currentDay.getTime() <= endDay.getTime()) {
         for (let hour = 0; hour < 24; hour += 1) {
@@ -88,7 +99,9 @@ function buildHourBuckets(start: Date, end: Date): ChartBucket[] {
 
             buckets.push({
                 key: `h-${currentDay.getFullYear()}-${currentDay.getMonth() + 1}-${currentDay.getDate()}-${hour}`,
-                label: hourDate.toLocaleDateString('en-US', { hour: 'numeric' }),
+                label: hourDate.toLocaleDateString('en-US', {
+                    hour: 'numeric',
+                }),
                 anchorIso: bStart.toISOString(),
                 startIso: bStart.toISOString(),
                 endIso: bEnd.toISOString(),
@@ -96,7 +109,11 @@ function buildHourBuckets(start: Date, end: Date): ChartBucket[] {
             })
         }
 
-        currentDay = new Date(currentDay.getFullYear(), currentDay.getMonth(), currentDay.getDate() + 1)
+        currentDay = new Date(
+            currentDay.getFullYear(),
+            currentDay.getMonth(),
+            currentDay.getDate() + 1
+        )
     }
 
     return buckets

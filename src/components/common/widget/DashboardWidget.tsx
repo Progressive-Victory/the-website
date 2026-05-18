@@ -3,8 +3,7 @@
 import styles from './DashboardWidget.module.css'
 import { forwardRef } from 'react'
 
-export interface DashboardWidgetProps
-    extends React.HTMLAttributes<HTMLElement> {
+export interface DashboardWidgetProps extends React.HTMLAttributes<HTMLElement> {
     title: string
     value: React.ReactNode
     stat1: React.ReactNode
@@ -12,7 +11,10 @@ export interface DashboardWidgetProps
 }
 
 export const DashboardWidget = forwardRef<HTMLElement, DashboardWidgetProps>(
-    function DashboardWidget({ title, value, stat1, stat2, className, ...props }, ref) {
+    function DashboardWidget(
+        { title, value, stat1, stat2, className, ...props },
+        ref
+    ) {
         return (
             <article
                 ref={ref}
