@@ -90,7 +90,7 @@ export default function Page() {
         >['onSearch']
     }
 
-    const roles = useMemo(() => rolesQuery.data?.data ?? [], [rolesQuery.data])
+    const roles = rolesQuery.data?.data ?? []
     const roleOptions = useMemo(
         () =>
             (rolesQuery.data?.data ?? []).map((role) => ({
@@ -389,7 +389,7 @@ export default function Page() {
         )
     }
 
-    const pane = (() => {
+    const renderPage = () => {
         if (!selectedId || !userQuery.data) return null
 
         switch (selectedTab) {
@@ -449,7 +449,7 @@ export default function Page() {
             default:
                 return null
         }
-    })()
+    }
 
     return (
         <>
@@ -587,7 +587,7 @@ export default function Page() {
                                 />
                             </div>
                         </div>
-                        <div className={styles.detailsContent}>{pane}</div>
+                        <div className={styles.detailsContent}>{renderPage()}</div>
                     </>
                 )}
             </div>
