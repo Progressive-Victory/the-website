@@ -32,6 +32,23 @@
     outline-offset: 1px;
 }
 
+.input::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+    appearance: none;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.input::-webkit-inner-spin-button,
+.input::-webkit-clear-button {
+    display: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
 .separator {
     font-size: 0.78rem;
     font-weight: 600;
