@@ -1,5 +1,3 @@
-import { SupportNote } from './SupportNote'
-
 export function BannedStage() {
     return (
         <div
