@@ -8,8 +8,8 @@ import {
     PhoneVerifyStage,
     UnderageStage,
 } from '.'
-import { NotCitizenStage } from './NotCitizenStage'
 import { BannedStage } from './BannedStage'
+import { NotCitizenStage } from './NotCitizenStage'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import { OnboardingStage } from '@/contracts/data'

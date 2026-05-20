@@ -5,8 +5,9 @@ export function BannedStage() {
             style={{ marginBottom: 30 + 'px' }}
         >
             <p className="mb-3 mt-6 text-center text-lg font-bold text-white">
-                You have been banned from the discord server. You can appeal by reaching out here: Community@progress.win</p>
-            
+                You have been banned from the discord server. You can appeal by
+                reaching out here: Community@progress.win
+            </p>
         </div>
     )
 }
