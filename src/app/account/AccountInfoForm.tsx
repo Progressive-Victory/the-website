@@ -1,4 +1,5 @@
 import styles from './account.module.css'
+import { stateOptions } from './stateOptions'
 import {
     Form,
     DateField,
@@ -10,7 +11,6 @@ import {
 import { User } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useState } from 'react'
-import { stateOptions } from './stateOptions'
 
 interface AccountInfoFormProps {
     user: User

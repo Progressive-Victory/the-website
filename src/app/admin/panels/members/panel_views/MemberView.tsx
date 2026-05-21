@@ -1,5 +1,6 @@
 'use client'
 
+import { stateOptions } from '@/app/account/stateOptions'
 import {
     CheckboxField,
     DateField,
@@ -13,7 +14,6 @@ import {
 } from '@/components/common/forms'
 import { Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
-import { stateOptions } from '@/app/account/stateOptions'
 
 const membershipCardShipmentOptions = [
     { value: 0, label: 'Not Eligible' },
@@ -230,16 +230,16 @@ export function MemberView({
                     })}
                 />
                 <DropDownField<User>
-                        label="State"
-                        getter={(user) => user.address.state}
-                        setter={(user, field) => ({
-                            ...user,
-                            address: {
-                                ...user.address,
-                                state: (field as string) ?? null,
-                            },
-                        })}
-                        options={stateOptions}
+                    label="State"
+                    getter={(user) => user.address.state}
+                    setter={(user, field) => ({
+                        ...user,
+                        address: {
+                            ...user.address,
+                            state: (field as string) ?? null,
+                        },
+                    })}
+                    options={stateOptions}
                 />
                 <TextField<User>
                     label="Zip Code"
