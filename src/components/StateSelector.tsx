@@ -8,9 +8,13 @@ export const StateSelector = ({
     return (
         <select
             defaultValue={initialValue}
-            onChange={(e) => { onUpdate(e.target.value)}}
+            onChange={(e) => {
+                onUpdate(e.target.value)
+            }}
         >
-            <option value="" disabled>Select state</option>
+            <option value="" disabled>
+                Select state
+            </option>
             <option value="AL">Alabama</option>
             <option value="AK">Alaska</option>
             <option value="AZ">Arizona</option>
