@@ -13,6 +13,7 @@ import {
 } from '@/components/common/forms'
 import { Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
+import { stateOptions } from '@/app/account/stateOptions'
 
 const membershipCardShipmentOptions = [
     { value: 0, label: 'Not Eligible' },
@@ -228,19 +229,17 @@ export function MemberView({
                         },
                     })}
                 />
-                <TextField<User>
-                    label="State"
-                    getter={(form) => form.address.state}
-                    setter={(form, field) => ({
-                        ...form,
-                        address: {
-                            ...form.address,
-                            state:
-                                field?.trim()?.toUpperCase()?.slice(0, 2) ??
-                                null,
-                        },
-                    })}
-                    validator={(field) => field?.length == 2}
+                <DropDownField<User>
+                        label="State"
+                        getter={(user) => user.address.state}
+                        setter={(user, field) => ({
+                            ...user,
+                            address: {
+                                ...user.address,
+                                state: (field as string) ?? null,
+                            },
+                        })}
+                        options={stateOptions}
                 />
                 <TextField<User>
                     label="Zip Code"
