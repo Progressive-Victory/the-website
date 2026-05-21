@@ -8,6 +8,7 @@ import { FaUsers, FaUserShield, FaUserTag, FaDonate } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 import { FiChevronLeft } from 'react-icons/fi'
 import type { IconType } from 'react-icons/lib'
+import { MdHowToVote } from 'react-icons/md'
 import { useLocalStorage } from 'usehooks-ts'
 
 interface SidebarProps {
@@ -16,6 +17,7 @@ interface SidebarProps {
     permissionCount?: number
     donorCount?: number
     contributionCount?: number
+    endorsementCount?: number
 }
 
 export default function Sidebar({
@@ -24,6 +26,7 @@ export default function Sidebar({
     permissionCount,
     donorCount,
     contributionCount,
+    endorsementCount,
 }: SidebarProps) {
     const [open, setOpen] = useLocalStorage('pv.admin-nav-open', true)
 
@@ -83,6 +86,13 @@ export default function Sidebar({
                     href="/admin/panels/permissions"
                     icon={FaUserShield}
                     count={permissionCount}
+                    open={open}
+                />
+                <NavLink
+                    title="Endorsements"
+                    href="/admin/panels/endorsements"
+                    icon={MdHowToVote}
+                    count={endorsementCount}
                     open={open}
                 />
                 <NavLink

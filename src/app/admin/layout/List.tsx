@@ -31,6 +31,7 @@ export interface ListProps {
     count: number | undefined
     isPending: boolean
     error: Error | null
+    emptyMessage?: string
 
     searchFields?: FieldOption[]
     sortFields?: FieldOption[]
@@ -210,13 +211,19 @@ export function ListTop({
 
 type ListBodyProps = Pick<
     ListProps,
-    'count' | 'isPending' | 'error' | 'pinnedContent' | 'children'
+    | 'count'
+    | 'isPending'
+    | 'error'
+    | 'emptyMessage'
+    | 'pinnedContent'
+    | 'children'
 >
 
 export function ListBody({
     count,
     isPending,
     error,
+    emptyMessage,
     pinnedContent,
     children,
 }: ListBodyProps) {
@@ -228,7 +235,7 @@ export function ListBody({
                 ) : error ? (
                     <span color="#ef4444">Error: {error.message}</span>
                 ) : (
-                    <span>No results found</span>
+                    <span>{emptyMessage ?? 'No results found'}</span>
                 )}
             </div>
         )

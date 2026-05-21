@@ -1,0 +1,219 @@
+.rightPane {
+    height: calc(100dvh - 100px);
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+    padding-bottom: 1rem;
+}
+
+.paneHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    background-color: #f9fafb;
+
+    border-bottom: 2px solid rgba(17, 24, 39, 0.1);
+
+    padding-block: 0.87rem;
+    padding-right: 0.85rem;
+    padding-left: 0.6rem;
+}
+
+.paneHeaderRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    width: 100%;
+}
+
+.paneHeaderTitle {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.7);
+}
+
+.actionBar {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.createButton,
+.deleteButton {
+    border: 0;
+    border-radius: 0.5rem;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+}
+
+.createButton {
+    background-color: #2986cc;
+}
+
+.createButton:hover {
+    background-color: #236fa8;
+}
+
+.deleteButton {
+    background-color: #dc2626;
+}
+
+.deleteButton:hover {
+    background-color: #b91c1c;
+}
+
+.deleteButton:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.listItemRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.listItemName {
+    font-weight: 500;
+    color: #000;
+}
+
+.emptyState {
+    height: calc(100% - 3rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.permissionWarning {
+    margin: 0 1.5rem 0.75rem;
+    border: 1px solid #f59e0b;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.55rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.modalBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: grid;
+    place-items: center;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+}
+
+.modal {
+    width: min(680px, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+    overflow: hidden;
+    border-radius: 1rem;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+    display: flex;
+    flex-direction: column;
+}
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.modalTitle {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #09223a;
+}
+
+.modalCloseButton {
+    border: 0;
+    border-radius: 0.5rem;
+    background: #e2e8f0;
+    color: #1e293b;
+    padding: 0.4rem 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.modalBody {
+    overflow-y: auto;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.popupField {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.popupField span {
+    color: #09223a;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.popupField input {
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.95rem;
+}
+
+.popupCheckRow {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: #0f172a;
+    font-weight: 500;
+}
+
+.modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.9rem 1.25rem 1.1rem;
+    border-top: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.modalSecondaryButton,
+.modalPrimaryButton {
+    border: 0;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.modalSecondaryButton {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.modalPrimaryButton {
+    background: #15803d;
+    color: #fff;
+}
+
+.modalPrimaryButton:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
