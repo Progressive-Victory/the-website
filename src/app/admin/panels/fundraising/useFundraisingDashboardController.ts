@@ -33,6 +33,23 @@ type OnGet = <R>(
     options?: GetOptions
 ) => Promise<R>
 
+type ChartBarDisplayMode = 'grouped' | 'stacked'
+
+function isSameLocalDay(aIso: string, bIso: string): boolean {
+    const a = new Date(aIso)
+    const b = new Date(bIso)
+
+    if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) {
+        return false
+    }
+
+    return (
+        a.getFullYear() === b.getFullYear() &&
+        a.getMonth() === b.getMonth() &&
+        a.getDate() === b.getDate()
+    )
+}
+
 function formatFullLabel(
     anchorIso: string,
     granularity: Exclude<ChartGranularityMode, 'auto'>
@@ -94,9 +111,16 @@ export function useFundraisingDashboardController(onGet: OnGet) {
     const [smoothLine, setSmoothLine] = useState(true)
     const [showAreaFill, setShowAreaFill] = useState(true)
     const [showDonationsLine, setShowDonationsLine] = useState(true)
+    const [chartBarDisplayMode, setChartBarDisplayMode] =
+        useState<ChartBarDisplayMode>('grouped')
+    const [zoomEnabled, setZoomEnabled] = useState(true)
     const [showFullXToDateSpan, setShowFullXToDateSpan] = useState(false)
     const [granularityMode, setGranularityMode] =
         useState<ChartGranularityMode>('auto')
+    const [chartViewOverrideRange, setChartViewOverrideRange] = useState<{
+        startIso: string
+        endIso: string
+    } | null>(null)
 
     const isAllTime = !startDate && !endDate
 
@@ -144,38 +168,77 @@ export function useFundraisingDashboardController(onGet: OnGet) {
         )
     }, [statsQuery.data])
 
-    const chartEndDate = useMemo(() => {
-        if (!showFullXToDateSpan) return endDate
-        if (!isXToDatePreset(committedPreset)) return endDate
+    const selectedChartStartDate = startDate
+    const selectedChartBaseEndDate = endDate
+
+    const selectedChartEndDate = useMemo(() => {
+        if (!showFullXToDateSpan) return selectedChartBaseEndDate
+        if (!isXToDatePreset(committedPreset)) return selectedChartBaseEndDate
         return getExtendedEndForXToDatePreset(
             committedPreset,
-            startDate,
-            endDate
+            selectedChartStartDate,
+            selectedChartBaseEndDate
         )
-    }, [showFullXToDateSpan, committedPreset, startDate, endDate])
+    }, [
+        showFullXToDateSpan,
+        committedPreset,
+        selectedChartStartDate,
+        selectedChartBaseEndDate,
+    ])
+
+    const chartViewStartDate = chartViewOverrideRange?.startIso ?? startDate
+    const chartViewBaseEndDate = chartViewOverrideRange?.endIso ?? endDate
+
+    const chartEndDate = useMemo(() => {
+        if (chartViewOverrideRange) return chartViewBaseEndDate
+        if (!showFullXToDateSpan) return chartViewBaseEndDate
+        if (!isXToDatePreset(committedPreset)) return chartViewBaseEndDate
+        return getExtendedEndForXToDatePreset(
+            committedPreset,
+            chartViewStartDate,
+            chartViewBaseEndDate
+        )
+    }, [
+        chartViewOverrideRange,
+        chartViewBaseEndDate,
+        showFullXToDateSpan,
+        committedPreset,
+        chartViewStartDate,
+    ])
 
     const validGranularityModes = useMemo(
-        () => getValidChartGranularityModes(startDate, chartEndDate),
-        [startDate, chartEndDate]
+        () => getValidChartGranularityModes(chartViewStartDate, chartEndDate),
+        [chartViewStartDate, chartEndDate]
     )
 
     const chartBuckets = useMemo(
         () =>
             buildChartBuckets(
-                startDate,
+                chartViewStartDate,
                 chartEndDate,
                 allTimeFirstIso,
                 granularityMode,
-                committedPreset === 'All Time'
+                !chartViewOverrideRange && committedPreset === 'All Time'
             ),
         [
-            startDate,
+            chartViewStartDate,
             chartEndDate,
             allTimeFirstIso,
             granularityMode,
+            chartViewOverrideRange,
             committedPreset,
         ]
     )
+
+    useEffect(() => {
+        setChartViewOverrideRange(null)
+    }, [startDate, endDate, committedPreset])
+
+    useEffect(() => {
+        if (!zoomEnabled) {
+            setChartViewOverrideRange(null)
+        }
+    }, [zoomEnabled])
 
     const chartBucketQueries = useQueries({
         queries: chartBuckets.map((bucket) => ({
@@ -203,6 +266,8 @@ export function useFundraisingDashboardController(onGet: OnGet) {
             return {
                 key: bucket.key,
                 anchorIso: bucket.anchorIso,
+                startIso: bucket.startIso,
+                endIso: bucket.endIso,
                 granularity: bucket.granularity,
                 label: bucket.label,
                 fullLabel: formatFullLabel(
@@ -242,6 +307,49 @@ export function useFundraisingDashboardController(onGet: OnGet) {
 
     const isXToDateSpanOptionRelevant = isXToDatePreset(committedPreset)
 
+    const applyChartViewOverrideRange = (range: {
+        startIso: string
+        endIso: string
+    }) => {
+        const selectedStart = selectedChartStartDate
+        const selectedEnd = selectedChartEndDate
+
+        if (range.startIso === selectedStart && range.endIso === selectedEnd) {
+            setChartViewOverrideRange(null)
+            return
+        }
+
+        const oneDayMs = 24 * 60 * 60 * 1000
+        const selectedInclusiveMs =
+            new Date(selectedEnd).getTime() -
+            new Date(selectedStart).getTime() +
+            1000
+        const selectedIsOneDayWindow =
+            Number.isFinite(selectedInclusiveMs) &&
+            selectedInclusiveMs >= oneDayMs &&
+            selectedInclusiveMs < oneDayMs * 2
+
+        if (
+            selectedIsOneDayWindow &&
+            isSameLocalDay(range.startIso, selectedStart) &&
+            isSameLocalDay(range.endIso, selectedEnd)
+        ) {
+            setChartViewOverrideRange(null)
+            return
+        }
+
+        setChartViewOverrideRange(range)
+    }
+
+    const chartViewOverrideActive =
+        chartViewOverrideRange != null &&
+        (chartViewOverrideRange.startIso !== selectedChartStartDate ||
+            chartViewOverrideRange.endIso !== selectedChartEndDate)
+
+    const resetChartViewToSelectedRange = () => {
+        setChartViewOverrideRange(null)
+    }
+
     return {
         isAllTime,
         startDate,
@@ -253,6 +361,8 @@ export function useFundraisingDashboardController(onGet: OnGet) {
         smoothLine,
         showAreaFill,
         showDonationsLine,
+        chartBarDisplayMode,
+        zoomEnabled,
         showFullXToDateSpan,
         granularityMode,
         selectedRangeLabel,
@@ -261,6 +371,7 @@ export function useFundraisingDashboardController(onGet: OnGet) {
         oneTimePct,
         validGranularityModes,
         chartPoints,
+        chartViewOverrideActive,
         allTimeFirstIso,
         isXToDateSpanOptionRelevant,
         hasValidDraft,
@@ -277,7 +388,11 @@ export function useFundraisingDashboardController(onGet: OnGet) {
         setSmoothLine,
         setShowAreaFill,
         setShowDonationsLine,
+        setChartBarDisplayMode,
+        setZoomEnabled,
         setShowFullXToDateSpan,
         setGranularityMode,
+        applyChartViewOverrideRange,
+        resetChartViewToSelectedRange,
     }
 }

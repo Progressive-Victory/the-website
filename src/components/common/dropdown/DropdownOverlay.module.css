@@ -1,4 +1,5 @@
 .shell {
+    box-sizing: border-box;
     width: max-content;
     max-width: 92dvw;
     padding: 0.62rem;

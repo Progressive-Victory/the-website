@@ -28,6 +28,8 @@ export type ChartGranularity =
 export interface ChartPoint {
     key: string
     anchorIso?: string
+    startIso?: string
+    endIso?: string
     granularity?: ChartGranularity
     label?: string
     fullLabel: string
@@ -70,6 +72,8 @@ interface DualAxisBarLineTableConfig {
     lineHeader: string
 }
 
+type ChartBarDisplayMode = 'grouped' | 'stacked'
+
 interface ChartProps {
     title?: string
     hint?: string
@@ -77,6 +81,7 @@ interface ChartProps {
     smoothLine?: boolean
     showAreaFill?: boolean
     showLine?: boolean
+    barDisplayMode?: ChartBarDisplayMode
     headerRight?: ReactNode
     seriesLabels?: Partial<DualAxisBarLineChartSeriesLabels>
     valueFormatters?: DualAxisBarLineChartValueFormatters
@@ -85,6 +90,8 @@ interface ChartProps {
     ariaLabel?: string
     chartAriaLabel?: string
     tableConfig?: Partial<DualAxisBarLineTableConfig>
+    onRangeSelect?: (range: { startIso: string; endIso: string }) => void
+    cornerTopRight?: ReactNode
 }
 
 const DEFAULT_COLORS: DualAxisBarLineChartColors = {
@@ -103,6 +110,8 @@ const COLOR_YEAR_DIVIDER = 'rgba(15, 23, 42, 0.32)'
 const COLOR_YEAR_LABEL_BG = 'rgba(15, 23, 42, 0.06)'
 const COLOR_YEAR_LABEL = 'rgba(15, 23, 42, 0.55)'
 const COLOR_HOVER_BAND = 'rgba(107, 68, 197, 0.08)'
+const COLOR_DRAG_BAND = 'rgba(14, 165, 233, 0.16)'
+const COLOR_DRAG_BAND_EDGE = 'rgba(2, 132, 199, 0.6)'
 
 const PADDING_LEFT = 56
 const PADDING_RIGHT = 52
@@ -139,6 +148,7 @@ export function Chart({
     smoothLine = true,
     showAreaFill = true,
     showLine = true,
+    barDisplayMode = 'grouped',
     headerRight,
     seriesLabels,
     valueFormatters,
@@ -147,6 +157,8 @@ export function Chart({
     ariaLabel,
     chartAriaLabel,
     tableConfig,
+    onRangeSelect,
+    cornerTopRight,
 }: ChartProps) {
     const labels: DualAxisBarLineChartSeriesLabels = {
         primaryBar: seriesLabels?.primaryBar ?? 'Primary Series',
@@ -190,6 +202,9 @@ export function Chart({
         y: number
     } | null>(null)
     const [tooltipSide, setTooltipSide] = useState<'left' | 'right'>('left')
+    const [dragStartIdx, setDragStartIdx] = useState<number | null>(null)
+    const [dragCurrentIdx, setDragCurrentIdx] = useState<number | null>(null)
+    const [dragPointerId, setDragPointerId] = useState<number | null>(null)
 
     useEffect(() => {
         const node = wrapRef.current
@@ -273,12 +288,14 @@ export function Chart({
     const barScale = useMemo(() => {
         const max = Math.max(
             ...points.map((p) =>
-                Math.max(p.primaryBarValue, p.secondaryBarValue)
+                barDisplayMode === 'stacked'
+                    ? p.primaryBarValue + p.secondaryBarValue
+                    : Math.max(p.primaryBarValue, p.secondaryBarValue)
             ),
             0
         )
         return niceScale(Math.max(max, 5), 6, false)
-    }, [points])
+    }, [points, barDisplayMode])
 
     const lineScale = useMemo(() => {
         const max = Math.max(...points.map((p) => p.lineValue), 0)
@@ -436,6 +453,34 @@ export function Chart({
             ctx.fillRect(cx - bandW / 2, g.plotTop, bandW, g.plotHeight)
         }
 
+        if (
+            dragStartIdx != null &&
+            dragCurrentIdx != null &&
+            dragStartIdx >= 0 &&
+            dragCurrentIdx >= 0 &&
+            dragStartIdx < points.length &&
+            dragCurrentIdx < points.length
+        ) {
+            const rangeStart = Math.min(dragStartIdx, dragCurrentIdx)
+            const rangeEnd = Math.max(dragStartIdx, dragCurrentIdx)
+            const startCenter = getColumnCenter(g, rangeStart, points.length)
+            const endCenter = getColumnCenter(g, rangeEnd, points.length)
+            const left = startCenter - g.columnWidth / 2
+            const right = endCenter + g.columnWidth / 2
+
+            ctx.fillStyle = COLOR_DRAG_BAND
+            ctx.fillRect(left, g.plotTop, right - left, g.plotHeight)
+
+            ctx.strokeStyle = COLOR_DRAG_BAND_EDGE
+            ctx.lineWidth = 1
+            ctx.beginPath()
+            ctx.moveTo(Math.round(left) + 0.5, g.plotTop)
+            ctx.lineTo(Math.round(left) + 0.5, g.plotBottom)
+            ctx.moveTo(Math.round(right) + 0.5, g.plotTop)
+            ctx.lineTo(Math.round(right) + 0.5, g.plotBottom)
+            ctx.stroke()
+        }
+
         const groupAvailable = Math.max(
             0,
             g.columnWidth * (1 - GROUP_GAP_RATIO)
@@ -443,6 +488,10 @@ export function Chart({
         const barWidth = Math.max(
             BAR_MIN_WIDTH,
             Math.min(BAR_MAX_WIDTH, (groupAvailable - BAR_GAP) / 2)
+        )
+        const stackedBarWidth = Math.max(
+            BAR_MIN_WIDTH,
+            Math.min(BAR_MAX_WIDTH * 2 + BAR_GAP, groupAvailable)
         )
 
         for (let i = 0; i < points.length; i += 1) {
@@ -461,33 +510,80 @@ export function Chart({
                 secondaryRatio * g.plotHeight
             )
 
-            const primaryX = cx - barWidth - BAR_GAP / 2
-            const secondaryX = cx + BAR_GAP / 2
             const baseY = g.plotBottom
 
-            ctx.fillStyle = palette.primaryBar
-            roundRect(
-                ctx,
-                primaryX,
-                baseY - primaryHeight,
-                barWidth,
-                primaryHeight,
-                Math.min(3, barWidth / 2),
-                true
-            )
-            ctx.fill()
+            if (barDisplayMode === 'stacked') {
+                const stackedX = cx - stackedBarWidth / 2
+                const stackedHeight = secondaryHeight + primaryHeight
 
-            ctx.fillStyle = palette.secondaryBar
-            roundRect(
-                ctx,
-                secondaryX,
-                baseY - secondaryHeight,
-                barWidth,
-                secondaryHeight,
-                Math.min(3, barWidth / 2),
-                true
-            )
-            ctx.fill()
+                if (stackedHeight > 0) {
+                    const stackedY = baseY - stackedHeight
+                    const stackedRadius = Math.min(4, stackedBarWidth / 2)
+
+                    // Clip segment fills to one rounded outer stack so top corners
+                    // stay visually consistent regardless of one-time segment size.
+                    ctx.save()
+                    roundRect(
+                        ctx,
+                        stackedX,
+                        stackedY,
+                        stackedBarWidth,
+                        stackedHeight,
+                        stackedRadius,
+                        true
+                    )
+                    ctx.clip()
+
+                    if (secondaryHeight > 0) {
+                        ctx.fillStyle = palette.secondaryBar
+                        ctx.fillRect(
+                            stackedX,
+                            baseY - secondaryHeight,
+                            stackedBarWidth,
+                            secondaryHeight
+                        )
+                    }
+
+                    if (primaryHeight > 0) {
+                        ctx.fillStyle = palette.primaryBar
+                        ctx.fillRect(
+                            stackedX,
+                            baseY - stackedHeight,
+                            stackedBarWidth,
+                            primaryHeight
+                        )
+                    }
+
+                    ctx.restore()
+                }
+            } else {
+                const primaryX = cx - barWidth - BAR_GAP / 2
+                const secondaryX = cx + BAR_GAP / 2
+
+                ctx.fillStyle = palette.primaryBar
+                roundRect(
+                    ctx,
+                    primaryX,
+                    baseY - primaryHeight,
+                    barWidth,
+                    primaryHeight,
+                    Math.min(3, barWidth / 2),
+                    true
+                )
+                ctx.fill()
+
+                ctx.fillStyle = palette.secondaryBar
+                roundRect(
+                    ctx,
+                    secondaryX,
+                    baseY - secondaryHeight,
+                    barWidth,
+                    secondaryHeight,
+                    Math.min(3, barWidth / 2),
+                    true
+                )
+                ctx.fill()
+            }
         }
 
         if (showLine && points.length > 0 && lineScale.max > 0) {
@@ -683,13 +779,25 @@ export function Chart({
         yearDividers,
         spansYears,
         hoverIdx,
+        dragStartIdx,
+        dragCurrentIdx,
         smoothLine,
         showAreaFill,
         showLine,
         leftAxisFormatter,
         rightAxisFormatter,
         palette,
+        barDisplayMode,
     ])
+
+    function getIndexAtX(x: number) {
+        const g = geometry
+        const ratio = (x - g.plotLeft) / g.plotWidth
+        return Math.min(
+            points.length - 1,
+            Math.max(0, Math.floor(ratio * points.length))
+        )
+    }
 
     function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
         const canvas = canvasRef.current
@@ -698,6 +806,20 @@ export function Chart({
         const x = e.clientX - rect.left
         const y = e.clientY - rect.top
         const g = geometry
+
+        if (dragPointerId != null && e.pointerId === dragPointerId) {
+            if (
+                x >= g.plotLeft &&
+                x <= g.plotRight &&
+                y >= g.plotTop &&
+                y <= g.plotBottom &&
+                points.length > 0
+            ) {
+                setDragCurrentIdx(getIndexAtX(x))
+            }
+            return
+        }
+
         if (
             x < g.plotLeft ||
             x > g.plotRight ||
@@ -708,17 +830,81 @@ export function Chart({
             if (hoverIdx !== null) setHoverIdx(null)
             return
         }
-        const ratio = (x - g.plotLeft) / g.plotWidth
-        const idx = Math.min(
-            points.length - 1,
-            Math.max(0, Math.floor(ratio * points.length))
-        )
+        const idx = getIndexAtX(x)
         setHoverIdx(idx)
         const cx = getColumnCenter(g, idx, points.length)
         setHoverPos({ x: cx, y })
     }
 
+    function onPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
+        if (!onRangeSelect) return
+
+        const canvas = canvasRef.current
+        if (!canvas || points.length === 0) return
+
+        const rect = canvas.getBoundingClientRect()
+        const x = e.clientX - rect.left
+        const y = e.clientY - rect.top
+        const g = geometry
+
+        if (
+            x < g.plotLeft ||
+            x > g.plotRight ||
+            y < g.plotTop ||
+            y > g.plotBottom
+        ) {
+            return
+        }
+
+        const idx = getIndexAtX(x)
+        setDragStartIdx(idx)
+        setDragCurrentIdx(idx)
+        setDragPointerId(e.pointerId)
+        setHoverIdx(null)
+        canvas.setPointerCapture(e.pointerId)
+    }
+
+    function onPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
+        const canvas = canvasRef.current
+        if (!canvas) return
+
+        if (dragPointerId == null || e.pointerId !== dragPointerId) return
+
+        if (dragStartIdx != null && dragCurrentIdx != null && onRangeSelect) {
+            const low = Math.min(dragStartIdx, dragCurrentIdx)
+            const high = Math.max(dragStartIdx, dragCurrentIdx)
+            const first = points[low]
+            const last = points[high]
+            const startIso = first?.startIso ?? first?.anchorIso
+            const endIso = last?.endIso ?? last?.anchorIso
+
+            if (startIso && endIso) {
+                onRangeSelect({ startIso, endIso })
+            }
+        }
+
+        if (canvas.hasPointerCapture(e.pointerId)) {
+            canvas.releasePointerCapture(e.pointerId)
+        }
+        setDragPointerId(null)
+        setDragStartIdx(null)
+        setDragCurrentIdx(null)
+    }
+
+    function onPointerCancel(e: React.PointerEvent<HTMLCanvasElement>) {
+        const canvas = canvasRef.current
+        if (!canvas) return
+        if (dragPointerId == null || e.pointerId !== dragPointerId) return
+        if (canvas.hasPointerCapture(e.pointerId)) {
+            canvas.releasePointerCapture(e.pointerId)
+        }
+        setDragPointerId(null)
+        setDragStartIdx(null)
+        setDragCurrentIdx(null)
+    }
+
     function onPointerLeave() {
+        if (dragPointerId != null) return
         setHoverIdx(null)
     }
 
@@ -769,6 +955,12 @@ export function Chart({
             </div>
 
             <div ref={wrapRef} className={styles.canvasWrap}>
+                {cornerTopRight ? (
+                    <div className={styles.cornerTopRight}>
+                        {cornerTopRight}
+                    </div>
+                ) : null}
+
                 <canvas
                     ref={canvasRef}
                     className={styles.canvas}
@@ -777,7 +969,10 @@ export function Chart({
                         chartAriaLabel ??
                         `${title} across ${points.length} periods`
                     }
+                    onPointerDown={onPointerDown}
                     onPointerMove={onPointerMove}
+                    onPointerUp={onPointerUp}
+                    onPointerCancel={onPointerCancel}
                     onPointerLeave={onPointerLeave}
                 />
 

@@ -88,6 +88,8 @@ export default function Page() {
         smoothLine,
         showAreaFill,
         showDonationsLine,
+        chartBarDisplayMode,
+        zoomEnabled,
         showFullXToDateSpan,
         granularityMode,
         selectedRangeLabel,
@@ -96,6 +98,7 @@ export default function Page() {
         oneTimePct,
         validGranularityModes,
         chartPoints,
+        chartViewOverrideActive,
         allTimeFirstIso,
         isXToDateSpanOptionRelevant,
         canApplyCustomRange,
@@ -111,8 +114,12 @@ export default function Page() {
         setSmoothLine,
         setShowAreaFill,
         setShowDonationsLine,
+        setChartBarDisplayMode,
+        setZoomEnabled,
         setShowFullXToDateSpan,
         setGranularityMode,
+        applyChartViewOverrideRange,
+        resetChartViewToSelectedRange,
     } = useFundraisingDashboardController(onGet)
 
     useEffect(() => {
@@ -169,11 +176,19 @@ export default function Page() {
         const viewportPadding = 12
         const constrainedBottomMargin = 16
         const triggerGap = 6
+        const narrowOverlayQuery = '(max-width: 53rem)'
 
         const updateDateRangeOverlayPosition = () => {
             const trigger = dateRangeTriggerRef.current
             const overlay = dateRangeOverlayRef.current
             if (!trigger || !overlay) return
+
+            const isNarrowLayout = window.matchMedia(narrowOverlayQuery).matches
+            if (isNarrowLayout) {
+                setDateRangeOverlayOffset(0)
+                setDateRangeOverlayMaxHeight(undefined)
+                return
+            }
 
             const triggerRect = trigger.getBoundingClientRect()
             const viewportHeight = window.innerHeight
@@ -191,7 +206,9 @@ export default function Page() {
 
             const overflowBelow = Math.max(0, naturalBottom - viewportBottom)
             const maxUpwardShift = Math.max(0, naturalTop - viewportPadding)
-            const upwardShift = Math.min(overflowBelow, maxUpwardShift)
+            const upwardShift = isNarrowLayout
+                ? 0
+                : Math.min(overflowBelow, maxUpwardShift)
 
             const shiftedTop = naturalTop - upwardShift
             const availableHeight = viewportBottom - shiftedTop
@@ -293,6 +310,7 @@ export default function Page() {
                                                     className={
                                                         styles.customDateRangeBox
                                                     }
+                                                    narrowLayoutMode="flow"
                                                     style={{
                                                         maxHeight:
                                                             dateRangeOverlayMaxHeight !=
@@ -554,6 +572,7 @@ export default function Page() {
                         smoothLine={smoothLine}
                         showAreaFill={showAreaFill}
                         showLine={showDonationsLine}
+                        barDisplayMode={chartBarDisplayMode}
                         seriesLabels={{
                             primaryBar: 'One-Time Amount',
                             secondaryBar: 'Recurring Amount',
@@ -577,6 +596,50 @@ export default function Page() {
                             secondaryBarHeader: 'Recurring',
                             lineHeader: 'Donations',
                         }}
+                        onRangeSelect={
+                            zoomEnabled
+                                ? ({
+                                      startIso,
+                                      endIso,
+                                  }: {
+                                      startIso: string
+                                      endIso: string
+                                  }) => {
+                                      const start = new Date(startIso)
+                                      const end = new Date(endIso)
+                                      const oneDayMs = 24 * 60 * 60 * 1000
+                                      const inclusiveRangeMs =
+                                          end.getTime() - start.getTime() + 1000
+
+                                      if (
+                                          Number.isNaN(start.getTime()) ||
+                                          Number.isNaN(end.getTime())
+                                      ) {
+                                          return
+                                      }
+
+                                      if (inclusiveRangeMs < oneDayMs) {
+                                          return
+                                      }
+
+                                      applyChartViewOverrideRange({
+                                          startIso,
+                                          endIso,
+                                      })
+                                  }
+                                : undefined
+                        }
+                        cornerTopRight={
+                            chartViewOverrideActive ? (
+                                <button
+                                    type="button"
+                                    className={styles.resetViewButton}
+                                    onClick={resetChartViewToSelectedRange}
+                                >
+                                    Reset
+                                </button>
+                            ) : null
+                        }
                         headerRight={
                             <div
                                 ref={chartOptionsControlRef}
@@ -809,6 +872,77 @@ export default function Page() {
                                                                 </div>
                                                             </>
                                                         )}
+
+                                                        <div
+                                                            className={
+                                                                styles.chartOptionRow
+                                                            }
+                                                        >
+                                                            <span
+                                                                className={
+                                                                    styles.chartOptionLabel
+                                                                }
+                                                            >
+                                                                Drag To Zoom
+                                                            </span>
+                                                            <ToggleGroup<boolean>
+                                                                ariaLabel="Chart zoom"
+                                                                orientation="horizontal"
+                                                                value={
+                                                                    zoomEnabled
+                                                                }
+                                                                options={[
+                                                                    {
+                                                                        value: true,
+                                                                        label: 'Enabled',
+                                                                    },
+                                                                    {
+                                                                        value: false,
+                                                                        label: 'Disabled',
+                                                                    },
+                                                                ]}
+                                                                onChange={
+                                                                    setZoomEnabled
+                                                                }
+                                                            />
+                                                        </div>
+
+                                                        <div
+                                                            className={
+                                                                styles.chartOptionRow
+                                                            }
+                                                        >
+                                                            <span
+                                                                className={
+                                                                    styles.chartOptionLabel
+                                                                }
+                                                            >
+                                                                Bar layout
+                                                            </span>
+                                                            <ToggleGroup<
+                                                                | 'grouped'
+                                                                | 'stacked'
+                                                            >
+                                                                ariaLabel="Bar layout"
+                                                                orientation="horizontal"
+                                                                value={
+                                                                    chartBarDisplayMode
+                                                                }
+                                                                options={[
+                                                                    {
+                                                                        value: 'stacked',
+                                                                        label: 'Stacked',
+                                                                    },
+                                                                    {
+                                                                        value: 'grouped',
+                                                                        label: 'Seperate',
+                                                                    },
+                                                                ]}
+                                                                onChange={
+                                                                    setChartBarDisplayMode
+                                                                }
+                                                            />
+                                                        </div>
                                                     </>
                                                 }
                                             ></DropdownOverlay>
