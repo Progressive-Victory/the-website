@@ -4,19 +4,22 @@ import { describe, it, expect, vi, beforeAll, afterEach } from 'vitest'
 
 describe('useInView', () => {
     const observeMock = vi.fn()
-    const disconnectMock = vi.fn()
     let callback: IntersectionObserverCallback | undefined
 
     beforeAll(() => {
-        window.IntersectionObserver = vi.fn(function (
-            cb: IntersectionObserverCallback
-        ) {
-            callback = cb
-            return {
+        vi.stubGlobal(
+            'IntersectionObserver',
+            vi.fn((callback: IntersectionObserverCallback) => ({
                 observe: observeMock,
-                disconnect: disconnectMock,
-            }
-        }) as unknown as typeof IntersectionObserver
+                unobserve: vi.fn(),
+                disconnect: vi.fn(),
+                // Store the callback to trigger it manually in tests
+                trigger: (
+                    entries: IntersectionObserverEntry[],
+                    observer: IntersectionObserver
+                ) => callback(entries, observer),
+            }))
+        )
     })
 
     afterEach(() => {

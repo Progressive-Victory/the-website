@@ -1,10 +1,11 @@
+import { clearQueryClient } from '@/app/QueryClientWrapper'
+import QueryClientWrapper from '@/app/QueryClientWrapper'
 import {
     startMirage,
     MIRAGE_API_BASE_URL,
     registerDefaultRoutes,
-} from '@/app/mirage'
-import { createQueryWrapper, clearQueryClient } from '@/test/fixtures/testUtils'
-import { getSuccessfulAuthReturn } from '@/test/fixtures/useAuthMock'
+} from '@/test/mirage'
+import { getSuccessfulAuthReturn } from '@/test/useAuthMock'
 import * as authModule from '@/util/hooks/useAuth'
 import { useFetch } from '@/util/hooks/useFetch'
 import { renderHook } from '@testing-library/react'
@@ -45,10 +46,6 @@ afterEach(() => {
     useAuthMock.mockReset()
 })
 
-function createWrapper() {
-    return createQueryWrapper()
-}
-
 describe('useFetch', () => {
     beforeEach(() => {
         authReturnValue = getSuccessfulAuthReturn()
@@ -61,7 +58,7 @@ describe('useFetch', () => {
         })
 
         const { result } = renderHook(() => useFetch(), {
-            wrapper: createWrapper(),
+            wrapper: QueryClientWrapper,
         })
 
         const data = await result.current.onGet(
@@ -87,7 +84,7 @@ describe('useFetch', () => {
         })
 
         const { result } = renderHook(() => useFetch(), {
-            wrapper: createWrapper(),
+            wrapper: QueryClientWrapper,
         })
 
         const response = await result.current.onGet(
@@ -111,7 +108,7 @@ describe('useFetch', () => {
         )
 
         const { result } = renderHook(() => useFetch(), {
-            wrapper: createWrapper(),
+            wrapper: QueryClientWrapper,
         })
 
         await expect(

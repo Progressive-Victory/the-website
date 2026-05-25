@@ -46,7 +46,7 @@ export function useAuth() {
             if (!res.ok) throw new Error('Failed to get login url from the API')
 
             const login = (await res.json()) as DiscordLoginResponse
-            window.location.href = login.redirectUri
+            window.location.assign(login.redirectUri)
         },
     })
 
@@ -60,7 +60,7 @@ export function useAuth() {
             })
         },
         async onSuccess(_data, { redirect }) {
-            window.location.href = redirect ?? '/'
+            window.location.assign(redirect ?? '/')
             await queryClient.invalidateQueries({ queryKey: ['/auth'] })
         },
     })

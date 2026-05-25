@@ -1,6 +1,7 @@
-import { startMirage, registerDefaultRoutes } from '@/app/mirage'
-import { MockDataService, mockDataService } from '@/test/fixtures'
-import { createQueryWrapper, clearQueryClient } from '@/test/fixtures/testUtils'
+import { clearQueryClient } from '@/app/QueryClientWrapper'
+import QueryClientWrapper from '@/app/QueryClientWrapper'
+import { startMirage, registerDefaultRoutes } from '@/test/mirage'
+import { MockDataService, mockDataService } from '@/test/mockDataService'
 import { useCurrentUser, hasPermission } from '@/util/hooks/useCurrentUser'
 import { renderHook, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
@@ -20,14 +21,10 @@ afterEach(() => {
     clearQueryClient()
 })
 
-function createWrapper() {
-    return createQueryWrapper()
-}
-
 describe('useCurrentUser', () => {
     it('should fetch the current user when ready', async () => {
         const { result } = renderHook(() => useCurrentUser(), {
-            wrapper: createWrapper(),
+            wrapper: QueryClientWrapper,
         })
 
         await waitFor(() => {
@@ -44,11 +41,9 @@ describe('useCurrentUser', () => {
             hasPermission(
                 mockDataService.createUser({
                     roles: [
-                        {
-                            id: 1,
-                            name: 'Member',
-                            permissions: [{ id: 1, name: 'READ' }],
-                        },
+                        mockDataService.createRole('Member', [
+                            mockDataService.createPermission('READ', 1),
+                        ]),
                     ],
                 }),
                 'WRITE'
@@ -61,11 +56,9 @@ describe('useCurrentUser', () => {
             hasPermission(
                 mockDataService.createUser({
                     roles: [
-                        {
-                            id: 1,
-                            name: 'Member',
-                            permissions: [{ id: 1, name: 'WRITE' }],
-                        },
+                        mockDataService.createRole('Member', [
+                            mockDataService.createPermission('WRITE', 1),
+                        ]),
                     ],
                 }),
                 'WRITE'

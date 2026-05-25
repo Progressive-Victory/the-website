@@ -1,6 +1,6 @@
-import usersData from './users.json'
 import { zUser } from '@/contracts/data'
-import { MockUser, MockData, MockDataFactory } from '@/test/fixtures/mockData'
+import { MockUser, MockData, MockDataFactory } from '@/test/mockData'
+import usersData from '@/test/users.json'
 
 /**
  * Service for managing mock data across tests
@@ -20,10 +20,7 @@ export class MockDataService {
     }
 
     static getInstance(): MockDataService {
-        if (!MockDataService.instance) {
-            MockDataService.instance = new MockDataService()
-        }
-        return MockDataService.instance
+        return (MockDataService.instance ??= new MockDataService())
     }
 
     // Get all users
@@ -51,6 +48,40 @@ export class MockDataService {
             throw new Error(`User with ID ${user.id} already exists`)
         }
         this.mockData.users.push(user)
+    }
+
+    getTokenClaimsForUser(
+        userId: number = MockDataService.DEFAULT_USER_ID,
+        permissions: { id: number; name: string }[] = []
+    ): {
+        userId: number
+        discordUserId: string
+        permissions: { id: number; name: string }[]
+    } {
+        return {
+            userId,
+            discordUserId: 'test-discord-user-id',
+            permissions,
+        }
+    }
+
+    createPermission(
+        name: string,
+        id = MockDataService.DEFAULT_USER_ID
+    ): { id: number; name: string } {
+        return { id, name }
+    }
+
+    createRole(
+        name: string,
+        permissions: { id: number; name: string }[],
+        id = MockDataService.DEFAULT_USER_ID
+    ): {
+        id: number
+        name: string
+        permissions: { id: number; name: string }[]
+    } {
+        return { id, name, permissions }
     }
 
     loadFixtures(): MockData {

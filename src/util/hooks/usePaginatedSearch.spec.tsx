@@ -1,5 +1,6 @@
-import { createQueryWrapper, clearQueryClient } from '@/test/fixtures/testUtils'
-import { OnGetMock, getFetchMocks } from '@/test/fixtures/useFetchMock'
+import { clearQueryClient } from '@/app/QueryClientWrapper'
+import QueryClientWrapper from '@/app/QueryClientWrapper'
+import { OnGetMock, getFetchMocks } from '@/test/useFetchMock'
 import type { ZodSchema } from '@/util/hooks/useFetch'
 import * as fetchModule from '@/util/hooks/useFetch'
 import { usePaginatedSearch } from '@/util/hooks/usePaginatedSearch'
@@ -61,7 +62,7 @@ describe('usePaginatedSearch', () => {
                     { search: { limit: 2, page: 0 } }
                 ),
             {
-                wrapper: createQueryWrapper(),
+                wrapper: QueryClientWrapper,
             }
         )
 
@@ -87,7 +88,7 @@ describe('usePaginatedSearch', () => {
                     { search: { limit: 2, page: 0 }, all: true }
                 ),
             {
-                wrapper: createQueryWrapper(),
+                wrapper: QueryClientWrapper,
             }
         )
 
@@ -123,7 +124,7 @@ describe('usePaginatedSearch', () => {
                     { search: { limit: 2, page: 0 } }
                 ),
             {
-                wrapper: createQueryWrapper(),
+                wrapper: QueryClientWrapper,
             }
         )
 

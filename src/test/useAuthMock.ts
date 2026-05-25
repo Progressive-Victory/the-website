@@ -1,5 +1,5 @@
-import { MockDataService } from '.'
-import { MIRAGE_API_BASE_URL } from '@/app/mirage'
+import { MIRAGE_API_BASE_URL } from '@/test/mirage'
+import { MockDataService } from '@/test/mockDataService'
 import type * as authModule from '@/util/hooks/useAuth'
 import { vi } from 'vitest'
 
