@@ -6,8 +6,8 @@ import { forwardRef } from 'react'
 export interface DashboardWidgetProps extends React.HTMLAttributes<HTMLElement> {
     title: string
     value: React.ReactNode
-    stat1: React.ReactNode
-    stat2: React.ReactNode
+    stat1?: React.ReactNode
+    stat2?: React.ReactNode
 }
 
 export const DashboardWidget = forwardRef<HTMLElement, DashboardWidgetProps>(
@@ -15,6 +15,9 @@ export const DashboardWidget = forwardRef<HTMLElement, DashboardWidgetProps>(
         { title, value, stat1, stat2, className, ...props },
         ref
     ) {
+        const hasStat1 = stat1 != null
+        const hasStat2 = stat2 != null
+
         return (
             <article
                 ref={ref}
@@ -23,11 +26,15 @@ export const DashboardWidget = forwardRef<HTMLElement, DashboardWidgetProps>(
             >
                 <div className={styles.title}>{title}</div>
                 <div className={styles.value}>{value}</div>
-                <div className={styles.stats}>
-                    <span>{stat1}</span>
-                    <span className={styles.separator}>·</span>
-                    <span>{stat2}</span>
-                </div>
+                {(hasStat1 || hasStat2) && (
+                    <div className={styles.stats}>
+                        {hasStat1 && <span>{stat1}</span>}
+                        {hasStat1 && hasStat2 && (
+                            <span className={styles.separator}>·</span>
+                        )}
+                        {hasStat2 && <span>{stat2}</span>}
+                    </div>
+                )}
             </article>
         )
     }
