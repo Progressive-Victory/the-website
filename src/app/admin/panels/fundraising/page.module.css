@@ -27,47 +27,6 @@
     color: rgba(15, 23, 42, 0.58);
 }
 
-.dateRangeTriggerButton {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.65rem;
-    min-width: 12rem;
-    padding: 0.45rem 0.68rem;
-    border-radius: 0.62rem;
-    border: 1px solid rgba(15, 23, 42, 0.1);
-    background: rgba(255, 255, 255, 0.88);
-    color: rgba(9, 34, 58, 0.9);
-    font-size: 0.86rem;
-    font-weight: 650;
-    text-align: left;
-    cursor: pointer;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset;
-    transition:
-        border-color 140ms ease,
-        background-color 140ms ease,
-        box-shadow 140ms ease,
-        transform 140ms ease;
-}
-
-.dateRangeTriggerButton > span {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.dateRangeTriggerChevron {
-    flex-shrink: 0;
-    color: rgba(15, 23, 42, 0.58);
-    stroke-width: 2.6;
-    transition: transform 140ms ease;
-}
-
-.dateRangeTriggerButton[aria-expanded='true'] .dateRangeTriggerChevron {
-    transform: rotate(180deg);
-}
-
 .dateRangeOptionList {
     display: grid;
     gap: 0.34rem;
@@ -492,10 +451,6 @@
     .dateFilterControls {
         width: 100%;
         justify-items: stretch;
-    }
-
-    .dateRangeTriggerButton {
-        min-width: 0;
     }
 
     .customDateRangeBox {
