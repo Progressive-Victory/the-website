@@ -1,3 +1,5 @@
+import type { ChartGranularityMode } from '@/components/common/charts/timeBuckets'
+
 export const PRESETS = [
     'All Time',
     'Year To Date',
@@ -10,6 +12,16 @@ export const PRESETS = [
 ] as const
 
 export type Preset = (typeof PRESETS)[number]
+
+export const CHART_GRANULARITY_LABELS: Record<ChartGranularityMode, string> = {
+    auto: 'Auto',
+    year: 'Years',
+    quarter: 'Quarters',
+    month: 'Months',
+    week: 'Weeks',
+    day: 'Days',
+    hour: 'Hours',
+}
 
 export function formatCurrency(value?: number) {
     if (value == null || !Number.isFinite(value)) return '—'
@@ -24,6 +36,44 @@ export function formatCurrency(value?: number) {
 export function formatCount(value?: number) {
     if (value == null || !Number.isFinite(value)) return '—'
     return value.toLocaleString('en-US')
+}
+
+export function formatCurrencyAxis(value: number, step: number): string {
+    if (!Number.isFinite(value)) return ''
+    let digits = 0
+    if (step < 1) digits = 2
+    else if (step < 10 && !Number.isInteger(step)) digits = 1
+
+    if (value >= 1_000_000) {
+        return `$${(value / 1_000_000).toLocaleString('en-US', {
+            maximumFractionDigits: 1,
+        })}M`
+    }
+
+    if (value >= 10_000) {
+        return `$${Math.round(value / 1000).toLocaleString('en-US')}k`
+    }
+
+    return value.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits,
+    })
+}
+
+export function formatCountAxis(value: number): string {
+    if (!Number.isFinite(value)) return ''
+    const rounded = Math.round(value)
+    if (rounded >= 1_000_000) {
+        return `${(rounded / 1_000_000).toLocaleString('en-US', {
+            maximumFractionDigits: 1,
+        })}M`
+    }
+    if (rounded >= 10_000) {
+        return `${Math.round(rounded / 1000).toLocaleString('en-US')}k`
+    }
+    return rounded.toLocaleString('en-US')
 }
 
 export function formatDonationCountLabel(value?: number) {
@@ -138,6 +188,58 @@ export function inferPresetFromRange(
     }
 
     return null
+}
+
+export function isXToDatePreset(
+    preset: Preset | null
+): preset is 'Year To Date' | 'Month To Date' | 'Week To Date' | 'Today' {
+    return (
+        preset === 'Year To Date' ||
+        preset === 'Month To Date' ||
+        preset === 'Week To Date' ||
+        preset === 'Today'
+    )
+}
+
+export function getXToDatePeriodName(
+    preset: Preset | null,
+    granularityMode: ChartGranularityMode
+): string {
+    if (preset === 'Year To Date') return 'Year'
+    if (preset === 'Month To Date') return 'Month'
+    if (preset === 'Week To Date') return 'Week'
+    if (preset === 'Today' && granularityMode === 'hour') return 'Hour'
+    return 'Date'
+}
+
+export function getExtendedEndForXToDatePreset(
+    preset: 'Year To Date' | 'Month To Date' | 'Week To Date' | 'Today',
+    startIso: string,
+    endIso: string
+): string {
+    if (!startIso || !endIso) return endIso
+
+    if (preset === 'Today') {
+        const d = new Date(startIso)
+        return endOfDayISO(d)
+    }
+
+    if (preset === 'Year To Date') {
+        const d = new Date(startIso)
+        return endOfDayISO(new Date(d.getFullYear(), 11, 31))
+    }
+
+    if (preset === 'Month To Date') {
+        const d = new Date(startIso)
+        return endOfDayISO(new Date(d.getFullYear(), d.getMonth() + 1, 0))
+    }
+
+    const start = new Date(startIso)
+    const weekEnd = addDays(
+        new Date(start.getFullYear(), start.getMonth(), start.getDate()),
+        6
+    )
+    return endOfDayISO(weekEnd)
 }
 
 export function formatRangeDate(iso: string): string {
