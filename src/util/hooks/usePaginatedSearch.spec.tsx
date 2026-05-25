@@ -1,11 +1,11 @@
 import { clearQueryClient } from '@/app/QueryClientWrapper'
 import QueryClientWrapper from '@/app/QueryClientWrapper'
-import { OnGetMock, getFetchMocks } from '@/test/useFetchMock'
-import type { ZodSchema } from '@/util/hooks/useFetch'
+import { getFetchMocks } from '@/test/useFetchMock'
 import * as fetchModule from '@/util/hooks/useFetch'
+import { ZodSchema } from '@/util/hooks/useFetch'
 import { usePaginatedSearch } from '@/util/hooks/usePaginatedSearch'
 import { renderHook, waitFor, act } from '@testing-library/react'
-import { vi, describe, it, expect, afterEach, Mock } from 'vitest'
+import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest'
 import z from 'zod'
 
 vi.mock('@/util/hooks/useFetch', () => ({
@@ -33,23 +33,29 @@ const createPageResponse = (page: number, limit: number) => {
         data: pageData,
     }
 }
-const onGetMock = vi.fn(function <R>(
-    url: string,
-    schema: ZodSchema,
-    options?: { query?: Record<string, unknown> }
-): Promise<R> {
-    const page = Number(options?.query?.page ?? 0)
-    const limit = Number(options?.query?.limit ?? ORIGINAL_LIMIT)
-    return Promise.resolve(createPageResponse(page, limit)) as Promise<R>
-}) as OnGetMock
+const onGetMock = vi.fn()
 useFetchMock.mockReturnValue({
     ...getFetchMocks(),
     onGet: onGetMock,
 })
 
+beforeEach(() => {
+    onGetMock.mockImplementation(
+        (
+            url: string,
+            schema: ZodSchema,
+            options: { query?: Record<string, unknown> }
+        ) => {
+            const page = Number(options?.query?.page ?? 0)
+            const limit = Number(options?.query?.limit ?? ORIGINAL_LIMIT)
+            return Promise.resolve(createPageResponse(page, limit))
+        }
+    )
+})
+
 afterEach(() => {
     clearQueryClient()
-    ;(onGetMock as Mock).mockClear()
+    onGetMock.mockClear()
 })
 
 describe('usePaginatedSearch', () => {
