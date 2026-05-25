@@ -1,0 +1,37 @@
+.card {
+    padding: 0.72rem 0.8rem;
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+.title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.52);
+}
+
+.value {
+    margin-top: 0.25rem;
+    font-size: 1.16rem;
+    font-weight: 850;
+    letter-spacing: -0.025em;
+    color: rgba(9, 34, 58, 0.9);
+}
+
+.stats {
+    margin-top: 0.18rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    font-size: 0.73rem;
+    font-weight: 650;
+    color: rgba(15, 23, 42, 0.48);
+}
+
+.separator {
+    color: rgba(15, 23, 42, 0.34);
+}
