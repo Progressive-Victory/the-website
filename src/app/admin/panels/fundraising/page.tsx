@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
+import { DashboardWidget, ProgressBar } from '@/components/common'
 import {
     ActBlueFundraisingStatsResponse,
     zActBlueFundraisingStatsResponse,
@@ -701,90 +702,81 @@ export default function Page() {
                 </div>
 
                 <div className={styles.metricGrid}>
-                    <article className={styles.metricCard}>
-                        <div className={styles.metricLabel}>Recurring</div>
-                        <div className={styles.metricValue}>
-                            {formatCurrency(
-                                statsQuery.data?.recurringDollarsRaised
-                            )}
-                        </div>
-                        <div className={styles.metricMeta}>
-                            {recurringPct != null &&
+                    <DashboardWidget
+                        title="Recurring"
+                        value={formatCurrency(
+                            statsQuery.data?.recurringDollarsRaised
+                        )}
+                        stat1={
+                            recurringPct != null &&
                             statsQuery.data?.recurringContributionCount != null
-                                ? `${recurringPct}% of total · ${formatDonationCountLabel(statsQuery.data.recurringContributionCount)}`
-                                : '—'}
-                        </div>
-                    </article>
+                                ? `${recurringPct}% of total`
+                                : '—'
+                        }
+                        stat2={
+                            statsQuery.data?.recurringContributionCount != null
+                                ? formatDonationCountLabel(
+                                      statsQuery.data.recurringContributionCount
+                                  )
+                                : '—'
+                        }
+                    />
 
-                    <article className={styles.metricCard}>
-                        <div className={styles.metricLabel}>One-Time</div>
-                        <div className={styles.metricValue}>
-                            {formatCurrency(
-                                statsQuery.data?.oneTimeDollarsRaised
-                            )}
-                        </div>
-                        <div className={styles.metricMeta}>
-                            {oneTimePct != null &&
+                    <DashboardWidget
+                        title="One-Time"
+                        value={formatCurrency(
+                            statsQuery.data?.oneTimeDollarsRaised
+                        )}
+                        stat1={
+                            oneTimePct != null &&
                             statsQuery.data?.oneTimeContributionCount != null
-                                ? `${oneTimePct}% of total · ${formatDonationCountLabel(statsQuery.data.oneTimeContributionCount)}`
-                                : '—'}
-                        </div>
-                    </article>
+                                ? `${oneTimePct}% of total`
+                                : '—'
+                        }
+                        stat2={
+                            statsQuery.data?.oneTimeContributionCount != null
+                                ? formatDonationCountLabel(
+                                      statsQuery.data.oneTimeContributionCount
+                                  )
+                                : '—'
+                        }
+                    />
 
-                    <article className={styles.metricCard}>
-                        <div className={styles.metricLabel}>Donors</div>
-                        <div className={styles.metricValue}>
-                            {formatCount(statsQuery.data?.totalDonorCount)}
-                        </div>
-                        <div className={styles.metricMeta}>
-                            {`${formatCount(statsQuery.data?.recurringDonorCount)} Recurring · ${formatCount(statsQuery.data?.oneTimeDonorCount)} One-Time`}
-                        </div>
-                    </article>
+                    <DashboardWidget
+                        title="Donors"
+                        value={formatCount(statsQuery.data?.totalDonorCount)}
+                        stat1={`Recurring ${formatCount(
+                            statsQuery.data?.recurringDonorCount
+                        )}`}
+                        stat2={`One-Time ${formatCount(
+                            statsQuery.data?.oneTimeDonorCount
+                        )}`}
+                    />
 
-                    <article className={styles.metricCard}>
-                        <div className={styles.metricLabel}>Contributions</div>
-                        <div className={styles.metricValue}>
-                            {formatCount(
-                                statsQuery.data?.totalContributionCount
-                            )}
-                        </div>
-                        <div className={styles.metricMeta}>
-                            {`${formatCount(statsQuery.data?.recurringContributionCount)} Recurring · ${formatCount(statsQuery.data?.oneTimeContributionCount)} One-Time`}
-                        </div>
-                    </article>
+                    <DashboardWidget
+                        title="Contributions"
+                        value={formatCount(
+                            statsQuery.data?.totalContributionCount
+                        )}
+                        stat1={`Recurring ${formatCount(
+                            statsQuery.data?.recurringContributionCount
+                        )}`}
+                        stat2={`One-Time ${formatCount(
+                            statsQuery.data?.oneTimeContributionCount
+                        )}`}
+                    />
                 </div>
 
-                <div className={styles.splitTrack}>
-                    <div className={styles.splitRow}>
-                        <span>Recurring Share</span>
-                        <span>
-                            {recurringPct != null ? `${recurringPct}%` : '—'}
-                        </span>
-                    </div>
-                    <div className={styles.trackBar} aria-hidden="true">
-                        <span
-                            className={styles.trackFillRecurring}
-                            style={{
-                                width: `${Math.max(0, Math.min(100, recurringPct ?? 0))}%`,
-                            }}
-                        />
-                    </div>
-
-                    <div className={styles.splitRow}>
-                        <span>One-Time Share</span>
-                        <span>
-                            {oneTimePct != null ? `${oneTimePct}%` : '—'}
-                        </span>
-                    </div>
-                    <div className={styles.trackBar} aria-hidden="true">
-                        <span
-                            className={styles.trackFillOneTime}
-                            style={{
-                                width: `${Math.max(0, Math.min(100, oneTimePct ?? 0))}%`,
-                            }}
-                        />
-                    </div>
-                </div>
+                <ProgressBar
+                    label="One-Time Share"
+                    value={oneTimePct}
+                    fill="linear-gradient(90deg, #9fb9e1 0%, #7f9fd4 52%, #6d95d1 100%)"
+                />
+                <ProgressBar
+                    label="Recurring Share"
+                    value={recurringPct}
+                    fill="linear-gradient(90deg, #b8da72 0%, #94c92d 48%, #7fb800 100%)"
+                />
             </div>
 
             <div className={styles.grid}>
