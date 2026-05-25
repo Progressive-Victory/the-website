@@ -512,10 +512,3 @@
         grid-template-columns: 1fr;
     }
 }
-
-/* Remove This Later */
-.RemoveOnlyForInitatizing {
-    margin-top: 0.88rem;
-    display: grid;
-    gap: 0.48rem;
-}
