@@ -805,3 +805,5 @@ export default function Page() {
         </div>
     )
 }
+
+//Preparing for future
