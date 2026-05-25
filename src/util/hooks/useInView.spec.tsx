@@ -4,35 +4,31 @@ import { describe, it, expect, vi, beforeAll, afterEach } from 'vitest'
 
 describe('useInView', () => {
     const observeMock = vi.fn()
-    let callback: IntersectionObserverCallback | undefined
+    let intersectionCallback: IntersectionObserverCallback | undefined
 
     beforeAll(() => {
-        vi.stubGlobal(
-            'IntersectionObserver',
-            vi.fn((callback: IntersectionObserverCallback) => ({
-                observe: observeMock,
-                unobserve: vi.fn(),
-                disconnect: vi.fn(),
-                // Store the callback to trigger it manually in tests
-                trigger: (
-                    entries: IntersectionObserverEntry[],
-                    observer: IntersectionObserver
-                ) => callback(entries, observer),
-            }))
-        )
+        class IntersectionObserverMock {
+            constructor(cb: IntersectionObserverCallback) {
+                intersectionCallback = cb
+            }
+            observe = observeMock
+            unobserve = vi.fn()
+            disconnect = vi.fn()
+        }
+        vi.stubGlobal('IntersectionObserver', IntersectionObserverMock)
     })
 
     afterEach(() => {
         observeMock.mockClear()
-        disconnectMock.mockClear()
-        callback = undefined
     })
 
     it('should update inView when the observer reports intersection', () => {
         const { result } = renderHook(() => useInView())
 
+        expect(result.current.inView).toBe(false)
+
         act(() => {
-            callback?.(
+            intersectionCallback?.(
                 [{ isIntersecting: true } as IntersectionObserverEntry],
                 {} as IntersectionObserver
             )
