@@ -2,6 +2,7 @@ import styles from './account.module.css'
 import {
     Form,
     DateField,
+    DropDownField,
     FormGroup,
     PhoneField,
     TextField,
@@ -9,6 +10,15 @@ import {
 import { User } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useState } from 'react'
+
+const shirtSizeOptions = [
+    { value: 'XS', label: 'Extra Small' },
+    { value: 'S', label: 'Small' },
+    { value: 'M', label: 'Medium' },
+    { value: 'L', label: 'Large' },
+    { value: 'XL', label: 'Extra Large' },
+    { value: '2XL', label: 'Double XL' },
+]
 
 interface AccountInfoFormProps {
     user: User
@@ -84,6 +94,12 @@ export const AccountInfoForm = ({
                             timeZone: 'UTC',
                             dateStyle: 'medium',
                         }}
+                    />
+                    <DropDownField<User>
+                        label="Shirt Size"
+                        field="shirtSize"
+
+                        options={shirtSizeOptions}
                     />
                     <TextField<User>
                         label={showAddressLine2 ? 'Address Line 1' : 'Address'}
