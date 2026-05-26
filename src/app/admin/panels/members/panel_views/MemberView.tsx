@@ -13,6 +13,7 @@ import {
 } from '@/components/common/forms'
 import { Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
+import { shirtSizeOptions } from '@/components/Map/constants'
 
 const membershipCardShipmentOptions = [
     { value: 0, label: 'Not Eligible' },
@@ -30,15 +31,6 @@ const membershipMerchShipmentOptions = [
     { value: 3, label: 'In Transit' },
     { value: 4, label: 'Recieved' },
     { value: 5, label: 'Returned' },
-]
-
-const shirtSizeOptions = [
-    { value: 'XS', label: 'Extra Small' },
-    { value: 'S', label: 'Small' },
-    { value: 'M', label: 'Medium' },
-    { value: 'L', label: 'Large' },
-    { value: 'XL', label: 'Extra Large' },
-    { value: '2XL', label: 'Double XL' },
 ]
 
 const membershipFulfillmentStatusOptions = [

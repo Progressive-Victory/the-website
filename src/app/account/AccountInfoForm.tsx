@@ -10,15 +10,7 @@ import {
 import { User } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useState } from 'react'
-
-const shirtSizeOptions = [
-    { value: 'XS', label: 'Extra Small' },
-    { value: 'S', label: 'Small' },
-    { value: 'M', label: 'Medium' },
-    { value: 'L', label: 'Large' },
-    { value: 'XL', label: 'Extra Large' },
-    { value: '2XL', label: 'Double XL' },
-]
+import { shirtSizeOptions } from '@/components/Map/constants'
 
 interface AccountInfoFormProps {
     user: User
