@@ -2,7 +2,13 @@
 
 import styles from './DropdownButton.module.css'
 import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
-import { forwardRef } from 'react'
+import {
+    forwardRef,
+    useEffect,
+    useRef,
+    useState,
+    type MouseEvent as ReactMouseEvent,
+} from 'react'
 import { FiChevronDown } from 'react-icons/fi'
 
 export type DropdownButtonVariant = 'long' | 'short' | 'minimal'
@@ -17,19 +23,12 @@ interface DropdownVariantConfig {
 }
 
 function getDropdownVariantConfig(
-    variant: DropdownButtonVariant,
-    classes: {
-        long: string
-        short: string
-        minimal: string
-        chevron: string
-        chevronMinimal: string
-    }
+    variant: DropdownButtonVariant
 ): DropdownVariantConfig {
     if (variant === 'short') {
         return {
             ariaHasPopup: 'menu',
-            buttonClassName: classes.short,
+            buttonClassName: styles.buttonShort,
             showLabel: false,
             showEllipsisIcon: true,
         }
@@ -38,8 +37,8 @@ function getDropdownVariantConfig(
     if (variant === 'minimal') {
         return {
             ariaHasPopup: 'dialog',
-            buttonClassName: classes.minimal,
-            chevronClassName: classes.chevronMinimal,
+            buttonClassName: styles.buttonMinimal,
+            chevronClassName: styles.chevronMinimal,
             chevronSize: 12,
             showLabel: true,
             showEllipsisIcon: false,
@@ -48,8 +47,8 @@ function getDropdownVariantConfig(
 
     return {
         ariaHasPopup: 'dialog',
-        buttonClassName: classes.long,
-        chevronClassName: classes.chevron,
+        buttonClassName: styles.button,
+        chevronClassName: styles.chevron,
         chevronSize: 14,
         showLabel: true,
         showEllipsisIcon: false,
@@ -57,9 +56,10 @@ function getDropdownVariantConfig(
 }
 
 export interface DropdownButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    isOpen: boolean
     label?: string
-    menu?: React.ReactNode
+    menu?:
+        | React.ReactNode
+        | ((controls: { closeDropdown: () => void }) => React.ReactNode)
     buttonVariant?: DropdownButtonVariant
 }
 
@@ -67,19 +67,57 @@ export const DropdownButton = forwardRef<
     HTMLButtonElement,
     DropdownButtonProps
 >(function DropdownButton(
-    { isOpen, label, menu, buttonVariant = 'long', className, ...props },
+    { label, menu, buttonVariant = 'long', className, onClick, ...props },
     ref
 ) {
-    const variant = getDropdownVariantConfig(buttonVariant, {
-        long: styles.button,
-        short: styles.buttonShort,
-        minimal: styles.buttonMinimal,
-        chevron: styles.chevron,
-        chevronMinimal: styles.chevronMinimal,
-    })
+    const [isOpen, setIsOpen] = useState(false)
+    const containerRef = useRef<HTMLDivElement | null>(null)
+
+    const closeDropdown = () => {
+        setIsOpen(false)
+    }
+
+    useEffect(() => {
+        if (!isOpen) return
+
+        const onDocumentMouseDown = (event: MouseEvent) => {
+            const container = containerRef.current
+            if (!container) return
+
+            if (!container.contains(event.target as Node)) {
+                closeDropdown()
+            }
+        }
+
+        const onDocumentKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                closeDropdown()
+            }
+        }
+
+        document.addEventListener('mousedown', onDocumentMouseDown)
+        document.addEventListener('keydown', onDocumentKeyDown)
+
+        return () => {
+            document.removeEventListener('mousedown', onDocumentMouseDown)
+            document.removeEventListener('keydown', onDocumentKeyDown)
+        }
+    }, [isOpen])
+
+    const variant = getDropdownVariantConfig(buttonVariant)
+
+    const renderedMenu =
+        typeof menu === 'function' ? menu({ closeDropdown }) : menu
+
+    const handleButtonClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+        onClick?.(event)
+        if (event.defaultPrevented) return
+
+        setIsOpen((current) => !current)
+    }
 
     return (
-        <>
+        <div ref={containerRef}>
             <button
                 type="button"
                 ref={ref}
@@ -88,6 +126,7 @@ export const DropdownButton = forwardRef<
                     .join(' ')}
                 aria-haspopup={variant.ariaHasPopup}
                 aria-expanded={isOpen}
+                onClick={handleButtonClick}
                 {...props}
             >
                 {variant.showLabel ? <span>{label}</span> : null}
@@ -104,7 +143,7 @@ export const DropdownButton = forwardRef<
                     />
                 )}
             </button>
-            {isOpen && menu}
-        </>
+            {isOpen && renderedMenu}
+        </div>
     )
 })

@@ -187,13 +187,11 @@ export default function Page() {
     const [endDate, setEndDate] = useState(() => getPresetRange('Today')[1])
     const [activePreset, setActivePreset] = useState<Preset | null>('Today')
     const [previousPreset, setPreviousPreset] = useState<Preset | null>('Today')
-    const [isDateRangeOverlayOpen, setIsDateRangeOverlayOpen] = useState(false)
     const [dateRangeOverlayMaxHeight, setDateRangeOverlayMaxHeight] =
         useState<number>()
     const [dateRangeOverlayOffset, setDateRangeOverlayOffset] = useState(0)
     const [draftStartDate, setDraftStartDate] = useState(startDate)
     const [draftEndDate, setDraftEndDate] = useState(endDate)
-    const dateRangeControlRef = useRef<HTMLDivElement | null>(null)
     const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
     const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
 
@@ -233,27 +231,10 @@ export default function Page() {
     const activeDateOption: DateRangeOption = activePreset ?? 'Custom Range'
 
     useEffect(() => {
-        const onDocumentMouseDown = (event: MouseEvent) => {
-            if (!isDateRangeOverlayOpen) return
+        const trigger = dateRangeTriggerRef.current
+        const overlay = dateRangeOverlayRef.current
 
-            const control = dateRangeControlRef.current
-            if (!control) return
-
-            if (!control.contains(event.target as Node)) {
-                setIsDateRangeOverlayOpen(false)
-                setDraftStartDate(startDate)
-                setDraftEndDate(endDate)
-            }
-        }
-
-        document.addEventListener('mousedown', onDocumentMouseDown)
-        return () => {
-            document.removeEventListener('mousedown', onDocumentMouseDown)
-        }
-    }, [isDateRangeOverlayOpen, startDate, endDate])
-
-    useEffect(() => {
-        if (!isDateRangeOverlayOpen) {
+        if (!trigger || !overlay) {
             setDateRangeOverlayMaxHeight(undefined)
             setDateRangeOverlayOffset(0)
             return
@@ -264,13 +245,13 @@ export default function Page() {
         const triggerGap = 6
 
         const updateDateRangeOverlayPosition = () => {
-            const trigger = dateRangeTriggerRef.current
-            const overlay = dateRangeOverlayRef.current
-            if (!trigger || !overlay) return
+            const currentTrigger = dateRangeTriggerRef.current
+            const currentOverlay = dateRangeOverlayRef.current
+            if (!currentTrigger || !currentOverlay) return
 
-            const triggerRect = trigger.getBoundingClientRect()
+            const triggerRect = currentTrigger.getBoundingClientRect()
             const viewportHeight = window.innerHeight
-            const naturalOverlayHeight = overlay.scrollHeight
+            const naturalOverlayHeight = currentOverlay.scrollHeight
             const naturalTop = triggerRect.bottom + triggerGap
             const naturalViewportBottom = viewportHeight - viewportPadding
 
@@ -313,7 +294,7 @@ export default function Page() {
                 true
             )
         }
-    }, [isDateRangeOverlayOpen, activeDateOption])
+    }, [activeDateOption])
 
     const { onGet } = useFetch()
 
@@ -429,10 +410,7 @@ export default function Page() {
 
                     <div className={styles.dashboardDateGroup}>
                         <div className={styles.dateContainer}>
-                            <div
-                                ref={dateRangeControlRef}
-                                className={styles.dateFilterControls}
-                            >
+                            <div className={styles.dateFilterControls}>
                                 <label
                                     htmlFor="fundraising-date-range-trigger"
                                     className={styles.dateFilterLabel}
@@ -443,20 +421,13 @@ export default function Page() {
                                     id="fundraising-date-range-trigger"
                                     type="button"
                                     ref={dateRangeTriggerRef}
-                                    isOpen={isDateRangeOverlayOpen}
                                     buttonVariant="long"
                                     label={selectedRangeLabel}
                                     onClick={() => {
-                                        if (!isDateRangeOverlayOpen) {
-                                            setDraftStartDate(startDate)
-                                            setDraftEndDate(endDate)
-                                        }
-
-                                        setIsDateRangeOverlayOpen(
-                                            (current) => !current
-                                        )
+                                        setDraftStartDate(startDate)
+                                        setDraftEndDate(endDate)
                                     }}
-                                    menu={
+                                    menu={({ closeDropdown }) => (
                                         <DropdownOverlay
                                             ref={dateRangeOverlayRef}
                                             className={
@@ -501,9 +472,7 @@ export default function Page() {
                                                                     preset
                                                                 )[1]
                                                             )
-                                                            setIsDateRangeOverlayOpen(
-                                                                false
-                                                            )
+                                                            closeDropdown()
                                                         }}
                                                     >
                                                         {preset}
@@ -656,9 +625,7 @@ export default function Page() {
                                                                 setActivePreset(
                                                                     previousPreset
                                                                 )
-                                                                setIsDateRangeOverlayOpen(
-                                                                    false
-                                                                )
+                                                                closeDropdown()
                                                             }}
                                                         >
                                                             Cancel
@@ -686,9 +653,7 @@ export default function Page() {
                                                                 setActivePreset(
                                                                     null
                                                                 )
-                                                                setIsDateRangeOverlayOpen(
-                                                                    false
-                                                                )
+                                                                closeDropdown()
                                                             }}
                                                         >
                                                             Set Range
@@ -697,7 +662,7 @@ export default function Page() {
                                                 </>
                                             )}
                                         </DropdownOverlay>
-                                    }
+                                    )}
                                 />
                             </div>
                         </div>
@@ -802,5 +767,3 @@ export default function Page() {
         </div>
     )
 }
-
-//Preparing for future
