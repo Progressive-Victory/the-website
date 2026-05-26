@@ -91,6 +91,10 @@ export const AccountInfoForm = ({
                         label="Shirt Size"
                         field="shirtSize"
 
+                        getter={(user) =>
+                            user.shirtSize ?? ""
+                        }
+                        
                         options={shirtSizeOptions}
                     />
                     <TextField<User>

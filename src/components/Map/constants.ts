@@ -33,6 +33,7 @@ export const shirtSizeOptions = [
     { value: 'L', label: 'Large' },
     { value: 'XL', label: 'Extra Large' },
     { value: '2XL', label: 'Double XL' },
+    { value: '', label: ''},
 ]
 
 /**
