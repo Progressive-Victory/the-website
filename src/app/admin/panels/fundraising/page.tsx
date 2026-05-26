@@ -1,7 +1,12 @@
 'use client'
 
 import styles from './page.module.css'
-import { DashboardWidget, ProgressBar } from '@/components/common'
+import {
+    DropdownButton,
+    DropdownOverlay,
+    DashboardWidget,
+    ProgressBar,
+} from '@/components/common'
 import {
     ActBlueFundraisingStatsResponse,
     zActBlueFundraisingStatsResponse,
@@ -12,7 +17,6 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FaDonate } from 'react-icons/fa'
 import { FaDollarSign } from 'react-icons/fa6'
-import { FiChevronDown } from 'react-icons/fi'
 
 function formatCurrency(value?: number) {
     if (value == null || !Number.isFinite(value)) return '—'
@@ -435,12 +439,13 @@ export default function Page() {
                                 >
                                     Date Range
                                 </label>
-
-                                <button
+                                <DropdownButton
                                     id="fundraising-date-range-trigger"
                                     type="button"
                                     ref={dateRangeTriggerRef}
-                                    className={styles.dateRangeTriggerButton}
+                                    isOpen={isDateRangeOverlayOpen}
+                                    buttonVariant="long"
+                                    label={selectedRangeLabel}
                                     onClick={() => {
                                         if (!isDateRangeOverlayOpen) {
                                             setDraftStartDate(startDate)
@@ -451,251 +456,249 @@ export default function Page() {
                                             (current) => !current
                                         )
                                     }}
-                                    aria-haspopup="dialog"
-                                    aria-expanded={isDateRangeOverlayOpen}
-                                >
-                                    <span>{selectedRangeLabel}</span>
-                                    <FiChevronDown
-                                        className={
-                                            styles.dateRangeTriggerChevron
-                                        }
-                                        aria-hidden="true"
-                                        size={14}
-                                    />
-                                </button>
-
-                                {isDateRangeOverlayOpen && (
-                                    <div
-                                        ref={dateRangeOverlayRef}
-                                        className={styles.customDateRangeBox}
-                                        style={{
-                                            maxHeight:
-                                                dateRangeOverlayMaxHeight !=
-                                                null
-                                                    ? `${dateRangeOverlayMaxHeight}px`
-                                                    : undefined,
-                                            transform: `translateY(-${dateRangeOverlayOffset}px)`,
-                                        }}
-                                    >
-                                        <div
-                                            className={styles.customRangeLabel}
-                                        >
-                                            Select Range
-                                        </div>
-
-                                        <div
+                                    menu={
+                                        <DropdownOverlay
+                                            ref={dateRangeOverlayRef}
                                             className={
-                                                styles.dateRangeOptionList
+                                                styles.customDateRangeBox
                                             }
+                                            style={{
+                                                maxHeight:
+                                                    dateRangeOverlayMaxHeight !=
+                                                    null
+                                                        ? `${dateRangeOverlayMaxHeight}px`
+                                                        : undefined,
+                                                transform: `translateY(-${dateRangeOverlayOffset}px)`,
+                                            }}
                                         >
-                                            {PRESETS.map((preset) => (
-                                                <button
-                                                    key={preset}
-                                                    type="button"
-                                                    className={`${styles.dateRangeOptionButton} ${activeDateOption === preset ? styles.dateRangeOptionButtonActive : ''}`}
-                                                    onClick={() => {
-                                                        applyPreset(preset)
-                                                        setDraftStartDate(
-                                                            getPresetRange(
-                                                                preset
-                                                            )[0]
-                                                        )
-                                                        setDraftEndDate(
-                                                            getPresetRange(
-                                                                preset
-                                                            )[1]
-                                                        )
-                                                        setIsDateRangeOverlayOpen(
-                                                            false
-                                                        )
-                                                    }}
-                                                >
-                                                    {preset}
-                                                </button>
-                                            ))}
-
-                                            <button
-                                                type="button"
-                                                className={`${styles.dateRangeOptionButton} ${activeDateOption === 'Custom Range' ? styles.dateRangeOptionButtonActive : ''}`}
-                                                onClick={() => {
-                                                    setPreviousPreset(
-                                                        activePreset
-                                                    )
-                                                    setActivePreset(null)
-                                                    if (!draftStartDate)
-                                                        setDraftStartDate(
-                                                            startDate
-                                                        )
-                                                    if (!draftEndDate)
-                                                        setDraftEndDate(endDate)
-                                                }}
+                                            <div
+                                                className={
+                                                    styles.customRangeLabel
+                                                }
                                             >
-                                                Custom Range
-                                            </button>
-                                        </div>
+                                                Select Range
+                                            </div>
 
-                                        {activeDateOption ===
-                                            'Custom Range' && (
-                                            <>
-                                                <div
-                                                    className={
-                                                        styles.customDateField
-                                                    }
-                                                >
-                                                    <label htmlFor="custom-start-date">
-                                                        Start Date
-                                                    </label>
-                                                    <input
-                                                        id="custom-start-date"
-                                                        type="date"
-                                                        name="startDate"
-                                                        max={
-                                                            draftEndInputValue
-                                                                ? draftEndInputValue <
-                                                                  todayInputValue
-                                                                    ? draftEndInputValue
-                                                                    : todayInputValue
-                                                                : todayInputValue
-                                                        }
-                                                        onChange={(ev) => {
-                                                            const next =
-                                                                dateInputToStartISO(
-                                                                    ev.target
-                                                                        .value
-                                                                )
-
-                                                            if (
-                                                                next &&
-                                                                draftEndDate &&
-                                                                new Date(
-                                                                    next
-                                                                ).getTime() >
-                                                                    new Date(
-                                                                        draftEndDate
-                                                                    ).getTime()
-                                                            ) {
-                                                                return
-                                                            }
-
-                                                            setDraftStartDate(
-                                                                next
-                                                            )
-                                                        }}
-                                                        value={isoToDateInput(
-                                                            draftStartDate
-                                                        )}
-                                                    />
-                                                </div>
-
-                                                <div
-                                                    className={
-                                                        styles.customDateField
-                                                    }
-                                                >
-                                                    <label htmlFor="custom-end-date">
-                                                        End Date
-                                                    </label>
-                                                    <input
-                                                        id="custom-end-date"
-                                                        type="date"
-                                                        name="endDate"
-                                                        min={
-                                                            draftStartInputValue ||
-                                                            undefined
-                                                        }
-                                                        max={todayInputValue}
-                                                        onChange={(ev) => {
-                                                            const next =
-                                                                dateInputToEndISO(
-                                                                    ev.target
-                                                                        .value
-                                                                )
-
-                                                            if (
-                                                                next &&
-                                                                draftStartDate &&
-                                                                new Date(
-                                                                    draftStartDate
-                                                                ).getTime() >
-                                                                    new Date(
-                                                                        next
-                                                                    ).getTime()
-                                                            ) {
-                                                                return
-                                                            }
-
-                                                            setDraftEndDate(
-                                                                next
-                                                            )
-                                                        }}
-                                                        value={isoToDateInput(
-                                                            draftEndDate
-                                                        )}
-                                                    />
-                                                </div>
-
-                                                <div
-                                                    className={
-                                                        styles.customDateActions
-                                                    }
-                                                >
+                                            <div
+                                                className={
+                                                    styles.dateRangeOptionList
+                                                }
+                                            >
+                                                {PRESETS.map((preset) => (
                                                     <button
+                                                        key={preset}
                                                         type="button"
-                                                        className={
-                                                            styles.cancelRangeButton
-                                                        }
+                                                        className={`${styles.dateRangeOptionButton} ${activeDateOption === preset ? styles.dateRangeOptionButtonActive : ''}`}
                                                         onClick={() => {
+                                                            applyPreset(preset)
+                                                            setDraftStartDate(
+                                                                getPresetRange(
+                                                                    preset
+                                                                )[0]
+                                                            )
+                                                            setDraftEndDate(
+                                                                getPresetRange(
+                                                                    preset
+                                                                )[1]
+                                                            )
+                                                            setIsDateRangeOverlayOpen(
+                                                                false
+                                                            )
+                                                        }}
+                                                    >
+                                                        {preset}
+                                                    </button>
+                                                ))}
+
+                                                <button
+                                                    type="button"
+                                                    className={`${styles.dateRangeOptionButton} ${activeDateOption === 'Custom Range' ? styles.dateRangeOptionButtonActive : ''}`}
+                                                    onClick={() => {
+                                                        setPreviousPreset(
+                                                            activePreset
+                                                        )
+                                                        setActivePreset(null)
+                                                        if (!draftStartDate)
                                                             setDraftStartDate(
                                                                 startDate
                                                             )
+                                                        if (!draftEndDate)
                                                             setDraftEndDate(
                                                                 endDate
                                                             )
-                                                            setActivePreset(
-                                                                previousPreset
-                                                            )
-                                                            setIsDateRangeOverlayOpen(
-                                                                false
-                                                            )
-                                                        }}
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className={
-                                                            styles.setRangeButton
-                                                        }
-                                                        disabled={
-                                                            !canApplyCustomRange
-                                                        }
-                                                        onClick={() => {
-                                                            if (
-                                                                !canApplyCustomRange
-                                                            )
-                                                                return
+                                                    }}
+                                                >
+                                                    Custom Range
+                                                </button>
+                                            </div>
 
-                                                            setStartDate(
-                                                                draftStartDate
-                                                            )
-                                                            setEndDate(
-                                                                draftEndDate
-                                                            )
-                                                            setActivePreset(
-                                                                null
-                                                            )
-                                                            setIsDateRangeOverlayOpen(
-                                                                false
-                                                            )
-                                                        }}
+                                            {activeDateOption ===
+                                                'Custom Range' && (
+                                                <>
+                                                    <div
+                                                        className={
+                                                            styles.customDateField
+                                                        }
                                                     >
-                                                        Set Range
-                                                    </button>
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                )}
+                                                        <label htmlFor="custom-start-date">
+                                                            Start Date
+                                                        </label>
+                                                        <input
+                                                            id="custom-start-date"
+                                                            type="date"
+                                                            name="startDate"
+                                                            max={
+                                                                draftEndInputValue
+                                                                    ? draftEndInputValue <
+                                                                      todayInputValue
+                                                                        ? draftEndInputValue
+                                                                        : todayInputValue
+                                                                    : todayInputValue
+                                                            }
+                                                            onChange={(ev) => {
+                                                                const next =
+                                                                    dateInputToStartISO(
+                                                                        ev
+                                                                            .target
+                                                                            .value
+                                                                    )
+
+                                                                if (
+                                                                    next &&
+                                                                    draftEndDate &&
+                                                                    new Date(
+                                                                        next
+                                                                    ).getTime() >
+                                                                        new Date(
+                                                                            draftEndDate
+                                                                        ).getTime()
+                                                                ) {
+                                                                    return
+                                                                }
+
+                                                                setDraftStartDate(
+                                                                    next
+                                                                )
+                                                            }}
+                                                            value={isoToDateInput(
+                                                                draftStartDate
+                                                            )}
+                                                        />
+                                                    </div>
+
+                                                    <div
+                                                        className={
+                                                            styles.customDateField
+                                                        }
+                                                    >
+                                                        <label htmlFor="custom-end-date">
+                                                            End Date
+                                                        </label>
+                                                        <input
+                                                            id="custom-end-date"
+                                                            type="date"
+                                                            name="endDate"
+                                                            min={
+                                                                draftStartInputValue ||
+                                                                undefined
+                                                            }
+                                                            max={
+                                                                todayInputValue
+                                                            }
+                                                            onChange={(ev) => {
+                                                                const next =
+                                                                    dateInputToEndISO(
+                                                                        ev
+                                                                            .target
+                                                                            .value
+                                                                    )
+
+                                                                if (
+                                                                    next &&
+                                                                    draftStartDate &&
+                                                                    new Date(
+                                                                        draftStartDate
+                                                                    ).getTime() >
+                                                                        new Date(
+                                                                            next
+                                                                        ).getTime()
+                                                                ) {
+                                                                    return
+                                                                }
+
+                                                                setDraftEndDate(
+                                                                    next
+                                                                )
+                                                            }}
+                                                            value={isoToDateInput(
+                                                                draftEndDate
+                                                            )}
+                                                        />
+                                                    </div>
+
+                                                    <div
+                                                        className={
+                                                            styles.customDateActions
+                                                        }
+                                                    >
+                                                        <button
+                                                            type="button"
+                                                            className={
+                                                                styles.cancelRangeButton
+                                                            }
+                                                            onClick={() => {
+                                                                setDraftStartDate(
+                                                                    startDate
+                                                                )
+                                                                setDraftEndDate(
+                                                                    endDate
+                                                                )
+                                                                setActivePreset(
+                                                                    previousPreset
+                                                                )
+                                                                setIsDateRangeOverlayOpen(
+                                                                    false
+                                                                )
+                                                            }}
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className={
+                                                                styles.setRangeButton
+                                                            }
+                                                            disabled={
+                                                                !canApplyCustomRange
+                                                            }
+                                                            onClick={() => {
+                                                                if (
+                                                                    !canApplyCustomRange
+                                                                )
+                                                                    return
+
+                                                                setStartDate(
+                                                                    draftStartDate
+                                                                )
+                                                                setEndDate(
+                                                                    draftEndDate
+                                                                )
+                                                                setActivePreset(
+                                                                    null
+                                                                )
+                                                                setIsDateRangeOverlayOpen(
+                                                                    false
+                                                                )
+                                                            }}
+                                                        >
+                                                            Set Range
+                                                        </button>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </DropdownOverlay>
+                                    }
+                                />
                             </div>
                         </div>
                     </div>
