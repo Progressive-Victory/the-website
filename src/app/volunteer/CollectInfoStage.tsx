@@ -114,7 +114,7 @@ export function CollectInfoStage({
                     Join us on Discord and make a difference ✨
                 </p>
             </header>
-            <section className="flex flex-col gap-2 w-full min-w-0">
+            <section className="flex flex-col gap-2">
                 <section className="flex flex-col gap-2 sm:flex-row">
                     <Field
                         value={form.firstName}
@@ -172,7 +172,7 @@ export function CollectInfoStage({
                     onBlur={(e) => setFormattedPhoneNumber(e.target.value)}
                 />
                 <p
-                    className={`-mt-0.5 mb-1 text-[12px] text-gray-300 max-w-[800px] whitespace-normal break-words`}
+                    className={`-mt-0.5 mb-1 max-w-[800px] whitespace-normal break-words text-[12px] text-gray-300`}
                 >
                     <em>
                         US numbers only. Message and data rates may apply. Must
