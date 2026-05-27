@@ -8,6 +8,7 @@ import {
     PhoneVerifyStage,
     UnderageStage,
 } from '.'
+import { BannedStage } from './BannedStage'
 import { NotCitizenStage } from './NotCitizenStage'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
@@ -236,6 +237,10 @@ export default function VolunteerPage() {
 
                         {currentStage === OnboardingStage.NOT_CITIZEN && (
                             <NotCitizenStage />
+                        )}
+
+                        {currentStage === OnboardingStage.BANNED && (
+                            <BannedStage />
                         )}
 
                         {currentStage === OnboardingStage.AWAITING_VERIFY && (
