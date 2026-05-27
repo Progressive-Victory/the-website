@@ -365,6 +365,7 @@ function TiltWrapper({
                 className={styles.innerBox}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
+                onMouseMove={disabled ? undefined : handleMouseMove}
             >
                 <motion.div
                     className={[styles.tilt, tiltProps.className]
@@ -383,7 +384,6 @@ function TiltWrapper({
                     onAnimationComplete={() => {
                         if (!disabled && isHovered) setCanTilt(true)
                     }}
-                    onMouseMove={disabled ? undefined : handleMouseMove}
                 >
                     {children}
                 </motion.div>

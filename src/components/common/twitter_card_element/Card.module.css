@@ -264,6 +264,6 @@
 }
 
 .innerBox:hover {
-    padding: 3rem 1.5rem 3rem 1.5rem;
-    margin: -3rem -1.5rem -3rem -1.5rem;
+    padding: 3rem 1.5rem;
+    margin: -3rem -1.5rem;
 }

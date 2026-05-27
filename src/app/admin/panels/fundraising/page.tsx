@@ -481,7 +481,6 @@ export default function Page() {
                                         >
                                             Select Range
                                         </div>
-
                                         <div
                                             className={
                                                 styles.dateRangeOptionList
@@ -786,7 +785,6 @@ export default function Page() {
                     </div>
                 </div>
             </div>
-
             <div className={styles.grid}>
                 <FundraisingCard
                     title="Donors"
