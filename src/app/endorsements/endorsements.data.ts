@@ -631,7 +631,7 @@ export const CANDIDATES: CandidateConfig[] = [
         image: '/images/endorsement_images/2026/HARTZELL GRAY.png',
         learnMoreHref: '',
         initiativeType: '',
-        showPvPledge: true,
+        showPvPledge: false,
         showPvMember: false,
     },
     {
