@@ -2,10 +2,6 @@
 
 import styles from './ProgressBar.module.css'
 
-function clampPercent(value: number | null | undefined) {
-    return Math.max(0, Math.min(100, value ?? 0))
-}
-
 function defaultValueFormatter(value: number | null | undefined) {
     if (value == null || !Number.isFinite(value)) return '—'
     return `${value}%`
@@ -16,7 +12,7 @@ export interface ProgressBarProps extends React.HTMLAttributes<HTMLDivElement> {
     value: number | null | undefined
     fill: string
     valueText?: string
-    trackBackground?: string
+    barBackground?: string
     valueFormatter?: (value: number | null | undefined) => string
 }
 
@@ -25,7 +21,7 @@ export function ProgressBar({
     value,
     fill,
     valueText,
-    trackBackground,
+    barBackground,
     valueFormatter = defaultValueFormatter,
     className,
     ...props
@@ -40,16 +36,16 @@ export function ProgressBar({
                 <span>{valueText ?? valueFormatter(value)}</span>
             </div>
             <div
-                className={styles.track}
+                className={styles.bar}
                 aria-hidden="true"
                 style={{
-                    background: trackBackground,
+                    background: barBackground,
                 }}
             >
                 <span
                     className={styles.fill}
                     style={{
-                        width: `${clampPercent(value)}%`,
+                        width: `${Math.max(0, Math.min(100, value ?? 0))}%`,
                         background: fill,
                     }}
                 />

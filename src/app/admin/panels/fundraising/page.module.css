@@ -56,58 +56,6 @@
     align-items: stretch;
 }
 
-.chartOptionsBox {
-    min-width: 14rem;
-    background: rgba(255, 255, 255, 0.96);
-}
-
-.chartOptionsBody {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.55rem;
-}
-
-.chartOptionRow {
-    display: grid;
-    gap: 0.3rem;
-    padding: 0 0.15rem;
-}
-
-.chartOptionLabel {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: rgba(15, 23, 42, 0.58);
-}
-
-.chartOptionsControl {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-}
-
-.resetViewButton {
-    border-radius: 0.48rem;
-    background: rgb(241, 241, 242);
-    color: rgba(15, 23, 42, 0.72);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    padding: 0.26rem 0.5rem;
-    cursor: pointer;
-    transition:
-        background-color 0.15s ease,
-        border-color 0.15s ease,
-        color 0.15s ease;
-}
-
-.resetViewButton:hover:not(:disabled) {
-    background-color: #d1d5db;
-    color: rgba(9, 34, 58, 0.9);
-}
-
 .dateRangePresetCol {
     display: grid;
     gap: 0.34rem;

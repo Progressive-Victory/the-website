@@ -53,20 +53,3 @@ export async function getEarliestContribution(onGet: OnGet) {
         }
     )
 }
-
-export async function getFundraisingBucketStats(
-    onGet: OnGet,
-    bucketStartIso: string,
-    bucketEndIso: string
-) {
-    return onGet<ActBlueFundraisingStatsResponse>(
-        '/actblue/fundraising/stats',
-        zActBlueFundraisingStatsResponse,
-        {
-            query: {
-                startDate: bucketStartIso,
-                endDate: bucketEndIso,
-            },
-        }
-    )
-}
