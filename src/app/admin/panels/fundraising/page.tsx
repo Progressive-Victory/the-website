@@ -99,9 +99,9 @@ export default function Page() {
         const narrowOverlayQuery = '(max-width: 53rem)'
 
         const updateDateRangeOverlayPosition = () => {
-            const trigger = dateRangeTriggerRef.current
-            const overlay = dateRangeOverlayRef.current
-            if (!trigger || !overlay) return
+            const currentTrigger = dateRangeTriggerRef.current
+            const currentOverlay = dateRangeOverlayRef.current
+            if (!currentTrigger || !currentOverlay) return
 
             const isNarrowLayout = window.matchMedia(narrowOverlayQuery).matches
             setIsNarrowDateRangeLayout(isNarrowLayout)
@@ -113,7 +113,7 @@ export default function Page() {
 
             const triggerRect = trigger.getBoundingClientRect()
             const viewportHeight = window.innerHeight
-            const naturalOverlayHeight = overlay.scrollHeight
+            const naturalOverlayHeight = currentOverlay.scrollHeight
             const naturalTop = triggerRect.bottom + triggerGap
             const naturalViewportBottom = viewportHeight - viewportPadding
 
