@@ -357,6 +357,10 @@
         justify-items: stretch;
     }
 
+    .dateRangeTriggerButton {
+        width: 100%;
+    }
+
     .dateRangePopBody {
         grid-template-columns: 1fr;
     }

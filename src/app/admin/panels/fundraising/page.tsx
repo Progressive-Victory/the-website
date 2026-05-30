@@ -59,11 +59,11 @@ function FundraisingCard({
 }
 
 export default function Page() {
-    const [isDateRangeOverlayOpen, setIsDateRangeOverlayOpen] = useState(false)
     const [dateRangeOverlayMaxHeight, setDateRangeOverlayMaxHeight] =
         useState<number>()
     const [dateRangeOverlayOffset, setDateRangeOverlayOffset] = useState(0)
-    const dateRangeControlRef = useRef<HTMLDivElement | null>(null)
+    const [isNarrowDateRangeLayout, setIsNarrowDateRangeLayout] =
+        useState(false)
     const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
     const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
 
@@ -93,41 +93,6 @@ export default function Page() {
     } = useFundraisingDashboardController(onGet)
 
     useEffect(() => {
-        const onDocumentMouseDown = (event: MouseEvent) => {
-            if (!isDateRangeOverlayOpen) return
-
-            const control = dateRangeControlRef.current
-            if (!control) return
-
-            if (!control.contains(event.target as Node)) {
-                setIsDateRangeOverlayOpen(false)
-                setDraftStartDate(startDate)
-                setDraftEndDate(endDate)
-                setDraftPreset(committedPreset)
-            }
-        }
-
-        document.addEventListener('mousedown', onDocumentMouseDown)
-        return () => {
-            document.removeEventListener('mousedown', onDocumentMouseDown)
-        }
-    }, [
-        isDateRangeOverlayOpen,
-        startDate,
-        endDate,
-        committedPreset,
-        setDraftStartDate,
-        setDraftEndDate,
-        setDraftPreset,
-    ])
-
-    useEffect(() => {
-        if (!isDateRangeOverlayOpen) {
-            setDateRangeOverlayMaxHeight(undefined)
-            setDateRangeOverlayOffset(0)
-            return
-        }
-
         const viewportPadding = 12
         const constrainedBottomMargin = 16
         const triggerGap = 6
@@ -139,6 +104,7 @@ export default function Page() {
             if (!trigger || !overlay) return
 
             const isNarrowLayout = window.matchMedia(narrowOverlayQuery).matches
+            setIsNarrowDateRangeLayout(isNarrowLayout)
             if (isNarrowLayout) {
                 setDateRangeOverlayOffset(0)
                 setDateRangeOverlayMaxHeight(undefined)
@@ -192,7 +158,7 @@ export default function Page() {
                 true
             )
         }
-    }, [isDateRangeOverlayOpen])
+    }, [draftStartDate, draftEndDate, committedPreset])
 
     return (
         <div className={styles.panelContents}>
@@ -229,10 +195,7 @@ export default function Page() {
 
                         <div className={styles.dashboardDateGroup}>
                             <div className={styles.dateContainer}>
-                                <div
-                                    ref={dateRangeControlRef}
-                                    className={styles.dateFilterControls}
-                                >
+                                <div className={styles.dateFilterControls}>
                                     <label
                                         htmlFor="fundraising-date-range-trigger"
                                         className={styles.dateFilterLabel}
@@ -244,202 +207,181 @@ export default function Page() {
                                         id="fundraising-date-range-trigger"
                                         type="button"
                                         ref={dateRangeTriggerRef}
-                                        isOpen={isDateRangeOverlayOpen}
+                                        className={
+                                            styles.dateRangeTriggerButton
+                                        }
                                         buttonVariant="long"
                                         label={selectedRangeLabel}
                                         onClick={() => {
-                                            if (!isDateRangeOverlayOpen) {
-                                                setDraftStartDate(startDate)
-                                                setDraftEndDate(endDate)
-                                                setDraftPreset(committedPreset)
-                                            }
-
-                                            setIsDateRangeOverlayOpen(
-                                                (current) => !current
-                                            )
+                                            setDraftStartDate(startDate)
+                                            setDraftEndDate(endDate)
+                                            setDraftPreset(committedPreset)
                                         }}
-                                        menu={
-                                            isDateRangeOverlayOpen ? (
-                                                <DropdownOverlay
-                                                    ref={dateRangeOverlayRef}
-                                                    className={
-                                                        styles.customDateRangeBox
-                                                    }
-                                                    narrowLayoutMode="flow"
-                                                    style={{
-                                                        maxHeight:
-                                                            dateRangeOverlayMaxHeight !=
-                                                            null
-                                                                ? `${dateRangeOverlayMaxHeight}px`
-                                                                : undefined,
-                                                        transform: `translateY(-${dateRangeOverlayOffset}px)`,
-                                                    }}
-                                                    label="Select date range"
-                                                    onClose={() => {
-                                                        setIsDateRangeOverlayOpen(
-                                                            false
-                                                        )
-                                                        setDraftStartDate(
-                                                            startDate
-                                                        )
-                                                        setDraftEndDate(endDate)
-                                                        setDraftPreset(
-                                                            committedPreset
-                                                        )
-                                                    }}
-                                                    body={
-                                                        <>
-                                                            <div
-                                                                className={
-                                                                    styles.dateRangePresetCol
-                                                                }
-                                                            >
-                                                                {PRESETS.map(
-                                                                    (
+                                        menu={({ closeDropdown }) => (
+                                            <DropdownOverlay
+                                                ref={dateRangeOverlayRef}
+                                                className={
+                                                    styles.customDateRangeBox
+                                                }
+                                                narrowLayoutMode="flow"
+                                                style={{
+                                                    maxHeight:
+                                                        dateRangeOverlayMaxHeight !=
+                                                        null
+                                                            ? `${dateRangeOverlayMaxHeight}px`
+                                                            : undefined,
+                                                    transform: `translateY(-${dateRangeOverlayOffset}px)`,
+                                                    marginTop:
+                                                        isNarrowDateRangeLayout
+                                                            ? '0.35rem'
+                                                            : undefined,
+                                                }}
+                                                label="Select date range"
+                                                onClose={() => {
+                                                    closeDropdown()
+                                                }}
+                                                body={
+                                                    <>
+                                                        <div
+                                                            className={
+                                                                styles.dateRangePresetCol
+                                                            }
+                                                        >
+                                                            {PRESETS.map(
+                                                                (preset) => {
+                                                                    const isCommitted =
+                                                                        committedPreset ===
                                                                         preset
-                                                                    ) => {
-                                                                        const isCommitted =
-                                                                            committedPreset ===
-                                                                            preset
-                                                                        const isDraft =
-                                                                            draftPreset ===
-                                                                            preset
-                                                                        const classes =
-                                                                            [
-                                                                                styles.dateRangePresetButton,
-                                                                            ]
-                                                                        if (
-                                                                            isCommitted
+                                                                    const isDraft =
+                                                                        draftPreset ===
+                                                                        preset
+                                                                    const classes =
+                                                                        [
+                                                                            styles.dateRangePresetButton,
+                                                                        ]
+                                                                    if (
+                                                                        isCommitted
+                                                                    )
+                                                                        classes.push(
+                                                                            styles.dateRangePresetButtonCommitted
                                                                         )
-                                                                            classes.push(
-                                                                                styles.dateRangePresetButtonCommitted
-                                                                            )
-                                                                        if (
-                                                                            isDraft
+                                                                    if (isDraft)
+                                                                        classes.push(
+                                                                            styles.dateRangePresetButtonDraft
                                                                         )
-                                                                            classes.push(
-                                                                                styles.dateRangePresetButtonDraft
-                                                                            )
-                                                                        return (
-                                                                            <button
-                                                                                key={
+                                                                    return (
+                                                                        <button
+                                                                            key={
+                                                                                preset
+                                                                            }
+                                                                            type="button"
+                                                                            className={classes.join(
+                                                                                ' '
+                                                                            )}
+                                                                            onClick={() => {
+                                                                                const [
+                                                                                    s,
+                                                                                    e,
+                                                                                ] =
+                                                                                    getResolvedPresetRange(
+                                                                                        preset,
+                                                                                        allTimeFirstIso
+                                                                                    )
+                                                                                setDraftStartDate(
+                                                                                    s
+                                                                                )
+                                                                                setDraftEndDate(
+                                                                                    e
+                                                                                )
+                                                                                setDraftPreset(
+                                                                                    preset
+                                                                                )
+                                                                            }}
+                                                                            aria-pressed={
+                                                                                isDraft
+                                                                            }
+                                                                            aria-current={
+                                                                                isCommitted
+                                                                                    ? 'true'
+                                                                                    : undefined
+                                                                            }
+                                                                        >
+                                                                            <span>
+                                                                                {
                                                                                     preset
                                                                                 }
-                                                                                type="button"
-                                                                                className={classes.join(
-                                                                                    ' '
-                                                                                )}
-                                                                                onClick={() => {
-                                                                                    const [
-                                                                                        s,
-                                                                                        e,
-                                                                                    ] =
-                                                                                        getResolvedPresetRange(
-                                                                                            preset,
-                                                                                            allTimeFirstIso
-                                                                                        )
-                                                                                    setDraftStartDate(
-                                                                                        s
-                                                                                    )
-                                                                                    setDraftEndDate(
-                                                                                        e
-                                                                                    )
-                                                                                    setDraftPreset(
-                                                                                        preset
-                                                                                    )
-                                                                                }}
-                                                                                aria-pressed={
-                                                                                    isDraft
+                                                                            </span>
+                                                                            <span
+                                                                                className={
+                                                                                    styles.dateRangePresetCheck
                                                                                 }
-                                                                                aria-current={
-                                                                                    isCommitted
-                                                                                        ? 'true'
-                                                                                        : undefined
-                                                                                }
+                                                                                aria-hidden="true"
                                                                             >
-                                                                                <span>
-                                                                                    {
-                                                                                        preset
-                                                                                    }
-                                                                                </span>
-                                                                                <span
-                                                                                    className={
-                                                                                        styles.dateRangePresetCheck
-                                                                                    }
-                                                                                    aria-hidden="true"
-                                                                                >
-                                                                                    {isCommitted ? (
-                                                                                        <FiCheck
-                                                                                            size={
-                                                                                                14
-                                                                                            }
-                                                                                        />
-                                                                                    ) : null}
-                                                                                </span>
-                                                                            </button>
-                                                                        )
-                                                                    }
-                                                                )}
-                                                            </div>
+                                                                                {isCommitted ? (
+                                                                                    <FiCheck
+                                                                                        size={
+                                                                                            14
+                                                                                        }
+                                                                                    />
+                                                                                ) : null}
+                                                                            </span>
+                                                                        </button>
+                                                                    )
+                                                                }
+                                                            )}
+                                                        </div>
 
-                                                            <DateRangePicker
-                                                                startDate={
-                                                                    draftStartDate
-                                                                }
-                                                                endDate={
-                                                                    draftEndDate
-                                                                }
-                                                                onRangeChange={(
-                                                                    nextStartDate: string,
-                                                                    nextEndDate: string
-                                                                ) => {
-                                                                    setDraftStartDate(
-                                                                        nextStartDate
+                                                        <DateRangePicker
+                                                            startDate={
+                                                                draftStartDate
+                                                            }
+                                                            endDate={
+                                                                draftEndDate
+                                                            }
+                                                            onRangeChange={(
+                                                                nextStartDate: string,
+                                                                nextEndDate: string
+                                                            ) => {
+                                                                setDraftStartDate(
+                                                                    nextStartDate
+                                                                )
+                                                                setDraftEndDate(
+                                                                    nextEndDate
+                                                                )
+                                                                setDraftPreset(
+                                                                    inferPresetFromRange(
+                                                                        nextStartDate,
+                                                                        nextEndDate,
+                                                                        allTimeFirstIso
                                                                     )
-                                                                    setDraftEndDate(
-                                                                        nextEndDate
-                                                                    )
-                                                                    setDraftPreset(
-                                                                        inferPresetFromRange(
-                                                                            nextStartDate,
-                                                                            nextEndDate,
-                                                                            allTimeFirstIso
-                                                                        )
-                                                                    )
-                                                                }}
-                                                            />
-                                                        </>
-                                                    }
-                                                    bodyClassName={
-                                                        styles.dateRangePopBody
-                                                    }
-                                                    footerButtonLabel={
-                                                        isAwaitingDraftEndDate
-                                                            ? 'Select End Date'
-                                                            : 'Select'
-                                                    }
-                                                    footerButtonDisabled={
-                                                        !canApplyCustomRange
-                                                    }
-                                                    footerButtonOnClick={() => {
-                                                        if (
-                                                            !canApplyCustomRange
-                                                        )
-                                                            return
-                                                        setStartDate(
-                                                            draftStartDate
-                                                        )
-                                                        setEndDate(draftEndDate)
-                                                        setCommittedPreset(
-                                                            draftPreset
-                                                        )
-                                                        setIsDateRangeOverlayOpen(
-                                                            false
-                                                        )
-                                                    }}
-                                                />
-                                            ) : null
-                                        }
+                                                                )
+                                                            }}
+                                                        />
+                                                    </>
+                                                }
+                                                bodyClassName={
+                                                    styles.dateRangePopBody
+                                                }
+                                                footerButtonLabel={
+                                                    isAwaitingDraftEndDate
+                                                        ? 'Select End Date'
+                                                        : 'Select'
+                                                }
+                                                footerButtonDisabled={
+                                                    !canApplyCustomRange
+                                                }
+                                                footerButtonOnClick={() => {
+                                                    if (!canApplyCustomRange)
+                                                        return
+                                                    setStartDate(draftStartDate)
+                                                    setEndDate(draftEndDate)
+                                                    setCommittedPreset(
+                                                        draftPreset
+                                                    )
+                                                    closeDropdown()
+                                                }}
+                                            />
+                                        )}
                                     />
                                 </div>
                             </div>

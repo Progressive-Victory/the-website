@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 export function pascalToNormal(str: string): string {
     const pattern = /[a-z](?=[A-Z])/
     const pascalBounds: number[] = []
@@ -15,4 +17,21 @@ export function pascalToNormal(str: string): string {
     slicedStr.push(str.slice(pascalBounds[pascalBounds.length - 1] + 1))
 
     return slicedStr.join(' ')
+}
+
+export function areOverlayStylesEqual(
+    a: CSSProperties,
+    b: CSSProperties
+): boolean {
+    const keys = new Set([...Object.keys(a), ...Object.keys(b)]) as Set<
+        keyof CSSProperties
+    >
+
+    for (const key of keys) {
+        if (a[key] !== b[key]) {
+            return false
+        }
+    }
+
+    return true
 }
