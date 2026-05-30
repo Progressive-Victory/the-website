@@ -1,8 +1,17 @@
 export type InitiativeType = 'national' | 'state' | ''
+export type ElectionStatus =
+    | ''
+    | 'Won Primary'
+    | 'Elected'
+    | 'Lost Primary'
+    | 'Lost General Election'
+    | 'Dropped Out'
 
 export interface CandidateConfig {
     id: string
     name: string
+    state: string
+    electionStatus: ElectionStatus
     electionDate?: Date
 
     handle: string
@@ -21,6 +30,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '1',
         name: 'Jeromie Whalen',
+        state: 'Massachusetts',
+        electionStatus: '',
         electionDate: new Date('09/01/26'),
         handle: '@jeromiewhalen',
         handleHref: 'https://www.whalenforcongressma.com/',
@@ -35,6 +46,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '2',
         name: 'Abdul El-Sayed',
+        state: 'Michigan',
+        electionStatus: '',
         electionDate: new Date('11/03/26'),
         handle: '@abdulelsayed',
         handleHref: 'https://x.com/AbdulElSayed',
@@ -49,6 +62,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '3',
         name: 'Saikat Chakrabarti',
+        state: 'California',
+        electionStatus: '',
         electionDate: new Date('06/02/26'),
         handle: '@saikatc',
         handleHref: 'https://x.com/saikatc',
@@ -63,6 +78,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '4',
         name: 'Kat Abughazaleh',
+        state: 'Illinois',
+        electionStatus: 'Lost Primary',
         electionDate: new Date('03/17/26'),
         handle: '@katabughazaleh',
         handleHref: 'https://x.com/KatAbughazaleh',
@@ -77,6 +94,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '5',
         name: 'Graham Platner',
+        state: 'Maine',
+        electionStatus: 'Won Primary',
         electionDate: new Date('11/03/26'),
         handle: '@grahamformaine',
         handleHref: 'https://x.com/grahamformaine',
@@ -91,6 +110,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '6',
         name: 'Salaam Bhatti',
+        state: 'Virginia',
+        electionStatus: '',
         electionDate: new Date('08/01/26'),
         handle: '@salaambhattiva',
         handleHref: 'https://x.com/SalaamBhattiVA',
@@ -105,6 +126,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '7',
         name: 'Karishma Manzur',
+        state: 'North Carolina',
+        electionStatus: '',
         electionDate: new Date('09/08/26'),
         handle: '@karishma4senate',
         handleHref: 'https://x.com/Karishma4Senate',
@@ -118,6 +141,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '8',
         name: 'Oliver Larkin',
+        state: 'Florida',
+        electionStatus: '',
         electionDate: new Date('08/18/26'),
         handle: '@oliveralarkin',
         handleHref: 'https://x.com/OliverALarkin',
@@ -132,6 +157,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '9',
         name: 'Heath Howard',
+        state: 'New Hampshire',
+        electionStatus: '',
         electionDate: new Date('09/08/26'),
         handle: '@heathhowardnh',
         handleHref: 'https://x.com/HeathHowardNH',
@@ -145,6 +172,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '10',
         name: 'Adam Murphy',
+        state: 'Virginia',
+        electionStatus: '',
         electionDate: new Date('08/01/26'),
         handle: '@murphy4va',
         handleHref: 'https://x.com/Murphy4VA',
@@ -159,12 +188,14 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '11',
         name: 'Analilia Mejia',
+        state: 'New Jersey',
+        electionStatus: 'Elected',
         electionDate: new Date('02/05/26'),
         handle: '@analilia_mejia',
         handleHref: 'https://x.com/Analilia_Mejia',
         bodyText:
             ' is a life long organizer who will be instrumental in organizing the progressive movement from within congress! We are thrilled to endorse her, and to see her take the PV Pledge.',
-        image: '/images/endorsement_images/2026/ANALILIA MEJIA.png',
+        image: '/images/endorsement_images/2026/ANALILIA_MEJIA.png',
         learnMoreHref: '',
         initiativeType: 'national',
         showPvPledge: true,
@@ -173,6 +204,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '12',
         name: 'Mary Peltola',
+        state: 'Alaska',
+        electionStatus: '',
         electionDate: new Date('11/03/26'),
         handle: '@marypeltola',
         handleHref: 'https://x.com/MaryPeltola',
@@ -187,6 +220,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '13',
         name: 'Erica Watkins',
+        state: 'Oklahoma',
+        electionStatus: 'Dropped Out',
         electionDate: new Date('11/03/26'),
         handle: '@erica4ok',
         handleHref: 'https://x.com/erica4ok',
@@ -201,6 +236,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '14',
         name: 'Taylor Rehmet',
+        state: 'Texas',
+        electionStatus: 'Elected',
         electionDate: new Date('01/27/26'),
         handle: '@taylorrehmettx',
         handleHref: 'https://x.com/TaylorRehmetTX',
@@ -214,6 +251,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '15',
         name: 'Luis Villarreal',
+        state: 'Utah',
+        electionStatus: '',
         electionDate: new Date('11/03/26'),
         handle: '@luis4utah',
         handleHref: 'https://x.com/Luis4Utah',
@@ -227,6 +266,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '16',
         name: 'Brad Lander',
+        state: 'New York',
+        electionStatus: '',
         electionDate: new Date('11/03/26'),
         handle: '@bradlander',
         handleHref: 'https://x.com/bradlander',
@@ -240,6 +281,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '17',
         name: 'Ro Khanna',
+        state: 'California',
+        electionStatus: '',
         electionDate: new Date('11/03/26'),
         handle: '@rokhanna',
         handleHref: 'https://x.com/RoKhanna',
@@ -254,6 +297,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '18',
         name: 'Cori Bush',
+        state: 'Missouri',
+        electionStatus: '',
         electionDate: new Date('08/04/26'),
         handle: '@coribush',
         handleHref: 'https://x.com/CoriBush',
@@ -268,6 +313,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '19',
         name: 'James Talarico',
+        state: 'Texas',
+        electionStatus: 'Won Primary',
         electionDate: new Date('03/03/26'),
         handle: '@jamestalarico',
         handleHref: 'https://x.com/jamestalarico',
@@ -279,23 +326,27 @@ export const CANDIDATES: CandidateConfig[] = [
         showPvPledge: false,
         showPvMember: false,
     },
-    {
-        id: '20',
-        name: 'Jon Stewart',
-        electionDate: new Date('11/07/28'),
-        handle: '@jonstewart',
-        handleHref: 'https://x.com/jonstewart',
-        bodyText:
-            ' isn’t perfect, but his decades long track record of integrity and progressivism make him the decisive pick. We urge him to serve his country by running for the office.',
-        image: '/images/endorsement_images/2028/JON STEWART.png',
-        learnMoreHref: '',
-        initiativeType: '',
-        showPvPledge: false,
-        showPvMember: false,
-    },
+    // {
+    //     id: '20',
+    //     name: 'Jon Stewart',
+    //     state: 'President',
+    //     electionStatus: '',
+    //     electionDate: new Date('11/07/28'),
+    //     handle: '@jonstewart',
+    //     handleHref: 'https://x.com/jonstewart',
+    //     bodyText:
+    //         ' isn’t perfect, but his decades long track record of integrity and progressivism make him the decisive pick. We urge him to serve his country by running for the office.',
+    //     image: '/images/endorsement_images/2028/JON STEWART.png',
+    //     learnMoreHref: '',
+    //     initiativeType: '',
+    //     showPvPledge: false,
+    //     showPvMember: false,
+    // },
     {
         id: '21',
         name: 'Zeeshan Hafeez',
+        state: 'Texas',
+        electionStatus: 'Lost Primary',
         electionDate: new Date('03/03/26'),
         handle: '@zeeshanfortexas',
         handleHref: '',
@@ -310,6 +361,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '22',
         name: 'Michael Black',
+        state: 'New York',
+        electionStatus: '',
         electionDate: new Date('06/23/26'),
         handle: '@MrMikeBlake',
         handleHref: 'https://x.com/MrMikeBlake',
@@ -324,6 +377,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '23',
         name: 'Aaron Bailey',
+        state: 'Maryland',
+        electionStatus: '',
         electionDate: new Date('05/19/26'),
         handle: 'baileepolitics',
         handleHref: 'https://x.com/BaileePolitics',
@@ -337,6 +392,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '24',
         name: 'Adam Bojak',
+        state: 'New Jersey',
+        electionStatus: '',
         electionDate: new Date('06/23/26'),
         handle: 'bojak4assembly',
         handleHref: 'https://x.com/bojak4assembly',
@@ -350,6 +407,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '25',
         name: 'Beth Andres-Beck',
+        state: 'Massachusetts',
+        electionStatus: '',
         electionDate: new Date('09/01/26'),
         handle: 'beth4ma',
         handleHref: 'https://x.com/beth4ma',
@@ -363,6 +422,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '26',
         name: 'Blake Bracht',
+        state: 'Arizona',
+        electionStatus: '',
         electionDate: new Date('07/29/26'),
         handle: 'brachtforaz5',
         handleHref: 'https://x.com/BrachtforAZ5',
@@ -376,6 +437,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '27',
         name: 'Bobby Nichols',
+        state: 'Arizona',
+        electionStatus: '',
         electionDate: new Date('07/29/26'),
         handle: 'bobby4tempe',
         handleHref: 'https://www.instagram.com/bobby4tempe/',
@@ -389,6 +452,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '28',
         name: 'Brent Hennrich',
+        state: 'Massachusetts',
+        electionStatus: '',
         electionDate: new Date('09/01/26'),
         handle: 'bhennrich',
         handleHref: 'https://x.com/bhennrich',
@@ -402,6 +467,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '29',
         name: 'Ethan Wechtaluk',
+        state: 'Maryland',
+        electionStatus: '',
         electionDate: new Date('05/19/26'),
         handle: 'ethanformd',
         handleHref: 'https://x.com/ethanformd',
@@ -415,6 +482,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '30',
         name: 'Greg Casar',
+        state: 'Texas',
+        electionStatus: 'Won Primary',
         electionDate: new Date('03/03/26'),
         handle: 'gregcasar',
         handleHref: 'https://x.com/gregcasar',
@@ -428,6 +497,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '32',
         name: 'Hunter Gordon',
+        state: 'Washington',
+        electionStatus: '',
         electionDate: new Date('08/04/26'),
         handle: 'hunter4wa',
         handleHref: 'https://x.com/hunter4wa',
@@ -441,6 +512,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '33',
         name: 'Jakeya Johnson',
+        state: 'Washington',
+        electionStatus: '',
         electionDate: new Date('08/04/26'),
         handle: 'jakeya_hq',
         handleHref: 'https://www.instagram.com/jakeya_hq',
@@ -454,6 +527,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '34',
         name: 'John Padora',
+        state: 'Colorado',
+        electionStatus: 'Dropped Out',
         electionDate: new Date('06/30/26'),
         handle: 'padoraforco',
         handleHref: 'https://x.com/PadoraforCO',
@@ -467,6 +542,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '35',
         name: 'Josie Caballero',
+        state: 'Maryland',
+        electionStatus: '',
         electionDate: new Date('05/19/26'),
         handle: 'josieformd',
         handleHref: 'https://x.com/josieformd',
@@ -480,6 +557,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '36',
         name: 'Katie Bansil',
+        state: 'New Jersey',
+        electionStatus: '',
         electionDate: new Date('06/02/26'),
         handle: 'katiebansil4nj',
         handleHref: 'https://x.com/katiebansil4nj',
@@ -493,6 +572,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '37',
         name: 'Matt Conroy',
+        state: 'Illinois',
+        electionStatus: 'Lost Primary',
         electionDate: new Date('03/17/26'),
         handle: 'conroyforil',
         handleHref: 'https://x.com/ConroyForIL',
@@ -506,6 +587,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '38',
         name: 'Matt Fulmer',
+        state: 'North Carolina',
+        electionStatus: '',
         electionDate: new Date('05/19/26'),
         handle: 'mattforcarolina',
         handleHref: 'https://x.com/MattForCarolina',
@@ -519,6 +602,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '39',
         name: 'Maurice Brown',
+        state: 'Florida',
+        electionStatus: '',
         electionDate: new Date('03/17/26'),
         handle: 'electmauricebrown',
         handleHref: 'https://www.instagram.com/electmauricebrown',
@@ -532,6 +617,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '40',
         name: 'Max Diaz',
+        state: 'Missouri',
+        electionStatus: '',
         electionDate: new Date('08/04/26'),
         handle: 'votemaxdiaz',
         handleHref: 'https://x.com/VoteMaxDiaz',
@@ -545,6 +632,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '41',
         name: 'Maxwell Alejandro Frost',
+        state: 'Florida',
+        electionStatus: '',
         electionDate: new Date('08/18/26'),
         handle: 'maxwellfrostfl',
         handleHref: 'https://x.com/MaxwellFrostFL',
@@ -558,6 +647,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '42',
         name: 'Melissa Bird',
+        state: 'Alabama',
+        electionStatus: '',
         electionDate: new Date('05/19/26'),
         handle: 'melissabirdforcongress',
         handleHref: 'https://www.instagram.com/melissabirdforcongress/',
@@ -571,6 +662,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '44',
         name: 'Nida Allam',
+        state: 'North Carolina',
+        electionStatus: 'Lost Primary',
         electionDate: new Date('05/19/26'),
         handle: '',
         handleHref: 'https://x.com/NidaAllam',
@@ -584,6 +677,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '45',
         name: 'Robert Arnold',
+        state: 'South Dakota',
+        electionStatus: 'Dropped Out',
         electionDate: new Date('06/02/26'),
         handle: 'robertarnoldsd',
         handleHref: 'https://x.com/RobertArnoldSD',
@@ -597,6 +692,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '46',
         name: 'Val Thomason',
+        state: 'Nevada',
+        electionStatus: '',
         electionDate: new Date('06/09/26'),
         handle: 'valfornevada',
         handleHref: 'https://x.com/valfornevada',
@@ -610,6 +707,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '47',
         name: 'William Compton',
+        state: 'Kentucky',
+        electionStatus: 'Lost Primary',
         electionDate: new Date('05/19/26'),
         handle: 'compton4ky2024',
         handleHref: 'https://x.com/Compton4KY2024',
@@ -623,6 +722,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '48',
         name: 'Hartzell Gray',
+        state: 'Missouri',
+        electionStatus: '',
         electionDate: new Date('08/04/26'),
         handle: 'hartzellforkc',
         handleHref: 'https://x.com/hartzellforkc',
@@ -637,6 +738,8 @@ export const CANDIDATES: CandidateConfig[] = [
     {
         id: '49',
         name: 'Jackson Franklin',
+        state: 'Indiana',
+        electionStatus: 'Lost Primary',
         electionDate: new Date('05/05/26'),
         handle: 'jacksonfrankli',
         handleHref: 'https://x.com/jacksonfrankli',

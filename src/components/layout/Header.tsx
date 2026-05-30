@@ -83,6 +83,15 @@ const navitems: NavItem[] = [
         href: '/endorsements',
         subnav: {
             columns: [
+                // {
+                //     title: 'Criteria',
+                //     items: [
+                //         {
+                //             name: 'PV Pledge',
+                //             href: 'https://www.progress.win/pledge',
+                //         },
+                //     ],
+                // },
                 {
                     title: 'Endorsements',
                     items: [
