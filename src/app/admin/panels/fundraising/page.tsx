@@ -1,15 +1,11 @@
 'use client'
 
 import {
-    // CHART_GRANULARITY_LABELS,
     PRESETS,
     formatCount,
-    // formatCountAxis,
     formatCurrency,
-    // formatCurrencyAxis,
     formatDonationCountLabel,
     getResolvedPresetRange,
-    // getXToDatePeriodName,
     inferPresetFromRange,
 } from './fundraising.helpers'
 import styles from './page.module.css'
@@ -21,8 +17,6 @@ import {
     DateRangePicker,
     ProgressBar,
 } from '@/components/common'
-// import { Chart } from '@/components/common/charts/DualAxisBarLineChart'
-// import { type ChartGranularityMode } from '@/components/common/charts/timeBuckets'
 import { useFetch } from '@/util/hooks'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
@@ -73,9 +67,6 @@ export default function Page() {
     const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
     const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
 
-    // const [isChartOptionsOpen, setIsChartOptionsOpen] = useState(false)
-    // const chartOptionsControlRef = useRef<HTMLDivElement | null>(null)
-
     const { onGet } = useFetch()
     const {
         startDate,
@@ -84,22 +75,11 @@ export default function Page() {
         draftPreset,
         draftStartDate,
         draftEndDate,
-        // smoothLine,
-        // showAreaFill,
-        // showDonationsLine,
-        // chartBarDisplayMode,
-        // zoomEnabled,
-        // showFullXToDateSpan,
-        // granularityMode,
         selectedRangeLabel,
         raisedKickerLabel,
         recurringPct,
         oneTimePct,
-        // validGranularityModes,
-        // chartPoints,
-        // chartViewOverrideActive,
         allTimeFirstIso,
-        // isXToDateSpanOptionRelevant,
         canApplyCustomRange,
         isAwaitingDraftEndDate,
         statsQuery,
@@ -110,15 +90,6 @@ export default function Page() {
         setDraftPreset,
         setDraftStartDate,
         setDraftEndDate,
-        // setSmoothLine,
-        // setShowAreaFill,
-        // setShowDonationsLine,
-        // setChartBarDisplayMode,
-        // setZoomEnabled,
-        // setShowFullXToDateSpan,
-        // setGranularityMode,
-        // applyChartViewOverrideRange,
-        // resetChartViewToSelectedRange,
     } = useFundraisingDashboardController(onGet)
 
     useEffect(() => {
@@ -149,21 +120,6 @@ export default function Page() {
         setDraftEndDate,
         setDraftPreset,
     ])
-
-    // useEffect(() => {
-    //     if (!isChartOptionsOpen) return
-    //     const onDocumentMouseDown = (event: MouseEvent) => {
-    //         const control = chartOptionsControlRef.current
-    //         if (!control) return
-    //         if (!control.contains(event.target as Node)) {
-    //             setIsChartOptionsOpen(false)
-    //         }
-    //     }
-    //     document.addEventListener('mousedown', onDocumentMouseDown)
-    //     return () => {
-    //         document.removeEventListener('mousedown', onDocumentMouseDown)
-    //     }
-    // }, [isChartOptionsOpen])
 
     useEffect(() => {
         if (!isDateRangeOverlayOpen) {
