@@ -360,28 +360,34 @@ function TiltWrapper({
     }
 
     return (
-        <motion.div
-            className={[styles.tilt, tiltProps.className]
-                .filter(Boolean)
-                .join(' ')}
-            style={{
-                rotateX: disabled ? 0 : rotateX,
-                rotateY: disabled ? 0 : rotateY,
-                transformPerspective: 1000,
-            }}
-            animate={{
-                rotateZ: disabled ? 0 : isHovered ? zRotate : 0,
-                scale: disabled ? 1 : isHovered ? hoverScale : 1,
-            }}
-            transition={{ duration: 0.2 }}
-            onAnimationComplete={() => {
-                if (!disabled && isHovered) setCanTilt(true)
-            }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onMouseMove={disabled ? undefined : handleMouseMove}
-        >
-            {children}
-        </motion.div>
+        <div>
+            <div
+                className={styles.innerBox}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                onMouseMove={disabled ? undefined : handleMouseMove}
+            >
+                <motion.div
+                    className={[styles.tilt, tiltProps.className]
+                        .filter(Boolean)
+                        .join(' ')}
+                    style={{
+                        rotateX: disabled ? 0 : rotateX,
+                        rotateY: disabled ? 0 : rotateY,
+                        transformPerspective: 1000,
+                    }}
+                    animate={{
+                        rotateZ: disabled ? 0 : isHovered ? zRotate : 0,
+                        scale: disabled ? 1 : isHovered ? hoverScale : 1,
+                    }}
+                    transition={{ duration: 0.2 }}
+                    onAnimationComplete={() => {
+                        if (!disabled && isHovered) setCanTilt(true)
+                    }}
+                >
+                    {children}
+                </motion.div>
+            </div>
+        </div>
     )
 }
