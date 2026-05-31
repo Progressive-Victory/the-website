@@ -271,11 +271,11 @@
 }
 
 .searchControlStacked {
-        flex-direction: column;
-        align-items: stretch;
-        justify-content: flex-start;
-        height: auto;
-        gap: 0.45rem;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    height: auto;
+    gap: 0.45rem;
 }
 
 .searchControlStacked .searchMorph {
