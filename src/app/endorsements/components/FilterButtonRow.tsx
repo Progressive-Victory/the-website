@@ -12,7 +12,7 @@ import {
     type SectionSortOrder,
 } from '../endorsements.types'
 import { AnimatePresence, motion } from 'motion/react'
-import { useEffect, useRef, useState } from 'react'
+import { type FocusEvent, useEffect, useRef, useState } from 'react'
 
 interface FilterButtonRowProps {
     filter: FilterType | null
@@ -23,6 +23,8 @@ interface FilterButtonRowProps {
     setSectionMode: (mode: SectionGroupingMode) => void
     sectionSortOrder: SectionSortOrder
     setSectionSortOrder: (order: SectionSortOrder) => void
+    searchQuery: string
+    setSearchQuery: (query: string) => void
 }
 
 export function FilterButtonRow({
@@ -34,18 +36,95 @@ export function FilterButtonRow({
     setSectionMode,
     sectionSortOrder,
     setSectionSortOrder,
+    searchQuery,
+    setSearchQuery,
 }: FilterButtonRowProps) {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+    const [isSearchOpen, setIsSearchOpen] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
+    const [searchExpandedWidth, setSearchExpandedWidth] = useState<
+        number | null
+    >(null)
     const controlsPanelRef = useRef<HTMLDivElement | null>(null)
+    const leftMostControlRef = useRef<HTMLDivElement | null>(null)
+    const searchControlRef = useRef<HTMLDivElement | null>(null)
+    const searchToggleButtonRef = useRef<HTMLButtonElement | null>(null)
+    const searchInputRef = useRef<HTMLInputElement | null>(null)
+
+    function computeSearchExpandedWidth() {
+        const leftMostControl = leftMostControlRef.current
+        const searchButton = searchToggleButtonRef.current
+
+        if (!leftMostControl || !searchButton) {
+            return null
+        }
+
+        const leftRect = leftMostControl.getBoundingClientRect()
+        const buttonRect = searchButton.getBoundingClientRect()
+
+        return Math.max(buttonRect.width, buttonRect.right - leftRect.left)
+    }
+
+    const searchIsExpanded = isMobile || isSearchOpen
+    const hideFiltersForSearch = isSearchOpen && !isMobile
+
+    const openSearch = () => {
+        if (isMobile) return
+
+        setOpenDropdown(null)
+        setSearchExpandedWidth(computeSearchExpandedWidth())
+        setIsSearchOpen(true)
+    }
+
+    const closeSearch = () => {
+        if (isMobile) return
+
+        setIsSearchOpen(false)
+
+        const activeElement = document.activeElement
+        if (
+            activeElement instanceof HTMLElement &&
+            searchControlRef.current?.contains(activeElement)
+        ) {
+            activeElement.blur()
+        }
+    }
+
+    useEffect(() => {
+        if (!searchIsExpanded) return
+
+        searchInputRef.current?.focus()
+    }, [searchIsExpanded])
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(max-width: 640px)')
+
+        const syncMobileState = () => {
+            const mobile = mediaQuery.matches
+            setIsMobile(mobile)
+            if (mobile) {
+                setIsSearchOpen(false)
+            }
+        }
+
+        syncMobileState()
+
+        mediaQuery.addEventListener('change', syncMobileState)
+
+        return () => {
+            mediaQuery.removeEventListener('change', syncMobileState)
+        }
+    }, [])
 
     useEffect(() => {
         function handlePointerDown(event: PointerEvent) {
-            if (!openDropdown) return
+            if (!openDropdown && !isSearchOpen) return
 
             const target = event.target as Node
             if (controlsPanelRef.current?.contains(target)) return
 
             setOpenDropdown(null)
+            setIsSearchOpen(false)
         }
 
         document.addEventListener('pointerdown', handlePointerDown)
@@ -53,7 +132,21 @@ export function FilterButtonRow({
         return () => {
             document.removeEventListener('pointerdown', handlePointerDown)
         }
-    }, [openDropdown])
+    }, [openDropdown, isSearchOpen])
+
+    function handleSearchBlur(event: FocusEvent<HTMLDivElement>) {
+        if (!isSearchOpen) return
+
+        const nextFocusedElement = event.relatedTarget as Node | null
+        if (
+            nextFocusedElement &&
+            event.currentTarget.contains(nextFocusedElement)
+        ) {
+            return
+        }
+
+        closeSearch()
+    }
 
     return (
         <div className={styles.buttonRowWrap}>
@@ -68,80 +161,310 @@ export function FilterButtonRow({
                     mass: 0.72,
                 }}
             >
-                <TagsDropdownGroup
-                    dropdownId="filter"
-                    label="Tags"
-                    options={FILTER_OPTIONS}
-                    value={filter}
-                    onChange={setFilter}
-                    isOpen={openDropdown === 'filter'}
-                    setIsOpen={(isOpen) =>
-                        setOpenDropdown(isOpen ? 'filter' : null)
+                <motion.div
+                    layout
+                    className={
+                        hideFiltersForSearch
+                            ? `${styles.controlsPanelDefault} ${styles.controlsPanelCovered}`
+                            : styles.controlsPanelDefault
                     }
-                />
-                <DropdownGroup
-                    dropdownId="layout"
-                    label="Layout"
-                    options={DISPLAY_OPTIONS}
-                    value={displayMode}
-                    onChange={setDisplayMode}
-                    isOpen={openDropdown === 'layout'}
-                    setIsOpen={(isOpen) =>
-                        setOpenDropdown(isOpen ? 'layout' : null)
-                    }
-                />
-                <AnimatePresence initial={false} mode="popLayout">
-                    {displayMode === 'sectioned' && (
-                        <motion.div
-                            layout
-                            key="grouping-control"
-                            initial={{ opacity: 0, x: 14 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 14 }}
-                            transition={{
-                                duration: 0.2,
-                                ease: [0.22, 1, 0.36, 1],
-                            }}
+                    transition={{
+                        duration: 0.2,
+                        ease: [0.22, 1, 0.36, 1],
+                    }}
+                >
+                    <motion.div
+                        animate={
+                            hideFiltersForSearch
+                                ? {
+                                      opacity: 0,
+                                      scale: 0.985,
+                                      filter: 'blur(3px)',
+                                  }
+                                : {
+                                      opacity: 1,
+                                      scale: 1,
+                                      filter: 'blur(0px)',
+                                  }
+                        }
+                        transition={{
+                            duration: 0.22,
+                            ease: [0.2, 0, 0, 1],
+                        }}
+                    >
+                        <div
+                            ref={leftMostControlRef}
+                            className={styles.leftMostControlAnchor}
                         >
-                            <DropdownGroup
-                                dropdownId="grouping"
-                                label="Sort"
-                                options={SECTION_OPTIONS}
-                                value={sectionMode}
-                                onChange={setSectionMode}
-                                isOpen={openDropdown === 'grouping'}
+                            <TagsDropdownGroup
+                                dropdownId="filter"
+                                label="Tags"
+                                options={FILTER_OPTIONS}
+                                value={filter}
+                                onChange={setFilter}
+                                isOpen={openDropdown === 'filter'}
                                 setIsOpen={(isOpen) =>
-                                    setOpenDropdown(isOpen ? 'grouping' : null)
+                                    setOpenDropdown(isOpen ? 'filter' : null)
                                 }
                             />
-                        </motion.div>
-                    )}
-                    {displayMode === 'sectioned' && (
+                        </div>
+                    </motion.div>
+                    <motion.div
+                        animate={
+                            hideFiltersForSearch
+                                ? {
+                                      opacity: 0,
+                                      scale: 0.985,
+                                      filter: 'blur(3px)',
+                                  }
+                                : {
+                                      opacity: 1,
+                                      scale: 1,
+                                      filter: 'blur(0px)',
+                                  }
+                        }
+                        transition={{
+                            duration: 0.24,
+                            ease: [0.2, 0, 0, 1],
+                            delay: hideFiltersForSearch ? 0.012 : 0,
+                        }}
+                    >
+                        <DropdownGroup
+                            dropdownId="layout"
+                            label="Layout"
+                            options={DISPLAY_OPTIONS}
+                            value={displayMode}
+                            onChange={setDisplayMode}
+                            isOpen={openDropdown === 'layout'}
+                            setIsOpen={(isOpen) =>
+                                setOpenDropdown(isOpen ? 'layout' : null)
+                            }
+                        />
+                    </motion.div>
+                    <AnimatePresence initial={false} mode="popLayout">
+                        {displayMode === 'sectioned' && (
+                            <motion.div
+                                layout
+                                key="grouping-control"
+                                initial={{ opacity: 0, x: 14 }}
+                                animate={
+                                    hideFiltersForSearch
+                                        ? {
+                                              opacity: 0,
+                                              x: 4,
+                                              scale: 0.985,
+                                              filter: 'blur(3px)',
+                                          }
+                                        : {
+                                              opacity: 1,
+                                              x: 0,
+                                              scale: 1,
+                                              filter: 'blur(0px)',
+                                          }
+                                }
+                                exit={{ opacity: 0, x: 14 }}
+                                transition={{
+                                    duration: 0.24,
+                                    ease: [0.2, 0, 0, 1],
+                                }}
+                            >
+                                <DropdownGroup
+                                    dropdownId="grouping"
+                                    label="Sort"
+                                    options={SECTION_OPTIONS}
+                                    value={sectionMode}
+                                    onChange={setSectionMode}
+                                    isOpen={openDropdown === 'grouping'}
+                                    setIsOpen={(isOpen) =>
+                                        setOpenDropdown(
+                                            isOpen ? 'grouping' : null
+                                        )
+                                    }
+                                />
+                            </motion.div>
+                        )}
+                        {displayMode === 'sectioned' && (
+                            <motion.div
+                                layout
+                                key="order-control"
+                                initial={{ opacity: 0, x: 14 }}
+                                animate={
+                                    hideFiltersForSearch
+                                        ? {
+                                              opacity: 0,
+                                              x: 4,
+                                              scale: 0.985,
+                                              filter: 'blur(3px)',
+                                          }
+                                        : {
+                                              opacity: 1,
+                                              x: 0,
+                                              scale: 1,
+                                              filter: 'blur(0px)',
+                                          }
+                                }
+                                exit={{ opacity: 0, x: 14 }}
+                                transition={{
+                                    duration: 0.24,
+                                    ease: [0.2, 0, 0, 1],
+                                }}
+                            >
+                                <DropdownGroup
+                                    dropdownId="order"
+                                    label="Order"
+                                    options={SECTION_SORT_OPTIONS}
+                                    value={sectionSortOrder}
+                                    onChange={setSectionSortOrder}
+                                    isOpen={openDropdown === 'order'}
+                                    setIsOpen={(isOpen) =>
+                                        setOpenDropdown(isOpen ? 'order' : null)
+                                    }
+                                />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    <motion.div
+                        initial={false}
+                        layout="position"
+                        ref={searchControlRef}
+                        className={
+                            searchIsExpanded && !isMobile
+                                ? `${styles.searchControl} ${styles.searchControlExpanded}`
+                                : styles.searchControl
+                        }
+                        onPointerDownCapture={() => setOpenDropdown(null)}
+                        onBlur={handleSearchBlur}
+                    >
                         <motion.div
-                            layout
-                            key="order-control"
-                            initial={{ opacity: 0, x: 14 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 14 }}
+                            initial={false}
+                            className={styles.searchMorph}
+                            animate={{
+                                width: isMobile
+                                    ? '100%'
+                                    : isSearchOpen && searchExpandedWidth
+                                      ? `${searchExpandedWidth}px`
+                                      : 'var(--search-control-size)',
+                            }}
                             transition={{
-                                duration: 0.2,
-                                ease: [0.22, 1, 0.36, 1],
+                                type: 'spring',
+                                stiffness: 360,
+                                damping: 34,
+                                mass: 0.68,
                             }}
                         >
-                            <DropdownGroup
-                                dropdownId="order"
-                                label="Order"
-                                options={SECTION_SORT_OPTIONS}
-                                value={sectionSortOrder}
-                                onChange={setSectionSortOrder}
-                                isOpen={openDropdown === 'order'}
-                                setIsOpen={(isOpen) =>
-                                    setOpenDropdown(isOpen ? 'order' : null)
+                            <button
+                                ref={searchToggleButtonRef}
+                                type="button"
+                                className={
+                                    !isMobile && isSearchOpen
+                                        ? `${styles.searchToggleButton} ${styles.searchToggleButtonClose}`
+                                        : styles.searchToggleButton
                                 }
-                            />
+                                onClick={() => {
+                                    setOpenDropdown(null)
+
+                                    if (isMobile) {
+                                        if (searchQuery) {
+                                            setSearchQuery('')
+                                        } else {
+                                            searchInputRef.current?.focus()
+                                        }
+                                        return
+                                    }
+
+                                    if (isSearchOpen) {
+                                        closeSearch()
+                                    } else {
+                                        openSearch()
+                                    }
+                                }}
+                                aria-label={
+                                    isMobile
+                                        ? searchQuery
+                                            ? 'Clear search'
+                                            : 'Search endorsements'
+                                        : isSearchOpen
+                                          ? 'Close search'
+                                          : 'Open search'
+                                }
+                            >
+                                <span
+                                    className={styles.searchIconWrap}
+                                    aria-hidden="true"
+                                >
+                                    <svg
+                                        className={
+                                            !isMobile && isSearchOpen
+                                                ? styles.searchIcon
+                                                : `${styles.searchIcon} ${styles.searchIconVisible}`
+                                        }
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                    >
+                                        <circle
+                                            cx="11"
+                                            cy="11"
+                                            r="7"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                        />
+                                        <path
+                                            d="M20 20l-4.1-4.1"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                        />
+                                    </svg>
+                                    <svg
+                                        className={
+                                            !isMobile && isSearchOpen
+                                                ? `${styles.searchIcon} ${styles.searchIconVisible}`
+                                                : styles.searchIcon
+                                        }
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                    >
+                                        <path
+                                            d="M6 6l12 12M18 6L6 18"
+                                            stroke="currentColor"
+                                            strokeWidth="2.2"
+                                            strokeLinecap="round"
+                                        />
+                                    </svg>
+                                </span>
+                            </button>
+                            <AnimatePresence initial={false}>
+                                {searchIsExpanded && (
+                                    <motion.input
+                                        ref={searchInputRef}
+                                        type="text"
+                                        className={styles.searchInput}
+                                        value={searchQuery}
+                                        onChange={(event) =>
+                                            setSearchQuery(event.target.value)
+                                        }
+                                        onKeyDown={(event) => {
+                                            if (event.key === 'Escape') {
+                                                closeSearch()
+                                            }
+                                        }}
+                                        placeholder="Search candidates or states"
+                                        aria-label="Search endorsements"
+                                        initial={{ opacity: 0, x: -8 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -8 }}
+                                        transition={{ duration: 0.16 }}
+                                    />
+                                )}
+                            </AnimatePresence>
                         </motion.div>
-                    )}
-                </AnimatePresence>
+                    </motion.div>
+                </motion.div>
             </motion.div>
         </div>
     )

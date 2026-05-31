@@ -8,6 +8,7 @@ import {
     waveListVariants,
 } from '../endorsements.motion'
 import {
+    type FilterType,
     type GalleryDisplayMode,
     type SectionGroupingMode,
     type SectionSortOrder,
@@ -25,6 +26,7 @@ import { type ReactNode, useMemo } from 'react'
 
 interface CandidateGalleryProps {
     filteredCandidates: CandidateConfig[]
+    filter: FilterType | null
     displayMode: GalleryDisplayMode
     sectionMode: SectionGroupingMode
     sectionSortOrder: SectionSortOrder
@@ -32,6 +34,7 @@ interface CandidateGalleryProps {
 
 export function CandidateGallery({
     filteredCandidates,
+    filter,
     displayMode,
     sectionMode,
     sectionSortOrder,
@@ -67,6 +70,7 @@ export function CandidateGallery({
     }, [filteredCandidates])
 
     const animationKey = `${displayMode}-${sectionMode}-${sectionSortOrder}-${filteredCandidates.length}`
+    const flatHeaderTitle = getFlatHeaderTitle(filter, orderedFlatCandidates.length)
 
     if (displayMode === 'flat') {
         return (
@@ -86,15 +90,23 @@ export function CandidateGallery({
                             exit="exit"
                         >
                             <motion.header
-                                className={`${styles.sectionHeader} ${styles.flatSectionHeader}`}
-                                aria-hidden="true"
+                                className={`${styles.sectionHeader} ${styles.centeredSectionHeader}`}
                                 variants={headingVariants}
                                 initial="hidden"
                                 animate="visible"
                                 exit="exit"
                             >
-                                <h3 className={styles.sectionTitle}>Spacer</h3>
-                                <div className={styles.sectionDivider} />
+                                <div
+                                    className={styles.sectionDivider}
+                                    aria-hidden="true"
+                                />
+                                <h3 className={styles.sectionTitle}>
+                                    {flatHeaderTitle}
+                                </h3>
+                                <div
+                                    className={styles.sectionDivider}
+                                    aria-hidden="true"
+                                />
                             </motion.header>
 
                             <motion.div
@@ -234,6 +246,29 @@ export function CandidateGallery({
     )
 }
 
+function getFlatHeaderTitle(
+    filter: FilterType | null,
+    endorsementsCount: number
+): string {
+    if (filter === null) {
+        return `All ${endorsementsCount} Endorsements`
+    }
+
+    if (filter === 'national') {
+        return 'National Initiatives'
+    }
+
+    if (filter === 'state') {
+        return 'State Initiatives'
+    }
+
+    if (filter === 'pledge') {
+        return 'PV Pledge Endorsements'
+    }
+
+    return 'PV Members Running'
+}
+
 function CandidateCard({
     candidate,
     displayMode,
@@ -253,10 +288,14 @@ function CandidateCard({
         displayMode,
         sectionMode
     )
+    const avatarFrameClassName =
+        candidate.avatarBackgroundColor === 'blue'
+            ? styles.tileImageFramePledge
+            : styles.tileImageFrameNoPledge
 
     const tileContent = (
         <>
-            <div className={styles.tileImageFrame}>
+            <div className={`${styles.tileImageFrame} ${avatarFrameClassName}`}>
                 <CandidateAvatar
                     imageSrc={candidate.image}
                     name={candidate.name}

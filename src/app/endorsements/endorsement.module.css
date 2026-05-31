@@ -46,6 +46,8 @@
     justify-content: center;
     padding: 0 1rem;
     margin-bottom: 0.9rem;
+    position: relative;
+    z-index: 1000;
 }
 
 .controlsPanel {
@@ -54,6 +56,28 @@
     flex-wrap: wrap;
     gap: 0.85rem;
     justify-content: center;
+    position: relative;
+    z-index: 1000;
+}
+
+.controlsPanelDefault {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    justify-content: center;
+    align-items: flex-end;
+    position: relative;
+    z-index: 1000;
+}
+
+.controlsPanelDefault > :not(.searchControl) {
+    position: relative;
+    z-index: 1100;
+}
+
+.controlsPanelCovered {
+    pointer-events: none;
 }
 
 .controlGroup {
@@ -76,6 +100,7 @@
 .dropdownControl {
     position: relative;
     min-width: 13rem;
+    z-index: 1200;
 }
 
 .dropdownTrigger {
@@ -128,7 +153,7 @@
     position: absolute;
     top: calc(100% + 0.45rem);
     left: 0;
-    z-index: 20;
+    z-index: 2000;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -194,8 +219,129 @@
     transform: scale(1);
 }
 
+.searchControl {
+    --search-control-size: 2.58rem;
+    position: relative;
+    width: var(--search-control-size);
+    min-width: var(--search-control-size);
+    flex: 0 0 var(--search-control-size);
+    height: var(--search-control-size);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    overflow: visible;
+    pointer-events: auto;
+}
+
+.searchControlExpanded {
+    z-index: 30;
+}
+
+.searchMorph {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: var(--search-control-size);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    transition:
+        background-color 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.searchMorph:hover,
+.searchMorph:focus-within {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.28);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.searchToggleButton {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: #ffffff;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 2;
+    width: var(--search-control-size);
+    height: var(--search-control-size);
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition:
+        background-color 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.searchToggleButton:hover,
+.searchToggleButton:focus-visible {
+    background: transparent;
+    outline: none;
+}
+
+.searchToggleButtonClose:hover,
+.searchToggleButtonClose:focus-visible {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.searchIconWrap {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+}
+
+.searchIcon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(calc(-50% + 0.45px), calc(-50% - 0.65px));
+    opacity: 0;
+}
+
+.searchIconVisible {
+    opacity: 1;
+}
+
+.searchInput {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: #ffffff;
+    width: 100%;
+    min-width: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.2;
+    padding-left: 0.95rem;
+    padding-right: calc(var(--search-control-size) + 0.4rem);
+}
+
+.searchInput::placeholder {
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.searchInput:focus {
+    outline: none;
+}
+
 .hero {
     position: relative;
+    isolation: isolate;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -299,9 +445,24 @@
     width: 65px;
     aspect-ratio: 1;
     border-radius: 9999px;
-    background: #2986cc;
     /* box-sizing: border-box; */
     overflow: visible;
+}
+
+.tileImageFramePledge {
+    background-color: #2986cc;
+    background-image: url('/images/endorsement_images/background_blue.png');
+    background-position: -8px -20px;
+    background-repeat: no-repeat;
+    background-size: 110%;
+}
+
+.tileImageFrameNoPledge {
+    background-color: #fdb515;
+    background-image: url('/images/endorsement_images/background_yellow.png');
+    background-position: -8px -20px;
+    background-repeat: no-repeat;
+    background-size: 110%;
 }
 
 .tileStatusBadge {
@@ -457,8 +618,20 @@
         gap: 0.7rem;
     }
 
+    .controlsPanelDefault {
+        gap: 0.7rem;
+    }
+
     .controlGroup {
         width: 100%;
+    }
+
+    .searchControl {
+        --search-control-size: 2.44rem;
+        width: 100%;
+        min-width: 0;
+        flex: 1 1 100%;
+        height: var(--search-control-size);
     }
 
     .dropdownControl {
@@ -468,6 +641,10 @@
     .dropdownTrigger {
         padding: 0.78rem 0.9rem;
         font-size: 0.82rem;
+    }
+
+    .searchMorph {
+        width: 100%;
     }
 
     .finderGrid {
