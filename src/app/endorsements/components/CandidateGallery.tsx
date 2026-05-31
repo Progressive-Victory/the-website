@@ -70,7 +70,10 @@ export function CandidateGallery({
     }, [filteredCandidates])
 
     const animationKey = `${displayMode}-${sectionMode}-${sectionSortOrder}-${filteredCandidates.length}`
-    const flatHeaderTitle = getFlatHeaderTitle(filter, orderedFlatCandidates.length)
+    const flatHeaderTitle = getFlatHeaderTitle(
+        filter,
+        orderedFlatCandidates.length
+    )
 
     if (displayMode === 'flat') {
         return (

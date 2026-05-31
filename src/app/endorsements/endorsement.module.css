@@ -76,6 +76,39 @@
     z-index: 1100;
 }
 
+.controlsPanelDefault > :not(.searchControl):has([aria-expanded='true']) {
+    z-index: 2100;
+}
+
+@media (min-width: 641px) and (max-width: 959px) {
+    .controlsPanelSectionedMobile {
+        display: grid;
+        grid-template-columns: repeat(2, 13rem);
+        column-gap: 2rem;
+        row-gap: 0.85rem;
+        justify-content: center;
+    }
+
+    .controlsPanelSectionedMobile > :not(.searchControl) {
+        min-width: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .controlsPanelSectionedMobile .searchControl {
+        grid-column: 1 / -1;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        justify-self: stretch;
+    }
+
+    .controlsPanelSectionedMobile .searchMorph {
+        width: 100% !important;
+    }
+}
+
 .controlsPanelCovered {
     pointer-events: none;
 }
@@ -235,6 +268,27 @@
 
 .searchControlExpanded {
     z-index: 30;
+}
+
+.searchControlStacked {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        height: auto;
+        gap: 0.45rem;
+}
+
+.searchControlStacked .searchMorph {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.searchControlLabel {
+    text-align: center;
 }
 
 .searchMorph {
@@ -450,7 +504,6 @@
 }
 
 .tileImageFramePledge {
-    background-color: #2986cc;
     background-image: url('/images/endorsement_images/background_blue.png');
     background-position: -8px -20px;
     background-repeat: no-repeat;
@@ -458,7 +511,6 @@
 }
 
 .tileImageFrameNoPledge {
-    background-color: #fdb515;
     background-image: url('/images/endorsement_images/background_yellow.png');
     background-position: -8px -20px;
     background-repeat: no-repeat;
@@ -609,6 +661,21 @@
     min-height: 0rem;
 }
 
+@media (max-width: 1023px) {
+    .searchControl {
+        width: auto;
+        min-width: 0;
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+
+    .searchMorph {
+        position: relative;
+        right: auto;
+        top: auto;
+    }
+}
+
 @media (max-width: 640px) {
     .buttonRowWrap {
         padding: 0 0.75rem;
@@ -631,6 +698,10 @@
         width: 100%;
         min-width: 0;
         flex: 1 1 100%;
+        max-width: none;
+    }
+
+    .searchMorph {
         height: var(--search-control-size);
     }
 

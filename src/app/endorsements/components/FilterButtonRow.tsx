@@ -12,7 +12,13 @@ import {
     type SectionSortOrder,
 } from '../endorsements.types'
 import { AnimatePresence, motion } from 'motion/react'
-import { type FocusEvent, useEffect, useRef, useState } from 'react'
+import {
+    type FocusEvent,
+    useEffect,
+    useLayoutEffect,
+    useRef,
+    useState,
+} from 'react'
 
 interface FilterButtonRowProps {
     filter: FilterType | null
@@ -42,10 +48,17 @@ export function FilterButtonRow({
     const [openDropdown, setOpenDropdown] = useState<string | null>(null)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
+    const [skipLayoutAnim, setSkipLayoutAnim] = useState(false)
+    const [singleColumnLayout, setSingleColumnLayout] = useState(false)
+    const [showSearchLabel, setShowSearchLabel] = useState(false)
     const [searchExpandedWidth, setSearchExpandedWidth] = useState<
         number | null
     >(null)
+    const [mobileSearchWidth, setMobileSearchWidth] = useState<number | null>(
+        null
+    )
     const controlsPanelRef = useRef<HTMLDivElement | null>(null)
+    const controlsRowRef = useRef<HTMLDivElement | null>(null)
     const leftMostControlRef = useRef<HTMLDivElement | null>(null)
     const searchControlRef = useRef<HTMLDivElement | null>(null)
     const searchToggleButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -63,6 +76,58 @@ export function FilterButtonRow({
         const buttonRect = searchButton.getBoundingClientRect()
 
         return Math.max(buttonRect.width, buttonRect.right - leftRect.left)
+    }
+
+    function computeMobileLayout() {
+        const row = controlsRowRef.current
+        const searchControl = searchControlRef.current
+        if (!row || !searchControl) {
+            return {
+                width: null as number | null,
+                singleColumn: false,
+                maxPerRow: 0,
+            }
+        }
+        const items = Array.from(row.children).filter(
+            (child) => child !== searchControl
+        ) as HTMLElement[]
+        if (items.length === 0)
+            return { width: null, singleColumn: false, maxPerRow: 0 }
+
+        const rows = new Map<
+            number,
+            { left: number; right: number; count: number }
+        >()
+        for (const item of items) {
+            const rect = item.getBoundingClientRect()
+            if (rect.width === 0) continue
+            const key = Math.round(rect.top)
+            const existing = rows.get(key)
+            if (existing) {
+                existing.left = Math.min(existing.left, rect.left)
+                existing.right = Math.max(existing.right, rect.right)
+                existing.count += 1
+            } else {
+                rows.set(key, {
+                    left: rect.left,
+                    right: rect.right,
+                    count: 1,
+                })
+            }
+        }
+
+        let widest = 0
+        let maxPerRow = 0
+        for (const { left, right, count } of rows.values()) {
+            widest = Math.max(widest, right - left)
+            maxPerRow = Math.max(maxPerRow, count)
+        }
+
+        return {
+            width: widest > 0 ? widest : null,
+            singleColumn: maxPerRow === 1,
+            maxPerRow,
+        }
     }
 
     const searchIsExpanded = isMobile || isSearchOpen
@@ -91,17 +156,27 @@ export function FilterButtonRow({
     }
 
     useEffect(() => {
-        if (!searchIsExpanded) return
+        if (!isSearchOpen || isMobile) return
 
         searchInputRef.current?.focus()
-    }, [searchIsExpanded])
+    }, [isSearchOpen, isMobile])
 
     useEffect(() => {
-        const mediaQuery = window.matchMedia('(max-width: 640px)')
+        const mediaQuery = window.matchMedia('(max-width: 1023px)')
 
         const syncMobileState = () => {
             const mobile = mediaQuery.matches
-            setIsMobile(mobile)
+            setIsMobile((prev) => {
+                if (prev !== mobile) {
+                    setSkipLayoutAnim(true)
+                    window.requestAnimationFrame(() => {
+                        window.requestAnimationFrame(() => {
+                            setSkipLayoutAnim(false)
+                        })
+                    })
+                }
+                return mobile
+            })
             if (mobile) {
                 setIsSearchOpen(false)
             }
@@ -110,11 +185,57 @@ export function FilterButtonRow({
         syncMobileState()
 
         mediaQuery.addEventListener('change', syncMobileState)
+        window.addEventListener('resize', syncMobileState)
 
         return () => {
             mediaQuery.removeEventListener('change', syncMobileState)
+            window.removeEventListener('resize', syncMobileState)
         }
     }, [])
+
+    useLayoutEffect(() => {
+        if (!isMobile) {
+            setMobileSearchWidth(null)
+            setSingleColumnLayout(false)
+            setShowSearchLabel(false)
+            return
+        }
+
+        const row = controlsRowRef.current
+        if (!row) return
+
+        const measure = () => {
+            const next = computeMobileLayout()
+            if (next.width != null) {
+                setMobileSearchWidth(next.width)
+            }
+            setSingleColumnLayout(next.singleColumn)
+            setShowSearchLabel(
+                next.singleColumn ||
+                    (displayMode === 'sectioned' && next.maxPerRow === 2)
+            )
+        }
+
+        measure()
+        const rafId = window.requestAnimationFrame(measure)
+
+        const resizeObserver = new ResizeObserver(measure)
+        resizeObserver.observe(row)
+        const items = Array.from(row.children) as HTMLElement[]
+        for (const item of items) {
+            if (item !== searchControlRef.current) {
+                resizeObserver.observe(item)
+            }
+        }
+
+        window.addEventListener('resize', measure)
+
+        return () => {
+            window.cancelAnimationFrame(rafId)
+            resizeObserver.disconnect()
+            window.removeEventListener('resize', measure)
+        }
+    }, [isMobile, displayMode])
 
     useEffect(() => {
         function handlePointerDown(event: PointerEvent) {
@@ -154,24 +275,37 @@ export function FilterButtonRow({
                 layout
                 className={styles.controlsPanel}
                 ref={controlsPanelRef}
-                transition={{
-                    type: 'spring',
-                    stiffness: 320,
-                    damping: 30,
-                    mass: 0.72,
-                }}
+                transition={
+                    skipLayoutAnim
+                        ? { duration: 0 }
+                        : {
+                              type: 'spring',
+                              stiffness: 320,
+                              damping: 30,
+                              mass: 0.72,
+                          }
+                }
             >
                 <motion.div
                     layout
-                    className={
-                        hideFiltersForSearch
-                            ? `${styles.controlsPanelDefault} ${styles.controlsPanelCovered}`
-                            : styles.controlsPanelDefault
+                    className={[
+                        styles.controlsPanelDefault,
+                        hideFiltersForSearch ? styles.controlsPanelCovered : '',
+                        displayMode === 'sectioned'
+                            ? styles.controlsPanelSectionedMobile
+                            : '',
+                    ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    ref={controlsRowRef}
+                    transition={
+                        skipLayoutAnim
+                            ? { duration: 0 }
+                            : {
+                                  duration: 0.2,
+                                  ease: [0.22, 1, 0.36, 1],
+                              }
                     }
-                    transition={{
-                        duration: 0.2,
-                        ease: [0.22, 1, 0.36, 1],
-                    }}
                 >
                     <motion.div
                         animate={
@@ -328,30 +462,49 @@ export function FilterButtonRow({
                         initial={false}
                         layout="position"
                         ref={searchControlRef}
-                        className={
+                        className={[
+                            styles.searchControl,
                             searchIsExpanded && !isMobile
-                                ? `${styles.searchControl} ${styles.searchControlExpanded}`
-                                : styles.searchControl
-                        }
+                                ? styles.searchControlExpanded
+                                : '',
+                            singleColumnLayout || showSearchLabel
+                                ? styles.searchControlStacked
+                                : '',
+                        ]
+                            .filter(Boolean)
+                            .join(' ')}
                         onPointerDownCapture={() => setOpenDropdown(null)}
                         onBlur={handleSearchBlur}
                     >
+                        {showSearchLabel && (
+                            <p
+                                className={`${styles.controlLabel} ${styles.searchControlLabel}`}
+                            >
+                                Search
+                            </p>
+                        )}
                         <motion.div
                             initial={false}
                             className={styles.searchMorph}
                             animate={{
                                 width: isMobile
-                                    ? '100%'
+                                    ? mobileSearchWidth
+                                        ? `${mobileSearchWidth}px`
+                                        : 'var(--search-control-size)'
                                     : isSearchOpen && searchExpandedWidth
                                       ? `${searchExpandedWidth}px`
                                       : 'var(--search-control-size)',
                             }}
-                            transition={{
-                                type: 'spring',
-                                stiffness: 360,
-                                damping: 34,
-                                mass: 0.68,
-                            }}
+                            transition={
+                                skipLayoutAnim
+                                    ? { duration: 0 }
+                                    : {
+                                          type: 'spring',
+                                          stiffness: 360,
+                                          damping: 34,
+                                          mass: 0.68,
+                                      }
+                            }
                         >
                             <button
                                 ref={searchToggleButtonRef}
@@ -361,6 +514,11 @@ export function FilterButtonRow({
                                         ? `${styles.searchToggleButton} ${styles.searchToggleButtonClose}`
                                         : styles.searchToggleButton
                                 }
+                                onPointerDown={(event) => {
+                                    if (!isMobile && isSearchOpen) {
+                                        event.preventDefault()
+                                    }
+                                }}
                                 onClick={() => {
                                     setOpenDropdown(null)
 
@@ -451,9 +609,14 @@ export function FilterButtonRow({
                                         onKeyDown={(event) => {
                                             if (event.key === 'Escape') {
                                                 closeSearch()
+                                                return
+                                            }
+
+                                            if (event.key === 'Enter') {
+                                                searchInputRef.current?.blur()
                                             }
                                         }}
-                                        placeholder="Search candidates or states"
+                                        placeholder="Search"
                                         aria-label="Search endorsements"
                                         initial={{ opacity: 0, x: -8 }}
                                         animate={{ opacity: 1, x: 0 }}

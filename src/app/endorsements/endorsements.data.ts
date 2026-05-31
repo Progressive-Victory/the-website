@@ -285,7 +285,7 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '15',
         name: 'Luis Villarreal',
         state: 'Utah',
-        electionStatus: '',
+        electionStatus: 'Dropped Out',
         electionDate: new Date('11/03/26'),
         handle: '@luis4utah',
         handleHref: 'https://x.com/Luis4Utah',
