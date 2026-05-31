@@ -22,7 +22,7 @@ import {
 } from '../endorsements.utils'
 import { ImageWithFallback } from '@/components/common'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
-import { type ReactNode, useMemo } from 'react'
+import { memo, type ReactNode, useMemo } from 'react'
 
 interface CandidateGalleryProps {
     filteredCandidates: CandidateConfig[]
@@ -69,7 +69,7 @@ export function CandidateGallery({
         return [...filteredCandidates].sort(compareFlatCandidates)
     }, [filteredCandidates])
 
-    const animationKey = `${displayMode}-${sectionMode}-${sectionSortOrder}-${filteredCandidates.length}`
+    const animationKey = `${displayMode}-${sectionMode}-${sectionSortOrder}`
     const flatHeaderTitle = getFlatHeaderTitle(
         filter,
         orderedFlatCandidates.length
@@ -272,7 +272,7 @@ function getFlatHeaderTitle(
     return 'PV Members Running'
 }
 
-function CandidateCard({
+function CandidateCardImpl({
     candidate,
     displayMode,
     sectionMode,
@@ -361,6 +361,8 @@ function CandidateCard({
         </motion.a>
     )
 }
+
+const CandidateCard = memo(CandidateCardImpl)
 
 function CandidateAvatar({
     imageSrc,

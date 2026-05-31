@@ -10,7 +10,13 @@ import {
     type SectionGroupingMode,
     type SectionSortOrder,
 } from './endorsements.types'
-import { useMemo, useState } from 'react'
+import { useDeferredValue, useMemo, useState } from 'react'
+
+const SORTED_CANDIDATES: CandidateConfig[] = [...CANDIDATES].sort((a, b) => {
+    const aTime = a.electionDate?.getTime() ?? Infinity
+    const bTime = b.electionDate?.getTime() ?? Infinity
+    return aTime - bTime
+})
 
 const FILTER_PREDICATES: Record<FilterType, (c: CandidateConfig) => boolean> = {
     national: (c) => c.initiativeType === 'national',
@@ -28,18 +34,12 @@ export function Endorsements() {
     const [sectionSortOrder, setSectionSortOrder] =
         useState<SectionSortOrder>('ascending')
 
-    const sortedCandidates = useMemo(() => {
-        return [...CANDIDATES].sort((a, b) => {
-            const aTime = a.electionDate?.getTime() ?? Infinity
-            const bTime = b.electionDate?.getTime() ?? Infinity
-            return aTime - bTime
-        })
-    }, [])
+    const deferredSearchQuery = useDeferredValue(searchQuery)
 
     const filteredCandidates = useMemo(() => {
-        const query = searchQuery.trim().toLowerCase()
+        const query = deferredSearchQuery.trim().toLowerCase()
 
-        return sortedCandidates.filter((candidate) => {
+        return SORTED_CANDIDATES.filter((candidate) => {
             const matchesTagFilter =
                 filter === null ? true : FILTER_PREDICATES[filter](candidate)
 
@@ -57,7 +57,7 @@ export function Endorsements() {
                 candidate.handle.toLowerCase().includes(query)
             )
         })
-    }, [sortedCandidates, filter, searchQuery])
+    }, [filter, deferredSearchQuery])
 
     return (
         <div className={styles.hero}>
