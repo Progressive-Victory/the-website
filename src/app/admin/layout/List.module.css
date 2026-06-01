@@ -151,8 +151,11 @@
 }
 
 .pinned {
-    border-bottom-width: 3px;
-    border-bottom-style: solid;
+    border-bottom: 2px solid rgba(17, 24, 39, 0.1);
+}
+
+.pinnedNoDivider {
+    border-bottom: 0;
 }
 
 .pinned .element {

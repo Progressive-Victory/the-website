@@ -1,44 +1,214 @@
 .rightPane {
     height: calc(100dvh - 100px);
     flex: 1 1 auto;
-    overflow-y: auto;
     min-height: 0;
-    padding-bottom: 1rem;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    background: linear-gradient(
+        135deg,
+        rgba(248, 250, 252, 0.98) 0%,
+        rgba(241, 245, 249, 0.98) 38%,
+        rgba(14, 165, 233, 0.04) 100%
+    );
 }
 
-.paneHeader {
+.detailsHeader {
+    --banner-cover-height: 3.5rem;
+    --banner-cover-gradient:
+        radial-gradient(
+            circle at 18% 30%,
+            rgba(2, 132, 199, 0.24),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 82% 20%,
+            rgba(41, 134, 204, 0.28),
+            transparent 40%
+        ),
+        linear-gradient(120deg, rgba(9, 34, 58, 0.96), rgba(27, 69, 104, 0.9));
+
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
 
-    background-color: #f9fafb;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.95) 72%,
+        rgba(255, 255, 255, 0)
+    );
 
-    border-bottom: 2px solid rgba(17, 24, 39, 0.1);
-
-    padding-block: 0.87rem;
-    padding-right: 0.85rem;
-    padding-left: 0.6rem;
+    border-radius: 1rem;
 }
 
-.paneHeaderRow {
+.detailsHeader::before {
+    content: '';
+    position: absolute;
+    top: -100rem;
+    left: 0;
+    right: 0;
+    height: 100rem;
+    background: var(--banner-cover-gradient);
+    background-size: 100% var(--banner-cover-height);
+    background-position: 0 100%;
+    background-repeat: repeat-y;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.bannerCover {
+    height: var(--banner-cover-height);
+    background: var(--banner-cover-gradient);
+    background-size: 100% var(--banner-cover-height);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+}
+
+.headerTop {
+    border-radius: 0.75rem;
+    margin-top: -2rem;
+    margin-right: 0.9rem;
+    margin-bottom: 0.9rem;
+    margin-left: 0.9rem;
+    padding-top: 0.8rem;
+    padding-bottom: 0.9rem;
+    padding-inline: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.84);
+
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.11);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cardStyle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cardAvatar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.4rem;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 9999px;
+    border: 3px solid #fff;
+    background: #fff;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
+    overflow: hidden;
+}
+
+.cardAvatar img {
     width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.paneHeaderTitle {
+.cardAvatarFallback {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+.userInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.headerName {
     margin: 0;
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: rgba(15, 23, 42, 0.7);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
 }
 
-.actionBar {
+.headerSubtitle {
+    margin: 0;
+    padding: 0;
+    color: #475569;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.roleList {
+    display: flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.rolePill {
+    border-radius: 9999px;
+    border: 1px solid rgba(14, 116, 144, 0.3);
+    background: rgba(236, 253, 245, 0.9);
+    color: #115e59;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0.28rem 0.65rem;
+    text-transform: uppercase;
+}
+
+.roleEmpty {
+    font-size: 0.82rem;
+    color: #64748b;
+}
+
+.headerActions {
     display: flex;
     gap: 0.5rem;
+    align-items: center;
+}
+
+.detailsContent {
+    margin: 1rem;
+}
+
+.activityPlaceholder {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.activityPlaceholder p {
+    margin: 0 0 0.85rem;
+}
+
+@media (max-width: 720px) {
+    .detailsHeader {
+        --banner-cover-height: 4rem;
+        padding: 0.45rem 0.45rem 0.35rem;
+    }
+
+    .headerTop {
+        margin: -1.2rem 0.65rem 0.65rem;
+        padding-inline: 0.8rem;
+    }
+
+    .bannerCover {
+        height: var(--banner-cover-height);
+    }
+
+    .cardAvatar {
+        width: 4rem;
+        height: 4rem;
+    }
+
+    .headerName {
+        font-size: 1.1rem;
+    }
 }
 
 .createButton,
@@ -85,11 +255,54 @@
     color: #000;
 }
 
-.emptyState {
-    height: calc(100% - 3rem);
+.pinnedCreateTab {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    list-style: none;
+
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #fff;
+
+    background: linear-gradient(180deg, #2986cc 0%, #236fa8 100%);
+    border-bottom-color: #154567;
+
+    margin: 0.2rem 0.25rem 0.2rem;
+    padding: 0.5rem 0.9rem;
+
+    border-radius: 0.5rem 0.5rem 0.6rem 0.6rem;
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.18);
+
+    position: relative;
+}
+
+.pinnedCreateTab:hover {
+    background: linear-gradient(180deg, #2f95df 0%, #2778b6 100%);
+}
+
+.pinnedCreateTab:active {
+    transform: translateY(1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+        0 1px 0 rgba(15, 23, 42, 0.12),
+        0 2px 4px rgba(15, 23, 42, 0.18);
+}
+
+.emptyState {
+    height: calc(100% - 3rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    color: rgba(15, 23, 42, 0.7);
 }
 
 .permissionWarning {

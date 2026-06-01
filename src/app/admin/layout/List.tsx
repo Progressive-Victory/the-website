@@ -38,6 +38,7 @@ export interface ListProps {
     filters?: FilterOption[]
 
     pinnedContent?: ReactNode
+    showPinnedDivider?: boolean
     children?: ReactNode
 
     onSearch: (search: SearchRequest) => void
@@ -216,6 +217,7 @@ type ListBodyProps = Pick<
     | 'error'
     | 'emptyMessage'
     | 'pinnedContent'
+    | 'showPinnedDivider'
     | 'children'
 >
 
@@ -225,6 +227,7 @@ export function ListBody({
     error,
     emptyMessage,
     pinnedContent,
+    showPinnedDivider = true,
     children,
 }: ListBodyProps) {
     if (count == null) {
@@ -244,7 +247,14 @@ export function ListBody({
     return (
         <>
             {pinnedContent && (
-                <ul className={styles.pinned}>{pinnedContent}</ul>
+                <ul
+                    className={cx(
+                        styles.pinned,
+                        !showPinnedDivider && styles.pinnedNoDivider
+                    )}
+                >
+                    {pinnedContent}
+                </ul>
             )}
             <ul className={styles.elementList}>{children}</ul>
         </>
@@ -282,6 +292,12 @@ export function ListBottom({
 export interface ListElementProps {
     selected?: boolean
     className?: string
+    /**
+     * If true, no default `.element` wrapper styling is applied. Children are
+     * rendered directly inside the `<li>`, giving the caller full styling
+     * control. Useful for pinned items that need a custom look.
+     */
+    bare?: boolean
     children?: React.ReactNode
     onClick?: () => void
 }
@@ -290,13 +306,20 @@ export function ListElement({
     selected,
     children,
     className,
+    bare = false,
     onClick,
 }: ListElementProps) {
     return (
         <li className={className} onClick={onClick}>
-            <div className={cx(styles.element, selected && styles.selected)}>
-                {children}
-            </div>
+            {bare ? (
+                children
+            ) : (
+                <div
+                    className={cx(styles.element, selected && styles.selected)}
+                >
+                    {children}
+                </div>
+            )}
         </li>
     )
 }

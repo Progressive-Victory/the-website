@@ -6,6 +6,18 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 
 /**
+ * Exposed by the Form to its parent via `controlsRef`.
+ */
+export interface FormControls {
+    /** Enter edit mode (no-op if already editing or form is readonly). */
+    edit: () => void
+    /** Persist edits via the configured `onSave` and exit edit mode. */
+    save: () => void
+    /** Discard edits and exit edit mode. */
+    cancel: () => void
+}
+
+/**
  * Current internal state of the Form component. This is returned to the parent
  * component via a callback, so that they can do logic based on it.
  */
@@ -60,6 +72,18 @@ export interface FormProps<T> {
 
     /** Callback to save form data. Should correspond to `saving`. */
     onSave?: (form: T) => void
+
+    /**
+     * Optional ref populated with imperative controls so a parent component
+     * can trigger edit/save/cancel from outside the form.
+     */
+    controlsRef?: React.MutableRefObject<FormControls | null>
+
+    /**
+     * If true, the Form's built-in Edit/Save/Discard buttons are not
+     * rendered. Use with `controlsRef` to provide your own controls.
+     */
+    hideButtons?: boolean
 }
 
 /**
@@ -92,6 +116,8 @@ export function Form<T>({
     children = [],
     onUpdate,
     onSave,
+    controlsRef,
+    hideButtons = false,
 }: FormProps<T>) {
     // Stores the current state of the form while editing.
     const [editForm, setEditForm] = useState<T | null>(null)
@@ -215,6 +241,19 @@ export function Form<T>({
         onUpdate?.({ form, editing, dirty, invalid })
     }, [form, editing, dirty, invalid, onUpdate])
 
+    // Expose imperative controls to the parent through the optional ref.
+    useEffect(() => {
+        if (!controlsRef) return
+        controlsRef.current = {
+            edit: handleEdit,
+            save: handleSave,
+            cancel: handleCancel,
+        }
+        return () => {
+            if (controlsRef.current) controlsRef.current = null
+        }
+    })
+
     return (
         <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
             <header className={styles.header}>
@@ -228,7 +267,7 @@ export function Form<T>({
                     </div>
                 </div>
 
-                {!readonly && (
+                {!readonly && !hideButtons && (
                     <div className={styles.buttonRow}>
                         {editing ? (
                             <>

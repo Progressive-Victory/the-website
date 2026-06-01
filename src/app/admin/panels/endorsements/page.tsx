@@ -9,6 +9,9 @@ import {
     FormState,
     TextField,
 } from '@/components/common/forms'
+import type { FormControls } from '@/components/common/forms/Form'
+import formStyles from '@/components/common/forms/Form.module.css'
+import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import { Endorsement, zEndorsement } from '@/contracts/data/Endorsement'
 import { SearchRequest, SortDirection } from '@/contracts/requests'
 import { CreateEndorsementRequest } from '@/contracts/requests/CreateEndorsementRequest'
@@ -22,8 +25,16 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import { FaEdit, FaPlus, FaSave, FaTrashAlt } from 'react-icons/fa'
 import z from 'zod'
+
+type EndorsementTabKey = 'information' | 'activity'
+
+const tabs: TabSpec[] = [
+    { key: 'information', label: 'Information' },
+    { key: 'activity', label: 'Activity' },
+]
 
 function makeDefaultEndorsement(): Endorsement {
     return {
@@ -75,6 +86,9 @@ export default function Page() {
     const [formState, setFormState] = useState<FormState<Endorsement> | null>(
         null
     )
+    const [selectedTab, setSelectedTab] =
+        useState<EndorsementTabKey>('information')
+    const formControlsRef = useRef<FormControls | null>(null)
 
     const canManageEndorsements = useMemo(() => {
         return loggedInUser.data
@@ -244,6 +258,8 @@ export default function Page() {
             )
 
             setSelectedId(null)
+            setSelectedTab('information')
+            setFormState(null)
             setIsCreateModalOpen(false)
             setNewEndorsement(makeDefaultEndorsement())
         },
@@ -267,6 +283,7 @@ export default function Page() {
 
         setIsCreateModalOpen(false)
         setSelectedId(value.id)
+        setSelectedTab('information')
     }
 
     const handleCreateNew = () => {
@@ -291,23 +308,6 @@ export default function Page() {
 
         setIsCreateModalOpen(false)
         setNewEndorsement(makeDefaultEndorsement())
-    }
-
-    const handleDelete = () => {
-        if (selectedId == null) return
-        if (!canManageEndorsements) {
-            alert(
-                'Not authorized. You need the Manage Endorsements permission to delete endorsements.'
-            )
-            return
-        }
-
-        const proceed = confirm(
-            'Delete this endorsement? This action cannot be undone.'
-        )
-        if (!proceed) return
-
-        deleteMutation.mutate(selectedId)
     }
 
     const handleFormUpdate = (state: FormState<Endorsement>) => {
@@ -335,20 +335,33 @@ export default function Page() {
         createMutation.mutate(request)
     }
 
+    const handleDelete = (endorsementId: number, endorsementName: string) => {
+        if (!canManageEndorsements) {
+            alert(
+                'Not authorized. You need the Manage Endorsements permission to delete endorsements.'
+            )
+            return
+        }
+
+        const confirmation = confirm(
+            `Delete endorsement "${endorsementName || `Endorsement ${endorsementId}`}"? This cannot be undone.`
+        )
+        if (!confirmation) return
+
+        deleteMutation.mutate(endorsementId)
+    }
+
     const createInvalid =
         !newEndorsement.name.trim() || !newEndorsement.description.trim()
     const createDirty =
         newEndorsement.name.trim() !== '' ||
         newEndorsement.description.trim() !== '' ||
-        newEndorsement.candidateLink.trim() !== '' ||
-        newEndorsement.linkLabel.trim() !== '' ||
-        newEndorsement.imgUrl.trim() !== '' ||
         newEndorsement.isStateInitiative ||
         newEndorsement.isNationalInitiative ||
         newEndorsement.isPvMember ||
         newEndorsement.tookPvPledge
 
-    const form = endorsementQuery.data
+    const form = selectedId != null ? endorsementQuery.data : undefined
     const saving =
         createMutation.isPending ||
         updateMutation.isPending ||
@@ -364,6 +377,19 @@ export default function Page() {
                 isPending={endorsementsQuery.isPending}
                 error={endorsementsQuery.error}
                 emptyMessage="No endorsements yet"
+                showPinnedDivider={false}
+                pinnedContent={
+                    canManageEndorsements ? (
+                        <ListElement
+                            bare
+                            className={styles.pinnedCreateTab}
+                            onClick={handleCreateNew}
+                        >
+                            <FaPlus />
+                            <span>New Endorsement</span>
+                        </ListElement>
+                    ) : undefined
+                }
                 onSearch={onSearch}
             >
                 {filteredEndorsements.data.map((item) => (
@@ -382,30 +408,6 @@ export default function Page() {
             </List>
 
             <div className={styles.rightPane}>
-                <div className={styles.paneHeader}>
-                    <div className={styles.paneHeaderRow}>
-                        <h2 className={styles.paneHeaderTitle}>Endorsements</h2>
-
-                        <div className={styles.actionBar}>
-                            <button
-                                className={styles.createButton}
-                                onClick={handleCreateNew}
-                            >
-                                New Endorsement
-                            </button>
-                            {formState?.editing && selectedId != null && (
-                                <button
-                                    className={styles.deleteButton}
-                                    disabled={deleteMutation.isPending}
-                                    onClick={handleDelete}
-                                >
-                                    Delete Endorsement
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
                 {!canManageEndorsements && (
                     <div className={styles.permissionWarning}>
                         You are currently read-only for endorsements. Ask an
@@ -415,51 +417,170 @@ export default function Page() {
 
                 {!form && (
                     <div className={styles.emptyState}>
-                        No endorsement selected
+                        <span>No endorsement selected</span>
+                        <button
+                            className={styles.createButton}
+                            onClick={handleCreateNew}
+                        >
+                            New Endorsement
+                        </button>
                     </div>
                 )}
 
                 {form && (
-                    <Form<Endorsement>
-                        key={form.id}
-                        form={form}
-                        title={form.name || `Endorsement ${form.id}`}
-                        saving={saving}
-                        readonly={!canManageEndorsements}
-                        onUpdate={handleFormUpdate}
-                        onSave={handleSave}
-                    >
-                        <FormGroup title="Details">
-                            <TextField label="Name" field="name" required />
-                            <TextField
-                                label="Description"
-                                field="description"
-                                required
-                            />
-                            <TextField
-                                label="Candidate Link"
-                                field="candidateLink"
-                            />
-                            <TextField label="Link Label" field="linkLabel" />
-                            <TextField label="Image URL" field="imgUrl" />
-                            <CheckboxField
-                                label="State Initiative"
-                                field="isStateInitiative"
-                            />
-                            <CheckboxField
-                                label="National Initiative"
-                                field="isNationalInitiative"
-                            />
-                            <CheckboxField
-                                label="PV Member"
-                                field="isPvMember"
-                            />
-                            <CheckboxField
-                                label="Took PV Pledge"
-                                field="tookPvPledge"
-                            />
-                        </FormGroup>
-                    </Form>
+                    <>
+                        <div className={styles.detailsHeader}>
+                            <div className={styles.bannerCover} />
+                            <div className={styles.headerTop}>
+                                <div className={styles.cardStyle}>
+                                    <div className={styles.cardAvatar}>
+                                        {form.imgUrl ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                src={form.imgUrl}
+                                                alt={form.name}
+                                            />
+                                        ) : (
+                                            <span
+                                                className={
+                                                    styles.cardAvatarFallback
+                                                }
+                                            >
+                                                {(form.name || '?')
+                                                    .charAt(0)
+                                                    .toUpperCase()}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className={styles.userInfo}>
+                                        <h1 className={styles.headerName}>
+                                            {form.name ||
+                                                `Endorsement ${form.id}`}
+                                        </h1>
+                                        <h2 className={styles.headerSubtitle}>
+                                            {form.name ||
+                                                `Endorsement ${form.id}`}
+                                        </h2>
+                                    </div>
+                                </div>
+                                <div className={styles.headerActions}>
+                                    {!formState?.editing && (
+                                        <button
+                                            type="button"
+                                            className={formStyles.button}
+                                            disabled={!canManageEndorsements}
+                                            onClick={() =>
+                                                formControlsRef.current?.edit()
+                                            }
+                                        >
+                                            <FaEdit /> Edit
+                                        </button>
+                                    )}
+                                    {formState?.editing && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                className={formStyles.button}
+                                                disabled={
+                                                    !formState.dirty ||
+                                                    formState.invalid ||
+                                                    saving
+                                                }
+                                                onClick={() =>
+                                                    formControlsRef.current?.save()
+                                                }
+                                            >
+                                                <FaSave /> Save Changes
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`${formStyles.button} ${formStyles.discardButton}`}
+                                                onClick={() =>
+                                                    formControlsRef.current?.cancel()
+                                                }
+                                            >
+                                                <FaTrashAlt /> Discard Changes
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                                <TabBar
+                                    tabs={tabs}
+                                    value={selectedTab}
+                                    onChange={(key) =>
+                                        setSelectedTab(key as EndorsementTabKey)
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <div className={styles.detailsContent}>
+                            {selectedTab === 'information' && (
+                                <Form<Endorsement>
+                                    key={form.id}
+                                    form={form}
+                                    title={
+                                        form.name || `Endorsement ${form.id}`
+                                    }
+                                    saving={saving}
+                                    readonly={!canManageEndorsements}
+                                    onUpdate={handleFormUpdate}
+                                    onSave={handleSave}
+                                    controlsRef={formControlsRef}
+                                    hideButtons
+                                >
+                                    <FormGroup title="Details">
+                                        <TextField
+                                            label="Name"
+                                            field="name"
+                                            required
+                                        />
+                                        <TextField
+                                            label="Description"
+                                            field="description"
+                                            required
+                                        />
+                                        <CheckboxField
+                                            label="State Initiative"
+                                            field="isStateInitiative"
+                                        />
+                                        <CheckboxField
+                                            label="National Initiative"
+                                            field="isNationalInitiative"
+                                        />
+                                        <CheckboxField
+                                            label="PV Member"
+                                            field="isPvMember"
+                                        />
+                                        <CheckboxField
+                                            label="Took PV Pledge"
+                                            field="tookPvPledge"
+                                        />
+                                    </FormGroup>
+                                </Form>
+                            )}
+
+                            {selectedTab === 'activity' && (
+                                <div className={styles.activityPlaceholder}>
+                                    <p>No activity yet.</p>
+                                    <button
+                                        type="button"
+                                        className={styles.deleteButton}
+                                        disabled={
+                                            !canManageEndorsements || saving
+                                        }
+                                        onClick={() =>
+                                            handleDelete(
+                                                form.id,
+                                                form.name || ''
+                                            )
+                                        }
+                                    >
+                                        Delete Endorsement
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </>
                 )}
             </div>
 
@@ -506,45 +627,6 @@ export default function Page() {
                                         setNewEndorsement((prev) => ({
                                             ...prev,
                                             description: event.target.value,
-                                        }))
-                                    }
-                                />
-                            </label>
-
-                            <label className={styles.popupField}>
-                                <span>Candidate Link</span>
-                                <input
-                                    value={newEndorsement.candidateLink}
-                                    onChange={(event) =>
-                                        setNewEndorsement((prev) => ({
-                                            ...prev,
-                                            candidateLink: event.target.value,
-                                        }))
-                                    }
-                                />
-                            </label>
-
-                            <label className={styles.popupField}>
-                                <span>Link Label</span>
-                                <input
-                                    value={newEndorsement.linkLabel}
-                                    onChange={(event) =>
-                                        setNewEndorsement((prev) => ({
-                                            ...prev,
-                                            linkLabel: event.target.value,
-                                        }))
-                                    }
-                                />
-                            </label>
-
-                            <label className={styles.popupField}>
-                                <span>Image URL</span>
-                                <input
-                                    value={newEndorsement.imgUrl}
-                                    onChange={(event) =>
-                                        setNewEndorsement((prev) => ({
-                                            ...prev,
-                                            imgUrl: event.target.value,
                                         }))
                                     }
                                 />
