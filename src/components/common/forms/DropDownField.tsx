@@ -4,7 +4,7 @@ import formFieldStyles from '@/components/common/forms/FormField.module.css'
 import { ChangeEvent, useCallback, useMemo } from 'react'
 
 export interface DropDownProps<T, F> extends FormFieldProps<T, F> {
-    options: { value: string | number; label: string }[]
+    options: { value: string | number | null; label: string }[]
 }
 
 export function DropDownField<T>(
@@ -44,7 +44,7 @@ export function DropDownField<T>(
                     className={formFieldStyles.textField}
                 >
                     {props.options.map((option) => (
-                        <option key={option.value} value={option.value}>
+                        <option key={option.value} value={option.value ?? undefined}>
                             {option.label}
                         </option>
                     ))}

@@ -39,6 +39,7 @@ export function AccountPage() {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 birthdate: user.birthdate,
+                shirtSize: user.shirtSize,
                 address: {
                     addressLine1: user.address.addressLine1,
                     addressLine2: user.address.addressLine2,
