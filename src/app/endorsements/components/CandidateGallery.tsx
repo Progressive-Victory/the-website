@@ -52,7 +52,9 @@ export function CandidateGallery({
             }
         }
 
-        return [...map.entries()]
+        return map
+            .entries()
+            .toArray()
             .map(
                 ([sectionLabel, sectionCandidates]) =>
                     [
@@ -66,10 +68,10 @@ export function CandidateGallery({
     }, [filteredCandidates, sectionMode, sectionSortOrder])
 
     const orderedFlatCandidates = useMemo(() => {
-        return [...filteredCandidates].sort(compareFlatCandidates)
+        return filteredCandidates.values().toArray().sort(compareFlatCandidates)
     }, [filteredCandidates])
 
-    const animationKey = `${displayMode}-${sectionMode}-${sectionSortOrder}`
+    const animationKey = `${displayMode}-${sectionMode}-${sectionSortOrder}-${filter ?? 'all'}`
     const flatHeaderTitle = getFlatHeaderTitle(
         filter,
         orderedFlatCandidates.length
@@ -393,9 +395,13 @@ function getCandidateDestination(
     if (learnMoreHref) return learnMoreHref
 
     const handleHref = candidate.handleHref?.trim()
-    if (!handleHref) return undefined
-
-    return handleHref
+    switch (handleHref) {
+        case undefined:
+        case '':
+            return undefined
+        default:
+            return handleHref
+    }
 }
 
 function getElectionStatusBadgeClassName(
@@ -424,34 +430,27 @@ function getElectionStatusBadgeClassName(
 }
 
 function getElectionStatusBadgeIcon(electionStatus: ElectionStatus): ReactNode {
-    if (electionStatus === 'Won Primary') {
-        return (
-            <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
-                <path
-                    d="M4.5 10.5l3.5 3.5 7-7"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                />
-            </svg>
-        )
+    switch (electionStatus) {
+        case 'Won Primary':
+            return (
+                <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+                    <path
+                        d="M4.5 10.5l3.5 3.5 7-7"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                </svg>
+            )
+        case 'Elected':
+            return '★'
+        case 'Lost Primary':
+        case 'Lost General Election':
+            return '✕'
+        case 'Dropped Out':
+            return '−'
+        default:
+            return null
     }
-
-    if (electionStatus === 'Elected') {
-        return '★'
-    }
-
-    if (
-        electionStatus === 'Lost Primary' ||
-        electionStatus === 'Lost General Election'
-    ) {
-        return '✕'
-    }
-
-    if (electionStatus === 'Dropped Out') {
-        return '−'
-    }
-
-    return null
 }

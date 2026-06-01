@@ -40,7 +40,7 @@ export function sortSectionCandidates(
         return candidates
     }
 
-    return [...candidates].sort(compareCandidateNames)
+    return candidates.values().toArray().sort(compareCandidateNames)
 }
 
 export function compareFlatCandidates(
@@ -106,27 +106,24 @@ export function getSectionLabel(
     candidate: CandidateConfig,
     sectionMode: SectionGroupingMode
 ): string {
-    if (sectionMode === 'state') {
-        return getCandidateStateLabel(candidate)
+    switch (sectionMode) {
+        case 'state':
+            return getCandidateStateLabel(candidate)
+        case 'status':
+            return candidate.electionStatus || UPCOMING_STATUS_LABEL
+        case 'electionDate':
+            if (!candidate.electionDate) {
+                return 'No Election Date'
+            }
+
+            if (candidate.electionDate.getTime() < Date.now()) {
+                return PAST_ELECTION_LABEL
+            }
+
+            return electionDateFormatter.format(candidate.electionDate)
+        default:
+            return getFirstNameInitial(candidate)
     }
-
-    if (sectionMode === 'status') {
-        return candidate.electionStatus || UPCOMING_STATUS_LABEL
-    }
-
-    if (sectionMode === 'electionDate') {
-        if (!candidate.electionDate) {
-            return 'No Election Date'
-        }
-
-        if (candidate.electionDate.getTime() < Date.now()) {
-            return PAST_ELECTION_LABEL
-        }
-
-        return electionDateFormatter.format(candidate.electionDate)
-    }
-
-    return getFirstNameInitial(candidate)
 }
 
 export function compareSectionEntries(
@@ -150,22 +147,26 @@ export function compareSectionEntries(
         const timeB = candidatesB[0]?.electionDate?.getTime() ?? Infinity
         comparison = timeA - timeB || labelA.localeCompare(labelB)
     } else {
-        if (sectionMode === 'name') {
-            if (labelA === '#') return 1
-            if (labelB === '#') return -1
-        }
-
-        if (sectionMode === 'state') {
-            if (labelA === UNSPECIFIED_STATE_LABEL) return 1
-            if (labelB === UNSPECIFIED_STATE_LABEL) return -1
-        }
-
-        if (sectionMode === 'status') {
-            const orderA = getElectionStatusSortValue(labelA)
-            const orderB = getElectionStatusSortValue(labelB)
-            comparison = orderA - orderB || labelA.localeCompare(labelB)
-        } else {
-            comparison = labelA.localeCompare(labelB)
+        switch (sectionMode) {
+            case 'name':
+                if (labelA === '#') return 1
+                if (labelB === '#') return -1
+                comparison = labelA.localeCompare(labelB)
+                break
+            case 'state':
+                if (labelA === UNSPECIFIED_STATE_LABEL) return 1
+                if (labelB === UNSPECIFIED_STATE_LABEL) return -1
+                comparison = labelA.localeCompare(labelB)
+                break
+            case 'status': {
+                const orderA = getElectionStatusSortValue(labelA)
+                const orderB = getElectionStatusSortValue(labelB)
+                comparison = orderA - orderB || labelA.localeCompare(labelB)
+                break
+            }
+            default:
+                comparison = labelA.localeCompare(labelB)
+                break
         }
     }
 
