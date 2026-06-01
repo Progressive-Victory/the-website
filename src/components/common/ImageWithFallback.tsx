@@ -11,6 +11,8 @@ export interface ImageWithFallbackProps {
     height: number
     useFallback?: boolean
     className?: string
+    loading?: 'lazy' | 'eager'
+    priority?: boolean
 }
 
 export function ImageWithFallback({
@@ -20,6 +22,8 @@ export function ImageWithFallback({
     height,
     useFallback = false,
     className,
+    loading = 'lazy',
+    priority = false,
 }: ImageWithFallbackProps) {
     const [hasErrored, setHasErrored] = useState(false)
 
@@ -39,6 +43,8 @@ export function ImageWithFallback({
             height={height}
             className={cx('aspect-square rounded-full object-cover', className)}
             onError={() => setHasErrored(true)}
+            loading={priority ? undefined : loading}
+            priority={priority}
         />
     )
 }
