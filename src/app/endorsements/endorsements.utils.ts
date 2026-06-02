@@ -17,6 +17,12 @@ export function getCandidateStateLabel(candidate: CandidateConfig): string {
     return candidate.state || UNSPECIFIED_STATE_LABEL
 }
 
+function getStartOfToday(): number {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return today.getTime()
+}
+
 export function compareCandidateNames(
     a: CandidateConfig,
     b: CandidateConfig
@@ -86,7 +92,7 @@ export function getCandidateSubtitleText(
         : null
     const isPastElectionCandidate =
         !!candidate.electionDate &&
-        candidate.electionDate.getTime() < Date.now()
+        candidate.electionDate.getTime() < getStartOfToday()
 
     if (displayMode === 'flat') {
         return getFlatSubtitleText(candidate)
@@ -116,7 +122,7 @@ export function getSectionLabel(
                 return 'No Election Date'
             }
 
-            if (candidate.electionDate.getTime() < Date.now()) {
+            if (candidate.electionDate.getTime() < getStartOfToday()) {
                 return PAST_ELECTION_LABEL
             }
 
