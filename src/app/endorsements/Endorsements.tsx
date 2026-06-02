@@ -13,8 +13,8 @@ import {
 import { useDeferredValue, useMemo, useState } from 'react'
 
 const SORTED_CANDIDATES: CandidateConfig[] = [...CANDIDATES].sort((a, b) => {
-    const aTime = a.electionDate?.getTime() ?? Infinity
-    const bTime = b.electionDate?.getTime() ?? Infinity
+    const aTime = a.primaryElection?.getTime() ?? Infinity
+    const bTime = b.primaryElection?.getTime() ?? Infinity
     return aTime - bTime
 })
 

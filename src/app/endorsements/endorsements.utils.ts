@@ -87,12 +87,12 @@ export function getCandidateSubtitleText(
     displayMode: GalleryDisplayMode,
     sectionMode: SectionGroupingMode
 ): string | null {
-    const formattedElectionDate = candidate.electionDate
-        ? electionDateFormatter.format(candidate.electionDate)
+    const formattedElectionDate = candidate.primaryElection
+        ? electionDateFormatter.format(candidate.primaryElection)
         : null
     const isPastElectionCandidate =
-        !!candidate.electionDate &&
-        candidate.electionDate.getTime() < getStartOfToday()
+        !!candidate.primaryElection &&
+        candidate.primaryElection.getTime() < Date.now()
 
     if (displayMode === 'flat') {
         return getFlatSubtitleText(candidate)
@@ -118,15 +118,15 @@ export function getSectionLabel(
         case 'status':
             return candidate.electionStatus || UPCOMING_STATUS_LABEL
         case 'electionDate':
-            if (!candidate.electionDate) {
+            if (!candidate.primaryElection) {
                 return 'No Election Date'
             }
 
-            if (candidate.electionDate.getTime() < getStartOfToday()) {
+            if (candidate.primaryElection.getTime() < Date.now()) {
                 return PAST_ELECTION_LABEL
             }
 
-            return electionDateFormatter.format(candidate.electionDate)
+            return electionDateFormatter.format(candidate.primaryElection)
         default:
             return getFirstNameInitial(candidate)
     }
@@ -149,8 +149,8 @@ export function compareSectionEntries(
     let comparison = 0
 
     if (sectionMode === 'electionDate') {
-        const timeA = candidatesA[0]?.electionDate?.getTime() ?? Infinity
-        const timeB = candidatesB[0]?.electionDate?.getTime() ?? Infinity
+        const timeA = candidatesA[0]?.primaryElection?.getTime() ?? Infinity
+        const timeB = candidatesB[0]?.primaryElection?.getTime() ?? Infinity
         comparison = timeA - timeB || labelA.localeCompare(labelB)
     } else {
         switch (sectionMode) {
