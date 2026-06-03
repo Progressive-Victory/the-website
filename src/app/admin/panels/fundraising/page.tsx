@@ -20,11 +20,11 @@ import {
     DropdownOverlay,
     DateRangePicker,
     ProgressBar,
+    ToggleGroup,
 } from '@/components/common'
 import { Chart } from '@/components/common/charts/DualAxisBarLineChart'
 import { type ChartGranularityMode } from '@/components/common/charts/timeBuckets'
 import { useFetch } from '@/util/hooks'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { FaDonate } from 'react-icons/fa'
@@ -66,20 +66,13 @@ function FundraisingCard({
 }
 
 export default function Page() {
-    const [isDateRangeOverlayOpen, setIsDateRangeOverlayOpen] = useState(false)
     const [dateRangeOverlayMaxHeight, setDateRangeOverlayMaxHeight] =
         useState<number>()
     const [dateRangeOverlayOffset, setDateRangeOverlayOffset] = useState(0)
-    const [draftStartDate, setDraftStartDate] = useState(startDate)
-    const [draftEndDate, setDraftEndDate] = useState(endDate)
     const [isNarrowDateRangeLayout, setIsNarrowDateRangeLayout] =
         useState(false)
-    const dateRangeControlRef = useRef<HTMLDivElement | null>(null)
     const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
     const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
-
-    const [isChartOptionsOpen, setIsChartOptionsOpen] = useState(false)
-    const chartOptionsControlRef = useRef<HTMLDivElement | null>(null)
 
     const { onGet } = useFetch()
     const {
@@ -127,56 +120,6 @@ export default function Page() {
     } = useFundraisingDashboardController(onGet)
 
     useEffect(() => {
-        const onDocumentMouseDown = (event: MouseEvent) => {
-            if (!isDateRangeOverlayOpen) return
-
-            const control = dateRangeControlRef.current
-            if (!control) return
-
-            if (!control.contains(event.target as Node)) {
-                setIsDateRangeOverlayOpen(false)
-                setDraftStartDate(startDate)
-                setDraftEndDate(endDate)
-                setDraftPreset(committedPreset)
-            }
-        }
-
-        document.addEventListener('mousedown', onDocumentMouseDown)
-        return () => {
-            document.removeEventListener('mousedown', onDocumentMouseDown)
-        }
-    }, [
-        isDateRangeOverlayOpen,
-        startDate,
-        endDate,
-        committedPreset,
-        setDraftStartDate,
-        setDraftEndDate,
-        setDraftPreset,
-    ])
-
-    useEffect(() => {
-        if (!isChartOptionsOpen) return
-        const onDocumentMouseDown = (event: MouseEvent) => {
-            const control = chartOptionsControlRef.current
-            if (!control) return
-            if (!control.contains(event.target as Node)) {
-                setIsChartOptionsOpen(false)
-            }
-        }
-        document.addEventListener('mousedown', onDocumentMouseDown)
-        return () => {
-            document.removeEventListener('mousedown', onDocumentMouseDown)
-        }
-    }, [isChartOptionsOpen])
-
-    useEffect(() => {
-        if (!isDateRangeOverlayOpen) {
-            setDateRangeOverlayMaxHeight(undefined)
-            setDateRangeOverlayOffset(0)
-            return
-        }
-
         const viewportPadding = 12
         const constrainedBottomMargin = 16
         const triggerGap = 6
@@ -545,30 +488,6 @@ export default function Page() {
                             )}`}
                         />
                     </div>
-                        <article className={styles.metricCard}>
-                            <div className={styles.metricLabel}>Donors</div>
-                            <div className={styles.metricValue}>
-                                {formatCount(statsQuery.data?.totalDonorCount)}
-                            </div>
-                            <div className={styles.metricMeta}>
-                                {`${formatCount(statsQuery.data?.recurringDonorCount)} Recurring · ${formatCount(statsQuery.data?.oneTimeDonorCount)} One-Time`}
-                            </div>
-                        </article>
-
-                        <article className={styles.metricCard}>
-                            <div className={styles.metricLabel}>
-                                Contributions
-                            </div>
-                            <div className={styles.metricValue}>
-                                {formatCount(
-                                    statsQuery.data?.totalContributionCount
-                                )}
-                            </div>
-                            <div className={styles.metricMeta}>
-                                {`${formatCount(statsQuery.data?.recurringContributionCount)} Recurring · ${formatCount(statsQuery.data?.oneTimeContributionCount)} One-Time`}
-                            </div>
-                        </article>
-                    </div>
 
                     <Chart
                         title="Fundraising Volume"
@@ -646,35 +565,73 @@ export default function Page() {
                             ) : null
                         }
                         headerRight={
-                            <div
-                                ref={chartOptionsControlRef}
-                                className={styles.chartOptionsControl}
-                            >
+                            <div className={styles.chartOptionsControl}>
                                 <DropdownButton
                                     type="button"
-                                    isOpen={isChartOptionsOpen}
                                     label="Chart Options"
                                     buttonVariant="minimal"
-                                    onClick={() =>
-                                        setIsChartOptionsOpen(
-                                            (current) => !current
-                                        )
-                                    }
-                                    menu={
-                                        isChartOptionsOpen ? (
-                                            <DropdownOverlay
-                                                className={
-                                                    styles.chartOptionsBox
-                                                }
-                                                label="Chart Options"
-                                                onClose={() =>
-                                                    setIsChartOptionsOpen(false)
-                                                }
-                                                bodyClassName={
-                                                    styles.chartOptionsBody
-                                                }
-                                                body={
-                                                    <>
+                                    menu={({ closeDropdown }) => (
+                                        <DropdownOverlay
+                                            className={styles.chartOptionsBox}
+                                            label="Chart Options"
+                                            onClose={() => {
+                                                closeDropdown()
+                                            }}
+                                            bodyClassName={
+                                                styles.chartOptionsBody
+                                            }
+                                            body={
+                                                <>
+                                                    <div
+                                                        className={
+                                                            styles.chartOptionRow
+                                                        }
+                                                    >
+                                                        <span
+                                                            className={
+                                                                styles.chartOptionLabel
+                                                            }
+                                                        >
+                                                            Time scale
+                                                        </span>
+                                                        <ToggleGroup<ChartGranularityMode>
+                                                            ariaLabel="Time scale"
+                                                            orientation="horizontal"
+                                                            value={
+                                                                granularityMode
+                                                            }
+                                                            options={(
+                                                                [
+                                                                    'auto',
+                                                                    'year',
+                                                                    'quarter',
+                                                                    'month',
+                                                                    'week',
+                                                                    'day',
+                                                                    'hour',
+                                                                ] as ChartGranularityMode[]
+                                                            )
+                                                                .filter(
+                                                                    (mode) =>
+                                                                        validGranularityModes.includes(
+                                                                            mode
+                                                                        )
+                                                                )
+                                                                .map(
+                                                                    (mode) => ({
+                                                                        value: mode,
+                                                                        label: CHART_GRANULARITY_LABELS[
+                                                                            mode
+                                                                        ],
+                                                                    })
+                                                                )}
+                                                            onChange={
+                                                                setGranularityMode
+                                                            }
+                                                        />
+                                                    </div>
+
+                                                    {isXToDateSpanOptionRelevant && (
                                                         <div
                                                             className={
                                                                 styles.chartOptionRow
@@ -685,50 +642,72 @@ export default function Page() {
                                                                     styles.chartOptionLabel
                                                                 }
                                                             >
-                                                                Time scale
+                                                                Show{' '}
+                                                                {getXToDatePeriodName(
+                                                                    committedPreset,
+                                                                    granularityMode
+                                                                )}{' '}
+                                                                To Date
                                                             </span>
-                                                            <ToggleGroup<ChartGranularityMode>
-                                                                ariaLabel="Time scale"
+                                                            <ToggleGroup<boolean>
+                                                                ariaLabel="X-to-date span"
                                                                 orientation="horizontal"
                                                                 value={
-                                                                    granularityMode
+                                                                    showFullXToDateSpan
                                                                 }
-                                                                options={(
-                                                                    [
-                                                                        'auto',
-                                                                        'year',
-                                                                        'quarter',
-                                                                        'month',
-                                                                        'week',
-                                                                        'day',
-                                                                        'hour',
-                                                                    ] as ChartGranularityMode[]
-                                                                )
-                                                                    .filter(
-                                                                        (
-                                                                            mode
-                                                                        ) =>
-                                                                            validGranularityModes.includes(
-                                                                                mode
-                                                                            )
-                                                                    )
-                                                                    .map(
-                                                                        (
-                                                                            mode
-                                                                        ) => ({
-                                                                            value: mode,
-                                                                            label: CHART_GRANULARITY_LABELS[
-                                                                                mode
-                                                                            ],
-                                                                        })
-                                                                    )}
+                                                                options={[
+                                                                    {
+                                                                        value: true,
+                                                                        label: 'Hide',
+                                                                    },
+                                                                    {
+                                                                        value: false,
+                                                                        label: 'Show',
+                                                                    },
+                                                                ]}
                                                                 onChange={
-                                                                    setGranularityMode
+                                                                    setShowFullXToDateSpan
                                                                 }
                                                             />
                                                         </div>
+                                                    )}
 
-                                                        {isXToDateSpanOptionRelevant && (
+                                                    <div
+                                                        className={
+                                                            styles.chartOptionRow
+                                                        }
+                                                    >
+                                                        <span
+                                                            className={
+                                                                styles.chartOptionLabel
+                                                            }
+                                                        >
+                                                            Contributions line
+                                                        </span>
+                                                        <ToggleGroup<boolean>
+                                                            ariaLabel="Contributions line"
+                                                            orientation="horizontal"
+                                                            value={
+                                                                showDonationsLine
+                                                            }
+                                                            options={[
+                                                                {
+                                                                    value: true,
+                                                                    label: 'Show',
+                                                                },
+                                                                {
+                                                                    value: false,
+                                                                    label: 'Hide',
+                                                                },
+                                                            ]}
+                                                            onChange={
+                                                                setShowDonationsLine
+                                                            }
+                                                        />
+                                                    </div>
+
+                                                    {showDonationsLine && (
+                                                        <>
                                                             <div
                                                                 className={
                                                                     styles.chartOptionRow
@@ -739,242 +718,142 @@ export default function Page() {
                                                                         styles.chartOptionLabel
                                                                     }
                                                                 >
-                                                                    Show{' '}
-                                                                    {getXToDatePeriodName(
-                                                                        committedPreset,
-                                                                        granularityMode
-                                                                    )}{' '}
-                                                                    To Date
+                                                                    Line style
                                                                 </span>
                                                                 <ToggleGroup<boolean>
-                                                                    ariaLabel="X-to-date span"
+                                                                    ariaLabel="Line style"
                                                                     orientation="horizontal"
                                                                     value={
-                                                                        showFullXToDateSpan
+                                                                        smoothLine
                                                                     }
                                                                     options={[
                                                                         {
                                                                             value: true,
-                                                                            label: 'Hide',
+                                                                            label: 'Curved',
                                                                         },
                                                                         {
                                                                             value: false,
-                                                                            label: 'Show',
+                                                                            label: 'Straight',
                                                                         },
                                                                     ]}
                                                                     onChange={
-                                                                        setShowFullXToDateSpan
+                                                                        setSmoothLine
                                                                     }
                                                                 />
                                                             </div>
-                                                        )}
 
-                                                        <div
-                                                            className={
-                                                                styles.chartOptionRow
-                                                            }
-                                                        >
-                                                            <span
+                                                            <div
                                                                 className={
-                                                                    styles.chartOptionLabel
+                                                                    styles.chartOptionRow
                                                                 }
                                                             >
-                                                                Contributions
-                                                                line
-                                                            </span>
-                                                            <ToggleGroup<boolean>
-                                                                ariaLabel="Contributions line"
-                                                                orientation="horizontal"
-                                                                value={
-                                                                    showDonationsLine
-                                                                }
-                                                                options={[
-                                                                    {
-                                                                        value: true,
-                                                                        label: 'Show',
-                                                                    },
-                                                                    {
-                                                                        value: false,
-                                                                        label: 'Hide',
-                                                                    },
-                                                                ]}
-                                                                onChange={
-                                                                    setShowDonationsLine
-                                                                }
-                                                            />
-                                                        </div>
-
-                                                        {showDonationsLine && (
-                                                            <>
-                                                                <div
+                                                                <span
                                                                     className={
-                                                                        styles.chartOptionRow
+                                                                        styles.chartOptionLabel
                                                                     }
                                                                 >
-                                                                    <span
-                                                                        className={
-                                                                            styles.chartOptionLabel
-                                                                        }
-                                                                    >
-                                                                        Line
-                                                                        style
-                                                                    </span>
-                                                                    <ToggleGroup<boolean>
-                                                                        ariaLabel="Line style"
-                                                                        orientation="horizontal"
-                                                                        value={
-                                                                            smoothLine
-                                                                        }
-                                                                        options={[
-                                                                            {
-                                                                                value: true,
-                                                                                label: 'Curved',
-                                                                            },
-                                                                            {
-                                                                                value: false,
-                                                                                label: 'Straight',
-                                                                            },
-                                                                        ]}
-                                                                        onChange={
-                                                                            setSmoothLine
-                                                                        }
-                                                                    />
-                                                                </div>
-
-                                                                <div
-                                                                    className={
-                                                                        styles.chartOptionRow
+                                                                    Area fill
+                                                                </span>
+                                                                <ToggleGroup<boolean>
+                                                                    ariaLabel="Area fill"
+                                                                    orientation="horizontal"
+                                                                    value={
+                                                                        showAreaFill
                                                                     }
-                                                                >
-                                                                    <span
-                                                                        className={
-                                                                            styles.chartOptionLabel
-                                                                        }
-                                                                    >
-                                                                        Area
-                                                                        fill
-                                                                    </span>
-                                                                    <ToggleGroup<boolean>
-                                                                        ariaLabel="Area fill"
-                                                                        orientation="horizontal"
-                                                                        value={
-                                                                            showAreaFill
-                                                                        }
-                                                                        options={[
-                                                                            {
-                                                                                value: true,
-                                                                                label: 'Show',
-                                                                            },
-                                                                            {
-                                                                                value: false,
-                                                                                label: 'Hide',
-                                                                            },
-                                                                        ]}
-                                                                        onChange={
-                                                                            setShowAreaFill
-                                                                        }
-                                                                    />
-                                                                </div>
-                                                            </>
-                                                        )}
+                                                                    options={[
+                                                                        {
+                                                                            value: true,
+                                                                            label: 'Show',
+                                                                        },
+                                                                        {
+                                                                            value: false,
+                                                                            label: 'Hide',
+                                                                        },
+                                                                    ]}
+                                                                    onChange={
+                                                                        setShowAreaFill
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        </>
+                                                    )}
 
-                                                        <div
+                                                    <div
+                                                        className={
+                                                            styles.chartOptionRow
+                                                        }
+                                                    >
+                                                        <span
                                                             className={
-                                                                styles.chartOptionRow
+                                                                styles.chartOptionLabel
                                                             }
                                                         >
-                                                            <span
-                                                                className={
-                                                                    styles.chartOptionLabel
-                                                                }
-                                                            >
-                                                                Drag To Zoom
-                                                            </span>
-                                                            <ToggleGroup<boolean>
-                                                                ariaLabel="Chart zoom"
-                                                                orientation="horizontal"
-                                                                value={
-                                                                    zoomEnabled
-                                                                }
-                                                                options={[
-                                                                    {
-                                                                        value: true,
-                                                                        label: 'Enabled',
-                                                                    },
-                                                                    {
-                                                                        value: false,
-                                                                        label: 'Disabled',
-                                                                    },
-                                                                ]}
-                                                                onChange={
-                                                                    setZoomEnabled
-                                                                }
-                                                            />
-                                                        </div>
+                                                            Drag To Zoom
+                                                        </span>
+                                                        <ToggleGroup<boolean>
+                                                            ariaLabel="Chart zoom"
+                                                            orientation="horizontal"
+                                                            value={zoomEnabled}
+                                                            options={[
+                                                                {
+                                                                    value: true,
+                                                                    label: 'Enabled',
+                                                                },
+                                                                {
+                                                                    value: false,
+                                                                    label: 'Disabled',
+                                                                },
+                                                            ]}
+                                                            onChange={
+                                                                setZoomEnabled
+                                                            }
+                                                        />
+                                                    </div>
 
-                                                        <div
+                                                    <div
+                                                        className={
+                                                            styles.chartOptionRow
+                                                        }
+                                                    >
+                                                        <span
                                                             className={
-                                                                styles.chartOptionRow
+                                                                styles.chartOptionLabel
                                                             }
                                                         >
-                                                            <span
-                                                                className={
-                                                                    styles.chartOptionLabel
-                                                                }
-                                                            >
-                                                                Bar layout
-                                                            </span>
-                                                            <ToggleGroup<
-                                                                | 'grouped'
-                                                                | 'stacked'
-                                                            >
-                                                                ariaLabel="Bar layout"
-                                                                orientation="horizontal"
-                                                                value={
-                                                                    chartBarDisplayMode
-                                                                }
-                                                                options={[
-                                                                    {
-                                                                        value: 'stacked',
-                                                                        label: 'Stacked',
-                                                                    },
-                                                                    {
-                                                                        value: 'grouped',
-                                                                        label: 'Seperate',
-                                                                    },
-                                                                ]}
-                                                                onChange={
-                                                                    setChartBarDisplayMode
-                                                                }
-                                                            />
-                                                        </div>
-                                                    </>
-                                                }
-                                            ></DropdownOverlay>
-                                        ) : null
-                                    }
+                                                            Bar layout
+                                                        </span>
+                                                        <ToggleGroup<
+                                                            | 'grouped'
+                                                            | 'stacked'
+                                                        >
+                                                            ariaLabel="Bar layout"
+                                                            orientation="horizontal"
+                                                            value={
+                                                                chartBarDisplayMode
+                                                            }
+                                                            options={[
+                                                                {
+                                                                    value: 'stacked',
+                                                                    label: 'Stacked',
+                                                                },
+                                                                {
+                                                                    value: 'grouped',
+                                                                    label: 'Seperate',
+                                                                },
+                                                            ]}
+                                                            onChange={
+                                                                setChartBarDisplayMode
+                                                            }
+                                                        />
+                                                    </div>
+                                                </>
+                                            }
+                                        />
+                                    )}
                                 />
                             </div>
                         }
                     />
-
-                    <div className={styles.splitTrack}>
-                        <div className={styles.splitRow}>
-                            <span>Recurring Share</span>
-                            <span>
-                                {recurringPct != null
-                                    ? `${recurringPct}%`
-                                    : '—'}
-                            </span>
-                        </div>
-                        <div className={styles.trackBar} aria-hidden="true">
-                            <span
-                                className={styles.trackFillRecurring}
-                                style={{
-                                    width: `${Math.max(0, Math.min(100, recurringPct ?? 0))}%`,
-                                }}
-                            />
-                        </div>
 
                     <ProgressBar
                         label="One-Time Share"
@@ -1009,5 +888,3 @@ export default function Page() {
         </div>
     )
 }
-
-//Preparing for future
