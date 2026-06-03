@@ -163,11 +163,18 @@ function getRangeKind(
     startDate: string,
     endDate: string
 ): RangeKind {
-    if (committedPreset) return 'preset'
-    if (startDate && endDate) return 'both'
-    if (startDate) return 'from'
-    if (endDate) return 'until'
-    return 'all'
+    switch (true) {
+        case !!committedPreset:
+            return 'preset'
+        case !!(startDate && endDate):
+            return 'both'
+        case !!startDate:
+            return 'from'
+        case !!endDate:
+            return 'until'
+        default:
+            return 'all'
+    }
 }
 
 export function getSelectedRangeLabel(
