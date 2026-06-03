@@ -1,8 +1,21 @@
 .panelContents {
     width: 100%;
     min-width: 0;
-    height: 100%;
+    height: calc(100dvh - 100px);
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     padding: 0;
+}
+
+.scrollView {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0 0 1rem;
 }
 
 .dateContainer {
@@ -27,120 +40,81 @@
     color: rgba(15, 23, 42, 0.58);
 }
 
-.dateRangeOptionList {
+.customDateRangeBox {
+    --presetColMin: 12.5rem;
+    --presetColMax: 14rem;
+    --calendarWidth: 15.5rem;
+    --popBodyGap: 0.85rem;
+}
+
+.dateRangePopBody {
+    display: grid;
+    grid-template-columns: minmax(var(--presetColMin), var(--presetColMax)) var(
+            --calendarWidth
+        );
+    gap: var(--popBodyGap);
+    align-items: stretch;
+}
+
+.dateRangePresetCol {
     display: grid;
     gap: 0.34rem;
+    align-content: start;
+    padding-top: 0.1rem;
 }
 
-.customRangeLabel {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: rgba(15, 23, 42, 0.62);
-}
-
-.dateRangeOptionButton {
-    border-radius: 0.54rem;
-    background: rgba(255, 255, 255, 0.78);
-    color: rgba(9, 34, 58, 0.9);
+.dateRangePresetButton {
+    display: grid;
+    grid-template-columns: 1fr 1.1rem;
+    align-items: center;
+    gap: 0.4rem;
+    border: none;
+    background: transparent;
+    color: rgba(9, 34, 58, 0.88);
     text-align: left;
     font-size: 0.8rem;
     font-weight: 700;
-    padding: 0.38rem 0.52rem;
+    padding: 0.5rem 0.45rem;
+    border-radius: 0.54rem;
     cursor: pointer;
 }
 
-.dateRangeOptionButton:hover {
+.dateRangePresetButton:hover {
     background: rgba(15, 23, 42, 0.05);
 }
 
-.dateRangeOptionButtonActive {
+.dateRangePresetButtonCommitted {
     color: rgba(2, 132, 199, 1);
+    font-weight: 700;
+}
+
+.dateRangePresetButtonCommitted:hover {
+    background: rgba(14, 165, 233, 0.08);
+}
+
+.dateRangePresetButtonDraft {
     background: rgba(14, 165, 233, 0.14);
-}
-
-.dateRangeOptionButtonActive:hover {
     color: rgba(2, 132, 199, 1);
-    background: rgba(84, 158, 214, 0.14);
 }
 
-.customDateRangeBox {
-    width: min(20rem, 85vw);
-    padding: 0.62rem;
-    border-radius: 0.75rem;
-    border: 1px solid rgba(15, 23, 42, 0.14);
-    background: rgba(255, 255, 255, 0.94);
-    display: grid;
-    gap: 0.5rem;
-    position: absolute;
-    top: calc(100% + 0.35rem);
-    right: 0;
-    z-index: 120;
-    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.16);
-    overflow-y: auto;
+.dateRangePresetButtonDraft:hover {
+    background: rgba(14, 165, 233, 0.2);
 }
 
-.customDateField {
-    display: grid;
-    gap: 0.24rem;
+.dateRangePresetButtonDraft.dateRangePresetButtonCommitted {
+    background: rgba(14, 165, 233, 0.18);
 }
 
-.customDateField label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: rgba(15, 23, 42, 0.62);
-}
-
-.customDateField input {
-    width: 100%;
-    padding: 0.34rem 0.46rem;
-    border-radius: 0.5rem;
-    border: 1px solid rgba(15, 23, 42, 0.16);
-    background: rgba(255, 255, 255, 0.8);
-    font-size: 0.84rem;
-}
-
-.customDateActions {
-    display: flex;
-    justify-content: space-between;
+.dateRangePresetCheck {
+    display: inline-flex;
     align-items: center;
-    gap: 0.42rem;
+    justify-content: center;
+    color: rgba(2, 132, 199, 1);
+    width: 1.1rem;
 }
 
-.setRangeButton {
-    margin-left: auto;
-}
-
-.cancelRangeButton,
-.setRangeButton {
-    border: none;
-    border-radius: 0.54rem;
-    padding: 0.34rem 0.56rem;
-    font-size: 0.74rem;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.cancelRangeButton {
-    background: rgba(15, 23, 42, 0.08);
-    color: rgba(15, 23, 42, 0.7);
-}
-
-.cancelRangeButton:hover {
-    background: rgba(15, 23, 42, 0.12);
-}
-
-.setRangeButton {
-    background: rgba(9, 34, 58, 0.9);
-    color: #fff;
-}
-
-.setRangeButton:hover {
-    background: rgba(9, 34, 58, 0.98);
-}
-
-.setRangeButton:disabled {
-    background: rgba(9, 34, 58, 0.34);
-    cursor: not-allowed;
+.dateRangePresetCheck svg {
+    stroke-width: 3.5;
 }
 
 .panelHeader {
@@ -356,7 +330,7 @@
     }
 }
 
-@media (max-width: 42rem) {
+@media (max-width: 53rem) {
     .panelHeader {
         flex-direction: column;
         align-items: flex-start;
@@ -383,10 +357,12 @@
         justify-items: stretch;
     }
 
-    .customDateRangeBox {
+    .dateRangeTriggerButton {
         width: 100%;
-        right: auto;
-        left: 0;
+    }
+
+    .dateRangePopBody {
+        grid-template-columns: 1fr;
     }
 
     .metricGrid {
