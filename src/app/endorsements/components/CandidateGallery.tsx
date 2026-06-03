@@ -30,6 +30,8 @@ interface CandidateGalleryProps {
     displayMode: GalleryDisplayMode
     sectionMode: SectionGroupingMode
     sectionSortOrder: SectionSortOrder
+    year: number
+    searchQuery: string
 }
 
 export function CandidateGallery({
@@ -38,6 +40,8 @@ export function CandidateGallery({
     displayMode,
     sectionMode,
     sectionSortOrder,
+    year,
+    searchQuery,
 }: CandidateGalleryProps) {
     const groupedCandidates = useMemo(() => {
         const map = new Map<string, CandidateConfig[]>()
@@ -71,7 +75,7 @@ export function CandidateGallery({
         return filteredCandidates.values().toArray().sort(compareFlatCandidates)
     }, [filteredCandidates])
 
-    const animationKey = `${displayMode}-${sectionMode}-${sectionSortOrder}-${filter ?? 'all'}`
+    const animationKey = `${displayMode}-${sectionMode}-${sectionSortOrder}-${filter ?? 'all'}-${year}-${searchQuery.trim().toLowerCase()}`
     const flatHeaderTitle = getFlatHeaderTitle(
         filter,
         orderedFlatCandidates.length
@@ -417,7 +421,7 @@ function getElectionStatusBadgeClassName(
 
     if (
         electionStatus === 'Lost Primary' ||
-        electionStatus === 'Lost General Election'
+        electionStatus === 'Lost General'
     ) {
         return styles.tileStatusLost
     }
@@ -446,7 +450,7 @@ function getElectionStatusBadgeIcon(electionStatus: ElectionStatus): ReactNode {
         case 'Elected':
             return '★'
         case 'Lost Primary':
-        case 'Lost General Election':
+        case 'Lost General':
             return '✕'
         case 'Dropped Out':
             return '−'

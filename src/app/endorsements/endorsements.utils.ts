@@ -1,6 +1,7 @@
 import {
     ELECTION_STATUS_SORT_ORDER,
     LOST_OR_DROPPED_STATUSES,
+    NATIONWIDE_STATE_LABEL,
     PAST_ELECTION_LABEL,
     UNSPECIFIED_STATE_LABEL,
     UPCOMING_STATUS_LABEL,
@@ -15,6 +16,28 @@ import {
 
 export function getCandidateStateLabel(candidate: CandidateConfig): string {
     return candidate.state || UNSPECIFIED_STATE_LABEL
+}
+
+export function getRelevantElectionDate(
+    candidate: CandidateConfig
+): Date | undefined {
+    const { primaryElection, generalElection, electionStatus } = candidate
+
+    if (electionStatus === 'Lost Primary' && primaryElection) {
+        return primaryElection
+    }
+
+    const startOfToday = getStartOfToday()
+
+    if (
+        primaryElection &&
+        generalElection &&
+        primaryElection.getTime() < startOfToday
+    ) {
+        return generalElection
+    }
+
+    return primaryElection ?? generalElection
 }
 
 function getStartOfToday(): number {
@@ -87,12 +110,12 @@ export function getCandidateSubtitleText(
     displayMode: GalleryDisplayMode,
     sectionMode: SectionGroupingMode
 ): string | null {
-    const formattedElectionDate = candidate.primaryElection
-        ? electionDateFormatter.format(candidate.primaryElection)
+    const relevantDate = getRelevantElectionDate(candidate)
+    const formattedElectionDate = relevantDate
+        ? electionDateFormatter.format(relevantDate)
         : null
     const isPastElectionCandidate =
-        !!candidate.primaryElection &&
-        candidate.primaryElection.getTime() < Date.now()
+        !!relevantDate && relevantDate.getTime() < getStartOfToday()
 
     if (displayMode === 'flat') {
         return getFlatSubtitleText(candidate)
@@ -117,16 +140,18 @@ export function getSectionLabel(
             return getCandidateStateLabel(candidate)
         case 'status':
             return candidate.electionStatus || UPCOMING_STATUS_LABEL
-        case 'electionDate':
-            if (!candidate.primaryElection) {
+        case 'electionDate': {
+            const relevantDate = getRelevantElectionDate(candidate)
+            if (!relevantDate) {
                 return 'No Election Date'
             }
 
-            if (candidate.primaryElection.getTime() < Date.now()) {
+            if (relevantDate.getTime() < getStartOfToday()) {
                 return PAST_ELECTION_LABEL
             }
 
-            return electionDateFormatter.format(candidate.primaryElection)
+            return electionDateFormatter.format(relevantDate)
+        }
         default:
             return getFirstNameInitial(candidate)
     }
@@ -149,8 +174,12 @@ export function compareSectionEntries(
     let comparison = 0
 
     if (sectionMode === 'electionDate') {
-        const timeA = candidatesA[0]?.primaryElection?.getTime() ?? Infinity
-        const timeB = candidatesB[0]?.primaryElection?.getTime() ?? Infinity
+        const timeA = candidatesA[0]
+            ? (getRelevantElectionDate(candidatesA[0])?.getTime() ?? Infinity)
+            : Infinity
+        const timeB = candidatesB[0]
+            ? (getRelevantElectionDate(candidatesB[0])?.getTime() ?? Infinity)
+            : Infinity
         comparison = timeA - timeB || labelA.localeCompare(labelB)
     } else {
         switch (sectionMode) {
@@ -160,6 +189,8 @@ export function compareSectionEntries(
                 comparison = labelA.localeCompare(labelB)
                 break
             case 'state':
+                if (labelA === NATIONWIDE_STATE_LABEL) return -1
+                if (labelB === NATIONWIDE_STATE_LABEL) return 1
                 if (labelA === UNSPECIFIED_STATE_LABEL) return 1
                 if (labelB === UNSPECIFIED_STATE_LABEL) return -1
                 comparison = labelA.localeCompare(labelB)

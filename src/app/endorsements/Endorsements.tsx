@@ -10,11 +10,12 @@ import {
     type SectionGroupingMode,
     type SectionSortOrder,
 } from './endorsements.types'
+import { getRelevantElectionDate } from './endorsements.utils'
 import { useDeferredValue, useMemo, useState } from 'react'
 
 const SORTED_CANDIDATES: CandidateConfig[] = [...CANDIDATES].sort((a, b) => {
-    const aTime = a.primaryElection?.getTime() ?? Infinity
-    const bTime = b.primaryElection?.getTime() ?? Infinity
+    const aTime = getRelevantElectionDate(a)?.getTime() ?? Infinity
+    const bTime = getRelevantElectionDate(b)?.getTime() ?? Infinity
     return aTime - bTime
 })
 
@@ -25,6 +26,22 @@ const FILTER_PREDICATES: Record<FilterType, (c: CandidateConfig) => boolean> = {
     member: (c) => c.showPvMember,
 }
 
+const AVAILABLE_YEARS: number[] = (() => {
+    const years = new Set<number>()
+    for (const candidate of CANDIDATES) {
+        if (candidate.primaryElection) {
+            years.add(candidate.primaryElection.getFullYear())
+        }
+        if (candidate.generalElection) {
+            years.add(candidate.generalElection.getFullYear())
+        }
+    }
+    return Array.from(years).sort((a, b) => b - a)
+})()
+
+const DEFAULT_YEAR: number =
+    AVAILABLE_YEARS.find((year) => year === 2026) ?? AVAILABLE_YEARS[0] ?? 2026
+
 export function Endorsements() {
     const [filter, setFilter] = useState<FilterType | null>(null)
     const [searchQuery, setSearchQuery] = useState('')
@@ -33,6 +50,7 @@ export function Endorsements() {
         useState<SectionGroupingMode>('status')
     const [sectionSortOrder, setSectionSortOrder] =
         useState<SectionSortOrder>('ascending')
+    const [year, setYear] = useState<number>(DEFAULT_YEAR)
 
     const deferredSearchQuery = useDeferredValue(searchQuery)
 
@@ -40,6 +58,14 @@ export function Endorsements() {
         const query = deferredSearchQuery.trim().toLowerCase()
 
         return SORTED_CANDIDATES.filter((candidate) => {
+            const primaryYear = candidate.primaryElection?.getFullYear()
+            const generalYear = candidate.generalElection?.getFullYear()
+            const matchesYear = primaryYear === year || generalYear === year
+
+            if (!matchesYear) {
+                return false
+            }
+
             const matchesTagFilter =
                 filter === null ? true : FILTER_PREDICATES[filter](candidate)
 
@@ -57,7 +83,7 @@ export function Endorsements() {
                 candidate.handle.toLowerCase().includes(query)
             )
         })
-    }, [filter, deferredSearchQuery])
+    }, [filter, deferredSearchQuery, year])
 
     return (
         <div className={styles.hero}>
@@ -72,6 +98,9 @@ export function Endorsements() {
                 setSectionSortOrder={setSectionSortOrder}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
+                year={year}
+                setYear={setYear}
+                availableYears={AVAILABLE_YEARS}
             />
             <CandidateGallery
                 filteredCandidates={filteredCandidates}
@@ -79,6 +108,8 @@ export function Endorsements() {
                 displayMode={displayMode}
                 sectionMode={sectionMode}
                 sectionSortOrder={sectionSortOrder}
+                year={year}
+                searchQuery={deferredSearchQuery}
             />
         </div>
     )

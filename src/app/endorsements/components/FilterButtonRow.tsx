@@ -16,6 +16,7 @@ import {
     type FocusEvent,
     useEffect,
     useLayoutEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react'
@@ -31,6 +32,9 @@ interface FilterButtonRowProps {
     setSectionSortOrder: (order: SectionSortOrder) => void
     searchQuery: string
     setSearchQuery: (query: string) => void
+    year: number
+    setYear: (year: number) => void
+    availableYears: number[]
 }
 
 export function FilterButtonRow({
@@ -44,6 +48,9 @@ export function FilterButtonRow({
     setSectionSortOrder,
     searchQuery,
     setSearchQuery,
+    year,
+    setYear,
+    availableYears,
 }: FilterButtonRowProps) {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -63,6 +70,15 @@ export function FilterButtonRow({
     const searchControlRef = useRef<HTMLDivElement | null>(null)
     const searchToggleButtonRef = useRef<HTMLButtonElement | null>(null)
     const searchInputRef = useRef<HTMLInputElement | null>(null)
+
+    const yearOptions = useMemo(
+        () =>
+            availableYears.map((y) => ({
+                label: String(y),
+                value: String(y),
+            })),
+        [availableYears]
+    )
 
     function computeSearchExpandedWidth() {
         const leftMostControl = leftMostControlRef.current
@@ -340,6 +356,12 @@ export function FilterButtonRow({
                                 setIsOpen={(isOpen) =>
                                     setOpenDropdown(isOpen ? 'filter' : null)
                                 }
+                                requiredSection={{
+                                    label: 'Year',
+                                    value: String(year),
+                                    options: yearOptions,
+                                    onChange: (value) => setYear(Number(value)),
+                                }}
                             />
                         </div>
                     </motion.div>
@@ -745,6 +767,7 @@ function TagsDropdownGroup<T extends string>({
     onChange,
     isOpen,
     setIsOpen,
+    requiredSection,
 }: {
     dropdownId: string
     label: string
@@ -753,8 +776,20 @@ function TagsDropdownGroup<T extends string>({
     onChange: (value: T | null) => void
     isOpen: boolean
     setIsOpen: (isOpen: boolean) => void
+    requiredSection?: {
+        label: string
+        value: string
+        options: { label: string; value: string }[]
+        onChange: (value: string) => void
+    }
 }) {
-    const selectedLabel = value ? getOptionLabel(options, value) : 'Show All'
+    const selectedTagLabel = value ? getOptionLabel(options, value) : 'Show All'
+    const selectedRequiredLabel = requiredSection
+        ? getOptionLabel(requiredSection.options, requiredSection.value)
+        : null
+    const selectedLabel = selectedRequiredLabel
+        ? `${selectedTagLabel} · ${selectedRequiredLabel}`
+        : selectedTagLabel
 
     return (
         <motion.div layout className={styles.controlGroup}>
@@ -802,6 +837,79 @@ function TagsDropdownGroup<T extends string>({
                         role="listbox"
                         aria-label={label}
                     >
+                        {requiredSection && (
+                            <p className={styles.dropdownSectionLabel}>
+                                {requiredSection.label}
+                            </p>
+                        )}
+                        {requiredSection &&
+                            requiredSection.options.map((option) => {
+                                const isActive =
+                                    requiredSection.value === option.value
+
+                                return (
+                                    <button
+                                        key={`year-${option.value}`}
+                                        type="button"
+                                        role="option"
+                                        aria-selected={isActive}
+                                        className={
+                                            isActive
+                                                ? `${styles.dropdownOption} ${styles.dropdownOptionActive}`
+                                                : styles.dropdownOption
+                                        }
+                                        onClick={() => {
+                                            if (!isActive) {
+                                                requiredSection.onChange(
+                                                    option.value
+                                                )
+                                            }
+                                        }}
+                                    >
+                                        <span
+                                            className={
+                                                styles.dropdownOptionText
+                                            }
+                                        >
+                                            {option.label}
+                                        </span>
+                                        <span
+                                            className={
+                                                isActive
+                                                    ? `${styles.dropdownCheckmark} ${styles.dropdownCheckmarkVisible}`
+                                                    : styles.dropdownCheckmark
+                                            }
+                                            aria-hidden="true"
+                                        >
+                                            <svg
+                                                width="14"
+                                                height="14"
+                                                viewBox="0 0 20 20"
+                                                fill="none"
+                                            >
+                                                <path
+                                                    d="M4.5 10.5l3.5 3.5 7-7"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2.2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                />
+                                            </svg>
+                                        </span>
+                                    </button>
+                                )
+                            })}
+                        {requiredSection && (
+                            <div
+                                className={styles.dropdownDivider}
+                                aria-hidden="true"
+                            />
+                        )}
+                        {requiredSection && (
+                            <p className={styles.dropdownSectionLabel}>
+                                {label}
+                            </p>
+                        )}
                         {options.map((option) => {
                             const isActive = value === option.value
 
