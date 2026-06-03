@@ -156,22 +156,44 @@ export function isSameDay(a: Date, b: Date) {
     )
 }
 
+type RangeKind = 'preset' | 'all' | 'both' | 'from' | 'until'
+
+function getRangeKind(
+    committedPreset: Preset | null,
+    startDate: string,
+    endDate: string
+): RangeKind {
+    if (committedPreset) return 'preset'
+    if (startDate && endDate) return 'both'
+    if (startDate) return 'from'
+    if (endDate) return 'until'
+    return 'all'
+}
+
 export function getSelectedRangeLabel(
     committedPreset: Preset | null,
     startDate: string,
     endDate: string
 ) {
-    if (committedPreset) return committedPreset
-    if (!startDate && !endDate) return 'All Time'
-    if (startDate && endDate) {
-        if (isSameDay(new Date(startDate), new Date(endDate))) {
-            return formatRangeDate(startDate)
+    const kind = getRangeKind(committedPreset, startDate, endDate)
+    switch (kind) {
+        case 'preset':
+            return committedPreset!
+        case 'both':
+            return isSameDay(new Date(startDate), new Date(endDate))
+                ? formatRangeDate(startDate)
+                : `${formatRangeDate(startDate)} - ${formatRangeDate(endDate)}`
+        case 'from':
+            return `From ${formatRangeDate(startDate)}`
+        case 'until':
+            return `Until ${formatRangeDate(endDate)}`
+        case 'all':
+            return 'All Time'
+        default: {
+            const _exhaustive: never = kind
+            return _exhaustive
         }
-        return `${formatRangeDate(startDate)} - ${formatRangeDate(endDate)}`
     }
-    if (startDate) return `From ${formatRangeDate(startDate)}`
-    if (endDate) return `Until ${formatRangeDate(endDate)}`
-    return 'All Time'
 }
 
 export function getRaisedKickerLabel(
@@ -179,21 +201,23 @@ export function getRaisedKickerLabel(
     startDate: string,
     endDate: string
 ) {
-    if (committedPreset) return `Total Raised ${committedPreset}`
-
-    if (startDate && endDate) {
-        return `Total Raised ${formatRangeDate(startDate)} - ${formatRangeDate(endDate)}`
+    const kind = getRangeKind(committedPreset, startDate, endDate)
+    switch (kind) {
+        case 'preset':
+            return `Total Raised ${committedPreset!}`
+        case 'both':
+            return `Total Raised ${formatRangeDate(startDate)} - ${formatRangeDate(endDate)}`
+        case 'from':
+            return `Total Raised From ${formatRangeDate(startDate)}`
+        case 'until':
+            return `Total Raised Until ${formatRangeDate(endDate)}`
+        case 'all':
+            return 'Total Raised Custom Range'
+        default: {
+            const _exhaustive: never = kind
+            return _exhaustive
+        }
     }
-
-    if (startDate) {
-        return `Total Raised From ${formatRangeDate(startDate)}`
-    }
-
-    if (endDate) {
-        return `Total Raised Until ${formatRangeDate(endDate)}`
-    }
-
-    return 'Total Raised Custom Range'
 }
 
 export function getPercentage(part: number, total: number): number | null {
