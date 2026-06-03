@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './DropdownOverlay.module.css'
+import { areOverlayStylesEqual } from '@/util'
 import {
     forwardRef,
     useLayoutEffect,
@@ -116,25 +117,12 @@ function computeResponsiveOverlayStyle({
     }
 }
 
-function areOverlayStylesEqual(a: CSSProperties, b: CSSProperties): boolean {
-    const keys = new Set([...Object.keys(a), ...Object.keys(b)]) as Set<
-        keyof CSSProperties
-    >
-
-    for (const key of keys) {
-        if (a[key] !== b[key]) {
-            return false
-        }
-    }
-
-    return true
-}
-
 interface UseDropdownOverlayResponsiveStyleInput {
     overlayRef: RefObject<HTMLDivElement | null>
     narrowLayoutMode: DropdownOverlayNarrowLayoutMode
 }
 
+// This function figures out the container dimensions and sets the dropdown width and horizontal position to make sure it fits within the container and aligns it with dropdownbutton. It also updates width dynamically on window resize.
 function useDropdownOverlayResponsiveStyle({
     overlayRef,
     narrowLayoutMode,
