@@ -8,8 +8,8 @@ import {
     PositionBubble,
 } from './components/position'
 import { TeamNode, TeamNodeData } from './components/team'
-import { BuildGraphNodes } from './data/constructOrgGraph'
-import { Committees, orgchartData } from './data/orgchartGraphData'
+import { BuildGraphNodes, Committees } from './data/constructOrgGraph'
+import { orgchartData } from './data/orgchartGraphData'
 import dagre from '@dagrejs/dagre'
 import {
     type Node,

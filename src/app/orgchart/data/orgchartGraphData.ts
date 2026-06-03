@@ -415,7 +415,7 @@ export const orgchartData: OrgchartObjectData[] = [
         department: 'Organizing',
         team: 'Western Coalition',
         committees: [Committees[3]],
-        coalitions: 'Western',
+        coalition: 'Western',
     },
     {
         id: 51,
@@ -425,7 +425,7 @@ export const orgchartData: OrgchartObjectData[] = [
         department: 'Organizing',
         team: 'Western Coalition',
         committees: [Committees[3]],
-        coalitions: 'Western',
+        coalition: 'Western',
     },
     {
         id: 52,
@@ -435,7 +435,7 @@ export const orgchartData: OrgchartObjectData[] = [
         department: 'Organizing',
         team: 'Western Coalition',
         committees: [Committees[3]],
-        coalitions: 'Western',
+        coalition: 'Western',
     },
     {
         id: 53,
@@ -445,7 +445,7 @@ export const orgchartData: OrgchartObjectData[] = [
         department: 'Organizing',
         team: 'Midwest Coalition',
         committees: [Committees[3]],
-        coalitions: 'Midwest',
+        coalition: 'Midwest',
     },
     {
         id: 54,
@@ -455,7 +455,7 @@ export const orgchartData: OrgchartObjectData[] = [
         department: 'Organizing',
         team: 'Midwest Coalition',
         committees: [Committees[3]],
-        coalitions: 'Midwest',
+        coalition: 'Midwest',
     },
     {
         id: 55,
@@ -465,7 +465,7 @@ export const orgchartData: OrgchartObjectData[] = [
         department: 'Organizing',
         team: 'Midwest Coalition',
         committees: [Committees[3]],
-        coalitions: 'Midwest',
+        coalition: 'Midwest',
     },
     {
         id: 56,
@@ -475,7 +475,7 @@ export const orgchartData: OrgchartObjectData[] = [
         department: 'Organizing',
         team: 'Northeastern Coalition',
         committees: [Committees[3]],
-        coalitions: 'Northeastern',
+        coalition: 'Northeastern',
     },
     {
         id: 57,
@@ -485,7 +485,7 @@ export const orgchartData: OrgchartObjectData[] = [
         department: 'Organizing',
         team: 'Northeastern Coalition',
         committees: [Committees[3]],
-        coalitions: 'Northeastern',
+        coalition: 'Northeastern',
     },
     {
         id: 58,
@@ -495,7 +495,7 @@ export const orgchartData: OrgchartObjectData[] = [
         department: 'Organizing',
         team: 'Northeastern Coalition',
         committees: [Committees[3]],
-        coalitions: 'Northeastern',
+        coalition: 'Northeastern',
     },
     {
         id: 59,
@@ -505,7 +505,7 @@ export const orgchartData: OrgchartObjectData[] = [
         department: 'Organizing',
         team: 'Southern Coalition',
         committees: [Committees[3]],
-        coalitions: 'Southern',
+        coalition: 'Southern',
     },
     {
         id: 60,
@@ -515,7 +515,7 @@ export const orgchartData: OrgchartObjectData[] = [
         department: 'Organizing',
         team: 'Southern Coalition',
         committees: [Committees[3]],
-        coalitions: 'Southern',
+        coalition: 'Southern',
     },
     {
         id: 61,
@@ -525,7 +525,7 @@ export const orgchartData: OrgchartObjectData[] = [
         department: 'Organizing',
         team: 'Southern Coalition',
         committees: [Committees[3]],
-        coalitions: 'Southern',
+        coalition: 'Southern',
     },
     {
         id: 62,

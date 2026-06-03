@@ -19,14 +19,7 @@ export const departments = [
     { depName: 'Infrastructure', teams: ['Documentation', 'Research'] },
     {
         depName: 'Organizing',
-        teams: [
-            'Recruitment',
-            'Mobilization',
-            'Western Coalition',
-            'Midwest Coalition',
-            'Northeastern Coalition',
-            'Southern Coalition',
-        ],
+        teams: ['Recruitment', 'State Coalitions', 'Mobilization'],
         coalitions: ['Western', 'Midwest', 'Northeastern', 'Southern'],
     },
     { depName: 'Technology', teams: ['Discord', 'Database', 'Website'] },
@@ -192,16 +185,16 @@ export function BuildGraphNodes(inputNodes: OrgchartObjectData[]) {
         graphBuilder.addEdge(obj.DEP_EXEC_DIR_ID, graphBuilder.depId)
 
         dep?.teams.forEach((team) => {
-            const teamLeads = inputNodes.filter((t) => t.team === team)
-
-            graphBuilder.addTeamNode({
-                name: team,
-                desc: 'Description',
-                members: team === 'Moderation' ? teamLeads : undefined,
-                leads: team === 'Moderation' ? undefined : teamLeads,
-            })
-
-            graphBuilder.addEdge(graphBuilder.depId, graphBuilder.teamId)
+            if (team !== 'State Coalitions') {
+                addStandardTeam(graphBuilder, inputNodes, team)
+            } else {
+                addCoalitionTeam(
+                    graphBuilder,
+                    inputNodes,
+                    team,
+                    dep?.coalitions
+                )
+            }
         })
     })
 
@@ -209,4 +202,44 @@ export function BuildGraphNodes(inputNodes: OrgchartObjectData[]) {
         initialNodes: graphBuilder.nodes,
         initialEdges: graphBuilder.edges,
     }
+}
+
+function addStandardTeam(graphBuilder, inputNodes, team) {
+    const teamLeads = inputNodes.filter((t) => t.team === team)
+
+    graphBuilder.addTeamNode({
+        name: team,
+        desc: 'Description',
+        members: team === 'Moderation' ? teamLeads : undefined,
+        leads: team === 'Moderation' ? undefined : teamLeads,
+    })
+
+    graphBuilder.addEdge(graphBuilder.depId, graphBuilder.teamId)
+}
+
+function addCoalitionTeam(graphBuilder, inputNodes, team, coalitions) {
+    graphBuilder.addTeamNode({
+        name: team,
+        desc: 'Description',
+    })
+
+    graphBuilder.addEdge(graphBuilder.depId, graphBuilder.teamId)
+
+    const coalitionsTeam = graphBuilder.teamId
+
+    coalitions.forEach((coalition) => {
+        const coalitionLeads = inputNodes.filter(
+            (t) => t.coalition === coalition
+        )
+
+        console.log(inputNodes)
+
+        graphBuilder.addTeamNode({
+            name: coalition,
+            desc: 'Description',
+            members: undefined,
+            leads: coalitionLeads,
+        })
+        graphBuilder.addEdge(coalitionsTeam, graphBuilder.teamId)
+    })
 }
