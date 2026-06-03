@@ -1,11 +1,15 @@
 'use client'
 
 import {
+    CHART_GRANULARITY_LABELS,
     PRESETS,
     formatCount,
+    formatCountAxis,
     formatCurrency,
+    formatCurrencyAxis,
     formatDonationCountLabel,
     getResolvedPresetRange,
+    getXToDatePeriodName,
     inferPresetFromRange,
 } from './fundraising.helpers'
 import styles from './page.module.css'
@@ -16,7 +20,10 @@ import {
     DropdownOverlay,
     DateRangePicker,
     ProgressBar,
+    ToggleGroup,
 } from '@/components/common'
+import { Chart } from '@/components/common/charts/DualAxisBarLineChart'
+import { type ChartGranularityMode } from '@/components/common/charts/timeBuckets'
 import { useFetch } from '@/util/hooks'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
@@ -75,11 +82,22 @@ export default function Page() {
         draftPreset,
         draftStartDate,
         draftEndDate,
+        smoothLine,
+        showAreaFill,
+        showDonationsLine,
+        chartBarDisplayMode,
+        zoomEnabled,
+        showFullXToDateSpan,
+        granularityMode,
         selectedRangeLabel,
         raisedKickerLabel,
         recurringPct,
         oneTimePct,
+        validGranularityModes,
+        chartPoints,
+        chartViewOverrideActive,
         allTimeFirstIso,
+        isXToDateSpanOptionRelevant,
         canApplyCustomRange,
         isAwaitingDraftEndDate,
         statsQuery,
@@ -90,6 +108,15 @@ export default function Page() {
         setDraftPreset,
         setDraftStartDate,
         setDraftEndDate,
+        setSmoothLine,
+        setShowAreaFill,
+        setShowDonationsLine,
+        setChartBarDisplayMode,
+        setZoomEnabled,
+        setShowFullXToDateSpan,
+        setGranularityMode,
+        applyChartViewOverrideRange,
+        resetChartViewToSelectedRange,
     } = useFundraisingDashboardController(onGet)
 
     useEffect(() => {
@@ -461,6 +488,372 @@ export default function Page() {
                             )}`}
                         />
                     </div>
+
+                    <Chart
+                        title="Fundraising Volume"
+                        hint="Date Range"
+                        points={chartPoints}
+                        smoothLine={smoothLine}
+                        showAreaFill={showAreaFill}
+                        showLine={showDonationsLine}
+                        barDisplayMode={chartBarDisplayMode}
+                        seriesLabels={{
+                            primaryBar: 'One-Time Amount',
+                            secondaryBar: 'Recurring Amount',
+                            line: 'Total Donations',
+                        }}
+                        valueFormatters={{
+                            primaryBar: (value) => formatCurrency(value),
+                            secondaryBar: (value) => formatCurrency(value),
+                            line: (value) => formatCount(value),
+                        }}
+                        axisFormatters={{
+                            left: formatCurrencyAxis,
+                            right: formatCountAxis,
+                        }}
+                        ariaLabel="Fundraising volume by period: one-time and recurring dollars with total donations"
+                        chartAriaLabel={`Fundraising volume across ${chartPoints.length} periods`}
+                        tableConfig={{
+                            caption: 'Fundraising volume per period',
+                            periodHeader: 'Period',
+                            primaryBarHeader: 'One-Time',
+                            secondaryBarHeader: 'Recurring',
+                            lineHeader: 'Donations',
+                        }}
+                        onRangeSelect={
+                            zoomEnabled
+                                ? ({
+                                      startIso,
+                                      endIso,
+                                  }: {
+                                      startIso: string
+                                      endIso: string
+                                  }) => {
+                                      const start = new Date(startIso)
+                                      const end = new Date(endIso)
+                                      const oneDayMs = 24 * 60 * 60 * 1000
+                                      const inclusiveRangeMs =
+                                          end.getTime() - start.getTime() + 1000
+
+                                      if (
+                                          Number.isNaN(start.getTime()) ||
+                                          Number.isNaN(end.getTime())
+                                      ) {
+                                          return
+                                      }
+
+                                      if (inclusiveRangeMs < oneDayMs) {
+                                          return
+                                      }
+
+                                      applyChartViewOverrideRange({
+                                          startIso,
+                                          endIso,
+                                      })
+                                  }
+                                : undefined
+                        }
+                        cornerTopRight={
+                            chartViewOverrideActive ? (
+                                <button
+                                    type="button"
+                                    className={styles.resetViewButton}
+                                    onClick={resetChartViewToSelectedRange}
+                                >
+                                    Reset
+                                </button>
+                            ) : null
+                        }
+                        headerRight={
+                            <div className={styles.chartOptionsControl}>
+                                <DropdownButton
+                                    type="button"
+                                    label="Chart Options"
+                                    buttonVariant="minimal"
+                                    menu={({ closeDropdown }) => (
+                                        <DropdownOverlay
+                                            className={styles.chartOptionsBox}
+                                            label="Chart Options"
+                                            onClose={() => {
+                                                closeDropdown()
+                                            }}
+                                            bodyClassName={
+                                                styles.chartOptionsBody
+                                            }
+                                            body={
+                                                <>
+                                                    <div
+                                                        className={
+                                                            styles.chartOptionRow
+                                                        }
+                                                    >
+                                                        <span
+                                                            className={
+                                                                styles.chartOptionLabel
+                                                            }
+                                                        >
+                                                            Time scale
+                                                        </span>
+                                                        <ToggleGroup<ChartGranularityMode>
+                                                            ariaLabel="Time scale"
+                                                            orientation="horizontal"
+                                                            value={
+                                                                granularityMode
+                                                            }
+                                                            options={(
+                                                                [
+                                                                    'auto',
+                                                                    'year',
+                                                                    'quarter',
+                                                                    'month',
+                                                                    'week',
+                                                                    'day',
+                                                                    'hour',
+                                                                ] as ChartGranularityMode[]
+                                                            )
+                                                                .filter(
+                                                                    (mode) =>
+                                                                        validGranularityModes.includes(
+                                                                            mode
+                                                                        )
+                                                                )
+                                                                .map(
+                                                                    (mode) => ({
+                                                                        value: mode,
+                                                                        label: CHART_GRANULARITY_LABELS[
+                                                                            mode
+                                                                        ],
+                                                                    })
+                                                                )}
+                                                            onChange={
+                                                                setGranularityMode
+                                                            }
+                                                        />
+                                                    </div>
+
+                                                    {isXToDateSpanOptionRelevant && (
+                                                        <div
+                                                            className={
+                                                                styles.chartOptionRow
+                                                            }
+                                                        >
+                                                            <span
+                                                                className={
+                                                                    styles.chartOptionLabel
+                                                                }
+                                                            >
+                                                                Show{' '}
+                                                                {getXToDatePeriodName(
+                                                                    committedPreset,
+                                                                    granularityMode
+                                                                )}{' '}
+                                                                To Date
+                                                            </span>
+                                                            <ToggleGroup<boolean>
+                                                                ariaLabel="X-to-date span"
+                                                                orientation="horizontal"
+                                                                value={
+                                                                    showFullXToDateSpan
+                                                                }
+                                                                options={[
+                                                                    {
+                                                                        value: true,
+                                                                        label: 'Hide',
+                                                                    },
+                                                                    {
+                                                                        value: false,
+                                                                        label: 'Show',
+                                                                    },
+                                                                ]}
+                                                                onChange={
+                                                                    setShowFullXToDateSpan
+                                                                }
+                                                            />
+                                                        </div>
+                                                    )}
+
+                                                    <div
+                                                        className={
+                                                            styles.chartOptionRow
+                                                        }
+                                                    >
+                                                        <span
+                                                            className={
+                                                                styles.chartOptionLabel
+                                                            }
+                                                        >
+                                                            Contributions line
+                                                        </span>
+                                                        <ToggleGroup<boolean>
+                                                            ariaLabel="Contributions line"
+                                                            orientation="horizontal"
+                                                            value={
+                                                                showDonationsLine
+                                                            }
+                                                            options={[
+                                                                {
+                                                                    value: true,
+                                                                    label: 'Show',
+                                                                },
+                                                                {
+                                                                    value: false,
+                                                                    label: 'Hide',
+                                                                },
+                                                            ]}
+                                                            onChange={
+                                                                setShowDonationsLine
+                                                            }
+                                                        />
+                                                    </div>
+
+                                                    {showDonationsLine && (
+                                                        <>
+                                                            <div
+                                                                className={
+                                                                    styles.chartOptionRow
+                                                                }
+                                                            >
+                                                                <span
+                                                                    className={
+                                                                        styles.chartOptionLabel
+                                                                    }
+                                                                >
+                                                                    Line style
+                                                                </span>
+                                                                <ToggleGroup<boolean>
+                                                                    ariaLabel="Line style"
+                                                                    orientation="horizontal"
+                                                                    value={
+                                                                        smoothLine
+                                                                    }
+                                                                    options={[
+                                                                        {
+                                                                            value: true,
+                                                                            label: 'Curved',
+                                                                        },
+                                                                        {
+                                                                            value: false,
+                                                                            label: 'Straight',
+                                                                        },
+                                                                    ]}
+                                                                    onChange={
+                                                                        setSmoothLine
+                                                                    }
+                                                                />
+                                                            </div>
+
+                                                            <div
+                                                                className={
+                                                                    styles.chartOptionRow
+                                                                }
+                                                            >
+                                                                <span
+                                                                    className={
+                                                                        styles.chartOptionLabel
+                                                                    }
+                                                                >
+                                                                    Area fill
+                                                                </span>
+                                                                <ToggleGroup<boolean>
+                                                                    ariaLabel="Area fill"
+                                                                    orientation="horizontal"
+                                                                    value={
+                                                                        showAreaFill
+                                                                    }
+                                                                    options={[
+                                                                        {
+                                                                            value: true,
+                                                                            label: 'Show',
+                                                                        },
+                                                                        {
+                                                                            value: false,
+                                                                            label: 'Hide',
+                                                                        },
+                                                                    ]}
+                                                                    onChange={
+                                                                        setShowAreaFill
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        </>
+                                                    )}
+
+                                                    <div
+                                                        className={
+                                                            styles.chartOptionRow
+                                                        }
+                                                    >
+                                                        <span
+                                                            className={
+                                                                styles.chartOptionLabel
+                                                            }
+                                                        >
+                                                            Drag To Zoom
+                                                        </span>
+                                                        <ToggleGroup<boolean>
+                                                            ariaLabel="Chart zoom"
+                                                            orientation="horizontal"
+                                                            value={zoomEnabled}
+                                                            options={[
+                                                                {
+                                                                    value: true,
+                                                                    label: 'Enabled',
+                                                                },
+                                                                {
+                                                                    value: false,
+                                                                    label: 'Disabled',
+                                                                },
+                                                            ]}
+                                                            onChange={
+                                                                setZoomEnabled
+                                                            }
+                                                        />
+                                                    </div>
+
+                                                    <div
+                                                        className={
+                                                            styles.chartOptionRow
+                                                        }
+                                                    >
+                                                        <span
+                                                            className={
+                                                                styles.chartOptionLabel
+                                                            }
+                                                        >
+                                                            Bar layout
+                                                        </span>
+                                                        <ToggleGroup<
+                                                            | 'grouped'
+                                                            | 'stacked'
+                                                        >
+                                                            ariaLabel="Bar layout"
+                                                            orientation="horizontal"
+                                                            value={
+                                                                chartBarDisplayMode
+                                                            }
+                                                            options={[
+                                                                {
+                                                                    value: 'stacked',
+                                                                    label: 'Stacked',
+                                                                },
+                                                                {
+                                                                    value: 'grouped',
+                                                                    label: 'Seperate',
+                                                                },
+                                                            ]}
+                                                            onChange={
+                                                                setChartBarDisplayMode
+                                                            }
+                                                        />
+                                                    </div>
+                                                </>
+                                            }
+                                        />
+                                    )}
+                                />
+                            </div>
+                        }
+                    />
 
                     <ProgressBar
                         label="One-Time Share"
