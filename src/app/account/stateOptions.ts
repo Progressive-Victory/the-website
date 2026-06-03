@@ -49,6 +49,7 @@ export const stateOptions = [
     { value: 'WA', label: 'Washington' },
     { value: 'WV', label: 'West Virginia' },
     { value: 'WI', label: 'Wisconsin' },
+    { value: 'WY', label: 'Wyoming' },
     { value: 'AS', label: 'American Samoa' },
     { value: 'GU', label: 'Guam' },
     { value: 'MP', label: 'Northern Mariana Islands' },
