@@ -8,12 +8,15 @@ import {
     PhoneVerifyStage,
     UnderageStage,
 } from '.'
+import { BannedStage } from './BannedStage'
+import { NotCitizenStage } from './NotCitizenStage'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import { OnboardingStage } from '@/contracts/data'
 import {
     UserOnboardingCollectInfoRequest,
     UserOnboardingVerifyRequest,
+    zUserOnboardingCollectInfoRequest,
 } from '@/contracts/requests'
 import {
     DiscordUserIsInServerResponse,
@@ -28,6 +31,7 @@ import {
     useQueryClient,
 } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import z from 'zod'
 
 export default function VolunteerPage() {
     const queryClient = useQueryClient()
@@ -60,7 +64,12 @@ export default function VolunteerPage() {
             if (!user.data) return
             await onPut(
                 `/users/${user.data?.id}/onboardingStages/collectInfo`,
-                obj
+                z.parse(zUserOnboardingCollectInfoRequest, {
+                    ...obj,
+                    metaData: {
+                        dataSource: 'Intake Form',
+                    },
+                } satisfies UserOnboardingCollectInfoRequest)
             )
         },
         onSettled: () => {
@@ -138,6 +147,7 @@ export default function VolunteerPage() {
             zipCode: +form.zipCode,
             acceptedAlerts: form.getAlerts,
             birthdate: new Date(form.dateOfBirth),
+            usCitizen: form.usCitizen,
         })
     }
 
@@ -223,6 +233,14 @@ export default function VolunteerPage() {
                                 isPending={ageUpMutation.isPending}
                                 onAgeUp={ageUpMutation.mutate}
                             />
+                        )}
+
+                        {currentStage === OnboardingStage.NOT_CITIZEN && (
+                            <NotCitizenStage />
+                        )}
+
+                        {currentStage === OnboardingStage.BANNED && (
+                            <BannedStage />
                         )}
 
                         {currentStage === OnboardingStage.AWAITING_VERIFY && (

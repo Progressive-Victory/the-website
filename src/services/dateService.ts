@@ -13,6 +13,11 @@ class DateService {
             : null
     }
 
+    fromISODateString(date: Date | string | null | undefined) {
+        const isoString = this.toISODateString(date)
+        return isoString ? new Date(isoString) : null
+    }
+
     formatDate(date: Date) {
         date = typeof date !== typeof Date ? new Date(date) : date
         return `${date.getUTCMonth()}/${date.getUTCDate()}/${date.getFullYear()} ${date.getUTCHours() === 0 ? 12 : date.getUTCHours() % 12}:${date.getUTCMinutes()} ${date.getUTCHours() > 12 ? 'PM' : 'AM'}`

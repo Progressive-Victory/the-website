@@ -3,6 +3,7 @@
 import {
     CheckboxField,
     DateField,
+    DropDownField,
     Form,
     FormGroup,
     FormState,
@@ -13,6 +14,75 @@ import {
 import { Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
 
+const membershipCardShipmentOptions = [
+    { value: 0, label: 'Not Eligible' },
+    { value: 1, label: 'Not Started' },
+    { value: 2, label: 'Printed' },
+    { value: 3, label: 'In Transit' },
+    { value: 4, label: 'Recieved' },
+    { value: 5, label: 'Returned' },
+]
+
+const membershipMerchShipmentOptions = [
+    { value: 0, label: 'Not Eligible' },
+    { value: 1, label: 'Not Started' },
+    { value: 2, label: 'Printed' },
+    { value: 3, label: 'In Transit' },
+    { value: 4, label: 'Recieved' },
+    { value: 5, label: 'Returned' },
+]
+
+const shirtSizeOptions = [
+    { value: 'XS', label: 'Extra Small' },
+    { value: 'S', label: 'Small' },
+    { value: 'M', label: 'Medium' },
+    { value: 'L', label: 'Large' },
+    { value: 'XL', label: 'Extra Large' },
+    { value: '2XL', label: 'Double XL' },
+]
+
+const membershipFulfillmentStatusOptions = [
+    { value: 0, label: 'Not Eligible' },
+    { value: 1, label: 'Not Fulfilled' },
+    { value: 2, label: 'Fulfilled' },
+]
+
+const calcFutureDate = (
+    initialTime: Date,
+    period: 'weekly' | 'monthly',
+    duration: number
+) => {
+    switch (period) {
+        case 'weekly':
+            return new Date(
+                initialTime.getTime() +
+                    new Date(duration * 7 * 24 * 60 * 60 * 1000).getTime()
+            )
+        case 'monthly':
+            initialTime.setMonth(initialTime.getMonth())
+            return initialTime
+    }
+}
+
+const getHasActiveRecurringValue = (form: User): string => {
+    const donors = form.donors ?? []
+    if (donors.length === 0) return 'No Donor Info'
+
+    const hasActiveRecurring = donors.some((donor) =>
+        (donor.contributions ?? []).some(
+            (contribution) =>
+                contribution.isRecurring &&
+                ((contribution.recurringDuration ?? 1) < 0 ||
+                    calcFutureDate(
+                        contribution.createdAt,
+                        contribution.recurringPeriod as 'weekly' | 'monthly',
+                        contribution.recurringDuration ?? 1
+                    ) > new Date())
+        )
+    )
+
+    return hasActiveRecurring ? 'Yes' : 'No'
+}
 export interface MemberViewProps {
     selectedId: number
     user: User
@@ -84,11 +154,7 @@ export function MemberView({
                 <DateField<User>
                     label="Date of Birth"
                     getter={(form) =>
-                        dateService.isValid(form.birthdate)
-                            ? new Date(
-                                  dateService.toISODateString(form.birthdate)!
-                              )
-                            : null
+                        dateService.fromISODateString(form.birthdate)
                     }
                     field="birthdate"
                     format={{
@@ -191,6 +257,43 @@ export function MemberView({
                         },
                     })}
                     validator={(field) => field?.length == 5}
+                />
+            </FormGroup>
+
+            <FormGroup title="Membership Fulfillment (Mock)">
+                <DropDownField<User>
+                    label="Membership Card Shipped"
+                    field="membershipCardStatus"
+                    options={membershipCardShipmentOptions}
+                />
+                <DropDownField<User>
+                    label="Membership Merch Shipped"
+                    field="membershipMerchStatus"
+                    options={membershipMerchShipmentOptions}
+                />
+                <DropDownField<User>
+                    label="Shirt Size"
+                    field="shirtSize"
+                    options={shirtSizeOptions}
+                />
+                <CheckboxField<User>
+                    label="Dues Paying Member"
+                    field="duesPayingMember"
+                />
+                <DropDownField<User>
+                    label="Membership Fulfillment Status"
+                    field="membershipFulfillmentOptions"
+                    options={membershipFulfillmentStatusOptions}
+                />
+                <CheckboxField label="Name Confirmed" field="nameConfirmed" />
+                <CheckboxField
+                    label="Address Confirmed"
+                    field="addressConfirmed"
+                />
+                <TextField<User>
+                    label="Has Active Recurring"
+                    readonly
+                    getter={getHasActiveRecurringValue}
                 />
             </FormGroup>
 
