@@ -1,6 +1,9 @@
-import { zUser } from '@/contracts/data'
-import { MockUser, MockData, MockDataFactory } from '@/test/mockData'
-import usersData from '@/test/users.json'
+import {
+    MockUser,
+    MockData,
+    MockDataFactory,
+    createMockStaticData,
+} from '@/test/mockData'
 
 /**
  * Service for managing mock data across tests
@@ -85,9 +88,7 @@ export class MockDataService {
     }
 
     loadFixtures(): MockData {
-        return {
-            users: usersData.users.map((user) => zUser.parse(user)),
-        }
+        return createMockStaticData()
     }
 
     // Reset to original fixture data
