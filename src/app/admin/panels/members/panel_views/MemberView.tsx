@@ -13,6 +13,7 @@ import {
 } from '@/components/common/forms'
 import { Role, UpdateHistory, User } from '@/contracts/data'
 import { dateService } from '@/services'
+import { useState } from 'react'
 
 const membershipCardShipmentOptions = [
     { value: 0, label: 'Not Eligible' },
@@ -91,6 +92,7 @@ export interface MemberViewProps {
     setFormState?: (next: FormState<User> | null) => void
 
     saving: boolean
+    editing: boolean | undefined
     isInvalid: boolean
     roles: Role[]
     roleOptions: { value: number; label: string }[]
@@ -98,13 +100,13 @@ export interface MemberViewProps {
     makeFormTitle: (user: User) => string
     handleSave?: (user: User) => void
 }
-
 export function MemberView({
     selectedId,
     user,
     selectedHistory,
     setFormState,
     saving,
+    editing,
     isInvalid,
     roles,
     roleOptions,
@@ -144,13 +146,21 @@ export function MemberView({
                     required
                 />
                 <PhoneField label="Phone Number" field="phone" required />
-                <TextField
-                    label="Preferred Name"
-                    field="preferredName"
-                    deprecated
-                />
-                <TextField label="First Name" field="firstName" />
-                <TextField label="Last Name" field="lastName" />
+                {editing ? (
+                        <TextField label="First Name" field="firstName" />
+                    ) : (
+                        <TextField<User>
+                            label="Full Name"
+                            getter={(user) =>
+                                `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() ||
+                                null
+                            }
+                            readonly
+                        />
+                    )}
+                    {editing && (
+                        <TextField label="Last Name" field="lastName" />
+                    )}
                 <DateField<User>
                     label="Date of Birth"
                     getter={(form) =>
