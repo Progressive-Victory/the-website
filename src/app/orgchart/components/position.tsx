@@ -67,15 +67,15 @@ export function PositionBubble({
             case 'Junior':
                 return (
                     <div
-                        className={styles.banner}
-                        style={{ backgroundColor: '#60a5fa' }}
+                        className={styles.juniorBanner}
+                        title="Junior Leadership"
                     />
                 )
             case 'Senior':
                 return (
                     <div
-                        className={styles.banner}
-                        style={{ backgroundColor: '#dc2626' }}
+                        className={styles.seniorBanner}
+                        title="Senior Leadership"
                     />
                 )
             default:
@@ -159,6 +159,7 @@ export function PositionBubble({
                                 alt={committee.alt}
                                 width={mini ? 17 : 20}
                                 height={mini ? 17 : 20}
+                                title={committee.name}
                             />
                         </div>
                     )

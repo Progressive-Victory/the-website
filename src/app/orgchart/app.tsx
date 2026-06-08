@@ -19,13 +19,12 @@ import {
     Controls,
     useNodesState,
     useEdgesState,
-    XYPosition,
     Panel,
 } from '@xyflow/react'
 /* These work; they are just flagged as errors for some reason. */
 import '@xyflow/react/dist/base.css'
 import '@xyflow/react/dist/style.css'
-import React, { useState, useCallback } from 'react'
+import React, { useState } from 'react'
 
 /* A number of committees can be defined up to the number of icons. */
 
@@ -33,7 +32,6 @@ const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
 
 const nWidth = 360
 const nHeight = 300
-const defaultPos: XYPosition = { x: 0, y: 0 }
 
 const GetElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
     const isHorizontal = direction === 'LR'
@@ -81,7 +79,7 @@ const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
 export default function OrgChartApp() {
     const [legendEnabled, toggleLegend] = useState(false)
 
-    function LegendPanel() {
+    const LegendPanel = () => {
         return (
             <Panel position="top-left">
                 {!legendEnabled ? null : (
@@ -186,46 +184,25 @@ export default function OrgChartApp() {
         )
     }
 
+    const RefreshButton = () => {
+        return (
+            <Panel position="bottom-right">
+                <button
+                    className={styles.legendButton}
+                    onClick={() => {
+                        setNodes(layoutedNodes)
+                        setEdges(layoutedEdges)
+                    }}
+                >
+                    {'REFRESH'}
+                </button>
+            </Panel>
+        )
+    }
+
     const [currentDetails, setCurrentDetails] = useState(<DetailPanel />)
     const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges)
-    /*const [horizontal, setHorizontal] = useState(false)*/
-
-    const updateLayout = useCallback(
-        (direction: string | undefined) => {
-            const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
-                nodes,
-                edges,
-                direction
-            )
-            setNodes([...layoutedNodes])
-            setEdges([...layoutedEdges])
-        },
-        [nodes, edges, setNodes, setEdges]
-    )
-
-    /*const viewportRef = useCallback(
-        (viewport: HTMLDivElement) => {
-            if (!viewport) return
-            const observer = new ResizeObserver(() => {
-                if (
-                    viewport.offsetWidth > viewport.offsetHeight &&
-                    !horizontal
-                ) {
-                    updateLayout('TB')
-                    setHorizontal(false)
-                } else if (
-                    viewport.offsetWidth <= viewport.offsetHeight &&
-                    horizontal
-                ) {
-                    updateLayout('TB')
-                    setHorizontal(false)
-                }
-            })
-            observer.observe(viewport)
-        },
-        [updateLayout, horizontal]
-    )*/
 
     const handleNodeClick = (event: React.MouseEvent, node: Node) => {
         if (node.type == 'dep') {
@@ -263,12 +240,13 @@ export default function OrgChartApp() {
                 nodesDraggable={false}
                 nodesConnectable={false}
                 autoPanOnNodeFocus={true}
-                maxZoom={1.2}
+                maxZoom={1.25}
                 minZoom={0.25}
             >
                 <LegendPanel />
                 {currentDetails}
                 <Controls />
+                <RefreshButton />
             </ReactFlow>
         </div>
     )
