@@ -268,7 +268,6 @@ export function MemberView({
                     label="Shirt Size"
                     field="shirtSize"
                     getter={(user) => user.shirtSize ?? ''}
-                    //setter={(form, field) => ({ ...form, shirtSize: field || null })}
                     setter={(form, field) => ({
                         ...form,
                         shirtSize: field ? (field as ShirtSize) : null,
