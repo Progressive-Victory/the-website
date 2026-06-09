@@ -150,8 +150,11 @@ export function MemberView({
                     field="preferredName"
                     deprecated
                 />
-                {editing ? (
-                    <TextField label="First Name" field="firstName" />
+                {editing ? ( 
+                    <FormGroup>
+                        <TextField label="First Name" field="firstName" />
+                        <TextField label="Last Name" field="lastName" />
+                    </FormGroup>
                 ) : (
                     <TextField<User>
                         label="Full Name"
@@ -162,7 +165,6 @@ export function MemberView({
                         readonly
                     />
                 )}
-                {editing && <TextField label="Last Name" field="lastName" />}
                 <DateField<User>
                     label="Date of Birth"
                     getter={(form) =>
