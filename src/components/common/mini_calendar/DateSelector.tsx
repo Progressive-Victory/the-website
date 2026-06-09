@@ -30,7 +30,7 @@ function dateInputToEndISO(value: string): string {
     return new Date(y, mo - 1, d, 23, 59, 59).toISOString()
 }
 
-export default function DateSelector({
+export function DateSelector({
     startDate,
     endDate,
     onStartDateChange,
