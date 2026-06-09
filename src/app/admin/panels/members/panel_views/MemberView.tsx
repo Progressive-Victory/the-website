@@ -150,7 +150,7 @@ export function MemberView({
                     field="preferredName"
                     deprecated
                 />
-                {editing ? ( 
+                {editing ? (
                     <FormGroup>
                         <TextField label="First Name" field="firstName" />
                         <TextField label="Last Name" field="lastName" />
