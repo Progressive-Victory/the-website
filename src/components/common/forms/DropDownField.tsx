@@ -44,7 +44,10 @@ export function DropDownField<T>(
                     className={formFieldStyles.textField}
                 >
                     {props.options.map((option) => (
-                        <option key={option.value} value={option.value ?? undefined}>
+                        <option
+                            key={option.value}
+                            value={option.value ?? undefined}
+                        >
                             {option.label}
                         </option>
                     ))}

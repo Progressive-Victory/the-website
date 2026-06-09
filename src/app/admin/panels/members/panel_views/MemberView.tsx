@@ -1,5 +1,6 @@
 'use client'
 
+import { shirtSizeOptions } from '@/components/Map/constants'
 import {
     CheckboxField,
     DateField,
@@ -12,8 +13,8 @@ import {
     TextField,
 } from '@/components/common/forms'
 import { Role, UpdateHistory, User } from '@/contracts/data'
+import { ShirtSize } from '@/contracts/data'
 import { dateService } from '@/services'
-import { shirtSizeOptions } from '@/components/Map/constants'
 
 const membershipCardShipmentOptions = [
     { value: 0, label: 'Not Eligible' },
@@ -266,6 +267,12 @@ export function MemberView({
                 <DropDownField<User>
                     label="Shirt Size"
                     field="shirtSize"
+                    getter={(user) => user.shirtSize ?? ''}
+                    //setter={(form, field) => ({ ...form, shirtSize: field || null })}
+                    setter={(form, field) => ({
+                        ...form,
+                        shirtSize: field ? (field as ShirtSize) : null,
+                    })}
                     options={shirtSizeOptions}
                 />
                 <CheckboxField<User>

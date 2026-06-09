@@ -1,4 +1,5 @@
 import styles from './account.module.css'
+import { shirtSizeOptions } from '@/components/Map/constants'
 import {
     Form,
     DateField,
@@ -7,10 +8,10 @@ import {
     PhoneField,
     TextField,
 } from '@/components/common/forms'
+import { ShirtSize } from '@/contracts/data'
 import { User } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useState } from 'react'
-import { shirtSizeOptions } from '@/components/Map/constants'
 
 interface AccountInfoFormProps {
     user: User
@@ -90,11 +91,11 @@ export const AccountInfoForm = ({
                     <DropDownField<User>
                         label="Shirt Size"
                         field="shirtSize"
-
-                        getter={(user) =>
-                            user.shirtSize ?? ""
-                        }
-                        
+                        getter={(user) => user.shirtSize ?? ''}
+                        setter={(form, field) => ({
+                            ...form,
+                            shirtSize: field ? (field as ShirtSize) : null,
+                        })}
                         options={shirtSizeOptions}
                     />
                     <TextField<User>
