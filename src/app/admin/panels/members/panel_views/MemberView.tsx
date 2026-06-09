@@ -91,7 +91,7 @@ export interface MemberViewProps {
     setFormState?: (next: FormState<User> | null) => void
 
     saving: boolean
-    editing: boolean | undefined
+    editing: boolean
     isInvalid: boolean
     roles: Role[]
     roleOptions: { value: number; label: string }[]
