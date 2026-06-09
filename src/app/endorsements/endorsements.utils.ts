@@ -28,12 +28,14 @@ export function getRelevantElectionDate(
     }
 
     const startOfToday = getStartOfToday()
+    const primaryHasPassed =
+        !!primaryElection && primaryElection.getTime() < startOfToday
+    const generalIsUpcoming =
+        !!generalElection && generalElection.getTime() >= startOfToday
+    const advancedPastPrimary =
+        electionStatus === 'Won Primary' || electionStatus === 'Elected'
 
-    if (
-        primaryElection &&
-        generalElection &&
-        primaryElection.getTime() < startOfToday
-    ) {
+    if (primaryHasPassed && generalIsUpcoming && advancedPastPrimary) {
         return generalElection
     }
 
