@@ -222,6 +222,7 @@ export default function VolunteerPage() {
                                         user.data?.acceptedAlerts ?? false,
                                     usCitizen: false,
                                     privacyPolicy: false,
+                                    oneTimePasscode: false,
                                 }}
                                 isPending={collectInfoMutation.isPending}
                                 onSubmit={handleCollectInfoSuccess}
