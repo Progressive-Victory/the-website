@@ -1,6 +1,6 @@
-import { useFetch } from './useFetch'
 import { SearchRequest } from '@/contracts/requests'
 import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
+import { useFetch } from '@/util/hooks/useFetch'
 import {
     keepPreviousData,
     skipToken,

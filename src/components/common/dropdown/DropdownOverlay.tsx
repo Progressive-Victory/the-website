@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './DropdownOverlay.module.css'
-import { areOverlayStylesEqual } from '@/util'
+import { areOverlayStylesEqual } from '@/util/'
 import {
     forwardRef,
     useLayoutEffect,

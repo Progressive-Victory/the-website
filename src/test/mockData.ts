@@ -1,0 +1,111 @@
+import { OnboardingStage, ShirtSize, User } from '@/contracts/data'
+
+export interface MockUser extends User {
+    // Add any test-specific fields here
+    testNotes?: string
+}
+
+export interface MockData {
+    users: MockUser[]
+    // Add other entities as needed
+    // discordUsers: MockDiscordUser[]
+    // settings: MockSettings[]
+}
+
+// Factory functions for generating mock data
+export class MockDataFactory {
+    static createUser(
+        baseUser: MockUser,
+        overrides: Partial<MockUser> = {}
+    ): MockUser {
+        return {
+            ...baseUser,
+            ...overrides,
+        }
+    }
+}
+
+export function createMockStaticData(): MockData {
+    return {
+        users: [
+            {
+                id: 1,
+                email: 'john.doe@example.com',
+                phone: '+1234567890',
+                preferredName: 'Johnny',
+                firstName: 'John',
+                lastName: 'Doe',
+                birthdate: new Date('1990-01-01T00:00:00.000Z'),
+                address: {
+                    addressLine1: '123 Main St',
+                    addressLine2: null,
+                    city: 'Anytown',
+                    county: 'Any County',
+                    state: 'CA',
+                    zip: '12345',
+                },
+                acceptedAlerts: true,
+                verified: true,
+                onboardingStage: OnboardingStage.VERIFIED,
+                lastSmsCode: null,
+                lastSmsCodeSendTimeUtc: null,
+                status: 1,
+                createdAtUtc: new Date('2024-01-01T00:00:00.000Z'),
+                joinedAtUtc: new Date('2024-01-15T00:00:00.000Z'),
+                completedIntakeUtc: new Date('2024-01-10T00:00:00.000Z'),
+                membershipCardStatus: 2,
+                membershipMerchStatus: 1,
+                shirtSize: ShirtSize.Medium,
+                duesPayingMember: true,
+                membershipFulfillmentStatus: 2,
+                nameConfirmed: true,
+                addressConfirmed: true,
+                location: null,
+                aliases: ['JD', 'Johnny D'],
+                roles: [],
+                discordUsers: [],
+                donors: [],
+                testNotes: 'Verified user with membership card',
+            },
+            {
+                id: 2,
+                email: 'jane.smith@example.com',
+                phone: '+1987654321',
+                preferredName: null,
+                firstName: 'Jane',
+                lastName: 'Smith',
+                birthdate: new Date('1985-05-15T00:00:00.000Z'),
+                address: {
+                    addressLine1: '456 Oak Ave',
+                    addressLine2: 'Apt 2B',
+                    city: 'Somewhere',
+                    county: 'Some County',
+                    state: 'NY',
+                    zip: '67890',
+                },
+                acceptedAlerts: false,
+                verified: false,
+                onboardingStage: OnboardingStage.NOT_STARTED,
+                lastSmsCode: null,
+                lastSmsCodeSendTimeUtc: null,
+                status: 1,
+                createdAtUtc: new Date('2024-02-01T00:00:00.000Z'),
+                joinedAtUtc: null,
+                completedIntakeUtc: null,
+                membershipCardStatus: 0,
+                membershipMerchStatus: 0,
+                shirtSize: null,
+                duesPayingMember: false,
+                membershipFulfillmentStatus: null,
+                nameConfirmed: false,
+                addressConfirmed: false,
+                location: null,
+                aliases: [],
+                roles: [],
+                discordUsers: [],
+                donors: [],
+                testNotes: 'New user, not started onboarding',
+            },
+        ],
+    }
+}

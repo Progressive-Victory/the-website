@@ -15,3 +15,7 @@ export default function QueryClientWrapper({
         </QueryClientProvider>
     )
 }
+
+export function clearQueryClient() {
+    queryClient.clear()
+}
