@@ -91,6 +91,7 @@ export function CollectInfoStage({
         dateOfBirthIsValid &&
         zipCodeIsValid &&
         parsedPhone.isValid &&
+        form.usCitizen &&
         form.privacyPolicy &&
         form.oneTimePasscode
 
