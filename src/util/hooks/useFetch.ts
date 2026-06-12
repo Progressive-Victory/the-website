@@ -43,7 +43,7 @@ export function useFetch() {
             signal: options?.signal,
         }
 
-        if (body != null && method != 'GET') {
+        if (body != null) {
             req.body = JSON.stringify(body)
             req.headers ??= {}
             req.headers['Content-Type'] = 'application/json'
