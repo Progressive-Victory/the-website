@@ -1,0 +1,302 @@
+.item {
+    position: relative;
+    cursor: pointer;
+    border-radius: 0.85rem;
+    --group-scaffold-offset: 0.8rem;
+}
+
+.cardItem {
+    border-radius: 1rem;
+}
+
+.itemHeader {
+    display: block;
+}
+
+.itemHeader > .link:hover {
+    background: rgba(15, 23, 42, 0.05);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+.itemActive > .itemHeader > .link {
+    color: rgba(2, 132, 199, 1);
+    background: rgba(14, 165, 233, 0.14);
+}
+
+.itemActive > .itemHeader > .link:active {
+    transform: scale(0.99);
+}
+
+.itemInactive {
+    font-weight: 500;
+}
+
+.link {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.65rem;
+    color: rgba(15, 23, 42, 0.78);
+    text-decoration: none;
+    border-radius: 0.85rem;
+    transition:
+        background-color 140ms ease,
+        transform 140ms ease,
+        color 140ms ease,
+        box-shadow 140ms ease;
+}
+
+.cardLink {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.74);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 22px 55px rgba(15, 23, 42, 0.12);
+    transition:
+        transform 160ms ease,
+        box-shadow 160ms ease,
+        background-color 160ms ease;
+}
+
+.cardLink:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.78) inset,
+        0 26px 70px rgba(15, 23, 42, 0.16);
+}
+
+.cardLink:active {
+    transform: translateY(0) scale(0.995);
+}
+
+.cardTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.cardLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cardIconPill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.85rem;
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.72);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+.cardTitle {
+    margin-left: auto;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: rgba(9, 34, 58, 0.9);
+    text-align: right;
+}
+
+.cardCount {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 1rem;
+    border-radius: 1rem;
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.7);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.cardDescription {
+    font-size: 0.93rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.52);
+    line-height: 1.35;
+}
+
+.iconSection {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.labelSection {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tagSection {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+}
+
+:global([data-sidebar-collapsed='true']) .labelSection,
+:global([data-sidebar-collapsed='true']) .tagSection {
+    display: none;
+}
+
+.count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding-inline: 0.75rem;
+    border-radius: 9999px;
+    padding-block: 0.15rem;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.groupTagButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    border-radius: 9999px;
+    padding-inline: 0.75rem;
+    padding-block: 0.55rem;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+    cursor: pointer;
+    transition:
+        background-color 140ms ease,
+        color 140ms ease;
+}
+
+.groupTagButton:hover {
+    background: rgba(15, 23, 42, 0.1);
+}
+
+.groupTagButton[data-collapsed-active-child='true'] {
+    color: rgba(2, 132, 199, 1);
+    background: rgba(14, 165, 233, 0.14);
+}
+
+.groupTagChevron {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(135deg);
+    transition: transform 140ms ease;
+}
+
+.groupTagButton[data-open='true'] .groupTagChevron {
+    transform: rotate(45deg);
+}
+
+.groupChildren {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-top: 0.3rem;
+    margin-left: var(--group-scaffold-offset);
+    padding-left: 1.05rem;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+    transition:
+        max-height 220ms ease,
+        opacity 180ms ease,
+        transform 220ms ease;
+}
+
+.groupChildren[data-open='true'] {
+    max-height: 24rem;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.groupChildren > .item {
+    position: relative;
+    opacity: 0;
+    transform: translateY(-3px);
+    transition:
+        opacity 160ms ease,
+        transform 220ms ease;
+}
+
+.groupChildren[data-open='true'] > .item {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.groupChildren[data-open='true'] > .item:nth-child(1) {
+    transition-delay: 30ms;
+}
+
+.groupChildren[data-open='true'] > .item:nth-child(2) {
+    transition-delay: 55ms;
+}
+
+.groupChildren[data-open='true'] > .item:nth-child(3) {
+    transition-delay: 80ms;
+}
+
+.groupChildren[data-open='true'] > .item:nth-child(4) {
+    transition-delay: 105ms;
+}
+
+.groupChildren[data-open='true'] > .item:nth-child(5) {
+    transition-delay: 130ms;
+}
+
+.groupChildren > .item::before {
+    content: '';
+    position: absolute;
+    left: -1.05rem;
+    top: -0.2rem;
+    width: 1.05rem;
+    height: calc(50% + 0.2rem);
+    transform: translateY(1px);
+    border-left: 2px solid rgba(15, 23, 42, 0.18);
+    border-bottom: 2px solid rgba(15, 23, 42, 0.18);
+    border-bottom-left-radius: 0.45rem;
+    box-sizing: border-box;
+}
+
+.groupChildren > .item:first-child::before {
+    top: 0;
+    height: 50%;
+}
+
+.groupChildren > .item .link {
+    margin-left: 0.2rem;
+    padding: 0.6rem 0.65rem;
+    border-radius: 0.85rem;
+}
+
+.groupChildren > .item .labelSection {
+    font-size: 0.95rem;
+}
+
+:global([data-sidebar-collapsed='true']) .groupChildren {
+    display: none;
+}
