@@ -5,8 +5,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
     useEffect,
+    useLayoutEffect,
     useRef,
     useState,
+    type CSSProperties,
     type ReactElement,
     type ReactNode,
 } from 'react'
@@ -16,13 +18,15 @@ import type { IconType } from 'react-icons/lib'
 const PANEL_HISTORY_STORAGE_KEY = 'pv.admin.panel.history'
 const GROUP_CHILDREN_ANIMATION_MS = 220
 
-export type NavigationButtonType = 'default' | 'group' | 'card'
+export type NavigationButtonType = 'default' | 'group' | 'card' | 'account'
 export type IndicatorDirection = 'up' | 'down' | 'none'
 
 export interface NavigationButtonProps {
     label: string
+    subtitle?: string
     href: string
     icon?: IconType
+    iconNode?: ReactNode
     count?: number
     description?: string
     buttonType?: NavigationButtonType
@@ -33,13 +37,19 @@ export interface NavigationButtonProps {
     resetPanelHistoryOnClick?: boolean
     active?: boolean
     className?: string
+    linkClassName?: string
+    iconSectionClassName?: string
     labelClassName?: string
+    subtitleClassName?: string
+    tagSectionClassName?: string
 }
 
 export function NavigationButton({
     label,
+    subtitle,
     href,
     icon,
+    iconNode,
     count,
     description,
     buttonType = 'default',
@@ -50,17 +60,55 @@ export function NavigationButton({
     resetPanelHistoryOnClick = false,
     active = false,
     className,
+    linkClassName,
+    iconSectionClassName,
     labelClassName,
+    subtitleClassName,
+    tagSectionClassName,
 }: NavigationButtonProps): ReactElement {
     const Icon = icon
+    const isAccountButton = buttonType === 'account'
     const pathname = usePathname()
     const formattedCount = (count ?? 0).toLocaleString()
     const [isGroupOpen, setIsGroupOpen] = useState(false)
     const [shouldRenderGroupChildren, setShouldRenderGroupChildren] =
         useState(false)
+    const [groupChildrenHeight, setGroupChildrenHeight] = useState(0)
     const groupChildrenCloseTimeoutRef = useRef<ReturnType<
         typeof setTimeout
     > | null>(null)
+    const groupChildrenRef = useRef<HTMLDivElement | null>(null)
+
+    useLayoutEffect(() => {
+        if (!shouldRenderGroupChildren) {
+            setGroupChildrenHeight(0)
+            return
+        }
+
+        function updateGroupChildrenHeight() {
+            setGroupChildrenHeight(groupChildrenRef.current?.scrollHeight ?? 0)
+        }
+
+        updateGroupChildrenHeight()
+
+        const groupChildrenElement = groupChildrenRef.current
+
+        const resizeObserver =
+            typeof ResizeObserver === 'undefined' ||
+            groupChildrenElement === null
+                ? null
+                : new ResizeObserver(() => {
+                      updateGroupChildrenHeight()
+                  })
+
+        if (resizeObserver && groupChildrenElement) {
+            resizeObserver.observe(groupChildrenElement)
+        }
+
+        return () => {
+            resizeObserver?.disconnect()
+        }
+    }, [groupContent, shouldRenderGroupChildren])
 
     useEffect(() => {
         return () => {
@@ -181,6 +229,7 @@ export function NavigationButton({
         <div
             className={[
                 styles.item,
+                isAccountButton ? styles.accountItem : null,
                 active ? styles.itemActive : styles.itemInactive,
                 active && indicatorDirection === 'up'
                     ? styles.itemActiveFromUp
@@ -196,7 +245,13 @@ export function NavigationButton({
             <div className={styles.itemHeader}>
                 <Link
                     aria-current={active ? 'page' : undefined}
-                    className={styles.link}
+                    className={[
+                        styles.link,
+                        isAccountButton ? styles.accountLink : null,
+                        linkClassName,
+                    ]
+                        .filter(Boolean)
+                        .join(' ')}
                     data-indicator-target={
                         hasActiveGroupChild && !isGroupOpen ? 'true' : undefined
                     }
@@ -204,19 +259,53 @@ export function NavigationButton({
                     onClick={handleNavigationClick}
                     title={label}
                 >
-                    <span className={styles.iconSection}>
-                        {Icon ? <Icon size={19} /> : null}
+                    <span
+                        className={[
+                            styles.iconSection,
+                            isAccountButton ? styles.accountIconSection : null,
+                            iconSectionClassName,
+                        ]
+                            .filter(Boolean)
+                            .join(' ')}
+                    >
+                        {iconNode ?? (Icon ? <Icon size={19} /> : null)}
                     </span>
 
                     <span
-                        className={[styles.labelSection, labelClassName]
+                        className={[
+                            styles.labelSection,
+                            isAccountButton ? styles.accountText : null,
+                            labelClassName,
+                        ]
                             .filter(Boolean)
                             .join(' ')}
                     >
                         {label}
+                        {subtitle ? (
+                            <span
+                                className={[
+                                    isAccountButton
+                                        ? styles.accountSubtitle
+                                        : null,
+                                    subtitleClassName,
+                                ]
+                                    .filter(Boolean)
+                                    .join(' ')}
+                            >
+                                {subtitle}
+                            </span>
+                        ) : null}
                     </span>
 
-                    <span className={styles.tagSection}>
+                    <span
+                        className={[
+                            styles.tagSection,
+                            isAccountButton ? styles.accountTagSection : null,
+                            tagSectionClassName,
+                        ]
+                            .filter(Boolean)
+                            .join(' ')}
+                    >
                         {buttonType === 'group' ? (
                             <span
                                 aria-hidden="true"
@@ -229,7 +318,7 @@ export function NavigationButton({
                             >
                                 <span className={styles.groupTagChevron} />
                             </span>
-                        ) : count !== undefined ? (
+                        ) : !isAccountButton && count !== undefined ? (
                             <span className={styles.count}>
                                 {formattedCount}
                             </span>
@@ -239,7 +328,16 @@ export function NavigationButton({
             </div>
 
             {buttonType === 'group' && shouldRenderGroupChildren ? (
-                <div className={styles.groupChildren} data-open={isGroupOpen}>
+                <div
+                    className={styles.groupChildren}
+                    data-open={isGroupOpen}
+                    ref={groupChildrenRef}
+                    style={
+                        {
+                            '--group-children-open-height': `${groupChildrenHeight}px`,
+                        } as CSSProperties
+                    }
+                >
                     {groupContent}
                 </div>
             ) : null}

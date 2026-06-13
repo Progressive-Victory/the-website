@@ -29,8 +29,9 @@
     --navigation-stack-height: calc(100dvh - 100px);
 }
 
-.sidebar {
+.sidebar.sidebar {
     --navigation-stack-sidebar-bg: rgba(255, 255, 255, 0.72);
+    /* --navigation-stack-sidebar-width: 20rem; */
 }
 
 .unselectedView {
@@ -48,12 +49,10 @@
     from {
         opacity: 0;
         transform: translateY(18px) scale(0.97);
-        filter: blur(4px);
     }
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
-        filter: blur(0);
     }
 }
 
@@ -98,12 +97,10 @@
     from {
         opacity: 0;
         transform: translateY(5px);
-        filter: blur(2px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
-        filter: blur(0);
     }
 }
 

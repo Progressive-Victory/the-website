@@ -1,6 +1,9 @@
 'use client'
 
 import styles from './Sidebar.module.css'
+import { DiscordAvatar } from '@/components/common/DiscordAvatar'
+import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import { useCurrentUser } from '@/util/hooks'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactElement, ReactNode } from 'react'
@@ -20,18 +23,43 @@ export function Sidebar({
 }: NavigationStackSlotProps): ReactElement {
     const pathname = usePathname()
     const [open, setOpen] = useState(true)
+    const [indicatorLayoutSyncing, setIndicatorLayoutSyncing] = useState(false)
     const [indicatorStyle, setIndicatorStyle] = useState<{
         top: number
         height: number
         visible: boolean
     }>({ top: 0, height: 0, visible: false })
     const bodyRef = useRef<HTMLDivElement | null>(null)
+    const indicatorLayoutSyncTimeoutRef = useRef<ReturnType<
+        typeof setTimeout
+    > | null>(null)
     const isDesktop = useMediaQuery('(min-width: 64rem)')
     const isOpen = !isDesktop || open
     const mobileVisible = !pathname.startsWith('/admin/panels/')
+    const featuredHref = isDesktop ? '/admin' : '/admin/panels/members'
+    const currentUser = useCurrentUser()
+
+    const displayName =
+        `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim() ||
+        (currentUser.data?.discordUsers?.[0]?.username
+            ? `@${currentUser.data.discordUsers[0].username}`
+            : 'Admin User')
+    const discordUser = currentUser.data?.discordUsers?.[0]
 
     useEffect(() => {
         let frameId: number | null = null
+
+        function syncIndicatorToLayout() {
+            if (indicatorLayoutSyncTimeoutRef.current !== null) {
+                clearTimeout(indicatorLayoutSyncTimeoutRef.current)
+            }
+
+            setIndicatorLayoutSyncing(true)
+            indicatorLayoutSyncTimeoutRef.current = setTimeout(() => {
+                setIndicatorLayoutSyncing(false)
+                indicatorLayoutSyncTimeoutRef.current = null
+            }, 140)
+        }
 
         function getActiveLink(bodyElement: HTMLDivElement) {
             return (
@@ -102,9 +130,20 @@ export function Sidebar({
         window.addEventListener('resize', updateIndicator)
 
         const bodyElement = bodyRef.current
+        const resizeObserver =
+            typeof ResizeObserver === 'undefined' || !bodyElement
+                ? null
+                : new ResizeObserver(() => {
+                      syncIndicatorToLayout()
+                      scheduleIndicatorSync()
+                  })
         const mutationObserver = bodyElement
             ? new MutationObserver(scheduleIndicatorSync)
             : null
+
+        if (bodyElement) {
+            resizeObserver?.observe(bodyElement)
+        }
 
         if (bodyElement && mutationObserver) {
             mutationObserver.observe(bodyElement, {
@@ -122,7 +161,12 @@ export function Sidebar({
 
         return () => {
             window.removeEventListener('resize', updateIndicator)
+            resizeObserver?.disconnect()
             mutationObserver?.disconnect()
+
+            if (indicatorLayoutSyncTimeoutRef.current !== null) {
+                clearTimeout(indicatorLayoutSyncTimeoutRef.current)
+            }
 
             if (frameId !== null) {
                 cancelAnimationFrame(frameId)
@@ -147,11 +191,29 @@ export function Sidebar({
                     <div className={styles.label}>{label}</div>
                 ) : null}
             </div>
-            {/* <div className={styles.featured}></div> */}
+            <NavigationButton
+                buttonType="account"
+                href={featuredHref}
+                iconNode={
+                    <DiscordAvatar
+                        discordUserId={discordUser?.id}
+                        imageId={discordUser?.image}
+                        size={40}
+                    />
+                }
+                label={displayName}
+                resetPanelHistoryOnClick={!isDesktop}
+                subtitle={
+                    discordUser?.username
+                        ? `@${discordUser.username}`
+                        : undefined
+                }
+            />
             <div className={styles.body} ref={bodyRef}>
                 <div
                     aria-hidden="true"
                     className={styles.selectionIndicator}
+                    data-layout-syncing={indicatorLayoutSyncing}
                     data-visible={indicatorStyle.visible}
                     style={{
                         top: `${indicatorStyle.top}px`,

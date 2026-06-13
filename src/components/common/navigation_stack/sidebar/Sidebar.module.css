@@ -2,7 +2,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1rem; /* come back to this */
     padding: 0.9rem;
     width: 100%;
     height: 100dvh;
@@ -103,6 +103,13 @@
 
 .selectionIndicator[data-visible='true'] {
     opacity: 1;
+}
+
+.selectionIndicator[data-layout-syncing='true'] {
+    transition:
+        top 90ms ease-out,
+        height 90ms ease-out,
+        opacity 160ms ease;
 }
 
 .toggleButton {

@@ -8,6 +8,24 @@ import { useMediaQuery } from 'usehooks-ts'
 
 const PANEL_HISTORY_STORAGE_KEY = 'pv.admin.panel.history'
 
+function formatPanelLabelFromPath(path: string): string {
+    if (!path.startsWith('/admin/panels/')) {
+        return 'Back'
+    }
+
+    const panelSlug = path.slice('/admin/panels/'.length).split('/')[0]
+
+    if (!panelSlug) {
+        return 'Back'
+    }
+
+    return panelSlug
+        .split('-')
+        .filter(Boolean)
+        .map((segment) => segment[0].toUpperCase() + segment.slice(1))
+        .join(' ')
+}
+
 export interface DetailProps {
     body?: ReactNode
     label?: string
@@ -25,10 +43,15 @@ export function Detail({
     const router = useRouter()
     const isDesktop = useMediaQuery('(min-width: 64rem)')
     const [hasPanelHistory, setHasPanelHistory] = useState(false)
+    const [backTargetPanelLabel, setBackTargetPanelLabel] =
+        useState('Back')
     const isPanelRoute = pathname.startsWith('/admin/panels/')
-    const mobileVisible = isPanelRoute
+    const isAdminRootRoute = pathname === '/admin'
+    const mobileVisible = isPanelRoute || isAdminRootRoute
     const showDetailHeader = bodyType === 'blank'
     const showPanelBackButton = isPanelRoute && (!isDesktop || hasPanelHistory)
+    const backButtonText =
+        !isDesktop && !hasPanelHistory ? 'Back' : backTargetPanelLabel
 
     useEffect(() => {
         if (typeof window === 'undefined') {
@@ -40,13 +63,22 @@ export function Detail({
         )
         if (!isPanelRoute) {
             setHasPanelHistory(false)
+            setBackTargetPanelLabel('Back')
             return
         }
 
         const panelHistory = rawHistory
             ? (JSON.parse(rawHistory) as string[])
             : []
+
+        const previousPanelPath = panelHistory[panelHistory.length - 1]
+
         setHasPanelHistory(panelHistory.length > 0)
+        setBackTargetPanelLabel(
+            previousPanelPath
+                ? formatPanelLabelFromPath(previousPanelPath)
+                : 'Back'
+        )
     }, [isPanelRoute, pathname])
 
     function handleBackNavigation() {
@@ -84,13 +116,13 @@ export function Detail({
         >
             {showDetailHeader ? (
                 <div className={styles.header}>
-                    {mobileVisible ? (
+                    {isPanelRoute ? (
                         <button
                             className={styles.backButton}
                             onClick={handleBackNavigation}
                             type="button"
                         >
-                            Back
+                            {backButtonText}
                         </button>
                     ) : null}
                     {label && <div className={styles.label}>{label}</div>}
@@ -108,7 +140,7 @@ export function Detail({
                                     onClick={handleBackNavigation}
                                     type="button"
                                 >
-                                    Back
+                                    {backButtonText}
                                 </button>
                             ) : undefined
                         }
