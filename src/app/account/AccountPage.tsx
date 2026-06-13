@@ -77,7 +77,7 @@ export function AccountPage() {
                                 {canAccessAdminPanel && (
                                     <BaseButton
                                         label="Project Lootbox"
-                                        href="/admin"
+                                        href="/admin?from=welcome"
                                         className={styles.secondaryButton}
                                     />
                                 )}

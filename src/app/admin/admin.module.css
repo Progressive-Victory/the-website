@@ -154,6 +154,10 @@
     animation: nameIn 0.79s cubic-bezier(0.25, 0.46, 0.45, 0.94) 3.175s both;
 }
 
+.unselectedNameSlotImmediate .unselectedProfileName {
+    animation-delay: 0.75s;
+}
+
 .unselectedAvatar {
     width: 132px;
     height: 132px;
@@ -173,6 +177,10 @@
     letter-spacing: -0.01em;
     color: rgba(15, 23, 42, 0.55);
     animation: nameIn 0.79s cubic-bezier(0.25, 0.46, 0.45, 0.94) 3.275s both;
+}
+
+.unselectedNameSlotImmediate .unselectedProfileHandle {
+    animation-delay: 0.9s;
 }
 
 .unselectedGrid {
