@@ -2,6 +2,7 @@
 
 import styles from './admin.module.css'
 import { ProtectedPage } from '@/components/ProtectedPage'
+import { DiscordAvatar } from '@/components/common'
 import { NavigationStack } from '@/components/common/navigation_stack/NavigationStack'
 import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
@@ -14,10 +15,10 @@ import {
     zUser,
 } from '@/contracts/data'
 import { zActBlueDonor } from '@/contracts/data/ActBlueDonor'
-import { usePaginatedSearch } from '@/util/hooks'
+import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
-import type { ReactNode } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 import type { IconType } from 'react-icons/lib'
@@ -57,6 +58,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         zActBlueDonationPacket,
         { search: { limit: 0 } }
     )
+    const currentUser = useCurrentUser()
 
     const adminPanelConfig: AdminPanelConfigItem[] = [
         {
@@ -215,26 +217,145 @@ export default function Layout({ children }: { children: ReactNode }) {
                             body={children}
                         />
                     }
-                    unSelected={
-                        <Detail
-                            bodyType="panel"
-                            label="Admin Dashboard"
-                            body={
-                                <div className={styles.unselectedView}>
-                                    <h2 className={styles.unselectedTitle}>
-                                        Select a panel
-                                    </h2>
-                                    <p className={styles.unselectedDescription}>
-                                        Choose a section from the left to open
-                                        member, donor, contribution, role, or
-                                        permission tools.
-                                    </p>
-                                </div>
-                            }
-                        />
-                    }
+                    unSelected={renderAdminUnselectedDetail({
+                        currentUserName:
+                            `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim(),
+                        currentUserHandle:
+                            currentUser.data?.discordUsers?.[0]?.username,
+                        currentUserDiscordId:
+                            currentUser.data?.discordUsers?.[0]?.id,
+                        currentUserDiscordImage:
+                            currentUser.data?.discordUsers?.[0]?.image,
+                        userCount: users.query.data?.count,
+                        donorCount: donors.query.data?.count,
+                        contributionCount: contributions.query.data?.count,
+                        roleCount: roles.query.data?.count,
+                        permissionCount: permissions.query.data?.count,
+                    })}
                 />
             </div>
         </ProtectedPage>
+    )
+}
+
+function renderAdminUnselectedDetail({
+    currentUserName,
+    currentUserHandle,
+    currentUserDiscordId,
+    currentUserDiscordImage,
+    userCount,
+    donorCount,
+    contributionCount,
+    roleCount,
+    permissionCount,
+}: {
+    currentUserName?: string
+    currentUserHandle?: string
+    currentUserDiscordId?: string
+    currentUserDiscordImage?: string
+    userCount?: number
+    donorCount?: number
+    contributionCount?: number
+    roleCount?: number
+    permissionCount?: number
+}): ReactElement {
+    return (
+        <Detail
+            bodyType="blank"
+            body={
+                <div className={styles.unselectedView}>
+                    <div className={styles.unselectedProfileHeader}>
+                        <DiscordAvatar
+                            discordUserId={currentUserDiscordId}
+                            imageId={currentUserDiscordImage}
+                            size={132}
+                            className={styles.unselectedAvatar}
+                        />
+                        <div className={styles.unselectedNameSlot}>
+                            <div className={styles.unselectedWelcome}>
+                                Welcome back,
+                            </div>
+                            <h2 className={styles.unselectedProfileName}>
+                                {(currentUserName?.trim()
+                                    ? currentUserName
+                                    : undefined) ??
+                                    (currentUserHandle
+                                        ? `@${currentUserHandle}`
+                                        : 'Admin User')}
+                            </h2>
+                            {currentUserHandle ? (
+                                <div className={styles.unselectedProfileHandle}>
+                                    @{currentUserHandle}
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>
+                    <div className={styles.unselectedGrid}>
+                        <NavigationButton
+                            label="Members"
+                            description="Member accounts and profiles."
+                            href="/admin/panels/members"
+                            icon={FaUsers}
+                            count={userCount}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                        <NavigationButton
+                            label="Fundraising"
+                            description="Donors, contributions, and fundraising stats."
+                            href="/admin/panels/fundraising"
+                            icon={FaDonate}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                        <NavigationButton
+                            label="Donors"
+                            description="ActBlue donors, totals, and records."
+                            href="/admin/panels/donors"
+                            icon={FaDonate}
+                            count={donorCount}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                        <NavigationButton
+                            label="Contributions"
+                            description="Contribution lineitems and payment info."
+                            href="/admin/panels/contributions"
+                            icon={FaDollarSign}
+                            count={contributionCount}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                        <NavigationButton
+                            label="Roles"
+                            description="User roles and access levels."
+                            href="/admin/panels/roles"
+                            icon={FaUserTag}
+                            count={roleCount}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                        <NavigationButton
+                            label="Permissions"
+                            description="Granular permission definitions."
+                            href="/admin/panels/permissions"
+                            icon={FaUserShield}
+                            count={permissionCount}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                        <NavigationButton
+                            label="Positions"
+                            description="Staff and volunteer position records."
+                            href="/admin/panels/positions"
+                            icon={FaClipboardUser}
+                            count={0}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                    </div>
+                </div>
+            }
+        />
     )
 }

@@ -839,9 +839,7 @@ export default function Page() {
                         description="ActBlue donors, totals, and donor records."
                         href="/admin/panels/donors"
                         icon={FaDonate}
-                        countText={formatCount(
-                            allTimeStatsQuery.data?.totalDonorCount
-                        )}
+                        count={allTimeStatsQuery.data?.totalDonorCount}
                         buttonType="card"
                         trackPanelHistory
                     />
@@ -851,9 +849,7 @@ export default function Page() {
                         description="Contribution lineitems, payment info, and details."
                         href="/admin/panels/contributions"
                         icon={FaDollarSign}
-                        countText={formatCount(
-                            allTimeStatsQuery.data?.totalContributionCount
-                        )}
+                        count={allTimeStatsQuery.data?.totalContributionCount}
                         buttonType="card"
                         trackPanelHistory
                     />

@@ -24,7 +24,6 @@ export interface NavigationButtonProps {
     href: string
     icon?: IconType
     count?: number
-    countText?: string
     description?: string
     buttonType?: NavigationButtonType
     groupContent?: ReactNode
@@ -42,7 +41,6 @@ export function NavigationButton({
     href,
     icon,
     count,
-    countText,
     description,
     buttonType = 'default',
     groupContent,
@@ -56,7 +54,7 @@ export function NavigationButton({
 }: NavigationButtonProps): ReactElement {
     const Icon = icon
     const pathname = usePathname()
-    const formattedCount = countText ?? (count ?? 0).toLocaleString()
+    const formattedCount = (count ?? 0).toLocaleString()
     const [isGroupOpen, setIsGroupOpen] = useState(false)
     const [shouldRenderGroupChildren, setShouldRenderGroupChildren] =
         useState(false)
@@ -161,7 +159,7 @@ export function NavigationButton({
                                 <div className={styles.cardTitle}>{label}</div>
                             </div>
 
-                            {typeof count === 'number' || countText ? (
+                            {count !== undefined ? (
                                 <div className={styles.cardCount}>
                                     {formattedCount}
                                 </div>
@@ -231,7 +229,7 @@ export function NavigationButton({
                             >
                                 <span className={styles.groupTagChevron} />
                             </span>
-                        ) : typeof count === 'number' ? (
+                        ) : count !== undefined ? (
                             <span className={styles.count}>
                                 {formattedCount}
                             </span>

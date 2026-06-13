@@ -4,6 +4,7 @@
     flex: 1;
 
     height: calc(100dvh - 7.75rem);
+    margin: 0.75rem;
     /* margin-inline: 0.25rem; */
     border-radius: 1.25rem;
 
