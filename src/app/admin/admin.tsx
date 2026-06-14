@@ -6,6 +6,18 @@ import type { ReactElement } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 
+function renderUnselectedGridHeader(label: string): ReactElement {
+    return (
+        <div className={styles.unselectedGridHeader}>
+            <span className={styles.unselectedGridHeaderText}>{label}</span>
+            <span
+                aria-hidden="true"
+                className={styles.unselectedGridHeaderLine}
+            />
+        </div>
+    )
+}
+
 export function renderAdminUnselectedDetail({
     showWelcome,
     currentUserName,
@@ -65,6 +77,7 @@ export function renderAdminUnselectedDetail({
                         </div>
                     </div>
                     <div className={styles.unselectedGrid}>
+                        {renderUnselectedGridHeader('Organization')}
                         <NavigationButton
                             label="Members"
                             description="Member accounts and profiles."
@@ -74,6 +87,19 @@ export function renderAdminUnselectedDetail({
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />
+
+                        <NavigationButton
+                            label="Positions"
+                            description="Staff and volunteer position records."
+                            href="/admin/panels/positions"
+                            icon={FaClipboardUser}
+                            count={0}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                    </div>
+                    <div className={styles.unselectedGrid}>
+                        {renderUnselectedGridHeader('Fundraising')}
                         <NavigationButton
                             label="Fundraising"
                             description="Donors, contributions, and fundraising stats."
@@ -100,6 +126,9 @@ export function renderAdminUnselectedDetail({
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />
+                    </div>
+                    <div className={styles.unselectedGrid}>
+                        {renderUnselectedGridHeader('Roles & Permissions')}
                         <NavigationButton
                             label="Roles"
                             description="User roles and access levels."
@@ -115,15 +144,6 @@ export function renderAdminUnselectedDetail({
                             href="/admin/panels/permissions"
                             icon={FaUserShield}
                             count={permissionCount}
-                            buttonType="card"
-                            resetPanelHistoryOnClick
-                        />
-                        <NavigationButton
-                            label="Positions"
-                            description="Staff and volunteer position records."
-                            href="/admin/panels/positions"
-                            icon={FaClipboardUser}
-                            count={0}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />

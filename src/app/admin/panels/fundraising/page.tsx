@@ -155,16 +155,6 @@ export default function Page() {
 
     return (
         <div className={styles.panelContents}>
-            <div className={styles.panelHeader}>
-                <div className={styles.breadcrumbs}>
-                    <span className={styles.prominentBreadcrumb}>Admin</span>
-                    <span className={styles.breadcrumbSeperator}>/</span>
-                    <span className={styles.panelBreadcrumb}>Fundraising</span>
-                </div>
-
-                {/* logic will eventually need to be reworked to show last api fetch and not most recent contribution date */}
-                <div className={styles.panelTimestamp}>Last Updated: N/A</div>
-            </div>
             <div className={styles.scrollView}>
                 <div className={styles.galleryHeader}>
                     <h1 className={styles.galleryTitle}>Fundraising</h1>

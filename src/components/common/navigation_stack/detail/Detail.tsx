@@ -43,8 +43,7 @@ export function Detail({
     const router = useRouter()
     const isDesktop = useMediaQuery('(min-width: 64rem)')
     const [hasPanelHistory, setHasPanelHistory] = useState(false)
-    const [backTargetPanelLabel, setBackTargetPanelLabel] =
-        useState('Back')
+    const [backTargetPanelLabel, setBackTargetPanelLabel] = useState('Back')
     const isPanelRoute = pathname.startsWith('/admin/panels/')
     const isAdminRootRoute = pathname === '/admin'
     const mobileVisible = isPanelRoute || isAdminRootRoute
