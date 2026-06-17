@@ -1,4 +1,4 @@
-import { zMetaData } from '../data/MetaData'
+import { zMetaData } from '../data'
 import z from 'zod'
 
 export const zMutationRequest = z.object({

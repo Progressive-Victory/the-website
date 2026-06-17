@@ -25,7 +25,7 @@ export default defineConfig([
 tseslint.configs.recommendedTypeChecked,
 tseslint.configs.stylisticTypeChecked,
 {
-    ignores: ['src/app/**', '**/*.helpers.*'],
+    ignores: ['src/app/**', '**/*.helpers.*', 'src/*'],
     extends: [eslintPluginIndex.configs.recommended],
 },
 ...nextCoreWebVitals,
