@@ -616,6 +616,11 @@ export function Header() {
         null
     )
 
+    const handleSetIsOpen = useCallback((openState: boolean) => {
+        setIsOpen(openState)
+        if(!isOpen) setMobileSubnavItem(null)
+    }, [isOpen])
+
     const { data: discordUsers } = useQuery({
         queryKey: [`/discordUsers/${session?.userId}`],
         queryFn:
@@ -633,7 +638,7 @@ export function Header() {
         if (!isOpen) return
 
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setIsOpen(false)
+            if (e.key === 'Escape') handleSetIsOpen(false)
         }
 
         document.addEventListener('keydown', onKeyDown)
@@ -644,7 +649,7 @@ export function Header() {
             document.removeEventListener('keydown', onKeyDown)
             document.body.style.overflow = prevOverflow
         }
-    }, [isOpen])
+    }, [isOpen, handleSetIsOpen])
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -654,10 +659,6 @@ export function Header() {
         return () => document.removeEventListener('keydown', onKeyDown)
     }, [])
 
-    const handleUpdateMobileSubnav = useCallback((item: NavItem | null) => {
-        setMobileSubnavItem(isOpen ? item : null)
-    }, [isOpen])
-
     useEffect(() => {
         if (typeof window === 'undefined') return
 
@@ -665,7 +666,7 @@ export function Header() {
 
         const syncToBreakpoint = () => {
             if (desktopMQ.matches) {
-                setIsOpen(false)
+                handleSetIsOpen(false)
             } else {
                 setActiveSubnav(null)
             }
@@ -682,7 +683,7 @@ export function Header() {
             desktopMQ.addListener(onChange)
             return () => desktopMQ.removeListener(onChange)
         }
-    }, [])
+    }, [handleSetIsOpen])
 
     const openSubnav = (item: NavItem) => {
         const hasColumns = !!item.subnav?.columns?.length
@@ -843,7 +844,7 @@ export function Header() {
                     className={styles.headerMenuButton}
                     onClick={() => {
                         closeSubnav()
-                        setIsOpen((prev) => !prev)
+                        handleSetIsOpen(!isOpen)
                     }}
                     initial={false}
                     animate={isOpen ? 'open' : 'closed'}
@@ -920,7 +921,7 @@ export function Header() {
                             WebkitBackdropFilter: 'blur(10px)',
                             backgroundColor: 'rgba(0, 0, 0, 0.18)',
                         }}
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => handleSetIsOpen(false)}
                     />
                 )}
             </AnimatePresence>
@@ -929,7 +930,7 @@ export function Header() {
                 isOpen={isOpen}
                 navitems={navitems}
                 mobileSubnavItem={mobileSubnavItem}
-                setMobileSubnavItem={handleUpdateMobileSubnav}
+                setMobileSubnavItem={setMobileSubnavItem}
                 isSessionLoading={isSessionLoading}
                 session={session}
                 discordUserId={discordUsers?.[0]?.id}
