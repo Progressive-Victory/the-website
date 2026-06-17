@@ -16,7 +16,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import NextLink from 'next/link'
 import type React from 'react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import z from 'zod'
 
 /**
@@ -654,8 +654,8 @@ export function Header() {
         return () => document.removeEventListener('keydown', onKeyDown)
     }, [])
 
-    useEffect(() => {
-        if (!isOpen) setMobileSubnavItem(null)
+    const handleUpdateMobileSubnav = useCallback((item: NavItem | null) => {
+        setMobileSubnavItem(isOpen ? item : null)
     }, [isOpen])
 
     useEffect(() => {
@@ -929,7 +929,7 @@ export function Header() {
                 isOpen={isOpen}
                 navitems={navitems}
                 mobileSubnavItem={mobileSubnavItem}
-                setMobileSubnavItem={setMobileSubnavItem}
+                setMobileSubnavItem={handleUpdateMobileSubnav}
                 isSessionLoading={isSessionLoading}
                 session={session}
                 discordUserId={discordUsers?.[0]?.id}
