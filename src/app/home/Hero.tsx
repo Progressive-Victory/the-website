@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './hero.module.css'
-import { Message } from '@/components/common'
+import { Message } from '@/components/common/twitter_card_element'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
 import cardStyles from '@/components/common/twitter_card_element/Card.module.css'

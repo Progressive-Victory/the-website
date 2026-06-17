@@ -10,7 +10,7 @@ import {
     US_STATES,
 } from '@/components/Map/constants'
 import { MapView, StateMapInteractionProps } from '@/components/Map/types'
-import { Message } from '@/components/common'
+import { Message } from '@/components/common/twitter_card_element'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
 import {
