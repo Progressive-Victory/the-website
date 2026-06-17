@@ -1,5 +1,5 @@
 import { Field, SupportNote, Toggle } from '.'
-import { zLocation, Location } from '@/contracts/data'
+import { zLocation, Location } from 'pv-contracts/data'
 import { dateService } from '@/services'
 import { useFetch, useInit } from '@/util/hooks'
 import Link from 'next/link'

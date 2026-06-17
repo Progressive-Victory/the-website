@@ -10,7 +10,7 @@ import {
     UpdateHistory,
     User,
     zDiscordUser,
-} from '@/contracts/data'
+} from 'pv-contracts/data'
 import { useFetch } from '@/util/hooks'
 import { useQueries } from '@tanstack/react-query'
 import cx from 'classnames'

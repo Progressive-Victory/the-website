@@ -15,7 +15,7 @@ import {
     ActBlueContribution,
     ActBlueLineitem,
     ActBlueContributionCustomField,
-} from '@/contracts/data'
+} from 'pv-contracts/data'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'

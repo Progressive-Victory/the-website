@@ -12,16 +12,16 @@ import { BannedStage } from './BannedStage'
 import { NotCitizenStage } from './NotCitizenStage'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
-import { OnboardingStage } from '@/contracts/data'
+import { OnboardingStage } from 'pv-contracts/data'
 import {
     UserOnboardingCollectInfoRequest,
     UserOnboardingVerifyRequest,
     zUserOnboardingCollectInfoRequest,
-} from '@/contracts/requests'
+} from 'pv-contracts/requests'
 import {
     DiscordUserIsInServerResponse,
     zDiscordUserIsInServerResponse,
-} from '@/contracts/responses'
+} from 'pv-contracts/responses'
 import { useAuth, useCurrentUser, useFetch } from '@/util/hooks'
 import {
     keepPreviousData,
