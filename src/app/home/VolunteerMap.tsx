@@ -14,9 +14,9 @@ import { Message } from '@/components/common/twitter_card_element'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
 import {
-    MapMemberCountResponse,
-    zMapMemberCountResponse,
-} from '@/contracts/responses'
+    MapMemberCountsResponse,
+    zMapMemberCountsResponse,
+} from 'pv-contracts/responses'
 import { useFetch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -30,9 +30,9 @@ export function VolunteerMap() {
         queryKey: ['/map/memberCounts'],
         queryFn: ready
             ? async ({ signal }) => {
-                  const data = await onGet<MapMemberCountResponse>(
+                  const data = await onGet<MapMemberCountsResponse>(
                       '/map/memberCounts',
-                      zMapMemberCountResponse,
+                      zMapMemberCountsResponse,
                       { signal }
                   )
 

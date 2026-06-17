@@ -9,8 +9,8 @@ import {
     zPermission,
     zRole,
     zUser,
-} from '@/contracts/data'
-import { zActBlueDonor } from '@/contracts/data/ActBlueDonor'
+    zActBlueDonor
+} from 'pv-contracts/data'
 import { usePaginatedSearch } from '@/util/hooks'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
