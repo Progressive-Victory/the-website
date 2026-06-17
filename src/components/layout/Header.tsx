@@ -9,7 +9,7 @@ import { LoginButton } from '@/components/common/buttons/button_types/LoginButto
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
-import { DiscordUser, TokenClaims, zDiscordUser } from '@/contracts/data'
+import { DiscordUser, TokenClaims, zDiscordUser } from 'pv-contracts/data'
 import { useAuth, useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
