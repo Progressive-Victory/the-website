@@ -1,5 +1,5 @@
-import { TokenClaims } from '@/contracts/data'
-import { DiscordLoginResponse } from '@/contracts/responses'
+import { TokenClaims } from 'pv-contracts/data'
+import { DiscordLoginResponse } from 'pv-contracts/responses'
 import { ApiError, FetchError } from '@/models'
 import {
     keepPreviousData,

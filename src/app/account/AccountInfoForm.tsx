@@ -6,7 +6,7 @@ import {
     PhoneField,
     TextField,
 } from '@/components/common/forms'
-import { User } from '@/contracts/data'
+import { User } from 'pv-contracts/data'
 import { dateService } from '@/services'
 import { useState } from 'react'
 

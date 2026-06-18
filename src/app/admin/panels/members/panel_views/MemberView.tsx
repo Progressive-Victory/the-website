@@ -11,7 +11,7 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
-import { Role, UpdateHistory, User } from '@/contracts/data'
+import { Role, UpdateHistory, User } from 'pv-contracts/data'
 import { dateService } from '@/services'
 
 const membershipCardShipmentOptions = [
@@ -167,7 +167,7 @@ export function MemberView({
                     readonly
                     getter={(form) =>
                         dateService.isValid(form.birthdate)
-                            ? dateService.getAge(form.birthdate!)?.toString()
+                            ? dateService.getAge(form.birthdate)?.toString()
                             : null
                     }
                 />

@@ -14,9 +14,9 @@ import {
     ActBlueDonor,
     ActBlueLineitem,
     User,
-} from '@/contracts/data'
-import type { SearchRequest } from '@/contracts/requests'
-import type { PaginatedResponse } from '@/contracts/responses'
+} from 'pv-contracts/data'
+import type { SearchRequest } from 'pv-contracts/requests'
+import type { PaginatedResponse } from 'pv-contracts/responses'
 import { FetchError } from '@/models'
 import type { UseQueryResult } from '@tanstack/react-query'
 import cx from 'classnames'
