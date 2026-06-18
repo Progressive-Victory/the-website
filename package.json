@@ -9,6 +9,7 @@
     "build": "next build",
     "postbuild": "next-sitemap",
     "start": "next start",
+    "vercel-install": "./vercel.sh",
     "lint": "eslint --fix .",
     "lint-ci": "eslint --max-warnings 0 .",
     "test": "vitest",
