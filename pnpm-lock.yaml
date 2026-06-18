@@ -70,8 +70,8 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
       pv-contracts:
-        specifier: git+https://github.com/Progressive-Victory/the-contracts.git
-        version: '@progressive-victory/the-contracts@git+https://github.com/Progressive-Victory/the-contracts.git#7c12401121fcb10f5c821673ba77b402ae0bf94c'
+        specifier: git+git@github.com:Progressive-Victory/the-contracts.git
+        version: '@progressive-victory/the-contracts@git+https://git@github.com:Progressive-Victory/the-contracts.git#7c12401121fcb10f5c821673ba77b402ae0bf94c'
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -1174,8 +1174,8 @@ packages:
       '@typescript-eslint/utils': ^8.60.1
       eslint: ^10.4.1
 
-  '@progressive-victory/the-contracts@git+https://github.com/Progressive-Victory/the-contracts.git#7c12401121fcb10f5c821673ba77b402ae0bf94c':
-    resolution: {commit: 7c12401121fcb10f5c821673ba77b402ae0bf94c, repo: https://github.com/Progressive-Victory/the-contracts.git, type: git}
+  '@progressive-victory/the-contracts@git+https://git@github.com:Progressive-Victory/the-contracts.git#7c12401121fcb10f5c821673ba77b402ae0bf94c':
+    resolution: {commit: 7c12401121fcb10f5c821673ba77b402ae0bf94c, repo: git@github.com:Progressive-Victory/the-contracts.git, type: git}
     version: 1.5.0
 
   '@radix-ui/primitive@1.1.3':
@@ -6265,7 +6265,7 @@ snapshots:
       '@typescript-eslint/utils': 8.53.1(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3)
       eslint: 9.39.2(jiti@1.21.7)
 
-  '@progressive-victory/the-contracts@git+https://github.com/Progressive-Victory/the-contracts.git#7c12401121fcb10f5c821673ba77b402ae0bf94c':
+  '@progressive-victory/the-contracts@git+https://git@github.com:Progressive-Victory/the-contracts.git#7c12401121fcb10f5c821673ba77b402ae0bf94c':
     dependencies:
       zod: 4.4.3
 
@@ -8173,8 +8173,8 @@ snapshots:
       '@babel/parser': 7.29.7
       eslint: 9.39.2(jiti@1.21.7)
       hermes-parser: 0.25.1
-      zod: 4.3.6
-      zod-validation-error: 4.0.2(zod@4.3.6)
+      zod: 4.4.3
+      zod-validation-error: 4.0.2(zod@4.4.3)
     transitivePeerDependencies:
       - supports-color
 
@@ -10870,9 +10870,9 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-validation-error@4.0.2(zod@4.3.6):
+  zod-validation-error@4.0.2(zod@4.4.3):
     dependencies:
-      zod: 4.3.6
+      zod: 4.4.3
 
   zod@4.3.6: {}
 
