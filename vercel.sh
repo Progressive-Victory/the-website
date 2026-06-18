@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "$PV_CONTRACTS_SSH_KEY"
 echo "$PV_CONTRACTS_SSH_KEY" > id_ed25519
 chmod 0400 ./id_ed25519
 
