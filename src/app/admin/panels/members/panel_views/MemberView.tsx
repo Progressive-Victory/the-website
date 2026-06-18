@@ -167,7 +167,7 @@ export function MemberView({
                     readonly
                     getter={(form) =>
                         dateService.isValid(form.birthdate)
-                            ? dateService.getAge(form.birthdate)?.toString()
+                            ? dateService.getAge(form.birthdate!)?.toString()
                             : null
                     }
                 />

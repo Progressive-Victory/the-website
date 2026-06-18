@@ -3,7 +3,7 @@ import { MultiSelect, MultiSelectOption } from '@/components/common'
 import { SearchRequest, SortDirection } from 'pv-contracts/requests'
 import cx from 'classnames'
 import Link from 'next/link'
-import React, { ChangeEvent, ReactNode, useEffect, useState } from 'react'
+import React, { ChangeEvent, InputEvent, ReactNode, useEffect, useState } from 'react'
 import {
     FiChevronLeft,
     FiChevronRight,
@@ -306,11 +306,10 @@ function SearchInput({
     panelOpen,
     onTogglePanel,
     onSearch,
-}: SearchInputProps) {
-    const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-        onSearch(e.target.value)
+}: Readonly<SearchInputProps>) {
+    const handleSearch = (e: InputEvent<HTMLInputElement>) => {
+        onSearch(e.data)
     }
-
     return (
         <div className={styles.searchInput}>
             <input

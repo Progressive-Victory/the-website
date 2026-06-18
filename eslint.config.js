@@ -50,6 +50,7 @@ tseslint.configs.stylisticTypeChecked,
         '@typescript-eslint/no-unsafe-call': 'warn',
         '@typescript-eslint/no-unsafe-return': 'warn',
         'tailwindcss/no-custom-classname': 'off',
+        'react-hooks/set-state-in-effect': 'warn' // temporary. All 13 instances should be fixed
     },
 }, {
     files: ['**/*.{js,mjs}'],

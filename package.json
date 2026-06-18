@@ -9,8 +9,8 @@
     "build": "next build",
     "postbuild": "next-sitemap",
     "start": "next start",
-    "lint": "eslint --fix .",
-    "lint-ci": "eslint --max-warnings 0 .",
+    "lint": "eslint --cache --fix src",
+    "lint-ci": "eslint --cache --max-warnings 0 .",
     "test": "vitest",
     "prettier": "prettier --write --ignore-path .prettierignore .",
     "prettier-ci": "prettier --check --ignore-path .prettierignore ."

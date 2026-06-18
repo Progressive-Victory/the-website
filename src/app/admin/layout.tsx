@@ -12,20 +12,21 @@ import {
     zActBlueDonor
 } from 'pv-contracts/data'
 import { usePaginatedSearch } from '@/util/hooks'
+import { SortDirection } from 'pv-contracts/requests'
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-    const users = usePaginatedSearch('/users', zUser, { search: { limit: 0 } })
-    const roles = usePaginatedSearch('/roles', zRole, { search: { limit: 0 } })
+export default function Layout({ children }: Readonly<{ children: React.ReactNode }>) {
+    const users = usePaginatedSearch('/users', zUser, { search: { limit: 0 , sort: SortDirection.DESC } })
+    const roles = usePaginatedSearch('/roles', zRole, { search: { limit: 0 , sort: SortDirection.DESC } })
     const permissions = usePaginatedSearch('/permissions', zPermission, {
-        search: { limit: 0 },
+        search: { limit: 0 , sort: SortDirection.DESC },
     })
     const donors = usePaginatedSearch('/actblue/donors', zActBlueDonor, {
-        search: { limit: 0 },
+        search: { limit: 0 , sort: SortDirection.DESC },
     })
     const contributions = usePaginatedSearch(
         '/actblue/contributions',
         zActBlueDonationPacket,
-        { search: { limit: 0 } }
+        { search: { limit: 0 , sort: SortDirection.DESC } }
     )
 
     return (

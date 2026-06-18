@@ -1,5 +1,5 @@
 import { useFetch } from './useFetch'
-import { SearchRequest } from 'pv-contracts/requests'
+import { SearchRequest, SortDirection } from 'pv-contracts/requests'
 import { PaginatedResponse, zPaginatedResponse } from 'pv-contracts/responses'
 import {
     keepPreviousData,
@@ -21,9 +21,9 @@ export function usePaginatedSearch<T>(
     const { ready, onGet } = useFetch()
 
     const [search, setSearch] = useState<SearchRequest>({
-        ...(options?.search ?? {}),
-        limit: options?.search?.limit,
-        sort: options?.search?.sort,
+        ...options?.search,
+        limit: options?.search?.limit ?? 10, // 
+        sort: options?.search?.sort ?? SortDirection.DESC,
     })
 
     interface Options {
