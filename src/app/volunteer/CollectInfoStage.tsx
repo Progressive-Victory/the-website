@@ -205,7 +205,7 @@ export function CollectInfoStage({
                             United States of America
                         </span>
                     }
-                    tooltip="Only US residents and citizens may participate in Progressive Victory"
+                    tooltip="Only US residents or citizens may participate in Progressive Victory"
                     onChange={() => {
                         setForm({ ...form, usCitizen: !form.usCitizen })
                     }}
