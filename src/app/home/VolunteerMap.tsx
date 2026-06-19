@@ -1,15 +1,15 @@
 'use client'
 
 import styles from './map.module.css'
-import { StateMap } from '@/components/Map'
+import { StateMap } from '@/components/map'
 import {
     BBOX_AK,
     BBOX_HI,
     BBOX_PR,
     BBOX_US,
     US_STATES,
-} from '@/components/Map/constants'
-import { MapView, StateMapInteractionProps } from '@/components/Map/types'
+} from '@/components/map/constants'
+import { MapView, StateMapInteractionProps } from '@/components/map/types'
 import { Message } from '@/components/common/twitter_card_element'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'

@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './map.module.css'
-import { Map } from '@/components/Map'
+import { Map } from '@/components/map'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
 
