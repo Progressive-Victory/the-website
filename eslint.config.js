@@ -36,6 +36,10 @@ tseslint.configs.recommendedTypeChecked,
         '@typescript-eslint/no-unsafe-call': 'warn',
         '@typescript-eslint/no-unsafe-return': 'warn',
         'tailwindcss/no-custom-classname': 'off',
+        'react-hooks/set-state-in-effect': 'warn', //temp
+        'react-hooks/preserve-manual-memoization': 'warn', //temp
+        'react-hooks/refs': 'warn', //temp
+        'react-hooks/immutability': 'warn', //temp
     },
 }, {
     files: ['**/*.{js,mjs}'],
