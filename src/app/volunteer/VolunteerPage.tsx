@@ -9,7 +9,6 @@ import {
     UnderageStage,
 } from '.'
 import { BannedStage } from './BannedStage'
-import { NotCitizenStage } from './NotCitizenStage'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import { OnboardingStage } from '@/contracts/data'
@@ -222,6 +221,7 @@ export default function VolunteerPage() {
                                         user.data?.acceptedAlerts ?? false,
                                     usCitizen: false,
                                     privacyPolicy: false,
+                                    oneTimePasscode: false,
                                 }}
                                 isPending={collectInfoMutation.isPending}
                                 onSubmit={handleCollectInfoSuccess}
@@ -233,10 +233,6 @@ export default function VolunteerPage() {
                                 isPending={ageUpMutation.isPending}
                                 onAgeUp={ageUpMutation.mutate}
                             />
-                        )}
-
-                        {currentStage === OnboardingStage.NOT_CITIZEN && (
-                            <NotCitizenStage />
                         )}
 
                         {currentStage === OnboardingStage.BANNED && (

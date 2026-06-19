@@ -488,6 +488,7 @@ export default function Page() {
                     { value: 'first_name', label: 'First Name' },
                     { value: 'last_name', label: 'Last Name' },
                     { value: 'created_at_utc', label: 'Created At' },
+                    { value: 'updated_at_utc', label: 'Recently Edited' },
                 ]}
                 filters={[
                     {

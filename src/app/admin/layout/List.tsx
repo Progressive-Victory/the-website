@@ -198,7 +198,7 @@ export function ListTop({
                     />
 
                     <FilterSelect
-                        filters={filter as Record<string, (string | number)[]>}
+                        filters={filter}
                         options={filters}
                         onChange={handleChangeFilter}
                     />
