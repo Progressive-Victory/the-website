@@ -35,7 +35,10 @@ export interface NavigationButtonProps {
     indicatorDirection?: IndicatorDirection
     trackPanelHistory?: boolean
     resetPanelHistoryOnClick?: boolean
+    onClick?: (event: MouseEvent<HTMLAnchorElement>) => void
+    showIndicator?: boolean
     active?: boolean
+    style?: CSSProperties
     className?: string
     linkClassName?: string
     iconSectionClassName?: string
@@ -58,7 +61,10 @@ export function NavigationButton({
     indicatorDirection = 'none',
     trackPanelHistory = false,
     resetPanelHistoryOnClick = false,
+    onClick,
+    showIndicator = true,
     active = false,
+    style,
     className,
     linkClassName,
     iconSectionClassName,
@@ -67,6 +73,7 @@ export function NavigationButton({
     tagSectionClassName,
 }: NavigationButtonProps): ReactElement {
     const Icon = icon
+    const hasIcon = Boolean(iconNode ?? Icon)
     const isAccountButton = buttonType === 'account'
     const pathname = usePathname()
     const formattedCount = (count ?? 0).toLocaleString()
@@ -189,8 +196,14 @@ export function NavigationButton({
                     <Link
                         aria-current={active ? 'page' : undefined}
                         className={styles.cardLink}
+                        data-show-indicator={
+                            showIndicator ? undefined : 'false'
+                        }
                         href={href}
-                        onClick={handleNavigationClick}
+                        onClick={(event) => {
+                            handleNavigationClick()
+                            onClick?.(event)
+                        }}
                         title={label}
                     >
                         <div className={styles.cardTop}>
@@ -241,6 +254,7 @@ export function NavigationButton({
             ]
                 .filter(Boolean)
                 .join(' ')}
+            style={style}
         >
             <div className={styles.itemHeader}>
                 <Link
@@ -253,23 +267,33 @@ export function NavigationButton({
                         .filter(Boolean)
                         .join(' ')}
                     data-indicator-target={
-                        hasActiveGroupChild && !isGroupOpen ? 'true' : undefined
+                        showIndicator && hasActiveGroupChild && !isGroupOpen
+                            ? 'true'
+                            : undefined
                     }
+                    data-show-indicator={showIndicator ? undefined : 'false'}
                     href={href}
-                    onClick={handleNavigationClick}
+                    onClick={(event) => {
+                        handleNavigationClick()
+                        onClick?.(event)
+                    }}
                     title={label}
                 >
-                    <span
-                        className={[
-                            styles.iconSection,
-                            isAccountButton ? styles.accountIconSection : null,
-                            iconSectionClassName,
-                        ]
-                            .filter(Boolean)
-                            .join(' ')}
-                    >
-                        {iconNode ?? (Icon ? <Icon size={19} /> : null)}
-                    </span>
+                    {hasIcon ? (
+                        <span
+                            className={[
+                                styles.iconSection,
+                                isAccountButton
+                                    ? styles.accountIconSection
+                                    : null,
+                                iconSectionClassName,
+                            ]
+                                .filter(Boolean)
+                                .join(' ')}
+                        >
+                            {iconNode ?? (Icon ? <Icon size={19} /> : null)}
+                        </span>
+                    ) : null}
 
                     <span
                         className={[
@@ -329,16 +353,20 @@ export function NavigationButton({
 
             {buttonType === 'group' && shouldRenderGroupChildren ? (
                 <div
-                    className={styles.groupChildren}
+                    className={styles.groupChildrenClip}
                     data-open={isGroupOpen}
-                    ref={groupChildrenRef}
                     style={
                         {
                             '--group-children-open-height': `${groupChildrenHeight}px`,
                         } as CSSProperties
                     }
                 >
-                    {groupContent}
+                    <div
+                        className={styles.groupChildren}
+                        ref={groupChildrenRef}
+                    >
+                        {groupContent}
+                    </div>
                 </div>
             ) : null}
         </div>

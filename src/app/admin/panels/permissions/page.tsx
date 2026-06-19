@@ -1,13 +1,13 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, List } from '@/app/admin/layout/List'
 import {
     Form,
     FormGroup,
     FormState,
     TextField,
 } from '@/components/common/forms'
+import Panel from '@/components/common/panel/Panel'
 import { Permission, zPermission } from '@/contracts/data'
 import { UpdatePermissionRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
@@ -27,11 +27,10 @@ export default function Page() {
         null
     )
 
-    const {
-        query: searchQuery,
-        search,
-        onSearch,
-    } = usePaginatedSearch<Permission>('/permissions', zPermission)
+    const { query: searchQuery, search } = usePaginatedSearch<Permission>(
+        '/permissions',
+        zPermission
+    )
 
     const updateMutation = useMutation<
         Permission,
@@ -85,7 +84,9 @@ export default function Page() {
             )
         },
         onSettled: () =>
-            queryClient.invalidateQueries({ queryKey: ['/roles', search] }),
+            queryClient.invalidateQueries({
+                queryKey: ['/permissions', search],
+            }),
     })
 
     const handleSelectItem = (value: Permission) => {
@@ -110,25 +111,58 @@ export default function Page() {
     }
 
     return (
-        <>
-            <List
-                search={search}
-                count={searchQuery.data?.count}
-                isPending={searchQuery.isPending}
-                error={searchQuery.error}
-                onSearch={onSearch}
-            >
-                {searchQuery.data?.data?.map((item) => (
-                    <ListElement
-                        key={item.id}
-                        selected={selectedPermission?.id == item.id}
-                        onClick={() => handleSelectItem(item)}
-                    >
-                        <span className={styles.listItemText}>{item.name}</span>
-                    </ListElement>
-                ))}
-            </List>
-
+        <Panel
+            includeSidebar
+            sidebarWidth="24rem"
+            sidebarClassName={styles.sidebarBg}
+            label="Permissions"
+            sidebarBody={
+                <div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                    <div>Test</div>
+                </div>
+            }
+        >
             <div className={styles.detailPane}>
                 {selectedPermission ? (
                     <Form<Permission>
@@ -149,6 +183,6 @@ export default function Page() {
                     </div>
                 )}
             </div>
-        </>
+        </Panel>
     )
 }

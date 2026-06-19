@@ -9,6 +9,7 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
+import Panel from '@/components/common/panel/Panel'
 import { Permission, Role, zPermission, zRole } from '@/contracts/data'
 import { SortDirection, UpdateRoleRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
@@ -29,6 +30,7 @@ export default function Page() {
 
     const [selectedId, setSelectedId] = useState<number | null>(null)
     const [formState, setFormState] = useState<FormState<Role> | null>(null)
+    const [searchPanelOpen, setSearchPanelOpen] = useState(false)
 
     const {
         query: searchQuery,
@@ -150,37 +152,47 @@ export default function Page() {
     }
 
     return (
-        <>
-            <List
-                search={search}
-                count={searchQuery.data?.count}
-                isPending={searchQuery.isPending}
-                error={searchQuery.error}
-                filters={[
-                    {
-                        value: 'permissionIds',
-                        label: 'Permissions',
-                        options: permissions.map((permission) => ({
-                            value: permission.id,
-                            label: permission.name,
-                        })),
-                    },
-                ]}
-                onSearch={onSearch}
-            >
-                {searchQuery.data?.data?.map((item) => (
-                    <ListElement
-                        key={item.id}
-                        selected={selectedId == item.id}
-                        onClick={() => handleSelectItem(item)}
-                    >
-                        <span className={styles.roleListItemName}>
-                            {item.name}
-                        </span>
-                    </ListElement>
-                ))}
-            </List>
-
+        <Panel
+            includeSidebar
+            sidebarWidth="24rem"
+            sidebarClassName={styles.sidebarBg}
+            label="Roles"
+            sidebarFilterOpen={searchPanelOpen}
+            onSidebarFilterOpenChange={setSearchPanelOpen}
+            sidebarBody={
+                <List
+                    search={search}
+                    count={searchQuery.data?.count}
+                    isPending={searchQuery.isPending}
+                    error={searchQuery.error}
+                    searchPanelOpen={searchPanelOpen}
+                    onSearchPanelOpenChange={setSearchPanelOpen}
+                    filters={[
+                        {
+                            value: 'permissionIds',
+                            label: 'Permissions',
+                            options: permissions.map((permission) => ({
+                                value: permission.id,
+                                label: permission.name,
+                            })),
+                        },
+                    ]}
+                    onSearch={onSearch}
+                >
+                    {searchQuery.data?.data?.map((item) => (
+                        <ListElement
+                            key={item.id}
+                            selected={selectedId == item.id}
+                            onClick={() => handleSelectItem(item)}
+                        >
+                            <span className={styles.roleListItemName}>
+                                {item.name}
+                            </span>
+                        </ListElement>
+                    ))}
+                </List>
+            }
+        >
             <div className={styles.rightPane}>
                 {selectedId == null && (
                     <div className={styles.emptyState}>No role selected</div>
@@ -218,6 +230,6 @@ export default function Page() {
                     </Form>
                 )}
             </div>
-        </>
+        </Panel>
     )
 }

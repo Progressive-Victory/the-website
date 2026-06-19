@@ -4,7 +4,7 @@ import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import type { ReactElement } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
-import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
+import { FaClipboardUser, FaDollarSign, FaFlask } from 'react-icons/fa6'
 
 function renderUnselectedGridHeader(label: string): ReactElement {
     return (
@@ -144,6 +144,17 @@ export function renderAdminUnselectedDetail({
                             href="/admin/panels/permissions"
                             icon={FaUserShield}
                             count={permissionCount}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                    </div>
+                    <div className={styles.unselectedGrid}>
+                        {renderUnselectedGridHeader('Developer')}
+                        <NavigationButton
+                            label="Test"
+                            description="Test panel for development and debugging."
+                            href="/admin/panels/test"
+                            icon={FaFlask}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />

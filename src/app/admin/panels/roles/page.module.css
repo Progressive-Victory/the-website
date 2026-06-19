@@ -1,3 +1,7 @@
+.sidebarBg {
+    --navigation-stack-sidebar-bg: #f9fafb;
+}
+
 .rightPane {
     height: calc(100dvh - 100px);
     flex: 1;

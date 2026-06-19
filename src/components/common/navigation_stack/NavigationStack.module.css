@@ -1,9 +1,25 @@
 .root {
+    position: relative;
     display: flex;
-    width: 100vw;
+    width: 100%;
     height: var(--navigation-stack-height, 100dvh);
     background: var(--navigation-stack-bg, transparent);
     overflow: hidden;
+}
+
+.overlay {
+    position: absolute;
+    top: -4px;
+    left: 0;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 0 1.25rem 1.25rem;
+    pointer-events: none;
+}
+
+.overlay > * {
+    pointer-events: auto;
 }
 
 .noContentView {

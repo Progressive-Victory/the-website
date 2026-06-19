@@ -1,0 +1,13 @@
+.rightPane {
+    height: calc(100dvh - 100px);
+    flex: 1;
+    overflow-y: auto;
+    padding-block: 1rem;
+}
+
+.emptyState {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

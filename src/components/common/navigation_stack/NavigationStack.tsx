@@ -4,6 +4,7 @@ import styles from './NavigationStack.module.css'
 import { Detail } from './detail/Detail'
 import type { DetailProps } from './detail/Detail'
 import { Sidebar } from './sidebar/Sidebar'
+import { SidebarToggleButton } from './sidebar/Sidebar'
 import type { NavigationStackSlotProps } from './sidebar/Sidebar'
 import {
     Children,
@@ -20,6 +21,7 @@ interface NavigationStackProps {
     detail?: ReactNode
     unSelected?: ReactNode
     isSelected?: boolean
+    overlay?: ReactNode
 }
 
 function isSplitViewSlot(
@@ -40,6 +42,7 @@ function BaseNavigationStack({
     detail,
     unSelected,
     isSelected,
+    overlay,
 }: NavigationStackProps) {
     let sidebarSlotContent: ReactNode = null
     let detailSlotContent: ReactNode = null
@@ -84,6 +87,7 @@ function BaseNavigationStack({
         <div className={[styles.root, className].filter(Boolean).join(' ')}>
             {sidebarContent}
             {activeDetailContent}
+            {overlay ? <div className={styles.overlay}>{overlay}</div> : null}
         </div>
     )
 }
@@ -99,6 +103,8 @@ export const NavigationStack = Object.assign(BaseNavigationStack, {
     Sidebar,
     Detail,
 }) as NavigationStackComponent
+
+export { SidebarToggleButton }
 
 function DefaultUnselectedView({
     className,

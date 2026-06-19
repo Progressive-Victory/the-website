@@ -41,6 +41,9 @@ export interface ListProps {
 
     onSearch: (search: SearchRequest) => void
 
+    searchPanelOpen?: boolean
+    onSearchPanelOpenChange?: (next: boolean) => void
+
     // NEW: Optional back button shown in the list header
     backHref?: string
     backLabel?: string
@@ -48,13 +51,22 @@ export interface ListProps {
 
 export function List(props: ListProps) {
     const [searchPanelOpen, setSearchPanelOpen] = useState(false)
+    const isSearchPanelControlled =
+        typeof props.searchPanelOpen === 'boolean' &&
+        typeof props.onSearchPanelOpenChange === 'function'
+    const panelOpen = isSearchPanelControlled
+        ? props.searchPanelOpen
+        : searchPanelOpen
+    const setPanelOpen = isSearchPanelControlled
+        ? props.onSearchPanelOpenChange
+        : setSearchPanelOpen
 
     return (
         <div className={styles.list}>
             <ListTop
                 {...props}
-                searchPanelOpen={searchPanelOpen}
-                setSearchPanelOpen={setSearchPanelOpen}
+                searchPanelOpen={panelOpen}
+                setSearchPanelOpen={setPanelOpen}
                 mode="full"
             />
 

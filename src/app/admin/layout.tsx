@@ -6,7 +6,10 @@ import { ProtectedPage } from '@/components/ProtectedPage'
 import { NavigationStack } from '@/components/common/navigation_stack/NavigationStack'
 import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
-import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
+import {
+    Sidebar,
+    SidebarFeatured,
+} from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { Header } from '@/components/layout/Header'
 import {
     zActBlueDonationPacket,
@@ -20,7 +23,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
-import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
+import { FaClipboardUser, FaDollarSign, FaFlask } from 'react-icons/fa6'
 import type { IconType } from 'react-icons/lib'
 
 interface AdminGroupChildConfigItem {
@@ -117,6 +120,82 @@ export default function Layout({ children }: { children: ReactNode }) {
             icon: FaUserShield,
             count: permissions.query.data?.count,
         },
+        {
+            key: 'test',
+            label: 'Test',
+            href: '/admin/panels/test',
+            icon: FaUserShield,
+            count: permissions.query.data?.count,
+        },
+        {
+            key: 'test_grouped',
+            label: 'Test Grouped',
+            href: '/admin/panels/test_grouped',
+            icon: FaFlask,
+            buttonType: 'group',
+            groupChildren: [
+                {
+                    key: 'test-1',
+                    label: 'Test 1',
+                    href: '/admin/panels/test-1',
+                    icon: FaFlask,
+                },
+                {
+                    key: 'test-2',
+                    label: 'Test 2',
+                    href: '/admin/panels/test-2',
+                    icon: FaFlask,
+                },
+                {
+                    key: 'test-3',
+                    label: 'Test 3',
+                    href: '/admin/panels/test-3',
+                    icon: FaFlask,
+                },
+                {
+                    key: 'test-4',
+                    label: 'Test 4',
+                    href: '/admin/panels/test-4',
+                    icon: FaFlask,
+                },
+                {
+                    key: 'test-5',
+                    label: 'Test 5',
+                    href: '/admin/panels/test-5',
+                    icon: FaFlask,
+                },
+                {
+                    key: 'test-6',
+                    label: 'Test 6',
+                    href: '/admin/panels/test-6',
+                    icon: FaFlask,
+                },
+                {
+                    key: 'test-7',
+                    label: 'Test 7',
+                    href: '/admin/panels/test-7',
+                    icon: FaFlask,
+                },
+                {
+                    key: 'test-8',
+                    label: 'Test 8',
+                    href: '/admin/panels/test-8',
+                    icon: FaFlask,
+                },
+                {
+                    key: 'test-9',
+                    label: 'Test 9',
+                    href: '/admin/panels/test-9',
+                    icon: FaFlask,
+                },
+                {
+                    key: 'test-10',
+                    label: 'Test 10',
+                    href: '/admin/panels/test-10',
+                    icon: FaFlask,
+                },
+            ],
+        },
     ]
 
     useEffect(() => {
@@ -154,6 +233,8 @@ export default function Layout({ children }: { children: ReactNode }) {
                         <Sidebar
                             className={styles.sidebar}
                             label="Volunteer Dashboard"
+                            sidebarStyle="minimal"
+                            featured={<SidebarFeatured />}
                         >
                             {adminPanelConfig.map((panel) => (
                                 <NavigationButton
