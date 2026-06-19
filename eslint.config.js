@@ -34,9 +34,7 @@ tseslint.configs.stylisticTypeChecked,
 {
     languageOptions: {
         parserOptions: {
-            projectService: {
-                allowDefaultProject: ['*.ts', '*.tsx']
-            },
+            projectService: true,
             tsconfigRootDir: import.meta.dirname,
         },
     },
