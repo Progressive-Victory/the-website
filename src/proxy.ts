@@ -10,7 +10,7 @@ import type { NextRequest } from 'next/server'
  * @param {NextRequest} request
  * @returns {NextResponse}
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url))
 }
 
