@@ -3,7 +3,13 @@ import { MultiSelect, MultiSelectOption } from '@/components/common'
 import { SearchRequest, SortDirection } from '@/contracts/requests'
 import cx from 'classnames'
 import Link from 'next/link'
-import React, { ChangeEvent, InputEvent, ReactNode, useEffect, useState } from 'react'
+import React, {
+    ChangeEvent,
+    InputEvent,
+    ReactNode,
+    useEffect,
+    useState,
+} from 'react'
 import {
     FiChevronLeft,
     FiChevronRight,

@@ -147,7 +147,10 @@ export function CollectInfoStage({
                         errorText="Enter a valid date of birth"
                         maxLength={10}
                         onInput={(e) =>
-                            setForm({ ...form, dateOfBirth: e.currentTarget.value })
+                            setForm({
+                                ...form,
+                                dateOfBirth: e.currentTarget.value,
+                            })
                         }
                     />
                     <Field
