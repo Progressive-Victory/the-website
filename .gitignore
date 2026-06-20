@@ -49,3 +49,4 @@ node_modules/
 #misc
 .direnv
 shell.nix
+.eslintcache

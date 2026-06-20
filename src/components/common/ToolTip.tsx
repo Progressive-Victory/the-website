@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, RefObject } from 'react'
+import { RefObject, useEffect, useRef, useState } from 'react'
 
 /*
 preliminary notes: component that generates a button which upon being clicked displays an 
@@ -52,7 +52,9 @@ export function ToolTip({
         setCloserList(closers)
     }, [open])
 
-    useOutsideDetector(wrapperRef)
+    // For code quality, an effect is wrapped in a function. 
+    // ESlint can't verify this function call as legal though, so we need to help it (pulling it out of the function passes cleanly)
+    useOutsideDetector(wrapperRef) //eslint-disable-line react-hooks/refs
 
     closerList?.map((element: Element) => {
         if (element instanceof HTMLButtonElement) {
