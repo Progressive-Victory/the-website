@@ -6,41 +6,27 @@ import nextTypescript from "eslint-config-next/typescript";
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 import js from '@eslint/js'
-import eslintPluginIndex from '@progressive-victory/eslint-plugin-index-file'
 
-export default defineConfig([
-    {
-        ignores: ['*.config.{js,mjs,ts,mts}']
-    },
-    {
-
+export default defineConfig([{
     files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     plugins: { js },
     extends: ['js/recommended'],
-},
-{
+}, {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
 }, 
 tseslint.configs.recommendedTypeChecked,
-tseslint.configs.stylisticTypeChecked,
-{
-    ignores: ['src/app/**', '**/*.helpers.*', 'src/*'],
-    extends: [eslintPluginIndex.configs.recommended],
-},
+ tseslint.configs.stylisticTypeChecked,
 ...nextCoreWebVitals,
 ...nextTypescript,
-...tailwind.configs['flat/recommended'],
-{
+...tailwind.configs['flat/recommended'], {
     languageOptions: {
         parserOptions: {
             projectService: true,
             tsconfigRootDir: import.meta.dirname,
         },
     },
-}, 
-
-{
+}, {
     rules: {
         'object-shorthand': 'warn',
         '@typescript-eslint/no-unsafe-assignment': 'warn',

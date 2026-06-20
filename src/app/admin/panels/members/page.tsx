@@ -20,14 +20,14 @@ import {
     zRole,
     zUser,
     zUserProfile,
-} from 'pv-contracts/data'
+} from '@/contracts/data'
 import {
     ActBlueDonorLinkRequest,
     SortDirection,
     UpdateUserRequest,
     zUpdateUserRequest,
-} from 'pv-contracts/requests'
-import { PaginatedResponse } from 'pv-contracts/responses'
+} from '@/contracts/requests'
+import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {

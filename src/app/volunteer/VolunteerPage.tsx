@@ -11,16 +11,16 @@ import {
 import { BannedStage } from './BannedStage'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
-import { OnboardingStage } from 'pv-contracts/data'
+import { OnboardingStage } from '@/contracts/data'
 import {
     UserOnboardingCollectInfoRequest,
     UserOnboardingVerifyRequest,
     zUserOnboardingCollectInfoRequest,
-} from 'pv-contracts/requests'
+} from '@/contracts/requests'
 import {
     DiscordUserIsInServerResponse,
     zDiscordUserIsInServerResponse,
-} from 'pv-contracts/responses'
+} from '@/contracts/responses'
 import { useAuth, useCurrentUser, useFetch } from '@/util/hooks'
 import {
     keepPreviousData,

@@ -1,5 +1,5 @@
 import { useFetch } from './useFetch'
-import { User, zUser } from 'pv-contracts/data'
+import { User, zUser } from '@/contracts/data'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 
 interface DataState {

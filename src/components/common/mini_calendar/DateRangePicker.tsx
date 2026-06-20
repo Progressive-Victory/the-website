@@ -10,7 +10,7 @@ import {
     startOfDayISO,
 } from './dateRange.helpers'
 import { useDateRangeSelectionController } from './useDateRangeSelectionController'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 interface DateRangePickerProps {
     startDate: string
@@ -32,18 +32,12 @@ export function DateRangePicker({
         return new Date(anchor.getFullYear(), anchor.getMonth(), 1)
     })
 
-    //this fix needs testing
-
-    const syncStartDate = useCallback(() => {
+    useEffect(() => {
         if (!startDate) return
         const anchor = new Date(startDate)
         if (Number.isNaN(anchor.getTime())) return
         setCalendarMonth(new Date(anchor.getFullYear(), anchor.getMonth(), 1))
     }, [startDate])
-
-    useEffect(() => {
-        return syncStartDate
-    }, [startDate, syncStartDate])
 
     const todayInputValue = useMemo(
         () => isoToDateInput(new Date().toISOString()),

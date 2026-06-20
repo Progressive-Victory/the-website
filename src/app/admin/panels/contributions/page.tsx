@@ -9,7 +9,7 @@ import {
     Form,
     DateField,
 } from '@/components/common/forms'
-import { ActBlueDonationPacket, zActBlueDonationPacket } from 'pv-contracts/data'
+import { ActBlueDonationPacket, zActBlueDonationPacket } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
