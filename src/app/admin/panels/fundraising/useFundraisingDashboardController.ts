@@ -281,11 +281,12 @@ export function useFundraisingDashboardController(onGet: OnGet) {
         })
     }, [chartBuckets, chartBucketQueries])
 
-    useEffect(() => {
-        if (!validGranularityModes.includes(granularityMode)) {
-            setGranularityMode('auto')
-        }
-    }, [validGranularityModes, granularityMode])
+    if (
+        granularityMode != 'auto' &&
+        !validGranularityModes.includes(granularityMode)
+    ) {
+        setGranularityMode('auto')
+    }
 
     const selectedRangeLabel = useMemo(
         () => getSelectedRangeLabel(committedPreset, startDate, endDate),
