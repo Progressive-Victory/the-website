@@ -545,7 +545,7 @@ export default function Page() {
                                       if (inclusiveRangeMs < oneDayMs) {
                                           return
                                       }
-
+                                      console.log("Applying chart view override range:", { startIso, endIso })
                                       applyChartViewOverrideRange({
                                           startIso,
                                           endIso,

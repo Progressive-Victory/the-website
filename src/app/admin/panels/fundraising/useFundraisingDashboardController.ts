@@ -20,7 +20,7 @@ import {
 } from '@/components/common/charts/timeBuckets'
 import type { QueryParams, ZodSchema } from '@/util/hooks/useFetch'
 import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 interface GetOptions {
     query?: QueryParams
@@ -230,15 +230,15 @@ export function useFundraisingDashboardController(onGet: OnGet) {
         ]
     )
 
-    useEffect(() => {
-        setChartViewOverrideRange(null)
-    }, [startDate, endDate, committedPreset])
+    // useEffect(() => {
+    //     setChartViewOverrideRange(null)
+    // }, [startDate, endDate, committedPreset])
 
-    useEffect(() => {
-        if (!zoomEnabled) {
-            setChartViewOverrideRange(null)
-        }
-    }, [zoomEnabled])
+    // useEffect(() => {
+    //     if (!zoomEnabled) {
+    //         setChartViewOverrideRange(null)
+    //     }
+    // }, [zoomEnabled])
 
     const chartBucketQueries = useQueries({
         queries: chartBuckets.map((bucket) => ({
@@ -338,7 +338,7 @@ export function useFundraisingDashboardController(onGet: OnGet) {
             setChartViewOverrideRange(null)
             return
         }
-
+        console.debug("Applying chart view override range:", range)
         setChartViewOverrideRange(range)
     }
 
