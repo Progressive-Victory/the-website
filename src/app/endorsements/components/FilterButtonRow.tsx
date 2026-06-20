@@ -195,9 +195,6 @@ export function FilterButtonRow({
 
     useLayoutEffect(() => {
         if (!isMobile) {
-            setMobileSearchWidth(null)
-            setSingleColumnLayout(false)
-            setShowSearchLabel(false)
             return
         }
 
@@ -217,7 +214,7 @@ export function FilterButtonRow({
         }
 
         measure()
-        const rafId = window.requestAnimationFrame(measure)
+        const rafId = globalThis.requestAnimationFrame(measure)
 
         const resizeObserver = new ResizeObserver(measure)
         resizeObserver.observe(row)
@@ -231,7 +228,7 @@ export function FilterButtonRow({
         window.addEventListener('resize', measure)
 
         return () => {
-            window.cancelAnimationFrame(rafId)
+            globalThis.cancelAnimationFrame(rafId)
             resizeObserver.disconnect()
             window.removeEventListener('resize', measure)
         }
