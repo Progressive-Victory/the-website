@@ -2,7 +2,7 @@ import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import cx from 'classnames'
 import phone from 'phone'
-import { ChangeEvent, InputEvent, useCallback } from 'react'
+import { InputEvent, useCallback } from 'react'
 
 /**
  * Formats a phone number string for display in readonly mode.

@@ -2,7 +2,6 @@ import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import cx from 'classnames'
 import {
-    ChangeEvent,
     HTMLInputAutoCompleteAttribute,
     InputEvent,
     useCallback,

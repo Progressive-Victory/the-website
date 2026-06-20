@@ -22,7 +22,7 @@ import type { UseQueryResult } from '@tanstack/react-query'
 import cx from 'classnames'
 import { motion } from 'motion/react'
 import Link from 'next/link'
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import React, { ChangeEvent, useMemo, useState } from 'react'
 
 export interface DonorViewProps {
     selectedId: number
@@ -138,8 +138,8 @@ export function DonorView({
     }
 
     const [overlayMounted, setOverlayMounted] = useState(false)
-    const [overlayOpen, setOverlayOpen] = useState(false)
-
+    //const [overlayOpen, setOverlayOpen] = useState(false)
+    const overlayOpen = false; // For consistency since setOverlay open was only used in the seemingly unused effect
     console.debug("Picking Donor? : ", pickingDonor);
     // useEffect(() => {
     //     if (pickingDonor) {
