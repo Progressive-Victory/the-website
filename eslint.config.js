@@ -21,7 +21,7 @@ export default defineConfig([
     tseslint.configs.stylisticTypeChecked,
     ...nextCoreWebVitals,
     ...nextTypescript,
-    tailwind.configs.recommended,
+    //tailwind.configs.recommended, tailwind needs to be phased out
     {
         languageOptions: {
             parserOptions: {
