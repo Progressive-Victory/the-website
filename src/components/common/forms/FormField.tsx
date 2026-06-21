@@ -1,5 +1,5 @@
 import styles from './FormField.module.css'
-import { ReactElement, useCallback, useEffect, useMemo } from 'react'
+import { ReactElement, useEffect, useMemo } from 'react'
 
 /**
  * Properties for the FormField component. All form fields extend their
@@ -167,7 +167,7 @@ export function useConfigure<FormType, FieldType>(
 
     // Use the provided getter if available, or default to `form[props.field]`.
     // If no field is provided either, be sad and return undefined.
-    const getter = useCallback(() => {
+    const getter = useMemo(() => {
         const getter = props.getter
         if (getter) return getter
 
@@ -180,7 +180,7 @@ export function useConfigure<FormType, FieldType>(
 
     // Use the provided setter if available, or default to `form[props.field]`.
     // If no field is provided either, be sad and return undefined.
-    const setter = useCallback(() => {
+    const setter = useMemo(() => {
         const setter = props.setter
         if (setter) return setter
 
