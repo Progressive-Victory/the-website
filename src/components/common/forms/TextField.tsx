@@ -1,11 +1,7 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import cx from 'classnames'
-import {
-    HTMLInputAutoCompleteAttribute,
-    InputEvent,
-    useCallback,
-} from 'react'
+import { HTMLInputAutoCompleteAttribute, InputEvent, useCallback } from 'react'
 
 export interface TextFieldProps<T> extends FormFieldProps<
     T,

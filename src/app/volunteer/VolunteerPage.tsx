@@ -181,7 +181,7 @@ export default function VolunteerPage() {
     if (isSessionLoading) return null
 
     if (!session) {
-        globalThis.location.replace('/login?redirect=/volunteer');
+        globalThis.location.replace('/login?redirect=/volunteer')
         return null
     }
 
