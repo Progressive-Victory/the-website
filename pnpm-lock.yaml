@@ -70,8 +70,8 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
       pv-contracts:
-        specifier: git+https://github.com/Progressive-Victory/the-contracts.git
-        version: '@progressive-victory/the-contracts@git+https://github.com/Progressive-Victory/the-contracts.git#7c12401121fcb10f5c821673ba77b402ae0bf94c'
+        specifier: git+git@github.com:Progressive-Victory/the-contracts.git
+        version: '@progressive-victory/the-contracts@git+https://git@github.com:Progressive-Victory/the-contracts.git#7c12401121fcb10f5c821673ba77b402ae0bf94c'
       react:
         specifier: ^19.2.7
         version: 19.2.7
@@ -1103,8 +1103,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@progressive-victory/the-contracts@git+https://github.com/Progressive-Victory/the-contracts.git#7c12401121fcb10f5c821673ba77b402ae0bf94c':
-    resolution: {commit: 7c12401121fcb10f5c821673ba77b402ae0bf94c, repo: https://github.com/Progressive-Victory/the-contracts.git, type: git}
+  '@progressive-victory/the-contracts@git+https://git@github.com:Progressive-Victory/the-contracts.git#7c12401121fcb10f5c821673ba77b402ae0bf94c':
+    resolution: {commit: 7c12401121fcb10f5c821673ba77b402ae0bf94c, repo: git@github.com:Progressive-Victory/the-contracts.git, type: git}
     version: 1.5.0
 
   '@radix-ui/primitive@1.1.4':
@@ -6070,7 +6070,7 @@ snapshots:
     dependencies:
       playwright: 1.61.0
 
-  '@progressive-victory/the-contracts@git+https://github.com/Progressive-Victory/the-contracts.git#7c12401121fcb10f5c821673ba77b402ae0bf94c':
+  '@progressive-victory/the-contracts@git+https://git@github.com:Progressive-Victory/the-contracts.git#7c12401121fcb10f5c821673ba77b402ae0bf94c':
     dependencies:
       zod: 4.4.3
 
