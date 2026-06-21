@@ -9,9 +9,6 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
-import { Permission, Role, zPermission, zRole } from '@/contracts/data'
-import { SortDirection, UpdateRoleRequest } from '@/contracts/requests'
-import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
@@ -21,6 +18,9 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { Permission, Role, zPermission, zRole } from 'pv-contracts/data'
+import { SortDirection, UpdateRoleRequest } from 'pv-contracts/requests'
+import { PaginatedResponse } from 'pv-contracts/responses'
 import { useMemo, useState } from 'react'
 
 export default function Page() {
