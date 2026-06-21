@@ -211,6 +211,29 @@
     padding-right: var(--navigation-stack-sidebar-padding, 0.9rem);
 }
 
+.sidebarBodyWrapperHideScrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sidebarBodyWrapperHideScrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Pinned sidebar footer — identical layout to list2's footer
+   (.pageSelectContainer), spanning the full sidebar width. */
+.prominentFooter {
+    margin-top: auto;
+    margin-right: calc(-1 * var(--navigation-stack-sidebar-padding, 0.9rem));
+    margin-left: calc(-1 * var(--navigation-stack-sidebar-padding, 0.9rem));
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    /* padding: 0.85rem; */
+    border-top: 2px solid #e5e7eb;
+    background-color: #f9fafb;
+}
+
 .selectionIndicator {
     position: absolute;
     right: calc(
@@ -482,4 +505,92 @@
 .panelBreadcrumb {
     font-weight: 650;
     color: rgba(15, 23, 42, 0.55);
+}
+
+.largeTitleBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 0.25rem 0 0.5rem;
+}
+
+.largeTitleBlock[data-collapsed='true'] {
+    display: none;
+}
+
+.largeTitle {
+    margin: 0;
+    padding: 1rem 1rem 0rem;
+
+    font-size: 1.85rem;
+    font-weight: 1000;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: rgba(15, 23, 42, 0.95);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+    transform-origin: left center;
+
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+        opacity 240ms cubic-bezier(0.32, 0.72, 0, 1),
+        transform 320ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.sidebar[data-sidebar-large-title-collapsed='true'] .largeTitle {
+    opacity: 0;
+    transform: translateY(-0.6rem);
+}
+
+.largeTitleSearch {
+    padding: 0 0.2rem;
+
+    /* The search lives with the large title. When the large title switches
+       off (collapse triggered), the search simply collapses out of view
+       instead of morphing into the header. Constant CSS timing. */
+    max-height: 4rem;
+    opacity: 1;
+    overflow: hidden;
+    transition:
+        max-height 280ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 200ms ease,
+        transform 320ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.sidebar[data-sidebar-large-title-collapsed='true'] .largeTitleSearch {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-0.35rem);
+    pointer-events: none;
+}
+
+.prominentBreadcrumb[data-large-title='true'] {
+    opacity: 0;
+    transform: translateY(0.35rem);
+    transition:
+        opacity 240ms cubic-bezier(0.32, 0.72, 0, 1),
+        transform 320ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.sidebar[data-sidebar-large-title-collapsed='true']
+    .prominentBreadcrumb[data-large-title='true'] {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.sidebarWithProminentHeader[data-sidebar-collapsed='true']
+    .prominentBreadcrumb[data-large-title='true'] {
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .largeTitle,
+    .largeTitleSearch,
+    .prominentBreadcrumb[data-large-title='true'] {
+        transition: none;
+    }
 }

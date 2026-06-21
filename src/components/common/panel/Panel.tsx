@@ -17,7 +17,11 @@ export interface PanelProps {
     label?: string
     includeHeader?: boolean
     includeSidebar?: boolean
+    largeTitle?: boolean
+    sidebarSearch?: ReactNode
+    sidebarFooter?: ReactNode
     sidebarWidth?: string
+    showScrollbar?: boolean
     sidebarClassName?: string
     sidebarBody?: ReactNode
     sidebarMobileVisible?: boolean
@@ -30,6 +34,7 @@ export interface PanelProps {
     headerLead?: ReactNode
     headerLeft?: ReactNode
     headerRight?: ReactNode
+    footer?: ReactNode
 }
 
 export function Panel({
@@ -37,7 +42,11 @@ export function Panel({
     label,
     includeHeader = false,
     includeSidebar = false,
+    largeTitle = false,
+    sidebarSearch,
+    sidebarFooter,
     sidebarWidth,
+    showScrollbar = true,
     sidebarClassName,
     sidebarBody,
     sidebarMobileVisible,
@@ -50,6 +59,7 @@ export function Panel({
     headerLead,
     headerLeft,
     headerRight,
+    footer,
 }: PanelProps) {
     const panelLabel = label ?? 'Panel'
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -90,7 +100,11 @@ export function Panel({
                         <Sidebar
                             label={panelLabel}
                             includeHeader={includeHeader}
+                            largeTitle={largeTitle}
+                            search={sidebarSearch}
+                            footer={sidebarFooter}
                             sidebarWidth={sidebarWidth}
+                            showScrollbar={showScrollbar}
                             className={sidebarClassName}
                             filterOpen={sidebarFilterOpen}
                             onFilterOpenChange={onSidebarFilterOpenChange}
@@ -124,6 +138,9 @@ export function Panel({
                                         />
                                     ) : null}
                                     {children}
+                                    {footer ? (
+                                        <PanelFooter>{footer}</PanelFooter>
+                                    ) : null}
                                 </>
                             }
                         />
@@ -142,6 +159,7 @@ export function Panel({
                         />
                     ) : null}
                     {children}
+                    {footer ? <PanelFooter>{footer}</PanelFooter> : null}
                 </>
             ) : null}
         </div>
@@ -197,4 +215,12 @@ function PanelHeader({
             </div>
         </div>
     )
+}
+
+interface PanelFooterProps {
+    children?: ReactNode
+}
+
+function PanelFooter({ children }: PanelFooterProps): ReactNode {
+    return <div className={styles.panelFooter}>{children}</div>
 }

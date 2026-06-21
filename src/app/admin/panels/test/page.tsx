@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
+import { DropdownButton, DropdownOverlay } from '@/components/common'
 import {
     Form,
     FormGroup,
@@ -10,16 +11,22 @@ import {
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import Panel from '@/components/common/panel/Panel'
 import { Permission, zPermission } from '@/contracts/data'
-import { UpdatePermissionRequest } from '@/contracts/requests'
+import { SearchRequest, UpdatePermissionRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import cx from 'classnames'
+import { useCallback, useEffect, useState } from 'react'
 import {
-    TbLayoutSidebarLeftCollapse,
-    TbLayoutSidebarLeftExpand,
-} from 'react-icons/tb'
+    FiChevronLeft,
+    FiChevronRight,
+    FiChevronsLeft,
+    FiChevronsRight,
+} from 'react-icons/fi'
+import { IoMdOptions } from 'react-icons/io'
+import { IoClose } from 'react-icons/io5'
+import { IconType } from 'react-icons/lib'
 import { useMediaQuery } from 'usehooks-ts'
 
 export default function Page() {
@@ -33,10 +40,11 @@ export default function Page() {
 
     const [, setFormState] = useState<FormState<Permission> | null>(null)
 
-    const { query: searchQuery, search } = usePaginatedSearch<Permission>(
-        '/permissions',
-        zPermission
-    )
+    const {
+        query: searchQuery,
+        search,
+        onSearch,
+    } = usePaginatedSearch<Permission>('/permissions', zPermission)
 
     const updateMutation = useMutation<
         Permission,
@@ -106,18 +114,46 @@ export default function Page() {
     const [panelOpen, setPanelOpen] = useState(false)
     const onTogglePanel = () => setPanelOpen((previous) => !previous)
 
-    const testElementCount = 42
     const permissions = searchQuery.data?.data ?? []
+    const resultCount = searchQuery.data?.count
 
     return (
         <Panel
             includeSidebar
+            largeTitle
+            sidebarSearch={<SearchBar search={search} onSearch={onSearch} />}
             sidebarWidth="24rem"
             sidebarClassName={styles.sidebarBg}
             sidebarMobileVisible={isDesktop || sidebarMobileVisible}
             label="Test"
+            showScrollbar={false}
+            sidebarFooter={
+                <Footer
+                    search={search}
+                    count={resultCount}
+                    isPending={searchQuery.isPending}
+                    onSearch={onSearch}
+                />
+            }
             prominentHeaderRight={
                 <>
+                    <DropdownButton
+                        type="button"
+                        label="List Options"
+                        buttonVariant="minimal"
+                        menu={({ closeDropdown }) => (
+                            <DropdownOverlay
+                                className={styles.chartOptionsBox}
+                                label="List Options"
+                                onClose={() => {
+                                    closeDropdown()
+                                }}
+                                bodyClassName={styles.dropdownOverlay}
+                                body={<></>}
+                            />
+                        )}
+                    />
+
                     <button
                         aria-label={panelOpen ? 'Hide Filters' : 'Show Filters'}
                         className={styles.iconToggleButton}
@@ -126,15 +162,9 @@ export default function Page() {
                         type="button"
                     >
                         {panelOpen ? (
-                            <TbLayoutSidebarLeftExpand
-                                size="20"
-                                style={{ strokeWidth: 2 }}
-                            />
+                            <IoClose size="20" />
                         ) : (
-                            <TbLayoutSidebarLeftCollapse
-                                size="20"
-                                style={{ strokeWidth: 2 }}
-                            />
+                            <IoMdOptions size="20" />
                         )}
                     </button>
                 </>
@@ -157,11 +187,6 @@ export default function Page() {
                             showIndicator={false}
                             className={styles.permissionNavigationButton}
                         />
-                    ))}
-                    {Array.from({ length: testElementCount }, (_, index) => (
-                        <div className={styles.element} key={index}>
-                            Test
-                        </div>
                     ))}
                 </>
             }
@@ -196,5 +221,168 @@ export default function Page() {
                 )}
             </div>
         </Panel>
+    )
+}
+
+interface SearchBarProps {
+    search: SearchRequest
+    onSearch: (search: SearchRequest) => void
+}
+
+function SearchBar({ search, onSearch }: SearchBarProps) {
+    return (
+        <div className={styles.searchInput}>
+            <input
+                type="text"
+                name="search"
+                id="search"
+                placeholder="Search..."
+                defaultValue={search.query ?? ''}
+                onInput={(event) =>
+                    onSearch({
+                        ...search,
+                        query: event.currentTarget.value,
+                        page: 0,
+                    })
+                }
+            />
+        </div>
+    )
+}
+
+interface FooterProps {
+    search: SearchRequest
+    count?: number
+    isPending: boolean
+    onSearch: (search: SearchRequest) => void
+}
+
+function Footer({
+    search,
+    count: resultCount,
+    isPending,
+    onSearch,
+}: FooterProps) {
+    const [value, setValue] = useState('')
+
+    const page = search.page ?? 0
+    const pageSize = search.limit ?? 25
+    const count = resultCount ?? 0
+    const disabled = isPending
+
+    const pageCount = Math.ceil(count / pageSize)
+    const canNavigate = pageCount > 1
+    const maxPage = pageCount - 1
+
+    const onChange = useCallback(
+        (page: number) => onSearch({ ...search, page }),
+        [onSearch, search]
+    )
+
+    const handleChangeValue = (value: string) => {
+        if (!value || (/^\d+$/.test(value) && value.length < 10))
+            setValue(value)
+    }
+
+    const handleSubmit = () => {
+        const newPage = +value - 1
+        if (0 <= newPage && newPage <= maxPage) onChange(newPage)
+        else setValue((page + 1).toString())
+    }
+
+    useEffect(() => {
+        setValue((page + 1).toString())
+    }, [page])
+
+    useEffect(() => {
+        if (page < 0) onChange(0)
+        else if (maxPage >= 0 && page > maxPage) onChange(maxPage)
+    }, [page, maxPage, onChange])
+
+    const PaginationArrow = ({
+        onClick,
+        icon: Icon,
+        title,
+        enabled,
+    }: {
+        onClick: () => void
+        icon: IconType
+        title: string
+        enabled: boolean
+    }) => (
+        <a
+            className={cx(
+                styles.arrow,
+                enabled ? styles.enabled : styles.disabled
+            )}
+            onClick={() => enabled && onClick()}
+            title={title}
+        >
+            <Icon size={20} />
+        </a>
+    )
+
+    if (resultCount == null) return null
+
+    return (
+        <div className={styles.pageSelectContainer}>
+            <div className={styles.pageSelect}>
+                <div className={styles.pageSelectButtons}>
+                    <PaginationArrow
+                        onClick={() => onChange(0)}
+                        icon={FiChevronsLeft}
+                        title="First"
+                        enabled={canNavigate && page > 0}
+                    />
+                    <PaginationArrow
+                        onClick={() => onChange(page - 1)}
+                        icon={FiChevronLeft}
+                        title="Previous"
+                        enabled={canNavigate && page > 0}
+                    />
+                    <form
+                        className={styles.pageSelectForm}
+                        onSubmit={(e) => {
+                            e.preventDefault()
+                            handleSubmit()
+                        }}
+                    >
+                        <input
+                            id="page"
+                            type="text"
+                            value={value}
+                            disabled={disabled}
+                            onBlur={handleSubmit}
+                            onChange={(e) => handleChangeValue(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.currentTarget.blur()
+                                }
+                            }}
+                            className={styles.pageSelectInput}
+                        />
+                        <input type="submit" hidden />
+                        <span className={styles.pageSelectSpan} color="#4b5563">
+                            of{' '}
+                            <span title={`${count} total results`}>
+                                {pageCount}
+                            </span>
+                        </span>
+                    </form>
+                    <PaginationArrow
+                        onClick={() => onChange(page + 1)}
+                        icon={FiChevronRight}
+                        title="Next"
+                        enabled={canNavigate && page < maxPage}
+                    />
+                    <PaginationArrow
+                        onClick={() => onChange(maxPage)}
+                        icon={FiChevronsRight}
+                        title="Last"
+                        enabled={canNavigate && page < maxPage}
+                    />
+                </div>
+            </div>
+        </div>
     )
 }

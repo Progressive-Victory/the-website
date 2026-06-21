@@ -21,7 +21,40 @@
 
 .searchInput {
     display: flex;
+    width: 100%;
     align-items: center;
+    gap: 0.5rem;
+    padding-inline: 0.5rem;
+}
+
+.searchInput > input {
+    width: 100%;
+    border-radius: 0.6rem;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #d1d5db;
+    padding: 0.25rem 0.75rem;
+}
+
+.searchInput > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    background: transparent;
+    border-radius: 0.85rem;
+
+    padding: 0.5rem;
+
+    cursor: pointer;
+    color: rgba(15, 23, 42, 0.62);
+
+    gap: 0.5rem;
+}
+
+.searchInput > button:hover {
+    background: rgba(15, 23, 42, 0.06);
 }
 
 .iconToggleButton {
@@ -177,4 +210,81 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* .pageSelectContainer {
+    margin-top: auto;
+    display: flex;
+    gap: 1rem;
+} */
+/* 
+.pageSelect {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+} */
+
+.pageSelectButtons {
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.9rem;
+}
+
+.pageSelectForm {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    color: rgba(15, 23, 42, 0.72);
+}
+
+.pageSelectInput {
+    width: 6ch;
+    max-width: min-content;
+    border-radius: 0.65rem;
+    border-width: 1px;
+    border-color: #d1d5db;
+    padding: 0.125rem 0.5rem;
+    text-align: center;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.pageSelectInput:focus {
+    border-color: rgba(14, 165, 233, 0.35);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+.arrow {
+    display: flex;
+    user-select: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.85rem;
+    padding: 0.45rem;
+
+    font-weight: 600;
+}
+
+.arrow.disabled {
+    cursor: not-allowed;
+    color: rgba(15, 23, 42, 0.28);
+}
+
+.arrow.enabled {
+    cursor: pointer;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.arrow.enabled:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.arrow.enabled:active {
+    background-color: #f3f4f6;
 }

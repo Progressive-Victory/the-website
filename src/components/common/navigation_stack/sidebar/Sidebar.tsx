@@ -48,6 +48,7 @@ interface ProminentSidebarHeaderProps {
     filterOpen?: boolean
     onFilterOpenChange?: (open: boolean) => void
     reserveToggleSpace: boolean
+    largeTitle?: boolean
 }
 
 interface SidebarFooterProps {
@@ -60,6 +61,9 @@ export interface NavigationStackSlotProps {
     children?: ReactNode
     featured?: ReactNode
     label?: string
+    largeTitle?: boolean
+    search?: ReactNode
+    footer?: ReactNode
     includeHeader?: boolean
     sidebarWidth?: string
     filterOpen?: boolean
@@ -72,6 +76,7 @@ export interface NavigationStackSlotProps {
     prominentHeaderRight?: ReactNode
     prominentHeader?: ReactNode
     mobileVisible?: boolean
+    showScrollbar?: boolean
     className?: string
 }
 
@@ -278,6 +283,81 @@ function useSidebarIndicator(
     }
 }
 
+function useLargeTitleScroll(
+    scrollRef: React.RefObject<HTMLDivElement | null>,
+    titleRef: React.RefObject<HTMLElement | null>,
+    enabled: boolean
+): boolean {
+    // The collapse is *triggered* by scrolling, but the animation itself is
+    // driven by CSS transitions (constant duration), not scrubbed by the
+    // scroll position. So this hook only resolves a boolean state with a small
+    // hysteresis band to avoid flicker right at the trigger point.
+    const [collapsed, setCollapsed] = useState(false)
+
+    useEffect(() => {
+        if (!enabled) {
+            setCollapsed((previous) => (previous ? false : previous))
+            return
+        }
+
+        const scrollElement = scrollRef.current
+
+        if (!scrollElement) {
+            return
+        }
+
+        let frameId: number | null = null
+
+        function evaluate() {
+            frameId = null
+
+            const element = scrollRef.current
+
+            if (!element) {
+                return
+            }
+
+            const collapseTrigger = 12
+            const expandTrigger = 4
+
+            setCollapsed((previous) => {
+                if (!previous && element.scrollTop > collapseTrigger) {
+                    return true
+                }
+
+                if (previous && element.scrollTop <= expandTrigger) {
+                    return false
+                }
+
+                return previous
+            })
+        }
+
+        function handleScroll() {
+            if (frameId !== null) {
+                return
+            }
+
+            frameId = requestAnimationFrame(evaluate)
+        }
+
+        scrollElement.addEventListener('scroll', handleScroll, {
+            passive: true,
+        })
+        evaluate()
+
+        return () => {
+            scrollElement.removeEventListener('scroll', handleScroll)
+
+            if (frameId !== null) {
+                cancelAnimationFrame(frameId)
+            }
+        }
+    }, [enabled, scrollRef, titleRef])
+
+    return enabled ? collapsed : false
+}
+
 export function Sidebar({
     sidebarStyle = 'minimal',
     ...props
@@ -298,6 +378,7 @@ function MinimalSidebar({
     open: controlledOpen,
     onOpenChange,
     mobileVisible,
+    showScrollbar = true,
     className,
 }: NavigationStackSlotProps): ReactElement {
     const pathname = usePathname()
@@ -334,7 +415,12 @@ function MinimalSidebar({
 
             {featured}
 
-            <div className={styles.sidebarBodyWrapper}>
+            <div
+                className={cx(
+                    styles.sidebarBodyWrapper,
+                    !showScrollbar && styles.sidebarBodyWrapperHideScrollbar
+                )}
+            >
                 <SidebarBody
                     bodyRef={bodyRef}
                     indicatorLayoutSyncing={indicatorLayoutSyncing}
@@ -357,6 +443,9 @@ function ProminentSidebar({
     children,
     featured,
     label,
+    largeTitle = false,
+    search,
+    footer,
     includeHeader = true,
     sidebarWidth,
     filterOpen,
@@ -367,6 +456,7 @@ function ProminentSidebar({
     prominentHeaderRight,
     prominentHeader,
     mobileVisible,
+    showScrollbar = true,
     className,
 }: NavigationStackSlotProps): ReactElement {
     const pathname = usePathname()
@@ -374,6 +464,19 @@ function ProminentSidebar({
     const { isDesktop, isOpen } = useSidebarOpenState(controlledOpen)
     const { bodyRef, indicatorLayoutSyncing, indicatorStyle } =
         useSidebarIndicator(pathname, isDesktop, isOpen, children)
+    const scrollRef = useRef<HTMLDivElement | null>(null)
+    const largeTitleRef = useRef<HTMLHeadingElement | null>(null)
+    const collapsed = isDesktop && !isOpen
+    // Large title applies to prominent sidebars (the prominent header acts as
+    // the inline title destination) but not when collapsed to the icon rail,
+    // where there's no room for the large title block.
+    const largeTitleActive = largeTitle
+    const largeTitleEnabled = largeTitleActive && !collapsed
+    const titleCollapsed = useLargeTitleScroll(
+        scrollRef,
+        largeTitleRef,
+        largeTitleEnabled
+    )
     const hiddenCollapsed =
         isDesktop && !isOpen && collapsedSidebarMode === 'hidden'
     const reserveProminentHeaderToggleSpace =
@@ -388,8 +491,12 @@ function ProminentSidebar({
     return (
         <aside
             data-mobile-visible={resolvedMobileVisible}
-            data-sidebar-collapsed={isDesktop && !isOpen}
+            data-sidebar-collapsed={collapsed}
             data-sidebar-header={includeHeader ? 'prominent' : 'bare'}
+            data-sidebar-large-title={largeTitleActive}
+            data-sidebar-large-title-collapsed={
+                largeTitleActive && titleCollapsed
+            }
             data-sidebar-variant="prominent"
             data-sidebar-visual-mode={visualMode}
             style={sidebarInlineStyle}
@@ -410,9 +517,36 @@ function ProminentSidebar({
                 filterOpen={filterOpen}
                 onFilterOpenChange={onFilterOpenChange}
                 reserveToggleSpace={reserveProminentHeaderToggleSpace}
+                largeTitle={largeTitleActive}
             />
-            <div className={styles.sidebarBodyWrapper}>
+            <div
+                ref={scrollRef}
+                className={cx(
+                    styles.sidebarBodyWrapper,
+                    !showScrollbar && styles.sidebarBodyWrapperHideScrollbar
+                )}
+            >
                 <div className={surfaceClassName}>
+                    {largeTitleActive ? (
+                        <div
+                            className={styles.largeTitleBlock}
+                            data-collapsed={collapsed}
+                        >
+                            <h1
+                                ref={largeTitleRef}
+                                className={styles.largeTitle}
+                            >
+                                {label}
+                            </h1>
+
+                            {search ? (
+                                <div className={styles.largeTitleSearch}>
+                                    {search}
+                                </div>
+                            ) : null}
+                        </div>
+                    ) : null}
+
                     {featured}
 
                     <SidebarBody
@@ -424,6 +558,9 @@ function ProminentSidebar({
                     </SidebarBody>
                 </div>
             </div>
+            {footer ? (
+                <div className={styles.prominentFooter}>{footer}</div>
+            ) : null}
         </aside>
     )
 }
@@ -456,6 +593,7 @@ function ProminentSidebarHeader({
     filterOpen,
     onFilterOpenChange,
     reserveToggleSpace,
+    largeTitle,
 }: ProminentSidebarHeaderProps): ReactElement {
     if (prominentHeader) {
         return <>{prominentHeader}</>
@@ -495,7 +633,10 @@ function ProminentSidebarHeader({
             >
                 {prominentHeaderLeft ?? (
                     <div className={styles.breadcrumbs}>
-                        <span className={styles.prominentBreadcrumb}>
+                        <span
+                            className={styles.prominentBreadcrumb}
+                            data-large-title={largeTitle}
+                        >
                             {label}
                         </span>
                     </div>
