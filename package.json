@@ -88,6 +88,11 @@
         "overrides": {
             "@babel/runtime@<7.26.10": ">=7.26.10",
             "undici@>=6.0.0 <6.21.2": ">=6.21.2"
-        }
+        },
+        "onlyBuiltDependencies": [
+            "esbuild",
+            "sharp",
+            "unrs-resolver"
+        ]
     }
 }

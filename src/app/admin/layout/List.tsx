@@ -473,20 +473,20 @@ function PageSelect({
     onChange,
 }: PageSelectProps) {
     const [value, setValue] = useState('')
-    
+
     const pageCount = Math.ceil(count / pageSize)
     const canNavigate = pageCount > 1
     const maxPage = pageCount - 1
-    
+
     const handleChangeValue = (value: string) => {
         if (!value || (/^\d+$/.test(value) && value.length < 10))
             setValue(value)
     }
-    
+
     const handleSubmit = () => {
         const newPage = +value - 1
         if (0 <= newPage && newPage <= maxPage) onChange(newPage)
-            else setValue((page + 1).toString())
+        else setValue((page + 1).toString())
     }
     const pageStr = (page + 1).toString()
     if (value != pageStr) {

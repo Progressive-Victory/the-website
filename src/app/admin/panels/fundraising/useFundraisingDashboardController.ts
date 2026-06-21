@@ -338,7 +338,7 @@ export function useFundraisingDashboardController(onGet: OnGet) {
             setChartViewOverrideRange(null)
             return
         }
-        console.debug("Applying chart view override range:", range)
+        console.debug('Applying chart view override range:', range)
         setChartViewOverrideRange(range)
     }
 

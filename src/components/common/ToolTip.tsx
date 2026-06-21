@@ -52,7 +52,7 @@ export function ToolTip({
         setCloserList(closers)
     }, [open])
 
-    // For code quality, an effect is wrapped in a function. 
+    // For code quality, an effect is wrapped in a function.
     // ESlint can't verify this function call as legal though, so we need to help it (pulling it out of the function passes cleanly)
     useOutsideDetector(wrapperRef) //eslint-disable-line react-hooks/refs
 

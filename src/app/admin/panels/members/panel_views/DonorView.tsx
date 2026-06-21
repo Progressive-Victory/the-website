@@ -139,8 +139,8 @@ export function DonorView({
 
     const [overlayMounted, setOverlayMounted] = useState(false)
     //const [overlayOpen, setOverlayOpen] = useState(false)
-    const overlayOpen = false; // For consistency since setOverlay open was only used in the seemingly unused effect
-    console.debug("Picking Donor? : ", pickingDonor);
+    const overlayOpen = false // For consistency since setOverlay open was only used in the seemingly unused effect
+    console.debug('Picking Donor? : ', pickingDonor)
     // useEffect(() => {
     //     if (pickingDonor) {
     //         setOverlayMounted(true)
