@@ -1,10 +1,10 @@
 import { Field, SupportNote, Toggle } from '.'
-import { zLocation, Location } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useFetch, useInit } from '@/util/hooks'
 import Link from 'next/link'
 import phone from 'phone'
 import { Country, isValidCountryPostalCode } from 'postal-code-validator'
+import { zLocation, Location } from 'pv-contracts/data'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export interface IOnboardingForm {

@@ -8,20 +8,20 @@ import {
     FormGroup,
     TextField,
 } from '@/components/common/forms'
+import { FetchError } from '@/models'
+import type { UseQueryResult } from '@tanstack/react-query'
+import cx from 'classnames'
+import { motion } from 'motion/react'
+import Link from 'next/link'
 import {
     ActBlueContribution,
     ActBlueContributionCustomField,
     ActBlueDonor,
     ActBlueLineitem,
     User,
-} from '@/contracts/data'
-import type { SearchRequest } from '@/contracts/requests'
-import type { PaginatedResponse } from '@/contracts/responses'
-import { FetchError } from '@/models'
-import type { UseQueryResult } from '@tanstack/react-query'
-import cx from 'classnames'
-import { motion } from 'motion/react'
-import Link from 'next/link'
+} from 'pv-contracts/data'
+import type { SearchRequest } from 'pv-contracts/requests'
+import type { PaginatedResponse } from 'pv-contracts/responses'
 import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
 
 export interface DonorViewProps {
