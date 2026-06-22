@@ -12,8 +12,15 @@ jobs:
             - name: Install pnpm
               uses: pnpm/action-setup@v3
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+            - name: Establish SSH Connection
+              uses: webfactory/ssh-agent@v0.9.0
+              with:
+                ssh-private-key: ${{ secrets.PV_CONTRACTS_SSH_KEY }}
+
+            - name: Install Dependencies
+              run: |
+                git config --global url."ssh://".insteadOf https://
+                pnpm install --frozen-lockfile
 
             - name: Run Eslint
               run: pnpm lint-ci
