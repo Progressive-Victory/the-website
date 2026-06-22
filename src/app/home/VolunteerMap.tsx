@@ -13,12 +13,12 @@ import { MapView, StateMapInteractionProps } from '@/components/Map/types'
 import { Message } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
-import {
-    MapMemberCountResponse,
-    zMapMemberCountResponse,
-} from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
+import {
+    MapMemberCountsResponse,
+    zMapMemberCountsResponse,
+} from 'pv-contracts/responses'
 import { useState } from 'react'
 
 export function VolunteerMap() {
@@ -30,9 +30,9 @@ export function VolunteerMap() {
         queryKey: ['/map/memberCounts'],
         queryFn: ready
             ? async ({ signal }) => {
-                  const data = await onGet<MapMemberCountResponse>(
+                  const data = await onGet<MapMemberCountsResponse>(
                       '/map/memberCounts',
-                      zMapMemberCountResponse,
+                      zMapMemberCountsResponse,
                       { signal }
                   )
 
