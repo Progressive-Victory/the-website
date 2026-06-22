@@ -1,0 +1,14 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "outputDirectory": "/dist",
+    "framework": "fastify",
+    "buildCommand": "pnpm build",
+    "installCommand": "./vercel.sh",
+    "devCommand": "node dist/index.js",
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/dist/index.js"
+        }
+    ]
+}
