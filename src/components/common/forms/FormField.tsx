@@ -114,7 +114,7 @@ export interface FieldConfiguration<FormType, FieldType> {
 /**
  * Dynamic properties populated automatically by the parent Form.
  *
- * Basically, the fields need to know what's goind on with the Form. We
+ * Basically, the fields need to know what's going on with the Form. We
  * could've had the user pass in FormState through every single field and
  * group, but that would've been awful and cluttered up the interface.
  * Instead, we populate it dynamically within Form so that the user doesn't
@@ -186,8 +186,10 @@ export function useConfigure<FormType, FieldType>(
 
         const key = props.field
         if (key)
-            return (form: FormType, field: FieldType) =>
-                ({ ...form, [key]: field }) as FormType
+            return (form: FormType, field: FieldType) => ({
+                ...form,
+                [key]: field,
+            })
 
         return (form: FormType) => form
     }, [props.setter, props.field])

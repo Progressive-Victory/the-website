@@ -17,6 +17,7 @@ export interface IOnboardingForm {
     getAlerts: boolean
     usCitizen: boolean
     privacyPolicy: boolean
+    oneTimePasscode: boolean
 }
 
 export interface CollectInfoStageProps {
@@ -90,7 +91,9 @@ export function CollectInfoStage({
         dateOfBirthIsValid &&
         zipCodeIsValid &&
         parsedPhone.isValid &&
-        form.privacyPolicy
+        form.usCitizen &&
+        form.privacyPolicy &&
+        form.oneTimePasscode
 
     useInit(() => setFormattedPhoneNumber(initialForm.phoneNumber))
 
@@ -112,7 +115,7 @@ export function CollectInfoStage({
                     Join us on Discord and make a difference ✨
                 </p>
             </header>
-            <section className="flex flex-col gap-2 ">
+            <section className="flex flex-col gap-2">
                 <section className="flex flex-col gap-2 sm:flex-row">
                     <Field
                         value={form.firstName}
@@ -144,7 +147,10 @@ export function CollectInfoStage({
                         errorText="Enter a valid date of birth"
                         maxLength={10}
                         onInput={(e) =>
-                            setForm({ ...form, dateOfBirth: e.target.value })
+                            setForm({
+                                ...form,
+                                dateOfBirth: e.currentTarget.value,
+                            })
                         }
                     />
                     <Field
@@ -169,10 +175,16 @@ export function CollectInfoStage({
                     }}
                     onBlur={(e) => setFormattedPhoneNumber(e.target.value)}
                 />
-                <p className={`-mt-0.5 mb-1 text-[12px] text-gray-300`}>
+                <p
+                    className={`-mt-0.5 mb-1 max-w-[800px] whitespace-normal break-words text-[12px] text-gray-300`}
+                >
                     <em>
                         US numbers only. Message and data rates may apply. Must
-                        be SMS reachable.
+                        be SMS reachable. For assistance, reply HELP to the
+                        number from which you received the message, or contact
+                        us at the email below. To stop receiving messages, reply
+                        STOP at any time. Carriers are not liable for delayed or
+                        undelivered messages
                     </em>
                 </p>
             </section>
@@ -189,10 +201,18 @@ export function CollectInfoStage({
                 <Toggle
                     name="us-citizen"
                     value={form.usCitizen}
-                    placeholder="I am a resident (or citizen living abroad) of the United States of America"
+                    placeholder={
+                        <span>
+                            <span className="text-red-500">*</span> I swear that
+                            I am a resident (or citizen living abroad) of the
+                            United States of America
+                        </span>
+                    }
+                    tooltip="Only US residents or citizens may participate in Progressive Victory"
                     onChange={() => {
                         setForm({ ...form, usCitizen: !form.usCitizen })
                     }}
+                    required
                 />
                 <Toggle
                     name="accept-privacy"
@@ -207,13 +227,33 @@ export function CollectInfoStage({
                                 referrerPolicy="no-referrer"
                                 className="text-steel-blue underline"
                             >
-                                Privacy Policy
+                                Terms and Conditions & Privacy Policy
                             </Link>
                         </span>
                     }
                     tooltip="You are agreeing to the usage of your data as described by the policy"
                     onChange={() => {
                         setForm({ ...form, privacyPolicy: !form.privacyPolicy })
+                    }}
+                    required
+                />
+                <Toggle
+                    name="accept-otp"
+                    value={form.oneTimePasscode}
+                    placeholder={
+                        <span>
+                            <span className="text-red-500">*</span>I agree to
+                            provide Progressive Victory my mobile number to
+                            obtain a one-time text message for account
+                            verification.
+                        </span>
+                    }
+                    tooltip="You are agreeing to recieve a one-time message via SMS"
+                    onChange={() => {
+                        setForm({
+                            ...form,
+                            oneTimePasscode: !form.oneTimePasscode,
+                        })
                     }}
                     required
                 />

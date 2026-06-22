@@ -1,15 +1,11 @@
-import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
+import nextTypescript from 'eslint-config-next/typescript'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
 import tailwind from 'eslint-plugin-tailwindcss'
 import { defineConfig } from 'eslint/config'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
-
-const compat = new FlatCompat({
-    // import.meta.dirname is available after Node.js v20.11.0
-    baseDirectory: import.meta.dirname,
-})
 
 export default defineConfig([
     {
@@ -23,8 +19,9 @@ export default defineConfig([
     },
     tseslint.configs.recommendedTypeChecked,
     tseslint.configs.stylisticTypeChecked,
-    ...compat.extends('next/core-web-vitals', 'next/typescript'),
-    ...tailwind.configs['flat/recommended'],
+    ...nextCoreWebVitals,
+    ...nextTypescript,
+    //tailwind.configs.recommended, tailwind needs to be phased out
     {
         languageOptions: {
             parserOptions: {
@@ -43,6 +40,10 @@ export default defineConfig([
             '@typescript-eslint/no-unsafe-call': 'warn',
             '@typescript-eslint/no-unsafe-return': 'warn',
             'tailwindcss/no-custom-classname': 'off',
+            'react-hooks/set-state-in-effect': 'warn', //temp
+            'react-hooks/preserve-manual-memoization': 'warn', //temp
+            'react-hooks/refs': 'warn', //temp
+            'react-hooks/immutability': 'warn', //temp
         },
     },
     {

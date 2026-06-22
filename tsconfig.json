@@ -13,7 +13,7 @@
         "resolveJsonModule": true,
         "isolatedModules": true,
         "noImplicitAny": false,
-        "jsx": "preserve",
+        "jsx": "react-jsx",
         "incremental": true,
         "plugins": [
             {
@@ -33,7 +33,8 @@
         ".next/types/**/*.ts",
         "**/*.mjs",
         "**/*.js",
-        "vitest.config.mts"
+        "vitest.config.mts",
+        ".next/dev/types/**/*.ts"
     ],
     "exclude": ["node_modules"]
 }

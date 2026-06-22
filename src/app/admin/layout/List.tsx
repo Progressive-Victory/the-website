@@ -3,7 +3,13 @@ import { MultiSelect, MultiSelectOption } from '@/components/common'
 import { SearchRequest, SortDirection } from '@/contracts/requests'
 import cx from 'classnames'
 import Link from 'next/link'
-import React, { ChangeEvent, ReactNode, useEffect, useState } from 'react'
+import React, {
+    ChangeEvent,
+    InputEvent,
+    ReactNode,
+    useEffect,
+    useState,
+} from 'react'
 import {
     FiChevronLeft,
     FiChevronRight,
@@ -198,7 +204,7 @@ export function ListTop({
                     />
 
                     <FilterSelect
-                        filters={filter as Record<string, (string | number)[]>}
+                        filters={filter}
                         options={filters}
                         onChange={handleChangeFilter}
                     />
@@ -307,8 +313,8 @@ function SearchInput({
     onTogglePanel,
     onSearch,
 }: SearchInputProps) {
-    const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-        onSearch(e.target.value)
+    const handleSearch = (e: InputEvent<HTMLInputElement>) => {
+        onSearch(e.currentTarget.value)
     }
 
     return (

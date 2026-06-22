@@ -119,7 +119,7 @@ export function useAuth() {
                           return true
                       }
 
-                      await onLogout()
+                      //await onLogout()
                       return false
                   }
                 : skipToken,
