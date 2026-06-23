@@ -1,8 +1,8 @@
 import styles from './List.module.css'
 import { MultiSelect, MultiSelectOption } from '@/components/common'
-import { SearchRequest, SortDirection } from '@/contracts/requests'
 import cx from 'classnames'
 import Link from 'next/link'
+import { SearchRequest, SortDirection } from 'pv-contracts/requests'
 import React, {
     ChangeEvent,
     InputEvent,

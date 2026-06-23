@@ -9,12 +9,12 @@ import { LoginButton } from '@/components/common/buttons/button_types/LoginButto
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
-import { DiscordUser, TokenClaims, zDiscordUser } from '@/contracts/data'
 import { useAuth, useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import NextLink from 'next/link'
+import { DiscordUser, TokenClaims, zDiscordUser } from 'pv-contracts/data'
 import type React from 'react'
 import { useEffect, useState } from 'react'
 import z from 'zod'
@@ -839,29 +839,46 @@ export function Header() {
                     )}
                 </div>
 
-                <motion.button
-                    type="button"
-                    className={styles.headerMenuButton}
-                    onClick={() => {
-                        closeSubnav()
-                        setIsOpen((prev) => !prev)
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
                     }}
-                    initial={false}
-                    animate={isOpen ? 'open' : 'closed'}
-                    whileHover="hover"
-                    whileTap="tap"
-                    variants={menuButtonVariants}
-                    transition={{ type: 'spring', stiffness: 520, damping: 32 }}
-                    aria-label={
-                        isOpen
-                            ? 'Close navigation menu'
-                            : 'Open navigation menu'
-                    }
-                    aria-expanded={isOpen}
-                    aria-controls="site-nav-drawer"
                 >
-                    <HamburgerIcon isOpen={isOpen} />
-                </motion.button>
+                    <DonateButton
+                        label="Donate"
+                        className={`${styles.mobileDonateButton} ${isOpen && styles.fadeOutTop}`}
+                    />
+
+                    <motion.button
+                        type="button"
+                        className={styles.headerMenuButton}
+                        onClick={() => {
+                            closeSubnav()
+                            setIsOpen((prev) => !prev)
+                        }}
+                        initial={false}
+                        animate={isOpen ? 'open' : 'closed'}
+                        whileHover="hover"
+                        whileTap="tap"
+                        variants={menuButtonVariants}
+                        transition={{
+                            type: 'spring',
+                            stiffness: 520,
+                            damping: 32,
+                        }}
+                        aria-label={
+                            isOpen
+                                ? 'Close navigation menu'
+                                : 'Open navigation menu'
+                        }
+                        aria-expanded={isOpen}
+                        aria-controls="site-nav-drawer"
+                    >
+                        <HamburgerIcon isOpen={isOpen} />
+                    </motion.button>
+                </div>
             </header>
 
             <AnimatePresence>

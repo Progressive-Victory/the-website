@@ -8,12 +8,12 @@ import {
     FormState,
     TextField,
 } from '@/components/common/forms'
-import { Permission, zPermission } from '@/contracts/data'
-import { UpdatePermissionRequest } from '@/contracts/requests'
-import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Permission, zPermission } from 'pv-contracts/data'
+import { UpdatePermissionRequest } from 'pv-contracts/requests'
+import { PaginatedResponse } from 'pv-contracts/responses'
 import { useState } from 'react'
 
 export default function Page() {
