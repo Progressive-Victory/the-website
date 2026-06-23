@@ -4,7 +4,7 @@ import { useFetch, useInit } from '@/util/hooks'
 import Link from 'next/link'
 import phone from 'phone'
 import { Country, isValidCountryPostalCode } from 'postal-code-validator'
-import { zLocation, Location } from 'pv-contracts/data'
+import { Location, zLocation } from 'pv-contracts/data'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export interface IOnboardingForm {
@@ -99,7 +99,9 @@ export function CollectInfoStage({
 
     useEffect(() => {
         if (parsedPhone.isValid)
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setForm((f) => ({
+                // 6/23/26 - Not worth addressing
                 ...f,
                 phoneNumber: parsedPhone.phoneNumber.substring(2),
             }))

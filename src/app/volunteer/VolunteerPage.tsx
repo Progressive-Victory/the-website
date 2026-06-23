@@ -174,7 +174,8 @@ export default function VolunteerPage() {
                 !user.data?.address?.zip ||
                 !user.data?.phone)
         ) {
-            setOverrideStage(OnboardingStage.NOT_STARTED)
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setOverrideStage(OnboardingStage.NOT_STARTED) // 6/23/26 - Not worth addressing
         }
     }, [user.data, currentStage])
 

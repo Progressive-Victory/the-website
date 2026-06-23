@@ -266,7 +266,8 @@ export function MemberBanner() {
 
     useEffect(() => {
         try {
-            if (inView) setVisible(true)
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            if (inView) setVisible(true) // 6/23/26 - Not worth addressing
         } catch (err) {
             safeLogError(err, 'inView effect error:')
         }

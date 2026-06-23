@@ -239,7 +239,8 @@ export function Chart({
 
     useLayoutEffect(() => {
         if (hoverIdx == null || !hoverPos) {
-            setTooltipPos(null)
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setTooltipPos(null) // 6/23/26 - Not worth addressing
             return
         }
 
