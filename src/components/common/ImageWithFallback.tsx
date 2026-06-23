@@ -26,7 +26,8 @@ export function ImageWithFallback({
     priority = false,
 }: ImageWithFallbackProps) {
     const [hasErrored, setHasErrored] = useState(false)
-    const fallbackSrc = 'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
+    const fallbackSrc =
+        'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
     const finalSrc = hasErrored || useFallback ? fallbackSrc : src
 
     return (
