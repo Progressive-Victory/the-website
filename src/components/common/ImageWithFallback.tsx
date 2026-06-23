@@ -2,7 +2,7 @@
 
 import cx from 'classnames'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 export interface ImageWithFallbackProps {
     src: string
@@ -26,18 +26,13 @@ export function ImageWithFallback({
     priority = false,
 }: ImageWithFallbackProps) {
     const [hasErrored, setHasErrored] = useState(false)
-
-    useEffect(() => {
-        setHasErrored(false)
-    }, [src, useFallback])
+    const fallbackSrc = 'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
+    const finalSrc = hasErrored || useFallback ? fallbackSrc : src
 
     return (
         <Image
-            src={
-                hasErrored || useFallback
-                    ? 'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
-                    : src
-            }
+            key={`${src}-${useFallback}`}
+            src={finalSrc}
             alt={alt}
             width={width}
             height={height}
