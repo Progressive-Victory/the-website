@@ -1,5 +1,4 @@
 import styles from './account.module.css'
-import { stateOptions } from './stateOptions'
 import {
     Form,
     DateField,
@@ -9,6 +8,8 @@ import {
     DropDownField,
 } from '@/components/common/forms'
 import { User } from '@/contracts/data'
+//import { stateOptions } from './stateOptions'
+import { stateOptions } from '@/models'
 import { dateService } from '@/services'
 import { useState } from 'react'
 
