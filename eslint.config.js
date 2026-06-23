@@ -40,11 +40,10 @@ export default defineConfig([
             // Keep track of
             'object-shorthand': 'warn',
             '@typescript-eslint/no-unsafe-return': 'warn',
-            '@typescript-eslint/no-unsafe-enum-comparison': 'off',
+            '@typescript-eslint/no-unsafe-enum-comparison': 'warn',
             'tailwindcss/no-custom-classname': 'off',
 
             // React Compiler rules (for testing)
-            'react-hooks/set-state-in-effect': 'off', // 7 look functional or good 2026-06-22
             'react-hooks/refs': 'warn',
             'react-hooks/immutability': 'warn',
         },

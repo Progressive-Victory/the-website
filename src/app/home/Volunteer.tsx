@@ -3,7 +3,7 @@
 import styles from './volunteer.module.css'
 import { motion } from 'motion/react'
 import Image from 'next/image'
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const actions = [
     {
@@ -36,7 +36,8 @@ export function Volunteer() {
     }, [observe])
 
     useEffect(() => {
-        if (inView) setVisible(true)
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        if (inView) setVisible(true) // 6/23/26 - Not worth addressing
     }, [inView])
 
     return (

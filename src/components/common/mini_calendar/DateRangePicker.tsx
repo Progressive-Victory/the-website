@@ -36,7 +36,8 @@ export function DateRangePicker({
         if (!startDate) return
         const anchor = new Date(startDate)
         if (Number.isNaN(anchor.getTime())) return
-        setCalendarMonth(new Date(anchor.getFullYear(), anchor.getMonth(), 1))
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setCalendarMonth(new Date(anchor.getFullYear(), anchor.getMonth(), 1)) // 6/23/26 - Not worth addressing
     }, [startDate])
 
     const todayInputValue = useMemo(
