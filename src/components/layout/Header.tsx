@@ -617,7 +617,7 @@ export function Header() {
     )
 
     const closeNav = () => {
-        setIsOpen(false);
+        setIsOpen(false)
         setMobileSubnavItem(null)
     }
 
@@ -638,7 +638,7 @@ export function Header() {
         if (!isOpen) return
 
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') closeNav();
+            if (e.key === 'Escape') closeNav()
         }
 
         document.addEventListener('keydown', onKeyDown)
