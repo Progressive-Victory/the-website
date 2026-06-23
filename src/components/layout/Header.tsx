@@ -838,29 +838,46 @@ export function Header() {
                     )}
                 </div>
 
-                <motion.button
-                    type="button"
-                    className={styles.headerMenuButton}
-                    onClick={() => {
-                        closeSubnav()
-                        setIsOpen((prev) => !prev)
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
                     }}
-                    initial={false}
-                    animate={isOpen ? 'open' : 'closed'}
-                    whileHover="hover"
-                    whileTap="tap"
-                    variants={menuButtonVariants}
-                    transition={{ type: 'spring', stiffness: 520, damping: 32 }}
-                    aria-label={
-                        isOpen
-                            ? 'Close navigation menu'
-                            : 'Open navigation menu'
-                    }
-                    aria-expanded={isOpen}
-                    aria-controls="site-nav-drawer"
                 >
-                    <HamburgerIcon isOpen={isOpen} />
-                </motion.button>
+                    <DonateButton
+                        label="Donate"
+                        className={`${styles.mobileDonateButton} ${isOpen && styles.fadeOutTop}`}
+                    />
+
+                    <motion.button
+                        type="button"
+                        className={styles.headerMenuButton}
+                        onClick={() => {
+                            closeSubnav()
+                            setIsOpen((prev) => !prev)
+                        }}
+                        initial={false}
+                        animate={isOpen ? 'open' : 'closed'}
+                        whileHover="hover"
+                        whileTap="tap"
+                        variants={menuButtonVariants}
+                        transition={{
+                            type: 'spring',
+                            stiffness: 520,
+                            damping: 32,
+                        }}
+                        aria-label={
+                            isOpen
+                                ? 'Close navigation menu'
+                                : 'Open navigation menu'
+                        }
+                        aria-expanded={isOpen}
+                        aria-controls="site-nav-drawer"
+                    >
+                        <HamburgerIcon isOpen={isOpen} />
+                    </motion.button>
+                </div>
             </header>
 
             <AnimatePresence>
