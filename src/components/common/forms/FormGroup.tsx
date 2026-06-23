@@ -14,7 +14,7 @@ export interface FormGroupProps<T> {
     id?: string
 
     /** The group's title, displayed as a heading above the fields. */
-    title?: string
+    title: string
 
     /** Whether the group is displayed as collapsed by default. */
     defaultCollapsed?: boolean

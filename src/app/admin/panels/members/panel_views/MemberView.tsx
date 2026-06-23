@@ -151,10 +151,7 @@ export function MemberView({
                     deprecated
                 />
                 {editing ? (
-                    <FormGroup>
-                        <TextField label="First Name" field="firstName" />
-                        <TextField label="Last Name" field="lastName" />
-                    </FormGroup>
+                    <TextField label="First Name" field="firstName" />
                 ) : (
                     <TextField<User>
                         label="Full Name"
@@ -165,6 +162,8 @@ export function MemberView({
                         readonly
                     />
                 )}
+                {/* Needs to be like this. Fragments break it. Check PR #436 to see previous testing */}
+                {editing && <TextField label="Last Name" field="lastName" />}
                 <DateField<User>
                     label="Date of Birth"
                     getter={(form) =>
