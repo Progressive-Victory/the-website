@@ -29,7 +29,7 @@ import {
     DiscordUserIsInServerResponse,
     zDiscordUserIsInServerResponse,
 } from 'pv-contracts/responses'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import z from 'zod'
 
 export default function VolunteerPage() {
@@ -165,19 +165,18 @@ export default function VolunteerPage() {
 
     const currentStage = overrideStage ?? user.data?.onboardingStage
 
-    useEffect(() => {
-        if (
-            currentStage === OnboardingStage.JOINED &&
-            (!user.data?.firstName ||
-                !user.data?.lastName ||
-                !user.data?.birthdate ||
-                !user.data?.address?.zip ||
-                !user.data?.phone)
-        ) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setOverrideStage(OnboardingStage.NOT_STARTED) // 6/23/26 - Not worth addressing
-        }
-    }, [user.data, currentStage])
+    // useEffect(() => {
+    if (
+        currentStage === OnboardingStage.JOINED &&
+        (!user.data?.firstName ||
+            !user.data?.lastName ||
+            !user.data?.birthdate ||
+            !user.data?.address?.zip ||
+            !user.data?.phone)
+    ) {
+        setOverrideStage(OnboardingStage.NOT_STARTED)
+    }
+    // }, [user.data, currentStage])
 
     if (isSessionLoading) return null
 
