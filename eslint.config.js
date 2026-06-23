@@ -45,7 +45,6 @@ export default defineConfig([
 
             // React Compiler rules (for testing)
             'react-hooks/set-state-in-effect': 'off', // 7 look functional or good 2026-06-22
-            'react-hooks/preserve-manual-memoization': 'off', // 2 look like valid patterns 2026-06-22
             'react-hooks/refs': 'warn',
             'react-hooks/immutability': 'warn',
         },
