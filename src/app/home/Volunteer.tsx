@@ -35,10 +35,7 @@ export function Volunteer() {
         if (divRef.current) observe(divRef.current)
     }, [observe])
 
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        if (inView) setVisible(true) // 6/23/26 - Not worth addressing
-    }, [inView])
+    if (!visible && inView) setVisible(true)
 
     return (
         <div className={styles.container}>
