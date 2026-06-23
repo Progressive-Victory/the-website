@@ -1,51 +1,22 @@
+import { PositionBubble, PositionData } from '../components/newPosition'
 import styles from './components.module.css'
+import Tag from './tag'
 import { XYPosition, Node, NodeProps, Position, Handle } from '@xyflow/react'
 import { motion } from 'motion/react'
 import React, { useState } from 'react'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type GroupNodeData = {
-    id: number | string
+export type GroupData = {
     name: string
-    bubble?: React.ReactNode
-    customData?: unknown[]
+    desc?: string
+    leads?: PositionData[]
+    members?: PositionData[]
+    tags?: Tag[]
 }
 
-type GroupNode = Node<GroupNodeData, 'groupNode'>
+export type GroupNode = Node<GroupData, 'groupNode'>
 
-function GroupNode({
-    data,
-    sourcePosition,
-    targetPosition,
-}: NodeProps<GroupNode>) {
-    return (
-        data.bubble ?? (
-            <DefaultGroupNode
-                id={data.id.toString()}
-                data={{
-                    id: data.id,
-                    name: data.name,
-                    bubble: null,
-                    customData: data.customData,
-                }}
-                type={'groupNode'}
-                dragging={false}
-                zIndex={0}
-                selectable={false}
-                deletable={false}
-                selected={false}
-                draggable={false}
-                isConnectable={false}
-                positionAbsoluteX={0}
-                positionAbsoluteY={0}
-                targetPosition={targetPosition}
-                sourcePosition={sourcePosition}
-            />
-        )
-    )
-}
-
-function DefaultGroupNode({
+export function GroupNode({
     data,
     sourcePosition,
     targetPosition,
@@ -58,9 +29,17 @@ function DefaultGroupNode({
         }
     }
 
+    const GroupLeads = () => {
+        let leadNumber = -1
+        return data.leads?.map(RenderLead)
+        function RenderLead(lead: PositionData) {
+            leadNumber++
+            return <PositionBubble key={leadNumber} data={lead} />
+        }
+    }
+
     return (
         <div
-            key={data.id}
             className={styles.nodeContainer}
             onPointerEnter={handlePointerEnter}
             onPointerLeave={() => setContentEnabled(false)}
@@ -70,7 +49,7 @@ function DefaultGroupNode({
                 position={targetPosition ?? Position.Left}
                 className={styles.targetHandle}
             />
-            <DefaultGroupBubble name={data.name} />
+            <GroupBubble data={data} />
             <motion.div
                 className={styles.dropdownContainer}
                 style={{
@@ -87,7 +66,7 @@ function DefaultGroupNode({
                     },
                 }}
             >
-                {'Sample Content!'}
+                <GroupLeads />
             </motion.div>
             <Handle
                 type="source"
@@ -98,55 +77,66 @@ function DefaultGroupNode({
     )
 }
 
-export function DefaultGroupBubble({
-    name,
-    children,
-}: {
-    name: string
-    children?: React.ReactNode
-}) {
-    if (children == null) {
+export function GroupBubble({ data }: { data: GroupData }) {
+    const Tags = () => {
         return (
-            <div className={styles.yellowBubble}>
-                {<p>{name.toUpperCase()}</p>}
+            <div className={styles.tagContainer}>
+                {data.tags?.map((tag) => {
+                    return (
+                        <div
+                            key={tag.name}
+                            className={styles.tag}
+                            title={tag.tooltip}
+                        >
+                            {tag.graphic}
+                        </div>
+                    )
+                })}
             </div>
         )
-    } else return <div className={styles.yellowBubble}>{children}</div>
+    }
+
+    return (
+        <div className={styles.yellowBubble}>
+            <p
+                style={{
+                    gridColumn: `${data.tags ? 'span 11 / span 11' : 'span 12 / span 12'}`,
+                }}
+            >
+                {data.name.toUpperCase()}
+            </p>
+            {data.tags ? <Tags /> : null}
+        </div>
+    )
 }
 
 export function CreateGroupNode({
     id,
+    position = { x: 0, y: 0 },
     name,
-    position,
-    bubble,
-    data,
+    desc,
+    leads,
+    members,
+    tags,
 }: {
     id: number | string
-    name: string
     position?: XYPosition
-    bubble?: React.ReactNode
-    data: unknown[]
+    name: string
+    desc?: string
+    leads?: PositionData[]
+    members?: PositionData[]
+    tags?: Tag[]
 }) {
-    if (position == null) {
-        return {
-            id: id.toString(),
-            position: { x: 0, y: 0 },
-            data: {
-                id,
-                name,
-                bubble,
-                data,
-            },
-        }
-    } else
-        return {
-            id: id.toString(),
-            position,
-            data: {
-                id,
-                name,
-                bubble,
-                data,
-            },
-        }
+    return {
+        id: id.toString(),
+        type: 'groupNode',
+        position,
+        data: {
+            name,
+            desc,
+            leads,
+            members,
+            tags,
+        },
+    }
 }

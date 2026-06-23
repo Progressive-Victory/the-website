@@ -1,4 +1,5 @@
 import styles from './components.module.css'
+import Tag from './tag'
 import { Handle, Node, NodeProps, Position, XYPosition } from '@xyflow/react'
 
 export enum Banner {
@@ -7,69 +8,43 @@ export enum Banner {
     RED,
 }
 
+type RGB = `rgb(${number}, ${number}, ${number})`
+type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`
+type HSL = `hsl(${number}, ${number}, ${number})`
+type HSLA = `hsla(${number},${number},${number})`
+type HEX = `#${string}`
+type Color = RGB | RGBA | HSL | HSLA | HEX
+
+export interface BannerObject {
+    color?: Color
+    title?: string
+}
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type PositionNodeData = {
-    id: number | string
+export type PositionData = {
     title?: string
     name?: string
     banner?: Banner
     bannerTitle?: string
     redacted?: boolean
-    bubble?: React.ReactNode
-    customData?: unknown[]
+    tags?: Tag[]
 }
 
-type PositionNode = Node<PositionNodeData, 'positionNode'>
+export type PositionNode = Node<PositionData, 'positionNode'>
 
-function PositionNode({
+export function PositionNode({
     data,
     sourcePosition,
     targetPosition,
 }: NodeProps<PositionNode>) {
     return (
-        data.bubble ?? (
-            <DefaultPositionNode
-                id={data.id.toString()}
-                data={{
-                    id: data.id,
-                    title: data.title,
-                    name: data.name,
-                    banner: data.banner,
-                    bannerTitle: data.bannerTitle,
-                    redacted: data.redacted,
-                    bubble: null,
-                    customData: data.customData,
-                }}
-                type={'positionNode'}
-                dragging={false}
-                zIndex={0}
-                selectable={false}
-                deletable={false}
-                selected={false}
-                draggable={false}
-                isConnectable={false}
-                positionAbsoluteX={0}
-                positionAbsoluteY={0}
-                targetPosition={targetPosition}
-                sourcePosition={sourcePosition}
-            />
-        )
-    )
-}
-
-function DefaultPositionNode({
-    data,
-    sourcePosition,
-    targetPosition,
-}: NodeProps<PositionNode>) {
-    return (
-        <div key={data.id} className={styles.nodeContainer}>
+        <div className={styles.nodeContainer}>
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
                 className={styles.targetHandle}
             />
-            <DefaultPositionBubble data={data} />
+            <PositionBubble data={data} />
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}
@@ -79,11 +54,11 @@ function DefaultPositionNode({
     )
 }
 
-function DefaultPositionBubble({
+export function PositionBubble({
     data,
     mini,
 }: {
-    data: PositionNodeData
+    data: PositionData
     mini?: boolean
 }) {
     const Banner = () => {
@@ -152,6 +127,24 @@ function DefaultPositionBubble({
         )
     }
 
+    const Tags = () => {
+        return (
+            <div className={styles.tagContainer}>
+                {data.tags?.map((tag) => {
+                    return (
+                        <div
+                            key={tag.name}
+                            className={styles.tag}
+                            title={tag.tooltip}
+                        >
+                            {tag.graphic}
+                        </div>
+                    )
+                })}
+            </div>
+        )
+    }
+
     return (
         <div
             className={styles.pearlBubble}
@@ -176,6 +169,7 @@ function DefaultPositionBubble({
                         : 'VOLUNTEER'}
                 </p>
                 <Nameplate />
+                <Tags />
             </div>
         </div>
     )
@@ -183,49 +177,31 @@ function DefaultPositionBubble({
 
 export function CreatePositionNode({
     id,
+    position = { x: 0, y: 0 },
     title,
     name,
     banner,
     bannerTitle,
     redacted,
-    data,
-    position,
 }: {
     id: number | string
+    position?: XYPosition
     title?: string
     name?: string
     banner?: Banner
     bannerTitle?: string
     redacted?: boolean
-    data?: unknown[]
-    position?: XYPosition
 }) {
-    if (position == null) {
-        return {
-            id: id.toString(),
-            position: { x: 0, y: 0 },
-            data: {
-                id,
-                title,
-                name,
-                banner,
-                bannerTitle,
-                redacted,
-                data,
-            },
-        }
-    } else
-        return {
-            id: id.toString(),
-            position,
-            data: {
-                id,
-                title,
-                name,
-                banner,
-                bannerTitle,
-                redacted,
-                data,
-            },
-        }
+    return {
+        id: id.toString(),
+        type: 'positionNode',
+        position,
+        data: {
+            title,
+            name,
+            banner,
+            bannerTitle,
+            redacted,
+        },
+    }
 }

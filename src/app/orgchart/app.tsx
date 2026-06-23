@@ -1,15 +1,21 @@
 import '../../../tailwind.config'
 import styles from './app.module.css'
-import { DepartmentNode, DepartmentNodeData } from './components/department'
 import OrgChartEdge from './components/edge'
+import { GroupNode } from './components/group'
+// import { DepartmentNode, DepartmentNodeData } from './components/department'
 import {
-    PositionData,
     PositionNode,
+    PositionData,
     PositionBubble,
-} from './components/position'
-import { TeamNode, TeamNodeData } from './components/team'
-import { BuildGraphNodes } from './data/constructOrgGraph'
-import { Committees, orgchartData } from './data/orgchartGraphData'
+} from './components/newPosition'
+// import { PositionData, PositionBubble } from './components/position'
+// import { TeamNode, TeamNodeData } from './components/team'
+// import { BuildGraphNodes } from './data/constructOrgGraph'
+import {
+    Committees,
+    testChartNodes,
+    testChartEdges,
+} from './data/orgchartGraphData'
 import dagre from '@dagrejs/dagre'
 import {
     type Node,
@@ -59,12 +65,11 @@ const GetElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
     return { nodes: newNodes, edges }
 }
 
-const { initialNodes, initialEdges } = BuildGraphNodes(orgchartData)
+// const { initialNodes, initialEdges } = BuildGraphNodes(orgchartData)
 
 const nodeTypes = {
-    pos: PositionNode,
-    dep: DepartmentNode,
-    tea: TeamNode,
+    positionNode: PositionNode,
+    groupNode: GroupNode,
 }
 
 const edgeTypes = {
@@ -72,14 +77,14 @@ const edgeTypes = {
 }
 
 const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
-    initialNodes,
-    initialEdges
+    testChartNodes,
+    testChartEdges
 )
 
 export default function OrgChartApp() {
-    const [legendEnabled, toggleLegend] = useState(false)
+    //const [legendEnabled, toggleLegend] = useState(false)
 
-    const LegendPanel = () => {
+    /*const LegendPanel = () => {
         return (
             <Panel position="top-left">
                 {!legendEnabled ? null : (
@@ -119,7 +124,7 @@ export default function OrgChartApp() {
                 </button>
             </Panel>
         )
-    }
+    }*/
 
     const DetailPanel = ({
         name,
@@ -133,6 +138,7 @@ export default function OrgChartApp() {
         members?: PositionData[]
     }) => {
         const MemberList = () => {
+            let memberNumber = -1
             if (leads && members) {
                 return leads.concat(members).map(CreateMini)
             } else if (leads) {
@@ -141,9 +147,10 @@ export default function OrgChartApp() {
                 return members.map(CreateMini)
             } else return null
             function CreateMini(position: PositionData) {
+                memberNumber++
                 return (
                     <PositionBubble
-                        key={position.id}
+                        key={memberNumber}
                         data={position}
                         mini={true}
                     />
@@ -169,12 +176,6 @@ export default function OrgChartApp() {
                         <p className={styles.description}>{desc}</p>
                     </div>
                 )}
-                {/*!leads && members ? null
-                Make something for the Moderation team
-                    <div>
-                        <ul>{ //names of moderation team members }</ul>
-                    </div>
-                */}
                 {!leads && !members ? null : (
                     <div className={styles.memberList}>
                         <MemberList />
@@ -205,28 +206,21 @@ export default function OrgChartApp() {
     const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges)
 
     const handleNodeClick = (event: React.MouseEvent, node: Node) => {
-        if (node.type == 'dep') {
-            const typedNode = node as DepartmentNodeData
+        if (node.type == 'groupNode') {
+            const castedNode = node as GroupNode
+            console.log(`${castedNode.data.name},${castedNode.data.desc}`)
             setCurrentDetails(
                 <DetailPanel
-                    name={typedNode.data.name}
-                    leads={typedNode.data.leads}
-                    members={typedNode.data.members}
-                />
-            )
-        } else if (node.type == 'tea') {
-            const typedNode = node as TeamNodeData
-            setCurrentDetails(
-                <DetailPanel
-                    name={typedNode.data.name}
-                    desc={typedNode.data.desc}
-                    leads={typedNode.data.leads}
-                    members={typedNode.data.members}
+                    name={castedNode.data.name}
+                    desc={castedNode.data.desc}
+                    leads={castedNode.data.leads}
+                    members={castedNode.data.members}
                 />
             )
         } else setCurrentDetails(<DetailPanel />)
     }
 
+    // Add back the legend panel
     return (
         <div className={styles.background} /*ref={viewportRef}*/>
             <ReactFlow
@@ -243,7 +237,6 @@ export default function OrgChartApp() {
                 maxZoom={1.25}
                 minZoom={0.25}
             >
-                <LegendPanel />
                 {currentDetails}
                 <Controls />
                 <RefreshButton />

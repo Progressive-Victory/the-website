@@ -1,6 +1,9 @@
 /* A number of committees can be defined up to the number of icons. */
+import { CreateGroupNode } from '../components/group'
+import { CreatePositionNode } from '../components/newPosition'
+import Tag from '../components/tag'
 import Committee from '../types/committee'
-import { type Node } from '@xyflow/react'
+import { Edge, type Node } from '@xyflow/react'
 
 export const Committees: Committee[] = [
     {
@@ -32,102 +35,193 @@ export const Committees: Committee[] = [
         alt: 'S',
     },
 ]
-/*export const testNodes: Node[] = [
+
+// Must add graphics as their own object.
+export const Tags: Tag[] = [
     {
+        name: 'Community Team',
+    },
+    {
+        name: 'Media Team',
+    },
+    {
+        name: 'Engineering Committee',
+    },
+    {
+        name: 'State Organizing Committee',
+    },
+]
+
+export const testChartNodes: Node[] = [
+    CreatePositionNode({
         id: 0,
         title: 'Executive Director',
         name: 'Sam Dryzmala',
-        leadership: 'Senior',
-    },
-    {
+    }),
+    CreatePositionNode({
         id: 1,
         title: 'Deputy Executive Director',
         name: 'Benjamin Gilbert-Lif',
-        leadership: 'Senior',
-    },
-    {
+    }),
+    CreateGroupNode({
         id: 2,
-        title: 'Community Relations Director',
-        name: 'Auntifa',
-        leadership: 'Senior',
-        department: 'Community',
-        team: null,
-        committees: [],
-    },
-    {
+        name: 'Community Department',
+        leads: [
+            { title: 'Community Relations Director', name: 'Auntifa' },
+            { title: 'Community Manager', name: 'Jenywlfersn' },
+            { title: 'Community Manager' },
+        ],
+    }),
+    CreateGroupNode({
         id: 3,
-        title: 'Community Mananger',
-        name: 'Jenywlfersn',
-        leadership: 'Junior',
-        department: 'Community',
-        team: null,
-        committees: [Committees[0], Committees[1]],
-    },
-    {
+        name: 'Media Department',
+        leads: [
+            { title: 'Media Director', name: 'Aussy' },
+            { title: 'Deputy Media Director', name: 'Leeloo' },
+            { title: 'Deputy Media Director' },
+        ],
+    }),
+    CreateGroupNode({
         id: 4,
-        title: 'Community Manager',
-        name: 'Unfilled',
-        leadership: 'Junior',
-        department: 'Community',
-        team: null,
-        committees: [Committees[0], Committees[1]],
-    },
-    {
+        name: 'Welcome Team',
+        leads: [
+            { title: 'Welcome Team Lead', name: 'Monarch' },
+            { title: 'Welcome Team Lead' },
+            { title: 'Welcome Team Lead' },
+        ],
+    }),
+    CreateGroupNode({
         id: 5,
-        title: 'Welcome Team Lead',
-        name: 'Monarch',
-        department: 'Community',
-        team: 'Welcome',
-        leadership: 'Junior',
-        committees: [Committees[0]],
-    },
-    {
+        name: 'Events Team',
+        leads: [
+            { title: 'Events Team Lead', name: 'BrewMasterCraft' },
+            { title: 'Events Team Lead' },
+            { title: 'Events Team Deputy', name: 'EM' },
+        ],
+    }),
+    CreateGroupNode({
         id: 6,
-        title: 'Welcome Team Lead',
-        name: 'Unfilled',
-        leadership: 'Junior',
-        department: 'Community',
-        team: 'Welcome',
-        committees: [Committees[0]],
-    },
-
-    {
+        name: 'Moderation Team',
+        members: [
+            { name: 'Clementine' },
+            { name: 'Finnegan' },
+            { name: 'Jaxonmaxx' },
+            { name: 'Natalie' },
+            { name: 'Noelle' },
+            { name: 'Onbi' },
+            { name: 'Starry' },
+            { name: 'TheSunKey' },
+            { name: 'Victoria' },
+        ],
+    }),
+    CreateGroupNode({
         id: 7,
-        name: 'Unfilled',
-        title: 'Welcome Team Deputy',
-        leadership: '?',
-        department: 'Community',
-        team: 'Welcome',
-        committees: [],
-    },
-    {
+        name: 'Writing Team',
+        leads: [
+            {
+                title: 'Writing Team Lead',
+                name: 'Dynas',
+            },
+            {
+                title: 'Writing Team Lead',
+                name: 'AJ',
+            },
+            {
+                title: 'Writing Team Deputy',
+                name: 'Jam',
+            },
+        ],
+    }),
+    CreateGroupNode({
         id: 8,
-        title: 'Events Team Lead',
-        name: 'BrewMasterCraft',
-        leadership: 'Junior',
-        department: 'Community',
-        team: 'Events',
-        committees: [Committees[0]],
-    },
-    {
+        name: 'This Week at PV Strike Team',
+        desc: 'Mananges the weekly publication of the This Week at Progressive Victory newsletter.',
+    }),
+    CreateGroupNode({
         id: 9,
-        title: 'Events Team Lead',
-        name: 'Unfilled',
-        leadership: 'Junior',
-        department: 'Community',
-        team: 'Events',
-        committees: [Committees[0]],
+        name: 'Audio-Video Team',
+        leads: [
+            {
+                title: 'Audio-Video Team Lead',
+                name: 'Vezanmatics',
+            },
+            {
+                title: 'Audio-Video Team Lead',
+            },
+            {
+                title: 'Audio-Video Team Deputy',
+            },
+        ],
+    }),
+    CreateGroupNode({
+        id: 10,
+        name: 'Design Team',
+        leads: [
+            { title: 'Design Team Lead' },
+            { title: 'Design Team Lead' },
+            { title: 'Design Team Deputy' },
+        ],
+    }),
+]
+
+export const testChartEdges: Edge[] = [
+    {
+        id: '0-1',
+        source: '0',
+        target: '1',
     },
     {
-        id: 10,
-        title: 'Events Team Deputy',
-        name: 'Unfilled',
-        leadership: '?',
-        department: 'Community',
-        team: 'Events',
+        id: '1-2',
+        source: '1',
+        target: '2',
     },
-]*/
-
+    {
+        id: '1-3',
+        source: '1',
+        target: '3',
+    },
+    {
+        id: '2-4',
+        source: '2',
+        target: '4',
+    },
+    {
+        id: '2-5',
+        source: '2',
+        target: '5',
+    },
+    {
+        id: '2-6',
+        source: '2',
+        target: '6',
+    },
+    {
+        id: '2-7',
+        source: '2',
+        target: '7',
+    },
+    {
+        id: '2-8',
+        source: '2',
+        target: '8',
+    },
+    {
+        id: '3-8',
+        source: '3',
+        target: '8',
+    },
+    {
+        id: '3-9',
+        source: '3',
+        target: '9',
+    },
+    {
+        id: '3-10',
+        source: '3',
+        target: '10',
+    },
+]
+/*
 export const orgchartData: Node[] = [
     {
         id: 0,
@@ -848,3 +942,4 @@ export const orgchartData: Node[] = [
         team: 'Moderation',
     },
 ]
+*/
