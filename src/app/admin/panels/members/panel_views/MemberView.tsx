@@ -1,6 +1,6 @@
 'use client'
 
-import { stateOptions } from '@/app/account/stateOptions'
+//import { stateOptions } from '@/app/account/stateOptions'
 import {
     CheckboxField,
     DateField,
@@ -13,6 +13,7 @@ import {
     TextField,
 } from '@/components/common/forms'
 import { Role, UpdateHistory, User } from '@/contracts/data'
+import { stateOptions } from '@/models'
 import { dateService } from '@/services'
 
 const membershipCardShipmentOptions = [

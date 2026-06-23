@@ -66,7 +66,6 @@ export function useFetch() {
 
             if (!schema) return data as R
             const parsed = z.safeParse(schema, data)
-
             return parsed.data as R
         } else {
             return {} as R
