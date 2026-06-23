@@ -616,6 +616,11 @@ export function Header() {
         null
     )
 
+    const closeNav = () => {
+        setIsOpen(false);
+        setMobileSubnavItem(null)
+    }
+
     const { data: discordUsers } = useQuery({
         queryKey: [`/discordUsers/${session?.userId}`],
         queryFn:
@@ -633,7 +638,7 @@ export function Header() {
         if (!isOpen) return
 
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setIsOpen(false)
+            if (e.key === 'Escape') closeNav();
         }
 
         document.addEventListener('keydown', onKeyDown)
@@ -655,17 +660,13 @@ export function Header() {
     }, [])
 
     useEffect(() => {
-        if (!isOpen) setMobileSubnavItem(null)
-    }, [isOpen])
-
-    useEffect(() => {
         if (typeof window === 'undefined') return
 
         const desktopMQ = window.matchMedia('(min-width: 1280px)')
 
         const syncToBreakpoint = () => {
             if (desktopMQ.matches) {
-                setIsOpen(false)
+                closeNav()
             } else {
                 setActiveSubnav(null)
             }
@@ -920,7 +921,7 @@ export function Header() {
                             WebkitBackdropFilter: 'blur(10px)',
                             backgroundColor: 'rgba(0, 0, 0, 0.18)',
                         }}
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => closeNav()}
                     />
                 )}
             </AnimatePresence>

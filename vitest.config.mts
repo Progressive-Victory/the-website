@@ -18,7 +18,9 @@ const tstConfig = testConfig({
     },
 })
 
-export default {
+const mergedConfig = {
     ...config,
     ...tstConfig,
 }
+
+export default mergedConfig
