@@ -1,5 +1,3 @@
-import { TokenClaims } from '@/contracts/data'
-import { DiscordLoginResponse } from '@/contracts/responses'
 import { ApiError, FetchError } from '@/models'
 import {
     keepPreviousData,
@@ -8,6 +6,8 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { TokenClaims } from 'pv-contracts/data'
+import { DiscordLoginResponse } from 'pv-contracts/responses'
 
 export function useAuth() {
     const queryClient = useQueryClient()
@@ -119,7 +119,7 @@ export function useAuth() {
                           return true
                       }
 
-                      await onLogout()
+                      //await onLogout()
                       return false
                   }
                 : skipToken,

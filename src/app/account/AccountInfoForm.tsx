@@ -7,9 +7,9 @@ import {
     TextField,
     DropDownField,
 } from '@/components/common/forms'
-import { User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
+import { User } from 'pv-contracts/data'
 import { useState } from 'react'
 
 interface AccountInfoFormProps {

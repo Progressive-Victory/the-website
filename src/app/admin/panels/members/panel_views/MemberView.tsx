@@ -11,9 +11,9 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
-import { Role, UpdateHistory, User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
+import { Role, UpdateHistory, User } from 'pv-contracts/data'
 
 const membershipCardShipmentOptions = [
     { value: 0, label: 'Not Eligible' },

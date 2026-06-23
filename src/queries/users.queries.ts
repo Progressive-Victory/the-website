@@ -1,9 +1,8 @@
-import { Role, User, zUser, zUserProfile, UserProfile } from '@/contracts/data'
-import { UpdateUserRequest } from '@/contracts/requests'
-import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
-import { useFetch, usePaginatedSearch } from '@/util/hooks'
+import { useFetch } from '@/util/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { User, zUser } from 'pv-contracts/data'
+import { UpdateUserRequest } from 'pv-contracts/requests'
 
 export function useUpdatedUser({
     loggedInUser,
@@ -13,8 +12,6 @@ export function useUpdatedUser({
     const queryClient = useQueryClient()
 
     const { onPatch } = useFetch()
-
-    const { search } = usePaginatedSearch<UserProfile>('/users', zUserProfile)
 
     const updateUser = useMutation<
         User,
@@ -35,15 +32,6 @@ export function useUpdatedUser({
             queryClient.setQueryData([`/users/${id}`], user)
             if (id == loggedInUser?.id)
                 queryClient.setQueryData(['/users/current'], user)
-            queryClient.setQueryData(
-                ['/users', search],
-                (res: PaginatedResponse<Role>) => ({
-                    ...res,
-                    data: res.data.map((prev) =>
-                        prev.id == user.id ? user : prev
-                    ),
-                })
-            )
             return prev
         },
 
@@ -53,15 +41,6 @@ export function useUpdatedUser({
             queryClient.setQueryData([`/users/${id}`], prev)
             if (id == loggedInUser?.id)
                 queryClient.setQueryData(['/users/current'], prev)
-            queryClient.setQueryData(
-                [`/users`, search],
-                (res: PaginatedResponse<Role>) => ({
-                    ...res,
-                    data: res.data.map((user) =>
-                        user.id == prev?.id ? prev : user
-                    ),
-                })
-            )
         },
 
         // On success, update the cache to the returned value in case there are any discrepancies
@@ -69,21 +48,11 @@ export function useUpdatedUser({
             queryClient.setQueryData([`/users/${id}`], data)
             if (id == loggedInUser?.id)
                 queryClient.setQueryData(['/users/current'], data)
-            queryClient.setQueryData(
-                [`/users`, search],
-                (res: PaginatedResponse<Role>) => ({
-                    ...res,
-                    data: res.data.map((user) =>
-                        user.id == data.id ? data : user
-                    ),
-                })
-            )
         },
 
         // After either success or failure, invalidate the caches to refresh from the server
         onSettled: (_data, _error, { id }) =>
             Promise.all([
-                queryClient.invalidateQueries({ queryKey: ['/users', search] }),
                 queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
                 queryClient.invalidateQueries({
                     queryKey: [`/users/${id}`],

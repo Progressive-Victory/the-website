@@ -8,19 +8,9 @@ import {
     PhoneVerifyStage,
     UnderageStage,
 } from '.'
-import { NotCitizenStage } from './NotCitizenStage'
+import { BannedStage } from './BannedStage'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
-import { OnboardingStage } from '@/contracts/data'
-import {
-    UserOnboardingCollectInfoRequest,
-    UserOnboardingVerifyRequest,
-    zUserOnboardingCollectInfoRequest,
-} from '@/contracts/requests'
-import {
-    DiscordUserIsInServerResponse,
-    zDiscordUserIsInServerResponse,
-} from '@/contracts/responses'
 import { useAuth, useCurrentUser, useFetch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -29,6 +19,16 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { OnboardingStage } from 'pv-contracts/data'
+import {
+    UserOnboardingCollectInfoRequest,
+    UserOnboardingVerifyRequest,
+    zUserOnboardingCollectInfoRequest,
+} from 'pv-contracts/requests'
+import {
+    DiscordUserIsInServerResponse,
+    zDiscordUserIsInServerResponse,
+} from 'pv-contracts/responses'
 import { useEffect, useState } from 'react'
 import z from 'zod'
 
@@ -221,6 +221,7 @@ export default function VolunteerPage() {
                                         user.data?.acceptedAlerts ?? false,
                                     usCitizen: false,
                                     privacyPolicy: false,
+                                    oneTimePasscode: false,
                                 }}
                                 isPending={collectInfoMutation.isPending}
                                 onSubmit={handleCollectInfoSuccess}
@@ -234,8 +235,8 @@ export default function VolunteerPage() {
                             />
                         )}
 
-                        {currentStage === OnboardingStage.NOT_CITIZEN && (
-                            <NotCitizenStage />
+                        {currentStage === OnboardingStage.BANNED && (
+                            <BannedStage />
                         )}
 
                         {currentStage === OnboardingStage.AWAITING_VERIFY && (
