@@ -186,8 +186,10 @@ export function useConfigure<FormType, FieldType>(
 
         const key = props.field
         if (key)
-            return (form: FormType, field: FieldType) =>
-                ({ ...form, [key]: field })
+            return (form: FormType, field: FieldType) => ({
+                ...form,
+                [key]: field,
+            })
 
         return (form: FormType) => form
     }, [props.setter, props.field])

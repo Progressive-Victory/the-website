@@ -3,6 +3,9 @@
 import styles from './HistoryView.module.css'
 import { MemberView } from './MemberView'
 import { CollapsibleSection } from '@/components/common'
+import { useFetch } from '@/util/hooks'
+import { useQueries } from '@tanstack/react-query'
+import cx from 'classnames'
 import {
     ActBlueDonor,
     DiscordUser,
@@ -10,10 +13,7 @@ import {
     UpdateHistory,
     User,
     zDiscordUser,
-} from '@/contracts/data'
-import { useFetch } from '@/util/hooks'
-import { useQueries } from '@tanstack/react-query'
-import cx from 'classnames'
+} from 'pv-contracts/data'
 import { ReactNode, useMemo } from 'react'
 import z from 'zod'
 
