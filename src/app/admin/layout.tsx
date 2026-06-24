@@ -235,6 +235,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                             label="Volunteer Dashboard"
                             sidebarStyle="minimal"
                             showScrollbar={false}
+                            showSelectionIndicator
                             featured={<SidebarFeatured />}
                         >
                             {adminPanelConfig.map((panel) => (

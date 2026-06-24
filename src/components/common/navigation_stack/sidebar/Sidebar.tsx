@@ -2,6 +2,8 @@
 
 import styles from './Sidebar.module.css'
 import { DiscordAvatar } from '@/components/common/DiscordAvatar'
+import { DropdownButton } from '@/components/common/dropdown/DropdownButton'
+import { DropdownOverlay } from '@/components/common/dropdown/DropdownOverlay'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import { useCurrentUser } from '@/util/hooks'
 import { usePathname } from 'next/navigation'
@@ -25,6 +27,7 @@ interface SidebarBodyProps {
     bodyRef: React.RefObject<HTMLDivElement | null>
     indicatorLayoutSyncing: boolean
     indicatorStyle: IndicatorStyle
+    showSelectionIndicator: boolean
     children?: ReactNode
 }
 
@@ -47,6 +50,7 @@ interface ProminentSidebarHeaderProps {
     prominentHeaderRight?: ReactNode
     filterOpen?: boolean
     onFilterOpenChange?: (open: boolean) => void
+    filterContent?: ReactNode
     reserveToggleSpace: boolean
     largeTitle?: boolean
 }
@@ -68,6 +72,7 @@ export interface NavigationStackSlotProps {
     sidebarWidth?: string
     filterOpen?: boolean
     onFilterOpenChange?: (open: boolean) => void
+    filterContent?: ReactNode
     sidebarStyle?: SidebarVariant
     collapsedSidebarMode?: 'compact' | 'hidden'
     open?: boolean
@@ -77,6 +82,7 @@ export interface NavigationStackSlotProps {
     prominentHeader?: ReactNode
     mobileVisible?: boolean
     showScrollbar?: boolean
+    showSelectionIndicator?: boolean
     className?: string
 }
 
@@ -129,7 +135,7 @@ function useSidebarIndicator(
     pathname: string,
     isDesktop: boolean,
     isOpen: boolean,
-    children: ReactNode
+    enabled: boolean
 ): {
     bodyRef: React.RefObject<HTMLDivElement | null>
     indicatorLayoutSyncing: boolean
@@ -147,6 +153,14 @@ function useSidebarIndicator(
     > | null>(null)
 
     useEffect(() => {
+        if (!enabled) {
+            setIndicatorLayoutSyncing(false)
+            setIndicatorStyle((previous) =>
+                previous.visible ? { ...previous, visible: false } : previous
+            )
+            return
+        }
+
         let frameId: number | null = null
 
         function syncIndicatorToLayout() {
@@ -274,7 +288,7 @@ function useSidebarIndicator(
                 cancelAnimationFrame(frameId)
             }
         }
-    }, [pathname, isDesktop, isOpen, children])
+    }, [pathname, isDesktop, isOpen, enabled])
 
     return {
         bodyRef,
@@ -288,10 +302,6 @@ function useLargeTitleScroll(
     titleRef: React.RefObject<HTMLElement | null>,
     enabled: boolean
 ): boolean {
-    // The collapse is *triggered* by scrolling, but the animation itself is
-    // driven by CSS transitions (constant duration), not scrubbed by the
-    // scroll position. So this hook only resolves a boolean state with a small
-    // hysteresis band to avoid flicker right at the trigger point.
     const [collapsed, setCollapsed] = useState(false)
 
     useEffect(() => {
@@ -379,6 +389,7 @@ function MinimalSidebar({
     onOpenChange,
     mobileVisible,
     showScrollbar = true,
+    showSelectionIndicator = false,
     className,
 }: NavigationStackSlotProps): ReactElement {
     const pathname = usePathname()
@@ -388,7 +399,7 @@ function MinimalSidebar({
         onOpenChange
     )
     const { bodyRef, indicatorLayoutSyncing, indicatorStyle } =
-        useSidebarIndicator(pathname, isDesktop, isOpen, children)
+        useSidebarIndicator(pathname, isDesktop, isOpen, showSelectionIndicator)
     const hiddenCollapsed =
         isDesktop && !isOpen && collapsedSidebarMode === 'hidden'
     const resolvedMobileVisible =
@@ -425,6 +436,7 @@ function MinimalSidebar({
                     bodyRef={bodyRef}
                     indicatorLayoutSyncing={indicatorLayoutSyncing}
                     indicatorStyle={indicatorStyle}
+                    showSelectionIndicator={showSelectionIndicator}
                 >
                     {children}
                 </SidebarBody>
@@ -450,6 +462,7 @@ function ProminentSidebar({
     sidebarWidth,
     filterOpen,
     onFilterOpenChange,
+    filterContent,
     collapsedSidebarMode = 'compact',
     open: controlledOpen,
     prominentHeaderLeft,
@@ -457,19 +470,17 @@ function ProminentSidebar({
     prominentHeader,
     mobileVisible,
     showScrollbar = true,
+    showSelectionIndicator = false,
     className,
 }: NavigationStackSlotProps): ReactElement {
     const pathname = usePathname()
     const visualMode = getProminentSidebarVisualMode(includeHeader)
     const { isDesktop, isOpen } = useSidebarOpenState(controlledOpen)
     const { bodyRef, indicatorLayoutSyncing, indicatorStyle } =
-        useSidebarIndicator(pathname, isDesktop, isOpen, children)
+        useSidebarIndicator(pathname, isDesktop, isOpen, showSelectionIndicator)
     const scrollRef = useRef<HTMLDivElement | null>(null)
     const largeTitleRef = useRef<HTMLHeadingElement | null>(null)
     const collapsed = isDesktop && !isOpen
-    // Large title applies to prominent sidebars (the prominent header acts as
-    // the inline title destination) but not when collapsed to the icon rail,
-    // where there's no room for the large title block.
     const largeTitleActive = largeTitle
     const largeTitleEnabled = largeTitleActive && !collapsed
     const titleCollapsed = useLargeTitleScroll(
@@ -516,6 +527,7 @@ function ProminentSidebar({
                 prominentHeaderRight={prominentHeaderRight}
                 filterOpen={filterOpen}
                 onFilterOpenChange={onFilterOpenChange}
+                filterContent={filterContent}
                 reserveToggleSpace={reserveProminentHeaderToggleSpace}
                 largeTitle={largeTitleActive}
             />
@@ -553,6 +565,7 @@ function ProminentSidebar({
                         bodyRef={bodyRef}
                         indicatorLayoutSyncing={indicatorLayoutSyncing}
                         indicatorStyle={indicatorStyle}
+                        showSelectionIndicator={showSelectionIndicator}
                     >
                         {children}
                     </SidebarBody>
@@ -592,6 +605,7 @@ function ProminentSidebarHeader({
     prominentHeaderRight,
     filterOpen,
     onFilterOpenChange,
+    filterContent,
     reserveToggleSpace,
     largeTitle,
 }: ProminentSidebarHeaderProps): ReactElement {
@@ -599,14 +613,35 @@ function ProminentSidebarHeader({
         return <>{prominentHeader}</>
     }
 
-    const usesGeneratedFilterToggle =
+    const usesGeneratedFilterDropdown =
         prominentHeaderRight == null &&
+        filterContent !== undefined &&
+        filterContent !== null
+    const usesGeneratedLegacyFilterToggle =
+        prominentHeaderRight == null &&
+        !usesGeneratedFilterDropdown &&
         typeof filterOpen === 'boolean' &&
         !!onFilterOpenChange
+    const usesGeneratedFilterToggle =
+        usesGeneratedFilterDropdown || usesGeneratedLegacyFilterToggle
 
     const resolvedHeaderRight =
         prominentHeaderRight ??
-        (typeof filterOpen === 'boolean' && onFilterOpenChange ? (
+        (usesGeneratedFilterDropdown ? (
+            <DropdownButton
+                type="button"
+                buttonVariant="icon"
+                aria-label="Show Filters"
+                title="Show Filters"
+                icon={<IoMdOptions size={20} />}
+                menu={({ closeDropdown }) => (
+                    <DropdownOverlay
+                        body={filterContent}
+                        onClose={closeDropdown}
+                    />
+                )}
+            />
+        ) : usesGeneratedLegacyFilterToggle ? (
             <div className={styles.filterToggleSlot}>
                 <button
                     className={styles.filterToggleButton}
@@ -691,20 +726,23 @@ function SidebarBody({
     bodyRef,
     indicatorLayoutSyncing,
     indicatorStyle,
+    showSelectionIndicator,
     children,
 }: SidebarBodyProps): ReactElement {
     return (
         <div className={styles.body} ref={bodyRef}>
-            <div
-                aria-hidden="true"
-                className={styles.selectionIndicator}
-                data-layout-syncing={indicatorLayoutSyncing}
-                data-visible={indicatorStyle.visible}
-                style={{
-                    top: `${indicatorStyle.top}px`,
-                    height: `${indicatorStyle.height}px`,
-                }}
-            />
+            {showSelectionIndicator ? (
+                <div
+                    aria-hidden="true"
+                    className={styles.selectionIndicator}
+                    data-layout-syncing={indicatorLayoutSyncing}
+                    data-visible={indicatorStyle.visible}
+                    style={{
+                        top: `${indicatorStyle.top}px`,
+                        height: `${indicatorStyle.height}px`,
+                    }}
+                />
+            ) : null}
             {children}
         </div>
     )

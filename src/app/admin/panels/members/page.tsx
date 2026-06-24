@@ -4,9 +4,11 @@ import styles from './page.module.css'
 import { DonorView } from './panel_views/DonorView'
 import { HistoryView } from './panel_views/HistoryView'
 import { MemberView } from './panel_views/MemberView'
-import { ListElement, List } from '@/app/admin/layout/List'
+import { ListElement } from '@/app/admin/layout/List'
 import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
+import Panel from '@/components/common/panel/Panel'
+import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ActBlueDonor,
@@ -38,8 +40,9 @@ import {
     useQueryClient,
     UseQueryResult,
 } from '@tanstack/react-query'
-import { useCallback, useMemo, useState } from 'react'
-import { PulseLoader } from 'react-spinners'
+import { useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMediaQuery } from 'usehooks-ts'
 import z from 'zod'
 
 type MemberTabKey = 'overview' | 'donorMatching' | 'history'
@@ -50,11 +53,44 @@ const tabs: TabSpec[] = [
     { key: 'history', label: 'History' },
 ]
 
+const MEMBER_FIELD_OPTIONS = [
+    { value: 'email', label: 'Email' },
+    { value: 'phone', label: 'Phone Number' },
+    { value: 'zip', label: 'Zip Code' },
+    { value: 'county', label: 'County' },
+    { value: 'city', label: 'City' },
+    { value: 'state', label: 'State' },
+    { value: 'preferred_name', label: 'Preferred Name' },
+    { value: 'first_name', label: 'First Name' },
+    { value: 'last_name', label: 'Last Name' },
+    { value: 'birthdate', label: 'Birthdate' },
+    { value: 'accepted_alerts', label: 'Accepted Notifications' },
+    { value: 'onboarding_stage', label: 'Onboarding Stage' },
+    { value: 'created_at_utc', label: 'Date Created' },
+    { value: 'joined_at_utc', label: 'Date Joined Server' },
+    { value: 'completed_intake_utc', label: 'Date Intake Done' },
+    { value: 'aliases', label: 'Aliases' },
+    { value: 'discord_usernames', label: 'Discord Usernames' },
+]
+
+const MEMBER_SORT_FIELD_OPTIONS = [
+    { value: 'email', label: 'Email' },
+    { value: 'first_name', label: 'First Name' },
+    { value: 'last_name', label: 'Last Name' },
+    { value: 'created_at_utc', label: 'Created At' },
+    { value: 'updated_at_utc', label: 'Recently Edited' },
+]
+
 export default function Page() {
     const queryClient = useQueryClient()
     const { ready, onGet, onPatch, onPost } = useFetch()
+    const navParams = useSearchParams()
+    const navUserId = navParams.get('userId')
 
-    const [selectedId, setSelectedId] = useState<number | null>(null)
+    const initialUserId = navUserId ? Number(navUserId) : null
+    const [selectedId, setSelectedId] = useState<number | null>(
+        Number.isFinite(initialUserId) ? initialUserId : null
+    )
 
     const [selectedHistory, setSelectedHistory] =
         useState<UpdateHistory<User> | null>(null)
@@ -64,6 +100,9 @@ export default function Page() {
     const [formState, setFormState] = useState<FormState<User> | null>(null)
     const [pickingDonor, setPickingDonor] = useState<boolean>(false)
     const [selectedTab, setSelectedTab] = useState<MemberTabKey>('overview')
+
+    const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
+    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const loggedInUser = useCurrentUser()
 
@@ -367,27 +406,27 @@ export default function Page() {
         [handleSelectDonorItem]
     )
 
-    const renderItem = (item: User | UserProfile) => {
-        return (
-            <ListElement
-                key={item.id}
-                selected={selectedId == item.id}
-                onClick={() => handleSelectItem(item)}
-            >
-                <DiscordAvatar
-                    discordUserId={item.discordUsers?.[0]?.id}
-                    imageId={item.discordUsers?.[0]?.image}
-                    size={48}
-                />
-                <div className={styles.userMeta}>
-                    <span className={styles.userName}>{makeTitle(item)}</span>
-                    <span className={styles.userUsername}>
-                        {item.discordUsers?.[0]?.username ?? 'NOT FOUND'}
-                    </span>
-                </div>
-            </ListElement>
+    const users = useMemo(() => {
+        const fetchedUsers = searchQuery.data?.data ?? []
+        const currentUser = loggedInUser.data
+
+        if (!currentUser) return fetchedUsers
+
+        const dedupedUsers = fetchedUsers.filter(
+            (user) => user.id !== currentUser.id
         )
-    }
+        return [currentUser, ...dedupedUsers]
+    }, [searchQuery.data?.data, loggedInUser.data])
+
+    useEffect(() => {
+        if (navUserId == null) {
+            return
+        }
+
+        const nextSelectedId = Number(navUserId)
+
+        setSelectedId(Number.isFinite(nextSelectedId) ? nextSelectedId : null)
+    }, [navUserId])
 
     const renderPage = () => {
         if (!selectedId || !userQuery.data) return null
@@ -451,5 +490,182 @@ export default function Page() {
         }
     }
 
-    return <></>
+    return (
+        <Panel
+            includeSidebar
+            // includeHeader
+            largeTitle
+            sidebarWidth="24rem"
+            sidebarClassName={styles.sidebarBg}
+            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            label="Members"
+            showScrollbar={false}
+            sidebarList={{
+                search: { search, onSearch },
+                footer: {
+                    page: search.page ?? 0,
+                    pageSize: search.limit ?? 25,
+                    count: searchQuery.data?.count,
+                    isPending: searchQuery.isPending,
+                    onPageChange: (nextPage: number) =>
+                        onSearch({ ...search, page: nextPage }),
+                },
+                filters: {
+                    search,
+                    onSearch,
+                    searchFieldOptions: MEMBER_FIELD_OPTIONS,
+                    sortFieldOptions: MEMBER_SORT_FIELD_OPTIONS,
+                    showSort: true,
+                    showLimit: true,
+                    options: [
+                        {
+                            label: 'Role',
+                            value: 'roleIds',
+                            options: roles.map((role) => ({
+                                label: role.name,
+                                value: role.id,
+                            })),
+                        },
+                    ],
+                },
+            }}
+            sidebarBody={
+                <SidebarBody<User | UserProfile>
+                    items={users}
+                    isLoading={searchQuery.isPending}
+                    error={searchQuery.error}
+                    selectedKey={selectedId}
+                    renderItem={(user) => ({
+                        key: user.id,
+                        label: makeTitle(user),
+                        subtitle: user.discordUsers?.[0]?.username
+                            ? `@${user.discordUsers[0].username}`
+                            : 'NOT FOUND',
+                        tagLabel:
+                            user.id === loggedInUser.data?.id
+                                ? 'You'
+                                : undefined,
+                        iconNode: (
+                            <DiscordAvatar
+                                discordUserId={user.discordUsers?.[0]?.id}
+                                imageId={user.discordUsers?.[0]?.image}
+                                size={40}
+                            />
+                        ),
+                        href: `/admin/panels/members?userId=${user.id}`,
+                        onClick: (event) => {
+                            event.preventDefault()
+                            handleSelectItem(user)
+                            if (!isDesktop) {
+                                setSidebarMobileVisible(false)
+                            }
+                        },
+                    })}
+                />
+            }
+        >
+            <div className={styles.detailsPane}>
+                {!isDesktop && !sidebarMobileVisible ? (
+                    <button
+                        className={styles.mobileBackButton}
+                        onClick={() => setSidebarMobileVisible(true)}
+                        type="button"
+                    >
+                        Members
+                    </button>
+                ) : null}
+
+                {selectedId == null && (
+                    <div className={styles.emptyState}>No user selected</div>
+                )}
+
+                {selectedId != null && userQuery.isPending && (
+                    <div className={styles.emptyState}>
+                        Loading user details...
+                    </div>
+                )}
+
+                {selectedId != null && userQuery.error && (
+                    <div
+                        className={styles.emptyState}
+                        style={{ color: '#ef4444' }}
+                    >
+                        Error:{' '}
+                        {userQuery.error instanceof Error
+                            ? userQuery.error.message
+                            : 'Unknown error'}
+                    </div>
+                )}
+
+                {selectedId && userQuery.data && (
+                    <>
+                        <div className={styles.detailsHeader}>
+                            <div className={styles.bannerCover} />
+                            <MemberBanner
+                                user={userQuery.data}
+                                makeTitle={makeTitle}
+                                selectedTab={selectedTab}
+                                onTabChange={setSelectedTab}
+                            />
+                            <div className={styles.detailsContent}>
+                                {renderPage()}
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
+        </Panel>
+    )
+}
+
+interface MemberBannerProps {
+    user: User
+    makeTitle: (user: User | UserProfile) => string
+    selectedTab: MemberTabKey
+    onTabChange: (key: MemberTabKey) => void
+}
+
+function MemberBanner({
+    user,
+    makeTitle,
+    selectedTab,
+    onTabChange,
+}: MemberBannerProps) {
+    return (
+        <div className={styles.headerTop}>
+            <div className={styles.cardStyle}>
+                <div className={styles.cardAvatar}>
+                    <DiscordAvatar
+                        discordUserId={user.discordUsers?.[0]?.id}
+                        imageId={user.discordUsers?.[0]?.image}
+                        size={64}
+                    />
+                </div>
+                <div className={styles.userInfo}>
+                    <h1 className={styles.headerUserName}>{makeTitle(user)}</h1>
+                    <h2 className={styles.headerUserUsername}>
+                        {user.discordUsers?.[0]?.username
+                            ? `@${user.discordUsers[0].username}`
+                            : 'NOT FOUND'}
+                    </h2>
+                </div>
+            </div>
+            <div className={styles.roleList}>
+                {user.roles?.length ? (
+                    user.roles.map((role) => (
+                        <span key={role.id} className={styles.rolePill}>
+                            {role.name}
+                        </span>
+                    ))
+                ) : (
+                    <span className={styles.roleEmpty}>No roles assigned</span>
+                )}
+            </div>
+            <TabBar
+                tabs={tabs}
+                value={selectedTab}
+                onChange={(key) => onTabChange(key as MemberTabKey)}
+            />
+        </div>
+    )
 }

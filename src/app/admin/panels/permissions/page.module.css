@@ -1,5 +1,7 @@
 .sidebarBg {
     --navigation-stack-sidebar-bg: #f9fafb;
+    --navigation-stack-sidebar-padding: 0rem;
+    --navigation-stack-sidebar-gap: 0rem;
 }
 
 .sidebarSearchInput {
@@ -15,6 +17,81 @@
     border-color: rgba(14, 165, 233, 0.45);
     box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
     outline: none;
+}
+
+.searchInput {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.5rem;
+    padding-inline: 0.5rem;
+}
+
+.searchInput > input {
+    width: 100%;
+    border-radius: 0.6rem;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #d1d5db;
+    padding: 0.25rem 0.75rem;
+}
+
+.searchInput > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    background: transparent;
+    border-radius: 0.85rem;
+
+    padding: 0.5rem;
+
+    cursor: pointer;
+    color: rgba(15, 23, 42, 0.62);
+
+    gap: 0.5rem;
+}
+
+.searchInput > button:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.iconToggleButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    background: transparent;
+    border-radius: 0.85rem;
+
+    padding: 0.5rem;
+
+    cursor: pointer;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.iconToggleButton:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.permissionNavigationButton {
+    --navigation-button-item-margin: 0.1rem 0.25rem;
+    --navigation-button-item-width: auto;
+    --navigation-button-item-radius: 1rem;
+    --navigation-button-link-gap: 1.25rem;
+    --navigation-button-link-padding: 1rem;
+    --navigation-button-link-radius: 1rem;
+    --navigation-button-link-color: #000;
+    --navigation-button-label-font-size: 1rem;
+    --navigation-button-label-font-weight: 500;
+    --navigation-button-label-letter-spacing: 0;
+    --navigation-button-label-color: #000;
+    --navigation-button-link-hover-bg: #e5e7eb;
+    --navigation-button-link-active-bg: #e5e7eb;
+    --navigation-button-link-active-color: #000;
+    --navigation-button-link-active-hover-bg: #d1d5db;
 }
 
 .sidebarList {
@@ -69,9 +146,63 @@
     padding-block: 1rem;
 }
 
-.listItemText {
+.mobileBackButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0 1rem 1rem;
+    border: 0;
+    background: transparent;
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.65rem;
+    color: #2986cc;
+    font: inherit;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.mobileBackButton::before {
+    content: '';
+    display: inline-block;
+    width: 0.58rem;
+    height: 0.58rem;
+    border-left: 0.14rem solid currentColor;
+    border-bottom: 0.14rem solid currentColor;
+    transform: rotate(45deg);
+    position: relative;
+    top: -0.5px;
+    border-bottom-left-radius: 0.04rem;
+}
+
+.mobileBackButton:hover {
+    color: #549ed6;
+    background: rgba(15, 23, 42, 0.05);
+}
+
+.element {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    margin: 0.25rem;
     font-weight: 500;
     color: #000;
+    background-color: #e5e7eb;
+}
+
+.element:hover {
+    background-color: #e5e7eb;
+}
+
+.element.selected {
+    background-color: #e5e7eb;
+}
+
+.element.selected:hover {
+    background-color: #d1d5db;
 }
 
 .emptyState {
@@ -79,4 +210,126 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.filterOverlay {
+    min-width: 16rem;
+}
+
+.filterOverlayBody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem;
+}
+
+.filterSelect {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filterSelect > strong {
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.75);
+}
+
+.select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.select > span {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.7);
+}
+
+.select > select {
+    border-radius: 0.85rem;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    background: rgba(255, 255, 255, 0.75);
+    padding: 0.35rem 0.55rem;
+    color: rgba(15, 23, 42, 0.8);
+    outline: none;
+}
+
+/* .pageSelectContainer {
+    margin-top: auto;
+    display: flex;
+    gap: 1rem;
+} */
+/* 
+.pageSelect {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+} */
+
+.pageSelectButtons {
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.9rem;
+}
+
+.pageSelectForm {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    color: rgba(15, 23, 42, 0.72);
+}
+
+.pageSelectInput {
+    width: 6ch;
+    max-width: min-content;
+    border-radius: 0.65rem;
+    border-width: 1px;
+    border-color: #d1d5db;
+    padding: 0.125rem 0.5rem;
+    text-align: center;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.pageSelectInput:focus {
+    border-color: rgba(14, 165, 233, 0.35);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+.arrow {
+    display: flex;
+    user-select: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.85rem;
+    padding: 0.45rem;
+
+    font-weight: 600;
+}
+
+.arrow.disabled {
+    cursor: not-allowed;
+    color: rgba(15, 23, 42, 0.28);
+}
+
+.arrow.enabled {
+    cursor: pointer;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.arrow.enabled:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.arrow.enabled:active {
+    background-color: #f3f4f6;
 }

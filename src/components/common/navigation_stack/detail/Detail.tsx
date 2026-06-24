@@ -1,11 +1,10 @@
 'use client'
 
+import { readPanelHistory, writePanelHistory } from '../panelHistory'
 import styles from './Detail.module.css'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState, type ReactElement, type ReactNode } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
-
-const PANEL_HISTORY_STORAGE_KEY = 'pv.admin.panel.history'
 
 function formatPanelLabelFromPath(path: string): string {
     if (!path.startsWith('/admin/panels/')) {
@@ -51,19 +50,13 @@ function usePanelBackNavigation() {
             return
         }
 
-        const rawHistory = window.sessionStorage.getItem(
-            PANEL_HISTORY_STORAGE_KEY
-        )
-
         if (!isPanelRoute) {
             setHasPanelHistory(false)
             setBackTargetPanelLabel('Back')
             return
         }
 
-        const panelHistory = rawHistory
-            ? (JSON.parse(rawHistory) as string[])
-            : []
+        const panelHistory = readPanelHistory()
 
         const previousPanelPath = panelHistory[panelHistory.length - 1]
 
@@ -80,21 +73,13 @@ function usePanelBackNavigation() {
             return
         }
 
-        const rawHistory = window.sessionStorage.getItem(
-            PANEL_HISTORY_STORAGE_KEY
-        )
-        const panelHistory = rawHistory
-            ? (JSON.parse(rawHistory) as string[])
-            : []
+        const panelHistory = readPanelHistory()
 
         if (panelHistory.length > 0) {
             const nextHistory = panelHistory.slice(0, -1)
             const previousPanelPath = panelHistory[panelHistory.length - 1]
 
-            window.sessionStorage.setItem(
-                PANEL_HISTORY_STORAGE_KEY,
-                JSON.stringify(nextHistory)
-            )
+            writePanelHistory(nextHistory)
 
             router.push(previousPanelPath)
             return

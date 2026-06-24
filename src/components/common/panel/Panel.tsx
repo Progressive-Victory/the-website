@@ -1,5 +1,17 @@
 import styles from './Panel.module.css'
 import {
+    SidebarListFilters,
+    type SidebarListFiltersConfig,
+} from './sidebar_list/SidebarList'
+import {
+    SidebarListFooter,
+    type SidebarListFooterProps,
+} from './sidebar_list/SidebarList'
+import {
+    SidebarListSearch,
+    type SidebarListSearchProps,
+} from './sidebar_list/SidebarList'
+import {
     NavigationStack,
     SidebarToggleButton,
 } from '@/components/common/navigation_stack/NavigationStack'
@@ -12,12 +24,19 @@ import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
+export interface SidebarListConfig {
+    search?: SidebarListSearchProps
+    filters?: SidebarListFiltersConfig
+    footer?: SidebarListFooterProps
+}
+
 export interface PanelProps {
     children: ReactNode
     label?: string
     includeHeader?: boolean
     includeSidebar?: boolean
     largeTitle?: boolean
+    sidebarList?: SidebarListConfig
     sidebarSearch?: ReactNode
     sidebarFooter?: ReactNode
     sidebarWidth?: string
@@ -27,6 +46,7 @@ export interface PanelProps {
     sidebarMobileVisible?: boolean
     sidebarFilterOpen?: boolean
     onSidebarFilterOpenChange?: (open: boolean) => void
+    sidebarFilterContent?: ReactNode
     collapsedSidebarMode?: 'compact' | 'hidden'
     prominentHeader?: ReactNode
     prominentHeaderLeft?: ReactNode
@@ -43,6 +63,7 @@ export function Panel({
     includeHeader = false,
     includeSidebar = false,
     largeTitle = false,
+    sidebarList,
     sidebarSearch,
     sidebarFooter,
     sidebarWidth,
@@ -52,6 +73,7 @@ export function Panel({
     sidebarMobileVisible,
     sidebarFilterOpen,
     onSidebarFilterOpenChange,
+    sidebarFilterContent,
     collapsedSidebarMode = 'hidden',
     prominentHeader,
     prominentHeaderLeft,
@@ -80,6 +102,21 @@ export function Panel({
     const resolvedProminentHeaderLeft =
         prominentHeaderLeft ??
         (includeSidebar && !isDesktop ? <PanelBackButton /> : undefined)
+    const resolvedSidebarFooter =
+        sidebarFooter ??
+        (sidebarList?.footer ? (
+            <SidebarListFooter {...sidebarList.footer} />
+        ) : null)
+    const resolvedSidebarSearch =
+        sidebarSearch ??
+        (sidebarList?.search ? (
+            <SidebarListSearch {...sidebarList.search} />
+        ) : null)
+    const resolvedSidebarFilterContent =
+        sidebarFilterContent ??
+        (sidebarList?.filters ? (
+            <SidebarListFilters {...sidebarList.filters} />
+        ) : undefined)
 
     return (
         <div className={styles.content} aria-label={panelLabel}>
@@ -101,13 +138,14 @@ export function Panel({
                             label={panelLabel}
                             includeHeader={includeHeader}
                             largeTitle={largeTitle}
-                            search={sidebarSearch}
-                            footer={sidebarFooter}
+                            search={resolvedSidebarSearch}
+                            footer={resolvedSidebarFooter}
                             sidebarWidth={sidebarWidth}
                             showScrollbar={showScrollbar}
                             className={sidebarClassName}
                             filterOpen={sidebarFilterOpen}
                             onFilterOpenChange={onSidebarFilterOpenChange}
+                            filterContent={resolvedSidebarFilterContent}
                             sidebarStyle="prominent"
                             collapsedSidebarMode={collapsedSidebarMode}
                             mobileVisible={sidebarMobileVisible}

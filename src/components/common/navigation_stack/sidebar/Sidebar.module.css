@@ -174,6 +174,10 @@
 .header {
     display: block;
     overflow: hidden;
+    /* display: flex;
+    min-height: var(--navigation-stack-sidebar-header-min-height, 10rem);
+    align-items: center;
+    overflow: hidden; */
 }
 
 .footer {
@@ -226,6 +230,7 @@
     margin-top: auto;
     margin-right: calc(-1 * var(--navigation-stack-sidebar-padding, 0.9rem));
     margin-left: calc(-1 * var(--navigation-stack-sidebar-padding, 0.9rem));
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -348,12 +353,13 @@
     position: relative;
     display: flex;
     flex-wrap: nowrap;
+    flex-shrink: 0;
     align-items: center;
     justify-content: space-between;
     column-gap: 0.75rem;
     min-width: 0;
-    min-height: 4rem;
-    padding: 1.35rem 1.25rem;
+    min-height: var(--navigation-stack-sidebar-header-min-height, 4.05rem);
+    padding: 0.8rem 1.25rem;
     background-color: #f9fafb;
     backdrop-filter: blur(14px) saturate(150%);
     -webkit-backdrop-filter: blur(14px) saturate(150%);

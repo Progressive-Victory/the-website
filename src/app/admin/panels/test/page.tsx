@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
-import { DropdownButton, DropdownOverlay } from '@/components/common'
+import { MultiSelectOption } from '@/components/common'
 import {
     Form,
     FormGroup,
@@ -11,22 +11,12 @@ import {
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import Panel from '@/components/common/panel/Panel'
 import { Permission, zPermission } from '@/contracts/data'
-import { SearchRequest, UpdatePermissionRequest } from '@/contracts/requests'
+import { UpdatePermissionRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import cx from 'classnames'
-import { useCallback, useEffect, useState } from 'react'
-import {
-    FiChevronLeft,
-    FiChevronRight,
-    FiChevronsLeft,
-    FiChevronsRight,
-} from 'react-icons/fi'
-import { IoMdOptions } from 'react-icons/io'
-import { IoClose } from 'react-icons/io5'
-import { IconType } from 'react-icons/lib'
+import { useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
 export default function Page() {
@@ -111,9 +101,6 @@ export default function Page() {
         })
     }
 
-    const [panelOpen, setPanelOpen] = useState(false)
-    const onTogglePanel = () => setPanelOpen((previous) => !previous)
-
     const permissions = searchQuery.data?.data ?? []
     const resultCount = searchQuery.data?.count
 
@@ -121,54 +108,30 @@ export default function Page() {
         <Panel
             includeSidebar
             largeTitle
-            sidebarSearch={<SearchBar search={search} onSearch={onSearch} />}
+            includeHeader
             sidebarWidth="24rem"
             sidebarClassName={styles.sidebarBg}
             sidebarMobileVisible={isDesktop || sidebarMobileVisible}
             label="Test"
             showScrollbar={false}
-            sidebarFooter={
-                <Footer
-                    search={search}
-                    count={resultCount}
-                    isPending={searchQuery.isPending}
-                    onSearch={onSearch}
-                />
-            }
-            prominentHeaderRight={
-                <>
-                    <DropdownButton
-                        type="button"
-                        label="List Options"
-                        buttonVariant="minimal"
-                        menu={({ closeDropdown }) => (
-                            <DropdownOverlay
-                                className={styles.chartOptionsBox}
-                                label="List Options"
-                                onClose={() => {
-                                    closeDropdown()
-                                }}
-                                bodyClassName={styles.dropdownOverlay}
-                                body={<></>}
-                            />
-                        )}
-                    />
-
-                    <button
-                        aria-label={panelOpen ? 'Hide Filters' : 'Show Filters'}
-                        className={styles.iconToggleButton}
-                        onClick={onTogglePanel}
-                        title={panelOpen ? 'Hide Filters' : 'Show Filters'}
-                        type="button"
-                    >
-                        {panelOpen ? (
-                            <IoClose size="20" />
-                        ) : (
-                            <IoMdOptions size="20" />
-                        )}
-                    </button>
-                </>
-            }
+            sidebarList={{
+                search: { search, onSearch },
+                footer: {
+                    page: search.page ?? 0,
+                    pageSize: search.limit ?? 25,
+                    count: resultCount,
+                    isPending: searchQuery.isPending,
+                    onPageChange: (nextPage: number) =>
+                        onSearch({ ...search, page: nextPage }),
+                },
+                filters: {
+                    search,
+                    onSearch,
+                    options: FILTER_OPTIONS,
+                    searchFieldOptions: FIELD_OPTIONS,
+                    sortFieldOptions: FIELD_OPTIONS,
+                },
+            }}
             sidebarBody={
                 <>
                     {permissions.map((permission) => (
@@ -224,165 +187,39 @@ export default function Page() {
     )
 }
 
-interface SearchBarProps {
-    search: SearchRequest
-    onSearch: (search: SearchRequest) => void
+interface FilterOption {
+    value: string
+    label: string
+    options: MultiSelectOption[]
 }
 
-function SearchBar({ search, onSearch }: SearchBarProps) {
-    return (
-        <div className={styles.searchInput}>
-            <input
-                type="text"
-                name="search"
-                id="search"
-                placeholder="Search..."
-                defaultValue={search.query ?? ''}
-                onInput={(event) =>
-                    onSearch({
-                        ...search,
-                        query: event.currentTarget.value,
-                        page: 0,
-                    })
-                }
-            />
-        </div>
-    )
+interface FieldOption {
+    value: string
+    label: string
 }
 
-interface FooterProps {
-    search: SearchRequest
-    count?: number
-    isPending: boolean
-    onSearch: (search: SearchRequest) => void
-}
+const FIELD_OPTIONS: FieldOption[] = [
+    { value: 'id', label: 'ID' },
+    { value: 'name', label: 'Name' },
+]
 
-function Footer({
-    search,
-    count: resultCount,
-    isPending,
-    onSearch,
-}: FooterProps) {
-    const [value, setValue] = useState('')
-
-    const page = search.page ?? 0
-    const pageSize = search.limit ?? 25
-    const count = resultCount ?? 0
-    const disabled = isPending
-
-    const pageCount = Math.ceil(count / pageSize)
-    const canNavigate = pageCount > 1
-    const maxPage = pageCount - 1
-
-    const onChange = useCallback(
-        (page: number) => onSearch({ ...search, page }),
-        [onSearch, search]
-    )
-
-    const handleChangeValue = (value: string) => {
-        if (!value || (/^\d+$/.test(value) && value.length < 10))
-            setValue(value)
-    }
-
-    const handleSubmit = () => {
-        const newPage = +value - 1
-        if (0 <= newPage && newPage <= maxPage) onChange(newPage)
-        else setValue((page + 1).toString())
-    }
-
-    useEffect(() => {
-        setValue((page + 1).toString())
-    }, [page])
-
-    useEffect(() => {
-        if (page < 0) onChange(0)
-        else if (maxPage >= 0 && page > maxPage) onChange(maxPage)
-    }, [page, maxPage, onChange])
-
-    const PaginationArrow = ({
-        onClick,
-        icon: Icon,
-        title,
-        enabled,
-    }: {
-        onClick: () => void
-        icon: IconType
-        title: string
-        enabled: boolean
-    }) => (
-        <a
-            className={cx(
-                styles.arrow,
-                enabled ? styles.enabled : styles.disabled
-            )}
-            onClick={() => enabled && onClick()}
-            title={title}
-        >
-            <Icon size={20} />
-        </a>
-    )
-
-    if (resultCount == null) return null
-
-    return (
-        <div className={styles.pageSelectContainer}>
-            <div className={styles.pageSelect}>
-                <div className={styles.pageSelectButtons}>
-                    <PaginationArrow
-                        onClick={() => onChange(0)}
-                        icon={FiChevronsLeft}
-                        title="First"
-                        enabled={canNavigate && page > 0}
-                    />
-                    <PaginationArrow
-                        onClick={() => onChange(page - 1)}
-                        icon={FiChevronLeft}
-                        title="Previous"
-                        enabled={canNavigate && page > 0}
-                    />
-                    <form
-                        className={styles.pageSelectForm}
-                        onSubmit={(e) => {
-                            e.preventDefault()
-                            handleSubmit()
-                        }}
-                    >
-                        <input
-                            id="page"
-                            type="text"
-                            value={value}
-                            disabled={disabled}
-                            onBlur={handleSubmit}
-                            onChange={(e) => handleChangeValue(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    e.currentTarget.blur()
-                                }
-                            }}
-                            className={styles.pageSelectInput}
-                        />
-                        <input type="submit" hidden />
-                        <span className={styles.pageSelectSpan} color="#4b5563">
-                            of{' '}
-                            <span title={`${count} total results`}>
-                                {pageCount}
-                            </span>
-                        </span>
-                    </form>
-                    <PaginationArrow
-                        onClick={() => onChange(page + 1)}
-                        icon={FiChevronRight}
-                        title="Next"
-                        enabled={canNavigate && page < maxPage}
-                    />
-                    <PaginationArrow
-                        onClick={() => onChange(maxPage)}
-                        icon={FiChevronsRight}
-                        title="Last"
-                        enabled={canNavigate && page < maxPage}
-                    />
-                </div>
-            </div>
-        </div>
-    )
-}
+const FILTER_OPTIONS: FilterOption[] = [
+    {
+        value: 'category',
+        label: 'Category',
+        options: [
+            { value: 'read', label: 'Read' },
+            { value: 'write', label: 'Write' },
+            { value: 'admin', label: 'Admin' },
+        ],
+    },
+    {
+        value: 'scope',
+        label: 'Scope',
+        options: [
+            { value: 'global', label: 'Global' },
+            { value: 'team', label: 'Team' },
+            { value: 'personal', label: 'Personal' },
+        ],
+    },
+]

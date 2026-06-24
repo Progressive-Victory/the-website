@@ -1,5 +1,10 @@
 'use client'
 
+import {
+    readPanelHistory,
+    writePanelHistory,
+    clearPanelHistory,
+} from '../panelHistory'
 import styles from './NavigationButton.module.css'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -15,7 +20,6 @@ import {
 import type { MouseEvent } from 'react'
 import type { IconType } from 'react-icons/lib'
 
-const PANEL_HISTORY_STORAGE_KEY = 'pv.admin.panel.history'
 const GROUP_CHILDREN_ANIMATION_MS = 220
 
 export type NavigationButtonType = 'default' | 'group' | 'card' | 'account'
@@ -24,6 +28,7 @@ export type IndicatorDirection = 'up' | 'down' | 'none'
 export interface NavigationButtonProps {
     label: string
     subtitle?: string
+    tagLabel?: string
     href: string
     icon?: IconType
     iconNode?: ReactNode
@@ -50,6 +55,7 @@ export interface NavigationButtonProps {
 export function NavigationButton({
     label,
     subtitle,
+    tagLabel,
     href,
     icon,
     iconNode,
@@ -75,6 +81,7 @@ export function NavigationButton({
     const Icon = icon
     const hasIcon = Boolean(iconNode ?? Icon)
     const isAccountButton = buttonType === 'account'
+    const hasSubtitle = subtitle != null && subtitle !== ''
     const pathname = usePathname()
     const formattedCount = (count ?? 0).toLocaleString()
     const [isGroupOpen, setIsGroupOpen] = useState(false)
@@ -155,7 +162,7 @@ export function NavigationButton({
         }
 
         if (resetPanelHistoryOnClick) {
-            window.sessionStorage.removeItem(PANEL_HISTORY_STORAGE_KEY)
+            clearPanelHistory()
             return
         }
 
@@ -167,22 +174,14 @@ export function NavigationButton({
             return
         }
 
-        const rawHistory = window.sessionStorage.getItem(
-            PANEL_HISTORY_STORAGE_KEY
-        )
-        const panelHistory = rawHistory
-            ? (JSON.parse(rawHistory) as string[])
-            : []
+        const panelHistory = readPanelHistory()
 
         const nextHistory =
             panelHistory[panelHistory.length - 1] === pathname
                 ? panelHistory
                 : [...panelHistory, pathname]
 
-        window.sessionStorage.setItem(
-            PANEL_HISTORY_STORAGE_KEY,
-            JSON.stringify(nextHistory.slice(-50))
-        )
+        writePanelHistory(nextHistory)
     }
 
     if (buttonType === 'card') {
@@ -298,6 +297,9 @@ export function NavigationButton({
                     <span
                         className={[
                             styles.labelSection,
+                            hasSubtitle && !isAccountButton
+                                ? styles.labelSectionWithSubtitle
+                                : null,
                             isAccountButton ? styles.accountText : null,
                             labelClassName,
                         ]
@@ -308,6 +310,9 @@ export function NavigationButton({
                         {subtitle ? (
                             <span
                                 className={[
+                                    !isAccountButton
+                                        ? styles.subtitleSection
+                                        : null,
                                     isAccountButton
                                         ? styles.accountSubtitle
                                         : null,
@@ -324,6 +329,7 @@ export function NavigationButton({
                     <span
                         className={[
                             styles.tagSection,
+                            tagLabel ? styles.tagSectionWithLabel : null,
                             isAccountButton ? styles.accountTagSection : null,
                             tagSectionClassName,
                         ]
@@ -342,6 +348,8 @@ export function NavigationButton({
                             >
                                 <span className={styles.groupTagChevron} />
                             </span>
+                        ) : tagLabel ? (
+                            <span className={styles.tagLabel}>{tagLabel}</span>
                         ) : !isAccountButton && count !== undefined ? (
                             <span className={styles.count}>
                                 {formattedCount}

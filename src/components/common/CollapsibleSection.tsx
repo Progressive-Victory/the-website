@@ -6,6 +6,7 @@ import { FiChevronDown, FiChevronLeft } from 'react-icons/fi'
 export interface CollapsibleSectionProps {
     children?: React.ReactNode
     title?: string
+    subtitle?: string
     initialOpenState?: boolean
     subGroup?: boolean
 }
@@ -13,6 +14,7 @@ export interface CollapsibleSectionProps {
 export function CollapsibleSection({
     children,
     title,
+    subtitle,
     initialOpenState = true,
     subGroup,
 }: CollapsibleSectionProps) {
@@ -22,9 +24,16 @@ export function CollapsibleSection({
         <section>
             {title && (
                 <h2
-                    className={`relative my-4 text-xl ${subGroup ? 'font-medium' : 'font-semibold'}`}
+                    className={`relative my-4 flex items-start justify-between gap-4 text-xl ${subGroup ? 'font-medium' : 'font-semibold'}`}
                 >
-                    {title}
+                    <span className="min-w-0">
+                        <span className="block truncate">{title}</span>
+                        {subtitle ? (
+                            <span className="block text-sm font-normal text-gray-500">
+                                {subtitle}
+                            </span>
+                        ) : null}
+                    </span>
                     <button
                         className="absolute right-0 top-0 flex size-8 cursor-pointer items-center justify-center rounded-full border-2 border-gray-200 text-gray-400 hover:text-gray-500"
                         onClick={() => setIsOpen(!isOpen)}
