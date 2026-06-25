@@ -1,8 +1,8 @@
 'use client'
 
 import styles from './NavigationStack.module.css'
-import { SidebarToggleButton } from './sidebar/Sidebar'
-import type { NavigationStackSlotProps } from './sidebar/Sidebar'
+import { SidebarToggleButton } from './sidebar/sidebar'
+import type { NavigationStackSlotProps } from './sidebar/sidebar'
 import type { ReactElement, ReactNode } from 'react'
 
 interface NavigationStackProps {

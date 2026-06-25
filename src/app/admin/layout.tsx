@@ -9,7 +9,7 @@ import { NavigationButton } from '@/components/common/navigation_stack/navigatio
 import {
     Sidebar,
     SidebarFeatured,
-} from '@/components/common/navigation_stack/sidebar/Sidebar'
+} from '@/components/common/navigation_stack/sidebar/sidebar'
 import { Header } from '@/components/layout/Header'
 import {
     zActBlueDonationPacket,
@@ -232,56 +232,62 @@ export default function Layout({ children }: { children: ReactNode }) {
                     sidebar={
                         <Sidebar
                             className={styles.sidebar}
-                            label="Volunteer Dashboard"
-                            sidebarStyle="minimal"
+                            variant="minimal"
                             showScrollbar={false}
                             showSelectionIndicator
-                            featured={<SidebarFeatured />}
+                            label="Volunteer Dashboard"
                         >
-                            {adminPanelConfig.map((panel) => (
-                                <NavigationButton
-                                    key={panel.key}
-                                    active={pathname === panel.href}
-                                    href={panel.href}
-                                    label={panel.label}
-                                    icon={panel.icon}
-                                    count={panel.count}
-                                    buttonType={panel.buttonType}
-                                    indicatorDirection={
-                                        pathname === panel.href &&
-                                        currentTopLevelIndex !== -1 &&
-                                        previousTopLevelIndex !== -1 &&
-                                        previousPathname !== pathname
-                                            ? currentTopLevelIndex >
-                                              previousTopLevelIndex
-                                                ? 'down'
-                                                : 'up'
-                                            : 'none'
-                                    }
-                                    hasActiveGroupChild={Boolean(
-                                        panel.groupChildren?.some(
-                                            (groupChild) =>
-                                                pathname === groupChild.href
-                                        )
-                                    )}
-                                    groupContent={panel.groupChildren?.map(
-                                        (groupChild) => (
-                                            <NavigationButton
-                                                key={groupChild.key}
-                                                active={
+                            <Sidebar.Featured>
+                                <SidebarFeatured />
+                            </Sidebar.Featured>
+
+                            <Sidebar.Body>
+                                {adminPanelConfig.map((panel) => (
+                                    <NavigationButton
+                                        key={panel.key}
+                                        active={pathname === panel.href}
+                                        href={panel.href}
+                                        label={panel.label}
+                                        icon={panel.icon}
+                                        count={panel.count}
+                                        buttonType={panel.buttonType}
+                                        indicatorDirection={
+                                            pathname === panel.href &&
+                                            currentTopLevelIndex !== -1 &&
+                                            previousTopLevelIndex !== -1 &&
+                                            previousPathname !== pathname
+                                                ? currentTopLevelIndex >
+                                                  previousTopLevelIndex
+                                                    ? 'down'
+                                                    : 'up'
+                                                : 'none'
+                                        }
+                                        hasActiveGroupChild={Boolean(
+                                            panel.groupChildren?.some(
+                                                (groupChild) =>
                                                     pathname === groupChild.href
-                                                }
-                                                href={groupChild.href}
-                                                label={groupChild.label}
-                                                icon={groupChild.icon}
-                                                count={groupChild.count}
-                                                resetPanelHistoryOnClick
-                                            />
-                                        )
-                                    )}
-                                    resetPanelHistoryOnClick
-                                />
-                            ))}
+                                            )
+                                        )}
+                                        groupContent={panel.groupChildren?.map(
+                                            (groupChild) => (
+                                                <NavigationButton
+                                                    key={groupChild.key}
+                                                    active={
+                                                        pathname ===
+                                                        groupChild.href
+                                                    }
+                                                    href={groupChild.href}
+                                                    label={groupChild.label}
+                                                    icon={groupChild.icon}
+                                                    count={groupChild.count}
+                                                    resetPanelHistoryOnClick
+                                                />
+                                            )
+                                        )}
+                                        resetPanelHistoryOnClick
+                                    />
+                                ))}
+                            </Sidebar.Body>
                         </Sidebar>
                     }
                     detail={

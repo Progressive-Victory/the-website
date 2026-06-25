@@ -7,7 +7,7 @@ import { DropdownOverlay } from '@/components/common/dropdown/DropdownOverlay'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import { useCurrentUser } from '@/util/hooks'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { Children, isValidElement, useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactElement, ReactNode } from 'react'
 import { FiChevronLeft } from 'react-icons/fi'
 import { IoMdOptions } from 'react-icons/io'
@@ -16,6 +16,7 @@ import { useMediaQuery } from 'usehooks-ts'
 
 type SidebarVariant = 'minimal' | 'prominent'
 type SidebarVisualMode = 'minimal' | 'prominent' | 'prominent-bare'
+type SidebarHeaderMode = 'shown' | 'hidden'
 
 interface IndicatorStyle {
     top: number
@@ -29,13 +30,6 @@ interface SidebarBodyProps {
     indicatorStyle: IndicatorStyle
     showSelectionIndicator: boolean
     children?: ReactNode
-}
-
-interface SidebarToggleButtonProps {
-    isOpen: boolean
-    onToggle: () => void
-    className?: string
-    size?: number
 }
 
 interface MinimalSidebarHeaderProps {
@@ -61,29 +55,261 @@ interface SidebarFooterProps {
     onToggle: () => void
 }
 
-export interface NavigationStackSlotProps {
-    children?: ReactNode
-    featured?: ReactNode
+export interface SidebarRootProps {
     label?: string
-    largeTitle?: boolean
-    search?: ReactNode
-    footer?: ReactNode
-    includeHeader?: boolean
-    sidebarWidth?: string
-    filterOpen?: boolean
-    onFilterOpenChange?: (open: boolean) => void
-    filterContent?: ReactNode
-    sidebarStyle?: SidebarVariant
-    collapsedSidebarMode?: 'compact' | 'hidden'
+    variant?: SidebarVariant
+    width?: string
+    collapsedMode?: 'compact' | 'hidden'
     open?: boolean
     onOpenChange?: (open: boolean) => void
-    prominentHeaderLeft?: ReactNode
-    prominentHeaderRight?: ReactNode
-    prominentHeader?: ReactNode
     mobileVisible?: boolean
     showScrollbar?: boolean
     showSelectionIndicator?: boolean
     className?: string
+    children?: ReactNode
+}
+
+export type NavigationStackSlotProps = SidebarRootProps
+
+export interface SidebarHeaderSlotProps {
+    mode?: SidebarHeaderMode
+    label?: string
+    largeTitle?: boolean
+    children?: ReactNode
+}
+
+export interface SidebarHeaderFiltersSlotProps {
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+    content?: ReactNode
+    children?: ReactNode
+}
+
+interface SidebarNamedSlotProps {
+    children?: ReactNode
+}
+
+interface ParsedHeaderSlots {
+    left?: ReactNode
+    right?: ReactNode
+    content?: ReactNode
+    search?: ReactNode
+    filters?: SidebarHeaderFiltersSlotProps
+}
+
+interface ResolvedHeaderProps {
+    mode: SidebarHeaderMode
+    label?: string
+    largeTitle?: boolean
+    search?: ReactNode
+    filterOpen?: boolean
+    onFilterOpenChange?: (open: boolean) => void
+    filterContent?: ReactNode
+    prominentHeader?: ReactNode
+    prominentHeaderLeft?: ReactNode
+    prominentHeaderRight?: ReactNode
+}
+
+interface ResolvedSidebarProps {
+    variant: SidebarVariant
+    width?: string
+    collapsedMode: 'compact' | 'hidden'
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+    mobileVisible?: boolean
+    showScrollbar: boolean
+    showSelectionIndicator: boolean
+    className?: string
+    header: ResolvedHeaderProps
+    featured?: ReactNode
+    body?: ReactNode
+    footer?: ReactNode
+}
+
+interface SidebarComponent {
+    (props: SidebarRootProps): ReactElement
+    Header: (props: SidebarHeaderSlotProps) => ReactElement | null
+    HeaderLeft: (props: SidebarNamedSlotProps) => ReactElement | null
+    HeaderRight: (props: SidebarNamedSlotProps) => ReactElement | null
+    HeaderContent: (props: SidebarNamedSlotProps) => ReactElement | null
+    HeaderSearch: (props: SidebarNamedSlotProps) => ReactElement | null
+    HeaderFilters: (props: SidebarHeaderFiltersSlotProps) => ReactElement | null
+    Featured: (props: SidebarNamedSlotProps) => ReactElement | null
+    Body: (props: SidebarNamedSlotProps) => ReactElement | null
+    Footer: (props: SidebarNamedSlotProps) => ReactElement | null
+}
+
+interface SidebarSlotElementProps {
+    children?: ReactNode
+}
+
+function SidebarHeaderSlot(_: SidebarHeaderSlotProps): ReactElement | null {
+    return null
+}
+
+function SidebarHeaderLeftSlot(_: SidebarNamedSlotProps): ReactElement | null {
+    return null
+}
+
+function SidebarHeaderRightSlot(_: SidebarNamedSlotProps): ReactElement | null {
+    return null
+}
+
+function SidebarHeaderContentSlot(
+    _: SidebarNamedSlotProps
+): ReactElement | null {
+    return null
+}
+
+function SidebarHeaderSearchSlot(
+    _: SidebarNamedSlotProps
+): ReactElement | null {
+    return null
+}
+
+function SidebarHeaderFiltersSlot(
+    _: SidebarHeaderFiltersSlotProps
+): ReactElement | null {
+    return null
+}
+
+function SidebarFeaturedSlot(_: SidebarNamedSlotProps): ReactElement | null {
+    return null
+}
+
+function SidebarBodySlot(_: SidebarNamedSlotProps): ReactElement | null {
+    return null
+}
+
+function SidebarFooterSlot(_: SidebarNamedSlotProps): ReactElement | null {
+    return null
+}
+
+function parseHeaderSlots(children: ReactNode): ParsedHeaderSlots {
+    const contentNodes: ReactNode[] = []
+    const parsed: ParsedHeaderSlots = {}
+
+    for (const child of Children.toArray(children)) {
+        if (!isValidElement(child)) {
+            contentNodes.push(child)
+            continue
+        }
+
+        if (child.type === SidebarHeaderLeftSlot) {
+            parsed.left = (child.props as SidebarSlotElementProps).children
+            continue
+        }
+
+        if (child.type === SidebarHeaderRightSlot) {
+            parsed.right = (child.props as SidebarSlotElementProps).children
+            continue
+        }
+
+        if (child.type === SidebarHeaderContentSlot) {
+            parsed.content = (child.props as SidebarSlotElementProps).children
+            continue
+        }
+
+        if (child.type === SidebarHeaderSearchSlot) {
+            parsed.search = (child.props as SidebarSlotElementProps).children
+            continue
+        }
+
+        if (child.type === SidebarHeaderFiltersSlot) {
+            const filtersProps = child.props as SidebarHeaderFiltersSlotProps
+            parsed.filters = {
+                open: filtersProps.open,
+                onOpenChange: filtersProps.onOpenChange,
+                content: filtersProps.content ?? filtersProps.children,
+            }
+            continue
+        }
+
+        contentNodes.push(child)
+    }
+
+    if (contentNodes.length > 0) {
+        parsed.content = <>{contentNodes}</>
+    }
+
+    return parsed
+}
+
+function resolveHeaderProps(
+    rootLabel: string | undefined,
+    headerSlot: SidebarHeaderSlotProps | undefined,
+    variant: SidebarVariant
+): ResolvedHeaderProps {
+    const nestedSlots = parseHeaderSlots(headerSlot?.children)
+
+    return {
+        mode:
+            headerSlot?.mode ?? (variant === 'prominent' ? 'hidden' : 'shown'),
+        label: headerSlot?.label ?? rootLabel,
+        largeTitle: headerSlot?.largeTitle ?? false,
+        search: nestedSlots.search,
+        filterOpen: nestedSlots.filters?.open,
+        onFilterOpenChange: nestedSlots.filters?.onOpenChange,
+        filterContent: nestedSlots.filters?.content,
+        prominentHeader: nestedSlots.content,
+        prominentHeaderLeft: nestedSlots.left,
+        prominentHeaderRight: nestedSlots.right,
+    }
+}
+
+function resolveSidebarProps(props: SidebarRootProps): ResolvedSidebarProps {
+    const variant = props.variant ?? 'minimal'
+    let headerSlot: SidebarHeaderSlotProps | undefined
+    let featured: ReactNode
+    let footer: ReactNode
+    const bodyNodes: ReactNode[] = []
+
+    for (const child of Children.toArray(props.children)) {
+        if (!isValidElement(child)) {
+            bodyNodes.push(child)
+            continue
+        }
+
+        if (child.type === SidebarHeaderSlot) {
+            headerSlot = child.props as SidebarHeaderSlotProps
+            continue
+        }
+
+        if (child.type === SidebarFeaturedSlot) {
+            featured = (child.props as SidebarSlotElementProps).children
+            continue
+        }
+
+        if (child.type === SidebarBodySlot) {
+            bodyNodes.push((child.props as SidebarSlotElementProps).children)
+            continue
+        }
+
+        if (child.type === SidebarFooterSlot) {
+            footer = (child.props as SidebarSlotElementProps).children
+            continue
+        }
+
+        bodyNodes.push(child)
+    }
+
+    const body = bodyNodes.length > 0 ? <>{bodyNodes}</> : undefined
+
+    return {
+        variant,
+        width: props.width,
+        collapsedMode: props.collapsedMode ?? 'compact',
+        open: props.open,
+        onOpenChange: props.onOpenChange,
+        mobileVisible: props.mobileVisible,
+        showScrollbar: props.showScrollbar ?? true,
+        showSelectionIndicator: props.showSelectionIndicator ?? false,
+        className: props.className,
+        header: resolveHeaderProps(props.label, headerSlot, variant),
+        featured,
+        body,
+        footer,
+    }
 }
 
 function cx(...parts: (string | false | undefined)[]): string {
@@ -368,30 +594,41 @@ function useLargeTitleScroll(
     return enabled ? collapsed : false
 }
 
-export function Sidebar({
-    sidebarStyle = 'minimal',
-    ...props
-}: NavigationStackSlotProps): ReactElement {
-    if (sidebarStyle === 'prominent') {
+function SidebarRoot(sidebarProps: SidebarRootProps): ReactElement {
+    const props = resolveSidebarProps(sidebarProps)
+
+    if (props.variant === 'prominent') {
         return <ProminentSidebar {...props} />
     }
 
     return <MinimalSidebar {...props} />
 }
 
+export const Sidebar = Object.assign(SidebarRoot, {
+    Header: SidebarHeaderSlot,
+    HeaderLeft: SidebarHeaderLeftSlot,
+    HeaderRight: SidebarHeaderRightSlot,
+    HeaderContent: SidebarHeaderContentSlot,
+    HeaderSearch: SidebarHeaderSearchSlot,
+    HeaderFilters: SidebarHeaderFiltersSlot,
+    Featured: SidebarFeaturedSlot,
+    Body: SidebarBodySlot,
+    Footer: SidebarFooterSlot,
+}) as SidebarComponent
+
 function MinimalSidebar({
-    children,
+    body,
     featured,
-    label,
-    sidebarWidth,
-    collapsedSidebarMode = 'compact',
+    width,
+    collapsedMode,
     open: controlledOpen,
     onOpenChange,
     mobileVisible,
-    showScrollbar = true,
-    showSelectionIndicator = false,
+    showScrollbar,
+    showSelectionIndicator,
     className,
-}: NavigationStackSlotProps): ReactElement {
+    header,
+}: ResolvedSidebarProps): ReactElement {
     const pathname = usePathname()
     const visualMode: SidebarVisualMode = 'minimal'
     const { isDesktop, isOpen, toggle } = useSidebarOpenState(
@@ -400,11 +637,10 @@ function MinimalSidebar({
     )
     const { bodyRef, indicatorLayoutSyncing, indicatorStyle } =
         useSidebarIndicator(pathname, isDesktop, isOpen, showSelectionIndicator)
-    const hiddenCollapsed =
-        isDesktop && !isOpen && collapsedSidebarMode === 'hidden'
+    const hiddenCollapsed = isDesktop && !isOpen && collapsedMode === 'hidden'
     const resolvedMobileVisible =
         mobileVisible ?? !pathname.startsWith('/admin/panels/')
-    const sidebarInlineStyle = getSidebarInlineStyle(sidebarWidth)
+    const sidebarInlineStyle = getSidebarInlineStyle(width)
 
     return (
         <aside
@@ -422,7 +658,7 @@ function MinimalSidebar({
                 className
             )}
         >
-            <MinimalSidebarHeader label={label} isOpen={isOpen} />
+            <MinimalSidebarHeader label={header.label} isOpen={isOpen} />
 
             {featured}
 
@@ -438,7 +674,7 @@ function MinimalSidebar({
                     indicatorStyle={indicatorStyle}
                     showSelectionIndicator={showSelectionIndicator}
                 >
-                    {children}
+                    {body}
                 </SidebarBody>
             </div>
 
@@ -452,28 +688,20 @@ function MinimalSidebar({
 }
 
 function ProminentSidebar({
-    children,
+    body,
     featured,
-    label,
-    largeTitle = false,
-    search,
     footer,
-    includeHeader = true,
-    sidebarWidth,
-    filterOpen,
-    onFilterOpenChange,
-    filterContent,
-    collapsedSidebarMode = 'compact',
+    width,
+    collapsedMode,
     open: controlledOpen,
-    prominentHeaderLeft,
-    prominentHeaderRight,
-    prominentHeader,
     mobileVisible,
-    showScrollbar = true,
-    showSelectionIndicator = false,
+    showScrollbar,
+    showSelectionIndicator,
     className,
-}: NavigationStackSlotProps): ReactElement {
+    header,
+}: ResolvedSidebarProps): ReactElement {
     const pathname = usePathname()
+    const includeHeader = header.mode !== 'hidden'
     const visualMode = getProminentSidebarVisualMode(includeHeader)
     const { isDesktop, isOpen } = useSidebarOpenState(controlledOpen)
     const { bodyRef, indicatorLayoutSyncing, indicatorStyle } =
@@ -481,22 +709,21 @@ function ProminentSidebar({
     const scrollRef = useRef<HTMLDivElement | null>(null)
     const largeTitleRef = useRef<HTMLHeadingElement | null>(null)
     const collapsed = isDesktop && !isOpen
-    const largeTitleActive = largeTitle
+    const largeTitleActive = header.largeTitle ?? false
     const largeTitleEnabled = largeTitleActive && !collapsed
     const titleCollapsed = useLargeTitleScroll(
         scrollRef,
         largeTitleRef,
         largeTitleEnabled
     )
-    const hiddenCollapsed =
-        isDesktop && !isOpen && collapsedSidebarMode === 'hidden'
+    const hiddenCollapsed = isDesktop && !isOpen && collapsedMode === 'hidden'
     const reserveProminentHeaderToggleSpace =
-        isDesktop && collapsedSidebarMode === 'hidden'
+        isDesktop && collapsedMode === 'hidden'
     const shellClassName =
         visualMode === 'prominent-bare' ? styles.sidebarMinimal : undefined
     const surfaceClassName =
         visualMode === 'prominent' ? styles.sidebarProminent : undefined
-    const sidebarInlineStyle = getSidebarInlineStyle(sidebarWidth)
+    const sidebarInlineStyle = getSidebarInlineStyle(width)
     const resolvedMobileVisible = mobileVisible ?? true
 
     return (
@@ -521,13 +748,13 @@ function ProminentSidebar({
             )}
         >
             <ProminentSidebarHeader
-                label={label}
-                prominentHeader={prominentHeader}
-                prominentHeaderLeft={prominentHeaderLeft}
-                prominentHeaderRight={prominentHeaderRight}
-                filterOpen={filterOpen}
-                onFilterOpenChange={onFilterOpenChange}
-                filterContent={filterContent}
+                label={header.label}
+                prominentHeader={header.prominentHeader}
+                prominentHeaderLeft={header.prominentHeaderLeft}
+                prominentHeaderRight={header.prominentHeaderRight}
+                filterOpen={header.filterOpen}
+                onFilterOpenChange={header.onFilterOpenChange}
+                filterContent={header.filterContent}
                 reserveToggleSpace={reserveProminentHeaderToggleSpace}
                 largeTitle={largeTitleActive}
             />
@@ -548,12 +775,12 @@ function ProminentSidebar({
                                 ref={largeTitleRef}
                                 className={styles.largeTitle}
                             >
-                                {label}
+                                {header.label}
                             </h1>
 
-                            {search ? (
+                            {header.search ? (
                                 <div className={styles.largeTitleSearch}>
-                                    {search}
+                                    {header.search}
                                 </div>
                             ) : null}
                         </div>
@@ -567,7 +794,7 @@ function ProminentSidebar({
                         indicatorStyle={indicatorStyle}
                         showSelectionIndicator={showSelectionIndicator}
                     >
-                        {children}
+                        {body}
                     </SidebarBody>
                 </div>
             </div>

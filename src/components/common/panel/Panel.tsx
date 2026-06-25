@@ -19,7 +19,7 @@ import {
     Detail,
     PanelBackButton,
 } from '@/components/common/navigation_stack/detail/Detail'
-import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
+import { Sidebar } from '@/components/common/navigation_stack/sidebar/sidebar'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
@@ -135,27 +135,57 @@ export function Panel({
                     }
                     sidebar={
                         <Sidebar
-                            label={panelLabel}
-                            includeHeader={includeHeader}
-                            largeTitle={largeTitle}
-                            search={resolvedSidebarSearch}
-                            footer={resolvedSidebarFooter}
-                            sidebarWidth={sidebarWidth}
-                            showScrollbar={showScrollbar}
                             className={sidebarClassName}
-                            filterOpen={sidebarFilterOpen}
-                            onFilterOpenChange={onSidebarFilterOpenChange}
-                            filterContent={resolvedSidebarFilterContent}
-                            sidebarStyle="prominent"
-                            collapsedSidebarMode={collapsedSidebarMode}
+                            variant="prominent"
+                            width={sidebarWidth}
+                            collapsedMode={collapsedSidebarMode}
                             mobileVisible={sidebarMobileVisible}
+                            showScrollbar={showScrollbar}
                             open={isSidebarOpen}
                             onOpenChange={setIsSidebarOpen}
-                            prominentHeader={prominentHeader}
-                            prominentHeaderLeft={resolvedProminentHeaderLeft}
-                            prominentHeaderRight={prominentHeaderRight}
+                            label={panelLabel}
                         >
-                            {sidebarBody}
+                            <Sidebar.Header
+                                mode={includeHeader ? 'shown' : 'hidden'}
+                                label={panelLabel}
+                                largeTitle={largeTitle}
+                            >
+                                {resolvedSidebarSearch ? (
+                                    <Sidebar.HeaderSearch>
+                                        {resolvedSidebarSearch}
+                                    </Sidebar.HeaderSearch>
+                                ) : null}
+                                {resolvedSidebarFilterContent ? (
+                                    <Sidebar.HeaderFilters
+                                        open={sidebarFilterOpen}
+                                        onOpenChange={onSidebarFilterOpenChange}
+                                        content={resolvedSidebarFilterContent}
+                                    />
+                                ) : null}
+                                {prominentHeader ? (
+                                    <Sidebar.HeaderContent>
+                                        {prominentHeader}
+                                    </Sidebar.HeaderContent>
+                                ) : null}
+                                {resolvedProminentHeaderLeft ? (
+                                    <Sidebar.HeaderLeft>
+                                        {resolvedProminentHeaderLeft}
+                                    </Sidebar.HeaderLeft>
+                                ) : null}
+                                {prominentHeaderRight ? (
+                                    <Sidebar.HeaderRight>
+                                        {prominentHeaderRight}
+                                    </Sidebar.HeaderRight>
+                                ) : null}
+                            </Sidebar.Header>
+
+                            {resolvedSidebarFooter ? (
+                                <Sidebar.Footer>
+                                    {resolvedSidebarFooter}
+                                </Sidebar.Footer>
+                            ) : null}
+
+                            <Sidebar.Body>{sidebarBody}</Sidebar.Body>
                         </Sidebar>
                     }
                     detail={
