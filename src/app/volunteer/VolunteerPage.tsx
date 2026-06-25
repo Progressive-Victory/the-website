@@ -97,7 +97,7 @@ export default function VolunteerPage() {
             if (!user.data) return
             await onPost(
                 `/users/${user.data?.id}/onboardingStages/sendVerificationCode`,
-                {},
+                null,
                 null
             )
         },
