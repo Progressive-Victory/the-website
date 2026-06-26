@@ -163,7 +163,9 @@ export function MemberView({
                         readonly
                     />
                 )}
-                {/* Needs to be like this. Fragments break it. Check PR #436 to see previous testing */}
+                {/* 6/25/36 - There is no way to merge this conditional in with the above trinary. 
+                    The obvious solution (fragment) causes the page to break for unknowable reasons. 
+                    Check website PR #493 to see details of how each solution breaks */}
                 {editing && <TextField label="Last Name" field="lastName" />}
                 <DateField<User>
                     label="Date of Birth"
