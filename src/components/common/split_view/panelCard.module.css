@@ -1,0 +1,26 @@
+/*
+ * Panel card — the glass surface a full-page admin panel sits in.
+ * Ported from the old panel/Panel.module.css `.content` so migrated panels keep
+ * their rounded, translucent card framing.
+ */
+
+.card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    height: calc(100dvh - 7.75rem);
+    margin: 0.75rem;
+    border-radius: 1.25rem;
+
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 24px 60px rgba(15, 23, 42, 0.08);
+
+    overflow: hidden;
+}

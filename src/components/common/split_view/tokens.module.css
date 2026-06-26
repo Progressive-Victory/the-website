@@ -1,0 +1,45 @@
+/*
+ * Split-View design tokens — SKELETON.
+ *
+ * Single source of truth for theming. Apply `.tokens` at the SplitView root.
+ * The ENTIRE minimal/prominent visual difference is expressed by overriding
+ * these custom properties off `[data-variant]`; component TSX has no
+ * variant branches.
+ *
+ * Values are seeded from the current system (sidebar.module.css durations,
+ * util/theme.ts brand colors) so parity is preserved when wired up.
+ */
+
+.tokens {
+    /* geometry */
+    --sv-sidebar-width: 18rem;
+    --sv-sidebar-rail-width: 4.5rem;
+    --sv-sidebar-collapsed-width: 0rem;
+    --sv-header-height: 3.25rem;
+    --sv-row-radius: 0.5rem;
+    --sv-gutter: 0.75rem;
+
+    /* motion (from current sidebar.module.css) */
+    --sv-collapse-duration: 280ms;
+    --sv-collapse-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --sv-slide-duration: 240ms;
+    --sv-slide-ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+    /* color (from util/theme.ts) */
+    --sv-surface: #ffffff;
+    --sv-surface-muted: #f5f7fa;
+    --sv-border: #e2e8f0;
+    --sv-indicator: #2986cc; /* brandLightBlue.400 */
+    --sv-text: #09223a; /* brandDarkBlue.200 */
+    --sv-text-muted: #64748b;
+}
+
+/* Variant overrides — the complete minimal/prominent difference. */
+.tokens [data-variant='minimal'] {
+    --sv-sidebar-width: var(--sv-sidebar-rail-width);
+    --sv-header-height: 0rem;
+}
+
+.tokens [data-variant='prominent'] {
+    /* defaults are already the prominent values */
+}

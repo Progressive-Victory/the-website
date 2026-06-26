@@ -1,0 +1,212 @@
+/*
+ * Sidebar visuals.
+ *
+ * The COMPLETE minimal/prominent difference is expressed here off
+ * `[data-variant]` plus the tokens in tokens.module.css. The TSX shell renders
+ * identical DOM for both variants.
+ */
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    width: var(--sv-sidebar-width);
+    min-width: 0;
+    height: 100%;
+    background: var(--sv-surface);
+    border-right: 1px solid var(--sv-border);
+    overflow: hidden;
+    transition: width var(--sv-collapse-duration) var(--sv-collapse-ease);
+}
+
+/* Collapsed rail (desktop only). */
+.sidebar[data-collapsed='true'] {
+    width: var(--sv-sidebar-rail-width);
+}
+
+.header {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    min-height: var(--sv-header-height);
+}
+
+/* Header rows: left/right action clusters sit on a flex row with the title. */
+.header [data-part='actions'] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.header [data-part='actions'][data-slot='right'] {
+    margin-left: auto;
+}
+
+.header [data-part='title'] {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sv-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* iOS large title: big at rest, crossfades to the inline header on collapse. */
+.header [data-part='title'][data-large='true'] {
+    font-size: 1.75rem;
+    line-height: 1.1;
+    transition:
+        font-size var(--sv-slide-duration) var(--sv-slide-ease),
+        opacity 160ms ease;
+}
+
+.header [data-part='title'][data-large='true'][data-collapsed='true'] {
+    font-size: 1rem;
+}
+
+.header [data-part='search'] {
+    overflow: hidden;
+    transition:
+        max-height var(--sv-slide-duration) var(--sv-slide-ease),
+        opacity 160ms ease;
+    max-height: 3rem;
+    opacity: 1;
+}
+
+/* When the large title collapses, a nested search slot collapses with it. */
+.sidebar[data-large-title-collapsed='true'] .header [data-part='search'] {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.featured {
+    flex: 0 0 auto;
+    padding: 0 0.75rem 0.5rem;
+}
+
+.list {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0.5rem 0.5rem 1rem;
+    list-style: none;
+    margin: 0;
+}
+
+.footer {
+    flex: 0 0 auto;
+    margin-top: auto;
+    padding: 0.5rem 0.75rem;
+    border-top: 1px solid var(--sv-border);
+    background: var(--sv-surface-muted);
+}
+
+/* Hide labels/content when collapsed to the rail. */
+.sidebar[data-collapsed='true'] .header [data-part='title'],
+.sidebar[data-collapsed='true'] .header [data-part='search'] {
+    max-width: 0;
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Variant-specific visuals key off the root data attribute only. */
+.sidebar[data-variant='minimal'] .header {
+    align-items: center;
+}
+
+.sidebar[data-variant='prominent'] {
+    align-items: stretch;
+}
+
+/* Animated active-row indicator. */
+.indicator {
+    position: absolute;
+    left: 0;
+    width: 3px;
+    background: var(--sv-indicator);
+    border-radius: 0 2px 2px 0;
+    opacity: 0;
+    transition:
+        top var(--sv-slide-duration) var(--sv-slide-ease),
+        height var(--sv-slide-duration) var(--sv-slide-ease),
+        opacity 160ms ease;
+}
+
+.indicator[data-visible='true'] {
+    opacity: 1;
+}
+
+/* During a layout reflow (e.g. accordion open) snap instead of lerping. */
+.indicator[data-syncing='true'] {
+    transition: opacity 160ms ease;
+}
+
+/* Header buttons (actions, filter trigger, collapse toggle). */
+.actionButton,
+.filterTrigger,
+.toggleButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.5rem;
+    border: 0;
+    border-radius: var(--sv-row-radius);
+    background: transparent;
+    color: var(--sv-text-muted);
+    cursor: pointer;
+    font: inherit;
+    transition:
+        background 160ms ease,
+        color 160ms ease;
+}
+
+.actionButton:hover,
+.filterTrigger:hover,
+.toggleButton:hover {
+    background: var(--sv-surface-muted);
+    color: var(--sv-text);
+}
+
+.actionButton[data-active='true'],
+.filterTrigger[aria-expanded='true'] {
+    background: var(--sv-surface-muted);
+    color: var(--sv-indicator);
+}
+
+.toggleButton {
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.filterWrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.filterOverlay {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    right: 0;
+    z-index: 5;
+    min-width: 16rem;
+    padding: 0.75rem;
+    background: var(--sv-surface);
+    border: 1px solid var(--sv-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 28px rgb(15 23 42 / 0.12);
+}
+
+/* Collapse the toggle chevron rotation by open state. */
+.toggleButton svg {
+    transition: transform var(--sv-collapse-duration) var(--sv-collapse-ease);
+}
+
+.toggleButton[data-open='false'] svg {
+    transform: rotate(180deg);
+}

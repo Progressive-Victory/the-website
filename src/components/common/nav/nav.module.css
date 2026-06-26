@@ -1,0 +1,229 @@
+/* Nav rows. */
+
+.item,
+.account {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--sv-gutter);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--sv-row-radius);
+    color: var(--sv-text);
+    text-decoration: none;
+    transition:
+        background 160ms ease,
+        color 160ms ease;
+}
+
+.item:hover,
+.account:hover {
+    background: var(--sv-surface-muted);
+}
+
+.item[aria-current='page'] {
+    background: var(--sv-surface-muted);
+    color: var(--sv-indicator);
+    font-weight: 600;
+}
+
+/* Card variant — rich navigation card (replaces NavigationButton buttonType="card"). */
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    text-decoration: none;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.74);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 22px 55px rgba(15, 23, 42, 0.12);
+    transition:
+        transform 160ms ease,
+        box-shadow 160ms ease,
+        background-color 160ms ease;
+}
+
+.card:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.78) inset,
+        0 26px 70px rgba(15, 23, 42, 0.16);
+}
+
+.card:active {
+    transform: translateY(0) scale(0.995);
+}
+
+.cardTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.cardLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cardIconPill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.85rem;
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.72);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+.cardTitle {
+    margin-left: auto;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: rgba(9, 34, 58, 0.9);
+    text-align: right;
+}
+
+.cardCount {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 1rem;
+    border-radius: 1rem;
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.7);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.cardDescription {
+    font-size: 0.93rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.52);
+    line-height: 1.35;
+}
+
+.labelSection {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    overflow: hidden;
+}
+
+.label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.subtitle,
+.count {
+    color: var(--sv-text-muted);
+    font-size: 0.85em;
+}
+
+.subtitle {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.count {
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+}
+
+.tag {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding-inline: 0.7rem;
+    padding-block: 0.18rem;
+    border-radius: 9999px;
+    color: rgba(2, 132, 199, 1);
+    background: rgba(14, 165, 233, 0.14);
+}
+
+/* Accordion group. */
+.group {
+    display: flex;
+    flex-direction: column;
+}
+
+.groupHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--sv-gutter);
+    padding: 0.5rem 0.75rem;
+    border: 0;
+    border-radius: var(--sv-row-radius);
+    background: none;
+    cursor: pointer;
+    color: var(--sv-text);
+    font: inherit;
+    transition: background 160ms ease;
+}
+
+.groupHeader:hover {
+    background: var(--sv-surface-muted);
+}
+
+.groupChevron {
+    flex: 0 0 auto;
+    color: var(--sv-text-muted);
+    transition: transform var(--sv-slide-duration) var(--sv-slide-ease);
+}
+
+.groupChevron[data-open='true'] {
+    transform: rotate(90deg);
+}
+
+/* Height-animated clip: collapses to 0, expands to the measured child height. */
+.groupChildrenClip {
+    height: 0;
+    overflow: hidden;
+    transition: height var(--sv-slide-duration) var(--sv-slide-ease);
+}
+
+.groupChildrenClip[data-open='true'] {
+    height: var(--group-children-open-height, auto);
+}
+
+.groupChildren {
+    display: flex;
+    flex-direction: column;
+    padding-left: 0.75rem;
+}
+
+/* repo-memory gotcha: keep child offsets stable while clipped. */
+.groupChildren > .item {
+    flex: 0 0 auto;
+}
+
+.account {
+    align-items: center;
+}
+
+.accountText {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}

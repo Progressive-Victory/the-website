@@ -26,7 +26,9 @@
 }
 
 .navigationStack {
-    --navigation-stack-height: calc(100dvh - 100px);
+    flex: 1;
+    min-height: 0;
+    height: calc(100dvh - 100px);
 }
 
 .sidebar.sidebar {

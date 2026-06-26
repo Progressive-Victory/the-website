@@ -4,6 +4,15 @@
     --navigation-stack-sidebar-gap: 0rem;
 }
 
+.sidebarState {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 7rem;
+    color: rgba(15, 23, 42, 0.64);
+    text-align: center;
+}
+
 .mobileBackButton {
     display: inline-flex;
     align-items: center;

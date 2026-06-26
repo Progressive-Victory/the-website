@@ -3,13 +3,13 @@
 import { renderAdminUnselectedDetail } from './admin'
 import styles from './admin.module.css'
 import { ProtectedPage } from '@/components/ProtectedPage'
-import { NavigationStack } from '@/components/common/navigation_stack/NavigationStack'
-import { Detail } from '@/components/common/navigation_stack/detail/Detail'
-import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import { DiscordAvatar } from '@/components/common'
+import { Nav } from '@/components/common/nav'
 import {
+    SplitView,
     Sidebar,
-    SidebarFeatured,
-} from '@/components/common/navigation_stack/sidebar/sidebar'
+    clearPanelHistory,
+} from '@/components/common/split_view'
 import { Header } from '@/components/layout/Header'
 import {
     zActBlueDonationPacket,
@@ -20,11 +20,11 @@ import {
 import { zActBlueDonor } from '@/contracts/data/ActBlueDonor'
 import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign, FaFlask } from 'react-icons/fa6'
 import type { IconType } from 'react-icons/lib'
+import { useMediaQuery } from 'usehooks-ts'
 
 interface AdminGroupChildConfigItem {
     key: string
@@ -46,13 +46,10 @@ interface AdminPanelConfigItem {
 
 export default function Layout({ children }: { children: ReactNode }) {
     const pathname = usePathname()
-    const previousPathnameRef = useRef(pathname)
-    const showWelcomeRef = useRef(
+    const isDesktop = useMediaQuery('(min-width: 64rem)')
+    const showWelcome =
         typeof window !== 'undefined' &&
-            new URLSearchParams(window.location.search).get('from') ===
-                'welcome'
-    )
-    const previousPathname = previousPathnameRef.current
+        new URLSearchParams(window.location.search).get('from') === 'welcome'
     const users = usePaginatedSearch('/users', zUser, { search: { limit: 0 } })
     const roles = usePaginatedSearch('/roles', zRole, { search: { limit: 0 } })
     const permissions = usePaginatedSearch('/permissions', zPermission, {
@@ -198,122 +195,124 @@ export default function Layout({ children }: { children: ReactNode }) {
         },
     ]
 
-    useEffect(() => {
-        previousPathnameRef.current = pathname
-    }, [pathname])
-
-    const currentTopLevelIndex = adminPanelConfig.findIndex(
-        (panel) => panel.href === pathname
-    )
-    const previousTopLevelIndex = adminPanelConfig.findIndex(
-        (panel) => panel.href === previousPathname
-    )
-
-    const activePanelLabel = adminPanelConfig
-        .flatMap((panel) => [
-            { href: panel.href, label: panel.label },
-            ...(panel.groupChildren ?? []).map((groupChild) => ({
-                href: groupChild.href,
-                label: groupChild.label,
-            })),
-        ])
-        .find((panel) => panel.href === pathname)?.label
-
     const isPanelSelected = pathname.startsWith('/admin/panels/')
+
+    const discordUser = currentUser.data?.discordUsers?.[0]
+    const accountName =
+        `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim() ||
+        (discordUser?.username ? `@${discordUser.username}` : 'Admin User')
+    const accountHref = isDesktop ? '/admin' : '/admin/panels/members'
 
     return (
         <ProtectedPage requiredRoles={['Superadmin']}>
             <div className={styles.root}>
                 <Header />
 
-                <NavigationStack
+                <SplitView
                     className={styles.navigationStack}
-                    isSelected={isPanelSelected}
-                    sidebar={
+                    selected={isPanelSelected}
+                >
+                    <SplitView.Sidebar>
                         <Sidebar
                             className={styles.sidebar}
                             variant="minimal"
-                            showScrollbar={false}
-                            showSelectionIndicator
-                            label="Volunteer Dashboard"
+                            selectionIndicator
                         >
                             <Sidebar.Featured>
-                                <SidebarFeatured />
+                                <Nav.Account
+                                    href={accountHref}
+                                    avatar={
+                                        <DiscordAvatar
+                                            discordUserId={discordUser?.id}
+                                            imageId={discordUser?.image}
+                                            size={40}
+                                        />
+                                    }
+                                    name={accountName}
+                                    subtitle={
+                                        discordUser?.username
+                                            ? `@${discordUser.username}`
+                                            : undefined
+                                    }
+                                    onClick={() => {
+                                        if (!isDesktop) {
+                                            clearPanelHistory()
+                                        }
+                                    }}
+                                />
                             </Sidebar.Featured>
 
-                            <Sidebar.Body>
-                                {adminPanelConfig.map((panel) => (
-                                    <NavigationButton
-                                        key={panel.key}
-                                        active={pathname === panel.href}
-                                        href={panel.href}
-                                        label={panel.label}
-                                        icon={panel.icon}
-                                        count={panel.count}
-                                        buttonType={panel.buttonType}
-                                        indicatorDirection={
-                                            pathname === panel.href &&
-                                            currentTopLevelIndex !== -1 &&
-                                            previousTopLevelIndex !== -1 &&
-                                            previousPathname !== pathname
-                                                ? currentTopLevelIndex >
-                                                  previousTopLevelIndex
-                                                    ? 'down'
-                                                    : 'up'
-                                                : 'none'
-                                        }
-                                        hasActiveGroupChild={Boolean(
-                                            panel.groupChildren?.some(
-                                                (groupChild) =>
-                                                    pathname === groupChild.href
-                                            )
-                                        )}
-                                        groupContent={panel.groupChildren?.map(
-                                            (groupChild) => (
-                                                <NavigationButton
-                                                    key={groupChild.key}
-                                                    active={
+                            <Sidebar.List selectionIndicator>
+                                {adminPanelConfig.map((panel) =>
+                                    panel.buttonType === 'group' ? (
+                                        <Nav.Group
+                                            key={panel.key}
+                                            label={panel.label}
+                                            icon={panel.icon}
+                                            count={panel.count}
+                                            hasActiveChild={Boolean(
+                                                panel.groupChildren?.some(
+                                                    (groupChild) =>
                                                         pathname ===
                                                         groupChild.href
-                                                    }
-                                                    href={groupChild.href}
-                                                    label={groupChild.label}
-                                                    icon={groupChild.icon}
-                                                    count={groupChild.count}
-                                                    resetPanelHistoryOnClick
-                                                />
-                                            )
-                                        )}
-                                        resetPanelHistoryOnClick
-                                    />
-                                ))}
-                            </Sidebar.Body>
+                                                )
+                                            )}
+                                        >
+                                            {panel.groupChildren?.map(
+                                                (groupChild) => (
+                                                    <Nav.Item
+                                                        key={groupChild.key}
+                                                        active={
+                                                            pathname ===
+                                                            groupChild.href
+                                                        }
+                                                        href={groupChild.href}
+                                                        label={groupChild.label}
+                                                        icon={groupChild.icon}
+                                                        count={groupChild.count}
+                                                        onClick={
+                                                            clearPanelHistory
+                                                        }
+                                                    />
+                                                )
+                                            )}
+                                        </Nav.Group>
+                                    ) : (
+                                        <Nav.Item
+                                            key={panel.key}
+                                            active={pathname === panel.href}
+                                            href={panel.href}
+                                            label={panel.label}
+                                            icon={panel.icon}
+                                            count={panel.count}
+                                            onClick={clearPanelHistory}
+                                        />
+                                    )
+                                )}
+                            </Sidebar.List>
                         </Sidebar>
-                    }
-                    detail={
-                        <Detail
-                            bodyType="panel"
-                            label={activePanelLabel}
-                            body={children}
-                        />
-                    }
-                    unSelected={renderAdminUnselectedDetail({
-                        showWelcome: showWelcomeRef.current,
-                        currentUserName:
-                            `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim(),
-                        currentUserHandle:
-                            currentUser.data?.discordUsers?.[0]?.username,
-                        currentUserDiscordId:
-                            currentUser.data?.discordUsers?.[0]?.id,
-                        currentUserDiscordImage:
-                            currentUser.data?.discordUsers?.[0]?.image,
-                        userCount: users.query.data?.count,
-                        donorCount: donors.query.data?.count,
-                        contributionCount: contributions.query.data?.count,
-                        roleCount: roles.query.data?.count,
-                        permissionCount: permissions.query.data?.count,
-                    })}
-                />
+                    </SplitView.Sidebar>
+
+                    <SplitView.Detail>
+                        {isPanelSelected
+                            ? children
+                            : renderAdminUnselectedDetail({
+                                  showWelcome,
+                                  currentUserName:
+                                      `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim(),
+                                  currentUserHandle: discordUser?.username,
+                                  currentUserDiscordId: discordUser?.id,
+                                  currentUserDiscordImage: discordUser?.image,
+                                  userCount: users.query.data?.count,
+                                  donorCount: donors.query.data?.count,
+                                  contributionCount:
+                                      contributions.query.data?.count,
+                                  roleCount: roles.query.data?.count,
+                                  permissionCount:
+                                      permissions.query.data?.count,
+                              })}
+                    </SplitView.Detail>
+                </SplitView>
             </div>
         </ProtectedPage>
     )

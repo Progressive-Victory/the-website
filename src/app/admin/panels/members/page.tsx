@@ -7,8 +7,14 @@ import { MemberView } from './panel_views/MemberView'
 import { ListElement } from '@/app/admin/layout/List'
 import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
-import Panel from '@/components/common/panel/Panel'
-import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
+import { Nav } from '@/components/common/nav'
+import {
+    Detail,
+    List,
+    Sidebar,
+    SplitView,
+} from '@/components/common/split_view'
+import card from '@/components/common/split_view/panelCard.module.css'
 import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ActBlueDonor,
@@ -491,130 +497,193 @@ export default function Page() {
     }
 
     return (
-        <Panel
-            includeSidebar
-            // includeHeader
-            largeTitle
-            sidebarWidth="24rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-            label="Members"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: searchQuery.data?.count,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
-                filters: {
-                    search,
-                    onSearch,
-                    searchFieldOptions: MEMBER_FIELD_OPTIONS,
-                    sortFieldOptions: MEMBER_SORT_FIELD_OPTIONS,
-                    showSort: true,
-                    showLimit: true,
-                    options: [
-                        {
-                            label: 'Role',
-                            value: 'roleIds',
-                            options: roles.map((role) => ({
-                                label: role.name,
-                                value: role.id,
-                            })),
-                        },
-                    ],
-                },
-            }}
-            sidebarBody={
-                <SidebarBody<User | UserProfile>
-                    items={users}
-                    isLoading={searchQuery.isPending}
-                    error={searchQuery.error}
-                    selectedKey={selectedId}
-                    renderItem={(user) => ({
-                        key: user.id,
-                        label: makeTitle(user),
-                        subtitle: user.discordUsers?.[0]?.username
-                            ? `@${user.discordUsers[0].username}`
-                            : 'NOT FOUND',
-                        tagLabel:
-                            user.id === loggedInUser.data?.id
-                                ? 'You'
-                                : undefined,
-                        iconNode: (
-                            <DiscordAvatar
-                                discordUserId={user.discordUsers?.[0]?.id}
-                                imageId={user.discordUsers?.[0]?.image}
-                                size={40}
-                            />
-                        ),
-                        href: `/admin/panels/members?userId=${user.id}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            handleSelectItem(user)
-                            if (!isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
-                        },
-                    })}
-                />
-            }
-        >
-            <div className={styles.detailsPane}>
-                {!isDesktop && !sidebarMobileVisible ? (
-                    <button
-                        className={styles.mobileBackButton}
-                        onClick={() => setSidebarMobileVisible(true)}
-                        type="button"
+        <div className={card.card}>
+            <SplitView selected={isDesktop || !sidebarMobileVisible}>
+                <SplitView.Sidebar>
+                    <Sidebar
+                        variant="prominent"
+                        largeTitle
+                        className={styles.sidebarBg}
                     >
-                        Members
-                    </button>
-                ) : null}
+                        <Sidebar.Header>
+                            <Sidebar.Title large>Members</Sidebar.Title>
+                            <Sidebar.Search>
+                                <List.Search
+                                    search={search}
+                                    onSearch={onSearch}
+                                />
+                            </Sidebar.Search>
+                            <Sidebar.Actions slot="right">
+                                <Sidebar.FilterButton>
+                                    <List.Filters
+                                        search={search}
+                                        onSearch={onSearch}
+                                        searchFieldOptions={
+                                            MEMBER_FIELD_OPTIONS
+                                        }
+                                        sortFieldOptions={
+                                            MEMBER_SORT_FIELD_OPTIONS
+                                        }
+                                        showSort
+                                        showLimit
+                                        options={[
+                                            {
+                                                label: 'Role',
+                                                value: 'roleIds',
+                                                options: roles.map((role) => ({
+                                                    label: role.name,
+                                                    value: role.id,
+                                                })),
+                                            },
+                                        ]}
+                                    />
+                                </Sidebar.FilterButton>
+                            </Sidebar.Actions>
+                        </Sidebar.Header>
 
-                {selectedId == null && (
-                    <div className={styles.emptyState}>No user selected</div>
-                )}
+                        <Sidebar.List>
+                            {searchQuery.isPending ? (
+                                <div className={styles.sidebarState}>
+                                    Loading...
+                                </div>
+                            ) : searchQuery.error ? (
+                                <div
+                                    className={styles.sidebarState}
+                                    style={{ color: '#ef4444' }}
+                                >
+                                    Error:{' '}
+                                    {searchQuery.error instanceof Error
+                                        ? searchQuery.error.message
+                                        : 'Unknown error'}
+                                </div>
+                            ) : users.length === 0 ? (
+                                <div className={styles.sidebarState}>
+                                    No items found
+                                </div>
+                            ) : (
+                                users.map((user) => (
+                                    <Nav.Item
+                                        key={user.id}
+                                        active={selectedId === user.id}
+                                        href={`/admin/panels/members?userId=${user.id}`}
+                                        label={makeTitle(user)}
+                                        subtitle={
+                                            user.discordUsers?.[0]?.username
+                                                ? `@${user.discordUsers[0].username}`
+                                                : 'NOT FOUND'
+                                        }
+                                        tagLabel={
+                                            user.id === loggedInUser.data?.id
+                                                ? 'You'
+                                                : undefined
+                                        }
+                                        iconNode={
+                                            <DiscordAvatar
+                                                discordUserId={
+                                                    user.discordUsers?.[0]?.id
+                                                }
+                                                imageId={
+                                                    user.discordUsers?.[0]
+                                                        ?.image
+                                                }
+                                                size={40}
+                                            />
+                                        }
+                                        showIndicator={false}
+                                        onClick={(event) => {
+                                            event.preventDefault()
+                                            handleSelectItem(user)
+                                            if (!isDesktop) {
+                                                setSidebarMobileVisible(false)
+                                            }
+                                        }}
+                                    />
+                                ))
+                            )}
+                        </Sidebar.List>
 
-                {selectedId != null && userQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading user details...
-                    </div>
-                )}
-
-                {selectedId != null && userQuery.error && (
-                    <div
-                        className={styles.emptyState}
-                        style={{ color: '#ef4444' }}
-                    >
-                        Error:{' '}
-                        {userQuery.error instanceof Error
-                            ? userQuery.error.message
-                            : 'Unknown error'}
-                    </div>
-                )}
-
-                {selectedId && userQuery.data && (
-                    <>
-                        <div className={styles.detailsHeader}>
-                            <div className={styles.bannerCover} />
-                            <MemberBanner
-                                user={userQuery.data}
-                                makeTitle={makeTitle}
-                                selectedTab={selectedTab}
-                                onTabChange={setSelectedTab}
+                        <Sidebar.Footer>
+                            <List.Footer
+                                page={search.page ?? 0}
+                                pageSize={search.limit ?? 25}
+                                count={searchQuery.data?.count}
+                                isPending={searchQuery.isPending}
+                                onPageChange={(nextPage) =>
+                                    onSearch({ ...search, page: nextPage })
+                                }
                             />
-                            <div className={styles.detailsContent}>
-                                {renderPage()}
+                        </Sidebar.Footer>
+                    </Sidebar>
+                </SplitView.Sidebar>
+
+                <SplitView.Detail>
+                    <Detail>
+                        <Detail.Body>
+                            <div className={styles.detailsPane}>
+                                {!isDesktop && !sidebarMobileVisible ? (
+                                    <button
+                                        className={styles.mobileBackButton}
+                                        onClick={() =>
+                                            setSidebarMobileVisible(true)
+                                        }
+                                        type="button"
+                                    >
+                                        Members
+                                    </button>
+                                ) : null}
+
+                                {selectedId == null && (
+                                    <div className={styles.emptyState}>
+                                        No user selected
+                                    </div>
+                                )}
+
+                                {selectedId != null && userQuery.isPending && (
+                                    <div className={styles.emptyState}>
+                                        Loading user details...
+                                    </div>
+                                )}
+
+                                {selectedId != null && userQuery.error && (
+                                    <div
+                                        className={styles.emptyState}
+                                        style={{ color: '#ef4444' }}
+                                    >
+                                        Error:{' '}
+                                        {userQuery.error instanceof Error
+                                            ? userQuery.error.message
+                                            : 'Unknown error'}
+                                    </div>
+                                )}
+
+                                {selectedId && userQuery.data && (
+                                    <>
+                                        <div className={styles.detailsHeader}>
+                                            <div
+                                                className={styles.bannerCover}
+                                            />
+                                            <MemberBanner
+                                                user={userQuery.data}
+                                                makeTitle={makeTitle}
+                                                selectedTab={selectedTab}
+                                                onTabChange={setSelectedTab}
+                                            />
+                                            <div
+                                                className={
+                                                    styles.detailsContent
+                                                }
+                                            >
+                                                {renderPage()}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
-                        </div>
-                    </>
-                )}
-            </div>
-        </Panel>
+                        </Detail.Body>
+                    </Detail>
+                </SplitView.Detail>
+            </SplitView>
+        </div>
     )
 }
 

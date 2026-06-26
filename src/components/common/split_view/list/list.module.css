@@ -1,0 +1,154 @@
+/*
+ * List controls — search / filters / pagination styling.
+ * Ported from panel/sidebar_list/SidebarList.module.css for parity.
+ */
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.select > span {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.7);
+}
+
+.select > select {
+    border-radius: 0.85rem;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    background: rgba(255, 255, 255, 0.75);
+    padding: 0.35rem 0.55rem;
+    color: rgba(15, 23, 42, 0.8);
+    outline: none;
+}
+
+.filterSelect {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filterSelect > strong {
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.75);
+}
+
+.searchInput {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.searchInput > input {
+    width: 100%;
+    border-radius: 0.6rem;
+    border: 1px solid #d1d5db;
+    padding: 0.35rem 0.75rem;
+    color: rgba(15, 23, 42, 0.85);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.searchInput > input:focus {
+    border-color: rgba(14, 165, 233, 0.45);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+    outline: none;
+}
+
+.state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 7rem;
+    color: rgba(15, 23, 42, 0.64);
+    text-align: center;
+}
+
+.pageSelectContainer {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.pageSelect {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pageSelectButtons {
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.pageSelectForm {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    color: rgba(15, 23, 42, 0.72);
+}
+
+.pageSelectInput {
+    width: 6ch;
+    max-width: min-content;
+    border-radius: 0.65rem;
+    border: 1px solid #d1d5db;
+    padding: 0.125rem 0.5rem;
+    text-align: center;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.pageSelectInput:focus {
+    border-color: rgba(14, 165, 233, 0.35);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+    outline: none;
+}
+
+.pageSelectSpan {
+    white-space: nowrap;
+}
+
+.arrow {
+    display: flex;
+    user-select: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.85rem;
+    padding: 0.45rem;
+    font-weight: 600;
+}
+
+.arrow.disabled {
+    cursor: not-allowed;
+    color: rgba(15, 23, 42, 0.28);
+}
+
+.arrow.enabled {
+    cursor: pointer;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.arrow.enabled:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.arrow.enabled:active {
+    background-color: #f3f4f6;
+}

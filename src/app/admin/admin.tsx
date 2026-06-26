@@ -1,7 +1,7 @@
 import styles from './admin.module.css'
 import { DiscordAvatar } from '@/components/common'
-import { Detail } from '@/components/common/navigation_stack/detail/Detail'
-import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import { Nav } from '@/components/common/nav'
+import { Detail, clearPanelHistory } from '@/components/common/split_view'
 import type { ReactElement } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign, FaFlask } from 'react-icons/fa6'
@@ -42,9 +42,8 @@ export function renderAdminUnselectedDetail({
     permissionCount?: number
 }): ReactElement {
     return (
-        <Detail
-            bodyType="blank"
-            body={
+        <Detail>
+            <Detail.Body>
                 <div className={styles.unselectedView}>
                     <div className={styles.unselectedProfileHeader}>
                         <DiscordAvatar
@@ -78,89 +77,89 @@ export function renderAdminUnselectedDetail({
                     </div>
                     <div className={styles.unselectedGrid}>
                         {renderUnselectedGridHeader('Organization')}
-                        <NavigationButton
+                        <Nav.Item
+                            variant="card"
                             label="Members"
                             description="Member accounts and profiles."
                             href="/admin/panels/members"
                             icon={FaUsers}
                             count={userCount}
-                            buttonType="card"
-                            resetPanelHistoryOnClick
+                            onClick={clearPanelHistory}
                         />
 
-                        <NavigationButton
+                        <Nav.Item
+                            variant="card"
                             label="Positions"
                             description="Staff and volunteer position records."
                             href="/admin/panels/positions"
                             icon={FaClipboardUser}
                             count={0}
-                            buttonType="card"
-                            resetPanelHistoryOnClick
+                            onClick={clearPanelHistory}
                         />
                     </div>
                     <div className={styles.unselectedGrid}>
                         {renderUnselectedGridHeader('Fundraising')}
-                        <NavigationButton
+                        <Nav.Item
+                            variant="card"
                             label="Fundraising"
                             description="Donors, contributions, and fundraising stats."
                             href="/admin/panels/fundraising"
                             icon={FaDonate}
-                            buttonType="card"
-                            resetPanelHistoryOnClick
+                            onClick={clearPanelHistory}
                         />
-                        <NavigationButton
+                        <Nav.Item
+                            variant="card"
                             label="Donors"
                             description="ActBlue donors, totals, and records."
                             href="/admin/panels/donors"
                             icon={FaDonate}
                             count={donorCount}
-                            buttonType="card"
-                            resetPanelHistoryOnClick
+                            onClick={clearPanelHistory}
                         />
-                        <NavigationButton
+                        <Nav.Item
+                            variant="card"
                             label="Contributions"
                             description="Contribution lineitems and payment info."
                             href="/admin/panels/contributions"
                             icon={FaDollarSign}
                             count={contributionCount}
-                            buttonType="card"
-                            resetPanelHistoryOnClick
+                            onClick={clearPanelHistory}
                         />
                     </div>
                     <div className={styles.unselectedGrid}>
                         {renderUnselectedGridHeader('Roles & Permissions')}
-                        <NavigationButton
+                        <Nav.Item
+                            variant="card"
                             label="Roles"
                             description="User roles and access levels."
                             href="/admin/panels/roles"
                             icon={FaUserTag}
                             count={roleCount}
-                            buttonType="card"
-                            resetPanelHistoryOnClick
+                            onClick={clearPanelHistory}
                         />
-                        <NavigationButton
+                        <Nav.Item
+                            variant="card"
                             label="Permissions"
                             description="Granular permission definitions."
                             href="/admin/panels/permissions"
                             icon={FaUserShield}
                             count={permissionCount}
-                            buttonType="card"
-                            resetPanelHistoryOnClick
+                            onClick={clearPanelHistory}
                         />
                     </div>
                     <div className={styles.unselectedGrid}>
                         {renderUnselectedGridHeader('Developer')}
-                        <NavigationButton
+                        <Nav.Item
+                            variant="card"
                             label="Test"
                             description="Test panel for development and debugging."
                             href="/admin/panels/test"
                             icon={FaFlask}
-                            buttonType="card"
-                            resetPanelHistoryOnClick
+                            onClick={clearPanelHistory}
                         />
                     </div>
                 </div>
-            }
-        />
+            </Detail.Body>
+        </Detail>
     )
 }

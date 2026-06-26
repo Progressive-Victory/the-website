@@ -7,8 +7,14 @@ import {
     FormState,
     TextField,
 } from '@/components/common/forms'
-import Panel from '@/components/common/panel/Panel'
-import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
+import { Nav } from '@/components/common/nav'
+import {
+    Detail,
+    List,
+    Sidebar,
+    SplitView,
+} from '@/components/common/split_view'
+import card from '@/components/common/split_view/panelCard.module.css'
 import { Permission, zPermission } from '@/contracts/data'
 import { UpdatePermissionRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
@@ -104,81 +110,129 @@ export default function Page() {
     const resultCount = searchQuery.data?.count
 
     return (
-        <Panel
-            includeSidebar
-            largeTitle
-            sidebarWidth="24rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-            label="Permissions"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: resultCount,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
-                filters: {
-                    search,
-                    onSearch,
-                    showSort: true,
-                    showLimit: true,
-                },
-            }}
-            sidebarBody={
-                <SidebarBody<Permission>
-                    items={permissions}
-                    isLoading={searchQuery.isPending}
-                    error={searchQuery.error}
-                    selectedKey={selectedPermission?.id}
-                    renderItem={(permission) => ({
-                        key: permission.id,
-                        label: permission.name,
-                        href: `/admin/panels/permissions?permissionId=${permission.id}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            setSelectedPermission(permission)
-                            if (!isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
-                        },
-                    })}
-                />
-            }
-        >
-            <div className={styles.detailPane}>
-                {!isDesktop && !sidebarMobileVisible ? (
-                    <button
-                        className={styles.mobileBackButton}
-                        onClick={() => setSidebarMobileVisible(true)}
-                        type="button"
+        <div className={card.card}>
+            <SplitView selected={isDesktop || !sidebarMobileVisible}>
+                <SplitView.Sidebar>
+                    <Sidebar
+                        variant="prominent"
+                        largeTitle
+                        className={styles.sidebarBg}
                     >
-                        Permissions
-                    </button>
-                ) : null}
-                {selectedPermission ? (
-                    <Form<Permission>
-                        key={selectedPermission.id}
-                        form={selectedPermission}
-                        title={selectedPermission.name}
-                        saving={updateMutation.isPending}
-                        onUpdate={setFormState}
-                        onSave={handleSave}
-                    >
-                        <FormGroup title="Details">
-                            <TextField label="Name" field="name" required />
-                        </FormGroup>
-                    </Form>
-                ) : (
-                    <div className={styles.emptyState}>
-                        No permission selected
-                    </div>
-                )}
-            </div>
-        </Panel>
+                        <Sidebar.Header>
+                            <Sidebar.Title large>Permissions</Sidebar.Title>
+                            <Sidebar.Search>
+                                <List.Search
+                                    search={search}
+                                    onSearch={onSearch}
+                                />
+                            </Sidebar.Search>
+                            <Sidebar.Actions slot="right">
+                                <Sidebar.FilterButton>
+                                    <List.Filters
+                                        search={search}
+                                        onSearch={onSearch}
+                                        showSort
+                                        showLimit
+                                    />
+                                </Sidebar.FilterButton>
+                            </Sidebar.Actions>
+                        </Sidebar.Header>
+
+                        <Sidebar.List>
+                            {searchQuery.isPending ? (
+                                <div className={styles.sidebarState}>
+                                    Loading...
+                                </div>
+                            ) : searchQuery.error ? (
+                                <div
+                                    className={styles.sidebarState}
+                                    style={{ color: '#ef4444' }}
+                                >
+                                    Error loading permissions
+                                </div>
+                            ) : permissions.length === 0 ? (
+                                <div className={styles.sidebarState}>
+                                    No items found
+                                </div>
+                            ) : (
+                                permissions.map((permission) => (
+                                    <Nav.Item
+                                        key={permission.id}
+                                        active={
+                                            selectedPermission?.id ===
+                                            permission.id
+                                        }
+                                        href={`/admin/panels/permissions?permissionId=${permission.id}`}
+                                        label={permission.name}
+                                        showIndicator={false}
+                                        onClick={(event) => {
+                                            event.preventDefault()
+                                            setSelectedPermission(permission)
+                                            if (!isDesktop) {
+                                                setSidebarMobileVisible(false)
+                                            }
+                                        }}
+                                    />
+                                ))
+                            )}
+                        </Sidebar.List>
+
+                        <Sidebar.Footer>
+                            <List.Footer
+                                page={search.page ?? 0}
+                                pageSize={search.limit ?? 25}
+                                count={resultCount}
+                                isPending={searchQuery.isPending}
+                                onPageChange={(nextPage) =>
+                                    onSearch({ ...search, page: nextPage })
+                                }
+                            />
+                        </Sidebar.Footer>
+                    </Sidebar>
+                </SplitView.Sidebar>
+
+                <SplitView.Detail>
+                    <Detail>
+                        <Detail.Body>
+                            <div className={styles.detailPane}>
+                                {!isDesktop && !sidebarMobileVisible ? (
+                                    <button
+                                        className={styles.mobileBackButton}
+                                        onClick={() =>
+                                            setSidebarMobileVisible(true)
+                                        }
+                                        type="button"
+                                    >
+                                        Permissions
+                                    </button>
+                                ) : null}
+                                {selectedPermission ? (
+                                    <Form<Permission>
+                                        key={selectedPermission.id}
+                                        form={selectedPermission}
+                                        title={selectedPermission.name}
+                                        saving={updateMutation.isPending}
+                                        onUpdate={setFormState}
+                                        onSave={handleSave}
+                                    >
+                                        <FormGroup title="Details">
+                                            <TextField
+                                                label="Name"
+                                                field="name"
+                                                required
+                                            />
+                                        </FormGroup>
+                                    </Form>
+                                ) : (
+                                    <div className={styles.emptyState}>
+                                        No permission selected
+                                    </div>
+                                )}
+                            </div>
+                        </Detail.Body>
+                    </Detail>
+                </SplitView.Detail>
+            </SplitView>
+        </div>
     )
 }

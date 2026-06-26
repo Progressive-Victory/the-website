@@ -1,0 +1,83 @@
+/* Detail pane — SKELETON. */
+
+.detail {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    background: var(--sv-surface);
+}
+
+.header {
+    min-height: var(--sv-header-height);
+    display: flex;
+    align-items: center;
+    gap: var(--sv-gutter);
+    padding: 0 var(--sv-gutter);
+    border-bottom: 1px solid var(--sv-border);
+}
+
+.body {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.footer {
+    border-top: 1px solid var(--sv-border);
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    width: fit-content;
+    margin: 0;
+    color: #2986cc;
+    border: 0;
+    background: transparent;
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.65rem;
+    cursor: pointer;
+    font: inherit;
+    font-size: 1.06rem;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+        background-color 140ms ease,
+        box-shadow 140ms ease,
+        color 140ms ease,
+        transform 140ms ease;
+}
+
+.backButton::before {
+    content: '';
+    display: inline-block;
+    width: 0.58rem;
+    height: 0.58rem;
+    border-left: 0.14rem solid currentColor;
+    border-bottom: 0.14rem solid currentColor;
+    transform: rotate(45deg);
+    position: relative;
+    top: -0.5px;
+    border-bottom-left-radius: 0.04rem;
+}
+
+.backButton:hover {
+    color: #549ed6;
+    background: rgba(15, 23, 42, 0.05);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+.backButton:active {
+    color: #1b4568;
+    transform: translateX(-1px);
+}
+
+.backButton:focus-visible {
+    outline: 2px solid rgba(41, 134, 204, 0.28);
+    outline-offset: 0.2rem;
+    border-radius: 999px;
+}

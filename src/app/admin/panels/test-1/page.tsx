@@ -1,11 +1,28 @@
 'use client'
 
-import Panel from '@/components/common/panel/Panel'
+import { Detail, Sidebar, SplitView } from '@/components/common/split_view'
+import card from '@/components/common/split_view/panelCard.module.css'
 
 export default function Page() {
     return (
-        <Panel includeHeader includeSidebar label="Test">
-            <div />
-        </Panel>
+        <div className={card.card}>
+            <SplitView>
+                <SplitView.Sidebar>
+                    <Sidebar variant="prominent" largeTitle>
+                        <Sidebar.Header>
+                            <Sidebar.Title large>Test</Sidebar.Title>
+                        </Sidebar.Header>
+                        <Sidebar.List />
+                    </Sidebar>
+                </SplitView.Sidebar>
+                <SplitView.Detail>
+                    <Detail>
+                        <Detail.Body>
+                            <div />
+                        </Detail.Body>
+                    </Detail>
+                </SplitView.Detail>
+            </SplitView>
+        </div>
     )
 }

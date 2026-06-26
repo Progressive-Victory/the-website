@@ -9,8 +9,14 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
-import Panel from '@/components/common/panel/Panel'
-import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
+import { Nav } from '@/components/common/nav'
+import {
+    Detail,
+    List,
+    Sidebar,
+    SplitView,
+} from '@/components/common/split_view'
+import card from '@/components/common/split_view/panelCard.module.css'
 import { Permission, Role, zPermission, zRole } from '@/contracts/data'
 import { SortDirection, UpdateRoleRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
@@ -169,113 +175,170 @@ export default function Page() {
     )
 
     return (
-        <Panel
-            includeSidebar
-            largeTitle
-            sidebarWidth="24rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-            label="Roles"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: resultCount,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
-                filters: {
-                    search,
-                    onSearch,
-                    options: filterOptions,
-                },
-            }}
-            sidebarBody={
-                <SidebarBody<Role>
-                    items={roles}
-                    isLoading={searchQuery.isPending}
-                    error={searchQuery.error}
-                    selectedKey={selectedId}
-                    renderItem={(role) => ({
-                        key: role.id,
-                        label: role.name,
-                        href: `/admin/panels/roles?roleId=${role.id}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            handleSelectItem(role)
-                            if (!isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
-                        },
-                    })}
-                />
-            }
-        >
-            <div className={styles.detailPane}>
-                {!isDesktop && !sidebarMobileVisible ? (
-                    <button
-                        className={styles.mobileBackButton}
-                        onClick={() => setSidebarMobileVisible(true)}
-                        type="button"
+        <div className={card.card}>
+            <SplitView selected={isDesktop || !sidebarMobileVisible}>
+                <SplitView.Sidebar>
+                    <Sidebar
+                        variant="prominent"
+                        largeTitle
+                        className={styles.sidebarBg}
                     >
-                        Roles
-                    </button>
-                ) : null}
-                {selectedId == null && (
-                    <div className={styles.emptyState}>No role selected</div>
-                )}
-                {selectedId != null && roleQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading role details...
-                    </div>
-                )}
-                {selectedId != null && roleQuery.error && (
-                    <div
-                        className={styles.emptyState}
-                        style={{ color: '#ef4444' }}
-                    >
-                        Error: {roleQuery.error.message}
-                    </div>
-                )}
-                {selectedId != null && roleQuery.data ? (
-                    <Form<Role>
-                        key={selectedId}
-                        form={roleQuery.data}
-                        title={roleQuery.data.name}
-                        saving={updateMutation.isPending}
-                        onUpdate={setFormState}
-                        onSave={handleSave}
-                    >
-                        <FormGroup title="Details">
-                            <TextField label="Name" field="name" required />
-                            <SelectManyField<Role>
-                                label="Permissions"
-                                options={permissionOptions}
-                                getter={(form) =>
-                                    (form.permissions ?? []).map(
-                                        (permission) => permission.id
-                                    )
+                        <Sidebar.Header>
+                            <Sidebar.Title large>Roles</Sidebar.Title>
+                            <Sidebar.Search>
+                                <List.Search
+                                    search={search}
+                                    onSearch={onSearch}
+                                />
+                            </Sidebar.Search>
+                            <Sidebar.Actions slot="right">
+                                <Sidebar.FilterButton>
+                                    <List.Filters
+                                        search={search}
+                                        onSearch={onSearch}
+                                        options={filterOptions}
+                                    />
+                                </Sidebar.FilterButton>
+                            </Sidebar.Actions>
+                        </Sidebar.Header>
+
+                        <Sidebar.List>
+                            {searchQuery.isPending ? (
+                                <div className={styles.sidebarState}>
+                                    Loading...
+                                </div>
+                            ) : searchQuery.error ? (
+                                <div
+                                    className={styles.sidebarState}
+                                    style={{ color: '#ef4444' }}
+                                >
+                                    Error: {searchQuery.error.message}
+                                </div>
+                            ) : roles.length === 0 ? (
+                                <div className={styles.sidebarState}>
+                                    No items found
+                                </div>
+                            ) : (
+                                roles.map((role) => (
+                                    <Nav.Item
+                                        key={role.id}
+                                        active={selectedId === role.id}
+                                        href={`/admin/panels/roles?roleId=${role.id}`}
+                                        label={role.name}
+                                        showIndicator={false}
+                                        onClick={(event) => {
+                                            event.preventDefault()
+                                            handleSelectItem(role)
+                                            if (!isDesktop) {
+                                                setSidebarMobileVisible(false)
+                                            }
+                                        }}
+                                    />
+                                ))
+                            )}
+                        </Sidebar.List>
+
+                        <Sidebar.Footer>
+                            <List.Footer
+                                page={search.page ?? 0}
+                                pageSize={search.limit ?? 25}
+                                count={resultCount}
+                                isPending={searchQuery.isPending}
+                                onPageChange={(nextPage) =>
+                                    onSearch({ ...search, page: nextPage })
                                 }
-                                setter={(form, field) => ({
-                                    ...form,
-                                    permissions:
-                                        field != null
-                                            ? permissions.filter((permission) =>
-                                                  field.includes(permission.id)
-                                              )
-                                            : form.permissions,
-                                })}
                             />
-                        </FormGroup>
-                    </Form>
-                ) : (
-                    <div className={styles.emptyState}>No role selected</div>
-                )}
-            </div>
-        </Panel>
+                        </Sidebar.Footer>
+                    </Sidebar>
+                </SplitView.Sidebar>
+
+                <SplitView.Detail>
+                    <Detail>
+                        <Detail.Body>
+                            <div className={styles.detailPane}>
+                                {!isDesktop && !sidebarMobileVisible ? (
+                                    <button
+                                        className={styles.mobileBackButton}
+                                        onClick={() =>
+                                            setSidebarMobileVisible(true)
+                                        }
+                                        type="button"
+                                    >
+                                        Roles
+                                    </button>
+                                ) : null}
+                                {selectedId == null && (
+                                    <div className={styles.emptyState}>
+                                        No role selected
+                                    </div>
+                                )}
+                                {selectedId != null && roleQuery.isPending && (
+                                    <div className={styles.emptyState}>
+                                        Loading role details...
+                                    </div>
+                                )}
+                                {selectedId != null && roleQuery.error && (
+                                    <div
+                                        className={styles.emptyState}
+                                        style={{ color: '#ef4444' }}
+                                    >
+                                        Error: {roleQuery.error.message}
+                                    </div>
+                                )}
+                                {selectedId != null && roleQuery.data ? (
+                                    <Form<Role>
+                                        key={selectedId}
+                                        form={roleQuery.data}
+                                        title={roleQuery.data.name}
+                                        saving={updateMutation.isPending}
+                                        onUpdate={setFormState}
+                                        onSave={handleSave}
+                                    >
+                                        <FormGroup title="Details">
+                                            <TextField
+                                                label="Name"
+                                                field="name"
+                                                required
+                                            />
+                                            <SelectManyField<Role>
+                                                label="Permissions"
+                                                options={permissionOptions}
+                                                getter={(form) =>
+                                                    (
+                                                        form.permissions ?? []
+                                                    ).map(
+                                                        (permission) =>
+                                                            permission.id
+                                                    )
+                                                }
+                                                setter={(form, field) => ({
+                                                    ...form,
+                                                    permissions:
+                                                        field != null
+                                                            ? permissions.filter(
+                                                                  (
+                                                                      permission
+                                                                  ) =>
+                                                                      field.includes(
+                                                                          permission.id
+                                                                      )
+                                                              )
+                                                            : form.permissions,
+                                                })}
+                                            />
+                                        </FormGroup>
+                                    </Form>
+                                ) : (
+                                    <div className={styles.emptyState}>
+                                        No role selected
+                                    </div>
+                                )}
+                            </div>
+                        </Detail.Body>
+                    </Detail>
+                </SplitView.Detail>
+            </SplitView>
+        </div>
     )
 }
 
