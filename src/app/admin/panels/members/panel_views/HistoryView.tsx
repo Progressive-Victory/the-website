@@ -275,6 +275,7 @@ export function HistoryView({
                         user={user}
                         selectedHistory={selectedHistory}
                         saving={false}
+                        editing={false}
                         isInvalid={false}
                         roles={roles}
                         roleOptions={roleOptions}
