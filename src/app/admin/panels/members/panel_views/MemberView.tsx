@@ -157,8 +157,7 @@ export function MemberView({
                     <TextField<User>
                         label="Full Name"
                         getter={(user) =>
-                            `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() ||
-                            null
+                            `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
                         }
                         readonly
                     />
