@@ -256,7 +256,7 @@ export default function Page() {
     const locationQuery = useQuery({
         queryKey: [`/locations/${formState?.form?.address?.zip}`],
         queryFn:
-            ready && formState?.editing && formState.form.address?.zip
+            ready && formState?.mode === 'edit' && formState.form.address?.zip
                 ? async () => {
                       try {
                           return await onGet<Location>(

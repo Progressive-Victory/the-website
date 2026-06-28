@@ -5,6 +5,8 @@ export function useClickAway<T extends Element>(
 ) {
     const ref = useRef<T>(null)
 
+    console.log('ClickAway rerender!')
+
     function assertIsNode(event: EventTarget | null): asserts event is Node {
         if (!event || !('nodeType' in event)) {
             throw new Error(`Node expected`)
@@ -14,15 +16,17 @@ export function useClickAway<T extends Element>(
     useEffect(() => {
         const listener = (event: MouseEvent | TouchEvent) => {
             assertIsNode(event.target)
-            if (ref.current && !ref.current.contains(event.target))
-                callback(event.target)
+            const contains = ref.current && !ref.current.contains(event.target)
+            console.log('Event hit!', contains, event.target)
+            if (contains) callback(event.target)
         }
 
-        document.addEventListener('mousedown', listener)
-        document.addEventListener('touchstart', listener)
+        document.addEventListener('mouseup', listener)
+        document.addEventListener('touchend', listener)
         return () => {
-            document.removeEventListener('mousedown', listener)
-            document.removeEventListener('touchstart', listener)
+            console.log('ClickAway cleanup!')
+            document.removeEventListener('mouseup', listener)
+            document.removeEventListener('touchend', listener)
         }
     }, [ref, callback])
 
