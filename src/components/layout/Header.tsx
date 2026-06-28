@@ -629,11 +629,16 @@ export function Header() {
                 : skipToken,
     })
 
+    const handleClose = () => {
+        setIsOpen(false)
+        setMobileSubnavItem(null)
+    }
+
     useEffect(() => {
         if (!isOpen) return
 
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setIsOpen(false)
+            if (e.key === 'Escape') handleClose()
         }
 
         document.addEventListener('keydown', onKeyDown)
@@ -655,17 +660,13 @@ export function Header() {
     }, [])
 
     useEffect(() => {
-        if (!isOpen) setMobileSubnavItem(null)
-    }, [isOpen])
-
-    useEffect(() => {
         if (typeof window === 'undefined') return
 
         const desktopMQ = window.matchMedia('(min-width: 1280px)')
 
         const syncToBreakpoint = () => {
             if (desktopMQ.matches) {
-                setIsOpen(false)
+                handleClose()
             } else {
                 setActiveSubnav(null)
             }
@@ -920,7 +921,7 @@ export function Header() {
                             WebkitBackdropFilter: 'blur(10px)',
                             backgroundColor: 'rgba(0, 0, 0, 0.18)',
                         }}
-                        onClick={() => setIsOpen(false)}
+                        onClick={handleClose}
                     />
                 )}
             </AnimatePresence>
