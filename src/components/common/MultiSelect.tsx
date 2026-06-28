@@ -26,14 +26,11 @@ export function MultiSelect({
     disabled,
     onUpdate,
 }: MultiSelectProps) {
-    console.log('Rerender')
-
     const [menuOpen, setMenuOpen] = useState(false)
 
     const buttonRef = useRef<HTMLButtonElement>(null)
     const menuRef = useClickAway<HTMLDivElement>((target) => {
         const contains = buttonRef.current?.contains(target)
-        console.log('useClickAway callback!', menuOpen, contains)
         if (!contains) setMenuOpen(false)
     })
 
@@ -49,18 +46,15 @@ export function MultiSelect({
     }, [optionMap, selected])
 
     const handleToggleMenu = () => {
-        console.log('Toggle!', menuOpen)
         setMenuOpen((open) => !open)
     }
 
     const handleAdd = (value: string | number) => {
-        console.log('Adding!', menuOpen, value)
         onUpdate([...selected, value])
         setMenuOpen(false)
     }
 
     const handleRemove = (value: string | number) => {
-        console.log('Remove!', menuOpen, value)
         onUpdate(selected.filter((selection) => selection != value))
     }
 
