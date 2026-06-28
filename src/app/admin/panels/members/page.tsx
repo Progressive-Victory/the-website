@@ -401,7 +401,7 @@ export default function Page() {
                         selectedHistory={null}
                         setFormState={setFormState}
                         saving={updateMutation.isPending}
-                        editing={formState?.editing ?? false}
+                        editing={formState?.mode === 'edit'}
                         isInvalid={
                             (formState?.form?.address?.zip != null &&
                                 locationQuery.data == null) ||
