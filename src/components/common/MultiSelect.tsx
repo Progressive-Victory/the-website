@@ -62,7 +62,9 @@ export function MultiSelect({
         <>
             {selected.map((value) => (
                 <button
-                    key={value}
+                    type="button"
+                    id={`remove-${value}`}
+                    key={`remove-${value}`}
                     className={cx(
                         styles.option,
                         !readonly && styles.removeButton
@@ -79,6 +81,7 @@ export function MultiSelect({
                 <div className={styles.menuBase}>
                     {!readonly && (
                         <button
+                            type="button"
                             ref={buttonRef}
                             className={styles.menuButton}
                             disabled={disabled}
@@ -92,7 +95,9 @@ export function MultiSelect({
                         <div ref={menuRef} className={styles.menu}>
                             {available.map(([value, label]) => (
                                 <button
-                                    key={value}
+                                    type="button"
+                                    id={`add-${value}`}
+                                    key={`add-${value}`}
                                     className={styles.addButton}
                                     onClick={() => handleAdd(value)}
                                 >
