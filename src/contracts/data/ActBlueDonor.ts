@@ -23,7 +23,7 @@ export const zActBlueDonor = z
             })
             .nullable(),
         email: z.string(),
-        phone: z.string().optional(),
+        phone: z.string().nullable(),
         userId: z.number().optional(),
         contributions: z.array(zActBlueContribution).optional(),
     })
