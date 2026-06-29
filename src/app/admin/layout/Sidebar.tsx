@@ -12,18 +12,20 @@ import { useLocalStorage } from 'usehooks-ts'
 
 interface SidebarProps {
     userCount?: number
-    roleCount?: number
-    permissionCount?: number
     donorCount?: number
     contributionCount?: number
+    positionCount?: number
+    roleCount?: number
+    permissionCount?: number
 }
 
 export default function Sidebar({
     userCount,
-    roleCount,
-    permissionCount,
     donorCount,
     contributionCount,
+    positionCount,
+    roleCount,
+    permissionCount,
 }: SidebarProps) {
     const [open, setOpen] = useLocalStorage('pv.admin-nav-open', true)
 
@@ -66,7 +68,7 @@ export default function Sidebar({
                     title="Positions"
                     href="/admin/panels/positions"
                     icon={FaClipboardUser}
-                    count={0}
+                    count={positionCount}
                     open={open}
                 />
 

@@ -44,7 +44,7 @@ export const AccountInfoForm = ({
                 title={title}
                 subtitle={subtitle}
                 avatar={avatar}
-                onUpdate={(state) => setIsEditing(state.editing)}
+                onUpdate={(state) => setIsEditing(state.mode === 'edit')}
                 onSave={handleFormSave}
             >
                 <FormGroup title="">
