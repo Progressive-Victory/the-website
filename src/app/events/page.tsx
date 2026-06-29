@@ -39,6 +39,11 @@ const calendarMap = new Map<string, string>([
         'Y185NDhjMzI5OWU3OTQ2N2M3MjBkNWQzMTY0YjEzOGU4OGRiM2FjNTFiNmUxMmM0ZTc2ZjAzZjY0NThjMTA2OGYzQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20',
         '009949',
     ], // Volunteeer Initiatives was #fc035e
+
+    [
+        'OTAzMjM5NWVjOWU1MmYzYTdjZWI4YWE2NjE3MjRiY2FjNjg5ZjA2OTQxODlhNzk0ZjMzMjE2NjMyNGY0ZmFjMUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t',
+        '004649',
+    ],
 ])
 export default function Events() {
     const calendarUri = new URL('https://calendar.google.com/calendar/embed')

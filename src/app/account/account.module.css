@@ -1,15 +1,79 @@
-.pageRoot {
+.root {
     position: relative;
-    width: 100%;
     display: flex;
     justify-content: center;
+    width: 100%;
 }
 
-.controlsRow {
-    min-width: 270px;
+.main {
     display: flex;
-    justify-content: space-evenly;
-    flex-wrap: wrap;
+    flex-direction: column;
+    width: min(1100px, calc(100% - 2rem));
+    margin: 2rem 3rem;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.content {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    border-radius: 1rem;
+    background: rgba(9, 34, 58, 1);
+
+    padding: 1rem;
+}
+
+.headerTopRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.headerActions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 0.5rem;
+}
+
+.contentHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border-radius: 0.75rem;
+
+    margin-bottom: 1rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.75rem;
+    padding-inline: 1rem;
+}
+
+.headerEyebrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #09223a;
+}
+
+.pageTitle {
+    font-size: 1.875rem;
+    text-align: left;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+.pageSubtitle {
+    font-size: 0.95rem;
+    color: #ffffff;
+    font-weight: 500;
+    opacity: 0.85;
 }
 
 .primaryButton {
@@ -39,8 +103,31 @@
     outline-offset: 3px;
 }
 
-.adminLink {
+.secondaryButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
     text-decoration: none;
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    font-weight: 700;
+    color: #fff;
+    background: #2986cc;
+    transition:
+        background-color 200ms ease,
+        color 200ms ease;
+}
+
+.secondaryButton:hover {
+    background: #fff;
+    color: #09223a;
+}
+
+.secondaryButton:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.85);
+    outline-offset: 3px;
 }
 
 .notice {
@@ -67,4 +154,69 @@
     border-radius: 9999px;
     background: #fff;
     color: #2986cc;
+}
+
+.accountInfoBackground,
+.accountMembershipBackground {
+    background-color: whitesmoke;
+    border-radius: 10px;
+    padding-top: 1rem;
+    margin: 0;
+}
+
+.contentRow {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+@media (min-width: 768px) {
+    .contentRow {
+        gap: 3rem;
+    }
+}
+
+@media (min-width: 1020px) {
+    .contentRow {
+        flex-direction: row-reverse;
+    }
+}
+
+.cardColumn {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cardColumnInner {
+    width: 100%;
+    max-width: 500px;
+    padding-bottom: 1rem;
+}
+
+.formMargin {
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 900px) {
+    .headerTopRow {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .headerActions {
+        justify-content: center;
+    }
+
+    .pageTitle {
+        text-align: center;
+    }
+
+    .pageSubtitle,
+    .headerEyebrow {
+        text-align: center;
+    }
 }

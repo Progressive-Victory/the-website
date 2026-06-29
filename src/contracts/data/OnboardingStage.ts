@@ -14,6 +14,9 @@ export enum OnboardingStage {
     // The user is under 18 and isn't allowed to join the server.
     UNDERAGE = 'underage',
 
+    // The user was already banned from the server.
+    BANNED = 'banned',
+
     // The user has joined the server successfully.
     JOINED = 'joined',
 }

@@ -8,8 +8,8 @@ import { DonateButton } from '@/components/common/buttons/button_types/DonateBut
 import { LoginButton } from '@/components/common/buttons/button_types/LoginButton'
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import styles from '@/components/layout/footer.module.css'
+import { useAuth } from '@/util/hooks'
 import { motion } from 'motion/react'
-import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { SocialIcon } from 'react-social-icons'
 
@@ -38,7 +38,7 @@ export function Footer() {
 }
 
 function MobileFooter() {
-    const { data: session } = useSession()
+    const { session } = useAuth()
 
     return (
         <div className={styles.mobileFooterContainer}>
@@ -136,7 +136,6 @@ function MobileFooter() {
                     {session ? (
                         <LogoutButton
                             label="Sign Out"
-                            callbackUrl="/"
                             className={`${buttonStyles.plain} ${styles.mobileBottomNavButton}`}
                         />
                     ) : (
@@ -153,7 +152,7 @@ function MobileFooter() {
 }
 
 function DesktopFooter() {
-    const { data: session } = useSession()
+    const { session } = useAuth()
 
     return (
         <div className={styles.desktopFooterContainer}>
@@ -237,7 +236,6 @@ function DesktopFooter() {
                         {session ? (
                             <LogoutButton
                                 label="Sign Out"
-                                callbackUrl="/"
                                 className={`${buttonStyles.plain} ${styles.bottomNavButtonAdjustment}`}
                             />
                         ) : (

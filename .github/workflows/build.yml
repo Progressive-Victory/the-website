@@ -1,33 +1,19 @@
-name: Build with pnpm
-
-on:
-    push:
+name: Build
+on: [push]
 
 jobs:
     build:
         runs-on: ubuntu-latest
         environment: Preview
         steps:
-            - uses: actions/checkout@v4
-            - name: Install pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v4
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: 'pnpm'
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
 
             - name: Install dependencies
-              run: pnpm install
+              run: pnpm install --frozen-lockfile
 
             - name: Run build
-              run: pnpm run build
-              env:
-                  BOOMERANG_URI: ${{ secrets.BOOMERANG_URI }}
-                  DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-                  DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
-                  DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}
-                  GUILD_ID: ${{ secrets.GUILD_ID }}
+              run: pnpm build

@@ -46,7 +46,7 @@ export const AccountInfoForm = ({
                 title={title}
                 subtitle={subtitle}
                 avatar={avatar}
-                onUpdate={(state) => setIsEditing(state.editing)}
+                onUpdate={(state) => setIsEditing(state.mode === 'edit')}
                 onSave={handleFormSave}
             >
                 <FormGroup title="">
@@ -78,7 +78,9 @@ export const AccountInfoForm = ({
                     <TextField label="Email" field="email" readonly />
                     <DateField<User>
                         label="Date of Birth"
-                        getter={(user) => dateService.fromISODateString(user.birthdate)}
+                        getter={(user) =>
+                            dateService.fromISODateString(user.birthdate)
+                        }
                         field="birthdate"
                         format={{
                             timeZone: 'UTC',

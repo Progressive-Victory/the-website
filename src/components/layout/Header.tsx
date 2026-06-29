@@ -9,12 +9,15 @@ import { LoginButton } from '@/components/common/buttons/button_types/LoginButto
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
+import { DiscordUser, TokenClaims, zDiscordUser } from '@/contracts/data'
+import { useAuth, useFetch } from '@/util/hooks'
+import { skipToken, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
-import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import NextLink from 'next/link'
 import type React from 'react'
 import { useEffect, useState } from 'react'
+import z from 'zod'
 
 /**
  * A navigation header for the Progressive Victory website.
@@ -80,6 +83,15 @@ const navitems: NavItem[] = [
         href: '/endorsements',
         subnav: {
             columns: [
+                // {
+                //     title: 'Criteria',
+                //     items: [
+                //         {
+                //             name: 'PV Pledge',
+                //             href: 'https://www.progress.win/pledge',
+                //         },
+                //     ],
+                // },
                 {
                     title: 'Endorsements',
                     items: [
@@ -91,9 +103,22 @@ const navitems: NavItem[] = [
     },
     {
         name: 'More',
-        href: '/home',
+        href: '/',
         subnav: {
             columns: [
+                {
+                    title: 'Initiatives',
+                    items: [
+                        {
+                            name: 'Section 230 Initiative',
+                            href: '/initiatives/section-230',
+                        },
+                        {
+                            name: 'Jackson Franklin Initiative',
+                            href: '/initiatives/franklin',
+                        },
+                    ],
+                },
                 {
                     title: 'Join',
                     items: [
@@ -248,23 +273,29 @@ function MobileBackButton(props: { onClick: () => void }) {
     )
 }
 
-function NavDrawer(props: {
+interface NavDrawerProps {
     isOpen: boolean
     navitems: NavItem[]
     mobileSubnavItem: NavItem | null
     setMobileSubnavItem: (item: NavItem | null) => void
-    session: unknown
-    avatarSrc: string
-}) {
-    const {
-        isOpen,
-        navitems,
-        mobileSubnavItem,
-        setMobileSubnavItem,
-        session,
-        avatarSrc,
-    } = props
+    isSessionLoading: boolean
+    session: TokenClaims | null
+    discordUserId: string | undefined
+    avatarImageId: string | undefined
+    onLogin: () => Promise<void>
+}
 
+function NavDrawer({
+    isOpen,
+    navitems,
+    mobileSubnavItem,
+    setMobileSubnavItem,
+    isSessionLoading,
+    session,
+    discordUserId,
+    avatarImageId,
+    onLogin,
+}: NavDrawerProps) {
     const showSubnav = mobileSubnavItem !== null
 
     return (
@@ -329,7 +360,11 @@ function NavDrawer(props: {
                                                         rotateChevronOnHover={
                                                             false
                                                         }
-                                                        href={item.href}
+                                                        href={
+                                                            item.name == 'More'
+                                                                ? '#'
+                                                                : item.href
+                                                        }
                                                         renderContent={({
                                                             showNavChevron,
                                                         }) => (
@@ -414,7 +449,24 @@ function NavDrawer(props: {
                                             />
                                         </motion.div>
 
-                                        {!session ? (
+                                        {isSessionLoading ? (
+                                            <motion.div
+                                                variants={itemVariants}
+                                                animate="visible"
+                                                exit="exit"
+                                            >
+                                                <AccountButton
+                                                    label="Account"
+                                                    href="/account"
+                                                    discordUserId={
+                                                        discordUserId
+                                                    }
+                                                    imageId={avatarImageId}
+                                                    buttonVariant="long"
+                                                    disabled
+                                                />
+                                            </motion.div>
+                                        ) : !session ? (
                                             <motion.div
                                                 variants={itemVariants}
                                                 animate="visible"
@@ -423,7 +475,9 @@ function NavDrawer(props: {
                                                 <LoginButton
                                                     label="Log In"
                                                     buttonVariant="long"
-                                                    href="/login"
+                                                    onClick={() =>
+                                                        void onLogin()
+                                                    }
                                                 />
                                             </motion.div>
                                         ) : (
@@ -436,8 +490,10 @@ function NavDrawer(props: {
                                                     label="Account"
                                                     buttonVariant="long"
                                                     href="/account"
-                                                    avatarSrc={avatarSrc}
-                                                    avatarAlt="User avatar"
+                                                    discordUserId={
+                                                        discordUserId
+                                                    }
+                                                    imageId={avatarImageId}
                                                 />
                                             </motion.div>
                                         )}
@@ -551,14 +607,27 @@ function NavDrawer(props: {
 }
 
 export function Header() {
+    const { session, onLogin, isSessionLoading } = useAuth()
+    const { ready, onGet } = useFetch()
+
     const [isOpen, setIsOpen] = useState(false)
     const [activeSubnav, setActiveSubnav] = useState<NavItem | null>(null)
     const [mobileSubnavItem, setMobileSubnavItem] = useState<NavItem | null>(
         null
     )
 
-    const { data: session } = useSession()
-    const avatarSrc = session?.user?.image ?? ''
+    const { data: discordUsers } = useQuery({
+        queryKey: [`/discordUsers/${session?.userId}`],
+        queryFn:
+            session?.discordUserId != null && ready
+                ? async () => {
+                      return await onGet<DiscordUser[]>(
+                          `/discordUsers/${session?.userId}`,
+                          z.array(zDiscordUser)
+                      )
+                  }
+                : skipToken,
+    })
 
     useEffect(() => {
         if (!isOpen) return
@@ -721,6 +790,7 @@ export function Header() {
                                     label={item.name}
                                     href={item.href}
                                     showChevron={item.name === 'More'}
+                                    disabled={item.name === 'More'}
                                     isSubnavOpen={isActive}
                                     onOpenSubnav={() => openSubnav(item)}
                                     className={
@@ -745,41 +815,69 @@ export function Header() {
                 <div className={styles.headerRightActions}>
                     <DonateButton label="Donate" />
 
-                    {!session ? (
-                        <LoginButton label="Log In" href="/login" />
+                    {isSessionLoading ? (
+                        <AccountButton
+                            label="Account"
+                            href="/account"
+                            discordUserId={discordUsers?.[0]?.id}
+                            imageId={discordUsers?.[0]?.image}
+                            disabled
+                        />
+                    ) : !session ? (
+                        <LoginButton
+                            label="Log In"
+                            onClick={() => void onLogin()}
+                        />
                     ) : (
                         <AccountButton
                             label="Account"
                             href="/account"
-                            avatarSrc={avatarSrc}
-                            avatarAlt="User avatar"
+                            discordUserId={discordUsers?.[0]?.id}
+                            imageId={discordUsers?.[0]?.image}
                         />
                     )}
                 </div>
 
-                <motion.button
-                    type="button"
-                    className={styles.headerMenuButton}
-                    onClick={() => {
-                        closeSubnav()
-                        setIsOpen((prev) => !prev)
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
                     }}
-                    initial={false}
-                    animate={isOpen ? 'open' : 'closed'}
-                    whileHover="hover"
-                    whileTap="tap"
-                    variants={menuButtonVariants}
-                    transition={{ type: 'spring', stiffness: 520, damping: 32 }}
-                    aria-label={
-                        isOpen
-                            ? 'Close navigation menu'
-                            : 'Open navigation menu'
-                    }
-                    aria-expanded={isOpen}
-                    aria-controls="site-nav-drawer"
                 >
-                    <HamburgerIcon isOpen={isOpen} />
-                </motion.button>
+                    <DonateButton
+                        label="Donate"
+                        className={`${styles.mobileDonateButton} ${isOpen && styles.fadeOutTop}`}
+                    />
+
+                    <motion.button
+                        type="button"
+                        className={styles.headerMenuButton}
+                        onClick={() => {
+                            closeSubnav()
+                            setIsOpen((prev) => !prev)
+                        }}
+                        initial={false}
+                        animate={isOpen ? 'open' : 'closed'}
+                        whileHover="hover"
+                        whileTap="tap"
+                        variants={menuButtonVariants}
+                        transition={{
+                            type: 'spring',
+                            stiffness: 520,
+                            damping: 32,
+                        }}
+                        aria-label={
+                            isOpen
+                                ? 'Close navigation menu'
+                                : 'Open navigation menu'
+                        }
+                        aria-expanded={isOpen}
+                        aria-controls="site-nav-drawer"
+                    >
+                        <HamburgerIcon isOpen={isOpen} />
+                    </motion.button>
+                </div>
             </header>
 
             <AnimatePresence>
@@ -849,8 +947,11 @@ export function Header() {
                 navitems={navitems}
                 mobileSubnavItem={mobileSubnavItem}
                 setMobileSubnavItem={setMobileSubnavItem}
+                isSessionLoading={isSessionLoading}
                 session={session}
-                avatarSrc={avatarSrc}
+                discordUserId={discordUsers?.[0]?.id}
+                avatarImageId={discordUsers?.[0]?.image}
+                onLogin={onLogin}
             />
         </>
     )

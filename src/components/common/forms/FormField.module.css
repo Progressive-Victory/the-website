@@ -1,0 +1,71 @@
+.fieldHeader {
+    padding-left: 1.5rem;
+    display: flex;
+}
+
+.fieldLabel {
+    font-weight: 500;
+    flex: 0 2 50%;
+}
+
+.required {
+    margin-left: 0.25rem;
+    color: #ef4444;
+}
+
+.deprecated {
+    margin-left: 0.25rem;
+    color: 234 179 8;
+    color: #eab308;
+}
+
+.readonly {
+    width: 100%;
+}
+
+.invalid {
+    border-color: #ef4444 !important;
+    border-width: 2px;
+}
+
+.fieldValue {
+    flex: 0 0 50%;
+}
+
+.textField {
+    width: 100%;
+    max-width: 24rem;
+    border-radius: 0.5rem;
+    border-width: 1px;
+    border-color: #d1d5db;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.125rem;
+    padding-bottom: 0.125rem;
+}
+
+.checkboxField {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.selectManyField {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.phoneField {
+    width: 100%;
+    max-width: 24rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.validationError {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: #ef4444;
+}

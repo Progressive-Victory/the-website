@@ -22,7 +22,8 @@ export function usePaginatedSearch<T>(
 
     const [search, setSearch] = useState<SearchRequest>({
         ...(options?.search ?? {}),
-        limit: options?.search?.limit ?? 25,
+        limit: options?.search?.limit,
+        sort: options?.search?.sort,
     })
 
     interface Options {
@@ -34,14 +35,19 @@ export function usePaginatedSearch<T>(
     const getPage = async (options: Options) => {
         const page = options?.page ?? search.page ?? 0
         const limit = options?.count
-            ? Math.min(search.limit, options.count - page * search.limit)
+            ? Math.min(
+                  search.limit ?? 25,
+                  options.count - page * (search.limit ?? 25)
+              )
             : search.limit
 
-        return await onGet<PaginatedResponse<T>>(
+        const res = await onGet<PaginatedResponse<T>>(
             endpoint,
             zPaginatedResponse(schema),
             { query: { ...search, page, limit }, signal: options?.signal }
         )
+
+        return res
     }
 
     const getAllPages = async (options: Options) => {
@@ -49,7 +55,7 @@ export function usePaginatedSearch<T>(
         const { data, count } = res
 
         const limit = search.limit
-        const pageCount = Math.ceil(count / limit)
+        const pageCount = Math.ceil(count / (limit ?? 25))
 
         const pageQueries: Promise<PaginatedResponse<T>>[] = []
         for (let page = 1; page < pageCount; page++)

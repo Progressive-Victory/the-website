@@ -1,5 +1,5 @@
-import { useCurrentUser } from '@/util/hooks'
-import { useSession } from 'next-auth/react'
+import { AccessDenied } from '@/components/AccessDenied'
+import { useAuth, useCurrentUser } from '@/util/hooks'
 import { ReactNode } from 'react'
 
 interface ProtectedPageProps {
@@ -11,25 +11,19 @@ export function ProtectedPage({
     children,
     requiredRoles = [],
 }: ProtectedPageProps) {
-    const session = useSession()
+    const { isSessionLoading, session } = useAuth()
     const currentUser = useCurrentUser()
 
-    if (currentUser.isLoading || session.status == 'loading') return null
+    if (currentUser.isLoading || isSessionLoading) return null
 
-    if (session.status == 'unauthenticated')
+    if (!session)
         return (
-            <div>
-                <h1>Access Denied</h1>
-                <p>You need to be logged in to view this page.</p>
-            </div>
+            <AccessDenied message="You need to be logged in to view this page." />
         )
 
     if (!currentUser.data || currentUser.error)
         return (
-            <div>
-                <h1>Access Denied</h1>
-                <p>There was an error while checking your authentication.</p>
-            </div>
+            <AccessDenied message="There was an error while checking your authentication." />
         )
 
     if (
@@ -38,11 +32,7 @@ export function ProtectedPage({
         )
     )
         return (
-            <div>
-                <h1>Access Denied</h1>
-                <p>You lack sufficient permissions to view this page.</p>
-            </div>
+            <AccessDenied message="You lack sufficient permissions to view this page." />
         )
-
     return children
 }

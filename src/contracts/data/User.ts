@@ -1,14 +1,46 @@
+import { zActBlueDonor } from './ActBlueDonor'
 import { zDiscordUser } from './DiscordUser'
 import { zLocation } from './Location'
 import { zOnboardingStage } from './OnboardingStage'
 import { zRole } from './Role'
 import { zUpdateHistory } from './UpdateHistory'
+import { zUserAddress } from './UserAddress'
 import z from 'zod'
 
 export enum UserStatus {
     Deleted = 0,
     Active = 1,
 }
+
+export enum MembershipDeliverableStatus {
+    NotEligible = 0,
+    NotStarted = 1,
+    Printed = 2,
+    InTransit = 3,
+    Recieved = 4,
+    Returned = 5,
+}
+
+export enum MembershipFulfillmentStatus {
+    NotEligible = 0,
+    NotFulfilled = 1,
+    Fulfilled = 2,
+}
+
+export enum ShirtSize {
+    ExtraSmall = 'XS',
+    Small = 'S',
+    Medium = 'M',
+    Large = 'L',
+    ExtraLarge = 'XL',
+    DoubleExtraLarge = '2XL',
+}
+
+export const zShirtSize = z.enum(ShirtSize)
+
+export const zMembershipFulfillmentStatus = z.enum(MembershipFulfillmentStatus)
+
+export const zMembershipDeliverableStatus = z.enum(MembershipDeliverableStatus)
 
 export const zUserStatus = z.enum(UserStatus)
 
@@ -21,6 +53,7 @@ const zBaseUser = z.object({
     lastName: z.string().nullable(),
     birthdate: z.coerce.date().nullable(),
     location: zLocation.nullable(),
+    address: zUserAddress,
 
     acceptedAlerts: z.boolean(),
     verified: z.boolean(),
@@ -33,13 +66,23 @@ const zBaseUser = z.object({
     joinedAtUtc: z.coerce.date().nullable(),
     completedIntakeUtc: z.coerce.date().nullable(),
 
+    membershipCardStatus: zMembershipDeliverableStatus.default(0),
+    membershipMerchStatus: zMembershipDeliverableStatus.default(0),
+    shirtSize: zShirtSize.nullable(),
+    duesPayingMember: z.boolean(),
+    membershipFulfillmentStatus: zMembershipFulfillmentStatus.nullable(),
+    nameConfirmed: z.boolean(),
+    addressConfirmed: z.boolean(),
+
     aliases: z.array(z.string()).optional(),
     roles: z.array(zRole).optional(),
     discordUsers: z.array(zDiscordUser).optional(),
+    donors: z.array(zActBlueDonor).optional(),
 })
 
 export const zUser = zBaseUser.extend({
     history: z.array(zUpdateHistory(zBaseUser)).optional(),
+    donorHistory: z.array(zUpdateHistory(zActBlueDonor)).optional(),
 })
 
 export type User = z.infer<typeof zUser>

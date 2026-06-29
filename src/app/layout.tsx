@@ -1,6 +1,5 @@
 import './globals.css'
 import QueryClientWrapper from '@/app/QueryClientWrapper'
-import { AuthProvider } from '@/components/AuthProvider'
 import { Analytics } from '@vercel/analytics/react'
 import 'leaflet/dist/leaflet.css'
 import type { Metadata } from 'next'
@@ -42,7 +41,7 @@ export default function RootLayout({
             <body className={montserrat.className}>
                 <QueryClientWrapper>
                     <Analytics />
-                    <AuthProvider>{children}</AuthProvider>
+                    {children}
                 </QueryClientWrapper>
             </body>
         </html>

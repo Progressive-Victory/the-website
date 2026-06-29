@@ -3,17 +3,20 @@
     "version": "1.1.0",
     "private": true,
     "type": "module",
+    "packageManager": "pnpm@10.30.2",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
         "postbuild": "next-sitemap",
         "start": "next start",
-        "lint": "next lint",
-        "test": "vitest"
+        "lint": "eslint --fix .",
+        "lint-ci": "eslint --max-warnings 0 .",
+        "test": "vitest",
+        "prettier": "prettier --write --ignore-path .prettierignore .",
+        "prettier-ci": "prettier --check --ignore-path .prettierignore ."
     },
     "dependencies": {
         "@auth/core": "^0.40.0",
-        "@discordjs/rest": "^2.6.0",
         "@headlessui/react": "^2.2.9",
         "@heroicons/react": "^2.2.0",
         "@react-three/postprocessing": "^3.0.4",
@@ -23,15 +26,12 @@
         "classnames": "^2.5.1",
         "csv-parser": "^3.2.0",
         "deep-equal": "^2.2.3",
-        "discord-api-types": "^0.38.37",
         "framer-motion": "^12.29.0",
         "leaflet": "^1.9.4",
         "leaflet.markercluster": "^1.5.3",
         "leva": "^0.10.1",
-        "mongoose": "^8.21.0",
         "motion": "^12.29.0",
-        "next": "15.4.10",
-        "next-auth": "5.0.0-beta.30",
+        "next": "15.5.18",
         "next-sitemap": "^4.2.3",
         "phone": "^3.1.70",
         "postal-code-validator": "^1.0.3",
@@ -46,12 +46,12 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
-        "@eslint/eslintrc": "^3.3.3",
         "@eslint/js": "^9.39.2",
         "@next/eslint-plugin-next": "^15.5.9",
-        "@playwright/test": "^1.57.0",
+        "@playwright/test": "^1.60.0",
         "@testing-library/jest-dom": "^6.9.1",
         "@testing-library/react": "^16.3.2",
+        "@testing-library/user-event": "^14.6.1",
         "@trivago/prettier-plugin-sort-imports": "^5.2.2",
         "@types/deep-equal": "^1.0.4",
         "@types/express": "^5.0.6",
@@ -64,7 +64,7 @@
         "@types/react-dom": "^19.2.3",
         "@vitejs/plugin-react": "^4.7.0",
         "eslint": "^9.39.2",
-        "eslint-config-next": "^15.5.9",
+        "eslint-config-next": "^16.2.9",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^5.2.0",
@@ -80,7 +80,7 @@
         "typescript-eslint": "^8.53.1",
         "vite-plugin-node-polyfills": "^0.24.0",
         "vite-tsconfig-paths": "^6.0.4",
-        "vitest": "^4.0.18"
+        "vitest": "^4.1.0"
     },
     "pnpm": {
         "overrides": {

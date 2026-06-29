@@ -1,20 +1,35 @@
 'use client'
 
+import cx from 'classnames'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export interface ImageWithFallbackProps {
     src: string
     alt: string
+    width: number
+    height: number
     useFallback?: boolean
+    className?: string
+    loading?: 'lazy' | 'eager'
+    priority?: boolean
 }
 
 export function ImageWithFallback({
     src,
     alt,
+    width,
+    height,
     useFallback = false,
+    className,
+    loading = 'lazy',
+    priority = false,
 }: ImageWithFallbackProps) {
     const [hasErrored, setHasErrored] = useState(false)
+
+    useEffect(() => {
+        setHasErrored(false)
+    }, [src, useFallback])
 
     return (
         <Image
@@ -24,10 +39,12 @@ export function ImageWithFallback({
                     : src
             }
             alt={alt}
-            width={48}
-            height={48}
-            className="aspect-square max-h-[48px] rounded-full"
+            width={width}
+            height={height}
+            className={cx('aspect-square rounded-full object-cover', className)}
             onError={() => setHasErrored(true)}
+            loading={priority ? undefined : loading}
+            priority={priority}
         />
     )
 }
