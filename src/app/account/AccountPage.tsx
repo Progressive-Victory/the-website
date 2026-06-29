@@ -1,6 +1,7 @@
 'use client'
 
 import { AccountInfoForm } from './AccountInfoForm'
+import { AccountMembershipSection } from './AccountMembershipSection'
 import styles from '@/app/account/account.module.css'
 import { DiscordAvatar } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
@@ -123,6 +124,8 @@ export function AccountPage() {
                         )}
                     </div>
                 </section>
+
+                {loggedInUser.data && <AccountMembershipSection />}
             </div>
         </div>
     )

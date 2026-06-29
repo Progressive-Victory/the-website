@@ -47,7 +47,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         userCount={users.query.data?.count}
                         roleCount={roles.query.data?.count}
                         permissionCount={permissions.query.data?.count}
-                        positionCount={positionHierarchy.data?.positions?.length}
+                        positionCount={
+                            positionHierarchy.data?.positions?.length
+                        }
                         donorCount={donors.query.data?.count}
                         contributionCount={contributions.query.data?.count}
                     />
