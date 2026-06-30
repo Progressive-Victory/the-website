@@ -6,11 +6,11 @@ import { ProtectedPage } from '@/components/ProtectedPage'
 import { Header } from '@/components/layout/Header'
 import {
     zActBlueDonationPacket,
+    zActBlueDonor,
     zPermission,
     zRole,
     zUser,
 } from '@/contracts/data'
-import { zActBlueDonor } from '@/contracts/data/ActBlueDonor'
 import { usePositionQueries } from '@/queries'
 import { usePaginatedSearch } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
