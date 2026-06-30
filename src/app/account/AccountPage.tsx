@@ -1,12 +1,13 @@
 'use client'
 
 import { AccountInfoForm } from './AccountInfoForm'
+import { AccountMembershipSection } from './AccountMembershipSection'
 import styles from '@/app/account/account.module.css'
 import { DiscordAvatar } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
+import { User } from '@/contracts/data'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
-import { User } from 'pv-contracts/data'
 import { useMemo } from 'react'
 
 export function AccountPage() {
@@ -123,6 +124,8 @@ export function AccountPage() {
                         )}
                     </div>
                 </section>
+
+                {loggedInUser.data && <AccountMembershipSection />}
             </div>
         </div>
     )

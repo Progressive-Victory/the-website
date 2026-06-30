@@ -1,8 +1,8 @@
+import { User, zUser } from '@/contracts/data'
+import { UpdateUserRequest } from '@/contracts/requests'
 import { FetchError } from '@/models'
 import { useFetch } from '@/util/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { User, zUser } from 'pv-contracts/data'
-import { UpdateUserRequest } from 'pv-contracts/requests'
 
 export function useUpdatedUser({
     loggedInUser,

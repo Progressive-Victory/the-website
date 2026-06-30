@@ -11,9 +11,9 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
+import { Role, UpdateHistory, User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
-import { Role, UpdateHistory, User } from 'pv-contracts/data'
 
 const membershipCardShipmentOptions = [
     { value: 0, label: 'Not Eligible' },
@@ -92,6 +92,7 @@ export interface MemberViewProps {
     setFormState?: (next: FormState<User> | null) => void
 
     saving: boolean
+    editing: boolean
     isInvalid: boolean
     roles: Role[]
     roleOptions: { value: number; label: string }[]
@@ -107,6 +108,7 @@ export function MemberView({
     setFormState,
     saving,
     isInvalid,
+    editing,
     roles,
     roleOptions,
     makeFormTitle,
@@ -150,8 +152,21 @@ export function MemberView({
                     field="preferredName"
                     deprecated
                 />
-                <TextField label="First Name" field="firstName" />
-                <TextField label="Last Name" field="lastName" />
+                {editing ? (
+                    <TextField label="First Name" field="firstName" />
+                ) : (
+                    <TextField<User>
+                        label="Full Name"
+                        getter={(user) =>
+                            `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
+                        }
+                        readonly
+                    />
+                )}
+                {/* 6/25/36 - There is no way to merge this conditional in with the above trinary.
+                    The obvious solution (fragment) causes the page to break for unknowable reasons.
+                    Check website PR #493 to see details of how each solution breaks */}
+                {editing && <TextField label="Last Name" field="lastName" />}
                 <DateField<User>
                     label="Date of Birth"
                     getter={(form) =>
@@ -255,7 +270,7 @@ export function MemberView({
                                     ?.slice(-5) ?? null,
                         },
                     })}
-                    validator={(field) => field?.length == 5}
+                    validator={(field) => !field?.length || field?.length == 5}
                 />
             </FormGroup>
 

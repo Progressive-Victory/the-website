@@ -8,16 +8,6 @@ import { ListElement, List } from '@/app/admin/layout/List'
 import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
 import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
-import { FetchError } from '@/models'
-import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
-import {
-    keepPreviousData,
-    skipToken,
-    useMutation,
-    useQuery,
-    useQueryClient,
-    UseQueryResult,
-} from '@tanstack/react-query'
 import {
     ActBlueDonor,
     Location,
@@ -30,14 +20,24 @@ import {
     zRole,
     zUser,
     zUserProfile,
-} from 'pv-contracts/data'
+} from '@/contracts/data'
 import {
     ActBlueDonorLinkRequest,
     SortDirection,
     UpdateUserRequest,
     zUpdateUserRequest,
-} from 'pv-contracts/requests'
-import { PaginatedResponse } from 'pv-contracts/responses'
+} from '@/contracts/requests'
+import { PaginatedResponse } from '@/contracts/responses'
+import { FetchError } from '@/models'
+import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
+import {
+    keepPreviousData,
+    skipToken,
+    useMutation,
+    useQuery,
+    useQueryClient,
+    UseQueryResult,
+} from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 import z from 'zod'
@@ -256,7 +256,7 @@ export default function Page() {
     const locationQuery = useQuery({
         queryKey: [`/locations/${formState?.form?.address?.zip}`],
         queryFn:
-            ready && formState?.editing && formState.form.address?.zip
+            ready && formState?.mode === 'edit' && formState.form.address?.zip
                 ? async () => {
                       try {
                           return await onGet<Location>(
@@ -401,6 +401,7 @@ export default function Page() {
                         selectedHistory={null}
                         setFormState={setFormState}
                         saving={updateMutation.isPending}
+                        editing={formState?.mode === 'edit'}
                         isInvalid={
                             (formState?.form?.address?.zip != null &&
                                 locationQuery.data == null) ||

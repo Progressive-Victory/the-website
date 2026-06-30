@@ -1,4 +1,4 @@
-import { ChangeEvent, InputEvent, KeyboardEvent } from 'react'
+import { ChangeEvent, KeyboardEvent } from 'react'
 
 export function Field({
     type = 'text',
@@ -18,7 +18,7 @@ export function Field({
     type?: string
     value: string
     onChange?: (e: ChangeEvent<HTMLInputElement>) => void
-    onInput?: (e: InputEvent<HTMLInputElement>) => void
+    onInput?: (e: ChangeEvent<HTMLInputElement>) => void
     onBlur?: (e: ChangeEvent<HTMLInputElement>) => void
     placeholder?: string
     disabled?: boolean

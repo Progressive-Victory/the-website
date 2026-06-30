@@ -1,15 +1,11 @@
-import type { QueryParams, ZodSchema } from '@/util/hooks/useFetch'
+import { ActBlueDonationPacket, zActBlueDonationPacket } from '@/contracts/data'
+import { SortDirection } from '@/contracts/requests'
+import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import {
-    ActBlueDonationPacket,
-    zActBlueDonationPacket,
-} from 'pv-contracts/data'
-import { SortDirection } from 'pv-contracts/requests'
-import {
-    PaginatedResponse,
-    zPaginatedResponse,
     ActBlueFundraisingStatsResponse,
     zActBlueFundraisingStatsResponse,
-} from 'pv-contracts/responses'
+} from '@/contracts/responses/fundraisingStatsResponse'
+import type { QueryParams, ZodSchema } from '@/util/hooks/useFetch'
 
 interface GetOptions {
     query?: QueryParams

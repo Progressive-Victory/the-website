@@ -146,7 +146,7 @@ export function compareSectionEntries(
         return labelA === PAST_ELECTION_LABEL ? 1 : -1
     }
 
-    let comparison
+    let comparison = 0
 
     if (sectionMode === 'electionDate') {
         const timeA = candidatesA[0]?.electionDate?.getTime() ?? Infinity

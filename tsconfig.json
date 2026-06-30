@@ -13,7 +13,7 @@
         "resolveJsonModule": true,
         "isolatedModules": true,
         "noImplicitAny": false,
-        "jsx": "react-jsx",
+        "jsx": "preserve",
         "incremental": true,
         "plugins": [
             {
@@ -24,6 +24,28 @@
             "@/*": ["./src/*"],
             "auth": ["./src/util/auth"]
         }
+    },
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noImplicitAny": false,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+        {
+            "name": "next"
+        }
+    ],
+    "paths": {
+        "@/*": ["./src/*"],
+        "auth": ["./src/util/auth"]
     },
     "include": [
         "process.d.ts",

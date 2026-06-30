@@ -55,6 +55,7 @@
     position: absolute;
     left: 0;
     top: calc(100% + 0.25rem);
+    z-index: 40;
     height: 14rem;
     width: 12rem;
     overflow-y: auto;

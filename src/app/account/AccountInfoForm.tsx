@@ -7,9 +7,9 @@ import {
     TextField,
     DropDownField,
 } from '@/components/common/forms'
+import { User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
-import { User } from 'pv-contracts/data'
 import { useState } from 'react'
 
 interface AccountInfoFormProps {
@@ -46,7 +46,7 @@ export const AccountInfoForm = ({
                 title={title}
                 subtitle={subtitle}
                 avatar={avatar}
-                onUpdate={(state) => setIsEditing(state.editing)}
+                onUpdate={(state) => setIsEditing(state.mode === 'edit')}
                 onSave={handleFormSave}
             >
                 <FormGroup title="">
