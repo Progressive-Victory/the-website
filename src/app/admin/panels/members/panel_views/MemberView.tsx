@@ -255,7 +255,7 @@ export function MemberView({
                                 null,
                         },
                     })}
-                    validator={(field) => field?.length == 2}
+                    validator={(field) => !field?.length || field?.length == 2}
                 />
                 <TextField<User>
                     label="Zip Code"
@@ -271,7 +271,7 @@ export function MemberView({
                                     ?.slice(-5) ?? null,
                         },
                     })}
-                    validator={(field) => field?.length == 5}
+                    validator={(field) => !field?.length || field?.length == 5}
                 />
             </FormGroup>
 

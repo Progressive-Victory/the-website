@@ -1,9 +1,16 @@
 import styles from './Form.module.css'
 import { DynamicFormFieldProps, FieldConfiguration } from './FormField'
+import { HStack, Spacer, VStack } from '@/components/layout'
 import cx from 'classnames'
 import deepEqual from 'deep-equal'
 import React, { useCallback, useEffect, useState } from 'react'
-import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
+import { FaPlus, FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
+
+/**
+ * The current mode the form is in. It'll usually be in `read` mode unless
+ * you've started creating or editing something.
+ */
+export type FormMode = 'read' | 'create' | 'edit'
 
 /**
  * Current internal state of the Form component. This is returned to the parent
@@ -13,8 +20,8 @@ export interface FormState<T> {
     /** The current state of the form's data. */
     form: T
 
-    /** Whether the form is currently being edited. */
-    editing: boolean
+    /** The current edit mode of the form. */
+    mode: FormMode
 
     /** Whether any field has been modified. Only set while editing. */
     dirty: boolean
@@ -26,7 +33,7 @@ export interface FormState<T> {
 /** Properties for the Form component. */
 export interface FormProps<T> {
     /** The data your form will operate on. */
-    form: T
+    form: T | null
 
     /** A title heading, listed above the form groups. */
     title: string
@@ -60,11 +67,17 @@ export interface FormProps<T> {
 
     /** Callback to save form data. Should correspond to `saving`. */
     onSave?: (form: T) => void
+
+    /** Callback to create a new form value. */
+    onCreate?: () => T
+
+    /** Callback to delete a form value. */
+    onDelete?: (form: T) => void
 }
 
 /**
  * Generalized component for creating forms. Supports custom fields, generic
- * data, and validation.
+ * data, and validation. You can also create and delete forms with it.
  *
  * To add fields, add a list of fields or FormGroups as children.
  *
@@ -92,9 +105,17 @@ export function Form<T>({
     children = [],
     onUpdate,
     onSave,
+    onCreate,
+    onDelete,
 }: FormProps<T>) {
+    // Stores the initial state of the form while editing.
+    const [baseForm, setBaseForm] = useState<T | null>(null)
+
     // Stores the current state of the form while editing.
     const [editForm, setEditForm] = useState<T | null>(null)
+
+    // Stores the current editing mode of the form.
+    const [mode, setMode] = useState<FormMode>('read')
 
     // Stores a set of field ids which have values different than their
     // initial values.
@@ -111,29 +132,53 @@ export function Form<T>({
 
     // Current form state
     const form = editForm ?? initialForm
-    const editing = editForm != null
+    const editing = mode !== 'read'
     const dirty = dirtyMap.size > 0
     const invalid = isInvalid || invalidMap.size > 0
 
+    const reset = () => {
+        setEditForm(null)
+        setBaseForm(null)
+        setMode('read')
+        setDirtyMap(new Set<string>())
+        setInvalidMap(new Set<string>())
+    }
+
+    const beginEdit = (formToEdit: T, mode: 'create' | 'edit') => {
+        setBaseForm(formToEdit)
+        setEditForm(formToEdit)
+        setMode(mode)
+    }
+
     // Called when 'Edit' is pressed. Simply edits current form state.
     const handleEdit = () => {
-        setEditForm(initialForm)
+        if (!initialForm) return
+        beginEdit(initialForm, 'edit')
+    }
+
+    // Called when 'Create' is pressed. Asks the parent for a blank form and
+    // begins editing.
+    const handleCreate = () => {
+        if (!onCreate) return
+        beginEdit(onCreate(), 'create')
+    }
+
+    // Called when 'Delete' is pressed. Asks the parent to delete the form.
+    const handleDelete = () => {
+        if (!initialForm) return
+        onDelete?.(initialForm)
     }
 
     // Called when 'Save' is pressed. Asks the parent component to save, and
     // then clears edit state.
     const handleSave = () => {
         if (editForm) onSave?.(editForm)
-        setEditForm(null)
-        setDirtyMap(new Set<string>())
-        setInvalidMap(new Set<string>())
+        reset()
     }
 
     // Called when 'Cancel' is pressed. Clears edit state.
     const handleCancel = () => {
-        setEditForm(null)
-        setDirtyMap(new Set<string>())
-        setInvalidMap(new Set<string>())
+        reset()
     }
 
     // Called whenever the data in any field changes.
@@ -144,14 +189,17 @@ export function Form<T>({
             const configuration = configureMap[id]
             if (!configuration) return
 
+            // Similarly, if the forms are null somehow, we'll just return.
+            if (!baseForm || !editForm) return
+
             const { getter, setter, validator } = configuration
 
             // Use the field's setter to update current form state.
-            const currForm = setter(form, field)
+            const currForm = setter(editForm, field)
             setEditForm(currForm)
 
             // Use the field's getter to update whether the field is dirty.
-            const init = getter(initialForm)
+            const init = getter(baseForm)
             const curr = getter(currForm)
             const clean = (!init && !curr) || deepEqual(init, curr)
             setDirtyMap((prev) => {
@@ -168,7 +216,7 @@ export function Form<T>({
                 return prev
             })
         },
-        [configureMap, form, initialForm]
+        [configureMap, baseForm, editForm]
     )
 
     // Called whenever a field is configured (see `FormField`). Stores the
@@ -179,6 +227,34 @@ export function Form<T>({
         },
         []
     )
+
+    // If anything changes, inform the parent component of the new state
+    useEffect(() => {
+        if (onUpdate && form != null) onUpdate({ form, mode, dirty, invalid })
+    }, [form, mode, dirty, invalid, onUpdate])
+
+    // If the form is null, display a blank area message.
+    if (form == null) {
+        return (
+            <div className={styles.emptyContainer}>
+                <HStack grow>
+                    <VStack grow gap>
+                        <Spacer />
+                        <span>{`No ${title} selected`}</span>
+                        {onCreate && (
+                            <button
+                                onClick={handleCreate}
+                                className={cx(styles.button)}
+                            >
+                                <FaPlus /> Create
+                            </button>
+                        )}
+                        <Spacer />
+                    </VStack>
+                </HStack>
+            </div>
+        )
+    }
 
     // Dynamic state. This is populated automatically within each child to
     // allow them to have access to form state without the user needing to
@@ -209,11 +285,6 @@ export function Form<T>({
             },
         }
     })
-
-    // If anything changes, inform the parent component of the new state
-    useEffect(() => {
-        onUpdate?.({ form, editing, dirty, invalid })
-    }, [form, editing, dirty, invalid, onUpdate])
 
     return (
         <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
@@ -251,12 +322,31 @@ export function Form<T>({
                             </>
                         ) : (
                             <>
+                                {onCreate && (
+                                    <button
+                                        onClick={handleCreate}
+                                        className={styles.button}
+                                    >
+                                        <FaPlus /> Create
+                                    </button>
+                                )}
                                 <button
                                     onClick={handleEdit}
                                     className={styles.button}
                                 >
                                     <FaEdit /> Edit
                                 </button>
+                                {onDelete && (
+                                    <button
+                                        onClick={handleDelete}
+                                        className={cx(
+                                            styles.button,
+                                            styles.discardButton
+                                        )}
+                                    >
+                                        <FaTrashAlt /> Delete
+                                    </button>
+                                )}
                             </>
                         )}
                     </div>
