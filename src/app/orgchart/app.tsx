@@ -11,11 +11,7 @@ import {
 // import { PositionData, PositionBubble } from './components/position'
 // import { TeamNode, TeamNodeData } from './components/team'
 // import { BuildGraphNodes } from './data/constructOrgGraph'
-import {
-    Committees,
-    testChartNodes,
-    testChartEdges,
-} from './data/orgchartGraphData'
+import { testChartNodes, testChartEdges } from './data/orgchartGraphData'
 import dagre from '@dagrejs/dagre'
 import {
     type Node,
@@ -208,7 +204,6 @@ export default function OrgChartApp() {
     const handleNodeClick = (event: React.MouseEvent, node: Node) => {
         if (node.type == 'groupNode') {
             const castedNode = node as GroupNode
-            console.log(`${castedNode.data.name},${castedNode.data.desc}`)
             setCurrentDetails(
                 <DetailPanel
                     name={castedNode.data.name}
@@ -234,7 +229,7 @@ export default function OrgChartApp() {
                 nodesDraggable={false}
                 nodesConnectable={false}
                 autoPanOnNodeFocus={true}
-                maxZoom={1.25}
+                maxZoom={1.0}
                 minZoom={0.25}
             >
                 {currentDetails}

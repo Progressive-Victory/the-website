@@ -3,7 +3,7 @@ import styles from './components.module.css'
 import Tag from './tag'
 import { XYPosition, Node, NodeProps, Position, Handle } from '@xyflow/react'
 import { motion } from 'motion/react'
-import React, { useState } from 'react'
+import React, { useCallback, useRef } from 'react'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type GroupData = {
@@ -21,14 +21,6 @@ export function GroupNode({
     sourcePosition,
     targetPosition,
 }: NodeProps<GroupNode>) {
-    const [contentEnabled, setContentEnabled] = useState(false)
-
-    const handlePointerEnter = (e: React.PointerEvent) => {
-        if (e.pointerType == 'mouse') {
-            setContentEnabled(true)
-        }
-    }
-
     const GroupLeads = () => {
         let leadNumber = -1
         return data.leads?.map(RenderLead)
@@ -39,35 +31,16 @@ export function GroupNode({
     }
 
     return (
-        <div
-            className={styles.nodeContainer}
-            onPointerEnter={handlePointerEnter}
-            onPointerLeave={() => setContentEnabled(false)}
-        >
+        <div className={styles.newNodeContainer}>
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
                 className={styles.targetHandle}
             />
             <GroupBubble data={data} />
-            <motion.div
-                className={styles.dropdownContainer}
-                style={{
-                    willChange: 'max-height',
-                }}
-                initial={{
-                    maxHeight: `${contentEnabled ? '240' : '0'}px`,
-                }}
-                animate={{
-                    maxHeight: `${contentEnabled ? '240' : '0'}px`,
-                    transition: {
-                        type: 'tween',
-                        duration: 0.5,
-                    },
-                }}
-            >
+            <div className={styles.newDropdown}>
                 <GroupLeads />
-            </motion.div>
+            </div>
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}
@@ -78,8 +51,59 @@ export function GroupNode({
 }
 
 export function GroupBubble({ data }: { data: GroupData }) {
-    const Tags = () => {
+    const nameContainer = useRef<HTMLDivElement>(null)
+
+    const Nameplate = useCallback(() => {
         return (
+            <motion.div
+                initial={{
+                    translateX: 0,
+                }}
+                animate={{
+                    translateX: [
+                        0,
+                        `min(calc(-100% + ${nameContainer.current ? nameContainer.current.offsetWidth : 0}px), 0px)`,
+                    ],
+                    transition: {
+                        times: [0.2, 0.8],
+                        duration: 10,
+                        repeat: Infinity,
+                    },
+                }}
+            >
+                {data.name.toUpperCase()}
+            </motion.div>
+        )
+    }, [data])
+
+    const Tags = useCallback(() => {
+        if (!data.tags) return
+        const pairs: Tag[][] = []
+        data.tags.forEach((tag: Tag, index: number) => {
+            pairs[Math.floor(index / 2)][index % 2] = tag
+        })
+        return (
+            <div>
+                {pairs.map((pair) => {
+                    return (
+                        <div className={styles.tagContainer} key={pair[0].name}>
+                            {pair.map((tag) => {
+                                return (
+                                    <div
+                                        key={tag.name}
+                                        className={styles.tag}
+                                        title={tag.tooltip}
+                                    >
+                                        {tag.graphic}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )
+                })}
+            </div>
+        )
+        /*return (
             <div className={styles.tagContainer}>
                 {data.tags?.map((tag) => {
                     return (
@@ -93,18 +117,14 @@ export function GroupBubble({ data }: { data: GroupData }) {
                     )
                 })}
             </div>
-        )
-    }
+        )*/
+    }, [data])
 
     return (
         <div className={styles.yellowBubble}>
-            <p
-                style={{
-                    gridColumn: `${data.tags ? 'span 11 / span 11' : 'span 12 / span 12'}`,
-                }}
-            >
-                {data.name.toUpperCase()}
-            </p>
+            <div className={styles.groupNameContainer} ref={nameContainer}>
+                <Nameplate />
+            </div>
             {data.tags ? <Tags /> : null}
         </div>
     )

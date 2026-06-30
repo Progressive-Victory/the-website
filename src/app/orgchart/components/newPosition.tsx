@@ -1,6 +1,8 @@
 import styles from './components.module.css'
 import Tag from './tag'
 import { Handle, Node, NodeProps, Position, XYPosition } from '@xyflow/react'
+import { motion } from 'motion/react'
+import { useCallback, useRef, useState } from 'react'
 
 export enum Banner {
     NONE,
@@ -11,7 +13,7 @@ export enum Banner {
 type RGB = `rgb(${number}, ${number}, ${number})`
 type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`
 type HSL = `hsl(${number}, ${number}, ${number})`
-type HSLA = `hsla(${number},${number},${number})`
+type HSLA = `hsla(${number},${number}%,${number}%,${number})`
 type HEX = `#${string}`
 type Color = RGB | RGBA | HSL | HSLA | HEX
 
@@ -19,6 +21,11 @@ export interface BannerObject {
     color?: Color
     title?: string
 }
+
+export const DefaultBanners: BannerObject[] = [
+    { color: '#60a5fa', title: 'Junior' },
+    { color: '#dc2626', title: 'Senior' },
+]
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PositionData = {
@@ -54,6 +61,10 @@ export function PositionNode({
     )
 }
 
+/* $-100% + ${titleContainer.current ? titleContainer.current.offsetWidth : 310}px
+    The title container at some point is null if the bubble is initially hidden.
+*/
+
 export function PositionBubble({
     data,
     mini,
@@ -61,19 +72,24 @@ export function PositionBubble({
     data: PositionData
     mini?: boolean
 }) {
+    const bubble = useRef<HTMLDivElement>(null)
+    const titleContainer = useRef<HTMLDivElement>(null)
+
     const Banner = () => {
         switch (data.banner) {
             case 1:
                 return (
                     <div
-                        className={styles.juniorBanner}
+                        className={styles.banner}
+                        style={{ backgroundColor: '#60a5fa' }}
                         title={data.bannerTitle}
                     />
                 )
             case 2:
                 return (
                     <div
-                        className={styles.seniorBanner}
+                        className={styles.banner}
+                        style={{ backgroundColor: '#dc2626' }}
                         title={data.bannerTitle}
                     />
                 )
@@ -81,54 +97,98 @@ export function PositionBubble({
                 return (
                     <div
                         className={styles.banner}
-                        style={{ borderRightWidth: 0 }}
+                        style={{ display: 'none' }}
                     />
                 )
         }
     }
 
-    const Nameplate = () => {
-        if (data.redacted) {
-            return (
-                <p
-                    style={{
-                        fontSize: `${mini ? '0.875' : '1'}rem`,
-                        lineHeight: `${mini ? '1.25' : '1.5'}rem`,
-                        color: '#dc2626',
-                    }}
-                >
-                    REDACTED
-                </p>
-            )
-        }
-        if (data.name == null) {
-            return (
-                <p
-                    style={{
-                        fontSize: `${mini ? '0.875' : '1'}rem`,
-                        lineHeight: `${mini ? '1.25' : '1.5'}rem`,
-                        color: '#dc2626',
-                    }}
-                >
-                    UNFILLED
-                </p>
-            )
-        }
+    const Titleplate = useCallback(() => {
         return (
-            <p
-                style={{
-                    fontSize: `${mini ? '0.875' : '1'}rem`,
-                    lineHeight: `${mini ? '1.25' : '1.5'}rem`,
-                    color: '#ffffff',
+            <motion.div
+                initial={{
+                    translateX: 0,
+                }}
+                animate={{
+                    translateX: [
+                        0,
+                        `min(calc(-100% + ${titleContainer.current ? titleContainer.current.offsetWidth : 0}px), 0px)`,
+                    ],
+                    transition: {
+                        times: [0.2, 0.8],
+                        duration: 10,
+                        repeat: Infinity,
+                    },
                 }}
             >
-                {data.name.toUpperCase()}
-            </p>
+                {data.title != null ? data.title.toUpperCase() : 'VOLUNTEER'}
+            </motion.div>
         )
-    }
+    }, [data])
 
-    const Tags = () => {
+    const Nameplate = useCallback(() => {
+        let newName: string
+        if (data.redacted) {
+            newName = 'REDACTED'
+        } else if (data.name == null) {
+            newName = 'UNFILLED'
+        } else newName = data.name.toUpperCase()
         return (
+            <motion.div
+                style={{
+                    color: `${newName == 'REDACTED' || newName == 'UNFILLED' ? '#dc2626' : '#ffffff'}`,
+                }}
+                initial={{
+                    translateX: 0,
+                }}
+                animate={{
+                    translateX: [
+                        0,
+                        `min(calc(-100% + ${titleContainer.current ? titleContainer.current.offsetWidth : 0}px), 0px)`,
+                    ],
+                    transition: {
+                        times: [0.2, 0.8],
+                        duration: 10,
+                        repeat: Infinity,
+                    },
+                }}
+            >
+                {newName}
+            </motion.div>
+        )
+    }, [data])
+
+    const Tags = useCallback(() => {
+        if (!data.tags) return
+        // eslint-disable-next-line prefer-const
+        let pairs: Tag[][] = []
+        data.tags.forEach((tag: Tag, index: number) => {
+            if (index % 2 == 0) {
+                pairs.push([tag])
+            } else pairs[Math.floor(index / 2)][1] = tag
+        })
+        return (
+            <div className={styles.tags}>
+                {pairs.map((pair) => {
+                    return (
+                        <div className={styles.tagContainer} key={pair[0].name}>
+                            {pair.map((tag) => {
+                                return (
+                                    <div
+                                        key={tag.name}
+                                        className={styles.tag}
+                                        title={tag.tooltip ?? tag.name}
+                                    >
+                                        {tag.graphic}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )
+                })}
+            </div>
+        )
+        /*return (
             <div className={styles.tagContainer}>
                 {data.tags?.map((tag) => {
                     return (
@@ -142,35 +202,28 @@ export function PositionBubble({
                     )
                 })}
             </div>
-        )
-    }
+        )*/
+    }, [data])
 
     return (
         <div
             className={styles.pearlBubble}
             style={{ width: `${mini ? '290' : '360'}px` }}
+            ref={bubble}
+            onClick={() => {
+                console.log(bubble.current?.offsetHeight)
+            }}
         >
             <Banner />
-            <div
-                style={{
-                    gridColumn: 'span 11 / span 11',
-                    padding: '0.5rem',
-                }}
-            >
-                <p
-                    className={styles.title}
-                    style={{
-                        fontSize: `${mini ? '0.75' : '0.875'}rem`,
-                        lineHeight: `${mini ? '1' : '1.25'}rem`,
-                    }}
-                >
-                    {data.title != null
-                        ? data.title.toUpperCase()
-                        : 'VOLUNTEER'}
-                </p>
-                <Nameplate />
-                <Tags />
+            <div className={styles.textbox}>
+                <div className={styles.titleContainer} ref={titleContainer}>
+                    <Titleplate />
+                </div>
+                <div className={styles.nameplateContainer}>
+                    <Nameplate />
+                </div>
             </div>
+            <Tags />
         </div>
     )
 }
@@ -183,6 +236,7 @@ export function CreatePositionNode({
     banner,
     bannerTitle,
     redacted,
+    tags,
 }: {
     id: number | string
     position?: XYPosition
@@ -191,6 +245,7 @@ export function CreatePositionNode({
     banner?: Banner
     bannerTitle?: string
     redacted?: boolean
+    tags?: Tag[]
 }) {
     return {
         id: id.toString(),
@@ -202,6 +257,7 @@ export function CreatePositionNode({
             banner,
             bannerTitle,
             redacted,
+            tags,
         },
     }
 }

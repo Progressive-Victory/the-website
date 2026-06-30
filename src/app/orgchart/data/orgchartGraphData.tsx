@@ -1,6 +1,7 @@
 /* A number of committees can be defined up to the number of icons. */
+import { CreateEdge } from '../components/edge'
 import { CreateGroupNode } from '../components/group'
-import { CreatePositionNode } from '../components/newPosition'
+import { Banner, CreatePositionNode } from '../components/newPosition'
 import Tag from '../components/tag'
 import Committee from '../types/committee'
 import { Edge, type Node } from '@xyflow/react'
@@ -40,53 +41,145 @@ export const Committees: Committee[] = [
 export const Tags: Tag[] = [
     {
         name: 'Community Team',
+        graphic: (
+            <svg width="32" height="32">
+                <circle
+                    r="10"
+                    cx="16"
+                    cy="16"
+                    fill="#1b4568"
+                    stroke="#fcd34d"
+                />
+            </svg>
+        ),
+        tooltip: 'Community Team',
     },
     {
         name: 'Media Team',
+        graphic: (
+            <svg width="32" height="32">
+                <polygon
+                    points="16,4 28,24 4,24"
+                    fill="#1b4568"
+                    stroke="#fcd34d"
+                />
+            </svg>
+        ),
+        tooltip: 'Media Team',
     },
     {
         name: 'Engineering Committee',
+        graphic: (
+            <svg width="32" height="32">
+                <rect
+                    width="20"
+                    height="20"
+                    x="6"
+                    y="6"
+                    fill="#1b4568"
+                    stroke="#fcd34d"
+                />
+            </svg>
+        ),
+        tooltip: 'Engineering Committee',
     },
     {
         name: 'State Organizing Committee',
+        graphic: (
+            <svg width="32" height="32">
+                <polygon
+                    points="15,5 25,15 15,25 5,15"
+                    fill="#1b4568"
+                    stroke="#fcd34d"
+                />
+            </svg>
+        ),
+        tooltip: 'State Organizing Committee',
     },
 ]
+
+// Benjamin Gilbert-Lif
 
 export const testChartNodes: Node[] = [
     CreatePositionNode({
         id: 0,
         title: 'Executive Director',
         name: 'Sam Dryzmala',
+        banner: Banner.RED,
+        bannerTitle: 'Senior Leadership',
     }),
     CreatePositionNode({
         id: 1,
-        title: 'Deputy Executive Director',
-        name: 'Benjamin Gilbert-Lif',
+        title: 'A really long title such that the autoscroll animation can be demonstrated.',
+        name: 'A really long name such that the autoscroll animation can be demonstrated.',
+        banner: Banner.RED,
+        bannerTitle: 'Senior Leadership',
     }),
     CreateGroupNode({
         id: 2,
-        name: 'Community Department',
+        name: 'A really long group name such that the autoscroll animation can be demonstrated.',
         leads: [
-            { title: 'Community Relations Director', name: 'Auntifa' },
-            { title: 'Community Manager', name: 'Jenywlfersn' },
-            { title: 'Community Manager' },
+            {
+                title: 'Community Relations Director',
+                name: 'Auntifa',
+                banner: Banner.RED,
+                bannerTitle: 'Senior Leadership',
+            },
+            {
+                title: 'Community Manager',
+                name: 'Jenywlfersn',
+                banner: Banner.BLUE,
+                bannerTitle: 'Junior Leadership',
+                tags: [Tags[0], Tags[1]],
+            },
+            {
+                title: 'Community Manager',
+                banner: Banner.BLUE,
+                bannerTitle: 'Junior Leadership',
+                tags: [Tags[0], Tags[1]],
+            },
         ],
     }),
     CreateGroupNode({
         id: 3,
         name: 'Media Department',
         leads: [
-            { title: 'Media Director', name: 'Aussy' },
-            { title: 'Deputy Media Director', name: 'Leeloo' },
-            { title: 'Deputy Media Director' },
+            {
+                title: 'Media Director',
+                name: 'Aussy',
+                banner: Banner.RED,
+                bannerTitle: 'Senior Leadership',
+            },
+            {
+                title: 'Deputy Media Director',
+                name: 'Leeloo',
+                banner: Banner.RED,
+                bannerTitle: 'Senior Leadership',
+            },
+            {
+                title: 'Deputy Media Director',
+                banner: Banner.RED,
+                bannerTitle: 'Senior Leadership',
+            },
         ],
     }),
     CreateGroupNode({
         id: 4,
         name: 'Welcome Team',
         leads: [
-            { title: 'Welcome Team Lead', name: 'Monarch' },
-            { title: 'Welcome Team Lead' },
+            {
+                title: 'Welcome Team Lead',
+                name: 'Monarch',
+                banner: Banner.BLUE,
+                bannerTitle: 'Junior Leadership',
+                tags: [Tags[0]],
+            },
+            {
+                title: 'Welcome Team Lead',
+                banner: Banner.BLUE,
+                bannerTitle: 'Junior Leadership',
+                tags: [Tags[0]],
+            },
             { title: 'Welcome Team Lead' },
         ],
     }),
@@ -94,8 +187,19 @@ export const testChartNodes: Node[] = [
         id: 5,
         name: 'Events Team',
         leads: [
-            { title: 'Events Team Lead', name: 'BrewMasterCraft' },
-            { title: 'Events Team Lead' },
+            {
+                title: 'Events Team Lead',
+                name: 'BrewMasterCraft',
+                banner: Banner.BLUE,
+                bannerTitle: 'Junior Leadership',
+                tags: [Tags[0]],
+            },
+            {
+                title: 'Events Team Lead',
+                banner: Banner.BLUE,
+                bannerTitle: 'Junior Leadership',
+                tags: [Tags[0]],
+            },
             { title: 'Events Team Deputy', name: 'EM' },
         ],
     }),
@@ -121,10 +225,16 @@ export const testChartNodes: Node[] = [
             {
                 title: 'Writing Team Lead',
                 name: 'Dynas',
+                banner: Banner.BLUE,
+                bannerTitle: 'Junior Leadership',
+                tags: [Tags[0], Tags[1]],
             },
             {
                 title: 'Writing Team Lead',
                 name: 'AJ',
+                banner: Banner.BLUE,
+                bannerTitle: 'Junior Leadership',
+                tags: [Tags[0], Tags[1]],
             },
             {
                 title: 'Writing Team Deputy',
@@ -144,9 +254,15 @@ export const testChartNodes: Node[] = [
             {
                 title: 'Audio-Video Team Lead',
                 name: 'Vezanmatics',
+                banner: Banner.BLUE,
+                bannerTitle: 'Junior Leadership',
+                tags: [Tags[1]],
             },
             {
                 title: 'Audio-Video Team Lead',
+                banner: Banner.BLUE,
+                bannerTitle: 'Junior Leadership',
+                tags: [Tags[1]],
             },
             {
                 title: 'Audio-Video Team Deputy',
@@ -157,69 +273,35 @@ export const testChartNodes: Node[] = [
         id: 10,
         name: 'Design Team',
         leads: [
-            { title: 'Design Team Lead' },
-            { title: 'Design Team Lead' },
+            {
+                title: 'Design Team Lead',
+                banner: Banner.BLUE,
+                bannerTitle: 'Junior Leadership',
+                tags: [Tags[1]],
+            },
+            {
+                title: 'Design Team Lead',
+                banner: Banner.BLUE,
+                bannerTitle: 'Junior Leadership',
+                tags: [Tags[1]],
+            },
             { title: 'Design Team Deputy' },
         ],
     }),
 ]
 
 export const testChartEdges: Edge[] = [
-    {
-        id: '0-1',
-        source: '0',
-        target: '1',
-    },
-    {
-        id: '1-2',
-        source: '1',
-        target: '2',
-    },
-    {
-        id: '1-3',
-        source: '1',
-        target: '3',
-    },
-    {
-        id: '2-4',
-        source: '2',
-        target: '4',
-    },
-    {
-        id: '2-5',
-        source: '2',
-        target: '5',
-    },
-    {
-        id: '2-6',
-        source: '2',
-        target: '6',
-    },
-    {
-        id: '2-7',
-        source: '2',
-        target: '7',
-    },
-    {
-        id: '2-8',
-        source: '2',
-        target: '8',
-    },
-    {
-        id: '3-8',
-        source: '3',
-        target: '8',
-    },
-    {
-        id: '3-9',
-        source: '3',
-        target: '9',
-    },
-    {
-        id: '3-10',
-        source: '3',
-        target: '10',
-    },
+    CreateEdge({ source: 0, target: 1 }),
+    CreateEdge({ source: 1, target: 2 }),
+    CreateEdge({ source: 1, target: 3 }),
+    CreateEdge({ source: 2, target: 4 }),
+    CreateEdge({ source: 2, target: 5 }),
+    CreateEdge({ source: 2, target: 6 }),
+    CreateEdge({ source: 2, target: 7 }),
+    CreateEdge({ source: 7, target: 8 }),
+    CreateEdge({ source: 3, target: 7 }),
+    CreateEdge({ source: 3, target: 9 }),
+    CreateEdge({ source: 3, target: 10 }),
 ]
 /*
 export const orgchartData: Node[] = [

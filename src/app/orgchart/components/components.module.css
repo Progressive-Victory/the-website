@@ -1,3 +1,8 @@
+.edge {
+    stroke: #1b4568;
+    stroke-width: 2;
+}
+
 .nodeContainer {
     display: flex;
     width: 360px;
@@ -6,84 +11,6 @@
     justify-content: center;
 }
 
-.yellowBubble {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    overflow: hidden;
-    width: 360px;
-    border-radius: 0rem 1rem 1rem 0rem;
-    border-width: 4px;
-    border-color: #fcd34d;
-    background-color: #fffbeb;
-    padding: 0.5rem;
-    color: #09223a;
-    text-align: center;
-    font-size: 1.25rem;
-    line-height: 1.75rem;
-    font-weight: 800;
-}
-
-.nodeContainer:hover > .yellowBubble {
-    color: #1b4568;
-    background-color: white;
-    border-width: 2px 2px 4px 2px;
-    margin: 2px 2px 0px 2px;
-}
-
-.dropdownContainer {
-    overflow: auto;
-}
-
-.pearlBubble {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    overflow: hidden;
-    border-radius: 1rem;
-    border-width: 2px;
-    border-color: #fcd34d;
-    background-color: #09223a;
-    font-weight: 700;
-}
-
-.banner {
-    grid-column: span 1 / span 1;
-    border-right-width: 2px;
-    border-color: #fcd34d;
-}
-
-.juniorBanner {
-    grid-column: span 1 / span 1;
-    border-right-width: 2px;
-    border-color: #fcd34d;
-    background-color: #60a5fa;
-}
-
-.seniorBanner {
-    grid-column: span 1 / span 1;
-    border-right-width: 2px;
-    border-color: #fcd34d;
-    background-color: #dc2626;
-}
-
-.title {
-    font-style: italic;
-    color: #fcd34d;
-}
-/*
-Deprecated
-.committeesContainer {
-    grid-column: span 1 / span 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-Deprecated
-.committeeIcon {
-    display: flex;
-    justify-content: center;
-}
-*/
 .targetHandle {
     border-color: #fcd34d;
     background-color: #fffbeb;
@@ -97,8 +24,9 @@ Deprecated
 }
 
 .tagContainer {
-    grid-column: span 1 / span 1;
     display: flex;
+    width: 32px;
+    height: 64px;
     flex-direction: column;
     justify-content: center;
 }
@@ -106,4 +34,117 @@ Deprecated
 .tag {
     display: flex;
     justify-content: center;
+}
+
+.pearlBubble {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    border-radius: 1rem 0 0 1rem;
+    border-width: 2px;
+    border-color: #fcd34d;
+    background-color: #09223a;
+    font-weight: 700;
+    width: 100%;
+    height: 64px;
+}
+
+.banner {
+    flex-grow: 1;
+    position: relative;
+    width: 20px;
+    border-right-width: 2px;
+    border-color: #fcd34d;
+}
+
+.textbox {
+    flex-grow: 1000;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.titleContainer {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    overflow: hidden;
+}
+
+.nameplateContainer {
+    position: relative;
+    width: 100%;
+    height: 25px;
+    overflow: hidden;
+}
+
+.titleContainer > * {
+    position: absolute;
+    font-style: italic;
+    height: 20px;
+    white-space: nowrap;
+    color: #fcd34d;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.nameplateContainer > * {
+    position: absolute;
+    height: 25px;
+    white-space: nowrap;
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+.yellowBubble {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    border-radius: 1rem 0 0 1rem;
+    border-width: 4px;
+    border-color: #fcd34d;
+    background-color: #fffbeb;
+    color: #09223a;
+    font-size: 1.75rem;
+    font-weight: 800;
+    padding: 0.5rem;
+    width: 360px;
+    height: 64px;
+}
+
+.newDropdown {
+    overflow: hidden;
+    max-height: 0px;
+}
+
+/*.newNodeContainer:hover > .newYellowBubble {
+    color: #1b4568;
+    background-color: white;
+    border-width: 2px 2px 4px 2px;
+    margin: 2px 2px 0px 2px;
+}*/
+
+.newNodeContainer:hover > .newDropdown {
+    max-height: 240px;
+}
+
+.groupNameContainer {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    flex-grow: 1000;
+}
+
+.groupNameContainer > * {
+    position: absolute;
+    white-space: nowrap;
+}
+
+.tags {
+    display: flex;
+    flex-direction: row-reverse;
+    border-left-width: 2px;
+    border-color: #fcd34d;
 }
