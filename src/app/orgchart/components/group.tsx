@@ -3,7 +3,7 @@ import styles from './components.module.css'
 import Tag from './tag'
 import { XYPosition, Node, NodeProps, Position, Handle } from '@xyflow/react'
 import { motion } from 'motion/react'
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type GroupData = {
@@ -52,6 +52,7 @@ export function GroupNode({
 
 export function GroupBubble({ data }: { data: GroupData }) {
     const nameContainer = useRef<HTMLDivElement>(null)
+    const [textboxWidth, setBoxWidth] = useState<number>(310)
 
     const Nameplate = useCallback(() => {
         return (
@@ -62,28 +63,38 @@ export function GroupBubble({ data }: { data: GroupData }) {
                 animate={{
                     translateX: [
                         0,
-                        `min(calc(-100% + ${nameContainer.current ? nameContainer.current.offsetWidth : 0}px), 0px)`,
+                        `min(calc(-100% + ${textboxWidth}px), 0px)`,
                     ],
                     transition: {
+                        delay: 0.2,
                         times: [0.2, 0.8],
                         duration: 10,
                         repeat: Infinity,
                     },
                 }}
+                onAnimationStart={() => {
+                    setBoxWidth(
+                        nameContainer.current
+                            ? nameContainer.current.offsetWidth
+                            : 310
+                    )
+                }}
             >
                 {data.name.toUpperCase()}
             </motion.div>
         )
-    }, [data])
+    }, [data, textboxWidth])
 
     const Tags = useCallback(() => {
         if (!data.tags) return
         const pairs: Tag[][] = []
         data.tags.forEach((tag: Tag, index: number) => {
-            pairs[Math.floor(index / 2)][index % 2] = tag
+            if (index % 2 == 0) {
+                pairs.push([tag])
+            } else pairs[Math.floor(index / 2)][1] = tag
         })
         return (
-            <div>
+            <div className={styles.tags}>
                 {pairs.map((pair) => {
                     return (
                         <div className={styles.tagContainer} key={pair[0].name}>
@@ -92,7 +103,7 @@ export function GroupBubble({ data }: { data: GroupData }) {
                                     <div
                                         key={tag.name}
                                         className={styles.tag}
-                                        title={tag.tooltip}
+                                        title={tag.tooltip ?? tag.name}
                                     >
                                         {tag.graphic}
                                     </div>
@@ -103,21 +114,6 @@ export function GroupBubble({ data }: { data: GroupData }) {
                 })}
             </div>
         )
-        /*return (
-            <div className={styles.tagContainer}>
-                {data.tags?.map((tag) => {
-                    return (
-                        <div
-                            key={tag.name}
-                            className={styles.tag}
-                            title={tag.tooltip}
-                        >
-                            {tag.graphic}
-                        </div>
-                    )
-                })}
-            </div>
-        )*/
     }, [data])
 
     return (

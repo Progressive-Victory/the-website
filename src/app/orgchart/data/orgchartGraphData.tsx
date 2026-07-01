@@ -37,7 +37,6 @@ export const Committees: Committee[] = [
     },
 ]
 
-// Must add graphics as their own object.
 export const Tags: Tag[] = [
     {
         name: 'Community Team',
@@ -52,7 +51,6 @@ export const Tags: Tag[] = [
                 />
             </svg>
         ),
-        tooltip: 'Community Team',
     },
     {
         name: 'Media Team',
@@ -65,7 +63,6 @@ export const Tags: Tag[] = [
                 />
             </svg>
         ),
-        tooltip: 'Media Team',
     },
     {
         name: 'Engineering Committee',
@@ -81,7 +78,6 @@ export const Tags: Tag[] = [
                 />
             </svg>
         ),
-        tooltip: 'Engineering Committee',
     },
     {
         name: 'State Organizing Committee',
@@ -94,11 +90,8 @@ export const Tags: Tag[] = [
                 />
             </svg>
         ),
-        tooltip: 'State Organizing Committee',
     },
 ]
-
-// Benjamin Gilbert-Lif
 
 export const testChartNodes: Node[] = [
     CreatePositionNode({
@@ -110,14 +103,14 @@ export const testChartNodes: Node[] = [
     }),
     CreatePositionNode({
         id: 1,
-        title: 'A really long title such that the autoscroll animation can be demonstrated.',
-        name: 'A really long name such that the autoscroll animation can be demonstrated.',
+        title: 'Deputy Executive Director',
+        name: 'Benjamin Gilbert-Lif',
         banner: Banner.RED,
         bannerTitle: 'Senior Leadership',
     }),
     CreateGroupNode({
         id: 2,
-        name: 'A really long group name such that the autoscroll animation can be demonstrated.',
+        name: 'Community Department',
         leads: [
             {
                 title: 'Community Relations Director',

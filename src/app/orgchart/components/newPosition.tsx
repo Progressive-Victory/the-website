@@ -61,10 +61,6 @@ export function PositionNode({
     )
 }
 
-/* $-100% + ${titleContainer.current ? titleContainer.current.offsetWidth : 310}px
-    The title container at some point is null if the bubble is initially hidden.
-*/
-
 export function PositionBubble({
     data,
     mini,
@@ -73,7 +69,8 @@ export function PositionBubble({
     mini?: boolean
 }) {
     const bubble = useRef<HTMLDivElement>(null)
-    const titleContainer = useRef<HTMLDivElement>(null)
+    const titleRef = useRef<HTMLDivElement>(null)
+    const [textboxWidth, setBoxWidth] = useState<number>(310)
 
     const Banner = () => {
         switch (data.banner) {
@@ -103,6 +100,8 @@ export function PositionBubble({
         }
     }
 
+    // Should take 1 second to scroll 50 pixels.
+
     const Titleplate = useCallback(() => {
         return (
             <motion.div
@@ -112,9 +111,10 @@ export function PositionBubble({
                 animate={{
                     translateX: [
                         0,
-                        `min(calc(-100% + ${titleContainer.current ? titleContainer.current.offsetWidth : 0}px), 0px)`,
+                        `min(calc(-100% + ${textboxWidth}px), 0px)`,
                     ],
                     transition: {
+                        delay: 0.2,
                         times: [0.2, 0.8],
                         duration: 10,
                         repeat: Infinity,
@@ -124,7 +124,7 @@ export function PositionBubble({
                 {data.title != null ? data.title.toUpperCase() : 'VOLUNTEER'}
             </motion.div>
         )
-    }, [data])
+    }, [data, textboxWidth])
 
     const Nameplate = useCallback(() => {
         let newName: string
@@ -144,24 +144,29 @@ export function PositionBubble({
                 animate={{
                     translateX: [
                         0,
-                        `min(calc(-100% + ${titleContainer.current ? titleContainer.current.offsetWidth : 0}px), 0px)`,
+                        `min(calc(-100% + ${textboxWidth}px), 0px)`,
                     ],
                     transition: {
+                        delay: 0.2,
                         times: [0.2, 0.8],
                         duration: 10,
                         repeat: Infinity,
                     },
                 }}
+                onAnimationStart={() => {
+                    setBoxWidth(
+                        titleRef.current ? titleRef.current.offsetWidth : 310
+                    )
+                }}
             >
                 {newName}
             </motion.div>
         )
-    }, [data])
+    }, [data, textboxWidth])
 
     const Tags = useCallback(() => {
         if (!data.tags) return
-        // eslint-disable-next-line prefer-const
-        let pairs: Tag[][] = []
+        const pairs: Tag[][] = []
         data.tags.forEach((tag: Tag, index: number) => {
             if (index % 2 == 0) {
                 pairs.push([tag])
@@ -188,35 +193,19 @@ export function PositionBubble({
                 })}
             </div>
         )
-        /*return (
-            <div className={styles.tagContainer}>
-                {data.tags?.map((tag) => {
-                    return (
-                        <div
-                            key={tag.name}
-                            className={styles.tag}
-                            title={tag.tooltip}
-                        >
-                            {tag.graphic}
-                        </div>
-                    )
-                })}
-            </div>
-        )*/
     }, [data])
 
     return (
         <div
             className={styles.pearlBubble}
             style={{ width: `${mini ? '290' : '360'}px` }}
-            ref={bubble}
             onClick={() => {
                 console.log(bubble.current?.offsetHeight)
             }}
         >
             <Banner />
             <div className={styles.textbox}>
-                <div className={styles.titleContainer} ref={titleContainer}>
+                <div className={styles.titleContainer} ref={titleRef}>
                     <Titleplate />
                 </div>
                 <div className={styles.nameplateContainer}>
