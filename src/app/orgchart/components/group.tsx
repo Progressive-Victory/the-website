@@ -21,6 +21,8 @@ export function GroupNode({
     sourcePosition,
     targetPosition,
 }: NodeProps<GroupNode>) {
+    const [leadsHeight, setLeadsHeight] = useState<number>(0)
+
     const GroupLeads = () => {
         let leadNumber = -1
         return data.leads?.map(RenderLead)
@@ -31,16 +33,32 @@ export function GroupNode({
     }
 
     return (
-        <div className={styles.newNodeContainer}>
+        <div
+            className={styles.nodeContainer}
+            onPointerEnter={(e) => {
+                if (e.pointerType == 'mouse') {
+                    setLeadsHeight(192)
+                }
+            }}
+            onPointerLeave={() => setLeadsHeight(0)}
+        >
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
                 className={styles.targetHandle}
             />
             <GroupBubble data={data} />
-            <div className={styles.newDropdown}>
+            <motion.div
+                className={styles.dropdown}
+                animate={{
+                    maxHeight: `${leadsHeight}px`,
+                }}
+                transition={{
+                    type: false,
+                }}
+            >
                 <GroupLeads />
-            </div>
+            </motion.div>
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}

@@ -116,13 +116,9 @@
     justify-items: center;
 }
 
-.newDropdown {
+.dropdown {
     overflow: hidden;
     max-height: 0px;
-}
-
-.newNodeContainer:hover > .newDropdown {
-    max-height: 240px;
 }
 
 .groupNameContainer {

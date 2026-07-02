@@ -68,7 +68,6 @@ export function PositionBubble({
     data: PositionData
     mini?: boolean
 }) {
-    const bubble = useRef<HTMLDivElement>(null)
     const titleRef = useRef<HTMLDivElement>(null)
     const [textboxWidth, setBoxWidth] = useState<number>(310)
 
@@ -99,8 +98,6 @@ export function PositionBubble({
                 )
         }
     }
-
-    // Should take 1 second to scroll 50 pixels.
 
     const Titleplate = useCallback(() => {
         return (
@@ -199,9 +196,6 @@ export function PositionBubble({
         <div
             className={styles.pearlBubble}
             style={{ width: `${mini ? '290' : '360'}px` }}
-            onClick={() => {
-                console.log(bubble.current?.offsetHeight)
-            }}
         >
             <Banner />
             <div className={styles.textbox}>
