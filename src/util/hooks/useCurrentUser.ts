@@ -13,11 +13,14 @@ export function useCurrentUser(): DataState {
     const { ready, onGet } = useFetch()
 
     const user = useQuery({
-        queryKey: ['/users/current'],
+        queryKey: ['/users/current?includeDonors=true'],
         queryFn: ready
             ? async () => {
                   return onGet<User>('/users/current', zUser, {
-                      query: { includeDiscordUsers: true },
+                      query: {
+                          includeDiscordUsers: true,
+                          includeDonors: true,
+                      },
                   })
               }
             : skipToken,
