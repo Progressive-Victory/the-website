@@ -38,7 +38,7 @@ export const AccountInfoForm = ({
         isEditing || Boolean(updatedUser.address.addressLine2?.trim()?.length)
 
     return (
-        <div className={styles.accountInfoBackground}>
+        <div className={styles.contentBackground}>
             <Form<User>
                 form={updatedUser}
                 title={title}

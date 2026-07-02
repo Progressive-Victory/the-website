@@ -1,6 +1,6 @@
 'use client'
 
-import InteractiveThreeCard, { safeLogError } from '../home/MemberBanner'
+import InteractiveThreeCard, { safeLogError } from '../../home/MemberBanner'
 import styles from '@/app/account/account.module.css'
 import { MembershipBulletPoints } from '@/app/home/MembershipBulletPoints'
 import { BaseButton } from '@/components/common/buttons/Button'
@@ -59,7 +59,7 @@ export function AccountMembershipSection() {
             <div className={styles.contentPanel}>
                 <div
                     ref={containerRef}
-                    className={`${styles.accountMembershipBackground} ${styles.contentRow}`}
+                    className={`${styles.contentBackground} ${styles.contentRow}`}
                 >
                     <motion.div
                         className={styles.cardColumn}
