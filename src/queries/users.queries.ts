@@ -69,12 +69,13 @@ export function useUpdatedUser({
     >({
         mutationFn: async ({ id, donorLinkRequest }) => {
             const { donorEmail: e, orderId: o } = donorLinkRequest
-            await onPut(`/users/${id}/donors/${e}/link?orderId=${o}`, null)
+            await onPut(`/users/${id}/donors/${e}/link`, null, {
+                query: { orderId: o },
+            })
 
-            const user = await onGet<User>(
-                `/users/${id}?includeDonors=true`,
-                zUser
-            )
+            const user = await onGet<User>(`/users/${id}`, zUser, {
+                query: { includeDonors: true },
+            })
             return user
         },
 
