@@ -9,8 +9,8 @@
     display: flex;
     flex-direction: column;
     width: min(1100px, calc(100% - 2rem));
-    margin: 3rem;
-    gap: 0;
+    margin: 2rem 3rem;
+    gap: 1rem;
     align-items: stretch;
 }
 
@@ -156,11 +156,148 @@
     color: #2986cc;
 }
 
-.accountInfoBackground {
+.contentBackground {
     background-color: whitesmoke;
     border-radius: 10px;
     padding-top: 1rem;
     margin: 0;
+}
+
+.contentRow {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.linkActBlueFormContainer {
+    padding: 1rem;
+
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 2rem;
+    align-items: center;
+}
+
+.linkActBlueFormInputContainer {
+    width: 100%;
+
+    display: flex;
+    gap: 2rem;
+    justify-content: space-evenly;
+    align-items: center;
+
+    & > label {
+        width: 33%;
+
+        display: flex;
+        flex-flow: column nowrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: stretch;
+    }
+}
+
+.linkActBlueFormErrorText {
+    color: #ce3728;
+    font-weight: 500;
+}
+
+.contributionsTableContainer,
+.noContributionsMessage {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: stretch;
+
+    padding: 0 1rem 1rem 1rem;
+}
+
+.contributionsTable {
+    border-collapse: separate;
+    border-spacing: 0;
+
+    & td {
+        border: 1px solid black;
+
+        text-align: center;
+    }
+
+    & tr,
+    td {
+        font-weight: 500;
+    }
+
+    & tr:first-child td:first-child {
+        border-top-left-radius: 12px;
+    }
+    & tr:first-child td:last-child {
+        border-top-right-radius: 12px;
+    }
+
+    & tr:last-child td:first-child {
+        border-bottom-left-radius: 12px;
+    }
+    & tr:last-child td:last-child {
+        border-bottom-right-radius: 12px;
+    }
+
+    & tr:first-child td {
+        border-top-style: solid;
+    }
+    & tr td:first-child {
+        border-left-style: solid;
+    }
+}
+
+.recurrenceBadge {
+    width: 100px;
+    margin: 0.15rem calc(50% - 50px);
+    padding: 0.1rem 0.4rem;
+
+    border-radius: 12px;
+
+    text-transform: uppercase;
+
+    &.one-time {
+        background-color: rgb(from slategrey r g b / 0.5);
+        border: 2px solid dimgrey;
+    }
+
+    &.monthly {
+        background-color: rgb(from #0ea5e9 r g b / 0.75);
+        border: 2px solid #0284c7;
+    }
+
+    &.weekly {
+        background-color: rgb(from #ef4444 r g b / 0.5);
+        border: 2px solid #ef4444;
+    }
+}
+
+@media (min-width: 768px) {
+    .contentRow {
+        gap: 3rem;
+    }
+}
+
+@media (min-width: 1020px) {
+    .contentRow {
+        flex-direction: row-reverse;
+    }
+}
+
+.cardColumn {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cardColumnInner {
+    width: 100%;
+    max-width: 500px;
+    padding-bottom: 1rem;
 }
 
 .formMargin {

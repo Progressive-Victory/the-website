@@ -1,4 +1,5 @@
 import { Field, SupportNote, Toggle } from '.'
+import { zLocation, Location } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useFetch, useInit } from '@/util/hooks'
 import Link from 'next/link'
@@ -149,10 +150,7 @@ export function CollectInfoStage({
                         errorText="Enter a valid date of birth"
                         maxLength={10}
                         onInput={(e) =>
-                            setForm({
-                                ...form,
-                                dateOfBirth: e.currentTarget.value,
-                            })
+                            setForm({ ...form, dateOfBirth: e.target.value })
                         }
                     />
                     <Field

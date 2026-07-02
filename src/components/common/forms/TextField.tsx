@@ -1,7 +1,7 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import cx from 'classnames'
-import { HTMLInputAutoCompleteAttribute, InputEvent, useCallback } from 'react'
+import { ChangeEvent, HTMLInputAutoCompleteAttribute, useCallback } from 'react'
 
 export interface TextFieldProps<T> extends FormFieldProps<
     T,
@@ -22,8 +22,8 @@ export function TextField<T>(props: TextFieldProps<T>) {
 
     const value = getter(props.dynamic!.form) ?? ''
 
-    const handleInput = (event: InputEvent<HTMLInputElement>) => {
-        onChange(event.currentTarget.value)
+    const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
+        onChange(event.target.value)
     }
 
     return (

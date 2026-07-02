@@ -1,12 +1,15 @@
 'use client'
 
-import { AccountInfoForm } from './AccountInfoForm'
+import {
+    AccountContributionsSection,
+    AccountDetailsSection,
+    AccountMembershipSection,
+    ManualDonorLinkRequest,
+} from './sections/index'
 import styles from '@/app/account/account.module.css'
-import { DiscordAvatar } from '@/components/common'
-import { BaseButton } from '@/components/common/buttons/Button'
+import { User } from '@/contracts/data'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
-import { User } from 'pv-contracts/data'
 import { useMemo } from 'react'
 
 export function AccountPage() {
@@ -23,10 +26,12 @@ export function AccountPage() {
         void onLogout()
     }
 
-    const updateMutation = useUpdatedUser({ loggedInUser: loggedInUser.data })
+    const { updateUser, linkUser } = useUpdatedUser({
+        loggedInUser: loggedInUser.data,
+    })
 
     const onSave = (user: User) => {
-        updateMutation.mutate({
+        updateUser.mutate({
             id: user.id,
             user,
             request: {
@@ -51,6 +56,23 @@ export function AccountPage() {
         })
     }
 
+    const onLinkFormSubmit = (
+        e: React.FormEvent,
+        user: User,
+        donorLinkForm: ManualDonorLinkRequest
+    ) => {
+        e.preventDefault()
+
+        linkUser.mutate({
+            id: user.id,
+            user,
+            donorLinkRequest: donorLinkForm,
+        })
+
+        // bubble errors to the UI for user feedback on failure
+        if (linkUser.error) return linkUser.error.message
+    }
+
     if (isSessionLoading) return null
 
     if (!session) return null
@@ -58,71 +80,21 @@ export function AccountPage() {
     return (
         <div className={styles.root}>
             <div className={styles.main}>
-                <section className={styles.content}>
-                    <header className={styles.contentHeader}>
-                        <div className={styles.headerTopRow}>
-                            <div className={styles.headerTextBlock}>
-                                <p className={styles.pageTitle}>
-                                    Account Dashboard
-                                </p>
-
-                                <p className={styles.pageSubtitle}>
-                                    View and update your personal account
-                                    information. We use this info to create and
-                                    ship membership cards.
-                                </p>
-                            </div>
-
-                            <div className={styles.headerActions}>
-                                {canAccessAdminPanel && (
-                                    <BaseButton
-                                        label="Admin Panel"
-                                        href="/admin"
-                                        className={styles.secondaryButton}
-                                    />
-                                )}
-
-                                <BaseButton
-                                    label="Sign Out"
-                                    onClick={handleSignOut}
-                                    className={styles.primaryButton}
-                                />
-                            </div>
-                        </div>
-                    </header>
-
-                    <div className={styles.contentPanel}>
-                        {loggedInUser.data && (
-                            <AccountInfoForm
-                                user={loggedInUser.data}
-                                onSave={onSave}
-                                subtitle={
-                                    loggedInUser.data.discordUsers?.[0]
-                                        ?.username
-                                        ? `@${loggedInUser.data.discordUsers[0].username}`
-                                        : undefined
-                                }
-                                avatar={
-                                    <DiscordAvatar
-                                        discordUserId={
-                                            loggedInUser.data.discordUsers?.[0]
-                                                ?.id
-                                        }
-                                        imageId={
-                                            loggedInUser.data.discordUsers?.[0]
-                                                ?.image
-                                        }
-                                        size={48}
-                                    />
-                                }
-                                title={
-                                    `${loggedInUser.data.firstName ?? ''} ${loggedInUser.data.lastName ?? ''}`.trim() ||
-                                    'Account'
-                                }
-                            />
-                        )}
-                    </div>
-                </section>
+                {loggedInUser.data && (
+                    <>
+                        <AccountDetailsSection
+                            userData={loggedInUser.data}
+                            canAccessAdminPanel={canAccessAdminPanel}
+                            handleSignOut={handleSignOut}
+                            onSave={onSave}
+                        />
+                        <AccountMembershipSection />
+                        <AccountContributionsSection
+                            userData={loggedInUser.data}
+                            onLinkFormSubmit={onLinkFormSubmit}
+                        />
+                    </>
+                )}
             </div>
         </div>
     )

@@ -1,12 +1,12 @@
 import { useFetch } from './useFetch'
+import { SearchRequest } from '@/contracts/requests'
+import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import {
     keepPreviousData,
     skipToken,
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { SearchRequest, SortDirection } from 'pv-contracts/requests'
-import { PaginatedResponse, zPaginatedResponse } from 'pv-contracts/responses'
 import { useEffect, useState } from 'react'
 import z from 'zod'
 
@@ -22,8 +22,8 @@ export function usePaginatedSearch<T>(
 
     const [search, setSearch] = useState<SearchRequest>({
         ...(options?.search ?? {}),
-        limit: options?.search?.limit ?? 25,
-        sort: options?.search?.sort ?? SortDirection.DESC,
+        limit: options?.search?.limit,
+        sort: options?.search?.sort,
     })
 
     interface Options {

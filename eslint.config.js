@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
 import nextTypescript from 'eslint-config-next/typescript'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
+import tailwind from 'eslint-plugin-tailwindcss'
 import { defineConfig } from 'eslint/config'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
@@ -20,7 +21,7 @@ export default defineConfig([
     tseslint.configs.stylisticTypeChecked,
     ...nextCoreWebVitals,
     ...nextTypescript,
-    //tailwind.configs.recommended, tailwind needs to be phased out
+    ...tailwind.configs['flat/recommended'],
     {
         languageOptions: {
             parserOptions: {

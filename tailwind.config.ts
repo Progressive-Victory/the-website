@@ -6,12 +6,12 @@ export default {
         './src/components/**/*.{js,ts,jsx,tsx,mdx}',
         './src/app/**/*.{js,ts,jsx,tsx,mdx}',
     ],
-    /*variants: {
+    variants: {
         extend: {
             padding: ['last'],
             display: ['group-hover'],
         },
-    },*/ //this is no longer supported in tail wind
+    },
     theme: {
         fontFamily: {
             sans: ['Inter', 'sans-serif'],

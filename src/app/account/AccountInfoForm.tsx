@@ -6,8 +6,8 @@ import {
     PhoneField,
     TextField,
 } from '@/components/common/forms'
+import { User } from '@/contracts/data'
 import { dateService } from '@/services'
-import { User } from 'pv-contracts/data'
 import { useState } from 'react'
 
 interface AccountInfoFormProps {
@@ -38,13 +38,13 @@ export const AccountInfoForm = ({
         isEditing || Boolean(updatedUser.address.addressLine2?.trim()?.length)
 
     return (
-        <div className={styles.accountInfoBackground}>
+        <div className={styles.contentBackground}>
             <Form<User>
                 form={updatedUser}
                 title={title}
                 subtitle={subtitle}
                 avatar={avatar}
-                onUpdate={(state) => setIsEditing(state.editing)}
+                onUpdate={(state) => setIsEditing(state.mode === 'edit')}
                 onSave={handleFormSave}
             >
                 <FormGroup title="">

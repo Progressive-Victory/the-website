@@ -2,7 +2,7 @@ import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import cx from 'classnames'
 import phone from 'phone'
-import { InputEvent, useCallback } from 'react'
+import { ChangeEvent, useCallback } from 'react'
 
 /**
  * Formats a phone number string for display in readonly mode.
@@ -49,12 +49,12 @@ export function PhoneField<T>(
         : ''
     const displayValue = storedValue.replace(/^\+1/, '').replace(/\D/g, '')
 
-    const handleInput = (event: InputEvent<HTMLInputElement>) => {
-        const input = event.currentTarget.value
+    const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
+        const input = event.target.value
         const digitsOnly = input.replace(/\D/g, '')
         const limitedDigits = digitsOnly.slice(0, 10)
 
-        event.currentTarget.value = limitedDigits
+        event.target.value = limitedDigits
         const e164Value =
             limitedDigits.length === 10 ? `+1${limitedDigits}` : limitedDigits
         onChange(e164Value)
