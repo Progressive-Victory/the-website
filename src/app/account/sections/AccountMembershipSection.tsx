@@ -28,7 +28,8 @@ export function AccountMembershipSection() {
 
     useEffect(() => {
         try {
-            if (inView) setVisible(true)
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            if (inView) setVisible(true) // 07/02/26 - not currently worth addressing
         } catch (err) {
             safeLogError(err, 'inView effect error:')
         }

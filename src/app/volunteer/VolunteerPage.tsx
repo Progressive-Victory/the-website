@@ -29,16 +29,6 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { OnboardingStage } from 'pv-contracts/data'
-import {
-    UserOnboardingCollectInfoRequest,
-    UserOnboardingVerifyRequest,
-    zUserOnboardingCollectInfoRequest,
-} from 'pv-contracts/requests'
-import {
-    DiscordUserIsInServerResponse,
-    zDiscordUserIsInServerResponse,
-} from 'pv-contracts/responses'
 import { useState } from 'react'
 import z from 'zod'
 
