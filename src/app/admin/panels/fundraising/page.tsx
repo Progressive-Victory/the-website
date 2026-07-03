@@ -24,7 +24,6 @@ import {
 } from '@/components/common'
 import { Chart } from '@/components/common/charts/DualAxisBarLineChart'
 import { type ChartGranularityMode } from '@/components/common/charts/timeBuckets'
-import { useFetch } from '@/util/hooks'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { FaDonate } from 'react-icons/fa'
@@ -74,7 +73,6 @@ export default function Page() {
     const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
     const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
 
-    const { onGet } = useFetch()
     const {
         startDate,
         endDate,
@@ -117,7 +115,7 @@ export default function Page() {
         setGranularityMode,
         applyChartViewOverrideRange,
         resetChartViewToSelectedRange,
-    } = useFundraisingDashboardController(onGet)
+    } = useFundraisingDashboardController()
 
     useEffect(() => {
         const viewportPadding = 12
