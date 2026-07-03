@@ -148,17 +148,6 @@ export function renderAdminUnselectedDetail({
                             resetPanelHistoryOnClick
                         />
                     </div>
-                    <div className={styles.unselectedGrid}>
-                        {renderUnselectedGridHeader('Developer')}
-                        <NavigationButton
-                            label="Test"
-                            description="Test panel for development and debugging."
-                            href="/admin/panels/test"
-                            icon={FaFlask}
-                            buttonType="card"
-                            resetPanelHistoryOnClick
-                        />
-                    </div>
                 </div>
             }
         />
