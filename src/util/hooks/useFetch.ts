@@ -33,7 +33,7 @@ export function useFetch() {
                 'Invalid fetch! Routes can only contain substitution keys or path identifiers'
             )
 
-        const encodedRoute = route.replaceAll(/:([\w-]+)/, (_, key) => {
+        const encodedRoute = route.replaceAll(/:([\w-]+)/g, (_, key) => {
             const value = params[key as string]
             if (value != null) return encodeURIComponent(value)
             throw new Error(
