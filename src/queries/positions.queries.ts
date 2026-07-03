@@ -1,12 +1,9 @@
-import { Position, zPosition } from '@/contracts/data'
+import { zPosition } from '@/contracts/data'
 import {
     CreatePositionRequest,
     UpdatePositionRequest,
 } from '@/contracts/requests'
-import {
-    PositionHierarchyResponse,
-    zPositionHierarchyResponse,
-} from '@/contracts/responses'
+import { zPositionHierarchyResponse } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
 
 export function usePositionQueries() {
@@ -14,16 +11,17 @@ export function usePositionQueries() {
 
     return {
         ready,
-        getPositionHierarchy: () =>
-            onGet<PositionHierarchyResponse>(
-                '/positions/hierarchy',
-                zPositionHierarchyResponse
-            ),
+        getPositionHierarchy: (options?: { signal?: AbortSignal }) =>
+            onGet('/positions/hierarchy', zPositionHierarchyResponse, {
+                signal: options?.signal,
+            }),
         createPosition: (request: CreatePositionRequest) =>
-            onPost<Position>('/positions', request, zPosition),
+            onPost('/positions', request, zPosition),
         updatePosition: (positionId: number, request: UpdatePositionRequest) =>
-            onPatch<Position>(`/positions/${positionId}`, request, zPosition),
+            onPatch('/positions/:positionId', request, zPosition, {
+                params: { positionId },
+            }),
         deletePosition: (positionId: number) =>
-            onDelete(`/positions/${positionId}`),
+            onDelete('/positions/:positionId', { params: { positionId } }),
     }
 }

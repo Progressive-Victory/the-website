@@ -1,10 +1,7 @@
-import { ActBlueDonationPacket, zActBlueDonationPacket } from '@/contracts/data'
+import { zActBlueDonationPacket } from '@/contracts/data'
 import { SortDirection } from '@/contracts/requests'
-import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
-import {
-    ActBlueFundraisingStatsResponse,
-    zActBlueFundraisingStatsResponse,
-} from '@/contracts/responses/fundraisingStatsResponse'
+import { zPaginatedResponse } from '@/contracts/responses'
+import { zActBlueFundraisingStatsResponse } from '@/contracts/responses/fundraisingStatsResponse'
 import type { QueryParams, ZodSchema } from '@/util/hooks/useFetch'
 
 interface GetOptions {
@@ -25,7 +22,7 @@ export async function getFundraisingStats(
 ) {
     const isAllTime = !startDate && !endDate
 
-    return onGet<ActBlueFundraisingStatsResponse>(
+    return onGet(
         '/actblue/fundraising/stats',
         zActBlueFundraisingStatsResponse,
         isAllTime
@@ -40,7 +37,7 @@ export async function getFundraisingStats(
 }
 
 export async function getEarliestContribution(onGet: OnGet) {
-    return onGet<PaginatedResponse<ActBlueDonationPacket>>(
+    return onGet(
         '/actblue/contributions',
         zPaginatedResponse(zActBlueDonationPacket),
         {
@@ -59,7 +56,7 @@ export async function getFundraisingBucketStats(
     bucketStartIso: string,
     bucketEndIso: string
 ) {
-    return onGet<ActBlueFundraisingStatsResponse>(
+    return onGet(
         '/actblue/fundraising/stats',
         zActBlueFundraisingStatsResponse,
         {

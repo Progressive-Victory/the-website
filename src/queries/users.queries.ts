@@ -21,7 +21,9 @@ export function useUpdatedUser({
         User | undefined
     >({
         mutationFn: async ({ id, user, request }) => {
-            const result = await onPatch<User>(`/users/${id}`, request, zUser)
+            const result = await onPatch('/users/:userId', request, zUser, {
+                params: { userId: id },
+            })
             return { ...user, ...result }
         },
 
@@ -68,15 +70,16 @@ export function useUpdatedUser({
         User | undefined
     >({
         mutationFn: async ({ id, donorLinkRequest }) => {
-            const { donorEmail: e, orderId: o } = donorLinkRequest
-            await onPut(`/users/${id}/donors/${e}/link`, null, {
-                query: { orderId: o },
+            const { donorEmail, orderId } = donorLinkRequest
+            await onPut('/users/:userId/donors/:donorEmail/link', null, null, {
+                params: { userId: id, donorEmail },
+                query: { orderId },
             })
 
-            const user = await onGet<User>(`/users/${id}`, zUser, {
+            return await onGet('/users/:userId', zUser, {
+                params: { userId: id },
                 query: { includeDonors: true },
             })
-            return user
         },
 
         // When the mutation begins, optimistically update the cache to use the new state

@@ -10,7 +10,6 @@ import { FormState } from '@/components/common/forms'
 import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ActBlueDonor,
-    Location,
     Role,
     UpdateHistory,
     User,
@@ -36,7 +35,6 @@ import {
     useMutation,
     useQuery,
     useQueryClient,
-    UseQueryResult,
 } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
@@ -71,9 +69,9 @@ export default function Page() {
         query: searchQuery,
         search,
         onSearch,
-    } = usePaginatedSearch<UserProfile>('/users', zUserProfile)
+    } = usePaginatedSearch('/users', zUserProfile)
 
-    const { query: rolesQuery } = usePaginatedSearch<Role>('/roles', zRole, {
+    const { query: rolesQuery } = usePaginatedSearch('/roles', zRole, {
         search: { limit: 50, sort: SortDirection.DESC },
         all: true,
     })
@@ -82,13 +80,7 @@ export default function Page() {
         query: donorSearchQuery,
         search: donorSearch,
         onSearch: onDonorSearch,
-    } = usePaginatedSearch<ActBlueDonor>('/actblue/donors', zActBlueDonor) as {
-        query: UseQueryResult<PaginatedResponse<ActBlueDonor>, FetchError>
-        search: ReturnType<typeof usePaginatedSearch<ActBlueDonor>>['search']
-        onSearch: ReturnType<
-            typeof usePaginatedSearch<ActBlueDonor>
-        >['onSearch']
-    }
+    } = usePaginatedSearch('/actblue/donors', zActBlueDonor)
 
     const roles = rolesQuery.data?.data ?? []
     const roleOptions = useMemo(
@@ -104,13 +96,15 @@ export default function Page() {
         queryKey: [`/users/${selectedId}`],
         queryFn:
             ready && selectedId != null
-                ? () =>
-                      onGet<User>(`/users/${selectedId}`, zUser, {
+                ? ({ signal }) =>
+                      onGet('/users/:userId', zUser, {
+                          params: { userId: selectedId },
                           query: {
                               includeDiscordUsers: true,
                               includeHistory: true,
                               includeDonors: true,
                           },
+                          signal,
                       })
                 : skipToken,
         placeholderData: keepPreviousData,
@@ -123,7 +117,9 @@ export default function Page() {
         User | undefined
     >({
         mutationFn: async ({ id, user, request }) => {
-            const result = await onPatch<User>(`/users/${id}`, request, zUser)
+            const result = await onPatch('/users/:userId', request, zUser, {
+                params: { userId: id },
+            })
             return { ...user, ...result }
         },
         onMutate: ({ id, user }) => {
@@ -196,8 +192,8 @@ export default function Page() {
         async (value: ActBlueDonor, userId: number) => {
             setPickingDonor(false)
 
-            await onPost<void>(
-                `/actblue/donors/${value.email}/link`,
+            await onPost(
+                '/actblue/donors/:donorEmail/link',
                 {
                     userId,
                     metaData: {
@@ -205,7 +201,8 @@ export default function Page() {
                         userWhoUpdatedId: loggedInUser.data?.id,
                     },
                 } satisfies ActBlueDonorLinkRequest,
-                null
+                null,
+                { params: { donorEmail: value.email } }
             )
 
             await queryClient.invalidateQueries({
@@ -216,9 +213,9 @@ export default function Page() {
     )
 
     const handleDeleteDonorItem = useCallback(
-        (value: ActBlueDonor, userId: number) => {
-            void onPost<void>(
-                `/actblue/donors/${value.email}/link`,
+        async (value: ActBlueDonor, userId: number) => {
+            await onPost(
+                '/actblue/donors/:donorEmail/link',
                 {
                     userId: null,
                     metaData: {
@@ -226,12 +223,13 @@ export default function Page() {
                         userWhoUpdatedId: loggedInUser.data?.id,
                     },
                 },
-                null
-            ).then(() =>
-                queryClient.invalidateQueries({
-                    queryKey: [`/users/${userId}`],
-                })
+                null,
+                { params: { donorEmail: value.email } }
             )
+
+            await queryClient.invalidateQueries({
+                queryKey: [`/users/${userId}`],
+            })
         },
         [onPost, queryClient, loggedInUser.data?.id]
     )
@@ -257,12 +255,12 @@ export default function Page() {
         queryKey: [`/locations/${formState?.form?.address?.zip}`],
         queryFn:
             ready && formState?.mode === 'edit' && formState.form.address?.zip
-                ? async () => {
+                ? async ({ signal }) => {
                       try {
-                          return await onGet<Location>(
-                              `/locations/${formState.form.address?.zip}`,
-                              zLocation
-                          )
+                          return await onGet('/locations/:zip', zLocation, {
+                              params: { zip: formState.form.address.zip! },
+                              signal,
+                          })
                       } catch {
                           return null
                       }
@@ -427,7 +425,9 @@ export default function Page() {
                         donorSearchQuery={donorSearchQuery}
                         onDonorSearch={onDonorSearch}
                         renderDonorItem={renderDonorItem}
-                        handleDeleteDonorItem={handleDeleteDonorItem}
+                        handleDeleteDonorItem={(value, userId) =>
+                            void handleDeleteDonorItem(value, userId)
+                        }
                     />
                 )
 
