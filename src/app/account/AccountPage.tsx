@@ -56,26 +56,17 @@ export function AccountPage() {
         })
     }
 
-    const onLinkFormSubmit = (
-        e: React.FormEvent,
-        user: User,
-        donorLinkForm: ManualDonorLinkRequest
-    ) => {
-        e.preventDefault()
+    const onLinkFormSubmit = (donorLinkForm: ManualDonorLinkRequest) => {
+        if (!loggedInUser.data) return
 
         linkUser.mutate({
-            id: user.id,
-            user,
+            id: loggedInUser.data.id,
+            user: loggedInUser.data,
             donorLinkRequest: donorLinkForm,
         })
-
-        // bubble errors to the UI for user feedback on failure
-        if (linkUser.error) return linkUser.error.message
     }
 
-    if (isSessionLoading) return null
-
-    if (!session) return null
+    if (isSessionLoading || !session) return null
 
     if (
         loggedInUser.data &&
@@ -98,8 +89,9 @@ export function AccountPage() {
                         />
                         <AccountMembershipSection />
                         <AccountContributionsSection
-                            userData={loggedInUser.data}
-                            onLinkFormSubmit={onLinkFormSubmit}
+                            user={loggedInUser.data}
+                            error={linkUser.error}
+                            onSubmit={onLinkFormSubmit}
                         />
                     </>
                 )}

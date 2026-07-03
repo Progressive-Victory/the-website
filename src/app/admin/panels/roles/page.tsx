@@ -56,10 +56,10 @@ export default function Page() {
         queryKey: [`/roles/${selectedId}`],
         queryFn:
             ready && selectedId != null
-                ? ({signal}) =>
+                ? ({ signal }) =>
                       onGet('/roles/:roleId', zRole, {
                           params: { roleId: selectedId },
-                          signal
+                          signal,
                       })
                 : skipToken,
         placeholderData: keepPreviousData,

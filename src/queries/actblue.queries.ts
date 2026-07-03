@@ -9,7 +9,7 @@ export function useActblueQueries() {
 
     return {
         ready,
-        getContributions: async (options?: {
+        getContributions: (options?: {
             search?: SearchRequest
             signal?: AbortSignal
         }) => {
@@ -20,7 +20,7 @@ export function useActblueQueries() {
                 { query: search, signal }
             )
         },
-        getFundraisingStats: async (options?: {
+        getFundraisingStats: (options?: {
             startDate?: string
             endDate?: string
             signal?: AbortSignal
