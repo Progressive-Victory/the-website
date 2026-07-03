@@ -19,5 +19,6 @@ export function useAfterEffectsSettle(
         timeoutRef.current = setTimeout(() => cbRef.current(), 0)
 
         return () => clearTimeout(timeoutRef.current)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, deps) // linter does not like deps since it is not a static array
 }
