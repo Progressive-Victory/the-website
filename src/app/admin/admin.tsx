@@ -4,7 +4,7 @@ import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import type { ReactElement } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
-import { FaClipboardUser, FaDollarSign, FaFlask } from 'react-icons/fa6'
+import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 
 function renderUnselectedGridHeader(label: string): ReactElement {
     return (
@@ -29,6 +29,7 @@ export function renderAdminUnselectedDetail({
     contributionCount,
     roleCount,
     permissionCount,
+    positionCount,
 }: {
     showWelcome?: boolean
     currentUserName?: string
@@ -40,6 +41,7 @@ export function renderAdminUnselectedDetail({
     contributionCount?: number
     roleCount?: number
     permissionCount?: number
+    positionCount?: number
 }): ReactElement {
     return (
         <Detail
@@ -93,7 +95,7 @@ export function renderAdminUnselectedDetail({
                             description="Staff and volunteer position records."
                             href="/admin/panels/positions"
                             icon={FaClipboardUser}
-                            count={0}
+                            count={positionCount}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />

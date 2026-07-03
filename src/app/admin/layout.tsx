@@ -18,15 +18,14 @@ import {
     zRole,
     zUser,
 } from '@/contracts/data'
-import { zActBlueDonor } from '@/contracts/data/ActBlueDonor'
 import { usePositionQueries } from '@/queries'
-import { useQuery } from '@tanstack/react-query'
 import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
+import { useQuery } from '@tanstack/react-query'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
-import { FaClipboardUser, FaDollarSign, FaFlask } from 'react-icons/fa6'
+import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 import type { IconType } from 'react-icons/lib'
 
 interface AdminGroupChildConfigItem {
@@ -50,7 +49,7 @@ interface AdminPanelConfigItem {
 export default function Layout({ children }: { children: ReactNode }) {
     const pathname = usePathname()
     const previousPathnameRef = useRef(pathname)
-        const positionQueries = usePositionQueries()
+    const positionQueries = usePositionQueries()
     const showWelcomeRef = useRef(
         typeof window !== 'undefined' &&
             new URLSearchParams(window.location.search).get('from') ===
@@ -70,12 +69,14 @@ export default function Layout({ children }: { children: ReactNode }) {
         zActBlueDonationPacket,
         { search: { limit: 0 } }
     )
-     const positionHierarchy = useQuery({
+    const positionHierarchy = useQuery({
         queryKey: ['positionHierarchy'],
         queryFn: positionQueries.getPositionHierarchy,
         enabled: positionQueries.ready,
     })
-    
+
+    const positionCount = positionHierarchy.data?.positions?.length
+
     const currentUser = useCurrentUser()
 
     const adminPanelConfig: AdminPanelConfigItem[] = [
@@ -114,7 +115,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             label: 'Positions',
             href: '/admin/panels/positions',
             icon: FaClipboardUser,
-            count: 0,
+            count: positionCount,
         },
         {
             key: 'roles',
@@ -246,8 +247,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                         contributionCount: contributions.query.data?.count,
                         roleCount: roles.query.data?.count,
                         permissionCount: permissions.query.data?.count,
-                        positionCount: positionHierarchy.query.data?.positions?.length,
-                        }
+                        positionCount,
                     })}
                 />
             </div>

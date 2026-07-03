@@ -36,8 +36,8 @@ export function AccountDetailsSection({
                     <div className={styles.headerActions}>
                         {canAccessAdminPanel && (
                             <BaseButton
-                                label="Admin Panel"
-                                href="/admin"
+                                label="Project Lootbox"
+                                href="/admin?from=welcome"
                                 className={styles.secondaryButton}
                             />
                         )}
