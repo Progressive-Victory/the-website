@@ -47,12 +47,12 @@ export function useFetch() {
             if (value === undefined) return
             if (!Array.isArray(value)) {
                 url.searchParams.append(key, String(value))
-            } else {
-                value.forEach((elem) => {
-                    if (elem === undefined) return
-                    url.searchParams.append(key, String(elem))
-                })
+                return
             }
+            value.forEach((elem) => {
+                if (elem === undefined) return
+                url.searchParams.append(key, String(elem))
+            })
         })
 
         const req: RequestInit = {
