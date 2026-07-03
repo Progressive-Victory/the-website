@@ -78,20 +78,14 @@ export function useAuth() {
                       credentials: 'include',
                   })
 
-                  if (!res.ok) {
-                      if (res.status == 404) return null
+                  if (res.ok) return (await res.json()) as TokenClaims
 
-                      await onLogout()
+                  if (res.status == 404) return null
 
-                      const error = (await res.json()) as ApiError
-                      throw new FetchError(
-                          error.message,
-                          res.status,
-                          error.error
-                      )
-                  }
+                  await onLogout()
 
-                  return (await res.json()) as TokenClaims
+                  const error = (await res.json()) as ApiError
+                  throw new FetchError(error.message, res.status, error.error)
               }
             : skipToken,
     })
@@ -119,7 +113,7 @@ export function useAuth() {
                           return true
                       }
 
-                      //await onLogout()
+                      await onLogout()
                       return false
                   }
                 : skipToken,
