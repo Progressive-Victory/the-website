@@ -1,5 +1,5 @@
 import { Field, SupportNote, Toggle } from '.'
-import { zLocation, Location } from '@/contracts/data'
+import { zLocation } from '@/contracts/data'
 import { dateService } from '@/services'
 import { useFetch, useInit } from '@/util/hooks'
 import Link from 'next/link'
@@ -67,9 +67,11 @@ export function CollectInfoStage({
     }
 
     const checkZip = useCallback(
-        async (code: string): Promise<boolean> => {
+        async (code: string) => {
             try {
-                await onGet<Location>(`/locations/${code}`, zLocation)
+                await onGet('/locations/:zip', zLocation, {
+                    params: { zip: code },
+                })
                 return true
             } catch {
                 return false
@@ -91,6 +93,7 @@ export function CollectInfoStage({
         dateOfBirthIsValid &&
         zipCodeIsValid &&
         parsedPhone.isValid &&
+        form.usCitizen &&
         form.privacyPolicy &&
         form.oneTimePasscode
 
@@ -197,10 +200,18 @@ export function CollectInfoStage({
                 <Toggle
                     name="us-citizen"
                     value={form.usCitizen}
-                    placeholder="I am a resident (or citizen living abroad) of the United States of America"
+                    placeholder={
+                        <span>
+                            <span className="text-red-500">*</span> I swear that
+                            I am a resident (or citizen living abroad) of the
+                            United States of America
+                        </span>
+                    }
+                    tooltip="Only US residents or citizens may participate in Progressive Victory"
                     onChange={() => {
                         setForm({ ...form, usCitizen: !form.usCitizen })
                     }}
+                    required
                 />
                 <Toggle
                     name="accept-privacy"

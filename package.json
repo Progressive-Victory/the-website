@@ -9,8 +9,8 @@
         "build": "next build",
         "postbuild": "next-sitemap",
         "start": "next start",
-        "lint": "next lint --fix",
-        "lint-ci": "next lint --max-warnings 0",
+        "lint": "eslint --fix .",
+        "lint-ci": "eslint --max-warnings 0 .",
         "test": "vitest",
         "prettier": "prettier --write --ignore-path .prettierignore .",
         "prettier-ci": "prettier --check --ignore-path .prettierignore ."
@@ -46,7 +46,6 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
-        "@eslint/eslintrc": "^3.3.3",
         "@eslint/js": "^9.39.2",
         "@next/eslint-plugin-next": "^15.5.9",
         "@playwright/test": "^1.60.0",
@@ -65,7 +64,7 @@
         "@types/react-dom": "^19.2.3",
         "@vitejs/plugin-react": "^4.7.0",
         "eslint": "^9.39.2",
-        "eslint-config-next": "^15.5.9",
+        "eslint-config-next": "^16.2.9",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^5.2.0",

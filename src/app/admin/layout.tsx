@@ -13,11 +13,14 @@ import {
 import { Header } from '@/components/layout/Header'
 import {
     zActBlueDonationPacket,
+    zActBlueDonor,
     zPermission,
     zRole,
     zUser,
 } from '@/contracts/data'
 import { zActBlueDonor } from '@/contracts/data/ActBlueDonor'
+import { usePositionQueries } from '@/queries'
+import { useQuery } from '@tanstack/react-query'
 import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
@@ -47,6 +50,7 @@ interface AdminPanelConfigItem {
 export default function Layout({ children }: { children: ReactNode }) {
     const pathname = usePathname()
     const previousPathnameRef = useRef(pathname)
+        const positionQueries = usePositionQueries()
     const showWelcomeRef = useRef(
         typeof window !== 'undefined' &&
             new URLSearchParams(window.location.search).get('from') ===
@@ -66,6 +70,12 @@ export default function Layout({ children }: { children: ReactNode }) {
         zActBlueDonationPacket,
         { search: { limit: 0 } }
     )
+     const positionHierarchy = useQuery({
+        queryKey: ['positionHierarchy'],
+        queryFn: positionQueries.getPositionHierarchy,
+        enabled: positionQueries.ready,
+    })
+    
     const currentUser = useCurrentUser()
 
     const adminPanelConfig: AdminPanelConfigItem[] = [
@@ -236,6 +246,8 @@ export default function Layout({ children }: { children: ReactNode }) {
                         contributionCount: contributions.query.data?.count,
                         roleCount: roles.query.data?.count,
                         permissionCount: permissions.query.data?.count,
+                        positionCount: positionHierarchy.query.data?.positions?.length,
+                        }
                     })}
                 />
             </div>

@@ -27,6 +27,7 @@ import { type ChartGranularityMode } from '@/components/common/charts/timeBucket
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import Panel from '@/components/common/panel/Panel'
 import { useFetch } from '@/util/hooks'
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { FaDonate } from 'react-icons/fa'
 import { FaDollarSign } from 'react-icons/fa6'
@@ -41,7 +42,6 @@ export default function Page() {
     const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
     const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
 
-    const { onGet } = useFetch()
     const {
         startDate,
         endDate,
@@ -84,7 +84,7 @@ export default function Page() {
         setGranularityMode,
         applyChartViewOverrideRange,
         resetChartViewToSelectedRange,
-    } = useFundraisingDashboardController(onGet)
+    } = useFundraisingDashboardController()
 
     useEffect(() => {
         const viewportPadding = 12

@@ -11,7 +11,7 @@ import {
 } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
-import { Permission, Role, zPermission, zRole } from '@/contracts/data'
+import { Role, zPermission, zRole } from '@/contracts/data'
 import { SortDirection, UpdateRoleRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
@@ -39,9 +39,9 @@ export default function Page() {
         query: searchQuery,
         search,
         onSearch,
-    } = usePaginatedSearch<Role>('/roles', zRole)
+    } = usePaginatedSearch('/roles', zRole)
 
-    const { query: permissionsQuery } = usePaginatedSearch<Permission>(
+    const { query: permissionsQuery } = usePaginatedSearch(
         '/permissions',
         zPermission,
         { search: { limit: 50, sort: SortDirection.DESC }, all: true }
@@ -61,7 +61,11 @@ export default function Page() {
         queryKey: [`/roles/${selectedId}`],
         queryFn:
             ready && selectedId != null
-                ? () => onGet<Role>(`/roles/${selectedId}`, zRole)
+                ? ({ signal }) =>
+                      onGet('/roles/:roleId', zRole, {
+                          params: { roleId: selectedId },
+                          signal,
+                      })
                 : skipToken,
         placeholderData: keepPreviousData,
     })
@@ -73,7 +77,9 @@ export default function Page() {
         Role | undefined
     >({
         mutationFn: ({ id, request }) =>
-            onPatch<Role>(`/roles/${id}`, request, zRole),
+            onPatch('/roles/:roleId', request, zRole, {
+                params: { roleId: id },
+            }),
         // When the mutation begins, optimistically update the cache to use the new state
         onMutate: ({ id, role }) => {
             const prev: Role | undefined = queryClient.getQueryData([
