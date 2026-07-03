@@ -5,8 +5,10 @@ import {
     FormGroup,
     PhoneField,
     TextField,
+    DropDownField,
 } from '@/components/common/forms'
 import { User } from '@/contracts/data'
+import { stateOptions } from '@/models'
 import { dateService } from '@/services'
 import { useState } from 'react'
 
@@ -140,19 +142,17 @@ export const AccountInfoForm = ({
                             },
                         })}
                     />
-                    <TextField<User>
+                    <DropDownField<User>
                         label="State"
                         getter={(user) => user.address.state}
                         setter={(user, field) => ({
                             ...user,
                             address: {
                                 ...user.address,
-                                state:
-                                    field?.trim()?.toUpperCase()?.slice(0, 2) ??
-                                    null,
+                                state: (field as string) ?? null,
                             },
                         })}
-                        validator={(field) => field?.length == 2}
+                        options={stateOptions}
                     />
                 </FormGroup>
             </Form>

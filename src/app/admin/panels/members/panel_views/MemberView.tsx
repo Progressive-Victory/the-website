@@ -12,6 +12,7 @@ import {
     TextField,
 } from '@/components/common/forms'
 import { Role, UpdateHistory, User } from '@/contracts/data'
+import { stateOptions } from '@/models'
 import { dateService } from '@/services'
 
 const membershipCardShipmentOptions = [
@@ -162,8 +163,8 @@ export function MemberView({
                         readonly
                     />
                 )}
-                {/* 6/25/36 - There is no way to merge this conditional in with the above trinary. 
-                    The obvious solution (fragment) causes the page to break for unknowable reasons. 
+                {/* 6/25/36 - There is no way to merge this conditional in with the above trinary.
+                    The obvious solution (fragment) causes the page to break for unknowable reasons.
                     Check website PR #493 to see details of how each solution breaks */}
                 {editing && <TextField label="Last Name" field="lastName" />}
                 <DateField<User>
@@ -243,19 +244,17 @@ export function MemberView({
                         },
                     })}
                 />
-                <TextField<User>
+                <DropDownField<User>
                     label="State"
-                    getter={(form) => form.address.state}
-                    setter={(form, field) => ({
-                        ...form,
+                    getter={(user) => user.address.state}
+                    setter={(user, field) => ({
+                        ...user,
                         address: {
-                            ...form.address,
-                            state:
-                                field?.trim()?.toUpperCase()?.slice(0, 2) ??
-                                null,
+                            ...user.address,
+                            state: (field as string) ?? null,
                         },
                     })}
-                    validator={(field) => !field?.length || field?.length == 2}
+                    options={stateOptions}
                 />
                 <TextField<User>
                     label="Zip Code"
