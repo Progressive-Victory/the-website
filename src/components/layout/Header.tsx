@@ -9,7 +9,7 @@ import { LoginButton } from '@/components/common/buttons/button_types/LoginButto
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
-import { DiscordUser, TokenClaims, zDiscordUser } from '@/contracts/data'
+import { TokenClaims, zDiscordUser } from '@/contracts/data'
 import { useAuth, useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
@@ -620,12 +620,12 @@ export function Header() {
         queryKey: [`/discordUsers/${session?.userId}`],
         queryFn:
             session?.discordUserId != null && ready
-                ? async () => {
-                      return await onGet<DiscordUser[]>(
-                          `/discordUsers/${session?.userId}`,
-                          z.array(zDiscordUser)
+                ? ({ signal }) =>
+                      onGet(
+                          '/discordUsers/:discordUserId',
+                          z.array(zDiscordUser),
+                          { params: { discordUserId: session?.userId }, signal }
                       )
-                  }
                 : skipToken,
     })
 

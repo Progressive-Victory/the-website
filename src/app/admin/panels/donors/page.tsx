@@ -43,17 +43,17 @@ export default function Page() {
         query: searchQuery,
         search,
         onSearch,
-    } = usePaginatedSearch<ActBlueDonor>('/actblue/donors', zActBlueDonor)
+    } = usePaginatedSearch('/actblue/donors', zActBlueDonor)
 
     const donorQuery = useQuery({
         queryKey: [`/actblue/donors/${selectedEmail}`],
         queryFn:
             ready && selectedEmail != null
-                ? async () =>
-                      onGet<ActBlueDonor>(
-                          `/actblue/donors/${selectedEmail}`,
-                          zActBlueDonor
-                      )
+                ? ({ signal }) =>
+                      onGet('/actblue/donors/:donorEmail', zActBlueDonor, {
+                          params: { donorEmail: selectedEmail },
+                          signal,
+                      })
                 : skipToken,
         placeholderData: keepPreviousData,
     })
