@@ -51,7 +51,7 @@ export function AccountPage() {
                     state: user.address.state,
                     zip: user.address.zip,
                 },
-                    shirtSize: user.shirtSize,
+                shirtSize: user.shirtSize,
             },
         })
     }
