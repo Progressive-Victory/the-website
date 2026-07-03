@@ -89,7 +89,7 @@ export function useFetch() {
             res.status === 204 ? undefined : ((await res.json()) as unknown)
 
         const parsed = z.parse(schema ?? z.undefined(), content)
-        return parsed as S extends null ? void : S
+        return parsed as S extends null ? void : z.infer<S>
     }
 
     async function onGet<S extends ZodSchema>(
