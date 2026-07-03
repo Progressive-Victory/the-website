@@ -17,7 +17,7 @@ interface QueryOptions {
 }
 
 export function useFetch() {
-    const { apiBaseUrl, session, onRefresh } = useAuth()
+    const { apiBaseUrl, session, onRefresh, onLogout } = useAuth()
 
     async function onFetch<S extends ZodSchema | null>(
         method: HttpMethod,
@@ -78,6 +78,10 @@ export function useFetch() {
         if (session && res.status === 401) {
             await onRefresh()
             res = await fetch(url, req)
+        }
+
+        if (session && res.status === 401) {
+            await onLogout()
         }
 
         if (!res.ok) {

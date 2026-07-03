@@ -8,9 +8,15 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { useRef } from 'react'
 
 export function useAuth() {
     const queryClient = useQueryClient()
+
+    // Prevents refreshing on the first render so we don't hit refresh race
+    // conditions as often. They can still happen, but they'll be much less
+    // common.
+    const shouldRefresh = useRef(false)
 
     const settingsQuery = useQuery({
         queryKey: ['/api/settings'],
@@ -31,17 +37,17 @@ export function useAuth() {
         async mutationFn({ redirect }) {
             if (!apiBaseUrl) return
 
-            const redirectUri = redirect
-                ? `${window.location.origin}/${redirect}`
-                : encodeURIComponent(window.location.toString())
-            const errorUri = `${window.location.origin}/login`
-
-            const res = await fetch(
-                new URL(
-                    `/auth/discord/login?redirectUri=${redirectUri}&errorUri=${errorUri}`,
-                    apiBaseUrl
-                )
+            const url = new URL('/auth/discord/login', apiBaseUrl)
+            url.searchParams.append(
+                'redirectUri',
+                `${window.location.origin}${redirect ?? '/account'}`
             )
+            url.searchParams.append(
+                'errorUri',
+                `${window.location.origin}/login`
+            )
+
+            const res = await fetch(url)
 
             if (!res.ok) throw new Error('Failed to get login url from the API')
 
@@ -98,6 +104,11 @@ export function useAuth() {
         queryFn:
             apiBaseUrl && session
                 ? async () => {
+                      if (!shouldRefresh.current) {
+                          shouldRefresh.current = true
+                          return true
+                      }
+
                       const res = await fetch(
                           new URL('/auth/refresh', apiBaseUrl),
                           {
@@ -118,6 +129,9 @@ export function useAuth() {
                   }
                 : skipToken,
         refetchInterval: 5 * 60 * 1000,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
     })
 
     const onRefresh = refreshQuery.refetch

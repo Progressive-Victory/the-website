@@ -67,11 +67,9 @@ export default function VolunteerPage() {
                 { params: { userId: user.data?.id } }
             )
         },
-        onSettled: () => {
+        onSettled: async () => {
             setOverrideStage(null)
-            return queryClient.invalidateQueries({
-                queryKey: ['/users/current'],
-            })
+            await user.onInvalidate()
         },
     })
 
@@ -82,11 +80,9 @@ export default function VolunteerPage() {
                 params: { userId: user.data?.id },
             })
         },
-        onSettled: () => {
+        onSettled: async () => {
             setOverrideStage(null)
-            return queryClient.invalidateQueries({
-                queryKey: ['/users/current'],
-            })
+            await user.onInvalidate()
         },
     })
 
@@ -100,11 +96,9 @@ export default function VolunteerPage() {
                 { params: { userId: user.data?.id } }
             )
         },
-        onSettled: () => {
+        onSettled: async () => {
             setOverrideStage(null)
-            return queryClient.invalidateQueries({
-                queryKey: ['/users/current'],
-            })
+            await user.onInvalidate()
         },
     })
 
@@ -115,10 +109,10 @@ export default function VolunteerPage() {
                 params: { userId: user.data?.id },
             })
         },
-        onSettled: () => {
+        onSettled: async () => {
             setOverrideStage(null)
-            return Promise.all([
-                queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
+            await Promise.all([
+                user.onInvalidate(),
                 queryClient.invalidateQueries({
                     queryKey: [`/discordUsers/${discordUserId}/isInServer`],
                 }),
@@ -133,8 +127,9 @@ export default function VolunteerPage() {
                 params: { userId: user.data?.id },
             })
         },
-        onSettled: () =>
-            queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
+        onSettled: async () => {
+            await user.onInvalidate()
+        },
     })
 
     const handleCollectInfoSuccess = (form: IOnboardingForm) => {

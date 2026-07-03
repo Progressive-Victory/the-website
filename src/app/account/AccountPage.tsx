@@ -7,7 +7,7 @@ import {
     ManualDonorLinkRequest,
 } from './sections/index'
 import styles from '@/app/account/account.module.css'
-import { User } from '@/contracts/data'
+import { OnboardingStage, User } from '@/contracts/data'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
 import { useMemo } from 'react'
@@ -76,6 +76,14 @@ export function AccountPage() {
     if (isSessionLoading) return null
 
     if (!session) return null
+
+    if (
+        loggedInUser.data &&
+        loggedInUser.data.onboardingStage != OnboardingStage.JOINED
+    ) {
+        window.location.href = '/volunteer'
+        return null
+    }
 
     return (
         <div className={styles.root}>

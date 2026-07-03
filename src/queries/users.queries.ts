@@ -85,47 +85,34 @@ export function useUpdatedUser({
         // When the mutation begins, optimistically update the cache to use the new state
         onMutate: ({ id, user }) => {
             const prev: User | undefined = queryClient.getQueryData([
-                `/users/${id}?includeDonors=true`,
+                `/users/${id}`,
             ])
-            queryClient.setQueryData([`/users/${id}?includeDonors=true`], user)
+            queryClient.setQueryData([`/users/${id}`], user)
             if (id == loggedInUser?.id)
-                queryClient.setQueryData(
-                    ['/users/current?includeDonors=true'],
-                    user
-                )
+                queryClient.setQueryData(['/users/current'], user)
             return prev
         },
 
         // If an error occurs, rollback to the previous state
         onError: (error, { id }, prev) => {
             console.error(error)
-            queryClient.setQueryData([`/users/${id}?includeDonors=true`], prev)
+            queryClient.setQueryData([`/users/${id}`], prev)
             if (id == loggedInUser?.id)
-                queryClient.setQueryData(
-                    ['/users/current?includeDonors=true'],
-                    prev
-                )
+                queryClient.setQueryData(['/users/current'], prev)
         },
 
         // On success, update the cache to the returned value in case there are any discrepancies
         onSuccess: (data, { id }) => {
-            queryClient.setQueryData([`/users/${id}?includeDonors=true`], data)
+            queryClient.setQueryData([`/users/${id}`], data)
             if (id == loggedInUser?.id)
-                queryClient.setQueryData(
-                    ['/users/current?includeDonors=true'],
-                    data
-                )
+                queryClient.setQueryData(['/users/current'], data)
         },
 
         // After either success or failure, invalidate the caches to refresh from the server
         onSettled: (_data, _error, { id }) =>
             Promise.all([
-                queryClient.invalidateQueries({
-                    queryKey: ['/users/current?includeDonors=true'],
-                }),
-                queryClient.invalidateQueries({
-                    queryKey: [`/users/${id}?includeDonors=true`],
-                }),
+                queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
+                queryClient.invalidateQueries({ queryKey: [`/users/${id}`] }),
             ]),
     })
 
