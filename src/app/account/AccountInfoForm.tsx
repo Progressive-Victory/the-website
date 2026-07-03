@@ -7,10 +7,10 @@ import {
     TextField,
     DropDownField,
 } from '@/components/common/forms'
-import { User } from '@/contracts/data'
+import { ShirtSize, User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface AccountInfoFormProps {
     user: User
@@ -18,7 +18,36 @@ interface AccountInfoFormProps {
     subtitle?: string
     avatar?: React.ReactNode
     title?: string
+    hasMatchedDonor?: boolean
+    showShirtSize?: boolean
 }
+
+const shirtSizeOptions = [
+    { value: '', label: 'No shirt size selected' },
+    { value: ShirtSize.ExtraSmall, label: 'Extra Small' },
+    { value: ShirtSize.Small, label: 'Small' },
+    { value: ShirtSize.Medium, label: 'Medium' },
+    { value: ShirtSize.Large, label: 'Large' },
+    { value: ShirtSize.ExtraLarge, label: 'Extra Large' },
+    { value: ShirtSize.DoubleExtraLarge, label: 'Double XL' },
+]
+
+const shirtSizeLabels: Record<ShirtSize, string> = {
+    [ShirtSize.ExtraSmall]: 'Extra Small',
+    [ShirtSize.Small]: 'Small',
+    [ShirtSize.Medium]: 'Medium',
+    [ShirtSize.Large]: 'Large',
+    [ShirtSize.ExtraLarge]: 'Extra Large',
+    [ShirtSize.DoubleExtraLarge]: 'Double XL',
+}
+
+const missingAddressInfoText = '*Info needed to ship card'
+const missingShirtSizeInfoText =
+    '*Info needed to ship Inner Circle merch bundle'
+const stateOptionsWithEmpty = [
+    { value: '', label: 'No state selected' },
+    ...stateOptions,
+]
 
 export const AccountInfoForm = ({
     user,
@@ -26,9 +55,15 @@ export const AccountInfoForm = ({
     subtitle,
     avatar,
     title = 'Account Information',
+    hasMatchedDonor = false,
+    showShirtSize = false,
 }: AccountInfoFormProps) => {
     const [updatedUser, setUpdatedUser] = useState<User>(user)
     const [isEditing, setIsEditing] = useState(false)
+
+    useEffect(() => {
+        setUpdatedUser(user)
+    }, [user])
 
     const handleFormSave = (user: User) => {
         setUpdatedUser(user)
@@ -38,6 +73,19 @@ export const AccountInfoForm = ({
 
     const showAddressLine2 =
         isEditing || Boolean(updatedUser.address.addressLine2?.trim()?.length)
+
+    const hasAddressForShipping = (user: User) =>
+        Boolean(
+            user.address.addressLine1?.trim() &&
+            user.address.city?.trim() &&
+            user.address.state?.trim() &&
+            user.address.zip?.trim()
+        )
+
+    const normalizeText = (value?: string | null) => {
+        const trimmed = value?.trim() ?? ''
+        return trimmed.length ? trimmed : null
+    }
 
     return (
         <div className={styles.contentBackground}>
@@ -87,17 +135,68 @@ export const AccountInfoForm = ({
                             dateStyle: 'medium',
                         }}
                     />
-                    <TextField<User>
-                        label={showAddressLine2 ? 'Address Line 1' : 'Address'}
-                        getter={(user) => user.address.addressLine1}
-                        setter={(user, field) => ({
-                            ...user,
-                            address: {
-                                ...user.address,
-                                addressLine1: field?.slice(0, 100) ?? null,
-                            },
-                        })}
-                    />
+                    {hasMatchedDonor &&
+                        showShirtSize &&
+                        (isEditing ? (
+                            <DropDownField<User>
+                                label="Shirt Size"
+                                getter={(user) => user.shirtSize ?? ''}
+                                setter={(user, field) => ({
+                                    ...user,
+                                    shirtSize: field
+                                        ? (field as ShirtSize)
+                                        : null,
+                                })}
+                                options={shirtSizeOptions}
+                            />
+                        ) : updatedUser.shirtSize ? (
+                            <TextField<User>
+                                label="Shirt Size"
+                                getter={(user) =>
+                                    user.shirtSize
+                                        ? shirtSizeLabels[user.shirtSize]
+                                        : null
+                                }
+                                readonly
+                            />
+                        ) : (
+                            <TextField<User>
+                                label="Shirt Size"
+                                getter={() => missingShirtSizeInfoText}
+                                readonly
+                                readonlyClassName={
+                                    styles.shippingInfoWarningText
+                                }
+                            />
+                        ))}
+                    {hasMatchedDonor &&
+                    !isEditing &&
+                    !hasAddressForShipping(updatedUser) ? (
+                        <TextField<User>
+                            label={
+                                showAddressLine2 ? 'Address Line 1' : 'Address'
+                            }
+                            getter={() => missingAddressInfoText}
+                            readonly
+                            readonlyClassName={styles.shippingInfoWarningText}
+                        />
+                    ) : (
+                        <TextField<User>
+                            label={
+                                showAddressLine2 ? 'Address Line 1' : 'Address'
+                            }
+                            getter={(user) => user.address.addressLine1}
+                            setter={(user, field) => ({
+                                ...user,
+                                address: {
+                                    ...user.address,
+                                    addressLine1:
+                                        normalizeText(field)?.slice(0, 100) ??
+                                        null,
+                                },
+                            })}
+                        />
+                    )}
                     {showAddressLine2 && (
                         <TextField<User>
                             label="Address Line 2"
@@ -106,7 +205,9 @@ export const AccountInfoForm = ({
                                 ...user,
                                 address: {
                                     ...user.address,
-                                    addressLine2: field?.slice(0, 100) ?? null,
+                                    addressLine2:
+                                        normalizeText(field)?.slice(0, 100) ??
+                                        null,
                                 },
                             })}
                         />
@@ -122,14 +223,17 @@ export const AccountInfoForm = ({
                             ...user,
                             address: {
                                 ...user.address,
-                                zip:
-                                    field
-                                        ?.replace(/[^\d]/, '')
-                                        ?.padStart(5, '0')
-                                        ?.slice(-5) ?? null,
+                                zip: field?.trim().length
+                                    ? field
+                                          .replace(/[^\d]/g, '')
+                                          .padStart(5, '0')
+                                          .slice(-5)
+                                    : null,
                             },
                         })}
-                        validator={(field) => field?.length == 5}
+                        validator={(field) =>
+                            !field?.length || field?.length == 5
+                        }
                     />
                     <TextField<User>
                         label="City"
@@ -138,7 +242,8 @@ export const AccountInfoForm = ({
                             ...user,
                             address: {
                                 ...user.address,
-                                city: field?.slice(0, 50) ?? null,
+                                city:
+                                    normalizeText(field)?.slice(0, 50) ?? null,
                             },
                         })}
                     />
@@ -149,10 +254,10 @@ export const AccountInfoForm = ({
                             ...user,
                             address: {
                                 ...user.address,
-                                state: (field as string) ?? null,
+                                state: (field as string) || null,
                             },
                         })}
-                        options={stateOptions}
+                        options={stateOptionsWithEmpty}
                     />
                 </FormGroup>
             </Form>
