@@ -2,12 +2,17 @@
 
 import InteractiveThreeCard from '../../home/MemberBanner'
 import { AccountInfoForm } from '../AccountInfoForm'
+import { AddressConfirmationModal } from './AddressConfirmationModal'
 import styles from '@/app/account/account.module.css'
 import { DiscordAvatar } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
 import formStyles from '@/components/common/forms/Form.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
 import { MembershipDeliverableStatus, User } from '@/contracts/data'
+import { zDiscordUserIsInServerResponse } from '@/contracts/responses'
+import { useFetch } from '@/util/hooks'
+import { skipToken, useQuery } from '@tanstack/react-query'
+import cx from 'classnames'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { IoClose } from 'react-icons/io5'
 
@@ -31,6 +36,27 @@ export function AccountDetailsSection({
     donorLinkError,
     onDonorLinkSubmit,
 }: AccountDetailsSectionProps) {
+    const { ready, onGet } = useFetch()
+    const [updatedUser, setUpdatedUser] = useState(userData)
+    const discordUserId = userData.discordUsers?.[0]?.id ?? null
+
+    const isInServerResult = useQuery({
+        queryKey: [`/discordUsers/${discordUserId}/isInServer`],
+        queryFn:
+            ready && discordUserId != null
+                ? ({ signal }) =>
+                      onGet(
+                          '/discordUsers/:discordUserId/isInServer',
+                          zDiscordUserIsInServerResponse,
+                          { params: { discordUserId }, signal }
+                      )
+                : skipToken,
+    })
+
+    useEffect(() => {
+        setUpdatedUser(userData)
+    }, [userData])
+
     const membershipDeliverableLabels: Record<
         MembershipDeliverableStatus,
         string
@@ -186,6 +212,56 @@ export function AccountDetailsSection({
         onDonorLinkSubmit(donorLinkForm)
     }
 
+    const renderDonorLinkForm = () => {
+        return (
+            <form
+                className={cx(
+                    styles.linkActBlueFormContainer,
+                    styles.detailsLinkForm
+                )}
+                onSubmit={submitLinkForm}
+            >
+                <div
+                    className={cx(
+                        styles.linkActBlueFormInputContainer,
+                        styles.detailsLinkFormInputs
+                    )}
+                >
+                    <label>
+                        <span className={formFieldStyles.fieldLabel}>
+                            Email Address
+                        </span>
+                        <input
+                            className={formFieldStyles.textField}
+                            value={donorLinkForm.donorEmail}
+                            onChange={handleChangeDonorEmail}
+                        />
+                    </label>
+                    <label>
+                        <span className={formFieldStyles.fieldLabel}>
+                            ActBlue Order Number
+                        </span>
+                        <input
+                            className={formFieldStyles.textField}
+                            value={donorLinkForm.orderId}
+                            onChange={handleChangeOrderId}
+                        />
+                    </label>
+                </div>
+                {donorLinkError && (
+                    <span className={styles.linkActBlueFormErrorText}>
+                        {donorLinkError.message}
+                    </span>
+                )}
+                <div className={styles.detailsLinkSubmitRow}>
+                    <button type="submit" className={formStyles.button}>
+                        Link
+                    </button>
+                </div>
+            </form>
+        )
+    }
+
     const updateAddressDraft = (
         field: 'addressLine1' | 'addressLine2' | 'city' | 'state' | 'zip',
         value: string
@@ -250,13 +326,13 @@ export function AccountDetailsSection({
                                 href="/admin"
                                 className={styles.secondaryButton}
                             />
-                        ) : (
+                        ) : isInServerResult.data?.isInServer === false ? (
                             <BaseButton
                                 label="Join Community"
                                 href="/volunteer"
                                 className={styles.secondaryButton}
                             />
-                        )}
+                        ) : null}
 
                         <BaseButton
                             label="Sign Out"
@@ -269,17 +345,23 @@ export function AccountDetailsSection({
 
             <div className={styles.contentPanel}>
                 <div
-                    className={`${styles.contentRow} ${styles.detailsContentRow}`}
+                    className={cx(styles.contentRow, styles.detailsContentRow)}
                 >
                     <div
-                        className={`${styles.contentBackground} ${styles.detailsCardPanel} ${
-                            !userHasDonor && showDonorLinkForm
-                                ? styles.detailsCardPanelLockedHeight
-                                : ''
-                        }`}
+                        className={cx(
+                            styles.contentBackground,
+                            styles.detailsCardPanel,
+                            !userHasDonor &&
+                                showDonorLinkForm &&
+                                styles.detailsCardPanelLockedHeight
+                        )}
                     >
                         <div
-                            className={`${styles.cardColumn} ${styles.detailsCardColumn} ${styles.detailsCardMobileLast}`}
+                            className={cx(
+                                styles.cardColumn,
+                                styles.detailsCardColumn,
+                                styles.detailsCardMobileLast
+                            )}
                         >
                             {!userHasDonor && showDonorLinkForm ? (
                                 <>
@@ -322,76 +404,7 @@ export function AccountDetailsSection({
                                             <IoClose size={20} />
                                         </button>
                                     </div>
-                                    <form
-                                        className={`${styles.linkActBlueFormContainer} ${styles.detailsLinkForm}`}
-                                        onSubmit={submitLinkForm}
-                                    >
-                                        <div
-                                            className={`${styles.linkActBlueFormInputContainer} ${styles.detailsLinkFormInputs}`}
-                                        >
-                                            <label>
-                                                <span
-                                                    className={
-                                                        formFieldStyles.fieldLabel
-                                                    }
-                                                >
-                                                    Email Address
-                                                </span>
-                                                <input
-                                                    className={
-                                                        formFieldStyles.textField
-                                                    }
-                                                    value={
-                                                        donorLinkForm.donorEmail
-                                                    }
-                                                    onChange={
-                                                        handleChangeDonorEmail
-                                                    }
-                                                />
-                                            </label>
-                                            <label>
-                                                <span
-                                                    className={
-                                                        formFieldStyles.fieldLabel
-                                                    }
-                                                >
-                                                    ActBlue Order Number
-                                                </span>
-                                                <input
-                                                    className={
-                                                        formFieldStyles.textField
-                                                    }
-                                                    value={
-                                                        donorLinkForm.orderId
-                                                    }
-                                                    onChange={
-                                                        handleChangeOrderId
-                                                    }
-                                                />
-                                            </label>
-                                        </div>
-                                        {donorLinkError && (
-                                            <span
-                                                className={
-                                                    styles.linkActBlueFormErrorText
-                                                }
-                                            >
-                                                {donorLinkError.message}
-                                            </span>
-                                        )}
-                                        <div
-                                            className={
-                                                styles.detailsLinkSubmitRow
-                                            }
-                                        >
-                                            <button
-                                                type="submit"
-                                                className={formStyles.button}
-                                            >
-                                                Link
-                                            </button>
-                                        </div>
-                                    </form>
+                                    {renderDonorLinkForm()}
                                 </>
                             ) : (
                                 <>
@@ -535,7 +548,10 @@ export function AccountDetailsSection({
                                     )}
                                     {!userHasDonor && (
                                         <div
-                                            className={`${styles.detailsMembershipCta} ${styles.detailsConnectCta}`}
+                                            className={cx(
+                                                styles.detailsMembershipCta,
+                                                styles.detailsConnectCta
+                                            )}
                                         >
                                             <div
                                                 className={
@@ -564,7 +580,10 @@ export function AccountDetailsSection({
                                                 onClick={() =>
                                                     setShowDonorLinkForm(true)
                                                 }
-                                                className={`${styles.secondaryButton} ${styles.buttonHover}`}
+                                                className={cx(
+                                                    styles.secondaryButton,
+                                                    styles.buttonHover
+                                                )}
                                             />
                                         </div>
                                     )}
@@ -575,28 +594,31 @@ export function AccountDetailsSection({
 
                     <div className={styles.detailsFormPanel}>
                         <AccountInfoForm
-                            user={userData}
+                            user={updatedUser}
                             onSave={onSave}
+                            onUpdateUser={setUpdatedUser}
                             hasMatchedDonor={userHasDonor}
                             showShirtSize={
                                 hasRecurringPvMemberContributionAtOrAboveThreshold
                             }
                             subtitle={
-                                userData.discordUsers?.[0]?.username
-                                    ? `@${userData.discordUsers[0].username}`
+                                updatedUser.discordUsers?.[0]?.username
+                                    ? `@${updatedUser.discordUsers[0].username}`
                                     : undefined
                             }
                             avatar={
                                 <DiscordAvatar
                                     discordUserId={
-                                        userData.discordUsers?.[0]?.id
+                                        updatedUser.discordUsers?.[0]?.id
                                     }
-                                    imageId={userData.discordUsers?.[0]?.image}
+                                    imageId={
+                                        updatedUser.discordUsers?.[0]?.image
+                                    }
                                     size={48}
                                 />
                             }
                             title={
-                                `${userData.firstName ?? ''} ${userData.lastName ?? ''}`.trim() ||
+                                `${updatedUser.firstName ?? ''} ${updatedUser.lastName ?? ''}`.trim() ||
                                 'Account'
                             }
                         />
@@ -604,142 +626,13 @@ export function AccountDetailsSection({
                 </div>
             </div>
 
-            {showAddressConfirmModal && (
-                <div
-                    className={styles.detailsModalBackdrop}
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="Confirm address"
-                >
-                    <div className={styles.detailsModalCard}>
-                        <div className={styles.detailsLinkFormHeader}>
-                            <div className={styles.detailsLinkFormCopy}>
-                                <p className={styles.detailsAlreadyMemberText}>
-                                    Confirm your address
-                                </p>
-                                <p className={styles.detailsLinkFormSubtitle}>
-                                    We found a donor match. Please confirm this
-                                    mailing address.
-                                </p>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setShowAddressConfirmModal(false)
-                                }
-                                className={styles.detailsCloseButton}
-                                aria-label="Close address confirmation"
-                            >
-                                <IoClose size={20} />
-                            </button>
-                        </div>
-
-                        <form
-                            className={`${styles.linkActBlueFormContainer} ${styles.detailsLinkForm}`}
-                            onSubmit={submitAddressConfirmation}
-                        >
-                            <div
-                                className={`${styles.linkActBlueFormInputContainer} ${styles.detailsLinkFormInputs}`}
-                            >
-                                <label>
-                                    <span
-                                        className={formFieldStyles.fieldLabel}
-                                    >
-                                        Address Line 1
-                                    </span>
-                                    <input
-                                        className={formFieldStyles.textField}
-                                        value={addressDraft.addressLine1 ?? ''}
-                                        onChange={(e) =>
-                                            updateAddressDraft(
-                                                'addressLine1',
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                </label>
-                                <label>
-                                    <span
-                                        className={formFieldStyles.fieldLabel}
-                                    >
-                                        Address Line 2
-                                    </span>
-                                    <input
-                                        className={formFieldStyles.textField}
-                                        value={addressDraft.addressLine2 ?? ''}
-                                        onChange={(e) =>
-                                            updateAddressDraft(
-                                                'addressLine2',
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                </label>
-                                <label>
-                                    <span
-                                        className={formFieldStyles.fieldLabel}
-                                    >
-                                        City
-                                    </span>
-                                    <input
-                                        className={formFieldStyles.textField}
-                                        value={addressDraft.city ?? ''}
-                                        onChange={(e) =>
-                                            updateAddressDraft(
-                                                'city',
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                </label>
-                                <label>
-                                    <span
-                                        className={formFieldStyles.fieldLabel}
-                                    >
-                                        State
-                                    </span>
-                                    <input
-                                        className={formFieldStyles.textField}
-                                        value={addressDraft.state ?? ''}
-                                        onChange={(e) =>
-                                            updateAddressDraft(
-                                                'state',
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                </label>
-                                <label>
-                                    <span
-                                        className={formFieldStyles.fieldLabel}
-                                    >
-                                        Zip
-                                    </span>
-                                    <input
-                                        className={formFieldStyles.textField}
-                                        value={addressDraft.zip ?? ''}
-                                        onChange={(e) =>
-                                            updateAddressDraft(
-                                                'zip',
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                </label>
-                            </div>
-
-                            <div className={styles.detailsModalActions}>
-                                <button
-                                    type="submit"
-                                    className={`${styles.secondaryButton} ${styles.detailsConfirmAddressButton}`}
-                                >
-                                    Confirm Address
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            <AddressConfirmationModal
+                isOpen={showAddressConfirmModal}
+                addressDraft={addressDraft}
+                onClose={() => setShowAddressConfirmModal(false)}
+                onSubmit={submitAddressConfirmation}
+                onChangeAddressDraft={updateAddressDraft}
+            />
         </section>
     )
 }

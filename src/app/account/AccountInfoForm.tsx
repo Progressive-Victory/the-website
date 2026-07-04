@@ -10,11 +10,12 @@ import {
 import { ShirtSize, User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 interface AccountInfoFormProps {
     user: User
     onSave: (user: User) => void
+    onUpdateUser: (user: User) => void
     subtitle?: string
     avatar?: React.ReactNode
     title?: string
@@ -52,27 +53,22 @@ const stateOptionsWithEmpty = [
 export const AccountInfoForm = ({
     user,
     onSave,
+    onUpdateUser,
     subtitle,
     avatar,
     title = 'Account Information',
     hasMatchedDonor = false,
     showShirtSize = false,
 }: AccountInfoFormProps) => {
-    const [updatedUser, setUpdatedUser] = useState<User>(user)
     const [isEditing, setIsEditing] = useState(false)
 
-    useEffect(() => {
-        setUpdatedUser(user)
-    }, [user])
-
     const handleFormSave = (user: User) => {
-        setUpdatedUser(user)
-
+        onUpdateUser(user)
         onSave(user)
     }
 
     const showAddressLine2 =
-        isEditing || Boolean(updatedUser.address.addressLine2?.trim()?.length)
+        isEditing || Boolean(user.address.addressLine2?.trim()?.length)
 
     const hasAddressForShipping = (user: User) =>
         Boolean(
@@ -90,7 +86,7 @@ export const AccountInfoForm = ({
     return (
         <div className={styles.contentBackground}>
             <Form<User>
-                form={updatedUser}
+                form={user}
                 title={title}
                 subtitle={subtitle}
                 avatar={avatar}
@@ -149,7 +145,7 @@ export const AccountInfoForm = ({
                                 })}
                                 options={shirtSizeOptions}
                             />
-                        ) : updatedUser.shirtSize ? (
+                        ) : user.shirtSize ? (
                             <TextField<User>
                                 label="Shirt Size"
                                 getter={(user) =>
@@ -171,7 +167,7 @@ export const AccountInfoForm = ({
                         ))}
                     {hasMatchedDonor &&
                     !isEditing &&
-                    !hasAddressForShipping(updatedUser) ? (
+                    !hasAddressForShipping(user) ? (
                         <TextField<User>
                             label={
                                 showAddressLine2 ? 'Address Line 1' : 'Address'
