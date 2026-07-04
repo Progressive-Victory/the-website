@@ -3,7 +3,6 @@
 import {
     AccountContributionsSection,
     AccountDetailsSection,
-    AccountMembershipSection,
     ManualDonorLinkRequest,
 } from './sections/index'
 import styles from '@/app/account/account.module.css'
@@ -52,6 +51,7 @@ export function AccountPage() {
                     state: user.address.state,
                     zip: user.address.zip,
                 },
+                shirtSize: user.shirtSize,
             },
         })
     }
@@ -86,13 +86,16 @@ export function AccountPage() {
                             canAccessAdminPanel={canAccessAdminPanel}
                             handleSignOut={handleSignOut}
                             onSave={onSave}
+                            donorLinkError={linkUser.error}
+                            onDonorLinkSubmit={onLinkFormSubmit}
                         />
-                        <AccountMembershipSection />
-                        <AccountContributionsSection
-                            user={loggedInUser.data}
-                            error={linkUser.error}
-                            onSubmit={onLinkFormSubmit}
-                        />
+                        {loggedInUser.data.donors?.length && (
+                            <AccountContributionsSection
+                                user={loggedInUser.data}
+                                error={linkUser.error}
+                                onSubmit={onLinkFormSubmit}
+                            />
+                        )}
                     </>
                 )}
             </div>

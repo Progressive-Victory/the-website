@@ -51,7 +51,7 @@
 .cardColumn {
     margin: 0 auto;
     width: 100%;
-    max-width: 500px;
+    max-width: 420px;
     display: flex;
     justify-content: center;
 }
@@ -65,7 +65,7 @@
 
 .cardColumnInner {
     width: 100%;
-    max-width: 500px;
+    max-width: 420px;
     margin-bottom: 2rem;
 }
 
@@ -84,9 +84,9 @@
 
 .cardStage {
     position: relative;
-    height: 300px;
+    height: 252px;
     width: 100%;
-    max-width: 500px;
+    max-width: 420px;
     cursor: pointer;
 }
 

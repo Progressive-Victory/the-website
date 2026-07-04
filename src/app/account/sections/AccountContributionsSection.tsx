@@ -12,7 +12,7 @@ export interface ManualDonorLinkRequest {
 }
 
 type RecurrencePeriod = 'one-time' | 'monthly' | 'weekly'
-const RecurrenceBadge = ({ type }: { type: RecurrencePeriod }) => {
+const RecurrenceTag = ({ type }: { type: RecurrencePeriod }) => {
     const nameMap = {
         ['one-time']: 'One Time',
         ['monthly']: 'Monthly',
@@ -20,7 +20,7 @@ const RecurrenceBadge = ({ type }: { type: RecurrencePeriod }) => {
     }
 
     return (
-        <div className={`${styles.recurrenceBadge} ${styles[type]}`}>
+        <div className={`${styles.recurringTag} ${styles[type]}`}>
             {nameMap[type]}
         </div>
     )
@@ -30,52 +30,96 @@ export interface ContributionsTableProps {
     contributions: ActBlueContribution[]
 }
 
+const formatContributionForm = (value: string) => {
+    const rawValue = value.trim()
+
+    if (!rawValue) return 'Unknown'
+
+    if (rawValue.startsWith('https://') || rawValue.startsWith('http://')) {
+        try {
+            const parsed = new URL(rawValue)
+            return parsed.pathname || rawValue
+        } catch {
+            return rawValue
+        }
+    }
+
+    return rawValue
+}
+
 const ContributionsTable = ({ contributions }: ContributionsTableProps) => {
     return (
         <div className={styles.contributionsTableContainer}>
-            <table className={styles.contributionsTable}>
-                <thead>
-                    <tr>
-                        <th>Recurring</th>
-                        <th>Order Number</th>
-                        <th>Amount</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {contributions.map((c) => (
-                        <tr key={c.uniqueIdentifier}>
-                            <td>
-                                <RecurrenceBadge
+            <div className={styles.contributionsList}>
+                <div className={styles.contributionsListHeader}>
+                    <span>Recurring</span>
+                    <span>Contribution Form</span>
+                    <span>Order Number</span>
+                    <span>Amount</span>
+                    <span>Date</span>
+                </div>
+
+                {contributions.map((c) => {
+                    const amount = (c.lineitems ?? []).reduce(
+                        (acc, l) => acc + l.amount,
+                        0
+                    )
+
+                    const paidDates = [
+                        ...new Set(
+                            (c.lineitems ?? []).map((l) =>
+                                l.paidAt.toLocaleDateString()
+                            )
+                        ),
+                    ]
+                        .sort()
+                        .join(', ')
+
+                    return (
+                        <div
+                            key={c.uniqueIdentifier}
+                            className={styles.contributionsListRow}
+                        >
+                            <span
+                                className={styles.contributionsListCell}
+                                data-label="Recurring"
+                            >
+                                <RecurrenceTag
                                     type={
                                         c.isRecurring
                                             ? (c.recurringPeriod as RecurrencePeriod)
                                             : 'one-time'
                                     }
                                 />
-                            </td>
-                            <td>{c.orderNumber}</td>
-                            <td>
-                                $
-                                {(c.lineitems ?? [])
-                                    .reduce((acc, l) => acc + l.amount, 0)
-                                    .toFixed(2)}
-                            </td>
-                            <td>
-                                {[
-                                    ...new Set(
-                                        (c.lineitems ?? []).map((l) =>
-                                            l.paidAt.toLocaleDateString()
-                                        )
-                                    ),
-                                ]
-                                    .sort()
-                                    .join(', ')}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                            </span>
+                            <span
+                                className={styles.contributionsListCell}
+                                data-label="Contribution Form"
+                            >
+                                {formatContributionForm(c.contributionForm)}
+                            </span>
+                            <span
+                                className={styles.contributionsListCell}
+                                data-label="Order Number"
+                            >
+                                {c.orderNumber}
+                            </span>
+                            <span
+                                className={styles.contributionsListCell}
+                                data-label="Amount"
+                            >
+                                ${amount.toFixed(2)}
+                            </span>
+                            <span
+                                className={styles.contributionsListCell}
+                                data-label="Date"
+                            >
+                                {paidDates}
+                            </span>
+                        </div>
+                    )
+                })}
+            </div>
         </div>
     )
 }
@@ -136,7 +180,7 @@ export function AccountContributionsSection({
             </header>
 
             <div className={styles.contentPanel}>
-                <div className={styles.contentBackground}>
+                <div className={styles.contributionsContentPanel}>
                     {!userHasDonor ? (
                         <form
                             className={styles.linkActBlueFormContainer}
