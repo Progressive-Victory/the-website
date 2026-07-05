@@ -111,18 +111,10 @@ export function AccountDetailsSection({
         return expiresAt > now
     }
 
-    const hasActiveRecurringPvMemberContribution =
+    const hasActiveRecurringContribution =
         userData.donors?.some((donor) =>
             (donor.contributions ?? []).some((contribution) => {
-                const contributionForm = normalizeContributionFormPath(
-                    contribution.contributionForm
-                )
-                const isPvMemberForm = contributionForm.endsWith(
-                    targetContributionPath
-                )
-
                 return (
-                    isPvMemberForm &&
                     contribution.isRecurring &&
                     isActiveRecurringContribution(
                         contribution.createdAt,
@@ -385,10 +377,18 @@ export function AccountDetailsSection({
                                                     styles.detailsLinkFormSubtitle
                                                 }
                                             >
-                                                Check the email you used to
-                                                donate and input the order
-                                                number so we can link your
-                                                account and ship your card.
+                                                <span
+                                                    className={
+                                                        styles.detailsLinkFormAlertText
+                                                    }
+                                                >
+                                                    Check the email you used to
+                                                    donate or log into ACTBLUE
+                                                </span>{' '}
+                                                to find and paste the order
+                                                number of any donation to PV so
+                                                we can link your account and
+                                                ship your card.
                                             </p>
                                         </div>
                                         <button
@@ -449,7 +449,8 @@ export function AccountDetailsSection({
                                                 styles.detailsMembershipStatusPanel
                                             }
                                         >
-                                            {hasActiveRecurringPvMemberContribution ? (
+                                            {userData.duesPayingMember &&
+                                            hasActiveRecurringContribution ? (
                                                 <>
                                                     <div
                                                         className={
@@ -515,34 +516,54 @@ export function AccountDetailsSection({
                                                     </div>
                                                 </>
                                             ) : (
-                                                <div
-                                                    className={
-                                                        formFieldStyles.fieldHeader
-                                                    }
-                                                >
-                                                    <span
+                                                <>
+                                                    <p
                                                         className={
-                                                            formFieldStyles.fieldLabel
+                                                            styles.membershipStatusManualNotice
                                                         }
                                                     >
-                                                        Dues Paying Member
-                                                    </span>
-                                                    <div
-                                                        className={
-                                                            formFieldStyles.fieldValue
-                                                        }
-                                                    >
-                                                        <div
+                                                        This has to be set
+                                                        manually please check
+                                                        back later, if it
+                                                        remains incorrect please{' '}
+                                                        <a
+                                                            href="https://www.progressivevictory.win/membership_support"
                                                             className={
-                                                                formFieldStyles.readonly
+                                                                styles.membershipStatusManualNoticeLink
                                                             }
                                                         >
-                                                            {userData.duesPayingMember
-                                                                ? 'Yes'
-                                                                : 'No'}
+                                                            click here
+                                                        </a>
+                                                    </p>
+                                                    <div
+                                                        className={
+                                                            formFieldStyles.fieldHeader
+                                                        }
+                                                    >
+                                                        <span
+                                                            className={
+                                                                formFieldStyles.fieldLabel
+                                                            }
+                                                        >
+                                                            Dues Paying Member
+                                                        </span>
+                                                        <div
+                                                            className={
+                                                                formFieldStyles.fieldValue
+                                                            }
+                                                        >
+                                                            <div
+                                                                className={
+                                                                    formFieldStyles.readonly
+                                                                }
+                                                            >
+                                                                {userData.duesPayingMember
+                                                                    ? 'Yes'
+                                                                    : 'No'}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </>
                                             )}
                                         </div>
                                     )}

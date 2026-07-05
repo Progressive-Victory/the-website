@@ -452,6 +452,20 @@
     gap: 0.5rem;
 }
 
+.membershipStatusManualNotice {
+    margin: 0;
+    color: #ce3728;
+    font-weight: 600;
+    font-size: 0.75rem;
+    line-height: 1.35;
+}
+
+.membershipStatusManualNoticeLink {
+    color: #2986cc;
+    text-decoration: underline;
+    font-weight: 700;
+}
+
 .detailsMembershipStatusRow {
     display: flex;
     justify-content: space-between;
@@ -556,6 +570,11 @@
     font-size: 0.88rem;
     font-weight: 500;
     line-height: 1.2;
+}
+
+.detailsLinkFormAlertText {
+    color: #ce3728;
+    font-weight: 600;
 }
 
 .detailsCloseButton {

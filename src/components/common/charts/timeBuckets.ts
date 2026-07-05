@@ -5,9 +5,9 @@ export type ChartGranularityMode = 'auto' | ChartGranularity
 export interface ChartBucket {
     key: string
     label: string
-    anchorIso: string
-    startIso: string
-    endIso: string
+    anchor: Date
+    start: Date
+    end: Date
     granularity: ChartGranularity
 }
 
@@ -102,9 +102,9 @@ function buildHourBuckets(start: Date, end: Date): ChartBucket[] {
                 label: hourDate.toLocaleDateString('en-US', {
                     hour: 'numeric',
                 }),
-                anchorIso: bStart.toISOString(),
-                startIso: bStart.toISOString(),
-                endIso: bEnd.toISOString(),
+                anchor: bStart,
+                start: bStart,
+                end: bEnd,
                 granularity: 'hour',
             })
         }
@@ -141,9 +141,9 @@ function buildDayBuckets(
                 month: 'numeric',
                 day: 'numeric',
             }),
-            anchorIso: bStart.toISOString(),
-            startIso: bStart.toISOString(),
-            endIso: bEnd.toISOString(),
+            anchor: bStart,
+            start: bStart,
+            end: bEnd,
             granularity: 'day',
         })
     }
@@ -174,9 +174,9 @@ function buildWeekBuckets(
                 month: 'numeric',
                 day: 'numeric',
             }),
-            anchorIso: bStart.toISOString(),
-            startIso: bStart.toISOString(),
-            endIso: bEnd.toISOString(),
+            anchor: bStart,
+            start: bStart,
+            end: bEnd,
             granularity: 'week',
         })
     }
@@ -211,9 +211,9 @@ function buildMonthBuckets(
         buckets.push({
             key: `m-${d.getFullYear()}-${d.getMonth() + 1}`,
             label: d.toLocaleDateString('en-US', { month: 'short' }),
-            anchorIso: bStart.toISOString(),
-            startIso: bStart.toISOString(),
-            endIso: bEnd.toISOString(),
+            anchor: bStart,
+            start: bStart,
+            end: bEnd,
             granularity: 'month',
         })
     }
@@ -259,9 +259,9 @@ function buildQuarterBuckets(
         buckets.push({
             key: `q-${d.getFullYear()}-Q${q}`,
             label: `Q${q}`,
-            anchorIso: bStart.toISOString(),
-            startIso: bStart.toISOString(),
-            endIso: bEnd.toISOString(),
+            anchor: bStart,
+            start: bStart,
+            end: bEnd,
             granularity: 'quarter',
         })
     }
@@ -283,9 +283,9 @@ function buildYearBuckets(start: Date, end: Date): ChartBucket[] {
         buckets.push({
             key: `y-${yr}`,
             label: String(yr),
-            anchorIso: bStart.toISOString(),
-            startIso: bStart.toISOString(),
-            endIso: bEnd.toISOString(),
+            anchor: bStart,
+            start: bStart,
+            end: bEnd,
             granularity: 'year',
         })
     }
@@ -293,11 +293,13 @@ function buildYearBuckets(start: Date, end: Date): ChartBucket[] {
 }
 
 export function getValidChartGranularityModes(
-    startIso: string,
-    endIso: string
+    startDate: Date | null,
+    endDate: Date | null
 ): ChartGranularityMode[] {
-    const start = clampToNoon(new Date(startIso))
-    const end = clampToNoon(new Date(endIso))
+    if (!startDate || !endDate) return ['auto', 'day']
+
+    const start = clampToNoon(startDate)
+    const end = clampToNoon(endDate)
 
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
         return ['auto', 'day']
@@ -315,9 +317,9 @@ export function getValidChartGranularityModes(
 }
 
 export function buildChartBuckets(
-    startIso: string,
-    endIso: string,
-    allTimeFirstIso?: string,
+    startDate: Date | null,
+    endDate: Date | null,
+    allTimeFirst?: Date | null,
     mode: ChartGranularityMode = 'auto',
     isAllTimeSelection = false
 ): ChartBucket[] {
@@ -326,10 +328,8 @@ export function buildChartBuckets(
     let start: Date
     let end: Date
 
-    if (!startIso || !endIso) {
-        const firstDate = allTimeFirstIso
-            ? clampToNoon(new Date(allTimeFirstIso))
-            : null
+    if (!startDate || !endDate) {
+        const firstDate = allTimeFirst ? clampToNoon(allTimeFirst) : null
         const useFirst =
             firstDate &&
             !Number.isNaN(firstDate.getTime()) &&
@@ -339,16 +339,16 @@ export function buildChartBuckets(
             : new Date(today.getFullYear(), today.getMonth() - 11, 1)
         end = today
     } else {
-        const parsedStart = clampToNoon(new Date(startIso))
-        const parsedEnd = clampToNoon(new Date(endIso))
+        const parsedStart = clampToNoon(startDate)
+        const parsedEnd = clampToNoon(endDate)
         if (
             Number.isNaN(parsedStart.getTime()) ||
             Number.isNaN(parsedEnd.getTime())
         ) {
             return buildChartBuckets(
-                '',
-                '',
-                allTimeFirstIso,
+                null,
+                null,
+                allTimeFirst,
                 mode,
                 isAllTimeSelection
             )
