@@ -7,31 +7,16 @@ import {
     isXToDatePreset,
     type Preset,
 } from './fundraising.helpers'
-import {
-    getEarliestContribution,
-    getFundraisingBucketStats,
-    getFundraisingStats,
-} from './fundraising.service'
 import type { ChartPoint } from '@/components/common/charts/DualAxisBarLineChart'
 import {
     buildChartBuckets,
     getValidChartGranularityModes,
     type ChartGranularityMode,
 } from '@/components/common/charts/timeBuckets'
-import type { QueryParams, ZodSchema } from '@/util/hooks/useFetch'
+import { SortDirection } from '@/contracts/requests'
+import { useActblueQueries } from '@/queries'
 import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
-
-interface GetOptions {
-    query?: QueryParams
-    signal?: AbortSignal
-}
-
-type OnGet = <R>(
-    url: string,
-    schema: ZodSchema,
-    options?: GetOptions
-) => Promise<R>
 
 type ChartBarDisplayMode = 'grouped' | 'stacked'
 
@@ -97,7 +82,9 @@ function formatFullLabel(
     })
 }
 
-export function useFundraisingDashboardController(onGet: OnGet) {
+export function useFundraisingDashboardController() {
+    const actblueQueries = useActblueQueries()
+
     const [startDate, setStartDate] = useState(() => getPresetRange('Today')[0])
     const [endDate, setEndDate] = useState(() => getPresetRange('Today')[1])
     const [committedPreset, setCommittedPreset] = useState<Preset | null>(
@@ -130,18 +117,31 @@ export function useFundraisingDashboardController(onGet: OnGet) {
             startDate || null,
             endDate || null,
         ],
-        queryFn: () => getFundraisingStats(onGet, startDate, endDate),
+        queryFn: ({ signal }) =>
+            actblueQueries.getFundraisingStats({ startDate, endDate, signal }),
         placeholderData: keepPreviousData,
+        enabled: actblueQueries.ready,
     })
 
     const allTimeStatsQuery = useQuery({
         queryKey: ['/actblue/fundraising/stats', 'all-time-cards'],
-        queryFn: () => getFundraisingStats(onGet),
+        queryFn: ({ signal }) => actblueQueries.getFundraisingStats({ signal }),
+        enabled: actblueQueries.ready,
     })
 
     const earliestContributionQuery = useQuery({
         queryKey: ['/actblue/contributions', 'earliest'],
-        queryFn: () => getEarliestContribution(onGet),
+        queryFn: ({ signal }) =>
+            actblueQueries.getContributions({
+                search: {
+                    page: 0,
+                    limit: 1,
+                    sortField: 'paidAt',
+                    sort: SortDirection.ASC,
+                },
+                signal,
+            }),
+        enabled: actblueQueries.ready,
         staleTime: 5 * 60_000,
     })
 
@@ -248,12 +248,13 @@ export function useFundraisingDashboardController(onGet: OnGet) {
                 bucket.startIso,
                 bucket.endIso,
             ],
-            queryFn: () =>
-                getFundraisingBucketStats(
-                    onGet,
-                    bucket.startIso,
-                    bucket.endIso
-                ),
+            queryFn: ({ signal }) =>
+                actblueQueries.getFundraisingStats({
+                    startDate: bucket.startIso,
+                    endDate: bucket.endIso,
+                    signal,
+                }),
+            enabled: actblueQueries.ready,
             staleTime: 60_000,
             placeholderData: keepPreviousData,
         })),

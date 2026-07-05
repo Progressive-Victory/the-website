@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+    experimental: {
+        reactCompiler: true,
+    },
     // set allowed image hosts
     images: {
         remotePatterns: [

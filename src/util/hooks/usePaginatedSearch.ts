@@ -1,4 +1,4 @@
-import { useFetch } from './useFetch'
+import { RouteParams, useFetch } from './useFetch'
 import { SearchRequest } from '@/contracts/requests'
 import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import {
@@ -10,10 +10,11 @@ import {
 import { useEffect, useState } from 'react'
 import z from 'zod'
 
-export function usePaginatedSearch<T>(
+export function usePaginatedSearch<S extends z.ZodObject>(
     endpoint: string,
-    schema: z.ZodObject,
+    schema: S,
     options?: {
+        endpointParams?: RouteParams
         search?: SearchRequest
         all?: boolean
     }
@@ -32,22 +33,20 @@ export function usePaginatedSearch<T>(
         signal?: AbortSignal
     }
 
-    const getPage = async (options: Options) => {
-        const page = options?.page ?? search.page ?? 0
-        const limit = options?.count
+    const getPage = async ({ page, count, signal }: Options) => {
+        const truePage = page ?? search.page ?? 0
+        const limit = count
             ? Math.min(
                   search.limit ?? 25,
-                  options.count - page * (search.limit ?? 25)
+                  count - truePage * (search.limit ?? 25)
               )
             : search.limit
 
-        const res = await onGet<PaginatedResponse<T>>(
-            endpoint,
-            zPaginatedResponse(schema),
-            { query: { ...search, page, limit }, signal: options?.signal }
-        )
-
-        return res
+        return await onGet(endpoint, zPaginatedResponse(schema), {
+            params: options?.endpointParams,
+            query: { ...search, truePage, limit },
+            signal,
+        })
     }
 
     const getAllPages = async (options: Options) => {
@@ -57,7 +56,7 @@ export function usePaginatedSearch<T>(
         const limit = search.limit
         const pageCount = Math.ceil(count / (limit ?? 25))
 
-        const pageQueries: Promise<PaginatedResponse<T>>[] = []
+        const pageQueries: Promise<PaginatedResponse<z.infer<S>>>[] = []
         for (let page = 1; page < pageCount; page++)
             pageQueries.push(getPage({ ...options, page, count }))
 

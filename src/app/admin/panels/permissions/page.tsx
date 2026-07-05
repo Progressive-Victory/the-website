@@ -31,7 +31,7 @@ export default function Page() {
         query: searchQuery,
         search,
         onSearch,
-    } = usePaginatedSearch<Permission>('/permissions', zPermission)
+    } = usePaginatedSearch('/permissions', zPermission)
 
     const updateMutation = useMutation<
         Permission,
@@ -44,7 +44,9 @@ export default function Page() {
         Permission | undefined
     >({
         mutationFn: ({ id, request }) =>
-            onPatch<Permission>(`/permissions/${id}`, request, zPermission),
+            onPatch('/permissions/:permissionId', request, zPermission, {
+                params: { permissionId: id },
+            }),
         onMutate: ({ id, permission }) => {
             const prev = searchQuery.data?.data?.find((prev) => prev.id == id)
             setSelectedPermission(permission)

@@ -5,7 +5,6 @@ import { MemberView } from './MemberView'
 import { CollapsibleSection } from '@/components/common'
 import {
     ActBlueDonor,
-    DiscordUser,
     Role,
     UpdateHistory,
     User,
@@ -159,11 +158,11 @@ export function HistoryView({
     const updaterDiscordQueries = useQueries({
         queries: updaterIds.map((id) => ({
             queryKey: [`/discordUsers/${id}`],
-            queryFn: () =>
-                onGet<DiscordUser[]>(
-                    `/discordUsers/${id}`,
-                    z.array(zDiscordUser)
-                ),
+            queryFn: ({ signal }) =>
+                onGet('/discordUsers/:discordUserId', z.array(zDiscordUser), {
+                    params: { discordUserId: id },
+                    signal,
+                }),
             enabled: ready,
         })),
     })

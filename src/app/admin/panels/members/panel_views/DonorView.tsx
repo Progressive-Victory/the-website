@@ -17,7 +17,6 @@ import {
 } from '@/contracts/data'
 import type { SearchRequest } from '@/contracts/requests'
 import type { PaginatedResponse } from '@/contracts/responses'
-import { FetchError } from '@/models'
 import type { UseQueryResult } from '@tanstack/react-query'
 import cx from 'classnames'
 import { motion } from 'motion/react'
@@ -34,10 +33,7 @@ export interface DonorViewProps {
     isRefetching: boolean
 
     donorSearch: SearchRequest
-    donorSearchQuery: UseQueryResult<
-        PaginatedResponse<ActBlueDonor>,
-        FetchError
-    >
+    donorSearchQuery: UseQueryResult<PaginatedResponse<ActBlueDonor>, Error>
     onDonorSearch: (req: SearchRequest) => void
 
     renderDonorItem: (item: ActBlueDonor, userId: number) => React.ReactNode
