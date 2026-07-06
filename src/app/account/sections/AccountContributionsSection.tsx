@@ -27,7 +27,12 @@ const RecurrenceTag = ({ type }: { type: RecurrencePeriod }) => {
 }
 
 export interface ContributionsTableProps {
-    contributions: ActBlueContribution[]
+    lineitems: {
+        contribution: ActBlueContribution
+        lineitemId: number
+        amount: number
+        paidAt: Date
+    }[]
 }
 
 const formatContributionForm = (value: string) => {
@@ -47,7 +52,16 @@ const formatContributionForm = (value: string) => {
     return rawValue
 }
 
-const ContributionsTable = ({ contributions }: ContributionsTableProps) => {
+const getRecurrenceType = (
+    contribution: ActBlueContribution
+): RecurrencePeriod => {
+    if (!contribution.isRecurring) return 'one-time'
+    return contribution.recurringPeriod.toLowerCase() === 'weekly'
+        ? 'weekly'
+        : 'monthly'
+}
+
+const ContributionsTable = ({ lineitems }: ContributionsTableProps) => {
     return (
         <div className={styles.contributionsTableContainer}>
             <div className={styles.contributionsList}>
@@ -59,66 +73,51 @@ const ContributionsTable = ({ contributions }: ContributionsTableProps) => {
                     <span>Date</span>
                 </div>
 
-                {contributions.map((c) => {
-                    const amount = (c.lineitems ?? []).reduce(
-                        (acc, l) => acc + l.amount,
-                        0
-                    )
-
-                    const paidDates = [
-                        ...new Set(
-                            (c.lineitems ?? []).map((l) =>
-                                l.paidAt.toLocaleDateString()
-                            )
-                        ),
-                    ]
-                        .sort()
-                        .join(', ')
-
-                    return (
-                        <div
-                            key={c.uniqueIdentifier}
-                            className={styles.contributionsListRow}
-                        >
-                            <span
-                                className={styles.contributionsListCell}
-                                data-label="Recurring"
+                {lineitems.map(
+                    ({ contribution, lineitemId, amount, paidAt }) => {
+                        return (
+                            <div
+                                key={`${contribution.uniqueIdentifier}-${lineitemId}`}
+                                className={styles.contributionsListRow}
                             >
-                                <RecurrenceTag
-                                    type={
-                                        c.isRecurring
-                                            ? (c.recurringPeriod as RecurrencePeriod)
-                                            : 'one-time'
-                                    }
-                                />
-                            </span>
-                            <span
-                                className={styles.contributionsListCell}
-                                data-label="Contribution Form"
-                            >
-                                {formatContributionForm(c.contributionForm)}
-                            </span>
-                            <span
-                                className={styles.contributionsListCell}
-                                data-label="Order Number"
-                            >
-                                {c.orderNumber}
-                            </span>
-                            <span
-                                className={styles.contributionsListCell}
-                                data-label="Amount"
-                            >
-                                ${amount.toFixed(2)}
-                            </span>
-                            <span
-                                className={styles.contributionsListCell}
-                                data-label="Date"
-                            >
-                                {paidDates}
-                            </span>
-                        </div>
-                    )
-                })}
+                                <span
+                                    className={styles.contributionsListCell}
+                                    data-label="Recurring"
+                                >
+                                    <RecurrenceTag
+                                        type={getRecurrenceType(contribution)}
+                                    />
+                                </span>
+                                <span
+                                    className={styles.contributionsListCell}
+                                    data-label="Contribution Form"
+                                >
+                                    {formatContributionForm(
+                                        contribution.contributionForm
+                                    )}
+                                </span>
+                                <span
+                                    className={styles.contributionsListCell}
+                                    data-label="Order Number"
+                                >
+                                    {contribution.orderNumber}
+                                </span>
+                                <span
+                                    className={styles.contributionsListCell}
+                                    data-label="Amount"
+                                >
+                                    ${amount.toFixed(2)}
+                                </span>
+                                <span
+                                    className={styles.contributionsListCell}
+                                    data-label="Date"
+                                >
+                                    {paidAt.toLocaleDateString()}
+                                </span>
+                            </div>
+                        )
+                    }
+                )}
             </div>
         </div>
     )
@@ -144,6 +143,17 @@ export function AccountContributionsSection({
 
     const allContributions =
         user.donors?.flatMap((d) => d.contributions ?? []) ?? []
+
+    const sortedLineitems = allContributions
+        .flatMap((contribution) =>
+            (contribution.lineitems ?? []).map((lineitem) => ({
+                contribution,
+                lineitemId: lineitem.lineitemId,
+                amount: lineitem.amount,
+                paidAt: lineitem.paidAt,
+            }))
+        )
+        .sort((a, b) => b.paidAt.getTime() - a.paidAt.getTime())
 
     const handleChangeDonorEmail = (e: ChangeEvent<HTMLInputElement>) => {
         setDonorLinkForm({
@@ -227,14 +237,14 @@ export function AccountContributionsSection({
                         </form>
                     ) : (
                         <>
-                            {!allContributions.length ? (
+                            {!sortedLineitems.length ? (
                                 <div className={styles.noContributionsMessage}>
                                     No contributions were found for your
                                     account.
                                 </div>
                             ) : (
                                 <ContributionsTable
-                                    contributions={allContributions}
+                                    lineitems={sortedLineitems}
                                 />
                             )}
                         </>

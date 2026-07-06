@@ -20,10 +20,26 @@ import { useEffect, useMemo, useState } from 'react'
 
 type ChartBarDisplayMode = 'grouped' | 'stacked'
 
-function isSameLocalDay(aIso: string, bIso: string): boolean {
-    const a = new Date(aIso)
-    const b = new Date(bIso)
+function getPreviousEquivalentRange(start: Date, end: Date) {
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+        return null
+    }
 
+    const durationMs = end.getTime() - start.getTime()
+    if (!Number.isFinite(durationMs) || durationMs < 0) {
+        return null
+    }
+
+    const previousEnd = new Date(start.getTime() - 1000)
+    const previousStart = new Date(previousEnd.getTime() - durationMs)
+
+    return {
+        start: previousStart,
+        end: previousEnd,
+    }
+}
+
+function isSameLocalDay(a: Date, b: Date): boolean {
     if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) {
         return false
     }
@@ -36,11 +52,9 @@ function isSameLocalDay(aIso: string, bIso: string): boolean {
 }
 
 function formatFullLabel(
-    anchorIso: string,
+    anchor: Date,
     granularity: Exclude<ChartGranularityMode, 'auto'>
 ): string {
-    const anchor = new Date(anchorIso)
-
     if (granularity === 'year') return String(anchor.getFullYear())
 
     if (granularity === 'hour') {
@@ -105,8 +119,8 @@ export function useFundraisingDashboardController() {
     const [granularityMode, setGranularityMode] =
         useState<ChartGranularityMode>('auto')
     const [chartViewOverrideRange, setChartViewOverrideRange] = useState<{
-        startIso: string
-        endIso: string
+        start: Date
+        end: Date
     } | null>(null)
 
     const isAllTime = !startDate && !endDate
@@ -114,13 +128,44 @@ export function useFundraisingDashboardController() {
     const statsQuery = useQuery({
         queryKey: [
             '/actblue/fundraising/stats',
-            startDate || null,
-            endDate || null,
+            startDate ?? null,
+            endDate ?? null,
         ],
         queryFn: ({ signal }) =>
-            actblueQueries.getFundraisingStats({ startDate, endDate, signal }),
+            actblueQueries.getFundraisingStats({
+                startDate: startDate?.toISOString(),
+                endDate: endDate?.toISOString(),
+                signal,
+            }),
         placeholderData: keepPreviousData,
         enabled: actblueQueries.ready,
+    })
+
+    const previousPeriodRange = useMemo(() => {
+        if (!startDate || !endDate) return null
+        if (committedPreset === 'All Time') return null
+        return getPreviousEquivalentRange(startDate, endDate)
+    }, [startDate, endDate, committedPreset])
+
+    const previousPeriodStatsQuery = useQuery({
+        queryKey: [
+            '/actblue/fundraising/stats',
+            'previous-period',
+            previousPeriodRange?.start ?? null,
+            previousPeriodRange?.end ?? null,
+        ],
+        queryFn: ({ signal }) => {
+            if (!previousPeriodRange) {
+                throw new Error('Missing previous period range')
+            }
+            return actblueQueries.getFundraisingStats({
+                startDate: previousPeriodRange.start.toISOString(),
+                endDate: previousPeriodRange.end.toISOString(),
+                signal,
+            })
+        },
+        placeholderData: keepPreviousData,
+        enabled: actblueQueries.ready && previousPeriodRange != null,
     })
 
     const allTimeStatsQuery = useQuery({
@@ -145,11 +190,11 @@ export function useFundraisingDashboardController() {
         staleTime: 5 * 60_000,
     })
 
-    const allTimeFirstIso = useMemo(() => {
+    const allTimeFirst = useMemo(() => {
         const first = earliestContributionQuery.data?.data?.[0]?.paidAt
         if (!first) return undefined
         const d = first instanceof Date ? first : new Date(first)
-        return Number.isNaN(d.getTime()) ? undefined : d.toISOString()
+        return Number.isNaN(d.getTime()) ? undefined : d
     }, [earliestContributionQuery.data])
 
     const recurringPct = useMemo(() => {
@@ -167,6 +212,22 @@ export function useFundraisingDashboardController() {
             statsQuery.data.totalDollarsRaised
         )
     }, [statsQuery.data])
+
+    const recurringDollarsChange = useMemo(() => {
+        const current = statsQuery.data?.recurringDollarsRaised
+        const previous = previousPeriodStatsQuery.data?.recurringDollarsRaised
+
+        if (
+            current == null ||
+            previous == null ||
+            !Number.isFinite(current) ||
+            !Number.isFinite(previous)
+        ) {
+            return null
+        }
+
+        return current - previous
+    }, [statsQuery.data, previousPeriodStatsQuery.data])
 
     const selectedChartStartDate = startDate
     const selectedChartBaseEndDate = endDate
@@ -186,8 +247,8 @@ export function useFundraisingDashboardController() {
         selectedChartBaseEndDate,
     ])
 
-    const chartViewStartDate = chartViewOverrideRange?.startIso ?? startDate
-    const chartViewBaseEndDate = chartViewOverrideRange?.endIso ?? endDate
+    const chartViewStartDate = chartViewOverrideRange?.start ?? startDate
+    const chartViewBaseEndDate = chartViewOverrideRange?.end ?? endDate
 
     const chartEndDate = useMemo(() => {
         if (chartViewOverrideRange) return chartViewBaseEndDate
@@ -216,14 +277,14 @@ export function useFundraisingDashboardController() {
             buildChartBuckets(
                 chartViewStartDate,
                 chartEndDate,
-                allTimeFirstIso,
+                allTimeFirst,
                 granularityMode,
                 !chartViewOverrideRange && committedPreset === 'All Time'
             ),
         [
             chartViewStartDate,
             chartEndDate,
-            allTimeFirstIso,
+            allTimeFirst,
             granularityMode,
             chartViewOverrideRange,
             committedPreset,
@@ -245,13 +306,13 @@ export function useFundraisingDashboardController() {
             queryKey: [
                 '/actblue/fundraising/stats',
                 'bucket',
-                bucket.startIso,
-                bucket.endIso,
+                bucket.start,
+                bucket.end,
             ],
             queryFn: ({ signal }) =>
                 actblueQueries.getFundraisingStats({
-                    startDate: bucket.startIso,
-                    endDate: bucket.endIso,
+                    startDate: bucket.start.toISOString(),
+                    endDate: bucket.end.toISOString(),
                     signal,
                 }),
             enabled: actblueQueries.ready,
@@ -266,15 +327,12 @@ export function useFundraisingDashboardController() {
 
             return {
                 key: bucket.key,
-                anchorIso: bucket.anchorIso,
-                startIso: bucket.startIso,
-                endIso: bucket.endIso,
+                anchor: bucket.anchor,
+                start: bucket.start,
+                end: bucket.end,
                 granularity: bucket.granularity,
                 label: bucket.label,
-                fullLabel: formatFullLabel(
-                    bucket.anchorIso,
-                    bucket.granularity
-                ),
+                fullLabel: formatFullLabel(bucket.anchor, bucket.granularity),
                 primaryBarValue: data?.oneTimeDollarsRaised ?? 0,
                 secondaryBarValue: data?.recurringDollarsRaised ?? 0,
                 lineValue: data?.totalContributionCount ?? 0,
@@ -308,35 +366,37 @@ export function useFundraisingDashboardController() {
 
     const isXToDateSpanOptionRelevant = isXToDatePreset(committedPreset)
 
-    const applyChartViewOverrideRange = (range: {
-        startIso: string
-        endIso: string
-    }) => {
+    const applyChartViewOverrideRange = (range: { start: Date; end: Date }) => {
         const selectedStart = selectedChartStartDate
         const selectedEnd = selectedChartEndDate
 
-        if (range.startIso === selectedStart && range.endIso === selectedEnd) {
+        if (
+            selectedStart &&
+            selectedEnd &&
+            range.start.getTime() === selectedStart.getTime() &&
+            range.end.getTime() === selectedEnd.getTime()
+        ) {
             setChartViewOverrideRange(null)
             return
         }
 
-        const oneDayMs = 24 * 60 * 60 * 1000
-        const selectedInclusiveMs =
-            new Date(selectedEnd).getTime() -
-            new Date(selectedStart).getTime() +
-            1000
-        const selectedIsOneDayWindow =
-            Number.isFinite(selectedInclusiveMs) &&
-            selectedInclusiveMs >= oneDayMs &&
-            selectedInclusiveMs < oneDayMs * 2
+        if (selectedStart && selectedEnd) {
+            const oneDayMs = 24 * 60 * 60 * 1000
+            const selectedInclusiveMs =
+                selectedEnd.getTime() - selectedStart.getTime() + 1000
+            const selectedIsOneDayWindow =
+                Number.isFinite(selectedInclusiveMs) &&
+                selectedInclusiveMs >= oneDayMs &&
+                selectedInclusiveMs < oneDayMs * 2
 
-        if (
-            selectedIsOneDayWindow &&
-            isSameLocalDay(range.startIso, selectedStart) &&
-            isSameLocalDay(range.endIso, selectedEnd)
-        ) {
-            setChartViewOverrideRange(null)
-            return
+            if (
+                selectedIsOneDayWindow &&
+                isSameLocalDay(range.start, selectedStart) &&
+                isSameLocalDay(range.end, selectedEnd)
+            ) {
+                setChartViewOverrideRange(null)
+                return
+            }
         }
 
         setChartViewOverrideRange(range)
@@ -344,8 +404,10 @@ export function useFundraisingDashboardController() {
 
     const chartViewOverrideActive =
         chartViewOverrideRange != null &&
-        (chartViewOverrideRange.startIso !== selectedChartStartDate ||
-            chartViewOverrideRange.endIso !== selectedChartEndDate)
+        (chartViewOverrideRange.start.getTime() !==
+            (selectedChartStartDate?.getTime() ?? NaN) ||
+            chartViewOverrideRange.end.getTime() !==
+                (selectedChartEndDate?.getTime() ?? NaN))
 
     const resetChartViewToSelectedRange = () => {
         setChartViewOverrideRange(null)
@@ -370,10 +432,11 @@ export function useFundraisingDashboardController() {
         raisedKickerLabel,
         recurringPct,
         oneTimePct,
+        recurringDollarsChange,
         validGranularityModes,
         chartPoints,
         chartViewOverrideActive,
-        allTimeFirstIso,
+        allTimeFirst,
         isXToDateSpanOptionRelevant,
         hasValidDraft,
         isAwaitingDraftEndDate,

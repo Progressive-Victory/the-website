@@ -396,7 +396,7 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '61',
         name: 'Darializa Avila Chevalier',
         state: 'New York',
-        electionStatus: '',
+        electionStatus: 'Won Primary',
         electionDate: new Date('06/23/26'),
         handle: '',
         bodyText: '',
@@ -504,26 +504,6 @@ export const CANDIDATES: CandidateConfig[] = [
         image: '/images/endorsement_images/2026/Silhouette/Evan Smith.png',
         learnMoreHref: '',
         initiativeType: '',
-        endorsementType: 'Endorsement',
-        showPvMember: false,
-        avatarBackgroundColor: 'yellow',
-    },
-
-    {
-        id: '5',
-        name: 'Graham Platner',
-        state: 'Maine',
-        electionStatus: '',
-        electionDate: new Date('06/09/26'),
-        handle: '@grahamformaine',
-        handleHref: 'https://x.com/grahamformaine',
-        bodyText:
-            ' is what happens when normal people get fed up and run for office over sanitized aspiring political wannabes! Our Maine team is so excited to get to work on his behalf!',
-        image: '/images/endorsement_images/2026/Silhouette/Graham Platner.png',
-        learnMoreHref:
-            '/images/endorsement_images/2026/Silhouette/Graham Platner.png',
-        initiativeType: 'national',
-
         endorsementType: 'Endorsement',
         showPvMember: false,
         avatarBackgroundColor: 'yellow',
