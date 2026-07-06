@@ -1,4 +1,3 @@
-import styles from './components.module.css'
 import { BaseEdge, Edge, EdgeProps, getBezierPath } from '@xyflow/react'
 
 type CustomEdge = Edge<{ value: number }, 'custom-edge'>
@@ -16,7 +15,13 @@ export default function OrgChartEdge({
         targetX,
         targetY,
     })
-    return <BaseEdge className={styles.edge} id={id} path={edgePath} />
+    return (
+        <BaseEdge
+            id={id}
+            path={edgePath}
+            style={{ stroke: '#1b4568', strokeWidth: 3 }}
+        />
+    )
 }
 
 export function CreateEdge({

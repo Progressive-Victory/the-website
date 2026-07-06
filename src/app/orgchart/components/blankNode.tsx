@@ -1,5 +1,5 @@
 import styles from './components.module.css'
-import { Handle, NodeProps, Position } from '@xyflow/react'
+import { Handle, NodeProps, Position, XYPosition } from '@xyflow/react'
 
 export function BlankNode({ targetPosition, sourcePosition }: NodeProps) {
     return (
@@ -9,6 +9,7 @@ export function BlankNode({ targetPosition, sourcePosition }: NodeProps) {
                 position={targetPosition ?? Position.Left}
                 className={styles.targetHandle}
             />
+            <div className={styles.blankNode} />
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}
@@ -16,4 +17,19 @@ export function BlankNode({ targetPosition, sourcePosition }: NodeProps) {
             />
         </div>
     )
+}
+
+export function CreateBlankNode({
+    id,
+    position = { x: 0, y: 0 },
+}: {
+    id: string | number
+    position?: XYPosition
+}) {
+    return {
+        id: id.toString(),
+        type: 'blankNode',
+        position,
+        data: {},
+    }
 }

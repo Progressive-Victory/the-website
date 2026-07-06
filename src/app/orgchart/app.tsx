@@ -1,17 +1,14 @@
 import '../../../tailwind.config'
 import styles from './app.module.css'
+import { BlankNode } from './components/blankNode'
 import OrgChartEdge from './components/edge'
 import { GroupNode } from './components/group'
-// import { DepartmentNode, DepartmentNodeData } from './components/department'
 import {
     PositionNode,
     PositionData,
     PositionBubble,
-} from './components/newPosition'
-// import { PositionData, PositionBubble } from './components/position'
-// import { TeamNode, TeamNodeData } from './components/team'
-// import { BuildGraphNodes } from './data/constructOrgGraph'
-import { testChartNodes, testChartEdges } from './data/orgchartGraphData'
+} from './components/position'
+import { orgchartData, orgchartEdges } from './data/orgchartGraphData'
 import dagre from '@dagrejs/dagre'
 import {
     type Node,
@@ -66,6 +63,7 @@ const GetElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
 const nodeTypes = {
     positionNode: PositionNode,
     groupNode: GroupNode,
+    blankNode: BlankNode,
 }
 
 const edgeTypes = {
@@ -73,8 +71,8 @@ const edgeTypes = {
 }
 
 const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
-    testChartNodes,
-    testChartEdges
+    orgchartData,
+    orgchartEdges
 )
 
 export default function OrgChartApp() {

@@ -1,26 +1,9 @@
-.edge {
-    stroke: #1b4568;
-    stroke-width: 2;
-}
-
 .nodeContainer {
     display: flex;
     width: 360px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-}
-
-.targetHandle {
-    border-color: #fcd34d;
-    background-color: #fffbeb;
-    opacity: 0;
-}
-
-.sourceHandle {
-    border-color: #fcd34d;
-    background-color: #1b4568;
-    opacity: 0;
 }
 
 .tagContainer {
@@ -140,4 +123,16 @@
     flex-direction: row-reverse;
     border-left-width: 2px;
     border-color: #fcd34d;
+}
+
+.handle {
+    border-color: #fcd34d;
+    background-color: #1b4568;
+}
+
+.blankNode {
+    border-color: #fcd34d;
+    background-color: #1b4568;
+    width: 1px;
+    height: 1px;
 }

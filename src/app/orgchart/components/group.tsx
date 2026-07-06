@@ -1,5 +1,5 @@
-import { PositionBubble, PositionData } from '../components/newPosition'
 import styles from './components.module.css'
+import { PositionBubble, PositionData } from './position'
 import Tag from './tag'
 import { XYPosition, Node, NodeProps, Position, Handle } from '@xyflow/react'
 import { motion } from 'motion/react'
@@ -7,6 +7,7 @@ import React, { useCallback, useRef, useState } from 'react'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type GroupData = {
+    id: string | number
     name: string
     desc?: string
     leads?: PositionData[]
@@ -45,7 +46,8 @@ export function GroupNode({
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
-                className={styles.targetHandle}
+                className={styles.handle}
+                style={{ opacity: 0 }}
             />
             <GroupBubble data={data} />
             <motion.div
@@ -62,7 +64,8 @@ export function GroupNode({
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}
-                className={styles.sourceHandle}
+                className={styles.handle}
+                style={{ opacity: 0 }}
             />
         </div>
     )
@@ -166,6 +169,7 @@ export function CreateGroupNode({
         type: 'groupNode',
         position,
         data: {
+            id: id.toString,
             name,
             desc,
             leads,
