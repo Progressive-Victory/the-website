@@ -13,20 +13,28 @@ import { useDateRangeSelectionController } from './useDateRangeSelectionControll
 import { useEffect, useMemo, useState } from 'react'
 
 interface DateRangePickerProps {
-    startDate: string
-    endDate: string
-    onRangeChange: (startDate: string, endDate: string) => void
+    startDate: Date | null
+    endDate: Date | null
+    onRangeChange: (startDate: Date | null, endDate: Date | null) => void
     maxDate?: Date
     stretch?: boolean
 }
 
 export function DateRangePicker({
-    startDate,
-    endDate,
-    onRangeChange,
+    startDate: startDateProp,
+    endDate: endDateProp,
+    onRangeChange: onRangeChangeProp,
     maxDate = new Date(),
     stretch = true,
 }: DateRangePickerProps) {
+    const startDate = startDateProp ? startDateProp.toISOString() : ''
+    const endDate = endDateProp ? endDateProp.toISOString() : ''
+    const onRangeChange = (nextStart: string, nextEnd: string) =>
+        onRangeChangeProp(
+            nextStart ? new Date(nextStart) : null,
+            nextEnd ? new Date(nextEnd) : null
+        )
+
     const [calendarMonth, setCalendarMonth] = useState(() => {
         const anchor = startDate ? new Date(startDate) : new Date()
         return new Date(anchor.getFullYear(), anchor.getMonth(), 1)

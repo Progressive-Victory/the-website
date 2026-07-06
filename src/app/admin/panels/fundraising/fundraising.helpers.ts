@@ -80,26 +80,17 @@ export function formatDonationCountLabel(value?: number) {
     return `${formatCount(value)} ${value === 1 ? 'donation' : 'donations'}`
 }
 
-export function startOfDayISO(d: Date): string {
-    return new Date(
-        d.getFullYear(),
-        d.getMonth(),
-        d.getDate(),
-        0,
-        0,
-        0
-    ).toISOString()
+export function startOfDay(d: Date): Date {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0)
 }
 
-export function endOfDayISO(d: Date): string {
-    return new Date(
-        d.getFullYear(),
-        d.getMonth(),
-        d.getDate(),
-        23,
-        59,
-        59
-    ).toISOString()
+export function endOfDay(d: Date): Date {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59)
+}
+
+function isSameDate(a: Date | null, b: Date | null): boolean {
+    if (a === null || b === null) return a === b
+    return a.getTime() === b.getTime()
 }
 
 export function addDays(date: Date, days: number) {
@@ -108,81 +99,77 @@ export function addDays(date: Date, days: number) {
     return d
 }
 
-export function getPresetRange(preset: Preset): [string, string] {
+export function getPresetRange(preset: Preset): [Date | null, Date | null] {
     const today = new Date()
 
     switch (preset) {
         case 'All Time':
-            return ['', '']
+            return [null, null]
         case 'Year To Date':
             return [
-                startOfDayISO(new Date(today.getFullYear(), 0, 1)),
-                endOfDayISO(today),
+                startOfDay(new Date(today.getFullYear(), 0, 1)),
+                endOfDay(today),
             ]
         case 'Month To Date':
             return [
-                startOfDayISO(
-                    new Date(today.getFullYear(), today.getMonth(), 1)
-                ),
-                endOfDayISO(today),
+                startOfDay(new Date(today.getFullYear(), today.getMonth(), 1)),
+                endOfDay(today),
             ]
         case 'Last Month': {
             const start = new Date(today.getFullYear(), today.getMonth() - 1, 1)
             const end = new Date(today.getFullYear(), today.getMonth(), 0)
-            return [startOfDayISO(start), endOfDayISO(end)]
+            return [startOfDay(start), endOfDay(end)]
         }
         case 'Week To Date': {
             const day = today.getDay()
             const diff = day === 0 ? 6 : day - 1
             const start = new Date(today)
             start.setDate(today.getDate() - diff)
-            return [startOfDayISO(start), endOfDayISO(today)]
+            return [startOfDay(start), endOfDay(today)]
         }
         case 'Last 7 Days': {
             const start = new Date(today)
             start.setDate(today.getDate() - 6)
-            return [startOfDayISO(start), endOfDayISO(today)]
+            return [startOfDay(start), endOfDay(today)]
         }
         case 'Today':
-            return [startOfDayISO(today), endOfDayISO(today)]
+            return [startOfDay(today), endOfDay(today)]
         case 'Yesterday': {
             const yesterday = new Date(today)
             yesterday.setDate(today.getDate() - 1)
-            return [startOfDayISO(yesterday), endOfDayISO(yesterday)]
+            return [startOfDay(yesterday), endOfDay(yesterday)]
         }
     }
 }
 
 export function getResolvedPresetRange(
     preset: Preset,
-    allTimeFirstIso?: string
-): [string, string] {
-    let [startIso, endIso] = getPresetRange(preset)
+    allTimeFirst?: Date | null
+): [Date | null, Date | null] {
+    let [start, end] = getPresetRange(preset)
 
     if (preset === 'All Time') {
         const today = new Date()
-        endIso = endOfDayISO(today)
-        startIso = allTimeFirstIso
-            ? startOfDayISO(new Date(allTimeFirstIso))
-            : startOfDayISO(today)
+        end = endOfDay(today)
+        start = allTimeFirst ? startOfDay(allTimeFirst) : startOfDay(today)
     }
 
-    return [startIso, endIso]
+    return [start, end]
 }
 
 export function inferPresetFromRange(
-    startIso: string,
-    endIso: string,
-    allTimeFirstIso?: string
+    start: Date | null,
+    end: Date | null,
+    allTimeFirst?: Date | null
 ): Preset | null {
-    if (!startIso || !endIso) return null
+    if (!start || !end) return null
 
     for (const preset of PRESETS) {
         const [presetStart, presetEnd] = getResolvedPresetRange(
             preset,
-            allTimeFirstIso
+            allTimeFirst
         )
-        if (startIso === presetStart && endIso === presetEnd) {
+        if (isSameDate(start, presetStart) && isSameDate(end, presetEnd)) {
             return preset
         }
     }
@@ -214,36 +201,32 @@ export function getXToDatePeriodName(
 
 export function getExtendedEndForXToDatePreset(
     preset: 'Year To Date' | 'Month To Date' | 'Week To Date' | 'Today',
-    startIso: string,
-    endIso: string
-): string {
-    if (!startIso || !endIso) return endIso
+    start: Date | null,
+    end: Date | null
+): Date | null {
+    if (!start || !end) return end
 
     if (preset === 'Today') {
-        const d = new Date(startIso)
-        return endOfDayISO(d)
+        return endOfDay(start)
     }
 
     if (preset === 'Year To Date') {
-        const d = new Date(startIso)
-        return endOfDayISO(new Date(d.getFullYear(), 11, 31))
+        return endOfDay(new Date(start.getFullYear(), 11, 31))
     }
 
     if (preset === 'Month To Date') {
-        const d = new Date(startIso)
-        return endOfDayISO(new Date(d.getFullYear(), d.getMonth() + 1, 0))
+        return endOfDay(new Date(start.getFullYear(), start.getMonth() + 1, 0))
     }
 
-    const start = new Date(startIso)
     const weekEnd = addDays(
         new Date(start.getFullYear(), start.getMonth(), start.getDate()),
         6
     )
-    return endOfDayISO(weekEnd)
+    return endOfDay(weekEnd)
 }
 
-export function formatRangeDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('en-US', {
+export function formatRangeDate(date: Date): string {
+    return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -262,8 +245,8 @@ type RangeKind = 'preset' | 'all' | 'both' | 'from' | 'until'
 
 function getRangeKind(
     committedPreset: Preset | null,
-    startDate: string,
-    endDate: string
+    startDate: Date | null,
+    endDate: Date | null
 ): RangeKind {
     switch (true) {
         case !!committedPreset:
@@ -281,21 +264,21 @@ function getRangeKind(
 
 export function getSelectedRangeLabel(
     committedPreset: Preset | null,
-    startDate: string,
-    endDate: string
+    startDate: Date | null,
+    endDate: Date | null
 ) {
     const kind = getRangeKind(committedPreset, startDate, endDate)
     switch (kind) {
         case 'preset':
             return committedPreset!
         case 'both':
-            return isSameDay(new Date(startDate), new Date(endDate))
-                ? formatRangeDate(startDate)
-                : `${formatRangeDate(startDate)} - ${formatRangeDate(endDate)}`
+            return isSameDay(startDate!, endDate!)
+                ? formatRangeDate(startDate!)
+                : `${formatRangeDate(startDate!)} - ${formatRangeDate(endDate!)}`
         case 'from':
-            return `From ${formatRangeDate(startDate)}`
+            return `From ${formatRangeDate(startDate!)}`
         case 'until':
-            return `Until ${formatRangeDate(endDate)}`
+            return `Until ${formatRangeDate(endDate!)}`
         case 'all':
             return 'All Time'
         default: {
@@ -307,19 +290,19 @@ export function getSelectedRangeLabel(
 
 export function getRaisedKickerLabel(
     committedPreset: Preset | null,
-    startDate: string,
-    endDate: string
+    startDate: Date | null,
+    endDate: Date | null
 ) {
     const kind = getRangeKind(committedPreset, startDate, endDate)
     switch (kind) {
         case 'preset':
             return `Total Raised ${committedPreset!}`
         case 'both':
-            return `Total Raised ${formatRangeDate(startDate)} - ${formatRangeDate(endDate)}`
+            return `Total Raised ${formatRangeDate(startDate!)} - ${formatRangeDate(endDate!)}`
         case 'from':
-            return `Total Raised From ${formatRangeDate(startDate)}`
+            return `Total Raised From ${formatRangeDate(startDate!)}`
         case 'until':
-            return `Total Raised Until ${formatRangeDate(endDate)}`
+            return `Total Raised Until ${formatRangeDate(endDate!)}`
         case 'all':
             return 'Total Raised Custom Range'
         default: {

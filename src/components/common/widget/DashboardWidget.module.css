@@ -14,12 +14,25 @@
     color: rgba(15, 23, 42, 0.52);
 }
 
-.value {
+.valueRow {
     margin-top: 0.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.35rem;
+}
+
+.value {
     font-size: 1.16rem;
     font-weight: 850;
     letter-spacing: -0.025em;
     color: rgba(9, 34, 58, 0.9);
+}
+
+.valueChange {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1;
 }
 
 .stats {
