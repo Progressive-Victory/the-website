@@ -89,7 +89,7 @@ export function AccountPage() {
                             donorLinkError={linkUser.error}
                             onDonorLinkSubmit={onLinkFormSubmit}
                         />
-                        {loggedInUser.data.donors?.length && (
+                        {!!loggedInUser.data.donors?.length && (
                             <AccountContributionsSection
                                 user={loggedInUser.data}
                                 error={linkUser.error}

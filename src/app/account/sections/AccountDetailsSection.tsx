@@ -517,44 +517,18 @@ export function AccountDetailsSection({
                                                 </>
                                             ) : (
                                                 <>
-                                                    <p
-                                                        className={
-                                                            styles.membershipStatusManualNotice
-                                                        }
-                                                    >
-                                                        This has to be set
-                                                        manually please check
-                                                        back later, if it
-                                                        remains incorrect please{' '}
-                                                        <a
-                                                            href="https://www.progressivevictory.win/membership_support"
-                                                            className={
-                                                                styles.membershipStatusManualNoticeLink
-                                                            }
-                                                        >
-                                                            click here
-                                                        </a>
-                                                    </p>
                                                     <div
                                                         className={
-                                                            formFieldStyles.fieldHeader
+                                                            styles.membershipStatusIndicatorContainer
                                                         }
                                                     >
-                                                        <span
-                                                            className={
-                                                                formFieldStyles.fieldLabel
-                                                            }
-                                                        >
-                                                            Dues Paying Member
+                                                        <span>
+                                                            Dues Paying Member:
                                                         </span>
-                                                        <div
-                                                            className={
-                                                                formFieldStyles.fieldValue
-                                                            }
-                                                        >
+                                                        <div>
                                                             <div
                                                                 className={
-                                                                    formFieldStyles.readonly
+                                                                    styles.membershipStatus
                                                                 }
                                                             >
                                                                 {userData.duesPayingMember
@@ -563,6 +537,32 @@ export function AccountDetailsSection({
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <p
+                                                        className={
+                                                            styles.membershipStatusManualNotice
+                                                        }
+                                                    >
+                                                        This must be set
+                                                        manually, please check
+                                                        back later.
+                                                    </p>
+                                                    <p
+                                                        className={
+                                                            styles.membershipStatusManualNotice
+                                                        }
+                                                    >
+                                                        If it remains incorrect,
+                                                        please{' '}
+                                                        <a
+                                                            href="https://www.progressivevictory.win/membership_support"
+                                                            className={
+                                                                styles.membershipStatusManualNoticeLink
+                                                            }
+                                                        >
+                                                            click here
+                                                        </a>{' '}
+                                                        for support.
+                                                    </p>
                                                 </>
                                             )}
                                         </div>
