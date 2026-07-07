@@ -522,10 +522,17 @@ export function AccountDetailsSection({
                                                             styles.membershipStatusManualNotice
                                                         }
                                                     >
-                                                        This has to be set
-                                                        manually please check
-                                                        back later, if it
-                                                        remains incorrect please{' '}
+                                                        This must be set
+                                                        manually, please check
+                                                        back later.
+                                                    </p>
+                                                    <p
+                                                        className={
+                                                            styles.membershipStatusManualNotice
+                                                        }
+                                                    >
+                                                        If it remains incorrect,
+                                                        please{' '}
                                                         <a
                                                             href="https://www.progressivevictory.win/membership_support"
                                                             className={
@@ -533,7 +540,8 @@ export function AccountDetailsSection({
                                                             }
                                                         >
                                                             click here
-                                                        </a>
+                                                        </a>{' '}
+                                                        for support.
                                                     </p>
                                                     <div
                                                         className={
