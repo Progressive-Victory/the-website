@@ -517,6 +517,32 @@ export function AccountDetailsSection({
                                                 </>
                                             ) : (
                                                 <>
+                                                    <div
+                                                        className={`${formFieldStyles.fieldHeader} ${styles.membershipStatusIndicatorContainer}`}
+                                                    >
+                                                        <span
+                                                            className={
+                                                                formFieldStyles.fieldLabel
+                                                            }
+                                                        >
+                                                            Dues Paying Member:
+                                                        </span>
+                                                        <div
+                                                            className={
+                                                                formFieldStyles.fieldValue
+                                                            }
+                                                        >
+                                                            <div
+                                                                className={
+                                                                    formFieldStyles.readonly
+                                                                }
+                                                            >
+                                                                {userData.duesPayingMember
+                                                                    ? 'Yes'
+                                                                    : 'No'}
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                     <p
                                                         className={
                                                             styles.membershipStatusManualNotice
@@ -543,34 +569,6 @@ export function AccountDetailsSection({
                                                         </a>{' '}
                                                         for support.
                                                     </p>
-                                                    <div
-                                                        className={
-                                                            formFieldStyles.fieldHeader
-                                                        }
-                                                    >
-                                                        <span
-                                                            className={
-                                                                formFieldStyles.fieldLabel
-                                                            }
-                                                        >
-                                                            Dues Paying Member
-                                                        </span>
-                                                        <div
-                                                            className={
-                                                                formFieldStyles.fieldValue
-                                                            }
-                                                        >
-                                                            <div
-                                                                className={
-                                                                    formFieldStyles.readonly
-                                                                }
-                                                            >
-                                                                {userData.duesPayingMember
-                                                                    ? 'Yes'
-                                                                    : 'No'}
-                                                            </div>
-                                                        </div>
-                                                    </div>
                                                 </>
                                             )}
                                         </div>

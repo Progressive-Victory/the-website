@@ -467,6 +467,29 @@
     font-weight: 700;
 }
 
+.membershipStatusIndicatorContainer {
+    padding-left: 0 !important;
+    justify-content: center;
+
+    & > * {
+        min-width: fit-content;
+    }
+
+    & > *:nth-child(1) {
+        flex: 0;
+
+        &::after {
+            content: '';
+            padding-right: 0.5rem;
+        }
+    }
+
+    & > *:nth-child(2) {
+        flex: 0;
+        font-weight: 600;
+    }
+}
+
 .detailsMembershipStatusRow {
     display: flex;
     justify-content: space-between;
