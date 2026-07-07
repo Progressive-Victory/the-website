@@ -518,23 +518,17 @@ export function AccountDetailsSection({
                                             ) : (
                                                 <>
                                                     <div
-                                                        className={`${formFieldStyles.fieldHeader} ${styles.membershipStatusIndicatorContainer}`}
+                                                        className={
+                                                            styles.membershipStatusIndicatorContainer
+                                                        }
                                                     >
-                                                        <span
-                                                            className={
-                                                                formFieldStyles.fieldLabel
-                                                            }
-                                                        >
+                                                        <span>
                                                             Dues Paying Member:
                                                         </span>
-                                                        <div
-                                                            className={
-                                                                formFieldStyles.fieldValue
-                                                            }
-                                                        >
+                                                        <div>
                                                             <div
                                                                 className={
-                                                                    formFieldStyles.readonly
+                                                                    styles.membershipStatus
                                                                 }
                                                             >
                                                                 {userData.duesPayingMember

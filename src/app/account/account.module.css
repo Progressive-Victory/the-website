@@ -468,26 +468,14 @@
 }
 
 .membershipStatusIndicatorContainer {
-    padding-left: 0 !important;
+    display: flex;
     justify-content: center;
+    gap: 0.5rem;
+    padding-left: 0 !important;
+}
 
-    & > * {
-        min-width: fit-content;
-    }
-
-    & > *:nth-child(1) {
-        flex: 0;
-
-        &::after {
-            content: '';
-            padding-right: 0.5rem;
-        }
-    }
-
-    & > *:nth-child(2) {
-        flex: 0;
-        font-weight: 600;
-    }
+.membershipStatus {
+    font-weight: 600;
 }
 
 .detailsMembershipStatusRow {
