@@ -2,11 +2,12 @@ import { useAuth } from './useAuth'
 import { ApiError, FetchError } from '@/models'
 import z from 'zod'
 
-type QueryPrim = string | number | boolean | null
-type QueryParam = QueryPrim | QueryPrim[] | undefined
+type ParamPrim = string | number | boolean | Date | null | undefined
+type RouteParam = ParamPrim
+type QueryParam = ParamPrim | ParamPrim[]
 
 export type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
-export type RouteParams = Record<string, string | number | boolean>
+export type RouteParams = Record<string, RouteParam>
 export type QueryParams = Record<string, QueryParam>
 export type ZodSchema = z.ZodObject | z.ZodArray | z.ZodRecord
 
@@ -18,6 +19,33 @@ interface QueryOptions {
 
 export function useFetch() {
     const { apiBaseUrl, session, onRefresh, onLogout } = useAuth()
+
+    const serializeParam = (param: ParamPrim) => {
+        if (param === undefined) return null
+        if (param instanceof Date) return param.toISOString()
+        return String(param)
+    }
+
+    const serializeRouteParam = (params: RouteParams, key: string) => {
+        const value = serializeParam(params[key])
+        if (!value)
+            throw new Error(
+                `Invalid fetch! Substitution key :${key} does not exist in params (value ${value})`
+            )
+
+        return encodeURIComponent(value)
+    }
+
+    const addQueryParam = (url: URL, key: string, param: QueryParam) => {
+        if (Array.isArray(param)) {
+            param.forEach((elem) => {
+                addQueryParam(url, key, elem)
+            })
+        } else {
+            const value = serializeParam(param)
+            if (value) url.searchParams.append(key, value)
+        }
+    }
 
     async function onFetch<S extends ZodSchema | null>(
         method: HttpMethod,
@@ -33,26 +61,14 @@ export function useFetch() {
                 'Invalid fetch! Routes can only contain substitution keys or path identifiers'
             )
 
-        const encodedRoute = route.replaceAll(/:([\w-]+)/g, (_, key) => {
-            const value = params[key as string]
-            if (value != null) return encodeURIComponent(value)
-            throw new Error(
-                `Invalid fetch! Substitution key :${key} does not exist in params`
-            )
-        })
+        const encodedRoute = route.replaceAll(/:([\w-]+)/g, (_, key: string) =>
+            serializeRouteParam(params, key)
+        )
 
         const url = new URL(encodedRoute, apiBaseUrl)
 
         Object.entries(query).forEach(([key, value]) => {
-            if (value === undefined) return
-            if (!Array.isArray(value)) {
-                url.searchParams.append(key, String(value))
-                return
-            }
-            value.forEach((elem) => {
-                if (elem === undefined) return
-                url.searchParams.append(key, String(elem))
-            })
+            addQueryParam(url, key, value)
         })
 
         const req: RequestInit = {
