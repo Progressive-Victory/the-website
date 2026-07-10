@@ -100,6 +100,15 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
     }
 }
 
+const formatContributionDateTime = (date: Date): string => {
+    if (Number.isNaN(date.getTime())) return 'Unknown date'
+
+    return new Intl.DateTimeFormat('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+    }).format(date)
+}
+
 export function DonorView({
     selectedId,
     user,
@@ -239,6 +248,31 @@ export function DonorView({
                     <div className={styles.linkedList}>
                         {linkedDonors.map((donor) => {
                             const contributionData = calcContributionData(donor)
+                            const contributionFormByLineitemId = new Map<
+                                number,
+                                string
+                            >()
+                            const contributionIsRecurringByLineitemId = new Map<
+                                number,
+                                boolean
+                            >()
+
+                            ;(donor.contributions ?? []).forEach(
+                                (contribution: ActBlueContribution) => {
+                                    ;(contribution.lineitems ?? []).forEach(
+                                        (lineitem: ActBlueLineitem) => {
+                                            contributionFormByLineitemId.set(
+                                                lineitem.lineitemId,
+                                                contribution.contributionForm
+                                            )
+                                            contributionIsRecurringByLineitemId.set(
+                                                lineitem.lineitemId,
+                                                contribution.isRecurring
+                                            )
+                                        }
+                                    )
+                                }
+                            )
 
                             return (
                                 <div
@@ -392,88 +426,101 @@ export function DonorView({
                                                     />
                                                 </FormGroup>
 
-                                                {(
-                                                    contributionData.lineitems ??
-                                                    []
-                                                ).map((lineitem) => (
-                                                    <FormGroup
-                                                        title={`${lineitem.lineitemId}`}
-                                                        key={
-                                                            lineitem.lineitemId
-                                                        }
-                                                        defaultCollapsed
-                                                        subGroup
-                                                    >
-                                                        <DateField<ActBlueDonor>
-                                                            label="Paid At"
-                                                            getter={() =>
-                                                                lineitem.paidAt
+                                                {[
+                                                    ...(contributionData.lineitems ??
+                                                        []),
+                                                ]
+
+                                                    .sort(
+                                                        (a, b) =>
+                                                            b.paidAt.getTime() -
+                                                            a.paidAt.getTime()
+                                                    )
+                                                    .map((lineitem) => (
+                                                        <FormGroup
+                                                            title={`Donated $${lineitem.amount}`}
+                                                            subtitle={`${formatContributionDateTime(lineitem.paidAt)} · ${contributionFormByLineitemId.get(lineitem.lineitemId) ?? 'Unknown form'}`}
+                                                            key={
+                                                                lineitem.lineitemId
                                                             }
-                                                        />
-                                                        <TextField<ActBlueDonor>
-                                                            label="Sequence"
-                                                            getter={() =>
-                                                                `${lineitem.sequence}`
-                                                            }
-                                                        />
-                                                        <TextField<ActBlueDonor>
-                                                            label="Amount"
-                                                            getter={() =>
-                                                                `$${lineitem.amount}`
-                                                            }
-                                                        />
-                                                        <TextField<ActBlueDonor>
-                                                            label="Recurring Amount"
-                                                            getter={() =>
-                                                                `$${lineitem.recurringAmount}`
-                                                            }
-                                                        />
-                                                        <TextField<ActBlueDonor>
-                                                            label="Amount Less AB Fees"
-                                                            getter={() =>
-                                                                `$${lineitem.amountLessAbFees}`
-                                                            }
-                                                        />
-                                                        <TextField
-                                                            label="Form Name"
-                                                            field="contributionForm"
-                                                            getter={() =>
-                                                                donor
-                                                                    .contributions?.[0]
-                                                                    ?.contributionForm
-                                                            }
-                                                        />
-                                                        <br />
-                                                        {contributionData.customFields?.map(
-                                                            (field) => (
-                                                                <TextField
-                                                                    key={
-                                                                        field.id
-                                                                    }
-                                                                    label={
-                                                                        field.label
-                                                                    }
-                                                                    getter={() =>
-                                                                        field.answer
-                                                                    }
-                                                                />
-                                                            )
-                                                        )}
-                                                        <br />
-                                                        <Link
-                                                            href={{
-                                                                pathname:
-                                                                    '/admin/panels/contributions',
-                                                                query: {
-                                                                    lineitemId:
-                                                                        lineitem.lineitemId,
-                                                                },
-                                                            }}
+                                                            defaultCollapsed
+                                                            subGroup
                                                         >
-                                                            Full Details
-                                                        </Link>
-                                                    </FormGroup>
-                                                ))}
+                                                            <DateField<ActBlueDonor>
+                                                                label="Paid At"
+                                                                getter={() =>
+                                                                    lineitem.paidAt
+                                                                }
+                                                            />
+                                                            <TextField<ActBlueDonor>
+                                                                label="Sequence"
+                                                                getter={() =>
+                                                                    `${lineitem.sequence}`
+                                                                }
+                                                            />
+                                                            <TextField<ActBlueDonor>
+                                                                label="Is Recurring"
+                                                                getter={() =>
+                                                                    `${
+                                                                        contributionIsRecurringByLineitemId.get(
+                                                                            lineitem.lineitemId
+                                                                        ) ??
+                                                                        false
+                                                                    }`
+                                                                }
+                                                            />
+                                                            <TextField<ActBlueDonor>
+                                                                label="Amount"
+                                                                getter={() =>
+                                                                    `$${lineitem.amount}`
+                                                                }
+                                                            />
+                                                            <TextField<ActBlueDonor>
+                                                                label="Recurring Amount"
+                                                                getter={() =>
+                                                                    `$${lineitem.recurringAmount}`
+                                                                }
+                                                            />
+                                                            <TextField
+                                                                label="Form Name"
+                                                                field="contributionForm"
+                                                                getter={() =>
+                                                                    contributionFormByLineitemId.get(
+                                                                        lineitem.lineitemId
+                                                                    )
+                                                                }
+                                                            />
+                                                            <br />
+                                                            {contributionData.customFields?.map(
+                                                                (field) => (
+                                                                    <TextField
+                                                                        key={
+                                                                            field.id
+                                                                        }
+                                                                        label={
+                                                                            field.label
+                                                                        }
+                                                                        getter={() =>
+                                                                            field.answer
+                                                                        }
+                                                                    />
+                                                                )
+                                                            )}
+                                                            <br />
+                                                            <Link
+                                                                href={{
+                                                                    pathname:
+                                                                        '/admin/panels/contributions',
+                                                                    query: {
+                                                                        lineitemId:
+                                                                            lineitem.lineitemId,
+                                                                    },
+                                                                }}
+                                                            >
+                                                                Full Details
+                                                            </Link>
+                                                        </FormGroup>
+                                                    ))}
                                                 <br />
                                                 <Link
                                                     href={{
