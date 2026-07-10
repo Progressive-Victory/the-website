@@ -92,16 +92,11 @@
     justify-content: center;
     gap: 1.75rem;
     padding: 0 1rem;
+    align-items: center;
 }
 
 .messageCard {
     max-width: 36rem;
-}
-
-@media (min-width: 1280px) {
-    .messageCard {
-        width: 30vw;
-    }
 }
 
 .orderLastXlFirst {
@@ -126,12 +121,6 @@
 
 .messageMid {
     height: fit-content;
-}
-
-@media (min-width: 1024px) {
-    .messageMid {
-        margin-top: 6rem;
-    }
 }
 
 .tilt {
