@@ -523,6 +523,16 @@ export default function Page() {
                             },
                         ],
                     },
+                    {
+                        label: 'Donors',
+                        value: 'isDonor',
+                        options: [
+                            {
+                                label: `Show ${donorCount ?? '...'} Matched Donors`,
+                                value: 'true',
+                            },
+                        ],
+                    },
                 ]}
                 pinnedContent={
                     loggedInUser.data ? (
