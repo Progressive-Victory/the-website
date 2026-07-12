@@ -16,9 +16,6 @@ export interface FormGroupProps<T> {
     /** The group's title, displayed as a heading above the fields. */
     title: string
 
-    /** Optional subtitle displayed under the group's title. */
-    subtitle?: string
-
     /** Whether the group is displayed as collapsed by default. */
     defaultCollapsed?: boolean
 
@@ -57,7 +54,6 @@ export interface FormGroupProps<T> {
 export function FormGroup<T>({
     id,
     title,
-    subtitle,
     defaultCollapsed,
     wrapper,
     subGroup,
@@ -86,7 +82,6 @@ export function FormGroup<T>({
     return (
         <CollapsibleSection
             title={title}
-            subtitle={subtitle}
             initialOpenState={!defaultCollapsed}
             subGroup={subGroup}
         >
