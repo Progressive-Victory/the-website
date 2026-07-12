@@ -275,133 +275,123 @@ export function DonorView({
                             )
 
                             return (
-                                <div
-                                    key={donor.email}
-                                    className={styles.donorCard}
-                                >
-                                    <div className={styles.donorCardTop}>
-                                        <div className={styles.donorCardTitle}>
-                                            {donor.firstname} {donor.lastname}
-                                        </div>
-                                    </div>
+                                <div key={donor.email}>
+                                    <div className={styles.donorCard}>
+                                        <Form<ActBlueDonor>
+                                            key={donor.userId}
+                                            title=""
+                                            readonly
+                                            form={donor}
+                                            onSave={() => {
+                                                return
+                                            }}
+                                        >
+                                            <FormGroup title="" wrapper>
+                                                <FormGroup
+                                                    title="Contact Info"
+                                                    subGroup
+                                                >
+                                                    <TextField
+                                                        label="First Name"
+                                                        field="firstname"
+                                                        required
+                                                    />
+                                                    <TextField
+                                                        label="Last Name"
+                                                        field="lastname"
+                                                        required
+                                                    />
+                                                    <TextField
+                                                        label="Email"
+                                                        field="email"
+                                                        readonly
+                                                    />
+                                                    <TextField
+                                                        label="Phone Number"
+                                                        field="phone"
+                                                    />
+                                                </FormGroup>
 
-                                    <Form<ActBlueDonor>
-                                        key={donor.userId}
-                                        title=""
-                                        readonly
-                                        form={donor}
-                                        onSave={() => {
-                                            return
-                                        }}
-                                    >
-                                        <FormGroup title="" wrapper>
-                                            <FormGroup
-                                                title="Contact Info"
-                                                subGroup
-                                            >
-                                                <TextField
-                                                    label="First Name"
-                                                    field="firstname"
-                                                    required
-                                                />
-                                                <TextField
-                                                    label="Last Name"
-                                                    field="lastname"
-                                                    required
-                                                />
-                                                <TextField
-                                                    label="Email"
-                                                    field="email"
-                                                    readonly
-                                                />
-                                                <TextField
-                                                    label="Phone Number"
-                                                    field="phone"
-                                                />
-                                            </FormGroup>
+                                                <FormGroup
+                                                    title="Address"
+                                                    subGroup
+                                                >
+                                                    <TextField
+                                                        label="Street Address"
+                                                        field="addr1"
+                                                    />
+                                                    <TextField
+                                                        label="City"
+                                                        field="city"
+                                                    />
+                                                    <TextField
+                                                        label="State"
+                                                        field="state"
+                                                    />
+                                                    <TextField
+                                                        label="Zip Code"
+                                                        field="zip"
+                                                    />
+                                                    <TextField
+                                                        label="Country"
+                                                        field="country"
+                                                    />
+                                                </FormGroup>
 
-                                            <FormGroup title="Address" subGroup>
-                                                <TextField
-                                                    label="Street Address"
-                                                    field="addr1"
-                                                />
-                                                <TextField
-                                                    label="City"
-                                                    field="city"
-                                                />
-                                                <TextField
-                                                    label="State"
-                                                    field="state"
-                                                />
-                                                <TextField
-                                                    label="Zip Code"
-                                                    field="zip"
-                                                />
-                                                <TextField
-                                                    label="Country"
-                                                    field="country"
-                                                />
-                                            </FormGroup>
+                                                <FormGroup
+                                                    title="Employer Info"
+                                                    subGroup
+                                                >
+                                                    <TextField<ActBlueDonor>
+                                                        label="Employer Name"
+                                                        getter={(form) =>
+                                                            form.employerData
+                                                                ?.employer
+                                                        }
+                                                    />
+                                                    <TextField<ActBlueDonor>
+                                                        label="Occupation"
+                                                        getter={(form) =>
+                                                            form.employerData
+                                                                ?.occupation
+                                                        }
+                                                    />
+                                                    <TextField<ActBlueDonor>
+                                                        label="Employer Street Address"
+                                                        getter={(form) =>
+                                                            form.employerData
+                                                                ?.employerAddr1
+                                                        }
+                                                    />
+                                                    <TextField<ActBlueDonor>
+                                                        label="Employer City"
+                                                        getter={(form) =>
+                                                            form.employerData
+                                                                ?.employerCity
+                                                        }
+                                                    />
+                                                    <TextField<ActBlueDonor>
+                                                        label="Employer State"
+                                                        getter={(form) =>
+                                                            form.employerData
+                                                                ?.employerState
+                                                        }
+                                                    />
+                                                    <TextField<ActBlueDonor>
+                                                        label="Employer Zip Code"
+                                                        getter={(form) =>
+                                                            `${form.employerData?.employerZip ?? ''}`
+                                                        }
+                                                    />
+                                                    <TextField<ActBlueDonor>
+                                                        label="Employer Country"
+                                                        getter={(form) =>
+                                                            form.employerData
+                                                                ?.employerCountry
+                                                        }
+                                                    />
+                                                </FormGroup>
 
-                                            <FormGroup
-                                                title="Employer Info"
-                                                subGroup
-                                            >
-                                                <TextField<ActBlueDonor>
-                                                    label="Employer Name"
-                                                    getter={(form) =>
-                                                        form.employerData
-                                                            ?.employer
-                                                    }
-                                                />
-                                                <TextField<ActBlueDonor>
-                                                    label="Occupation"
-                                                    getter={(form) =>
-                                                        form.employerData
-                                                            ?.occupation
-                                                    }
-                                                />
-                                                <TextField<ActBlueDonor>
-                                                    label="Employer Street Address"
-                                                    getter={(form) =>
-                                                        form.employerData
-                                                            ?.employerAddr1
-                                                    }
-                                                />
-                                                <TextField<ActBlueDonor>
-                                                    label="Employer City"
-                                                    getter={(form) =>
-                                                        form.employerData
-                                                            ?.employerCity
-                                                    }
-                                                />
-                                                <TextField<ActBlueDonor>
-                                                    label="Employer State"
-                                                    getter={(form) =>
-                                                        form.employerData
-                                                            ?.employerState
-                                                    }
-                                                />
-                                                <TextField<ActBlueDonor>
-                                                    label="Employer Zip Code"
-                                                    getter={(form) =>
-                                                        `${form.employerData?.employerZip ?? ''}`
-                                                    }
-                                                />
-                                                <TextField<ActBlueDonor>
-                                                    label="Employer Country"
-                                                    getter={(form) =>
-                                                        form.employerData
-                                                            ?.employerCountry
-                                                    }
-                                                />
-                                            </FormGroup>
-
-                                            <FormGroup
-                                                title="Contributions"
-                                                wrapper
-                                                subGroup
-                                            >
                                                 <FormGroup
                                                     title="All Time Stats"
                                                     subGroup
@@ -426,102 +416,6 @@ export function DonorView({
                                                     />
                                                 </FormGroup>
 
-                                                {[
-                                                    ...(contributionData.lineitems ??
-                                                        []),
-                                                ]
-
-                                                    .sort(
-                                                        (a, b) =>
-                                                            b.paidAt.getTime() -
-                                                            a.paidAt.getTime()
-                                                    )
-                                                    .map((lineitem) => (
-                                                        <FormGroup
-                                                            title={`Donated $${lineitem.amount}`}
-                                                            subtitle={`${formatContributionDateTime(lineitem.paidAt)} · ${contributionFormByLineitemId.get(lineitem.lineitemId) ?? 'Unknown form'}`}
-                                                            key={
-                                                                lineitem.lineitemId
-                                                            }
-                                                            defaultCollapsed
-                                                            subGroup
-                                                        >
-                                                            <DateField<ActBlueDonor>
-                                                                label="Paid At"
-                                                                getter={() =>
-                                                                    lineitem.paidAt
-                                                                }
-                                                            />
-                                                            <TextField<ActBlueDonor>
-                                                                label="Sequence"
-                                                                getter={() =>
-                                                                    `${lineitem.sequence}`
-                                                                }
-                                                            />
-                                                            <TextField<ActBlueDonor>
-                                                                label="Is Recurring"
-                                                                getter={() =>
-                                                                    `${
-                                                                        contributionIsRecurringByLineitemId.get(
-                                                                            lineitem.lineitemId
-                                                                        ) ??
-                                                                        false
-                                                                    }`
-                                                                }
-                                                            />
-                                                            <TextField<ActBlueDonor>
-                                                                label="Amount"
-                                                                getter={() =>
-                                                                    `$${lineitem.amount}`
-                                                                }
-                                                            />
-                                                            <TextField<ActBlueDonor>
-                                                                label="Recurring Amount"
-                                                                getter={() =>
-                                                                    `$${lineitem.recurringAmount}`
-                                                                }
-                                                            />
-                                                            <TextField
-                                                                label="Form Name"
-                                                                field="contributionForm"
-                                                                getter={() =>
-                                                                    contributionFormByLineitemId.get(
-                                                                        lineitem.lineitemId
-                                                                    )
-                                                                }
-                                                            />
-                                                            <br />
-                                                            {contributionData.customFields?.map(
-                                                                (field) => (
-                                                                    <TextField
-                                                                        key={
-                                                                            field.id
-                                                                        }
-                                                                        label={
-                                                                            field.label
-                                                                        }
-                                                                        getter={() =>
-                                                                            field.answer
-                                                                        }
-                                                                    />
-                                                                )
-                                                            )}
-                                                            <br />
-                                                            <Link
-                                                                href={{
-                                                                    pathname:
-                                                                        '/admin/panels/contributions',
-                                                                    query: {
-                                                                        lineitemId:
-                                                                            lineitem.lineitemId,
-                                                                    },
-                                                                }}
-                                                            >
-                                                                Full Details
-                                                            </Link>
-                                                        </FormGroup>
-                                                    ))}
-                                                <br />
                                                 <Link
                                                     href={{
                                                         pathname:
@@ -534,8 +428,124 @@ export function DonorView({
                                                     Open in Donors Panel
                                                 </Link>
                                             </FormGroup>
-                                        </FormGroup>
-                                    </Form>
+                                        </Form>
+                                    </div>
+                                    <div className={styles.donorCard}>
+                                        <Form<ActBlueDonor>
+                                            key={donor.userId}
+                                            title=""
+                                            readonly
+                                            form={donor}
+                                            onSave={() => {
+                                                return
+                                            }}
+                                        >
+                                            <FormGroup title="" wrapper>
+                                                <FormGroup
+                                                    title="Contributions"
+                                                    wrapper
+                                                    subGroup
+                                                >
+                                                    {[
+                                                        ...(contributionData.lineitems ??
+                                                            []),
+                                                    ]
+
+                                                        .sort(
+                                                            (a, b) =>
+                                                                b.paidAt.getTime() -
+                                                                a.paidAt.getTime()
+                                                        )
+                                                        .map((lineitem) => (
+                                                            <FormGroup
+                                                                title={`Donated $${lineitem.amount}`}
+                                                                subtitle={`${formatContributionDateTime(lineitem.paidAt)} · ${contributionFormByLineitemId.get(lineitem.lineitemId) ?? 'Unknown form'}`}
+                                                                key={
+                                                                    lineitem.lineitemId
+                                                                }
+                                                                defaultCollapsed
+                                                                subGroup
+                                                            >
+                                                                <DateField<ActBlueDonor>
+                                                                    label="Paid At"
+                                                                    getter={() =>
+                                                                        lineitem.paidAt
+                                                                    }
+                                                                />
+                                                                <TextField<ActBlueDonor>
+                                                                    label="Sequence"
+                                                                    getter={() =>
+                                                                        `${lineitem.sequence}`
+                                                                    }
+                                                                />
+                                                                <TextField<ActBlueDonor>
+                                                                    label="Is Recurring"
+                                                                    getter={() =>
+                                                                        `${
+                                                                            contributionIsRecurringByLineitemId.get(
+                                                                                lineitem.lineitemId
+                                                                            ) ??
+                                                                            false
+                                                                        }`
+                                                                    }
+                                                                />
+                                                                <TextField<ActBlueDonor>
+                                                                    label="Amount"
+                                                                    getter={() =>
+                                                                        `$${lineitem.amount}`
+                                                                    }
+                                                                />
+                                                                <TextField<ActBlueDonor>
+                                                                    label="Recurring Amount"
+                                                                    getter={() =>
+                                                                        `$${lineitem.recurringAmount}`
+                                                                    }
+                                                                />
+                                                                <TextField
+                                                                    label="Form Name"
+                                                                    field="contributionForm"
+                                                                    getter={() =>
+                                                                        contributionFormByLineitemId.get(
+                                                                            lineitem.lineitemId
+                                                                        )
+                                                                    }
+                                                                />
+                                                                <br />
+                                                                {contributionData.customFields?.map(
+                                                                    (field) => (
+                                                                        <TextField
+                                                                            key={
+                                                                                field.id
+                                                                            }
+                                                                            label={
+                                                                                field.label
+                                                                            }
+                                                                            getter={() =>
+                                                                                field.answer
+                                                                            }
+                                                                        />
+                                                                    )
+                                                                )}
+                                                                <br />
+                                                                <Link
+                                                                    href={{
+                                                                        pathname:
+                                                                            '/admin/panels/contributions',
+                                                                        query: {
+                                                                            lineitemId:
+                                                                                lineitem.lineitemId,
+                                                                        },
+                                                                    }}
+                                                                >
+                                                                    Full Details
+                                                                </Link>
+                                                            </FormGroup>
+                                                        ))}
+                                                    <br />
+                                                </FormGroup>
+                                            </FormGroup>
+                                        </Form>
+                                    </div>
                                 </div>
                             )
                         })}
