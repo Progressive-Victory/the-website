@@ -1,13 +1,14 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, List } from '@/app/admin/layout/List'
 import {
     Form,
     FormGroup,
     FormState,
     TextField,
 } from '@/components/common/forms'
+import Panel from '@/components/common/panel/Panel'
+import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { Permission, zPermission } from '@/contracts/data'
 import { SortDirection, UpdatePermissionRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
@@ -15,6 +16,7 @@ import { FetchError } from '@/models'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useMediaQuery } from 'usehooks-ts'
 
 export default function Page() {
     const queryClient = useQueryClient()
@@ -22,6 +24,8 @@ export default function Page() {
 
     const [selectedPermission, setSelectedPermission] =
         useState<Permission | null>(null)
+    const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
+    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const [formState, setFormState] = useState<FormState<Permission> | null>(
         null
@@ -92,17 +96,18 @@ export default function Page() {
             queryClient.invalidateQueries({ queryKey: ['/roles', search] }),
     })
 
-    const handleSelectItem = (value: Permission) => {
-        if (value.id === selectedPermission?.id) return
+    const handleSelectItem = (value: Permission): boolean => {
+        if (value.id === selectedPermission?.id) return false
 
         if (formState?.dirty) {
             const proceed = confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
             )
-            if (!proceed) return
+            if (!proceed) return false
         }
 
         setSelectedPermission(value)
+        return true
     }
 
     const handleSave = (permission: Permission) => {
@@ -113,27 +118,66 @@ export default function Page() {
         })
     }
 
-    return (
-        <>
-            <List
-                search={search}
-                count={searchQuery.data?.count}
-                isPending={searchQuery.isPending}
-                error={searchQuery.error}
-                onSearch={onSearch}
-            >
-                {searchQuery.data?.data?.map((item) => (
-                    <ListElement
-                        key={item.id}
-                        selected={selectedPermission?.id == item.id}
-                        onClick={() => handleSelectItem(item)}
-                    >
-                        <span className={styles.listItemText}>{item.name}</span>
-                    </ListElement>
-                ))}
-            </List>
+    const permissions = searchQuery.data?.data ?? []
+    const resultCount = searchQuery.data?.count
 
+    return (
+        <Panel
+            includeSidebar
+            largeTitle
+            sidebarWidth="24rem"
+            sidebarClassName={styles.sidebarBg}
+            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            label="Permissions"
+            showScrollbar={false}
+            sidebarList={{
+                search: { search, onSearch },
+                footer: {
+                    page: search.page ?? 0,
+                    pageSize: search.limit ?? 25,
+                    count: resultCount,
+                    isPending: searchQuery.isPending,
+                    onPageChange: (nextPage: number) =>
+                        onSearch({ ...search, page: nextPage }),
+                },
+                filters: {
+                    search,
+                    onSearch,
+                    showSort: true,
+                    showLimit: true,
+                },
+            }}
+            sidebarBody={
+                <SidebarBody<Permission>
+                    items={permissions}
+                    isLoading={searchQuery.isPending}
+                    error={searchQuery.error}
+                    selectedKey={selectedPermission?.id}
+                    renderItem={(permission) => ({
+                        key: permission.id,
+                        label: permission.name,
+                        href: `/admin/panels/permissions?permissionId=${permission.id}`,
+                        onClick: (event) => {
+                            event.preventDefault()
+                            const selected = handleSelectItem(permission)
+                            if (selected && !isDesktop) {
+                                setSidebarMobileVisible(false)
+                            }
+                        },
+                    })}
+                />
+            }
+        >
             <div className={styles.detailPane}>
+                {!isDesktop && !sidebarMobileVisible ? (
+                    <button
+                        className={styles.mobileBackButton}
+                        onClick={() => setSidebarMobileVisible(true)}
+                        type="button"
+                    >
+                        Permissions
+                    </button>
+                ) : null}
                 {selectedPermission ? (
                     <Form<Permission>
                         key={selectedPermission.id}
@@ -153,6 +197,6 @@ export default function Page() {
                     </div>
                 )}
             </div>
-        </>
+        </Panel>
     )
 }

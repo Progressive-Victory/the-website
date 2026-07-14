@@ -1,8 +1,15 @@
 'use client'
 
+import { renderAdminUnselectedDetail } from './admin'
 import styles from './admin.module.css'
-import Sidebar from './layout/Sidebar'
 import { ProtectedPage } from '@/components/ProtectedPage'
+import { NavigationStack } from '@/components/common/navigation_stack/NavigationStack'
+import { Detail } from '@/components/common/navigation_stack/detail/Detail'
+import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import {
+    Sidebar,
+    SidebarFeatured,
+} from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { Header } from '@/components/layout/Header'
 import {
     zActBlueDonationPacket,
@@ -12,12 +19,43 @@ import {
     zUser,
 } from '@/contracts/data'
 import { usePositionQueries } from '@/queries'
-import { usePaginatedSearch } from '@/util/hooks'
+import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
+import { usePathname } from 'next/navigation'
+import { useEffect, useRef } from 'react'
+import type { ReactNode } from 'react'
+import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
+import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
+import type { IconType } from 'react-icons/lib'
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+interface AdminGroupChildConfigItem {
+    key: string
+    label: string
+    href: `/admin/panels/${string}`
+    icon?: IconType
+    count?: number
+}
+
+interface AdminPanelConfigItem {
+    href: `/admin/panels/${string}`
+    key: string
+    label: string
+    icon: IconType
+    count?: number
+    buttonType?: 'default' | 'group'
+    groupChildren?: AdminGroupChildConfigItem[]
+}
+
+export default function Layout({ children }: { children: ReactNode }) {
+    const pathname = usePathname()
+    const previousPathnameRef = useRef(pathname)
     const positionQueries = usePositionQueries()
-
+    const showWelcomeRef = useRef(
+        typeof window !== 'undefined' &&
+            new URLSearchParams(window.location.search).get('from') ===
+                'welcome'
+    )
+    const previousPathname = previousPathnameRef.current
     const users = usePaginatedSearch('/users', zUser, { search: { limit: 0 } })
     const roles = usePaginatedSearch('/roles', zRole, { search: { limit: 0 } })
     const permissions = usePaginatedSearch('/permissions', zPermission, {
@@ -37,25 +75,181 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         enabled: positionQueries.ready,
     })
 
+    const positionCount = positionHierarchy.data?.positions?.length
+
+    const currentUser = useCurrentUser()
+
+    const adminPanelConfig: AdminPanelConfigItem[] = [
+        {
+            key: 'members',
+            label: 'Members',
+            href: '/admin/panels/members',
+            icon: FaUsers,
+            count: users.query.data?.count,
+        },
+        {
+            key: 'fundraising',
+            label: 'Fundraising',
+            href: '/admin/panels/fundraising',
+            icon: FaDonate,
+            buttonType: 'group',
+            groupChildren: [
+                {
+                    key: 'donors',
+                    label: 'Donors',
+                    href: '/admin/panels/donors',
+                    icon: FaDonate,
+                    count: donors.query.data?.count,
+                },
+                {
+                    key: 'contributions',
+                    label: 'Contributions',
+                    href: '/admin/panels/contributions',
+                    icon: FaDollarSign,
+                    count: contributions.query.data?.count,
+                },
+            ],
+        },
+        {
+            key: 'positions',
+            label: 'Positions',
+            href: '/admin/panels/positions',
+            icon: FaClipboardUser,
+            count: positionCount,
+        },
+        {
+            key: 'roles',
+            label: 'Roles',
+            href: '/admin/panels/roles',
+            icon: FaUserTag,
+            count: roles.query.data?.count,
+        },
+        {
+            key: 'permissions',
+            label: 'Permissions',
+            href: '/admin/panels/permissions',
+            icon: FaUserShield,
+            count: permissions.query.data?.count,
+        },
+    ]
+
+    useEffect(() => {
+        previousPathnameRef.current = pathname
+    }, [pathname])
+
+    const currentTopLevelIndex = adminPanelConfig.findIndex(
+        (panel) => panel.href === pathname
+    )
+    const previousTopLevelIndex = adminPanelConfig.findIndex(
+        (panel) => panel.href === previousPathname
+    )
+
+    const activePanelLabel = adminPanelConfig
+        .flatMap((panel) => [
+            { href: panel.href, label: panel.label },
+            ...(panel.groupChildren ?? []).map((groupChild) => ({
+                href: groupChild.href,
+                label: groupChild.label,
+            })),
+        ])
+        .find((panel) => panel.href === pathname)?.label
+
+    const isPanelSelected = pathname.startsWith('/admin/panels/')
+
     return (
         <ProtectedPage requiredRoles={['Superadmin']}>
             <div className={styles.root}>
                 <Header />
 
-                <div className={styles.main}>
-                    <Sidebar
-                        userCount={users.query.data?.count}
-                        roleCount={roles.query.data?.count}
-                        permissionCount={permissions.query.data?.count}
-                        positionCount={
-                            positionHierarchy.data?.positions?.length
-                        }
-                        donorCount={donors.query.data?.count}
-                        contributionCount={contributions.query.data?.count}
-                    />
+                <NavigationStack
+                    className={styles.navigationStack}
+                    isSelected={isPanelSelected}
+                    sidebar={
+                        <Sidebar
+                            className={styles.sidebar}
+                            variant="minimal"
+                            showScrollbar={false}
+                            showSelectionIndicator
+                            label="Volunteer Dashboard"
+                        >
+                            <Sidebar.Featured>
+                                <SidebarFeatured />
+                            </Sidebar.Featured>
 
-                    <div className={styles.content}>{children}</div>
-                </div>
+                            <Sidebar.Body>
+                                {adminPanelConfig.map((panel) => (
+                                    <NavigationButton
+                                        key={panel.key}
+                                        active={pathname === panel.href}
+                                        href={panel.href}
+                                        label={panel.label}
+                                        icon={panel.icon}
+                                        count={panel.count}
+                                        buttonType={panel.buttonType}
+                                        indicatorDirection={
+                                            pathname === panel.href &&
+                                            currentTopLevelIndex !== -1 &&
+                                            previousTopLevelIndex !== -1 &&
+                                            previousPathname !== pathname
+                                                ? currentTopLevelIndex >
+                                                  previousTopLevelIndex
+                                                    ? 'down'
+                                                    : 'up'
+                                                : 'none'
+                                        }
+                                        hasActiveGroupChild={Boolean(
+                                            panel.groupChildren?.some(
+                                                (groupChild) =>
+                                                    pathname === groupChild.href
+                                            )
+                                        )}
+                                        groupContent={panel.groupChildren?.map(
+                                            (groupChild) => (
+                                                <NavigationButton
+                                                    key={groupChild.key}
+                                                    active={
+                                                        pathname ===
+                                                        groupChild.href
+                                                    }
+                                                    href={groupChild.href}
+                                                    label={groupChild.label}
+                                                    icon={groupChild.icon}
+                                                    count={groupChild.count}
+                                                    resetPanelHistoryOnClick
+                                                />
+                                            )
+                                        )}
+                                        resetPanelHistoryOnClick
+                                    />
+                                ))}
+                            </Sidebar.Body>
+                        </Sidebar>
+                    }
+                    detail={
+                        <Detail
+                            bodyType="panel"
+                            label={activePanelLabel}
+                            body={children}
+                        />
+                    }
+                    unSelected={renderAdminUnselectedDetail({
+                        showWelcome: showWelcomeRef.current,
+                        currentUserName:
+                            `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim(),
+                        currentUserHandle:
+                            currentUser.data?.discordUsers?.[0]?.username,
+                        currentUserDiscordId:
+                            currentUser.data?.discordUsers?.[0]?.id,
+                        currentUserDiscordImage:
+                            currentUser.data?.discordUsers?.[0]?.image,
+                        userCount: users.query.data?.count,
+                        donorCount: donors.query.data?.count,
+                        contributionCount: contributions.query.data?.count,
+                        roleCount: roles.query.data?.count,
+                        permissionCount: permissions.query.data?.count,
+                        positionCount,
+                    })}
+                />
             </div>
         </ProtectedPage>
     )

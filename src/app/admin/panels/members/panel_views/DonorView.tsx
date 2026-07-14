@@ -9,6 +9,7 @@ import {
     FormGroup,
     TextField,
 } from '@/components/common/forms'
+import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import {
     ActBlueContribution,
     ActBlueContributionCustomField,
@@ -19,8 +20,9 @@ import {
 import type { SearchRequest } from '@/contracts/requests'
 import type { PaginatedResponse } from '@/contracts/responses'
 import type { UseQueryResult } from '@tanstack/react-query'
-import Link from 'next/link'
-import React, { ChangeEvent } from 'react'
+import cx from 'classnames'
+import { motion } from 'motion/react'
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
 
 export interface DonorViewProps {
     selectedId: number
@@ -98,6 +100,12 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
         lineitems: li,
     }
 }
+
+const formatLineitemDate = (value: Date) =>
+    Intl.DateTimeFormat('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+    }).format(value)
 
 export function DonorView({
     selectedId,
@@ -366,17 +374,112 @@ export function DonorView({
                                                     />
                                                 </FormGroup>
 
-                                                <Link
-                                                    href={{
-                                                        pathname:
-                                                            '/admin/panels/donors',
-                                                        query: {
-                                                            email: donor.email,
-                                                        },
-                                                    }}
-                                                >
-                                                    Open in Donors Panel
-                                                </Link>
+                                                {(
+                                                    contributionData.lineitems ??
+                                                    []
+                                                ).map((lineitem) => (
+                                                    <FormGroup
+                                                        title={`Donated $${lineitem.amount}`}
+                                                        subtitle={formatLineitemDate(
+                                                            lineitem.paidAt
+                                                        )}
+                                                        key={
+                                                            lineitem.lineitemId
+                                                        }
+                                                        defaultCollapsed
+                                                        subGroup
+                                                    >
+                                                        <DateField<ActBlueDonor>
+                                                            label="Paid At"
+                                                            getter={() =>
+                                                                lineitem.paidAt
+                                                            }
+                                                        />
+                                                        <TextField<ActBlueDonor>
+                                                            label="Sequence"
+                                                            getter={() =>
+                                                                `${lineitem.sequence}`
+                                                            }
+                                                        />
+                                                        <TextField<ActBlueDonor>
+                                                            label="Amount"
+                                                            getter={() =>
+                                                                `$${lineitem.amount}`
+                                                            }
+                                                        />
+                                                        <TextField<ActBlueDonor>
+                                                            label="Recurring Amount"
+                                                            getter={() =>
+                                                                `$${lineitem.recurringAmount}`
+                                                            }
+                                                        />
+                                                        <TextField<ActBlueDonor>
+                                                            label="Amount Less AB Fees"
+                                                            getter={() =>
+                                                                `$${lineitem.amountLessAbFees}`
+                                                            }
+                                                        />
+                                                        <TextField
+                                                            label="Form Name"
+                                                            field="contributionForm"
+                                                            getter={() =>
+                                                                donor
+                                                                    .contributions?.[0]
+                                                                    ?.contributionForm
+                                                            }
+                                                        />
+                                                        {contributionData.customFields?.map(
+                                                            (field) => (
+                                                                <TextField
+                                                                    key={
+                                                                        field.id
+                                                                    }
+                                                                    label={
+                                                                        field.label
+                                                                    }
+                                                                    getter={() =>
+                                                                        field.answer
+                                                                    }
+                                                                />
+                                                            )
+                                                        )}
+
+                                                        <NavigationButton
+                                                            className={
+                                                                styles.detailsNavigationButton
+                                                            }
+                                                            href={`/admin/panels/contributions?lineitemId=${lineitem.lineitemId}`}
+                                                            label="Full Details"
+                                                            trackPanelHistory
+                                                            linkClassName={
+                                                                styles.detailsNavigationLink
+                                                            }
+                                                            labelClassName={
+                                                                styles.detailsNavigationLabel
+                                                            }
+                                                            tagSectionClassName={
+                                                                styles.detailsNavigationTagSection
+                                                            }
+                                                        />
+                                                    </FormGroup>
+                                                ))}
+                                                <NavigationButton
+                                                    className={
+                                                        styles.detailsNavigationButton
+                                                    }
+                                                    href={`/admin/panels/donors?email=${donor.email}`}
+                                                    label="Open in Donors Panel"
+                                                    trackPanelHistory
+                                                    linkClassName={
+                                                        styles.detailsNavigationLink
+                                                    }
+                                                    labelClassName={
+                                                        styles.detailsNavigationLabel
+                                                    }
+                                                    tagSectionClassName={
+                                                        styles.detailsNavigationTagSection
+                                                    }
+                                                />
                                             </FormGroup>
                                         </Form>
                                     </div>

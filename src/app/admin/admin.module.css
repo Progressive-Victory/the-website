@@ -25,31 +25,240 @@
         linear-gradient(180deg, #f8fafc 0%, #f3f4f6 100%);
 }
 
-.main {
-    display: flex;
-    flex: 1;
-    background: transparent;
-
-    /* gap: 0.75rem; */
+.navigationStack {
+    --navigation-stack-height: calc(100dvh - 100px);
 }
 
-.content {
+.sidebar.sidebar {
+    --navigation-stack-sidebar-bg: rgba(255, 255, 255, 0.72);
+    /* --navigation-stack-sidebar-width: 20rem; */
+}
+
+.unselectedView {
     display: flex;
-    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.55rem;
+    min-height: 100%;
+    text-align: center;
+    padding-inline: 4rem;
+    padding-bottom: 70rem;
+}
 
-    height: calc(100dvh - 7.75rem);
-    margin: 0.75rem;
+@keyframes profileHeaderIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
 
-    border-radius: 1.25rem;
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
 
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(16px) saturate(150%);
-    -webkit-backdrop-filter: blur(16px) saturate(150%);
+@keyframes welcomeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-6px);
+        filter: blur(1.5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+        filter: blur(0);
+    }
+}
 
-    border: 1px solid rgba(17, 24, 39, 0.08);
+@keyframes welcomeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+        filter: blur(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(6px);
+        filter: blur(1.5px);
+    }
+}
+
+@keyframes nameIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.unselectedProfileHeader {
+    display: grid;
+    justify-items: center;
+    gap: 0.3rem;
+    margin-top: 8rem;
+    margin-bottom: 2rem;
+    animation: profileHeaderIn 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s
+        both;
+}
+
+.unselectedWelcome {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(1.65rem, 2.6vw, 2.3rem);
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    color: rgba(9, 34, 58, 0.96);
+    animation:
+        welcomeIn 1.875s cubic-bezier(0.2, 0.8, 0.2, 1) 0.875s both,
+        welcomeOut 0.8s cubic-bezier(0.4, 0, 0.2, 1) 2.575s forwards;
+    pointer-events: none;
+}
+
+.unselectedNameSlot {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    padding-top: 0.5rem;
+}
+
+.unselectedProfileName {
+    margin: 0;
+    font-size: clamp(1.65rem, 2.6vw, 2.3rem);
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    color: rgba(9, 34, 58, 0.96);
+    animation: nameIn 0.79s cubic-bezier(0.25, 0.46, 0.45, 0.94) 3.175s both;
+}
+
+.unselectedNameSlotImmediate .unselectedProfileName {
+    animation-delay: 0.75s;
+}
+
+.unselectedAvatar {
+    width: 132px;
+    height: 132px;
+    border-radius: 999px;
+    border: 6px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 0;
     box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.75) inset,
-        0 24px 60px rgba(15, 23, 42, 0.08);
+        0 1px 0 rgba(255, 255, 255, 0.85) inset,
+        0 16px 34px rgba(15, 23, 42, 0.15);
+    object-fit: cover;
+}
 
-    overflow: hidden;
+.unselectedProfileHandle {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 540;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.55);
+    animation: nameIn 0.79s cubic-bezier(0.25, 0.46, 0.45, 0.94) 3.275s both;
+}
+
+.unselectedNameSlotImmediate .unselectedProfileHandle {
+    animation-delay: 0.9s;
+}
+
+.unselectedGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem;
+    width: 100%;
+    padding: 1.05rem 1.25rem 1.5rem;
+    text-align: left;
+}
+
+.unselectedGridHeader {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin: 0 0 0.1rem;
+}
+
+.unselectedGridHeaderText {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(9, 34, 58, 0.7);
+}
+
+.unselectedGridHeaderLine {
+    display: block;
+    width: 100%;
+    height: 1px;
+    border-radius: 999px;
+    background: linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.2) 0%,
+        rgba(15, 23, 42, 0.06) 70%,
+        rgba(15, 23, 42, 0) 100%
+    );
+}
+
+.unselectedGrid > * {
+    animation: cardIn 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.unselectedGrid > *:nth-child(1) {
+    animation-delay: 0.1s;
+}
+.unselectedGrid > *:nth-child(2) {
+    animation-delay: 0.15s;
+}
+.unselectedGrid > *:nth-child(3) {
+    animation-delay: 0.2s;
+}
+.unselectedGrid > *:nth-child(4) {
+    animation-delay: 0.25s;
+}
+.unselectedGrid > *:nth-child(5) {
+    animation-delay: 0.3s;
+}
+.unselectedGrid > *:nth-child(6) {
+    animation-delay: 0.35s;
+}
+.unselectedGrid > *:nth-child(7) {
+    animation-delay: 0.4s;
+}
+.unselectedGrid > *:nth-child(8) {
+    animation-delay: 0.45s;
+}
+
+.unselectedTitle {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.unselectedDescription {
+    margin: 0;
+    max-width: 44ch;
+    font-size: 0.92rem;
+    color: rgba(15, 23, 42, 0.62);
 }

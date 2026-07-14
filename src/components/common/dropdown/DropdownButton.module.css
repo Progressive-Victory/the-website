@@ -71,6 +71,38 @@
     justify-content: center;
 }
 
+.buttonIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    background: transparent;
+    border-radius: 0.85rem;
+
+    padding: 0.5rem;
+
+    cursor: pointer;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.buttonIcon:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.container {
+    position: relative;
+    display: inline-flex;
+}
+
+.menuAnchor {
+    pointer-events: none;
+}
+
+.menuAnchor > * {
+    pointer-events: auto;
+}
+
 .shortIcon {
     width: 1rem;
     height: 1rem;

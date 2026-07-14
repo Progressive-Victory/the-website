@@ -1,5 +1,41 @@
-.listWidth {
-    --list-width: 25.5rem;
+.sidebarBg {
+    --navigation-stack-sidebar-bg: #f9fafb;
+    --navigation-stack-sidebar-padding: 0rem;
+    --navigation-stack-sidebar-gap: 0rem;
+}
+
+.mobileBackButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0 1rem 1rem;
+    border: 0;
+    background: transparent;
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.65rem;
+    color: #2986cc;
+    font: inherit;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.mobileBackButton::before {
+    content: '';
+    display: inline-block;
+    width: 0.58rem;
+    height: 0.58rem;
+    border-left: 0.14rem solid currentColor;
+    border-bottom: 0.14rem solid currentColor;
+    transform: rotate(45deg);
+    position: relative;
+    top: -0.5px;
+    border-bottom-left-radius: 0.04rem;
+}
+
+.mobileBackButton:hover {
+    color: #549ed6;
+    background: rgba(15, 23, 42, 0.05);
 }
 
 .detailsHeader {
@@ -71,51 +107,6 @@
     background-position: 0 100%;
     background-repeat: no-repeat;
 }
-.headerTop {
-    border-radius: 0.75rem;
-    margin-top: -2rem;
-    margin-right: 0.9rem;
-    margin-bottom: 0.9rem;
-    margin-left: 0.9rem;
-    padding-top: 0.8rem;
-    padding-bottom: 0.9rem;
-    padding-inline: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.72);
-    background: rgba(255, 255, 255, 0.84);
-
-    backdrop-filter: blur(16px) saturate(145%);
-    -webkit-backdrop-filter: blur(16px) saturate(145%);
-    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.11);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    justify-content: space-between;
-}
-
-.cardStyle {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.cardAvatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 4.5rem;
-    height: 4.5rem;
-    border-radius: 9999px;
-    border: 3px solid #fff;
-    background: #fff;
-    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
-}
-
-.userInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-}
 
 .detailsPane {
     flex: 1;
@@ -126,75 +117,11 @@
         rgba(241, 245, 249, 0.98) 38%,
         rgba(14, 165, 233, 0.04) 100%
     );
+    z-index: 0;
 }
 
 .detailsContent {
     margin: 1rem;
-}
-
-.userMeta {
-    display: flex;
-    flex-direction: column;
-}
-
-.headerUserName {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #0f172a;
-}
-
-.headerUserUsername {
-    margin: 0;
-    padding: 0;
-    color: #475569;
-    font-size: 0.95rem;
-    font-weight: 500;
-}
-
-.userContact {
-    margin: 0;
-    color: #64748b;
-    font-size: 0.9rem;
-}
-
-.roleList {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-.rolePill {
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding-inline: 1rem;
-    padding-block: 0.45rem;
-    border-radius: 9999px;
-    white-space: nowrap;
-    color: rgba(15, 23, 42, 0.72);
-    background: rgba(15, 23, 42, 0.06);
-}
-
-.roleEmpty {
-    font-size: 0.82rem;
-    color: #64748b;
-}
-
-.userMemberSince {
-    padding-top: 0.25rem;
-    color: #6b7280;
-    font-size: small;
-    font-weight: 500;
-}
-
-.userName {
-    font-weight: 500;
-    color: #000;
-}
-
-.userUsername {
-    color: #6b7280;
 }
 
 .emptyState {
@@ -207,29 +134,4 @@
 .loading {
     display: flex;
     align-items: center;
-}
-
-@media (max-width: 720px) {
-    .detailsHeader {
-        --banner-cover-height: 4rem;
-        padding: 0.45rem 0.45rem 0.35rem;
-    }
-
-    .headerTop {
-        margin: -1.2rem 0.65rem 0.65rem;
-        padding-inline: 0.8rem;
-    }
-
-    .bannerCover {
-        height: var(--banner-cover-height);
-    }
-
-    .cardAvatar {
-        width: 4rem;
-        height: 4rem;
-    }
-
-    .headerUserName {
-        font-size: 1.1rem;
-    }
 }
