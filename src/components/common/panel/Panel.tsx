@@ -42,6 +42,7 @@ export interface PanelProps {
     hideSidebarFooterWhenCollapsed?: boolean
     keepSidebarBorderWhenCollapsed?: boolean
     sidebarWidth?: string
+    collapsedSidebarWidth?: string
     showScrollbar?: boolean
     sidebarClassName?: string
     sidebarBody?: ReactNode
@@ -72,6 +73,7 @@ export function Panel({
     hideSidebarFooterWhenCollapsed = false,
     keepSidebarBorderWhenCollapsed = false,
     sidebarWidth,
+    collapsedSidebarWidth,
     showScrollbar = true,
     sidebarClassName,
     sidebarBody,
@@ -149,6 +151,7 @@ export function Panel({
                             className={sidebarClassName}
                             variant="prominent"
                             width={sidebarWidth}
+                            collapsedWidth={collapsedSidebarWidth}
                             collapsedMode={collapsedSidebarMode}
                             mobileVisible={sidebarMobileVisible}
                             showScrollbar={showScrollbar}

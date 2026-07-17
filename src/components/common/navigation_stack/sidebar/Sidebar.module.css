@@ -73,7 +73,10 @@
 }
 
 .sidebarClosed {
-    --navigation-stack-sidebar-width: 4.5rem;
+    --navigation-stack-sidebar-width: var(
+        --navigation-stack-sidebar-collapsed-width,
+        4.5rem
+    );
 }
 
 .sidebarHiddenCollapsed {
@@ -239,11 +242,26 @@
     gap: 1rem;
     border-top: 2px solid #e5e7eb;
     background-color: #f9fafb;
+    max-height: 10rem;
+    transition:
+        max-height 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        padding 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        gap 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        border-top-color 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sidebar[data-hide-footer-when-collapsed='true'][data-sidebar-collapsed='true']
     .prominentFooter {
     overflow: hidden;
+    padding: 0;
+    gap: 0;
+    max-height: 0;
+    border-top-color: transparent;
+    transition:
+        max-height 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        padding 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        gap 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        border-top-color 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sidebar[data-hide-footer-when-collapsed='true'][data-sidebar-collapsed='true']
@@ -530,10 +548,23 @@
     flex-direction: column;
     gap: 0.6rem;
     padding: 0.25rem 0 0.5rem;
+    max-height: 8rem;
+    overflow: hidden;
+    transition:
+        max-height 320ms cubic-bezier(0.32, 0.72, 0, 1),
+        padding 320ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 240ms ease;
 }
 
 .largeTitleBlock[data-collapsed='true'] {
-    display: none;
+    max-height: 0;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        max-height 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        padding 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 180ms ease;
 }
 
 .largeTitle {

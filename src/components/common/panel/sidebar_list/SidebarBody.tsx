@@ -58,13 +58,12 @@ export function SidebarBody<T>({
         return <div className={styles.sidebarState}>No items found</div>
     }
 
-    const renderItemButton = (item: T, pinned = false) => {
+    const renderItemButton = (item: T) => {
         const config = renderItem(item)
-        const isActive = selectedKey === config.key
         return (
             <NavigationButton
                 key={config.key}
-                active={isActive}
+                active={selectedKey === config.key}
                 href={config.href}
                 label={config.label}
                 subtitle={config.subtitle}
@@ -73,11 +72,6 @@ export function SidebarBody<T>({
                 onClick={config.onClick}
                 showIndicator={false}
                 className={styles.sidebarNavigationButton}
-                linkClassName={
-                    pinned && !isActive
-                        ? styles.pinnedNavigationButtonLink
-                        : undefined
-                }
             />
         )
     }
@@ -86,7 +80,7 @@ export function SidebarBody<T>({
         <>
             {pinnedItems && pinnedItems.length > 0 ? (
                 <div className={styles.pinnedSection}>
-                    {pinnedItems.map((item) => renderItemButton(item, true))}
+                    {pinnedItems.map((item) => renderItemButton(item))}
                 </div>
             ) : null}
             {items.map((item) => renderItemButton(item))}

@@ -59,6 +59,7 @@ export interface SidebarRootProps {
     label?: string
     variant?: SidebarVariant
     width?: string
+    collapsedWidth?: string
     collapsedMode?: 'compact' | 'hidden'
     open?: boolean
     onOpenChange?: (open: boolean) => void
@@ -117,6 +118,7 @@ interface ResolvedHeaderProps {
 interface ResolvedSidebarProps {
     variant: SidebarVariant
     width?: string
+    collapsedWidth?: string
     collapsedMode: 'compact' | 'hidden'
     open?: boolean
     onOpenChange?: (open: boolean) => void
@@ -306,6 +308,7 @@ function resolveSidebarProps(props: SidebarRootProps): ResolvedSidebarProps {
     return {
         variant,
         width: props.width,
+        collapsedWidth: props.collapsedWidth,
         collapsedMode: props.collapsedMode ?? 'compact',
         open: props.open,
         onOpenChange: props.onOpenChange,
@@ -329,13 +332,16 @@ function cx(...parts: (string | false | undefined)[]): string {
 }
 
 function getSidebarInlineStyle(
-    sidebarWidth?: string
+    sidebarWidth?: string,
+    collapsedWidth?: string
 ): CSSProperties | undefined {
-    return sidebarWidth
-        ? ({
-              '--navigation-stack-sidebar-open-width': sidebarWidth,
-          } as CSSProperties)
-        : undefined
+    if (!sidebarWidth && !collapsedWidth) return undefined
+    const style: Record<string, string> = {}
+    if (sidebarWidth)
+        style['--navigation-stack-sidebar-open-width'] = sidebarWidth
+    if (collapsedWidth)
+        style['--navigation-stack-sidebar-collapsed-width'] = collapsedWidth
+    return style as CSSProperties
 }
 
 function getProminentSidebarVisualMode(
@@ -632,6 +638,7 @@ function MinimalSidebar({
     body,
     featured,
     width,
+    collapsedWidth,
     collapsedMode,
     open: controlledOpen,
     onOpenChange,
@@ -655,7 +662,7 @@ function MinimalSidebar({
     const hiddenCollapsed = isDesktop && !isOpen && collapsedMode === 'hidden'
     const resolvedMobileVisible =
         mobileVisible ?? !pathname.startsWith('/admin/panels/')
-    const sidebarInlineStyle = getSidebarInlineStyle(width)
+    const sidebarInlineStyle = getSidebarInlineStyle(width, collapsedWidth)
 
     return (
         <aside
@@ -711,6 +718,7 @@ function ProminentSidebar({
     featured,
     footer,
     width,
+    collapsedWidth,
     collapsedMode,
     open: controlledOpen,
     onOpenChange,
@@ -750,7 +758,7 @@ function ProminentSidebar({
         visualMode === 'prominent-bare' ? styles.sidebarMinimal : undefined
     const surfaceClassName =
         visualMode === 'prominent' ? styles.sidebarProminent : undefined
-    const sidebarInlineStyle = getSidebarInlineStyle(width)
+    const sidebarInlineStyle = getSidebarInlineStyle(width, collapsedWidth)
     const resolvedMobileVisible = mobileVisible ?? true
 
     return (

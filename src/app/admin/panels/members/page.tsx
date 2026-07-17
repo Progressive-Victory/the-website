@@ -614,6 +614,7 @@ export default function Page() {
             // includeHeader
             largeTitle
             sidebarWidth="24rem"
+            collapsedSidebarWidth="5rem"
             sidebarClassName={styles.sidebarBg}
             sidebarMobileVisible={isDesktop || sidebarMobileVisible}
             label="Members"
