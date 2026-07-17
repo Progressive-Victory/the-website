@@ -242,6 +242,9 @@
     gap: 1rem;
     border-top: 2px solid #e5e7eb;
     background-color: #f9fafb;
+    overflow: hidden;
+    white-space: nowrap;
+    min-width: max-content;
     max-height: 10rem;
     transition:
         max-height 280ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -397,7 +400,7 @@
     -webkit-backdrop-filter: blur(14px) saturate(150%);
     border-bottom: 2px solid #e5e7eb;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .panelTimestamp {
@@ -456,33 +459,38 @@
 
 .panelToggleButton {
     display: inline-flex;
-    width: 2rem;
-    height: 2rem;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
 
-    cursor: pointer;
-    border-radius: 9999px;
+    border: 0;
+    background: transparent;
+    border-radius: 0.85rem;
+    padding: 0.5rem;
 
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(17, 24, 39, 0.12);
-    color: rgba(15, 23, 42, 0.6);
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+    color: #696d79;
+    -webkit-tap-highlight-color: transparent;
 
     transition:
-        transform 140ms ease,
-        box-shadow 140ms ease,
         background-color 140ms ease,
         color 140ms ease;
 }
 
 .panelToggleButton:hover {
-    transform: translateY(-1px);
-    color: rgba(15, 23, 42, 0.8);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+    background: rgba(15, 23, 42, 0.06);
+    color: #696d79;
 }
 
 .panelToggleButton:active {
-    transform: translateY(0px) scale(0.98);
+    background: rgba(15, 23, 42, 0.1);
+}
+
+.sidebarIcon {
+    transition: opacity 200ms ease;
+    transform: translateY(-0.5px);
 }
 
 .panelHeaderLeft {
@@ -492,7 +500,8 @@
     gap: 0.75rem;
     justify-self: start;
     min-width: 0;
-    overflow: hidden;
+    overflow: clip;
+    overflow-clip-margin: 0.6rem;
 }
 
 .panelHeaderLeftShifted {
@@ -625,6 +634,18 @@
     .prominentBreadcrumb[data-large-title='true'] {
     opacity: 1;
     transform: translateY(0);
+}
+
+.sidebar[data-sidebar-large-title-collapsed='true']
+    .panelHeaderLeft
+    [data-back-label] {
+    display: none;
+}
+
+.sidebar[data-sidebar-large-title-collapsed='true']
+    .panelHeaderLeft
+    button:has([data-back-label]) {
+    padding-right: 0.4rem;
 }
 
 .sidebarWithProminentHeader[data-sidebar-collapsed='true']

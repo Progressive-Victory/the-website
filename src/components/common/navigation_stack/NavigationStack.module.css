@@ -9,12 +9,13 @@
 
 .overlay {
     position: absolute;
-    top: -4px;
+    top: 0;
     left: 0;
     z-index: 4;
     display: flex;
     align-items: center;
-    padding: 1.25rem 0 1.25rem 1.25rem;
+    height: var(--navigation-stack-sidebar-header-min-height, 4.05rem);
+    padding: 0 0 0 1.25rem;
     pointer-events: none;
 }
 

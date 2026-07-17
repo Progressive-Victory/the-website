@@ -4,6 +4,7 @@ import { readPanelHistory, writePanelHistory } from '../panelHistory'
 import styles from './Detail.module.css'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState, type ReactElement, type ReactNode } from 'react'
+import { FiChevronLeft } from 'react-icons/fi'
 import { useMediaQuery } from 'usehooks-ts'
 
 function formatPanelLabelFromPath(path: string): string {
@@ -121,8 +122,10 @@ export function PanelBackButton({
                 .join(' ')}
             onClick={handleBackNavigation}
             type="button"
+            aria-label={backButtonText}
         >
-            {backButtonText}
+            <FiChevronLeft size={18} />
+            <span data-back-label>{backButtonText}</span>
         </button>
     )
 }
@@ -153,6 +156,7 @@ export function Detail({
                             onClick={handleBackNavigation}
                             type="button"
                         >
+                            <FiChevronLeft size={18} />
                             {backButtonText}
                         </button>
                     ) : null}

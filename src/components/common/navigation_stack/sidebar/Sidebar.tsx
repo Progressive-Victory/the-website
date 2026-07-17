@@ -940,16 +940,15 @@ function ProminentSidebarHeader({
                     reserveToggleSpace && styles.panelHeaderLeftShifted
                 )}
             >
-                {prominentHeaderLeft ?? (
-                    <div className={styles.breadcrumbs}>
-                        <span
-                            className={styles.prominentBreadcrumb}
-                            data-large-title={largeTitle}
-                        >
-                            {label}
-                        </span>
-                    </div>
-                )}
+                {prominentHeaderLeft}
+                <div className={styles.breadcrumbs}>
+                    <span
+                        className={styles.prominentBreadcrumb}
+                        data-large-title={largeTitle}
+                    >
+                        {label}
+                    </span>
+                </div>
             </div>
 
             <div
@@ -1033,12 +1032,23 @@ function SidebarFooter({
 
     return (
         <div className={styles.footer}>
-            <SidebarToggleButton
-                isOpen={isOpen}
-                onToggle={onToggle}
+            <button
+                aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
                 className={styles.toggleButton}
-                size={20}
-            />
+                onClick={onToggle}
+                title={isOpen ? 'Collapse' : 'Expand'}
+                type="button"
+            >
+                <FiChevronLeft
+                    className={[
+                        styles.toggleIcon,
+                        !isOpen ? styles.toggleIconClosed : '',
+                    ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    size={20}
+                />
+            </button>
         </div>
     )
 }
@@ -1054,7 +1064,7 @@ export function SidebarToggleButton({
     isOpen,
     onToggle,
     className,
-    size = 18,
+    size = 22,
 }: SidebarToggleButtonProps): ReactElement {
     return (
         <button
@@ -1066,15 +1076,23 @@ export function SidebarToggleButton({
             title={isOpen ? 'Collapse' : 'Expand'}
             type="button"
         >
-            <FiChevronLeft
-                className={[
-                    styles.toggleIcon,
-                    !isOpen ? styles.toggleIconClosed : '',
-                ]
-                    .filter(Boolean)
-                    .join(' ')}
-                size={size}
-            />
+            <svg
+                className={styles.sidebarIcon}
+                fill="none"
+                height={size}
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+                width={size}
+            >
+                <rect height="18" rx="3" width="20" x="2" y="3" />
+                <line x1="9" x2="9" y1="3" y2="21" />
+                <line x1="4.5" x2="7" y1="7.5" y2="7.5" />
+                <line x1="4.5" x2="7" y1="11" y2="11" />
+                <line x1="4.5" x2="7" y1="14.5" y2="14.5" />
+            </svg>
         </button>
     )
 }

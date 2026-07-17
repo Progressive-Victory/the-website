@@ -114,7 +114,9 @@ export function Panel({
         ))
     const resolvedProminentHeaderLeft =
         prominentHeaderLeft ??
-        (includeSidebar && !isDesktop ? <PanelBackButton /> : undefined)
+        (includeSidebar && (!isDesktop || !includeHeader) ? (
+            <PanelBackButton showOnDesktop={!includeHeader} />
+        ) : undefined)
     const resolvedSidebarFooter =
         sidebarFooter ??
         (sidebarList?.footer ? (
@@ -142,7 +144,6 @@ export function Panel({
                                 onToggle={() =>
                                     setIsSidebarOpen((previous) => !previous)
                                 }
-                                size={18}
                             />
                         ) : null
                     }

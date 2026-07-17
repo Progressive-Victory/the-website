@@ -206,3 +206,12 @@
 .sidebarNavigationButton a > span:last-child {
     transition: opacity 280ms 100ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+.sidebarState {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    color: rgba(15, 23, 42, 0.5);
+    font-weight: 500;
+}
