@@ -114,9 +114,7 @@ export function Panel({
         ))
     const resolvedProminentHeaderLeft =
         prominentHeaderLeft ??
-        (includeSidebar && (!isDesktop || !includeHeader) ? (
-            <PanelBackButton showOnDesktop={!includeHeader} />
-        ) : undefined)
+        (includeSidebar && !isDesktop ? <PanelBackButton /> : undefined)
     const resolvedSidebarFooter =
         sidebarFooter ??
         (sidebarList?.footer ? (
