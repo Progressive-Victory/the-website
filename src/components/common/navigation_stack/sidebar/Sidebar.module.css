@@ -41,6 +41,11 @@
     border-right-color: transparent;
 }
 
+.sidebar[data-keep-border-when-collapsed='true'][data-sidebar-visual-mode='prominent-bare'][data-sidebar-collapsed='true'] {
+    border-right-width: 2px;
+    border-right-color: rgba(17, 24, 39, 0.08);
+}
+
 .sidebarWithProminentHeader {
     padding-top: 0;
 }
@@ -234,6 +239,18 @@
     gap: 1rem;
     border-top: 2px solid #e5e7eb;
     background-color: #f9fafb;
+}
+
+.sidebar[data-hide-footer-when-collapsed='true'][data-sidebar-collapsed='true']
+    .prominentFooter {
+    overflow: hidden;
+}
+
+.sidebar[data-hide-footer-when-collapsed='true'][data-sidebar-collapsed='true']
+    .prominentFooter
+    > * {
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .selectionIndicator {
@@ -443,9 +460,7 @@
 .panelToggleButton:hover {
     transform: translateY(-1px);
     color: rgba(15, 23, 42, 0.8);
-    box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.75) inset,
-        0 10px 24px rgba(15, 23, 42, 0.14);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
 }
 
 .panelToggleButton:active {

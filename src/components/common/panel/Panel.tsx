@@ -39,6 +39,8 @@ export interface PanelProps {
     sidebarList?: SidebarListConfig
     sidebarSearch?: ReactNode
     sidebarFooter?: ReactNode
+    hideSidebarFooterWhenCollapsed?: boolean
+    keepSidebarBorderWhenCollapsed?: boolean
     sidebarWidth?: string
     showScrollbar?: boolean
     sidebarClassName?: string
@@ -48,6 +50,7 @@ export interface PanelProps {
     onSidebarFilterOpenChange?: (open: boolean) => void
     sidebarFilterContent?: ReactNode
     collapsedSidebarMode?: 'compact' | 'hidden'
+    sidebarTogglePlacement?: 'header' | 'footer'
     prominentHeader?: ReactNode
     prominentHeaderLeft?: ReactNode
     prominentHeaderRight?: ReactNode
@@ -66,6 +69,8 @@ export function Panel({
     sidebarList,
     sidebarSearch,
     sidebarFooter,
+    hideSidebarFooterWhenCollapsed = false,
+    keepSidebarBorderWhenCollapsed = false,
     sidebarWidth,
     showScrollbar = true,
     sidebarClassName,
@@ -75,6 +80,7 @@ export function Panel({
     onSidebarFilterOpenChange,
     sidebarFilterContent,
     collapsedSidebarMode = 'hidden',
+    sidebarTogglePlacement,
     prominentHeader,
     prominentHeaderLeft,
     prominentHeaderRight,
@@ -87,8 +93,13 @@ export function Panel({
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
     const isDesktop = useMediaQuery('(min-width: 64rem)')
     const showHeader = includeHeader
+    const resolvedSidebarTogglePlacement =
+        sidebarTogglePlacement ??
+        (collapsedSidebarMode === 'hidden' ? 'header' : 'footer')
     const showOverlaySidebarToggle =
-        includeSidebar && collapsedSidebarMode === 'hidden' && isDesktop
+        includeSidebar &&
+        resolvedSidebarTogglePlacement === 'header' &&
+        isDesktop
     const shiftHeaderLeftForToggle = showOverlaySidebarToggle && !isSidebarOpen
     const resolvedHeaderLead =
         headerLead ??
@@ -143,6 +154,18 @@ export function Panel({
                             showScrollbar={showScrollbar}
                             open={isSidebarOpen}
                             onOpenChange={setIsSidebarOpen}
+                            showFooterToggle={
+                                resolvedSidebarTogglePlacement === 'footer'
+                            }
+                            hideFooterWhenCollapsed={
+                                hideSidebarFooterWhenCollapsed
+                            }
+                            keepBorderWhenCollapsed={
+                                keepSidebarBorderWhenCollapsed
+                            }
+                            reserveHeaderToggleSpace={
+                                resolvedSidebarTogglePlacement === 'header'
+                            }
                             label={panelLabel}
                         >
                             <Sidebar.Header

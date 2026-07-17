@@ -64,6 +64,10 @@ export interface SidebarRootProps {
     onOpenChange?: (open: boolean) => void
     mobileVisible?: boolean
     showScrollbar?: boolean
+    showFooterToggle?: boolean
+    hideFooterWhenCollapsed?: boolean
+    keepBorderWhenCollapsed?: boolean
+    reserveHeaderToggleSpace?: boolean
     showSelectionIndicator?: boolean
     className?: string
     children?: ReactNode
@@ -118,6 +122,10 @@ interface ResolvedSidebarProps {
     onOpenChange?: (open: boolean) => void
     mobileVisible?: boolean
     showScrollbar: boolean
+    showFooterToggle: boolean
+    hideFooterWhenCollapsed: boolean
+    keepBorderWhenCollapsed: boolean
+    reserveHeaderToggleSpace: boolean
     showSelectionIndicator: boolean
     className?: string
     header: ResolvedHeaderProps
@@ -303,6 +311,10 @@ function resolveSidebarProps(props: SidebarRootProps): ResolvedSidebarProps {
         onOpenChange: props.onOpenChange,
         mobileVisible: props.mobileVisible,
         showScrollbar: props.showScrollbar ?? true,
+        showFooterToggle: props.showFooterToggle ?? true,
+        hideFooterWhenCollapsed: props.hideFooterWhenCollapsed ?? false,
+        keepBorderWhenCollapsed: props.keepBorderWhenCollapsed ?? false,
+        reserveHeaderToggleSpace: props.reserveHeaderToggleSpace ?? false,
         showSelectionIndicator: props.showSelectionIndicator ?? false,
         className: props.className,
         header: resolveHeaderProps(props.label, headerSlot, variant),
@@ -625,6 +637,9 @@ function MinimalSidebar({
     onOpenChange,
     mobileVisible,
     showScrollbar,
+    showFooterToggle,
+    hideFooterWhenCollapsed,
+    keepBorderWhenCollapsed,
     showSelectionIndicator,
     className,
     header,
@@ -646,6 +661,8 @@ function MinimalSidebar({
         <aside
             data-mobile-visible={resolvedMobileVisible}
             data-sidebar-collapsed={isDesktop && !isOpen}
+            data-hide-footer-when-collapsed={hideFooterWhenCollapsed}
+            data-keep-border-when-collapsed={keepBorderWhenCollapsed}
             data-sidebar-header="minimal"
             data-sidebar-variant="minimal"
             data-sidebar-visual-mode={visualMode}
@@ -678,11 +695,13 @@ function MinimalSidebar({
                 </SidebarBody>
             </div>
 
-            <SidebarFooter
-                isOpen={isOpen}
-                hiddenCollapsed={hiddenCollapsed}
-                onToggle={toggle}
-            />
+            {showFooterToggle ? (
+                <SidebarFooter
+                    isOpen={isOpen}
+                    hiddenCollapsed={hiddenCollapsed}
+                    onToggle={toggle}
+                />
+            ) : null}
         </aside>
     )
 }
@@ -694,8 +713,13 @@ function ProminentSidebar({
     width,
     collapsedMode,
     open: controlledOpen,
+    onOpenChange,
     mobileVisible,
     showScrollbar,
+    showFooterToggle,
+    hideFooterWhenCollapsed,
+    keepBorderWhenCollapsed,
+    reserveHeaderToggleSpace,
     showSelectionIndicator,
     className,
     header,
@@ -703,7 +727,10 @@ function ProminentSidebar({
     const pathname = usePathname()
     const includeHeader = header.mode !== 'hidden'
     const visualMode = getProminentSidebarVisualMode(includeHeader)
-    const { isDesktop, isOpen } = useSidebarOpenState(controlledOpen)
+    const { isDesktop, isOpen, toggle } = useSidebarOpenState(
+        controlledOpen,
+        onOpenChange
+    )
     const { bodyRef, indicatorLayoutSyncing, indicatorStyle } =
         useSidebarIndicator(pathname, isDesktop, isOpen, showSelectionIndicator)
     const scrollRef = useRef<HTMLDivElement | null>(null)
@@ -718,7 +745,7 @@ function ProminentSidebar({
     )
     const hiddenCollapsed = isDesktop && !isOpen && collapsedMode === 'hidden'
     const reserveProminentHeaderToggleSpace =
-        isDesktop && collapsedMode === 'hidden'
+        isDesktop && reserveHeaderToggleSpace
     const shellClassName =
         visualMode === 'prominent-bare' ? styles.sidebarMinimal : undefined
     const surfaceClassName =
@@ -730,6 +757,8 @@ function ProminentSidebar({
         <aside
             data-mobile-visible={resolvedMobileVisible}
             data-sidebar-collapsed={collapsed}
+            data-hide-footer-when-collapsed={hideFooterWhenCollapsed}
+            data-keep-border-when-collapsed={keepBorderWhenCollapsed}
             data-sidebar-header={includeHeader ? 'prominent' : 'bare'}
             data-sidebar-large-title={largeTitleActive}
             data-sidebar-large-title-collapsed={
@@ -770,6 +799,9 @@ function ProminentSidebar({
                         <div
                             className={styles.largeTitleBlock}
                             data-collapsed={collapsed}
+                            data-reserve-toggle-space={
+                                reserveProminentHeaderToggleSpace
+                            }
                         >
                             <h1
                                 ref={largeTitleRef}
@@ -800,6 +832,13 @@ function ProminentSidebar({
             </div>
             {footer ? (
                 <div className={styles.prominentFooter}>{footer}</div>
+            ) : null}
+            {showFooterToggle ? (
+                <SidebarFooter
+                    isOpen={isOpen}
+                    hiddenCollapsed={hiddenCollapsed}
+                    onToggle={toggle}
+                />
             ) : null}
         </aside>
     )

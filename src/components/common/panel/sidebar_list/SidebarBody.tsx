@@ -17,6 +17,7 @@ export interface SidebarBodyItemConfig {
 
 export interface SidebarBodyProps<T> {
     items: T[]
+    pinnedItems?: T[]
     isLoading?: boolean
     error?: unknown
     selectedKey?: string | number | null
@@ -25,6 +26,7 @@ export interface SidebarBodyProps<T> {
 
 export function SidebarBody<T>({
     items,
+    pinnedItems,
     isLoading = false,
     error = null,
     selectedKey = null,
@@ -52,29 +54,42 @@ export function SidebarBody<T>({
         )
     }
 
-    if (items.length === 0) {
+    if (items.length === 0 && (!pinnedItems || pinnedItems.length === 0)) {
         return <div className={styles.sidebarState}>No items found</div>
+    }
+
+    const renderItemButton = (item: T, pinned = false) => {
+        const config = renderItem(item)
+        const isActive = selectedKey === config.key
+        return (
+            <NavigationButton
+                key={config.key}
+                active={isActive}
+                href={config.href}
+                label={config.label}
+                subtitle={config.subtitle}
+                tagLabel={config.tagLabel}
+                iconNode={config.iconNode}
+                onClick={config.onClick}
+                showIndicator={false}
+                className={styles.sidebarNavigationButton}
+                linkClassName={
+                    pinned && !isActive
+                        ? styles.pinnedNavigationButtonLink
+                        : undefined
+                }
+            />
+        )
     }
 
     return (
         <>
-            {items.map((item) => {
-                const config = renderItem(item)
-                return (
-                    <NavigationButton
-                        key={config.key}
-                        active={selectedKey === config.key}
-                        href={config.href}
-                        label={config.label}
-                        subtitle={config.subtitle}
-                        tagLabel={config.tagLabel}
-                        iconNode={config.iconNode}
-                        onClick={config.onClick}
-                        showIndicator={false}
-                        className={styles.sidebarNavigationButton}
-                    />
-                )
-            })}
+            {pinnedItems && pinnedItems.length > 0 ? (
+                <div className={styles.pinnedSection}>
+                    {pinnedItems.map((item) => renderItemButton(item, true))}
+                </div>
+            ) : null}
+            {items.map((item) => renderItemButton(item))}
         </>
     )
 }

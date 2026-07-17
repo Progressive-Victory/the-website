@@ -499,16 +499,18 @@ export default function Page() {
         [handleSelectDonorItem]
     )
 
+    const pinnedUsers = useMemo(() => {
+        const currentUser = loggedInUser.data
+        return currentUser ? [currentUser] : []
+    }, [loggedInUser.data])
+
     const users = useMemo(() => {
         const fetchedUsers = searchQuery.data?.data ?? []
         const currentUser = loggedInUser.data
 
         if (!currentUser) return fetchedUsers
 
-        const dedupedUsers = fetchedUsers.filter(
-            (user) => user.id !== currentUser.id
-        )
-        return [currentUser, ...dedupedUsers]
+        return fetchedUsers.filter((user) => user.id !== currentUser.id)
     }, [searchQuery.data?.data, loggedInUser.data])
 
     useEffect(() => {
@@ -605,6 +607,10 @@ export default function Page() {
     return (
         <Panel
             includeSidebar
+            collapsedSidebarMode="compact"
+            sidebarTogglePlacement="header"
+            hideSidebarFooterWhenCollapsed
+            keepSidebarBorderWhenCollapsed
             // includeHeader
             largeTitle
             sidebarWidth="24rem"
@@ -644,6 +650,7 @@ export default function Page() {
             sidebarBody={
                 <SidebarBody<User | UserProfile>
                     items={users}
+                    pinnedItems={pinnedUsers}
                     isLoading={searchQuery.isPending}
                     error={searchQuery.error}
                     selectedKey={selectedId}
