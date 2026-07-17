@@ -8,7 +8,12 @@ import {
     PositionBubble,
 } from './components/position'
 import { TeamNode, TeamNodeData } from './components/team'
-import { BuildGraphNodes, Committees } from './data/constructOrgGraph'
+import { posHierarchy } from './data/DummyNodes'
+import {
+    BuildGraphNodes,
+    Committees,
+    testNewGraphBuilder,
+} from './data/constructOrgGraph'
 import { orgchartData } from './data/orgchartGraphData'
 import dagre from '@dagrejs/dagre'
 import {
@@ -61,7 +66,11 @@ const GetElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
     return { nodes: newNodes, edges }
 }
 
-const { initialNodes, initialEdges } = BuildGraphNodes(orgchartData)
+//const { initialNodes, initialEdges } = BuildGraphNodes(orgchartData)
+//console.log(initialNodes)
+//testNewGraphBuilder(posHierarchy)
+const { initialNodes, initialEdges } = testNewGraphBuilder(posHierarchy)
+//console.log(initialNodes)
 
 const nodeTypes = {
     pos: PositionNode,
