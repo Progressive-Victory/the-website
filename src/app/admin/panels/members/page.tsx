@@ -26,7 +26,7 @@ import {
     UpdateUserRequest,
     zUpdateUserRequest,
 } from '@/contracts/requests'
-import { PaginatedResponse } from '@/contracts/responses'
+import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
@@ -81,6 +81,19 @@ export default function Page() {
         search: donorSearch,
         onSearch: onDonorSearch,
     } = usePaginatedSearch('/actblue/donors', zActBlueDonor)
+
+    const donorCountQuery = useQuery({
+        queryKey: ['/users', 'donorCount'],
+        queryFn: ready
+            ? ({ signal }) =>
+                  onGet('/users', zPaginatedResponse(zUserProfile), {
+                      query: { isDonor: true, limit: 0 },
+                      signal,
+                  })
+            : skipToken,
+        placeholderData: keepPreviousData,
+    })
+    const donorCount = donorCountQuery.data?.count
 
     const roles = rolesQuery.data?.data ?? []
     const roleOptions = useMemo(
@@ -499,6 +512,16 @@ export default function Page() {
                             label: role.name,
                             value: role.id,
                         })),
+                    },
+                    {
+                        label: 'Donors',
+                        value: 'isDonor',
+                        options: [
+                            {
+                                label: `Show ${donorCount ?? '...'} Matched Donors`,
+                                value: 'true',
+                            },
+                        ],
                     },
                 ]}
                 pinnedContent={
