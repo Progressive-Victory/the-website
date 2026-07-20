@@ -87,7 +87,7 @@ export default function Page() {
         queryFn: ready
             ? ({ signal }) =>
                   onGet('/users', zPaginatedResponse(zUserProfile), {
-                      query: { isDonor: true, limit: 1 },
+                      query: { isDonor: true, limit: 0 },
                       signal,
                   })
             : skipToken,
