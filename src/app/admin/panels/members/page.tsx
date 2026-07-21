@@ -69,10 +69,12 @@ export default function Page() {
         query: searchQuery,
         search,
         onSearch,
-    } = usePaginatedSearch('/users', zUserProfile)
+    } = usePaginatedSearch('/users', zUserProfile, {
+        search: { sort: SortDirection.DESC, sortField: 'created_at_utc' },
+    })
 
     const { query: rolesQuery } = usePaginatedSearch('/roles', zRole, {
-        search: { limit: 50, sort: SortDirection.DESC },
+        search: { limit: 50 },
         all: true,
     })
 
