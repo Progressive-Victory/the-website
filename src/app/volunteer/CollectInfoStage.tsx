@@ -101,9 +101,7 @@ export function CollectInfoStage({
 
     useEffect(() => {
         if (parsedPhone.isValid)
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setForm((f) => ({
-                // 6/23/26 - Not worth addressing
                 ...f,
                 phoneNumber: parsedPhone.phoneNumber.substring(2),
             }))

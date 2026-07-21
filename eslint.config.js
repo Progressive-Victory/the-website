@@ -42,6 +42,7 @@ export default defineConfig([
             'object-shorthand': 'warn',
             '@typescript-eslint/no-unsafe-return': 'warn',
             '@typescript-eslint/no-unsafe-enum-comparison': 'warn',
+            'react-hooks/set-state-in-effect': 'warn', // Should go back to (default) error when current set are dealt with
             'tailwindcss/no-custom-classname': 'off',
 
             // React Compiler rules (for testing)

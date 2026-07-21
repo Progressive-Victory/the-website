@@ -159,7 +159,6 @@ export default function VolunteerPage() {
 
     const currentStage = overrideStage ?? user.data?.onboardingStage
 
-    // useEffect(() => {
     if (
         currentStage === OnboardingStage.JOINED &&
         (!user.data?.firstName ||
@@ -170,12 +169,11 @@ export default function VolunteerPage() {
     ) {
         setOverrideStage(OnboardingStage.NOT_STARTED)
     }
-    // }, [user.data, currentStage])
 
     if (isSessionLoading) return null
 
     if (!session) {
-        globalThis.location.replace('/login?redirect=/volunteer')
+        window.location.replace('/login?redirect=/volunteer')
         return null
     }
 

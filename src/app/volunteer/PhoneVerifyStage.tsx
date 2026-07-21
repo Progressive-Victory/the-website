@@ -48,8 +48,7 @@ export function PhoneVerifyStage({
     }
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setCodeTimer(getCodeTime()) // 6/23/26 - Not worth addressing
+        setCodeTimer(getCodeTime())
         const interval = setInterval(() => {
             setCodeTimer(getCodeTime())
         }, 200)

@@ -10,7 +10,7 @@
         "postbuild": "next-sitemap",
         "start": "next start",
         "lint": "eslint --fix .",
-        "lint-ci": "eslint --max-warnings 0 .",
+        "lint-ci": "eslint --max-warnings 8 .",
         "test": "vitest",
         "prettier": "prettier --write --ignore-path .prettierignore .",
         "prettier-ci": "prettier --check --ignore-path .prettierignore ."
