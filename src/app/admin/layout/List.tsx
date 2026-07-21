@@ -343,7 +343,7 @@ function FieldSelect({ label, field, options, onSelect }: FieldSelectProps) {
 
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value
-        onSelect(value == 'all' ? undefined : value)
+        onSelect(value == 'default' ? undefined : value)
     }
 
     return (
@@ -352,10 +352,10 @@ function FieldSelect({ label, field, options, onSelect }: FieldSelectProps) {
             <select
                 name="field"
                 id="field"
-                defaultValue={field ?? 'all'}
+                defaultValue={field ?? 'default'}
                 onChange={handleChange}
             >
-                <option value={'all'}>All</option>
+                <option key="default">Default</option>
                 {options.map((option) => (
                     <option key={option.value} value={option.value}>
                         {option.label}
@@ -408,11 +408,11 @@ function SortSelect({ sort, onSelect }: SortSelectProps) {
             <select
                 name="sort"
                 id="sort"
-                defaultValue={sort ?? SortDirection.DESC}
+                defaultValue={sort}
                 onChange={handleChange}
             >
-                <option value={SortDirection.DESC}>Descending</option>
                 <option value={SortDirection.ASC}>Ascending</option>
+                <option value={SortDirection.DESC}>Descending</option>
             </select>
         </label>
     )

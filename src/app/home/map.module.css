@@ -142,12 +142,6 @@
 .message {
 }
 
-@media (min-width: 1280px) {
-    .message {
-        width: 30vw;
-    }
-}
-
 .botLeftText {
     font-weight: 500;
 }

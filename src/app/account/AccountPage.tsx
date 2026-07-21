@@ -3,11 +3,10 @@
 import {
     AccountContributionsSection,
     AccountDetailsSection,
-    AccountMembershipSection,
     ManualDonorLinkRequest,
 } from './sections/index'
 import styles from '@/app/account/account.module.css'
-import { User } from '@/contracts/data'
+import { OnboardingStage, User } from '@/contracts/data'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
 import { useMemo } from 'react'
@@ -52,30 +51,30 @@ export function AccountPage() {
                     state: user.address.state,
                     zip: user.address.zip,
                 },
+                shirtSize: user.shirtSize,
             },
         })
     }
 
-    const onLinkFormSubmit = (
-        e: React.FormEvent,
-        user: User,
-        donorLinkForm: ManualDonorLinkRequest
-    ) => {
-        e.preventDefault()
+    const onLinkFormSubmit = (donorLinkForm: ManualDonorLinkRequest) => {
+        if (!loggedInUser.data) return
 
         linkUser.mutate({
-            id: user.id,
-            user,
+            id: loggedInUser.data.id,
+            user: loggedInUser.data,
             donorLinkRequest: donorLinkForm,
         })
-
-        // bubble errors to the UI for user feedback on failure
-        if (linkUser.error) return linkUser.error.message
     }
 
-    if (isSessionLoading) return null
+    if (isSessionLoading || !session) return null
 
-    if (!session) return null
+    if (
+        loggedInUser.data &&
+        loggedInUser.data.onboardingStage != OnboardingStage.JOINED
+    ) {
+        window.location.href = '/volunteer'
+        return null
+    }
 
     return (
         <div className={styles.root}>
@@ -87,12 +86,16 @@ export function AccountPage() {
                             canAccessAdminPanel={canAccessAdminPanel}
                             handleSignOut={handleSignOut}
                             onSave={onSave}
+                            donorLinkError={linkUser.error}
+                            onDonorLinkSubmit={onLinkFormSubmit}
                         />
-                        <AccountMembershipSection />
-                        <AccountContributionsSection
-                            userData={loggedInUser.data}
-                            onLinkFormSubmit={onLinkFormSubmit}
-                        />
+                        {!!loggedInUser.data.donors?.length && (
+                            <AccountContributionsSection
+                                user={loggedInUser.data}
+                                error={linkUser.error}
+                                onSubmit={onLinkFormSubmit}
+                            />
+                        )}
                     </>
                 )}
             </div>

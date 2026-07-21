@@ -1,16 +1,31 @@
 .message {
     max-width: 40rem;
+    width: fit-content;
+
+    padding: 0.8rem;
+    background: #ffffff;
+    border-radius: 0.3rem;
+    display: flex;
+
+    box-shadow:
+        0 1rem 1.25rem -0.25rem rgba(0, 0, 0, 0.1),
+        0 0.4rem 0.5rem -0.3rem rgba(0, 0, 0, 0.1);
+}
+
+.mouseTrap {
+    max-width: 40rem;
+    width: fit-content;
+    box-sizing: border-box;
+}
+
+.messageInner {
+    max-width: 40rem;
+
+    border-radius: 0.3rem;
 
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
-
-    border-radius: 0.3rem;
-    background: #ffffff;
-    padding: 0.8rem;
-    box-shadow:
-        0 1rem 1.25rem -0.25rem rgba(0, 0, 0, 0.1),
-        0 0.4rem 0.5rem -0.3rem rgba(0, 0, 0, 0.1);
 }
 
 .header {

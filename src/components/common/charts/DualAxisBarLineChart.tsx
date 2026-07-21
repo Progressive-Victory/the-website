@@ -27,9 +27,9 @@ export type ChartGranularity =
 
 export interface ChartPoint {
     key: string
-    anchorIso?: string
-    startIso?: string
-    endIso?: string
+    anchor?: Date
+    start?: Date
+    end?: Date
     granularity?: ChartGranularity
     label?: string
     fullLabel: string
@@ -90,7 +90,7 @@ interface ChartProps {
     ariaLabel?: string
     chartAriaLabel?: string
     tableConfig?: Partial<DualAxisBarLineTableConfig>
-    onRangeSelect?: (range: { startIso: string; endIso: string }) => void
+    onRangeSelect?: (range: { start: Date; end: Date }) => void
     cornerTopRight?: ReactNode
 }
 
@@ -329,11 +329,11 @@ export function Chart({
     const yearDividers = useMemo(() => {
         const out: { idx: number; year: number }[] = []
         for (let i = 1; i < points.length; i += 1) {
-            const prev = points[i - 1].anchorIso
-            const curr = points[i].anchorIso
+            const prev = points[i - 1].anchor
+            const curr = points[i].anchor
             if (!prev || !curr) continue
-            const prevY = new Date(prev).getFullYear()
-            const currY = new Date(curr).getFullYear()
+            const prevY = prev.getFullYear()
+            const currY = curr.getFullYear()
             if (prevY !== currY) out.push({ idx: i, year: currY })
         }
         return out
@@ -341,12 +341,10 @@ export function Chart({
 
     const spansYears = useMemo(() => {
         if (points.length < 2) return false
-        const firstIso = points[0].anchorIso
-        const lastIso = points[points.length - 1].anchorIso
-        if (!firstIso || !lastIso) return false
-        return (
-            new Date(firstIso).getFullYear() !== new Date(lastIso).getFullYear()
-        )
+        const first = points[0].anchor
+        const last = points[points.length - 1].anchor
+        if (!first || !last) return false
+        return first.getFullYear() !== last.getFullYear()
     }, [points])
 
     useEffect(() => {
@@ -670,8 +668,8 @@ export function Chart({
             const cx = getColumnCenter(g, i, points.length)
             const isEnd = i === 0 || i === points.length - 1
             let label: string
-            if (p.anchorIso && p.granularity) {
-                const date = new Date(p.anchorIso)
+            if (p.anchor && p.granularity) {
+                const date = p.anchor
                 label = pickLabel(
                     p.granularity,
                     date,
@@ -874,11 +872,11 @@ export function Chart({
             const high = Math.max(dragStartIdx, dragCurrentIdx)
             const first = points[low]
             const last = points[high]
-            const startIso = first?.startIso ?? first?.anchorIso
-            const endIso = last?.endIso ?? last?.anchorIso
+            const start = first?.start ?? first?.anchor
+            const end = last?.end ?? last?.anchor
 
-            if (startIso && endIso) {
-                onRangeSelect({ startIso, endIso })
+            if (start && end) {
+                onRangeSelect({ start, end })
             }
         }
 

@@ -24,7 +24,6 @@ import {
 } from '@/components/common'
 import { Chart } from '@/components/common/charts/DualAxisBarLineChart'
 import { type ChartGranularityMode } from '@/components/common/charts/timeBuckets'
-import { useFetch } from '@/util/hooks'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { FaDonate } from 'react-icons/fa'
@@ -74,7 +73,6 @@ export default function Page() {
     const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
     const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
 
-    const { onGet } = useFetch()
     const {
         startDate,
         endDate,
@@ -93,10 +91,11 @@ export default function Page() {
         raisedKickerLabel,
         recurringPct,
         oneTimePct,
+        recurringDollarsChange,
         validGranularityModes,
         chartPoints,
         chartViewOverrideActive,
-        allTimeFirstIso,
+        allTimeFirst,
         isXToDateSpanOptionRelevant,
         canApplyCustomRange,
         isAwaitingDraftEndDate,
@@ -117,7 +116,20 @@ export default function Page() {
         setGranularityMode,
         applyChartViewOverrideRange,
         resetChartViewToSelectedRange,
-    } = useFundraisingDashboardController(onGet)
+    } = useFundraisingDashboardController()
+
+    const recurringChangeAmount =
+        typeof recurringDollarsChange === 'number' &&
+        Number.isFinite(recurringDollarsChange)
+            ? recurringDollarsChange
+            : null
+
+    const recurringChangeLabel =
+        recurringChangeAmount == null
+            ? null
+            : `${recurringChangeAmount > 0 ? '+' : recurringChangeAmount < 0 ? '-' : ''}${formatCurrency(
+                  Math.abs(recurringChangeAmount)
+              )}`
 
     useEffect(() => {
         const viewportPadding = 12
@@ -312,7 +324,7 @@ export default function Page() {
                                                                                 ] =
                                                                                     getResolvedPresetRange(
                                                                                         preset,
-                                                                                        allTimeFirstIso
+                                                                                        allTimeFirst
                                                                                     )
                                                                                 setDraftStartDate(
                                                                                     s
@@ -366,8 +378,8 @@ export default function Page() {
                                                                 draftEndDate
                                                             }
                                                             onRangeChange={(
-                                                                nextStartDate: string,
-                                                                nextEndDate: string
+                                                                nextStartDate: Date | null,
+                                                                nextEndDate: Date | null
                                                             ) => {
                                                                 setDraftStartDate(
                                                                     nextStartDate
@@ -379,7 +391,7 @@ export default function Page() {
                                                                     inferPresetFromRange(
                                                                         nextStartDate,
                                                                         nextEndDate,
-                                                                        allTimeFirstIso
+                                                                        allTimeFirst
                                                                     )
                                                                 )
                                                             }}
@@ -421,6 +433,20 @@ export default function Page() {
                             value={formatCurrency(
                                 statsQuery.data?.recurringDollarsRaised
                             )}
+                            valueChange={
+                                recurringChangeLabel != null ? (
+                                    <span
+                                        className={
+                                            recurringChangeAmount != null &&
+                                            recurringChangeAmount < 0
+                                                ? styles.metricChangeNegative
+                                                : styles.metricChangePositive
+                                        }
+                                    >
+                                        {recurringChangeLabel}
+                                    </span>
+                                ) : null
+                            }
                             stat1={
                                 recurringPct != null &&
                                 statsQuery.data?.recurringContributionCount !=
@@ -523,14 +549,12 @@ export default function Page() {
                         onRangeSelect={
                             zoomEnabled
                                 ? ({
-                                      startIso,
-                                      endIso,
+                                      start,
+                                      end,
                                   }: {
-                                      startIso: string
-                                      endIso: string
+                                      start: Date
+                                      end: Date
                                   }) => {
-                                      const start = new Date(startIso)
-                                      const end = new Date(endIso)
                                       const oneDayMs = 24 * 60 * 60 * 1000
                                       const inclusiveRangeMs =
                                           end.getTime() - start.getTime() + 1000
@@ -550,8 +574,8 @@ export default function Page() {
                                           { startIso, endIso }
                                       )
                                       applyChartViewOverrideRange({
-                                          startIso,
-                                          endIso,
+                                          start,
+                                          end,
                                       })
                                   }
                                 : undefined

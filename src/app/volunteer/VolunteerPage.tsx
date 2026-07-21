@@ -15,12 +15,8 @@ import { OnboardingStage } from '@/contracts/data'
 import {
     UserOnboardingCollectInfoRequest,
     UserOnboardingVerifyRequest,
-    zUserOnboardingCollectInfoRequest,
 } from '@/contracts/requests'
-import {
-    DiscordUserIsInServerResponse,
-    zDiscordUserIsInServerResponse,
-} from '@/contracts/responses'
+import { zDiscordUserIsInServerResponse } from '@/contracts/responses'
 import { useAuth, useCurrentUser, useFetch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -30,7 +26,6 @@ import {
     useQueryClient,
 } from '@tanstack/react-query'
 import { useState } from 'react'
-import z from 'zod'
 
 export default function VolunteerPage() {
     const queryClient = useQueryClient()
@@ -49,10 +44,10 @@ export default function VolunteerPage() {
         queryFn:
             ready && discordUserId != null
                 ? ({ signal }) =>
-                      onGet<DiscordUserIsInServerResponse>(
-                          `/discordUsers/${discordUserId}/isInServer`,
+                      onGet(
+                          '/discordUsers/:discordUserId/isInServer',
                           zDiscordUserIsInServerResponse,
-                          { signal }
+                          { params: { discordUserId }, signal }
                       )
                 : skipToken,
         placeholderData: keepPreviousData,
@@ -61,34 +56,33 @@ export default function VolunteerPage() {
     const collectInfoMutation = useMutation({
         mutationFn: async (obj: UserOnboardingCollectInfoRequest) => {
             if (!user.data) return
+
             await onPut(
-                `/users/${user.data?.id}/onboardingStages/collectInfo`,
-                z.parse(zUserOnboardingCollectInfoRequest, {
+                '/users/:userId/onboardingStages/collectInfo',
+                {
                     ...obj,
-                    metaData: {
-                        dataSource: 'Intake Form',
-                    },
-                } satisfies UserOnboardingCollectInfoRequest)
+                    metaData: { dataSource: 'Intake Form' },
+                } satisfies UserOnboardingCollectInfoRequest,
+                null,
+                { params: { userId: user.data?.id } }
             )
         },
-        onSettled: () => {
+        onSettled: async () => {
             setOverrideStage(null)
-            return queryClient.invalidateQueries({
-                queryKey: ['/users/current'],
-            })
+            await user.onInvalidate()
         },
     })
 
     const ageUpMutation = useMutation({
         mutationFn: async () => {
             if (!user.data) return
-            await onPut(`/users/${user.data?.id}/onboardingStages/ageUp`, null)
-        },
-        onSettled: () => {
-            setOverrideStage(null)
-            return queryClient.invalidateQueries({
-                queryKey: ['/users/current'],
+            await onPut('/users/:userId/onboardingStages/ageUp', null, null, {
+                params: { userId: user.data?.id },
             })
+        },
+        onSettled: async () => {
+            setOverrideStage(null)
+            await user.onInvalidate()
         },
     })
 
@@ -96,28 +90,29 @@ export default function VolunteerPage() {
         mutationFn: async () => {
             if (!user.data) return
             await onPost(
-                `/users/${user.data?.id}/onboardingStages/sendVerificationCode`,
+                '/users/:userId/onboardingStages/sendVerificationCode',
                 null,
-                null
+                null,
+                { params: { userId: user.data?.id } }
             )
         },
-        onSettled: () => {
+        onSettled: async () => {
             setOverrideStage(null)
-            return queryClient.invalidateQueries({
-                queryKey: ['/users/current'],
-            })
+            await user.onInvalidate()
         },
     })
 
     const verifyMutation = useMutation({
         mutationFn: async (obj: UserOnboardingVerifyRequest) => {
             if (!user.data) return
-            await onPut(`/users/${user.data?.id}/onboardingStages/verify`, obj)
+            await onPut('/users/:userId/onboardingStages/verify', obj, null, {
+                params: { userId: user.data?.id },
+            })
         },
-        onSettled: () => {
+        onSettled: async () => {
             setOverrideStage(null)
-            return Promise.all([
-                queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
+            await Promise.all([
+                user.onInvalidate(),
                 queryClient.invalidateQueries({
                     queryKey: [`/discordUsers/${discordUserId}/isInServer`],
                 }),
@@ -128,14 +123,13 @@ export default function VolunteerPage() {
     const joinMutation = useMutation({
         mutationFn: async () => {
             if (!user.data) return
-            await onPost(
-                `/users/${user.data?.id}/onboardingStages/join`,
-                null,
-                null
-            )
+            await onPost('/users/:userId/onboardingStages/join', null, null, {
+                params: { userId: user.data?.id },
+            })
         },
-        onSettled: () =>
-            queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
+        onSettled: async () => {
+            await user.onInvalidate()
+        },
     })
 
     const handleCollectInfoSuccess = (form: IOnboardingForm) => {

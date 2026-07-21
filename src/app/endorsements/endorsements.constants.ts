@@ -37,10 +37,11 @@ export const SECTION_SORT_OPTIONS: {
 export const PAST_ELECTION_LABEL = 'Past Elections'
 export const UPCOMING_STATUS_LABEL = 'Upcoming'
 export const UNSPECIFIED_STATE_LABEL = 'Unspecified'
+export const NATIONWIDE_STATE_LABEL = 'Nationwide'
 
 export const LOST_OR_DROPPED_STATUSES = new Set<ElectionStatus>([
     'Lost Primary',
-    'Lost General Election',
+    'Lost General',
     'Dropped Out',
 ])
 
@@ -48,7 +49,7 @@ export const ELECTION_STATUS_SORT_ORDER: Record<ElectionStatus, number> = {
     Elected: 0,
     'Won Primary': 1,
     '': 2,
-    'Lost General Election': 3,
+    'Lost General': 3,
     'Lost Primary': 4,
     'Dropped Out': 5,
 }

@@ -4,162 +4,174 @@ import styles from '@/app/account/account.module.css'
 import formStyles from '@/components/common/forms/Form.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
 import { ActBlueContribution, User } from '@/contracts/data'
-import React, { useMemo, useState } from 'react'
+import React, { ChangeEvent, useState } from 'react'
 
 export interface ManualDonorLinkRequest {
     donorEmail: string
     orderId: string
-    errorText?: string
 }
 
 type RecurrencePeriod = 'one-time' | 'monthly' | 'weekly'
-const RecurrenceBadge = ({ type }: { type: RecurrencePeriod }) => {
-    let label: string
-    switch (type) {
-        case 'one-time': {
-            label = 'One Time'
-            break
-        }
-        case 'monthly': {
-            label = 'Monthly'
-            break
-        }
-        case 'weekly': {
-            label = 'Weekly'
-            break
-        }
+const RecurrenceTag = ({ type }: { type: RecurrencePeriod }) => {
+    const nameMap = {
+        ['one-time']: 'One Time',
+        ['monthly']: 'Monthly',
+        ['weekly']: 'Weekly',
     }
 
     return (
-        <div className={`${styles.recurrenceBadge} ${styles[type]}`}>
-            {label}
+        <div className={`${styles.recurringTag} ${styles[type]}`}>
+            {nameMap[type]}
         </div>
     )
 }
 
-const ContributionsTable = ({
-    contributions,
-}: {
-    contributions: ActBlueContribution[]
-}) => {
-    const numToDollarAmount = (num: number | undefined) => {
-        if (num === undefined) return 0.0
+export interface ContributionsTableProps {
+    lineitems: {
+        contribution: ActBlueContribution
+        lineitemId: number
+        amount: number
+        paidAt: Date
+    }[]
+}
 
-        const ntos = num + ''
-        console.log('ntos:', ntos.length)
-        const matcher = new RegExp(/\./)
-        const ntosMatches = matcher.exec(ntos)
-        const length =
-            ntosMatches && ntosMatches.length > 0
-                ? ntos.replace('.', '').length
-                : ntos.length + 2
+const formatContributionForm = (value: string) => {
+    const rawValue = value.trim()
 
-        console.log('length: ', length)
-        return num.toPrecision(length)
+    if (!rawValue) return 'Unknown'
+
+    if (rawValue.startsWith('https://') || rawValue.startsWith('http://')) {
+        try {
+            const parsed = new URL(rawValue)
+            return parsed.pathname || rawValue
+        } catch {
+            return rawValue
+        }
     }
 
-    // TODO: replace with a better table
+    return rawValue
+}
+
+const getRecurrenceType = (
+    contribution: ActBlueContribution
+): RecurrencePeriod => {
+    if (!contribution.isRecurring) return 'one-time'
+    return contribution.recurringPeriod.toLowerCase() === 'weekly'
+        ? 'weekly'
+        : 'monthly'
+}
+
+const ContributionsTable = ({ lineitems }: ContributionsTableProps) => {
     return (
         <div className={styles.contributionsTableContainer}>
-            <table className={styles.contributionsTable}>
-                <thead>
-                    <tr>
-                        <th>Recurring</th>
-                        <th>Order Number</th>
-                        <th>Amount</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {contributions.map((c) => (
-                        <tr key={c.uniqueIdentifier}>
-                            <td>
-                                <RecurrenceBadge
-                                    type={
-                                        c.isRecurring
-                                            ? (c.recurringPeriod as RecurrencePeriod)
-                                            : 'one-time'
-                                    }
-                                />
-                            </td>
-                            <td>{c.orderNumber}</td>
-                            <td>
-                                $
-                                {numToDollarAmount(
-                                    c.lineitems?.reduce(
-                                        (acc, l) => acc + l.amount,
-                                        0
-                                    )
-                                )}
-                            </td>
-                            <td>
-                                {[
-                                    ...new Set(
-                                        c.lineitems?.map((l) =>
-                                            l.paidAt.toLocaleDateString()
-                                        )
-                                    ),
-                                ].join(', ')}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <div className={styles.contributionsList}>
+                <div className={styles.contributionsListHeader}>
+                    <span>Recurring</span>
+                    <span>Contribution Form</span>
+                    <span>Order Number</span>
+                    <span>Amount</span>
+                    <span>Date</span>
+                </div>
+
+                {lineitems.map(
+                    ({ contribution, lineitemId, amount, paidAt }) => {
+                        return (
+                            <div
+                                key={`${contribution.uniqueIdentifier}-${lineitemId}`}
+                                className={styles.contributionsListRow}
+                            >
+                                <span
+                                    className={styles.contributionsListCell}
+                                    data-label="Recurring"
+                                >
+                                    <RecurrenceTag
+                                        type={getRecurrenceType(contribution)}
+                                    />
+                                </span>
+                                <span
+                                    className={styles.contributionsListCell}
+                                    data-label="Contribution Form"
+                                >
+                                    {formatContributionForm(
+                                        contribution.contributionForm
+                                    )}
+                                </span>
+                                <span
+                                    className={styles.contributionsListCell}
+                                    data-label="Order Number"
+                                >
+                                    {contribution.orderNumber}
+                                </span>
+                                <span
+                                    className={styles.contributionsListCell}
+                                    data-label="Amount"
+                                >
+                                    ${amount.toFixed(2)}
+                                </span>
+                                <span
+                                    className={styles.contributionsListCell}
+                                    data-label="Date"
+                                >
+                                    {paidAt.toLocaleDateString()}
+                                </span>
+                            </div>
+                        )
+                    }
+                )}
+            </div>
         </div>
     )
 }
 
 interface AccountContributionsSectionProps {
-    userData: User
-    onLinkFormSubmit: (
-        e: React.FormEvent,
-        user: User,
-        donorLinkForm: ManualDonorLinkRequest
-    ) => void
+    user: User
+    error: Error | null
+    onSubmit: (donorLinkForm: ManualDonorLinkRequest) => void
 }
 
 export function AccountContributionsSection({
-    userData,
-    onLinkFormSubmit,
+    user,
+    error,
+    onSubmit,
 }: AccountContributionsSectionProps) {
-    const defaultDonorLinkForm: ManualDonorLinkRequest = {
+    const [donorLinkForm, setDonorLinkForm] = useState<ManualDonorLinkRequest>({
         donorEmail: '',
         orderId: '',
+    })
+
+    const userHasDonor = user.donors && user.donors.length > 0
+
+    const allContributions =
+        user.donors?.flatMap((d) => d.contributions ?? []) ?? []
+
+    const sortedLineitems = allContributions
+        .flatMap((contribution) =>
+            (contribution.lineitems ?? []).map((lineitem) => ({
+                contribution,
+                lineitemId: lineitem.lineitemId,
+                amount: lineitem.amount,
+                paidAt: lineitem.paidAt,
+            }))
+        )
+        .sort((a, b) => b.paidAt.getTime() - a.paidAt.getTime())
+
+    const handleChangeDonorEmail = (e: ChangeEvent<HTMLInputElement>) => {
+        setDonorLinkForm({
+            ...donorLinkForm,
+            donorEmail: e.target.value,
+        })
     }
-    const [donorLinkForm, setDonorLinkForm] =
-        useState<ManualDonorLinkRequest>(defaultDonorLinkForm)
 
-    const userHasDonor = useMemo(
-        () => userData.donors && userData.donors.length > 0,
-        [userData]
-    )
-    const donorHasContributions = useMemo(
-        () =>
-            userHasDonor &&
-            userData.donors!.find(
-                (d) => d.contributions && d.contributions.length > 0
-            )
-                ? true
-                : false,
-        [userHasDonor, userData]
-    )
-    const allContributions = useMemo(
-        () =>
-            donorHasContributions
-                ? userData.donors!.flatMap((d) =>
-                      d.contributions!.map((c) => c)
-                  )
-                : [],
-        [donorHasContributions, userData]
-    )
-
-    const contribSubtitle = !userHasDonor
-        ? 'Link your account to your ActBlue account to view your contributions.'
-        : 'Thank you for your support!'
+    const handleChangeOrderId = (e: ChangeEvent<HTMLInputElement>) => {
+        setDonorLinkForm({
+            ...donorLinkForm,
+            orderId: e.target.value,
+        })
+    }
 
     const submitLinkForm = (e: React.FormEvent) => {
-        const err = onLinkFormSubmit(e, userData, donorLinkForm) ?? undefined
-        setDonorLinkForm({ ...defaultDonorLinkForm, errorText: err })
+        e.preventDefault()
+        onSubmit(donorLinkForm)
     }
 
     return (
@@ -168,14 +180,17 @@ export function AccountContributionsSection({
                 <div className={styles.headerTopRow}>
                     <div className={styles.headerTextBlock}>
                         <p className={styles.pageTitle}>Contributions</p>
-
-                        <p className={styles.pageSubtitle}>{contribSubtitle}</p>
+                        <p className={styles.pageSubtitle}>
+                            {!userHasDonor
+                                ? 'Link your account to your ActBlue account to view your contributions.'
+                                : 'Thank you for your support!'}
+                        </p>
                     </div>
                 </div>
             </header>
 
             <div className={styles.contentPanel}>
-                <div className={styles.contentBackground}>
+                <div className={styles.contributionsContentPanel}>
                     {!userHasDonor ? (
                         <form
                             className={styles.linkActBlueFormContainer}
@@ -193,12 +208,7 @@ export function AccountContributionsSection({
                                     <input
                                         className={formFieldStyles.textField}
                                         value={donorLinkForm.donorEmail}
-                                        onChange={(e) =>
-                                            setDonorLinkForm({
-                                                ...donorLinkForm,
-                                                donorEmail: e.target.value,
-                                            })
-                                        }
+                                        onChange={handleChangeDonorEmail}
                                     />
                                 </label>
                                 <label>
@@ -210,32 +220,31 @@ export function AccountContributionsSection({
                                     <input
                                         className={formFieldStyles.textField}
                                         value={donorLinkForm.orderId}
-                                        onChange={(e) =>
-                                            setDonorLinkForm({
-                                                ...donorLinkForm,
-                                                orderId: e.target.value,
-                                            })
-                                        }
+                                        onChange={handleChangeOrderId}
                                     />
                                 </label>
                             </div>
                             <button type="submit" className={formStyles.button}>
                                 Link
                             </button>
-                            <span className={styles.linkActBlueFormErrorText}>
-                                {donorLinkForm.errorText}
-                            </span>
+                            {error && (
+                                <span
+                                    className={styles.linkActBlueFormErrorText}
+                                >
+                                    {error.message}
+                                </span>
+                            )}
                         </form>
                     ) : (
                         <>
-                            {!donorHasContributions ? (
+                            {!sortedLineitems.length ? (
                                 <div className={styles.noContributionsMessage}>
                                     No contributions were found for your
                                     account.
                                 </div>
                             ) : (
                                 <ContributionsTable
-                                    contributions={allContributions}
+                                    lineitems={sortedLineitems}
                                 />
                             )}
                         </>
@@ -245,87 +254,3 @@ export function AccountContributionsSection({
         </section>
     )
 }
-
-/*
-
-{
-    "donor": {
-        "firstname": "Elsa",
-        "lastname": "O'Gutkowski",
-        "addr1": "672 Ladarius Rapid",
-        "city": "Russelmouth",
-        "state": "KY",
-        "zip": "60938",
-        "country": "United States",
-        "isEligibleForExpressLane": false,
-        "employerData": {
-            "employer": "Rosenbaum-Stoltenberg",
-            "occupation": "painter 11",
-            "employerAddr1": null,
-            "employerCity": null,
-            "employerState": null,
-            "employerZip": null,
-            "employerCountry": null
-        },
-        "email": "ewell@ledner.example",
-        "phone": "(589) 742-7087 x5082"
-    },
-    "contribution": {
-        "createdAt": "2026-03-24T16:27:22.000Z",
-        "orderNumber": "ABTEST1",
-        "creditCardExpiration": "",
-        "recurringPeriod": "monthly",
-        "weeklyRecurringSunset": "",
-        "isPaypal": false,
-        "isMobile": false,
-        "isExpress": false,
-        "withExpressLane": false,
-        "expressSignup": false,
-        "status": "",
-        "textMessageOption": "",
-        "giftIdentifier": "",
-
-        "contributionForm": "oifhtoeifnhtoiefhtofhkt",
-        "refcodes": null,
-        "abTestName": "test",
-        "isRecurring": true,
-        "abTestVariation": "test",
-        "recurringDuration": "-1",
-        "uniqueIdentifier": "57956758",
-        "thanksUrl": "",
-        "retryUrl": "",
-        "giftDeclined": null,
-        "shippingName": "",
-        "shippingAddr1": "",
-        "shippingCity": "",
-        "shippingState": "",
-        "shippingZip": "",
-        "shippingCountry": "",
-        "smartBoostAmount": null,
-        "customFields": [],
-        "merchandise": [],
-        "bumpYourRecurring": null
-    },
-    "lineitems": [
-        {
-            "sequence": 0,
-            "entityId": 0,
-            "fecId": "",
-            "committeeName": "comm",
-            "paidAt": "2026-03-24T16:27:22.000Z",
-            "lineitemId": 579567558,
-            "amount": 10,
-            "recurringAmount": 10,
-            "amountLessAbFees": 9
-        }
-    ],
-    "form": {
-        "name": "oifhtoeifnhtoiefhtofhkt",
-        "kind": "i have no idea what this is for",
-        "ownerEmail": "ewell@ledner.example",
-        "managingEntityName": "ent",
-        "managingEntityCommitteeName": "comm"
-    }
-}
-
-*/
