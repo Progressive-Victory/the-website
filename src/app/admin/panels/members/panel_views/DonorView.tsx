@@ -81,8 +81,10 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
                         contribution.recurringPeriod as 'weekly' | 'monthly',
                         contribution.recurringDuration ?? 1
                     ) > new Date())
-            )
+            ) {
                 hasActiveRecurring = true
+            }
+
             ;(contribution.lineitems ?? []).forEach(
                 (lineitem: ActBlueLineitem) => {
                     total += lineitem.amount
@@ -282,9 +284,6 @@ export function DonorView({
                                             title=""
                                             readonly
                                             form={donor}
-                                            onSave={() => {
-                                                return
-                                            }}
                                         >
                                             <FormGroup title="" wrapper>
                                                 <FormGroup
@@ -436,9 +435,6 @@ export function DonorView({
                                             title=""
                                             readonly
                                             form={donor}
-                                            onSave={() => {
-                                                return
-                                            }}
                                         >
                                             <FormGroup title="" wrapper>
                                                 <FormGroup
