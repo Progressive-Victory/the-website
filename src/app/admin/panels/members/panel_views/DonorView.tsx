@@ -70,29 +70,28 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
     let total = 0
     let customFields: ActBlueContributionCustomField[] = []
 
-    ;(donor.contributions ?? []).forEach(
-        (contribution: ActBlueContribution) => {
-            customFields = contribution.customFields
-            if (
-                contribution.isRecurring &&
                 ((contribution.recurringDuration ?? 1) < 0 ||
-                    calcFutureDate(
-                        contribution.createdAt,
-                        contribution.recurringPeriod as 'weekly' | 'monthly',
-                        contribution.recurringDuration ?? 1
-                    ) > new Date())
-            ) {
-                hasActiveRecurring = true
-            }
-
-            ;(contribution.lineitems ?? []).forEach(
-                (lineitem: ActBlueLineitem) => {
-                    total += lineitem.amount
-                    li.push(lineitem)
-                }
-            )
+    const contributions = donor.contributions ?? []
+    contributions.forEach((contribution: ActBlueContribution) => {
+        customFields = contribution.customFields
+        if (
+            contribution.isRecurring &&
+            ((contribution.recurringDuration ?? 1) < 0 ||
+                calcFutureDate(
+                    contribution.createdAt,
+                    contribution.recurringPeriod as 'weekly' | 'monthly',
+                    contribution.recurringDuration ?? 1
+                ) > new Date())
+        ) {
+            hasActiveRecurring = true
         }
-    )
+
+        const lineitems = contribution.lineitems ?? []
+        lineitems.forEach((lineitem: ActBlueLineitem) => {
+            total += lineitem.amount
+            li.push(lineitem)
+        })
+    })
 
     return {
         total,
@@ -259,9 +258,12 @@ export function DonorView({
                                 boolean
                             >()
 
-                            ;(donor.contributions ?? []).forEach(
+                            const contributions = donor.contributions ?? []
+                            contributions.forEach(
                                 (contribution: ActBlueContribution) => {
-                                    ;(contribution.lineitems ?? []).forEach(
+                                    const lineitems =
+                                        contribution.lineitems ?? []
+                                    lineitems.forEach(
                                         (lineitem: ActBlueLineitem) => {
                                             contributionFormByLineitemId.set(
                                                 lineitem.lineitemId,
