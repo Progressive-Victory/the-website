@@ -11,7 +11,7 @@ import {
     type SectionSortOrder,
 } from './endorsements.types'
 import { getRelevantElectionDate } from './endorsements.utils'
-import { useDeferredValue, useMemo, useState } from 'react'
+import { useDeferredValue, useState } from 'react'
 
 const SORTED_CANDIDATES: CandidateConfig[] = [...CANDIDATES].sort((a, b) => {
     const aTime = getRelevantElectionDate(a)?.getTime() ?? Infinity
@@ -26,7 +26,7 @@ const FILTER_PREDICATES: Record<FilterType, (c: CandidateConfig) => boolean> = {
     member: (c) => c.showPvMember,
 }
 
-const AVAILABLE_YEARS: number[] = (() => {
+export function Endorsements() {
     const years = new Set<number>()
     for (const candidate of CANDIDATES) {
         if (candidate.primaryElection) {
@@ -36,13 +36,13 @@ const AVAILABLE_YEARS: number[] = (() => {
             years.add(candidate.generalElection.getFullYear())
         }
     }
-    return Array.from(years).sort((a, b) => b - a)
-})()
+    const availableYears = Array.from(years).sort((a, b) => b - a)
 
-const DEFAULT_YEAR: number =
-    AVAILABLE_YEARS.find((year) => year === 2026) ?? AVAILABLE_YEARS[0] ?? 2026
+    const defaultYear =
+        availableYears.find((year) => year === 2026) ??
+        availableYears[0] ??
+        2026
 
-export function Endorsements() {
     const [filter, setFilter] = useState<FilterType | null>(null)
     const [searchQuery, setSearchQuery] = useState('')
     const [displayMode, setDisplayMode] = useState<GalleryDisplayMode>('flat')
@@ -50,11 +50,11 @@ export function Endorsements() {
         useState<SectionGroupingMode>('status')
     const [sectionSortOrder, setSectionSortOrder] =
         useState<SectionSortOrder>('ascending')
-    const [year, setYear] = useState<number>(DEFAULT_YEAR)
+    const [year, setYear] = useState<number>(defaultYear)
 
     const deferredSearchQuery = useDeferredValue(searchQuery)
 
-    const filteredCandidates = useMemo(() => {
+    const filteredCandidates = (() => {
         const query = deferredSearchQuery.trim().toLowerCase()
 
         return SORTED_CANDIDATES.filter((candidate) => {
@@ -83,7 +83,7 @@ export function Endorsements() {
                 candidate.handle.toLowerCase().includes(query)
             )
         })
-    }, [filter, deferredSearchQuery, year])
+    })()
 
     return (
         <div className={styles.hero}>
@@ -100,7 +100,7 @@ export function Endorsements() {
                 setSearchQuery={setSearchQuery}
                 year={year}
                 setYear={setYear}
-                availableYears={AVAILABLE_YEARS}
+                availableYears={availableYears}
             />
             <CandidateGallery
                 filteredCandidates={filteredCandidates}

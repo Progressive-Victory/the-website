@@ -21,8 +21,9 @@ import {
     sortSectionCandidates,
 } from '../endorsements.utils'
 import { ImageWithFallback } from '@/components/common'
+import cx from 'classnames'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
-import { memo, type ReactNode, useMemo } from 'react'
+import { memo, type ReactNode } from 'react'
 
 interface CandidateGalleryProps {
     filteredCandidates: CandidateConfig[]
@@ -43,7 +44,7 @@ export function CandidateGallery({
     year,
     searchQuery,
 }: CandidateGalleryProps) {
-    const groupedCandidates = useMemo(() => {
+    const groupedCandidates = (() => {
         const map = new Map<string, CandidateConfig[]>()
 
         for (const candidate of filteredCandidates) {
@@ -69,11 +70,12 @@ export function CandidateGallery({
             .sort((a, b) =>
                 compareSectionEntries(a, b, sectionMode, sectionSortOrder)
             )
-    }, [filteredCandidates, sectionMode, sectionSortOrder])
+    })()
 
-    const orderedFlatCandidates = useMemo(() => {
-        return filteredCandidates.values().toArray().sort(compareFlatCandidates)
-    }, [filteredCandidates])
+    const orderedFlatCandidates = filteredCandidates
+        .values()
+        .toArray()
+        .sort(compareFlatCandidates)
 
     const animationKey = `${displayMode}-${sectionMode}-${sectionSortOrder}-${filter ?? 'all'}-${year}-${searchQuery.trim().toLowerCase()}`
     const flatHeaderTitle = getFlatHeaderTitle(
@@ -163,20 +165,20 @@ export function CandidateGallery({
                                     <motion.section
                                         key={sectionLabel}
                                         layout
-                                        className={
-                                            isPastElectionSection
-                                                ? `${styles.gallerySection} ${styles.pastElectionSection}`
-                                                : styles.gallerySection
-                                        }
+                                        className={cx(
+                                            styles.gallerySection,
+                                            isPastElectionSection &&
+                                                styles.pastElectionSection
+                                        )}
                                         transition={galleryLayoutTransition}
                                     >
                                         <motion.header
                                             layout="position"
-                                            className={
-                                                isPastElectionSection
-                                                    ? `${styles.sectionHeader} ${styles.centeredSectionHeader}`
-                                                    : styles.sectionHeader
-                                            }
+                                            className={cx(
+                                                styles.sectionHeader,
+                                                isPastElectionSection &&
+                                                    styles.centeredSectionHeader
+                                            )}
                                             transition={galleryLayoutTransition}
                                             variants={headingVariants}
                                             initial="hidden"

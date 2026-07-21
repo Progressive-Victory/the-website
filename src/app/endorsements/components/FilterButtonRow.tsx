@@ -11,12 +11,12 @@ import {
     type SectionGroupingMode,
     type SectionSortOrder,
 } from '../endorsements.types'
+import cx from 'classnames'
 import { AnimatePresence, motion } from 'motion/react'
 import {
     type FocusEvent,
     useEffect,
     useLayoutEffect,
-    useMemo,
     useRef,
     useState,
 } from 'react'
@@ -71,14 +71,10 @@ export function FilterButtonRow({
     const searchToggleButtonRef = useRef<HTMLButtonElement | null>(null)
     const searchInputRef = useRef<HTMLInputElement | null>(null)
 
-    const yearOptions = useMemo(
-        () =>
-            availableYears.map((y) => ({
-                label: String(y),
-                value: String(y),
-            })),
-        [availableYears]
-    )
+    const yearOptions = availableYears.map((y) => ({
+        label: String(y),
+        value: String(y),
+    }))
 
     function computeSearchExpandedWidth() {
         const leftMostControl = leftMostControlRef.current
@@ -531,11 +527,12 @@ export function FilterButtonRow({
                             <button
                                 ref={searchToggleButtonRef}
                                 type="button"
-                                className={
-                                    !isMobile && isSearchOpen
-                                        ? `${styles.searchToggleButton} ${styles.searchToggleButtonClose}`
-                                        : styles.searchToggleButton
-                                }
+                                className={cx(
+                                    styles.searchToggleButton,
+                                    !isMobile &&
+                                        isSearchOpen &&
+                                        styles.searchToggleButtonClose
+                                )}
                                 onPointerDown={(event) => {
                                     if (!isMobile && isSearchOpen) {
                                         event.preventDefault()
@@ -599,11 +596,12 @@ export function FilterButtonRow({
                                         />
                                     </svg>
                                     <svg
-                                        className={
-                                            !isMobile && isSearchOpen
-                                                ? `${styles.searchIcon} ${styles.searchIconVisible}`
-                                                : styles.searchIcon
-                                        }
+                                        className={cx(
+                                            styles.searchIcon,
+                                            !isMobile &&
+                                                isSearchOpen &&
+                                                styles.searchIconVisible
+                                        )}
                                         width="20"
                                         height="20"
                                         viewBox="0 0 24 24"
@@ -697,11 +695,10 @@ function DropdownGroup<T extends string>({
                         {selectedLabel}
                     </span>
                     <span
-                        className={
-                            isOpen
-                                ? `${styles.dropdownChevron} ${styles.dropdownChevronOpen}`
-                                : styles.dropdownChevron
-                        }
+                        className={cx(
+                            styles.dropdownChevron,
+                            isOpen && styles.dropdownChevronOpen
+                        )}
                         aria-hidden="true"
                     >
                         <svg
@@ -736,11 +733,10 @@ function DropdownGroup<T extends string>({
                                     type="button"
                                     role="option"
                                     aria-selected={isActive}
-                                    className={
-                                        isActive
-                                            ? `${styles.dropdownOption} ${styles.dropdownOptionActive}`
-                                            : styles.dropdownOption
-                                    }
+                                    className={cx(
+                                        styles.dropdownOption,
+                                        isActive && styles.dropdownOptionActive
+                                    )}
                                     onClick={() => {
                                         onChange(option.value)
                                         setIsOpen(false)
@@ -791,6 +787,12 @@ function TagsDropdownGroup<T extends string>({
         ? `${selectedTagLabel} · ${selectedRequiredLabel}`
         : selectedTagLabel
 
+    function handleRequiredSectionPress(optionValue: string) {
+        if (requiredSection && requiredSection.value !== optionValue) {
+            requiredSection.onChange(optionValue)
+        }
+    }
+
     return (
         <motion.div layout className={styles.controlGroup}>
             <p className={styles.controlLabel}>{label}</p>
@@ -807,11 +809,10 @@ function TagsDropdownGroup<T extends string>({
                         {selectedLabel}
                     </span>
                     <span
-                        className={
-                            isOpen
-                                ? `${styles.dropdownChevron} ${styles.dropdownChevronOpen}`
-                                : styles.dropdownChevron
-                        }
+                        className={cx(
+                            styles.dropdownChevron,
+                            isOpen && styles.dropdownChevronOpen
+                        )}
                         aria-hidden="true"
                     >
                         <svg
@@ -852,28 +853,23 @@ function TagsDropdownGroup<T extends string>({
                                     type="button"
                                     role="option"
                                     aria-selected={isActive}
-                                    className={
-                                        isActive
-                                            ? `${styles.dropdownOption} ${styles.dropdownOptionActive}`
-                                            : styles.dropdownOption
+                                    className={cx(
+                                        styles.dropdownOption,
+                                        isActive && styles.dropdownOptionActive
+                                    )}
+                                    onClick={() =>
+                                        handleRequiredSectionPress(option.value)
                                     }
-                                    onClick={() => {
-                                        if (!isActive) {
-                                            requiredSection.onChange(
-                                                option.value
-                                            )
-                                        }
-                                    }}
                                 >
                                     <span className={styles.dropdownOptionText}>
                                         {option.label}
                                     </span>
                                     <span
-                                        className={
-                                            isActive
-                                                ? `${styles.dropdownCheckmark} ${styles.dropdownCheckmarkVisible}`
-                                                : styles.dropdownCheckmark
-                                        }
+                                        className={cx(
+                                            styles.dropdownCheckmark,
+                                            isActive &&
+                                                styles.dropdownCheckmarkVisible
+                                        )}
                                         aria-hidden="true"
                                     >
                                         <svg
@@ -914,11 +910,10 @@ function TagsDropdownGroup<T extends string>({
                                     type="button"
                                     role="option"
                                     aria-selected={isActive}
-                                    className={
-                                        isActive
-                                            ? `${styles.dropdownOption} ${styles.dropdownOptionActive}`
-                                            : styles.dropdownOption
-                                    }
+                                    className={cx(
+                                        styles.dropdownOption,
+                                        isActive && styles.dropdownOptionActive
+                                    )}
                                     onClick={() => {
                                         onChange(isActive ? null : option.value)
                                         setIsOpen(false)
@@ -928,11 +923,11 @@ function TagsDropdownGroup<T extends string>({
                                         {option.label}
                                     </span>
                                     <span
-                                        className={
-                                            isActive
-                                                ? `${styles.dropdownCheckmark} ${styles.dropdownCheckmarkVisible}`
-                                                : styles.dropdownCheckmark
-                                        }
+                                        className={cx(
+                                            styles.dropdownCheckmark,
+                                            isActive &&
+                                                styles.dropdownCheckmarkVisible
+                                        )}
                                         aria-hidden="true"
                                     >
                                         <svg

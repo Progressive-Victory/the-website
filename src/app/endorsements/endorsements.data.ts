@@ -1246,7 +1246,7 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '78',
         name: 'Raj Goyle',
         state: 'New York',
-        electionStatus: '',
+        electionStatus: 'Lost Primary',
         primaryElection: new Date('06/23/26'),
         generalElection: new Date('11/03/26'),
         handle: '',
