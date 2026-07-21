@@ -70,7 +70,6 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
     let total = 0
     let customFields: ActBlueContributionCustomField[] = []
 
-                ((contribution.recurringDuration ?? 1) < 0 ||
     const contributions = donor.contributions ?? []
     contributions.forEach((contribution: ActBlueContribution) => {
         customFields = contribution.customFields
