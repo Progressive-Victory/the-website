@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './CollapsibleSection.module.css'
+import cx from 'classnames'
 import { useState } from 'react'
 import { FiChevronDown, FiChevronLeft } from 'react-icons/fi'
 
@@ -26,7 +27,10 @@ export function CollapsibleSection({
             {title && (
                 <div className={styles.header}>
                     <h2
-                        className={`${styles.title} ${subGroup ? styles.titleSub : ''}`}
+                        className={cx(
+                            styles.title,
+                            subGroup && styles.titleSub
+                        )}
                     >
                         {title}
                         <button

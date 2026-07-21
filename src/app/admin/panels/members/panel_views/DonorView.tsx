@@ -100,15 +100,6 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
     }
 }
 
-const formatContributionDateTime = (date: Date): string => {
-    if (Number.isNaN(date.getTime())) return 'Unknown date'
-
-    return new Intl.DateTimeFormat('en-US', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(date)
-}
-
 export function DonorView({
     selectedId,
     user,
@@ -121,6 +112,15 @@ export function DonorView({
     renderDonorItem,
     handleDeleteDonorItem,
 }: DonorViewProps) {
+    const formatContributionDateTime = (date: Date): string => {
+        if (Number.isNaN(date.getTime())) return 'Unknown date'
+
+        return new Intl.DateTimeFormat('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+        }).format(date)
+    }
+
     const linkedDonors = user.donors ?? []
     const hasLinked = linkedDonors.length > 0
 
