@@ -44,33 +44,31 @@ export function CandidateGallery({
     year,
     searchQuery,
 }: CandidateGalleryProps) {
-    const groupedCandidates = (() => {
-        const map = new Map<string, CandidateConfig[]>()
+    const candidateMap = new Map<string, CandidateConfig[]>()
 
-        for (const candidate of filteredCandidates) {
-            const sectionLabel = getSectionLabel(candidate, sectionMode)
-            const group = map.get(sectionLabel)
-            if (group) {
-                group.push(candidate)
-            } else {
-                map.set(sectionLabel, [candidate])
-            }
+    for (const candidate of filteredCandidates) {
+        const sectionLabel = getSectionLabel(candidate, sectionMode)
+        const group = candidateMap.get(sectionLabel)
+        if (group) {
+            group.push(candidate)
+        } else {
+            candidateMap.set(sectionLabel, [candidate])
         }
+    }
 
-        return map
-            .entries()
-            .toArray()
-            .map(
-                ([sectionLabel, sectionCandidates]) =>
-                    [
-                        sectionLabel,
-                        sortSectionCandidates(sectionCandidates, sectionMode),
-                    ] as [string, CandidateConfig[]]
-            )
-            .sort((a, b) =>
-                compareSectionEntries(a, b, sectionMode, sectionSortOrder)
-            )
-    })()
+    const groupedCandidates = candidateMap
+        .entries()
+        .toArray()
+        .map(
+            ([sectionLabel, sectionCandidates]) =>
+                [
+                    sectionLabel,
+                    sortSectionCandidates(sectionCandidates, sectionMode),
+                ] as [string, CandidateConfig[]]
+        )
+        .sort((a, b) =>
+            compareSectionEntries(a, b, sectionMode, sectionSortOrder)
+        )
 
     const orderedFlatCandidates = filteredCandidates
         .values()

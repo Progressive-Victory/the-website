@@ -755,16 +755,7 @@ function DropdownGroup<T extends string>({
     )
 }
 
-function TagsDropdownGroup<T extends string>({
-    dropdownId,
-    label,
-    options,
-    value,
-    onChange,
-    isOpen,
-    setIsOpen,
-    requiredSection,
-}: {
+interface TagsDropdownGroupProps<T extends string> {
     dropdownId: string
     label: string
     options: { label: string; value: T }[]
@@ -778,7 +769,18 @@ function TagsDropdownGroup<T extends string>({
         options: { label: string; value: string }[]
         onChange: (value: string) => void
     }
-}) {
+}
+
+function TagsDropdownGroup<T extends string>({
+    dropdownId,
+    label,
+    options,
+    value,
+    onChange,
+    isOpen,
+    setIsOpen,
+    requiredSection,
+}: TagsDropdownGroupProps<T>) {
     const selectedTagLabel = value ? getOptionLabel(options, value) : 'Show All'
     const selectedRequiredLabel = requiredSection
         ? getOptionLabel(requiredSection.options, requiredSection.value)
@@ -787,7 +789,7 @@ function TagsDropdownGroup<T extends string>({
         ? `${selectedTagLabel} · ${selectedRequiredLabel}`
         : selectedTagLabel
 
-    function handleRequiredSectionPress(optionValue: string) {
+    const handleRequiredSectionPress = (optionValue: string) => {
         if (requiredSection && requiredSection.value !== optionValue) {
             requiredSection.onChange(optionValue)
         }

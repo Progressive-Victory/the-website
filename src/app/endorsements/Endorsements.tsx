@@ -39,6 +39,7 @@ export function Endorsements() {
     const availableYears = Array.from(years).sort((a, b) => b - a)
 
     const defaultYear =
+        // Will update to not hardcode 2026 in next revision
         availableYears.find((year) => year === 2026) ??
         availableYears[0] ??
         2026
@@ -50,40 +51,38 @@ export function Endorsements() {
         useState<SectionGroupingMode>('status')
     const [sectionSortOrder, setSectionSortOrder] =
         useState<SectionSortOrder>('ascending')
-    const [year, setYear] = useState<number>(defaultYear)
+    const [year, setYear] = useState(defaultYear)
 
     const deferredSearchQuery = useDeferredValue(searchQuery)
 
-    const filteredCandidates = (() => {
-        const query = deferredSearchQuery.trim().toLowerCase()
+    const query = deferredSearchQuery.trim().toLowerCase()
 
-        return SORTED_CANDIDATES.filter((candidate) => {
-            const primaryYear = candidate.primaryElection?.getFullYear()
-            const generalYear = candidate.generalElection?.getFullYear()
-            const matchesYear = primaryYear === year || generalYear === year
+    const filteredCandidates = SORTED_CANDIDATES.filter((candidate) => {
+        const primaryYear = candidate.primaryElection?.getFullYear()
+        const generalYear = candidate.generalElection?.getFullYear()
+        const matchesYear = primaryYear === year || generalYear === year
 
-            if (!matchesYear) {
-                return false
-            }
+        if (!matchesYear) {
+            return false
+        }
 
-            const matchesTagFilter =
-                filter === null ? true : FILTER_PREDICATES[filter](candidate)
+        const matchesTagFilter =
+            filter === null ? true : FILTER_PREDICATES[filter](candidate)
 
-            if (!matchesTagFilter) {
-                return false
-            }
+        if (!matchesTagFilter) {
+            return false
+        }
 
-            if (!query) {
-                return true
-            }
+        if (!query) {
+            return true
+        }
 
-            return (
-                candidate.name.toLowerCase().includes(query) ||
-                candidate.state.toLowerCase().includes(query) ||
-                candidate.handle.toLowerCase().includes(query)
-            )
-        })
-    })()
+        return (
+            candidate.name.toLowerCase().includes(query) ||
+            candidate.state.toLowerCase().includes(query) ||
+            candidate.handle.toLowerCase().includes(query)
+        )
+    })
 
     return (
         <div className={styles.hero}>

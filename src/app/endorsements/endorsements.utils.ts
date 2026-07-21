@@ -18,9 +18,7 @@ export function getCandidateStateLabel(candidate: CandidateConfig): string {
     return candidate.state || UNSPECIFIED_STATE_LABEL
 }
 
-export function getRelevantElectionDate(
-    candidate: CandidateConfig
-): Date | undefined {
+export function getRelevantElectionDate(candidate: CandidateConfig) {
     const { primaryElection, generalElection, electionStatus } = candidate
 
     if (electionStatus === 'Lost Primary' && primaryElection) {
