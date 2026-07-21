@@ -9,7 +9,7 @@ import {
     TextField,
 } from '@/components/common/forms'
 import { Permission, zPermission } from '@/contracts/data'
-import { UpdatePermissionRequest } from '@/contracts/requests'
+import { SortDirection, UpdatePermissionRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
@@ -31,7 +31,9 @@ export default function Page() {
         query: searchQuery,
         search,
         onSearch,
-    } = usePaginatedSearch('/permissions', zPermission)
+    } = usePaginatedSearch('/permissions', zPermission, {
+        search: { sort: SortDirection.ASC },
+    })
 
     const updateMutation = useMutation<
         Permission,
