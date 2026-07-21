@@ -296,7 +296,7 @@ export function MemberView({
                 />
                 <DropDownField<User>
                     label="Membership Fulfillment Status"
-                    field="membershipFulfillmentOptions"
+                    field="membershipFulfillmentStatus"
                     options={membershipFulfillmentStatusOptions}
                 />
                 <CheckboxField label="Name Confirmed" field="nameConfirmed" />
