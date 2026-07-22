@@ -452,7 +452,11 @@ export function AccountDetailsSection({
                                             </p>
                                         </div>
                                         <BaseButton
-                                            href="https://secure.actblue.com/donate/pvmember?refcode=Account%20Page"
+                                            href={
+                                                discordUserId
+                                                    ? `https://secure.actblue.com/donate/pvmember?refcode=Account%20Page&refcode2=${discordUserId}`
+                                                    : 'https://secure.actblue.com/donate/pvmember?refcode=Account%20Page'
+                                            }
                                             label="Become a Member"
                                             className={styles.primaryButton}
                                         />
