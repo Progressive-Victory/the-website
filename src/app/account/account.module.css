@@ -41,6 +41,17 @@
     padding-top: 0.5rem;
 }
 
+@media (max-width: 600px) {
+    .headerTopRow {
+        flex-direction: column;
+    }
+
+    .headerActions {
+        flex-direction: column;
+        width: 100%;
+    }
+}
+
 .contentHeader {
     display: flex;
     flex-direction: column;
@@ -500,12 +511,17 @@
 
 @media (max-width: 600px) {
     .detailsMembershipCta {
-        flex-wrap: wrap;
-        justify-content: flex-start;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .detailsMembershipCta > *:last-child {
         margin-left: 0;
+    }
+
+    .detailsMembershipCopy {
+        align-items: center;
+        text-align: center;
     }
 }
 
@@ -517,6 +533,12 @@
     font-weight: 700;
     letter-spacing: 0.02em;
     text-align: left;
+}
+
+@media (max-width: 420px) {
+    .detailsMembershipHeading {
+        font-size: 1rem;
+    }
 }
 
 .detailsMembershipSubtitle {
