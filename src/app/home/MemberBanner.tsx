@@ -5,7 +5,7 @@ import MembershipCardFront from './MembershipCardFront'
 import styles from './membership.module.css'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
-import { useInView } from '@/util/hooks'
+import { useCurrentUser, useInView } from '@/util/hooks'
 import { motion, useSpring, useTransform } from 'motion/react'
 import Image, { StaticImageData } from 'next/image'
 import React, { useState, useRef, useEffect } from 'react'
@@ -169,6 +169,12 @@ export function MemberBanner() {
     const { inView, observe } = useInView()
     const containerRef = useRef<HTMLDivElement>(null)
     const [visible, setVisible] = useState<boolean>(false)
+    const loggedInUser = useCurrentUser()
+    const discordId = loggedInUser?.data?.discordUsers?.[0]?.id ?? null
+
+    const donateHref = discordId
+        ? `https://secure.actblue.com/donate/pvmember?refcode=Home%20Page&refcode2=${discordId}`
+        : 'https://secure.actblue.com/donate/pvmember?refcode=Home%20Page'
 
     useEffect(() => {
         try {
@@ -211,7 +217,7 @@ export function MemberBanner() {
 
                             <div className={styles.ctaRow}>
                                 <BaseButton
-                                    href="https://secure.actblue.com/donate/pvmember"
+                                    href={donateHref}
                                     label="Become a Member"
                                     className={`${buttonStyles.prominent} ${styles.buttonHover}`}
                                 />

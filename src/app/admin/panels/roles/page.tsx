@@ -10,7 +10,7 @@ import {
     TextField,
 } from '@/components/common/forms'
 import { Role, zPermission, zRole } from '@/contracts/data'
-import { UpdateRoleRequest } from '@/contracts/requests'
+import { SortDirection, UpdateRoleRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
@@ -34,7 +34,9 @@ export default function Page() {
         query: searchQuery,
         search,
         onSearch,
-    } = usePaginatedSearch('/roles', zRole)
+    } = usePaginatedSearch('/roles', zRole, {
+        search: { sort: SortDirection.ASC },
+    })
 
     const { query: permissionsQuery } = usePaginatedSearch(
         '/permissions',
