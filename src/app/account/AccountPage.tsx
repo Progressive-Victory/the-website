@@ -52,6 +52,8 @@ export function AccountPage() {
                     zip: user.address.zip,
                 },
                 shirtSize: user.shirtSize,
+                addressConfirmed: user.addressConfirmed,
+                nameConfirmed: user.nameConfirmed,
             },
         })
     }

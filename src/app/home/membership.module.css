@@ -84,7 +84,7 @@
 
 .cardStage {
     position: relative;
-    height: 252px;
+    aspect-ratio: 420 / 252;
     width: 100%;
     max-width: 420px;
     cursor: pointer;
