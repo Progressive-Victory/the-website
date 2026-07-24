@@ -260,7 +260,7 @@ export function MemberView({
                 />
             </FormGroup>
 
-            <FormGroup title="Membership Fulfillment (Mock)">
+            <FormGroup title="Membership Fulfillment">
                 <DropDownField<User>
                     label="Membership Card Shipped"
                     field="membershipCardStatus"

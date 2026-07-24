@@ -123,8 +123,17 @@ export default function Page() {
     const handleFilterTagChange = (key: string) => {
         setActiveFilterTag(key)
         //others blank on purpose waiting for API side logic to be implemented.
-        const { isMember, isDonor, isDuesPaying, isServerMember, ...rest } =
-            search as Record<string, unknown>
+        const rest = Object.fromEntries(
+            Object.entries(search).filter(
+                ([k]) =>
+                    ![
+                        'isMember',
+                        'isDonor',
+                        'isDuesPaying',
+                        'isServerMember',
+                    ].includes(k)
+            )
+        )
         const tagFilters: Record<string, (string | number)[]> = {}
         if (key === 'donors') tagFilters.isDonor = ['true']
         onSearch({ ...rest, page: 0, ...tagFilters })

@@ -47,7 +47,7 @@ function TagButton({
                 Math.ceil(labelRef.current.getBoundingClientRect().width) + 1
             )
         }
-    }, [tag.label, isActive])
+    }, [tag.label, isActive, setLabelWidth])
 
     return (
         <button
