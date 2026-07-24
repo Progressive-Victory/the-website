@@ -136,7 +136,7 @@ export function MemberView({
                     readonly
                 />
                 <TextField<User>
-                    label="Discord Id"
+                    label="Discord ID"
                     getter={(form) => form.discordUsers?.[0]?.id}
                     readonly
                 />
@@ -147,11 +147,6 @@ export function MemberView({
                     required
                 />
                 <PhoneField label="Phone Number" field="phone" required />
-                <TextField
-                    label="Preferred Name"
-                    field="preferredName"
-                    deprecated
-                />
                 {editing ? (
                     <TextField label="First Name" field="firstName" />
                 ) : (
@@ -188,15 +183,6 @@ export function MemberView({
                     }
                 />
                 <DateField label="Date Created" field="createdAtUtc" readonly />
-                <SelectManyField<User>
-                    label="Aliases"
-                    field="aliases"
-                    options={(user.aliases ?? []).map((alias) => ({
-                        value: alias,
-                        label: alias,
-                    }))}
-                    readonly
-                />
             </FormGroup>
 
             <FormGroup title="Address">
