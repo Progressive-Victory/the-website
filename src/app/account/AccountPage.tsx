@@ -72,7 +72,7 @@ export function AccountPage() {
         loggedInUser.data &&
         loggedInUser.data.onboardingStage != OnboardingStage.JOINED
     ) {
-        window.location.assign('/volunteer');
+        window.location.assign('/volunteer')
         return null
     }
 
