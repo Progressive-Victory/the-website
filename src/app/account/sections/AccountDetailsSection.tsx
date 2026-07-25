@@ -13,7 +13,7 @@ import { zDiscordUserIsInServerResponse } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
 import cx from 'classnames'
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useState } from 'react'
 import { IoClose } from 'react-icons/io5'
 
 interface AccountDetailsSectionProps {
@@ -39,6 +39,21 @@ export function AccountDetailsSection({
     const { ready, onGet } = useFetch()
     const [lastUserData, setLastUserData] = useState(userData)
     const [updatedUser, setUpdatedUser] = useState(userData)
+    const [donorLinkForm, setDonorLinkForm] = useState({
+        donorEmail: '',
+        orderId: '',
+    })
+    const [showDonorLinkForm, setShowDonorLinkForm] = useState(false)
+    const [pendingLinkEmail, setPendingLinkEmail] = useState<string | null>(
+        null
+    )
+    const [showAddressConfirmModal, setShowAddressConfirmModal] =
+        useState(false)
+    const [matchedDonorEmail, setMatchedDonorEmail] = useState<string | null>(
+        null
+    )
+    const [addressDraft, setAddressDraft] = useState({ ...userData.address })
+    const userHasDonor = !!userData.donors?.length
     const discordUserId = userData.discordUsers?.[0]?.id ?? null
 
     const isInServerResult = useQuery({
@@ -54,9 +69,37 @@ export function AccountDetailsSection({
                 : skipToken,
     })
 
+    function updateDonor() {
+        if (!pendingLinkEmail) return
+
+        const matchedDonor = userData.donors?.find(
+            (donor) => normalizeEmail(donor.email) === pendingLinkEmail
+        )
+        if (!matchedDonor) return
+
+        setAddressDraft({
+            ...userData.address,
+            addressLine1: matchedDonor.addr1 ?? userData.address.addressLine1,
+            city: matchedDonor.city ?? userData.address.city,
+            state: matchedDonor.state ?? userData.address.state,
+            zip: matchedDonor.zip ?? userData.address.zip,
+        })
+        setMatchedDonorEmail(matchedDonor.email)
+        setShowDonorLinkForm(false)
+        setShowAddressConfirmModal(true)
+        setPendingLinkEmail(null)
+    }
+
     if (lastUserData !== userData) {
         setUpdatedUser(userData)
         setLastUserData(userData)
+        if (
+            pendingLinkEmail &&
+            (userData.address !== lastUserData.address ||
+                userData.donors !== lastUserData.donors)
+        ) {
+            updateDonor()
+        }
     }
 
     const membershipDeliverableLabels: Record<
@@ -149,43 +192,6 @@ export function AccountDetailsSection({
             })
         ) ?? false
 
-    const [donorLinkForm, setDonorLinkForm] = useState({
-        donorEmail: '',
-        orderId: '',
-    })
-    const [showDonorLinkForm, setShowDonorLinkForm] = useState(false)
-    const [pendingLinkEmail, setPendingLinkEmail] = useState<string | null>(
-        null
-    )
-    const [showAddressConfirmModal, setShowAddressConfirmModal] =
-        useState(false)
-    const [matchedDonorEmail, setMatchedDonorEmail] = useState<string | null>(
-        null
-    )
-    const [addressDraft, setAddressDraft] = useState({ ...userData.address })
-    const userHasDonor = !!userData.donors?.length
-
-    useEffect(() => {
-        if (!pendingLinkEmail) return
-
-        const matchedDonor = userData.donors?.find(
-            (donor) => normalizeEmail(donor.email) === pendingLinkEmail
-        )
-        if (!matchedDonor) return
-
-        setAddressDraft({
-            ...userData.address,
-            addressLine1: matchedDonor.addr1 ?? userData.address.addressLine1,
-            city: matchedDonor.city ?? userData.address.city,
-            state: matchedDonor.state ?? userData.address.state,
-            zip: matchedDonor.zip ?? userData.address.zip,
-        })
-        setMatchedDonorEmail(matchedDonor.email)
-        setShowDonorLinkForm(false)
-        setShowAddressConfirmModal(true)
-        setPendingLinkEmail(null)
-    }, [pendingLinkEmail, userData.address, userData.donors])
-
     const handleChangeDonorEmail = (e: ChangeEvent<HTMLInputElement>) => {
         setDonorLinkForm({
             ...donorLinkForm,
@@ -204,6 +210,9 @@ export function AccountDetailsSection({
         e.preventDefault()
         setPendingLinkEmail(normalizeEmail(donorLinkForm.donorEmail))
         onDonorLinkSubmit(donorLinkForm)
+        if (pendingLinkEmail) {
+            updateDonor()
+        }
     }
 
     const renderDonorLinkForm = () => {
