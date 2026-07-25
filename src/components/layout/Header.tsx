@@ -616,7 +616,7 @@ export function Header() {
         null
     )
 
-    const closeNav = () => {
+    const handleClose = () => {
         setIsOpen(false)
         setMobileSubnavItem(null)
     }
@@ -638,7 +638,7 @@ export function Header() {
         if (!isOpen) return
 
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') closeNav()
+            if (e.key === 'Escape') handleClose()
         }
 
         document.addEventListener('keydown', onKeyDown)
@@ -666,7 +666,7 @@ export function Header() {
 
         const syncToBreakpoint = () => {
             if (desktopMQ.matches) {
-                closeNav()
+                handleClose()
             } else {
                 setActiveSubnav(null)
             }
@@ -938,7 +938,7 @@ export function Header() {
                             WebkitBackdropFilter: 'blur(10px)',
                             backgroundColor: 'rgba(0, 0, 0, 0.18)',
                         }}
-                        onClick={() => closeNav()}
+                        onClick={handleClose}
                     />
                 )}
             </AnimatePresence>
