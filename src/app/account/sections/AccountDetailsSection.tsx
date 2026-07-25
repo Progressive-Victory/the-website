@@ -35,8 +35,9 @@ export function AccountDetailsSection({
     onSave,
     donorLinkError,
     onDonorLinkSubmit,
-}: AccountDetailsSectionProps) {
+}: Readonly<AccountDetailsSectionProps>) {
     const { ready, onGet } = useFetch()
+    const [lastUserData, setLastUserData] = useState(userData);
     const [updatedUser, setUpdatedUser] = useState(userData)
     const discordUserId = userData.discordUsers?.[0]?.id ?? null
 
@@ -53,9 +54,10 @@ export function AccountDetailsSection({
                 : skipToken,
     })
 
-    useEffect(() => {
-        setUpdatedUser(userData)
-    }, [userData])
+    if (lastUserData !== userData) {
+        setUpdatedUser(userData);
+        setLastUserData(userData);
+    }
 
     const membershipDeliverableLabels: Record<
         MembershipDeliverableStatus,
