@@ -143,17 +143,13 @@ export function DonorView({
     }
 
     const [overlayMounted, setOverlayMounted] = useState(false)
-    //const [overlayOpen, setOverlayOpen] = useState(false)
-    const overlayOpen = false // For consistency since setOverlay open was only used in the seemingly unused effect
-    console.debug('Picking Donor? : ', pickingDonor)
-    // useEffect(() => {
-    //     if (pickingDonor) {
-    //         setOverlayMounted(true)
-    //         requestAnimationFrame(() => setOverlayOpen(true))
-    //     } else if (overlayMounted) {
-    //         setOverlayOpen(false)
-    //     }
-    // }, [pickingDonor, overlayMounted])
+    const [overlayOpen, setOverlayOpen] = useState(false)
+    if (pickingDonor) {
+        setOverlayMounted(true)
+        requestAnimationFrame(() => setOverlayOpen(true))
+    } else if (overlayMounted) {
+        setOverlayOpen(false)
+    }
 
     const backdropVariants = {
         open: {

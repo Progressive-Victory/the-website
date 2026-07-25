@@ -291,16 +291,6 @@ export function useFundraisingDashboardController() {
         ]
     )
 
-    // useEffect(() => {
-    //     setChartViewOverrideRange(null)
-    // }, [startDate, endDate, committedPreset])
-
-    // useEffect(() => {
-    //     if (!zoomEnabled) {
-    //         setChartViewOverrideRange(null)
-    //     }
-    // }, [zoomEnabled])
-
     const chartBucketQueries = useQueries({
         queries: chartBuckets.map((bucket) => ({
             queryKey: [
@@ -399,7 +389,6 @@ export function useFundraisingDashboardController() {
                 return
             }
         }
-        console.debug('Applying chart view override range:', range)
         setChartViewOverrideRange(range)
     }
 

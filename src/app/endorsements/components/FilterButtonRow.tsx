@@ -187,6 +187,12 @@ export function FilterButtonRow({
                         })
                     })
                 }
+                if (!mobile && prev) {
+                    // If we're transitioning from mobile to non-mobile, reset the layout
+                    setMobileSearchWidth(null)
+                    setSingleColumnLayout(false)
+                    setShowSearchLabel(false)
+                }
                 return mobile
             })
             if (mobile) {
@@ -226,7 +232,7 @@ export function FilterButtonRow({
         }
 
         measure()
-        const rafId = globalThis.requestAnimationFrame(measure)
+        const rafId = window.requestAnimationFrame(measure)
 
         const resizeObserver = new ResizeObserver(measure)
         resizeObserver.observe(row)
@@ -240,7 +246,7 @@ export function FilterButtonRow({
         window.addEventListener('resize', measure)
 
         return () => {
-            globalThis.cancelAnimationFrame(rafId)
+            window.cancelAnimationFrame(rafId)
             resizeObserver.disconnect()
             window.removeEventListener('resize', measure)
         }

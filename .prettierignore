@@ -2,3 +2,4 @@
 .next/
 pnpm-lock.yaml
 node_modules/
+public/images/

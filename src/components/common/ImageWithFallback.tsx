@@ -24,21 +24,21 @@ export function ImageWithFallback({
     className,
     loading = 'lazy',
     priority = false,
-}: ImageWithFallbackProps) {
-    const [hasErrored, setHasErrored] = useState(false)
+}: Readonly<ImageWithFallbackProps>) {
+    const [erroredSrc, setErroredSrc] = useState<string | null>(null)
+
     const fallbackSrc =
         'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
-    const finalSrc = hasErrored || useFallback ? fallbackSrc : src
+    const finalSrc = useFallback || erroredSrc === src ? fallbackSrc : src
 
     return (
         <Image
-            key={`${src}-${useFallback}`}
             src={finalSrc}
             alt={alt}
             width={width}
             height={height}
             className={cx('aspect-square rounded-full object-cover', className)}
-            onError={() => setHasErrored(true)}
+            onError={() => setErroredSrc(src)}
             loading={priority ? undefined : loading}
             priority={priority}
         />

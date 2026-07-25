@@ -22,7 +22,7 @@ export function LoginCard() {
 
     useEffect(() => {
         if (session) {
-            globalThis.location.href = redirect
+            window.location.href = redirect
         }
     }, [session, redirect])
 
