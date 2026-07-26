@@ -1,10 +1,10 @@
-import { zActBlueDonor } from './ActBlueDonor.js'
-import { zDiscordUser } from './DiscordUser.js'
-import { zLocation } from './Location.js'
-import { zOnboardingStage } from './OnboardingStage.js'
-import { zRole } from './Role.js'
-import { zUpdateHistory } from './UpdateHistory.js'
-import { zUserAddress } from './UserAddress.js'
+import { zActBlueDonor } from './ActBlueDonor'
+import { zDiscordUser } from './DiscordUser'
+import { zLocation } from './Location'
+import { zOnboardingStage } from './OnboardingStage'
+import { zRole } from './Role'
+import { zUpdateHistory } from './UpdateHistory'
+import { zUserAddress } from './UserAddress'
 import z from 'zod'
 
 export enum UserStatus {
