@@ -10,6 +10,7 @@ import {
     DateField,
 } from '@/components/common/forms'
 import { ActBlueDonationPacket, zActBlueDonationPacket } from '@/contracts/data'
+import { SortDirection } from '@/contracts/requests'
 import { dateService } from '@/services'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
@@ -32,7 +33,9 @@ export default function Page() {
         query: searchQuery,
         search,
         onSearch,
-    } = usePaginatedSearch('/actblue/contributions', zActBlueDonationPacket)
+    } = usePaginatedSearch('/actblue/contributions', zActBlueDonationPacket, {
+        search: { sort: SortDirection.ASC },
+    })
 
     const contributionQuery = useQuery({
         queryKey: [`/actblue/contributions/${selectedLineitemId}`],

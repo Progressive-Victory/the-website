@@ -10,11 +10,12 @@ import {
     type SectionGroupingMode,
     type SectionSortOrder,
 } from './endorsements.types'
-import { useDeferredValue, useMemo, useState } from 'react'
+import { getRelevantElectionDate } from './endorsements.utils'
+import { useDeferredValue, useState } from 'react'
 
 const SORTED_CANDIDATES: CandidateConfig[] = [...CANDIDATES].sort((a, b) => {
-    const aTime = a.electionDate?.getTime() ?? Infinity
-    const bTime = b.electionDate?.getTime() ?? Infinity
+    const aTime = getRelevantElectionDate(a)?.getTime() ?? Infinity
+    const bTime = getRelevantElectionDate(b)?.getTime() ?? Infinity
     return aTime - bTime
 })
 
@@ -26,6 +27,23 @@ const FILTER_PREDICATES: Record<FilterType, (c: CandidateConfig) => boolean> = {
 }
 
 export function Endorsements() {
+    const years = new Set<number>()
+    for (const candidate of CANDIDATES) {
+        if (candidate.primaryElection) {
+            years.add(candidate.primaryElection.getFullYear())
+        }
+        if (candidate.generalElection) {
+            years.add(candidate.generalElection.getFullYear())
+        }
+    }
+    const availableYears = Array.from(years).sort((a, b) => b - a)
+
+    const defaultYear =
+        // Will update to not hardcode 2026 in next revision
+        availableYears.find((year) => year === 2026) ??
+        availableYears[0] ??
+        2026
+
     const [filter, setFilter] = useState<FilterType | null>(null)
     const [searchQuery, setSearchQuery] = useState('')
     const [displayMode, setDisplayMode] = useState<GalleryDisplayMode>('flat')
@@ -33,31 +51,38 @@ export function Endorsements() {
         useState<SectionGroupingMode>('status')
     const [sectionSortOrder, setSectionSortOrder] =
         useState<SectionSortOrder>('ascending')
+    const [year, setYear] = useState(defaultYear)
 
     const deferredSearchQuery = useDeferredValue(searchQuery)
 
-    const filteredCandidates = useMemo(() => {
-        const query = deferredSearchQuery.trim().toLowerCase()
+    const query = deferredSearchQuery.trim().toLowerCase()
 
-        return SORTED_CANDIDATES.filter((candidate) => {
-            const matchesTagFilter =
-                filter === null ? true : FILTER_PREDICATES[filter](candidate)
+    const filteredCandidates = SORTED_CANDIDATES.filter((candidate) => {
+        const primaryYear = candidate.primaryElection?.getFullYear()
+        const generalYear = candidate.generalElection?.getFullYear()
+        const matchesYear = primaryYear === year || generalYear === year
 
-            if (!matchesTagFilter) {
-                return false
-            }
+        if (!matchesYear) {
+            return false
+        }
 
-            if (!query) {
-                return true
-            }
+        const matchesTagFilter =
+            filter === null ? true : FILTER_PREDICATES[filter](candidate)
 
-            return (
-                candidate.name.toLowerCase().includes(query) ||
-                candidate.state.toLowerCase().includes(query) ||
-                candidate.handle.toLowerCase().includes(query)
-            )
-        })
-    }, [filter, deferredSearchQuery])
+        if (!matchesTagFilter) {
+            return false
+        }
+
+        if (!query) {
+            return true
+        }
+
+        return (
+            candidate.name.toLowerCase().includes(query) ||
+            candidate.state.toLowerCase().includes(query) ||
+            candidate.handle.toLowerCase().includes(query)
+        )
+    })
 
     return (
         <div className={styles.hero}>
@@ -72,6 +97,9 @@ export function Endorsements() {
                 setSectionSortOrder={setSectionSortOrder}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
+                year={year}
+                setYear={setYear}
+                availableYears={availableYears}
             />
             <CandidateGallery
                 filteredCandidates={filteredCandidates}
@@ -79,6 +107,8 @@ export function Endorsements() {
                 displayMode={displayMode}
                 sectionMode={sectionMode}
                 sectionSortOrder={sectionSortOrder}
+                year={year}
+                searchQuery={deferredSearchQuery}
             />
         </div>
     )

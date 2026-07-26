@@ -16,6 +16,7 @@ import {
     ActBlueLineitem,
     ActBlueContributionCustomField,
 } from '@/contracts/data'
+import { SortDirection } from '@/contracts/requests'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
@@ -43,7 +44,9 @@ export default function Page() {
         query: searchQuery,
         search,
         onSearch,
-    } = usePaginatedSearch('/actblue/donors', zActBlueDonor)
+    } = usePaginatedSearch('/actblue/donors', zActBlueDonor, {
+        search: { sort: SortDirection.ASC },
+    })
 
     const donorQuery = useQuery({
         queryKey: [`/actblue/donors/${selectedEmail}`],

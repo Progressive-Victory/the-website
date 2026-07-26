@@ -34,12 +34,14 @@ export default function Page() {
         query: searchQuery,
         search,
         onSearch,
-    } = usePaginatedSearch('/roles', zRole)
+    } = usePaginatedSearch('/roles', zRole, {
+        search: { sort: SortDirection.ASC },
+    })
 
     const { query: permissionsQuery } = usePaginatedSearch(
         '/permissions',
         zPermission,
-        { search: { limit: 50, sort: SortDirection.DESC }, all: true }
+        { search: { limit: 50 }, all: true }
     )
 
     const permissions = permissionsQuery.data?.data ?? []
