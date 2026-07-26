@@ -3,6 +3,769 @@ import Committee from '../components/committee'
 import { Committees } from './constructOrgGraph'
 import { OrgchartObjectData } from './constructOrgGraph'
 
+/*export const chartEdges = [
+    {
+        id: '0e1',
+        source: 0,
+        target: 1,
+    },
+    {
+        id: '1e2',
+        source: 1,
+        target: 2,
+    },
+    {
+        id: '1e6',
+        source: 1,
+        target: 6,
+    },
+    {
+        id: '1e10',
+        source: 1,
+        target: 10,
+    },
+    {
+        id: '1e14',
+        source: 1,
+        target: 14,
+    },
+    {
+        id: '1e18',
+        source: 1,
+        target: 18,
+    },
+    {
+        id: 1e22,
+        source: 1,
+        target: 22,
+    },
+    {
+        id: '2e26',
+        source: 2,
+        target: 26,
+    },
+    {
+        id: '2e30',
+        source: 2,
+        target: 30,
+    },
+    {
+        id: '2e34',
+        source: 2,
+        target: 34,
+    },
+    {
+        id: '2e44',
+        source: 2,
+        target: 44,
+    },
+    {
+        id: '44e48',
+        source: 44,
+        target: 48,
+    },
+    {
+        id: '6e44',
+        source: 6,
+        target: 44,
+    },
+    {
+        id: '6e49',
+        source: 6,
+        target: 49,
+    },
+    {
+        id: '6e53',
+        source: 6,
+        target: 53,
+    },
+    {
+        id: '10e57',
+        source: 10,
+        target: 57,
+    },
+    {
+        id: '10e61',
+        source: 10,
+        target: 61,
+    },
+    {
+        id: '14e61',
+        source: 14,
+        target: 61,
+    },
+    {
+        id: '14e65',
+        source: 14,
+        target: 65,
+    },
+    {
+        id: '18e69',
+        source: 18,
+        target: 69,
+    },
+    {
+        id: '18e73',
+        source: 18,
+        target: 73,
+    },
+    {
+        id: '18e77',
+        source: 18,
+        target: 77,
+    },
+    {
+        id: '77e81',
+        source: 77,
+        target: 81,
+    },
+    {
+        id: '18e82',
+        source: 18,
+        target: 82,
+    },
+    {
+        id: '82e86',
+        source: 82,
+        target: 86,
+    },
+    {
+        id: '18e87',
+        source: 18,
+        target: 87,
+    },
+    {
+        id: '87e91',
+        source: 87,
+        target: 91,
+    },
+    {
+        id: '18e92',
+        source: 18,
+        target: 92,
+    },
+    {
+        id: '92e96',
+        source: 92,
+        target: 96,
+    },
+    {
+        id: '22e97',
+        source: 22,
+        target: 97,
+    },
+    {
+        id: '22e101',
+        source: 22,
+        target: 101,
+    },
+    {
+        id: '22e105',
+        source: 22,
+        target: 105,
+    },
+]
+
+export const chartNodes = [
+    {
+        type: 'member',
+        id: 0,
+        title: 'Executive Director',
+        name: 'Sam Dryzmala',
+        leadership: 'Senior',
+    },
+    {
+        type: 'member',
+        id: 1,
+        title: 'Deputy Executive Director',
+        name: 'Benjamin Gilbert-Lif',
+        leadership: 'Senior',
+    },
+    {
+        type: 'department',
+        id: 2,
+        name: 'Community Department',
+        leads: [
+            {
+                id: 3,
+                title: 'Community Relations Director',
+                name: 'Auntifa',
+                leadership: 'Senior',
+            },
+            {
+                id: 4,
+                title: 'Community Manager',
+                name: 'Jenywlfersn',
+                leadership: 'Junior',
+                committees: [0, 1],
+            },
+            {
+                id: 5,
+                title: 'Community Manager',
+                leadership: 'Junior',
+                committees: [0, 1],
+            },
+        ],
+    },
+    {
+        type: 'department',
+        id: 6,
+        name: 'Media Department',
+        leads: [
+            {
+                id: 7,
+                title: 'Media Director',
+                name: 'Aussy',
+                leadership: 'Senior',
+            },
+            {
+                id: 8,
+                title: 'Deputy Media Director',
+                name: 'Leeloo',
+                leadership: 'Senior',
+            },
+            {
+                id: 9,
+                title: 'Deputy Media Director',
+                leadership: 'Senior',
+            },
+        ],
+    },
+    {
+        type: 'department',
+        id: 10,
+        name: 'Operations Department',
+        leads: [
+            {
+                id: 11,
+                title: 'Operations Director',
+                name: 'Jay',
+                leadership: 'Senior',
+            },
+            { id: 12, title: 'Operations Deputy', leadership: 'Senior' },
+            { id: 13, title: 'Operations Deputy', leadership: 'Senior' },
+        ],
+    },
+    {
+        type: 'department',
+        id: 14,
+        name: 'Infrastructure Department',
+        leads: [
+            {
+                id: 15,
+                title: 'Infrastructure Director',
+                name: 'Kianna',
+                leadership: 'Senior',
+            },
+            {
+                id: 16,
+                title: 'Deputy Infrastructure Director',
+                leadership: 'Senior',
+            },
+            {
+                id: 17,
+                title: 'Deputy Infrastructure Director',
+                leadership: 'Senior',
+            },
+        ],
+    },
+    {
+        type: 'department',
+        id: 18,
+        name: 'Organizing Department',
+        leads: [
+            {
+                id: 19,
+                title: 'Organizing Director',
+                name: 'Gunga',
+                leadership: 'Senior',
+                acting: true,
+            },
+            {
+                id: 20,
+                title: 'Organizing Deputy',
+                name: 'PicklelyMe',
+                leadership: 'Senior',
+            },
+            { id: 21, title: 'Organizing Deputy', leadership: 'Senior' },
+        ],
+    },
+    {
+        type: 'department',
+        id: 22,
+        name: 'Technology Department',
+        leads: [
+            {
+                id: 23,
+                title: 'Technical Director',
+                leadership: 'Senior',
+                redacted: true,
+            },
+            {
+                id: 24,
+                title: 'Deputy Tech Director',
+                name: 'Adrian',
+                leadership: 'Senior',
+            },
+            {
+                id: 25,
+                title: 'Deputy Tech Director',
+                name: 'Joops',
+                leadership: 'Senior',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 26,
+        name: 'Welcome Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 27,
+                title: 'Welcome Team Lead',
+                name: 'Monarch',
+                leadership: 'Junior',
+                committees: [0],
+            },
+            {
+                id: 28,
+                title: 'Welcome Team Lead',
+                leadership: 'Junior',
+                committees: [0],
+            },
+            { id: 29, title: 'Welcome Team Deputy' },
+        ],
+    },
+    {
+        type: 'team',
+        id: 30,
+        name: 'Events Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 31,
+                title: 'Events Team Lead',
+                name: 'BrewMasterCraft',
+                leadership: 'Junior',
+                committees: [0],
+            },
+            {
+                id: 32,
+                title: 'Events Team Lead',
+                leadership: 'Junior',
+                committees: [0],
+            },
+            { id: 33, title: 'Events Team Deputy', name: 'Em' },
+        ],
+    },
+    {
+        type: 'team',
+        id: 34,
+        name: 'Moderation Team',
+        desc: 'Yada yada yada',
+        members: [
+            { id: 35, name: 'Clementine' },
+            { id: 36, name: 'Finnegan' },
+            { id: 37, name: 'Jaxonmaxx' },
+            { id: 38, name: 'Natalie' },
+            { id: 39, name: 'Noelle' },
+            { id: 40, name: 'Onbi' },
+            { id: 41, name: 'Starry' },
+            { id: 42, name: 'TheSunKey' },
+            { id: 43, name: 'Victoria' },
+        ],
+    },
+    {
+        type: 'team',
+        id: 44,
+        name: 'Writing Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 45,
+                title: 'Writing Team Lead',
+                name: 'Dynas',
+                leadership: 'Junior',
+                committees: [0, 1],
+            },
+            {
+                id: 46,
+                title: 'Writing Team Lead',
+                name: 'AJ',
+                leadership: 'Junior',
+                committees: [0, 1],
+            },
+            {
+                id: 47,
+                title: 'Writing Team Deputy',
+                name: 'Jam',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 48,
+        name: 'This Week at PV Strike Team',
+        desc: 'Manages the weekly publication of the This Week at Progressive Victory newsletter.',
+    },
+    {
+        type: 'team',
+        id: 49,
+        name: 'Audio-Video Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 50,
+                title: 'Audio-Video Team Lead',
+                name: 'Vezanmatics',
+                leadership: 'Junior',
+                committees: [1],
+            },
+            {
+                id: 51,
+                title: 'Audio-Video Team Lead',
+                leadership: 'Junior',
+                committees: [1],
+            },
+            {
+                id: 52,
+                title: 'Audio-Video Team Deputy',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 53,
+        name: 'Design Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 54,
+                title: 'Design Team Lead',
+                leadership: 'Junior',
+                committees: [1],
+            },
+            {
+                id: 55,
+                title: 'Design Team Lead',
+                leadership: 'Junior',
+                committees: [1],
+            },
+            {
+                id: 56,
+                title: 'Design Team Deputy',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 57,
+        name: 'Fundraising Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 58,
+                title: 'Fundraising Team Lead',
+                name: 'BrewMasterCraft',
+                leadership: 'Junior',
+            },
+            {
+                id: 59,
+                title: 'Fundraising Team Lead',
+                leadership: 'Junior',
+            },
+            {
+                id: 60,
+                title: 'Fundraising Team Deputy',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 61,
+        name: 'Documentation Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 62,
+                title: 'Documentation Lead',
+                leadership: 'Junior',
+            },
+            {
+                id: 63,
+                title: 'Documentation Lead',
+                leadership: 'Junior',
+            },
+            {
+                id: 64,
+                title: 'Documentation Deputy',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 65,
+        name: 'Research Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 66,
+                title: 'Research Team Lead',
+                name: 'Phoenix',
+                leadership: 'Junior',
+            },
+            {
+                id: 67,
+                title: 'Research Team Lead',
+                leadership: 'Junior',
+            },
+            {
+                id: 68,
+                title: 'Research Team Deputy',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 69,
+        name: 'Recruitment Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 70,
+                title: 'Recruitment Team Lead',
+                name: 'Gunga',
+                leadership: 'Junior',
+                committees: [3],
+            },
+            {
+                id: 71,
+                title: 'Recruitment Team Lead',
+                name: 'Damon',
+                leadership: 'Junior',
+                committees: [3],
+            },
+            {
+                id: 72,
+                title: 'Recruitment Team Deputy',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 73,
+        name: 'Mobilization Team',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 74,
+                title: 'Mobilization Team Lead',
+                name: 'Frankie',
+                leadership: 'Junior',
+                committees: [3],
+            },
+            {
+                id: 75,
+                title: 'Mobilization Team Lead',
+                leadership: 'Junior',
+                committees: [3],
+            },
+            {
+                id: 76,
+                title: 'Mobilization Deputy',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 77,
+        name: 'Western Coalition',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 78,
+                title: 'Western Coalition Lead',
+                name: 'Dynas',
+                leadership: 'Junior',
+                committees: [3],
+            },
+            {
+                id: 79,
+                title: 'Western Coalition Lead',
+                name: 'Finnegan',
+                leadership: 'Junior',
+                committees: [3],
+            },
+            {
+                id: 80,
+                title: 'Western Coalition Deputy',
+                name: 'Jimmy',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 81,
+        name: 'Western State Teams',
+    },
+    {
+        type: 'team',
+        id: 82,
+        name: 'Midwest Coalition',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 83,
+                title: 'Midwest Coalition Lead',
+                name: 'Sam WI',
+                leadership: 'Junior',
+                committees: [3],
+            },
+            {
+                id: 84,
+                title: 'Midwest Coalition Lead',
+                committees: [3],
+            },
+            {
+                id: 85,
+                title: 'Midwest Coalition Deputy',
+                name: 'Phoenix',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 86,
+        name: 'Midwest State Teams',
+    },
+    {
+        type: 'team',
+        id: 87,
+        name: 'Northeastern Coalition',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 88,
+                title: 'Northeastern Coalition Lead',
+                name: 'Matt',
+                committees: [3],
+            },
+            {
+                id: 89,
+                title: 'Northeastern Coalition Lead',
+                name: 'Gyd',
+                committees: [3],
+            },
+            {
+                id: 90,
+                title: 'Northeastern Coalition Deputy',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 91,
+        name: 'Northeast State Teams',
+    },
+    {
+        type: 'team',
+        id: 92,
+        name: 'Southern Coalition',
+        desc: 'Yada yada yada',
+        leads: [
+            {
+                id: 93,
+                title: 'Southern Coalition Lead',
+                committees: [3],
+            },
+            {
+                id: 94,
+                title: 'Southern Coalition Lead',
+                committees: [3],
+            },
+            {
+                id: 95,
+                title: 'Southern Coalition Deputy',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 96,
+        name: 'Southern State Teams',
+    },
+    {
+        type: 'team',
+        id: 97,
+        name: 'Discord Eng. Team',
+        desc: 'Fuck Discord.',
+        leads: [
+            {
+                id: 98,
+                title: 'Discord Eng. Team Lead',
+                name: 'Sh3llHound',
+                committees: [2],
+            },
+            {
+                id: 99,
+                title: 'Discord Eng. Team Lead',
+                committees: [2],
+            },
+            {
+                id: 100,
+                title: 'Discord Eng. Deputy',
+                name: 'Mafia',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 101,
+        name: 'Database Eng. Team',
+        desc: 'Manages the development of the Progressive Victory database.',
+        leads: [
+            {
+                id: 102,
+                title: 'Database Eng. Team Lead',
+                name: 'RexRath',
+                committees: [2],
+            },
+            {
+                id: 103,
+                title: 'Database Eng. Team Lead',
+                committees: [2],
+            },
+            {
+                id: 104,
+                title: 'Database Eng. Deputy',
+            },
+        ],
+    },
+    {
+        type: 'team',
+        id: 105,
+        name: 'Website Eng. Team',
+        desc: 'Manages the development of the Progressive Victory website.',
+        leads: [
+            {
+                id: 106,
+                title: 'Website Eng. Team Lead',
+                committees: [2],
+            },
+            {
+                id: 107,
+                title: 'Website Eng. Team Lead',
+                committees: [2],
+            },
+            {
+                id: 108,
+                title: 'Website Eng. Deputy',
+            },
+        ],
+    },
+]*/
+
 export const orgchartData: OrgchartObjectData[] = [
     {
         id: 0,
