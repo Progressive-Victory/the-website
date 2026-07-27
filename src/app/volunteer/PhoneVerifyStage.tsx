@@ -33,7 +33,7 @@ export function PhoneVerifyStage({
     }, [lastSmsCodeSendTimeUtc])
 
     const [securityCode, setSecurityCode] = useState('')
-    const [codeTimer, setCodeTimer] = useState(0)
+    const [codeTimer, setCodeTimer] = useState(getCodeTime())
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
@@ -48,7 +48,6 @@ export function PhoneVerifyStage({
     }
 
     useEffect(() => {
-        setCodeTimer(getCodeTime())
         const interval = setInterval(() => {
             setCodeTimer(getCodeTime())
         }, 200)
