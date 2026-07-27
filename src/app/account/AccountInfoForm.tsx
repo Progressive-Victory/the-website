@@ -23,6 +23,7 @@ interface AccountInfoFormProps {
     showShirtSize?: boolean
 }
 
+//Need to move these to API
 const shirtSizeOptions = [
     { value: '', label: 'No shirt size selected' },
     { value: ShirtSize.ExtraSmall, label: 'Extra Small' },

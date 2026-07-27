@@ -3,7 +3,28 @@ import { User, zUser } from '@/contracts/data'
 import { UpdateUserRequest } from '@/contracts/requests'
 import { FetchError } from '@/models'
 import { useFetch } from '@/util/hooks'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { skipToken, useMutation, useQueryClient } from '@tanstack/react-query'
+
+export function useUserQueries() {
+    const { ready, onGet } = useFetch()
+
+    const getCurrentUser = (options?: {
+        includeDiscordUsers?: boolean
+        includeDonors?: boolean
+    }) =>
+        ready
+            ? ({ signal }: { signal: AbortSignal }) =>
+                  onGet('/users/current', zUser, {
+                      query: {
+                          includeDiscordUsers: options?.includeDiscordUsers,
+                          includeDonors: options?.includeDonors,
+                      },
+                      signal,
+                  })
+            : skipToken
+
+    return { getCurrentUser }
+}
 
 export function useUpdatedUser({
     loggedInUser,

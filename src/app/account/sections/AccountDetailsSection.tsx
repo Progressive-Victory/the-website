@@ -2,7 +2,7 @@
 
 import InteractiveThreeCard from '../../home/MemberBanner'
 import { AccountInfoForm } from '../AccountInfoForm'
-import { AddressConfirmationModal } from './AddressConfirmationModal'
+import { ConfirmModal, NameDraft } from './ConfirmModal'
 import styles from '@/app/account/account.module.css'
 import { DiscordAvatar } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
@@ -163,6 +163,12 @@ export function AccountDetailsSection({
         null
     )
     const [addressDraft, setAddressDraft] = useState({ ...userData.address })
+    const [nameDraft, setNameDraft] = useState<NameDraft>({
+        firstName: userData.firstName ?? '',
+        lastName: userData.lastName ?? '',
+        phone: userData.phone ?? '',
+        shirtSize: userData.shirtSize ?? null,
+    })
     const userHasDonor = !!userData.donors?.length
 
     useEffect(() => {
@@ -202,8 +208,8 @@ export function AccountDetailsSection({
 
     const submitLinkForm = (e: FormEvent) => {
         e.preventDefault()
-        setPendingLinkEmail(normalizeEmail(donorLinkForm.donorEmail))
-        onDonorLinkSubmit(donorLinkForm)
+        setShowDonorLinkForm(false)
+        setShowAddressConfirmModal(true)
     }
 
     const renderDonorLinkForm = () => {
@@ -266,6 +272,14 @@ export function AccountDetailsSection({
         }))
     }
 
+    const handleConfirmName = (draft: NameDraft) => {
+        setNameDraft(draft)
+    }
+
+    const updateNameDraft = (field: keyof NameDraft, value: string) => {
+        setNameDraft((prev) => ({ ...prev, [field]: value }))
+    }
+
     const submitAddressConfirmation = (e: FormEvent) => {
         e.preventDefault()
         const shouldUseMatchedEmail = !normalizeEmail(userData.email)
@@ -282,6 +296,11 @@ export function AccountDetailsSection({
 
         onSave({
             ...userData,
+            firstName: nameDraft.firstName,
+            lastName: nameDraft.lastName,
+            phone: nameDraft.phone || null,
+            shirtSize: nameDraft.shirtSize,
+            nameConfirmed: true,
             email: shouldUseMatchedEmail
                 ? (matchedDonorEmail ?? userData.email)
                 : userData.email,
@@ -295,6 +314,7 @@ export function AccountDetailsSection({
             },
             addressConfirmed: true,
         })
+        onDonorLinkSubmit(donorLinkForm)
         setShowAddressConfirmModal(false)
         setMatchedDonorEmail(null)
     }
@@ -434,7 +454,11 @@ export function AccountDetailsSection({
                                             </p>
                                         </div>
                                         <BaseButton
-                                            href="https://secure.actblue.com/donate/pvmember?refcode=Account%20Page"
+                                            href={
+                                                discordUserId
+                                                    ? `https://secure.actblue.com/donate/pvmember?refcode=Account%20Page&refcode2=${discordUserId}`
+                                                    : 'https://secure.actblue.com/donate/pvmember?refcode=Account%20Page'
+                                            }
                                             label="Become a Member"
                                             className={styles.primaryButton}
                                         />
@@ -649,11 +673,14 @@ export function AccountDetailsSection({
                 </div>
             </div>
 
-            <AddressConfirmationModal
+            <ConfirmModal
                 isOpen={showAddressConfirmModal}
+                nameDraft={nameDraft}
                 addressDraft={addressDraft}
                 onClose={() => setShowAddressConfirmModal(false)}
-                onSubmit={submitAddressConfirmation}
+                onSubmitAddress={submitAddressConfirmation}
+                onConfirmName={handleConfirmName}
+                onChangeNameDraft={updateNameDraft}
                 onChangeAddressDraft={updateAddressDraft}
             />
         </section>

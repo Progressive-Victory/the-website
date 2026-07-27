@@ -16,7 +16,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import NextLink from 'next/link'
 import type React from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import z from 'zod'
 
 /**
@@ -106,19 +106,19 @@ const navitems: NavItem[] = [
         href: '/',
         subnav: {
             columns: [
-                {
-                    title: 'Initiatives',
-                    items: [
-                        {
-                            name: 'Section 230 Initiative',
-                            href: '/initiatives/section-230',
-                        },
-                        {
-                            name: 'Jackson Franklin Initiative',
-                            href: '/initiatives/franklin',
-                        },
-                    ],
-                },
+                // {
+                //     title: 'Initiatives',
+                //     items: [
+                //         {
+                //             name: 'Section 230 Initiative',
+                //             href: '/initiatives/section-230',
+                //         },
+                //         {
+                //             name: 'Jackson Franklin Initiative',
+                //             href: '/initiatives/franklin',
+                //         },
+                //     ],
+                // },
                 {
                     title: 'Join',
                     items: [
@@ -134,7 +134,7 @@ const navitems: NavItem[] = [
                     items: [
                         {
                             name: 'Dues Paying Membership',
-                            href: 'https://secure.actblue.com/donate/pvmember',
+                            href: 'https://secure.actblue.com/donate/pvmember?refcode=Website%20Header',
                         },
                         {
                             name: 'Merch',
@@ -634,6 +634,37 @@ export function Header() {
                 : skipToken,
     })
 
+    const resolvedNavitems = useMemo(() => {
+        const discordId = discordUsers?.[0]?.id
+        return navitems.map((item) => {
+            if (!item.subnav?.columns) return item
+            return {
+                ...item,
+                subnav: {
+                    ...item.subnav,
+                    columns: item.subnav.columns.map((col) => ({
+                        ...col,
+                        items: col.items.map((child) => {
+                            if (
+                                child.href.startsWith(
+                                    'https://secure.actblue.com/donate/pvmember'
+                                )
+                            ) {
+                                return {
+                                    ...child,
+                                    href: discordId
+                                        ? `${child.href}&refcode2=${discordId}`
+                                        : child.href,
+                                }
+                            }
+                            return child
+                        }),
+                    })),
+                },
+            }
+        })
+    }, [discordUsers])
+
     useEffect(() => {
         if (!isOpen) return
 
@@ -767,7 +798,7 @@ export function Header() {
                     className={styles.headerCenterNav}
                     aria-label="Primary navigation"
                 >
-                    {navitems.map((item) => {
+                    {resolvedNavitems.map((item) => {
                         const hasChildren = !!item.subnav?.columns?.length
                         const isActive = activeSubnav?.name === item.name
                         const shouldDim = !!activeSubnav && !isActive
@@ -945,7 +976,7 @@ export function Header() {
 
             <NavDrawer
                 isOpen={isOpen}
-                navitems={navitems}
+                navitems={resolvedNavitems}
                 mobileSubnavItem={mobileSubnavItem}
                 setMobileSubnavItem={setMobileSubnavItem}
                 isSessionLoading={isSessionLoading}
