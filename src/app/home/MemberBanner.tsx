@@ -168,7 +168,7 @@ export function safeLogError(err: unknown, prefix = '') {
 export function MemberBanner() {
     const { inView, observe } = useInView()
     const containerRef = useRef<HTMLDivElement>(null)
-    const [visible, setVisible] = useState<boolean>(false)
+    const [latchVisible, setLatchVisible] = useState<boolean>(false)
     const loggedInUser = useCurrentUser()
     const discordId = loggedInUser?.data?.discordUsers?.[0]?.id ?? null
 
@@ -184,13 +184,9 @@ export function MemberBanner() {
         }
     }, [observe])
 
-    useEffect(() => {
-        try {
-            if (inView) setVisible(true)
-        } catch (err) {
-            safeLogError(err, 'inView effect error:')
-        }
-    }, [inView])
+    if(!latchVisible && inView){
+        setLatchVisible(true)
+    }
 
     return (
         <div className={styles.section}>
@@ -206,7 +202,7 @@ export function MemberBanner() {
                     <motion.div
                         className={styles.cardColumn}
                         initial={{ opacity: 0, y: 50 }}
-                        animate={visible ? { opacity: 1, y: 0 } : {}}
+                        animate={latchVisible ? { opacity: 1, y: 0 } : {}}
                         transition={{ duration: 0.8, ease: 'easeOut' }}
                     >
                         <div className={styles.cardColumnInner}>
@@ -225,7 +221,7 @@ export function MemberBanner() {
                         </div>
                     </motion.div>
 
-                    <MembershipBulletPoints visible={visible} />
+                    <MembershipBulletPoints visible={latchVisible} />
                 </div>
             </div>
         </div>
