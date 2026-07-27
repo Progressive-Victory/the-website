@@ -184,7 +184,7 @@ export function MemberBanner() {
         }
     }, [observe])
 
-    if(!latchVisible && inView){
+    if (!latchVisible && inView) {
         setLatchVisible(true)
     }
 

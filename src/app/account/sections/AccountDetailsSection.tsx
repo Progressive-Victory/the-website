@@ -170,7 +170,7 @@ export function AccountDetailsSection({
         shirtSize: userData.shirtSize ?? null,
     })
     const userHasDonor = !!userData.donors?.length
-    const [prevUserAddress, setPrevUserAddress] = useState(userData.address);
+    const [prevUserAddress, setPrevUserAddress] = useState(userData.address)
     const [prevUserDonors, setPrevUserDonors] = useState(userData.donors)
 
     // Possibly deprecated - pendingLinkEmail is only set within this statement, which will never run with it's default value
@@ -179,8 +179,8 @@ export function AccountDetailsSection({
         (userData.address !== prevUserAddress ||
             userData.donors !== prevUserDonors)
     ) {
-        setPrevUserAddress(userData.address);
-        setPrevUserDonors(userData.donors);
+        setPrevUserAddress(userData.address)
+        setPrevUserDonors(userData.donors)
         const matchedDonor = userData.donors?.find(
             (donor) => normalizeEmail(donor.email) === pendingLinkEmail
         )
