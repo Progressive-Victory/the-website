@@ -39,13 +39,15 @@ export function DateRangePicker({
         const anchor = startDate ? new Date(startDate) : new Date()
         return new Date(anchor.getFullYear(), anchor.getMonth(), 1)
     })
-    const [prevDate, setPrevDate] = useState(startDate);
+    const [prevDate, setPrevDate] = useState(startDate)
 
     if (startDate && startDate != prevDate) {
         setPrevDate(startDate)
         const anchor = new Date(startDate)
         if (!Number.isNaN(anchor.getTime())) {
-            setCalendarMonth(new Date(anchor.getFullYear(), anchor.getMonth(), 1))
+            setCalendarMonth(
+                new Date(anchor.getFullYear(), anchor.getMonth(), 1)
+            )
         }
     }
 
