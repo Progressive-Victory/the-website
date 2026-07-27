@@ -1,3 +1,4 @@
+export * from './DiscordEventDetailsResponse'
 export * from './DiscordLoginResponse'
 export * from './DiscordUserIsInServerResponse'
 export * from './MapMemberCountResponse'

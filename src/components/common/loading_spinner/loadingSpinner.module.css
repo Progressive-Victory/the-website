@@ -1,0 +1,28 @@
+.loadingSpinnerContainer {
+    position: relative;
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+
+    &::after {
+        content: '';
+        position: absolute;
+        left: calc(50% - 24px);
+        top: calc(50% - 24px);
+        width: 48px;
+        aspect-ratio: 1 / 1;
+        background-color: white;
+        border-radius: 100%;
+        z-index: 10;
+    }
+}
+
+.loadingSpinner {
+    border-radius: 100%;
+    color: rgba(15, 23, 42, 0.72);
+
+    animation:
+        spin 777ms linear infinite,
+        recol 777ms linear infinite alternate;
+}

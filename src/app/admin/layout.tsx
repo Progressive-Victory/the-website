@@ -11,6 +11,7 @@ import {
     zRole,
     zUser,
 } from '@/contracts/data'
+import { zDiscordEvent } from '@/contracts/data/DiscordEvent'
 import { usePositionQueries } from '@/queries'
 import { usePaginatedSearch } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
@@ -31,6 +32,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         zActBlueDonationPacket,
         { search: { limit: 0 } }
     )
+    const events = usePaginatedSearch('/discordEvents', zDiscordEvent, {
+        search: { limit: 0 },
+    })
     const positionHierarchy = useQuery({
         queryKey: ['positionHierarchy'],
         queryFn: positionQueries.getPositionHierarchy,
@@ -52,6 +56,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         }
                         donorCount={donors.query.data?.count}
                         contributionCount={contributions.query.data?.count}
+                        eventCount={events.query.data?.count}
                     />
 
                     <div className={styles.content}>{children}</div>
