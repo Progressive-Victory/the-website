@@ -1,6 +1,6 @@
-import { ReactNode } from 'react'
+import { type MouseEventHandler, ReactNode } from 'react'
 
-type HFlexAlignment = 'center' | 'top' | 'bottom'
+type HFlexAlignment = 'middle' | 'top' | 'bottom'
 
 export interface HStackProps {
     align?: HFlexAlignment
@@ -8,14 +8,16 @@ export interface HStackProps {
     grow?: boolean | number
     className?: string
     children: ReactNode
+    onClick?: MouseEventHandler<HTMLDivElement>
 }
 
 export function HStack({
-    align = 'center',
+    align = 'middle',
     gap = 0,
     grow = 0,
     className,
     children,
+    onClick,
 }: HStackProps) {
     const gapStyle = `${Number(gap)}rem`
     const flexGrow = Number(grow)
@@ -26,11 +28,13 @@ export function HStack({
         <div
             style={{
                 display: 'flex',
+                flexDirection: 'row',
                 gap: gapStyle,
                 flexGrow,
                 alignItems,
             }}
             className={className}
+            onClick={onClick}
         >
             {children}
         </div>

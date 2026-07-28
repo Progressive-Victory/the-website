@@ -1,0 +1,38 @@
+.background {
+    position: fixed;
+    top: 100px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.container {
+    margin: 5rem;
+    background: #09223a;
+    border-radius: 1rem;
+}
+
+.avatarWrap {
+    flex-shrink: 0;
+    border: 3px solid #ffffff;
+    border-radius: 9999px;
+}
+
+.avatarBg {
+    border-radius: 9999px;
+    object-fit: cover;
+}
+
+.avatar {
+    border-radius: 9999px;
+    object-fit: cover;
+}
+
+.name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: #fff;
+}
