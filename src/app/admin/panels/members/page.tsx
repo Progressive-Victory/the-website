@@ -136,6 +136,7 @@ export default function Page() {
         )
         const tagFilters: Record<string, (string | number)[]> = {}
         if (key === 'donors') tagFilters.isDonor = ['true']
+        if (key === 'dues') tagFilters.isDuesPaying = ['true']
         onSearch({ ...rest, page: 0, ...tagFilters })
     }
 
