@@ -19,15 +19,13 @@ import {
     zDiscordEvent,
     DiscordEventStatus,
     zDiscordEventAttendee,
-    zDiscordUser,
-    DiscordUser,
 } from '@/contracts/data'
 import { zDiscordEventDetailsResponse } from '@/contracts/responses'
 import { dateService } from '@/services'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
+import { redirect, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { FaUsers } from 'react-icons/fa6'
 import z from 'zod'
@@ -102,6 +100,7 @@ export default function Page() {
         if (event.id === selectedEventId) return
         if (!loadingEvent) setLoadingEvent(true)
         setSelectedEventId(event.id)
+        redirect(`/admin/panels/events?eventId=${event.id}`)
     }
 
     const getStatusName = (status: DiscordEventStatus | null) =>
@@ -148,7 +147,7 @@ export default function Page() {
     }
 
     return (
-        <>
+        <div className={styles.root}>
             <List
                 search={search}
                 count={searchQuery.data?.count}
@@ -159,6 +158,8 @@ export default function Page() {
                     { label: 'Description', value: 'description' },
                     { label: 'Scheduled Start', value: 'scheduled_start_utc' },
                     { label: 'Scheduled End', value: 'scheduled_end_utc' },
+                    // i would like to search by creator, but that would require a heavier paginated search response body.
+                    // not pursuing at this time.
                 ]}
                 sortFields={[
                     { label: 'Name', value: 'name' },
@@ -326,14 +327,34 @@ export default function Page() {
                                     </span>
                                 </FormField>
                             </FormGroup>
-                            <FormGroup title="Attendees">
+                            <FormGroup
+                                title={
+                                    <h2>
+                                        Attendees
+                                        {eventQuery.data?.event.attendees
+                                            .length !== 0 && (
+                                            <span
+                                                className={styles.attendeeCount}
+                                            >
+                                                {` (${
+                                                    eventQuery.data?.event
+                                                        .attendees.length
+                                                })`}
+                                            </span>
+                                        )}
+                                    </h2>
+                                }
+                                subtitle={
+                                    eventQuery.data?.event.attendees.length.toString() ??
+                                    ''
+                                }
+                            >
                                 {
                                     <EventAttendees
                                         attendees={
                                             eventQuery.data?.event.attendees ??
                                             []
                                         }
-                                        eventId={eventQuery.data?.event.id}
                                     />
                                 }
                             </FormGroup>
@@ -341,6 +362,6 @@ export default function Page() {
                     </>
                 )}
             </div>
-        </>
+        </div>
     )
 }

@@ -26,3 +26,21 @@
         spin 777ms linear infinite,
         recol 777ms linear infinite alternate;
 }
+
+@keyframes spin {
+    0% {
+        transform: rotate(-360deg);
+    }
+}
+
+@keyframes recol {
+    0% {
+        background-color: #0ea5e9;
+    }
+    50% {
+        background-color: white;
+    }
+    100% {
+        background-color: #a52c20;
+    }
+}

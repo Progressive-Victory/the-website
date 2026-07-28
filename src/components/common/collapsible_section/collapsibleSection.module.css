@@ -1,0 +1,49 @@
+.header {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.title {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 0;
+
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.75rem;
+}
+
+.titleSub {
+    font-weight: 500;
+}
+
+.toggle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2rem;
+    aspect-ratio: 1 / 1;
+
+    color: rgb(156, 163, 175);
+
+    border-color: rgb(229, 231, 235);
+    border-width: 2px;
+    border-radius: 9999px;
+
+    cursor: pointer;
+
+    &:hover {
+        color: rgb(107, 114, 128);
+    }
+}
+
+.subtitle {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: rgb(107, 114, 128);
+}
