@@ -81,7 +81,7 @@
     padding-bottom: 0.9rem;
     padding-inline: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.72);
-    background: rgba(255, 255, 255, 0.84);
+    background: rgba(255, 255, 255, 0.66);
 
     backdrop-filter: blur(16px) saturate(145%);
     -webkit-backdrop-filter: blur(16px) saturate(145%);
