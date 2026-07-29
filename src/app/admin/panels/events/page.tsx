@@ -24,6 +24,7 @@ import { zDiscordEventDetailsResponse } from '@/contracts/responses'
 import { dateService } from '@/services'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
+import cx from 'classnames'
 import Image from 'next/image'
 import { redirect, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
@@ -112,8 +113,6 @@ export default function Page() {
             'Cancelled',
         ][status ?? 0]
 
-    const cn = (classes: string[]) => classes.join(' ')
-
     const renderEvent = (event: DiscordEvent) => {
         return (
             <ListElement
@@ -124,12 +123,12 @@ export default function Page() {
             >
                 <div className={styles.eventContainer}>
                     <div
-                        className={cn([
+                        className={cx(
                             styles.eventStatus,
                             styles[
                                 getStatusName(event.status).toLocaleLowerCase()
-                            ],
-                        ])}
+                            ]
+                        )}
                     />
                     <div className={styles.eventMeta}>
                         <span className={styles.eventName}>{event.name}</span>
@@ -217,14 +216,14 @@ export default function Page() {
                                 </div>
                                 <div className={styles.detailsEventStatus}>
                                     <span
-                                        className={cn([
+                                        className={cx(
                                             styles.statusPill,
                                             styles[
                                                 getStatusName(
                                                     eventQuery.data.event.status
                                                 ).toLocaleLowerCase()
-                                            ],
-                                        ])}
+                                            ]
+                                        )}
                                     >
                                         {getStatusName(
                                             eventQuery.data.event.status
@@ -249,14 +248,14 @@ export default function Page() {
                                 />
                                 <FormField label="Status">
                                     <div
-                                        className={cn([
+                                        className={cx(
                                             styles.detailsStatusField,
                                             styles[
                                                 getStatusName(
                                                     eventQuery.data.event.status
                                                 ).toLocaleLowerCase()
-                                            ],
-                                        ])}
+                                            ]
+                                        )}
                                     >
                                         <span className={formStyles.readonly}>
                                             {getStatusName(
