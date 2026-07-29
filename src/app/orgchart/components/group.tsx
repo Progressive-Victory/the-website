@@ -81,25 +81,6 @@ export function GroupBubble({ data }: { data: GroupData }) {
                 initial={{
                     translateX: 0,
                 }}
-                animate={{
-                    translateX: [
-                        0,
-                        `min(calc(-100% + ${textboxWidth}px), 0px)`,
-                    ],
-                    transition: {
-                        delay: 0.2,
-                        times: [0.2, 0.8],
-                        duration: 10,
-                        repeat: Infinity,
-                    },
-                }}
-                onAnimationStart={() => {
-                    setBoxWidth(
-                        nameContainer.current
-                            ? nameContainer.current.offsetWidth
-                            : 310
-                    )
-                }}
             >
                 {data.name.toUpperCase()}
             </motion.div>
