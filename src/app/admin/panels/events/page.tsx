@@ -214,7 +214,11 @@ export default function Page() {
                                         </h2>
                                     </div>
                                 </div>
-                                <div className={styles.detailsEventStatus}>
+                                <div
+                                    className={
+                                        styles.detailsEventDecorationContainer
+                                    }
+                                >
                                     <span
                                         className={cx(
                                             styles.statusPill,
@@ -229,6 +233,16 @@ export default function Page() {
                                             eventQuery.data.event.status
                                         )}
                                     </span>
+                                    {eventQuery.data.event.recurrent && (
+                                        <span
+                                            className={cx(
+                                                styles.statusPill,
+                                                styles.recurrent
+                                            )}
+                                        >
+                                            Recurring
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -263,6 +277,13 @@ export default function Page() {
                                             )}
                                         </span>
                                     </div>
+                                </FormField>
+                                <FormField label="Recurring">
+                                    <span className={formStyles.readonly}>
+                                        {eventQuery.data.event.recurrent
+                                            ? 'Yes'
+                                            : 'No'}
+                                    </span>
                                 </FormField>
                                 <FormField label="Created By">
                                     <div
