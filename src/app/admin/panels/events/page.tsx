@@ -344,10 +344,6 @@ export default function Page() {
                                         )}
                                     </h2>
                                 }
-                                subtitle={
-                                    eventQuery.data?.event.attendees.length.toString() ??
-                                    ''
-                                }
                             >
                                 {
                                     <EventAttendees
