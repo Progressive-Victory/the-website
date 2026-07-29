@@ -73,6 +73,7 @@ const zBaseUser = z.object({
     membershipFulfillmentStatus: zMembershipFulfillmentStatus.nullable(),
     nameConfirmed: z.boolean(),
     addressConfirmed: z.boolean(),
+    membershipBenefitEligible: z.boolean(),
 
     aliases: z.array(z.string()).optional(),
     roles: z.array(zRole).optional(),
