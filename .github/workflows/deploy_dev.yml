@@ -27,7 +27,7 @@ jobs:
        with:
          context: .
          push: true
-         tags: ${{ env.TAG }}
+         tags: ghcr.io/${{ github.repository_owner }}/${{ env.TAG }}:latest
      - name: Execute remote SSH commands using SSH key
        uses: appleboy/ssh-action@v1
        with:
