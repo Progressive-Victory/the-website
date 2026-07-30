@@ -22,7 +22,7 @@ Check out a new branch from `main` before you begin working on any new feature. 
 
 **AFTER** installing Node.js you **MUST** install [pnpm](https://pnpm.io/installation) to manage the dependencies for this project. We do **NOT** use npm, if you use npm your builds will fail!
 
-The easiest way to install pnpm is via npm after installing Node.js. Otherwise visit the linked page above to install it on your machine.
+The easiest way to install pnpm is via npm after installing Node.js. Otherwise, visit the linked page above to install it on your machine.
 
 ```sh
 npm install -g pnpm@latest-10
