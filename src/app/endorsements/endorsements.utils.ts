@@ -109,26 +109,8 @@ export function getCandidateSubtitleText(
     candidate: CandidateConfig,
     displayMode: GalleryDisplayMode,
     sectionMode: SectionGroupingMode
-): string | null {
-    const relevantDate = getRelevantElectionDate(candidate)
-    const formattedElectionDate = relevantDate
-        ? electionDateFormatter.format(relevantDate)
-        : null
-    const isPastElectionCandidate =
-        !!relevantDate && relevantDate.getTime() < getStartOfToday()
-
-    if (displayMode === 'flat') {
-        return getFlatSubtitleText(candidate)
-    }
-
-    if (
-        sectionMode === 'name' ||
-        (sectionMode === 'electionDate' && !isPastElectionCandidate)
-    ) {
-        return getCandidateStateLabel(candidate)
-    }
-
-    return formattedElectionDate
+): string {
+    return getCandidateStateLabel(candidate)
 }
 
 export function getSectionLabel(
