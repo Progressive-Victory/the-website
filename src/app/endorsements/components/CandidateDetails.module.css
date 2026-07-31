@@ -14,6 +14,8 @@
     border-radius: 1rem;
     width: 50dvw;
     color: #fff;
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .avatarWrap {
