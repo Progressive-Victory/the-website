@@ -22,6 +22,8 @@ export function CollapsibleSection({
 }: CollapsibleSectionProps) {
     const [isOpen, setIsOpen] = useState(initialOpenState)
 
+    const toRender = typeof title === 'string' ? <h2>{title}</h2> : <>{title}</>
+
     return (
         <section>
             {title && (
@@ -32,11 +34,7 @@ export function CollapsibleSection({
                             subGroup && styles.titleSub
                         )}
                     >
-                        {typeof title === 'string' ? (
-                            <h2>{title}</h2>
-                        ) : (
-                            <>{title}</>
-                        )}
+                        {toRender}
                         <button
                             className={styles.toggle}
                             onClick={() => setIsOpen(!isOpen)}
