@@ -1,6 +1,6 @@
 import styles from '../endorsement.module.css'
 import { PAST_ELECTION_LABEL } from '../endorsements.constants'
-import { type CandidateConfig, type ElectionStatus } from '../endorsements.data'
+import { type CandidateConfig } from '../endorsements.data'
 import {
     galleryLayoutTransition,
     headingVariants,
@@ -20,10 +20,11 @@ import {
     getSectionLabel,
     sortSectionCandidates,
 } from '../endorsements.utils'
+import { ElectionStatusBadge } from './ElectionStatusBadge'
 import { ImageWithFallback } from '@/components/common'
 import cx from 'classnames'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
-import { memo, type ReactNode } from 'react'
+import { memo } from 'react'
 
 interface CandidateGalleryProps {
     filteredCandidates: CandidateConfig[]
@@ -88,59 +89,59 @@ export function CandidateGallery({
             <LayoutGroup id="endorsements-gallery">
                 <motion.div
                     layout
-                        className={styles.galleryRoot}
-                        transition={galleryLayoutTransition}
-                    >
-                        <AnimatePresence mode="wait">
-                            <motion.section
-                                key={animationKey}
-                                className={styles.gallerySection}
-                                variants={waveListVariants}
+                    className={styles.galleryRoot}
+                    transition={galleryLayoutTransition}
+                >
+                    <AnimatePresence mode="wait">
+                        <motion.section
+                            key={animationKey}
+                            className={styles.gallerySection}
+                            variants={waveListVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                        >
+                            <motion.header
+                                className={`${styles.sectionHeader} ${styles.centeredSectionHeader}`}
+                                variants={headingVariants}
                                 initial="hidden"
                                 animate="visible"
                                 exit="exit"
                             >
-                                <motion.header
-                                    className={`${styles.sectionHeader} ${styles.centeredSectionHeader}`}
-                                    variants={headingVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    exit="exit"
-                                >
-                                    <div
-                                        className={styles.sectionDivider}
-                                        aria-hidden="true"
-                                    />
-                                    <h3 className={styles.sectionTitle}>
-                                        {flatHeaderTitle}
-                                    </h3>
-                                    <div
-                                        className={styles.sectionDivider}
-                                        aria-hidden="true"
-                                    />
-                                </motion.header>
+                                <div
+                                    className={styles.sectionDivider}
+                                    aria-hidden="true"
+                                />
+                                <h3 className={styles.sectionTitle}>
+                                    {flatHeaderTitle}
+                                </h3>
+                                <div
+                                    className={styles.sectionDivider}
+                                    aria-hidden="true"
+                                />
+                            </motion.header>
 
-                                <motion.div
-                                    layout
-                                    className={`${styles.finderGrid} ${styles.finderGridLarge}`}
-                                    transition={galleryLayoutTransition}
-                                >
-                                    {orderedFlatCandidates.map((candidate) => (
-                                        <CandidateCard
-                                            key={candidate.id}
-                                            candidate={candidate}
-                                            displayMode={displayMode}
-                                            sectionMode={sectionMode}
-                                            onSelect={() =>
-                                                onSelectCandidate(candidate)
-                                            }
-                                        />
-                                    ))}
-                                </motion.div>
-                            </motion.section>
-                        </AnimatePresence>
-                    </motion.div>
-                </LayoutGroup>
+                            <motion.div
+                                layout
+                                className={`${styles.finderGrid} ${styles.finderGridLarge}`}
+                                transition={galleryLayoutTransition}
+                            >
+                                {orderedFlatCandidates.map((candidate) => (
+                                    <CandidateCard
+                                        key={candidate.id}
+                                        candidate={candidate}
+                                        displayMode={displayMode}
+                                        sectionMode={sectionMode}
+                                        onSelect={() =>
+                                            onSelectCandidate(candidate)
+                                        }
+                                    />
+                                ))}
+                            </motion.div>
+                        </motion.section>
+                    </AnimatePresence>
+                </motion.div>
+            </LayoutGroup>
         )
     }
 
@@ -148,126 +149,120 @@ export function CandidateGallery({
         <LayoutGroup id="endorsements-gallery">
             <motion.div
                 layout
-                    className={styles.galleryRoot}
-                    transition={galleryLayoutTransition}
-                >
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={animationKey}
-                            variants={waveListVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                        >
-                            {groupedCandidates.map(
-                                ([sectionLabel, sectionCandidates]) => {
-                                    const isPastElectionSection =
-                                        sectionLabel === PAST_ELECTION_LABEL
+                className={styles.galleryRoot}
+                transition={galleryLayoutTransition}
+            >
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={animationKey}
+                        variants={waveListVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                    >
+                        {groupedCandidates.map(
+                            ([sectionLabel, sectionCandidates]) => {
+                                const isPastElectionSection =
+                                    sectionLabel === PAST_ELECTION_LABEL
 
-                                    return (
-                                        <motion.section
-                                            key={sectionLabel}
-                                            layout
+                                return (
+                                    <motion.section
+                                        key={sectionLabel}
+                                        layout
+                                        className={cx(
+                                            styles.gallerySection,
+                                            isPastElectionSection &&
+                                                styles.pastElectionSection
+                                        )}
+                                        transition={galleryLayoutTransition}
+                                    >
+                                        <motion.header
+                                            layout="position"
                                             className={cx(
-                                                styles.gallerySection,
+                                                styles.sectionHeader,
                                                 isPastElectionSection &&
-                                                    styles.pastElectionSection
+                                                    styles.centeredSectionHeader
                                             )}
                                             transition={galleryLayoutTransition}
+                                            variants={headingVariants}
+                                            initial="hidden"
+                                            animate="visible"
+                                            exit="exit"
                                         >
-                                            <motion.header
-                                                layout="position"
-                                                className={cx(
-                                                    styles.sectionHeader,
-                                                    isPastElectionSection &&
-                                                        styles.centeredSectionHeader
-                                                )}
-                                                transition={
-                                                    galleryLayoutTransition
-                                                }
-                                                variants={headingVariants}
-                                                initial="hidden"
-                                                animate="visible"
-                                                exit="exit"
-                                            >
-                                                {isPastElectionSection ? (
-                                                    <>
-                                                        <div
-                                                            className={
-                                                                styles.sectionDivider
-                                                            }
-                                                            aria-hidden="true"
-                                                        />
-                                                        <h3
-                                                            className={
-                                                                styles.sectionTitle
-                                                            }
-                                                        >
-                                                            {sectionLabel}
-                                                        </h3>
-                                                        <div
-                                                            className={
-                                                                styles.sectionDivider
-                                                            }
-                                                            aria-hidden="true"
-                                                        />
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <h3
-                                                            className={
-                                                                styles.sectionTitle
-                                                            }
-                                                        >
-                                                            {sectionLabel}
-                                                        </h3>
-                                                        <div
-                                                            className={
-                                                                styles.sectionDivider
-                                                            }
-                                                            aria-hidden="true"
-                                                        />
-                                                    </>
-                                                )}
-                                            </motion.header>
+                                            {isPastElectionSection ? (
+                                                <>
+                                                    <div
+                                                        className={
+                                                            styles.sectionDivider
+                                                        }
+                                                        aria-hidden="true"
+                                                    />
+                                                    <h3
+                                                        className={
+                                                            styles.sectionTitle
+                                                        }
+                                                    >
+                                                        {sectionLabel}
+                                                    </h3>
+                                                    <div
+                                                        className={
+                                                            styles.sectionDivider
+                                                        }
+                                                        aria-hidden="true"
+                                                    />
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <h3
+                                                        className={
+                                                            styles.sectionTitle
+                                                        }
+                                                    >
+                                                        {sectionLabel}
+                                                    </h3>
+                                                    <div
+                                                        className={
+                                                            styles.sectionDivider
+                                                        }
+                                                        aria-hidden="true"
+                                                    />
+                                                </>
+                                            )}
+                                        </motion.header>
 
-                                            <motion.div
-                                                layout
-                                                className={styles.finderGrid}
-                                                transition={
-                                                    galleryLayoutTransition
-                                                }
-                                            >
-                                                {sectionCandidates.map(
-                                                    (candidate) => (
-                                                        <CandidateCard
-                                                            key={candidate.id}
-                                                            candidate={
+                                        <motion.div
+                                            layout
+                                            className={styles.finderGrid}
+                                            transition={galleryLayoutTransition}
+                                        >
+                                            {sectionCandidates.map(
+                                                (candidate) => (
+                                                    <CandidateCard
+                                                        key={candidate.id}
+                                                        candidate={candidate}
+                                                        displayMode={
+                                                            displayMode
+                                                        }
+                                                        sectionMode={
+                                                            sectionMode
+                                                        }
+                                                        onSelect={() =>
+                                                            onSelectCandidate(
                                                                 candidate
-                                                            }
-                                                            displayMode={
-                                                                displayMode
-                                                            }
-                                                            sectionMode={
-                                                                sectionMode
-                                                            }
-                                                            onSelect={() =>
-                                                                onSelectCandidate(
-                                                                    candidate
-                                                                )
-                                                            }
-                                                        />
-                                                    )
-                                                )}
-                                            </motion.div>
-                                        </motion.section>
-                                    )
-                                }
-                            )}
-                        </motion.div>
-                    </AnimatePresence>
-                </motion.div>
-            </LayoutGroup>
+                                                            )
+                                                        }
+                                                    />
+                                                )
+                                            )}
+                                        </motion.div>
+                                    </motion.section>
+                                )
+                            }
+                        )}
+                    </motion.div>
+                </AnimatePresence>
+            </motion.div>
+        </LayoutGroup>
     )
 }
 
@@ -305,10 +300,6 @@ function CandidateCardImpl({
     sectionMode: SectionGroupingMode
     onSelect: () => void
 }) {
-    const statusBadgeClassName = getElectionStatusBadgeClassName(
-        candidate.electionStatus
-    )
-    const statusBadgeIcon = getElectionStatusBadgeIcon(candidate.electionStatus)
     const subtitleText = getCandidateSubtitleText(
         candidate,
         displayMode,
@@ -328,20 +319,9 @@ function CandidateCardImpl({
                     size={92}
                     className={styles.tileImage}
                 />
-                {statusBadgeClassName && (
-                    <span
-                        className={`${styles.tileStatusBadge} ${statusBadgeClassName}`}
-                        aria-label={`Election status: ${candidate.electionStatus}`}
-                    >
-                        <span aria-hidden="true">{statusBadgeIcon}</span>
-                        <span
-                            className={styles.tileStatusTooltip}
-                            aria-hidden="true"
-                        >
-                            {candidate.electionStatus}
-                        </span>
-                    </span>
-                )}
+                <ElectionStatusBadge
+                    electionStatus={candidate.electionStatus}
+                />
             </div>
             <div className={styles.tileMeta}>
                 <div className={styles.tileNameRow}>
@@ -391,55 +371,4 @@ function CandidateAvatar({
             className={className}
         />
     )
-}
-
-function getElectionStatusBadgeClassName(
-    electionStatus: ElectionStatus
-): string | null {
-    if (electionStatus === 'Won Primary') {
-        return styles.tileStatusWonPrimary
-    }
-
-    if (electionStatus === 'Elected') {
-        return styles.tileStatusElected
-    }
-
-    if (
-        electionStatus === 'Lost Primary' ||
-        electionStatus === 'Lost General'
-    ) {
-        return styles.tileStatusLost
-    }
-
-    if (electionStatus === 'Dropped Out') {
-        return styles.tileStatusDroppedOut
-    }
-
-    return null
-}
-
-function getElectionStatusBadgeIcon(electionStatus: ElectionStatus): ReactNode {
-    switch (electionStatus) {
-        case 'Won Primary':
-            return (
-                <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
-                    <path
-                        d="M4.5 10.5l3.5 3.5 7-7"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
-                </svg>
-            )
-        case 'Elected':
-            return '★'
-        case 'Lost Primary':
-        case 'Lost General':
-            return '✕'
-        case 'Dropped Out':
-            return '−'
-        default:
-            return null
-    }
 }
