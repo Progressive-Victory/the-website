@@ -134,9 +134,9 @@ export default function Page() {
                     ].includes(k)
             )
         )
-        const tagFilters: Record<string, (string | number)[]> = {}
-        if (key === 'donors') tagFilters.isDonor = ['true']
-        if (key === 'dues') tagFilters.isDuesPaying = ['true']
+        const tagFilters: Record<string, (string | number | boolean)[]> = {}
+        tagFilters.isDonor = [key === 'donors']
+        tagFilters.isDuesPaying = [key === 'dues']
         onSearch({ ...rest, page: 0, ...tagFilters })
     }
 
