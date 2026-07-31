@@ -1,6 +1,6 @@
 .nodeContainer {
     display: flex;
-    width: 360px;
+    width: 100px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -85,16 +85,16 @@
 .yellowBubble {
     display: flex;
     flex-wrap: nowrap;
-    overflow: hidden;
+    overflow: visible;
     border-radius: 1rem 0 0 1rem;
     border-width: 4px;
     border-color: #fcd34d;
     background-color: #fffbeb;
     color: #09223a;
-    font-size: 1.75rem;
+    font-size: 1.55rem;
     font-weight: 800;
-    width: 360px;
-    height: 64px;
+    width: 310px;
+    height: 100px;
     align-items: center;
     justify-items: center;
 }
@@ -108,13 +108,13 @@
     position: relative;
     width: 100%;
     height: 100%;
-    overflow: hidden;
+    overflow-y: scroll;
     flex-grow: 1000;
 }
 
 .groupNameContainer > * {
     position: absolute;
-    white-space: nowrap;
+    white-space: wrap;
     padding: 0.5rem;
 }
 

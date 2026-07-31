@@ -3,12 +3,13 @@ import styles from './app.module.css'
 import { BlankNode } from './components/blankNode'
 import OrgChartEdge from './components/edge'
 import { GroupNode } from './components/group'
+import { Banner } from './components/position'
 import {
     PositionNode,
     PositionData,
     PositionBubble,
 } from './components/position'
-import { orgchartData, orgchartEdges } from './data/orgchartGraphData'
+import { orgchartData, orgchartEdges, Tags } from './data/orgchartGraphData'
 import dagre from '@dagrejs/dagre'
 import {
     type Node,
@@ -29,8 +30,8 @@ import React, { useState } from 'react'
 
 const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
 
-const nWidth = 360
-const nHeight = 300
+const nWidth = 340
+const nHeight = 280
 
 const GetElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
     const isHorizontal = direction === 'LR'
@@ -76,9 +77,9 @@ const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
 )
 
 export default function OrgChartApp() {
-    //const [legendEnabled, toggleLegend] = useState(false)
+    const [legendEnabled, toggleLegend] = useState(false)
 
-    /*const LegendPanel = () => {
+    const LegendPanel = () => {
         return (
             <Panel position="top-left">
                 {!legendEnabled ? null : (
@@ -100,8 +101,8 @@ export default function OrgChartApp() {
                                 id: -1,
                                 title: 'Position Name',
                                 name: 'Holder Name',
-                                leadership: 'Senior',
-                                committees: [Committees[0]],
+                                banner: Banner.RED,
+                                tags: [Tags[0], Tags[1]],
                             }}
                             mini={true}
                         />
@@ -118,7 +119,7 @@ export default function OrgChartApp() {
                 </button>
             </Panel>
         )
-    }*/
+    }
 
     const DetailPanel = ({
         name,
@@ -230,6 +231,7 @@ export default function OrgChartApp() {
                 maxZoom={1.0}
                 minZoom={0.25}
             >
+                <LegendPanel />
                 {currentDetails}
                 <Controls />
                 <RefreshButton />

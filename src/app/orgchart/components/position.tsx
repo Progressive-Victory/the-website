@@ -108,18 +108,6 @@ export function PositionBubble({
                 initial={{
                     translateX: 0,
                 }}
-                animate={{
-                    translateX: [
-                        0,
-                        `min(calc(-100% + ${textboxWidth}px), 0px)`,
-                    ],
-                    transition: {
-                        delay: 0.2,
-                        times: [0.2, 0.8],
-                        duration: 10,
-                        repeat: Infinity,
-                    },
-                }}
             >
                 {data.title != null ? data.title.toUpperCase() : 'VOLUNTEER'}
             </motion.div>
@@ -137,26 +125,6 @@ export function PositionBubble({
             <motion.div
                 style={{
                     color: `${newName == 'REDACTED' || newName == 'UNFILLED' ? '#dc2626' : '#ffffff'}`,
-                }}
-                initial={{
-                    translateX: 0,
-                }}
-                animate={{
-                    translateX: [
-                        0,
-                        `min(calc(-100% + ${textboxWidth}px), 0px)`,
-                    ],
-                    transition: {
-                        delay: 0.2,
-                        times: [0.2, 0.8],
-                        duration: 10,
-                        repeat: Infinity,
-                    },
-                }}
-                onAnimationStart={() => {
-                    setBoxWidth(
-                        titleRef.current ? titleRef.current.offsetWidth : 310
-                    )
                 }}
             >
                 {newName}
