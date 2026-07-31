@@ -130,8 +130,6 @@ export function CandidateGallery({
                                     <CandidateCard
                                         key={candidate.id}
                                         candidate={candidate}
-                                        displayMode={displayMode}
-                                        sectionMode={sectionMode}
                                         onSelect={() =>
                                             onSelectCandidate(candidate)
                                         }
@@ -240,12 +238,6 @@ export function CandidateGallery({
                                                     <CandidateCard
                                                         key={candidate.id}
                                                         candidate={candidate}
-                                                        displayMode={
-                                                            displayMode
-                                                        }
-                                                        sectionMode={
-                                                            sectionMode
-                                                        }
                                                         onSelect={() =>
                                                             onSelectCandidate(
                                                                 candidate
@@ -291,20 +283,12 @@ function getFlatHeaderTitle(
 
 function CandidateCardImpl({
     candidate,
-    displayMode,
-    sectionMode,
     onSelect,
 }: {
     candidate: CandidateConfig
-    displayMode: GalleryDisplayMode
-    sectionMode: SectionGroupingMode
     onSelect: () => void
 }) {
-    const subtitleText = getCandidateSubtitleText(
-        candidate,
-        displayMode,
-        sectionMode
-    )
+    const subtitleText = getCandidateSubtitleText(candidate)
     const avatarFrameClassName =
         candidate.avatarBackgroundColor === 'blue'
             ? styles.tileImageFramePledge

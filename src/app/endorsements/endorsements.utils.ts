@@ -9,7 +9,6 @@ import {
 } from './endorsements.constants'
 import { type CandidateConfig, type ElectionStatus } from './endorsements.data'
 import {
-    type GalleryDisplayMode,
     type SectionGroupingMode,
     type SectionSortOrder,
 } from './endorsements.types'
@@ -105,11 +104,7 @@ export function getFlatSubtitleText(candidate: CandidateConfig): string {
         : getCandidateStateLabel(candidate)
 }
 
-export function getCandidateSubtitleText(
-    candidate: CandidateConfig,
-    displayMode: GalleryDisplayMode,
-    sectionMode: SectionGroupingMode
-): string {
+export function getCandidateSubtitleText(candidate: CandidateConfig): string {
     return getCandidateStateLabel(candidate)
 }
 
