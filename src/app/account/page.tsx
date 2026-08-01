@@ -1,4 +1,5 @@
 import { AccountPage } from './AccountPage'
+import { RedirectBanner } from './RedirectBanner'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { Metadata } from 'next'
@@ -15,10 +16,17 @@ export const metadata: Metadata = {
     },
 }
 
-export default function Page() {
+type Props = {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default async function Page({ searchParams }: Props) {
+    const { redirect } = await searchParams
+    const wasForceRedirected = redirect === 'true'
     return (
         <MainLayout>
             <HalftoneBackground />
+            { wasForceRedirected && <RedirectBanner /> }
             <AccountPage />
         </MainLayout>
     )
