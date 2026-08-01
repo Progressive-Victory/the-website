@@ -61,11 +61,11 @@ export function AccountDetailsSection({
         MembershipDeliverableStatus,
         string
     > = {
-        [MembershipDeliverableStatus.NotEligible]: 'Not Eligible',
         [MembershipDeliverableStatus.NotStarted]: 'Not Started',
+        [MembershipDeliverableStatus.Cancelled]: 'Cancelled',
         [MembershipDeliverableStatus.Printed]: 'Printed',
-        [MembershipDeliverableStatus.InTransit]: 'In Transit',
-        [MembershipDeliverableStatus.Recieved]: 'Received',
+        [MembershipDeliverableStatus.Shipped]: 'Shipped',
+        [MembershipDeliverableStatus.Received]: 'Received',
         [MembershipDeliverableStatus.Returned]: 'Returned',
     }
 
