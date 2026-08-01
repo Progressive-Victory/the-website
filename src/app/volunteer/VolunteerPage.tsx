@@ -86,6 +86,19 @@ export default function VolunteerPage() {
         },
     })
 
+    const unbanMutation = useMutation({
+        mutationFn: async () => {
+            if (!user.data) return
+            await onPut('/users/:userId/onboardingStages/unban', null, null, {
+                params: { userId: user.data?.id },
+            })
+        },
+        onSettled: async () => {
+            setOverrideStage(null)
+            await user.onInvalidate()
+        },
+    })
+
     const sendSmsCodeMutation = useMutation({
         mutationFn: async () => {
             if (!user.data) return
@@ -230,7 +243,10 @@ export default function VolunteerPage() {
                         )}
 
                         {currentStage === OnboardingStage.BANNED && (
-                            <BannedStage />
+                            <BannedStage
+                                isPending={unbanMutation.isPending}
+                                onUnban={unbanMutation.mutate}
+                            />
                         )}
 
                         {currentStage === OnboardingStage.AWAITING_VERIFY && (
