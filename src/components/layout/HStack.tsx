@@ -1,6 +1,6 @@
 import { type MouseEventHandler, ReactNode } from 'react'
 
-type HFlexAlignment = 'middle' | 'top' | 'bottom'
+type HFlexAlignment = 'center' | 'top' | 'bottom'
 
 export interface HStackProps {
     align?: HFlexAlignment
@@ -12,7 +12,7 @@ export interface HStackProps {
 }
 
 export function HStack({
-    align = 'middle',
+    align = 'center',
     gap = 0,
     grow = 0,
     className,

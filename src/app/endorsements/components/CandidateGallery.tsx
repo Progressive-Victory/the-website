@@ -26,6 +26,7 @@ import cx from 'classnames'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
 import { memo } from 'react'
 
+//TODO break out each candidate button into its own component
 interface CandidateGalleryProps {
     filteredCandidates: CandidateConfig[]
     filter: FilterType | null
