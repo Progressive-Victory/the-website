@@ -1,6 +1,6 @@
 import styles from '../endorsement.module.css'
 import { PAST_ELECTION_LABEL } from '../endorsements.constants'
-import { type CandidateConfig, type ElectionStatus } from '../endorsements.data'
+import { type CandidateConfig } from '../endorsements.data'
 import {
     galleryLayoutTransition,
     headingVariants,
@@ -20,11 +20,13 @@ import {
     getSectionLabel,
     sortSectionCandidates,
 } from '../endorsements.utils'
+import { ElectionStatusBadge } from './ElectionStatusBadge'
 import { ImageWithFallback } from '@/components/common'
 import cx from 'classnames'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
-import { memo, type ReactNode } from 'react'
+import { memo } from 'react'
 
+//TODO break out each candidate button into its own component
 interface CandidateGalleryProps {
     filteredCandidates: CandidateConfig[]
     filter: FilterType | null
@@ -33,6 +35,7 @@ interface CandidateGalleryProps {
     sectionSortOrder: SectionSortOrder
     year: number
     searchQuery: string
+    onSelectCandidate: (candidate: CandidateConfig) => void
 }
 
 export function CandidateGallery({
@@ -43,6 +46,7 @@ export function CandidateGallery({
     sectionSortOrder,
     year,
     searchQuery,
+    onSelectCandidate,
 }: CandidateGalleryProps) {
     const candidateMap = new Map<string, CandidateConfig[]>()
 
@@ -127,8 +131,9 @@ export function CandidateGallery({
                                     <CandidateCard
                                         key={candidate.id}
                                         candidate={candidate}
-                                        displayMode={displayMode}
-                                        sectionMode={sectionMode}
+                                        onSelect={() =>
+                                            onSelectCandidate(candidate)
+                                        }
                                     />
                                 ))}
                             </motion.div>
@@ -234,11 +239,10 @@ export function CandidateGallery({
                                                     <CandidateCard
                                                         key={candidate.id}
                                                         candidate={candidate}
-                                                        displayMode={
-                                                            displayMode
-                                                        }
-                                                        sectionMode={
-                                                            sectionMode
+                                                        onSelect={() =>
+                                                            onSelectCandidate(
+                                                                candidate
+                                                            )
                                                         }
                                                     />
                                                 )
@@ -280,23 +284,12 @@ function getFlatHeaderTitle(
 
 function CandidateCardImpl({
     candidate,
-    displayMode,
-    sectionMode,
+    onSelect,
 }: {
     candidate: CandidateConfig
-    displayMode: GalleryDisplayMode
-    sectionMode: SectionGroupingMode
+    onSelect: () => void
 }) {
-    const destination = getCandidateDestination(candidate)
-    const statusBadgeClassName = getElectionStatusBadgeClassName(
-        candidate.electionStatus
-    )
-    const statusBadgeIcon = getElectionStatusBadgeIcon(candidate.electionStatus)
-    const subtitleText = getCandidateSubtitleText(
-        candidate,
-        displayMode,
-        sectionMode
-    )
+    const subtitleText = getCandidateSubtitleText(candidate)
     const avatarFrameClassName =
         candidate.avatarBackgroundColor === 'blue'
             ? styles.tileImageFramePledge
@@ -311,20 +304,9 @@ function CandidateCardImpl({
                     size={92}
                     className={styles.tileImage}
                 />
-                {statusBadgeClassName && (
-                    <span
-                        className={`${styles.tileStatusBadge} ${statusBadgeClassName}`}
-                        aria-label={`Election status: ${candidate.electionStatus}`}
-                    >
-                        <span aria-hidden="true">{statusBadgeIcon}</span>
-                        <span
-                            className={styles.tileStatusTooltip}
-                            aria-hidden="true"
-                        >
-                            {candidate.electionStatus}
-                        </span>
-                    </span>
-                )}
+                <ElectionStatusBadge
+                    electionStatus={candidate.electionStatus}
+                />
             </div>
             <div className={styles.tileMeta}>
                 <div className={styles.tileNameRow}>
@@ -337,34 +319,18 @@ function CandidateCardImpl({
         </>
     )
 
-    if (!destination) {
-        return (
-            <motion.article
-                layout
-                className={styles.candidateTile}
-                transition={galleryLayoutTransition}
-                variants={waveItemVariants}
-                whileHover={{ y: -4, scale: 1.03 }}
-            >
-                {tileContent}
-            </motion.article>
-        )
-    }
-
     return (
-        <motion.a
+        <motion.article
             layout
-            href={destination}
-            target="_blank"
-            rel="noopener noreferrer"
             className={styles.candidateTile}
-            aria-label={`View details for ${candidate.name}`}
             transition={galleryLayoutTransition}
             variants={waveItemVariants}
             whileHover={{ y: -4, scale: 1.03 }}
+            onClick={onSelect}
+            style={{ cursor: 'pointer' }}
         >
             {tileContent}
-        </motion.a>
+        </motion.article>
     )
 }
 
@@ -390,71 +356,4 @@ function CandidateAvatar({
             className={className}
         />
     )
-}
-
-function getCandidateDestination(
-    candidate: CandidateConfig
-): string | undefined {
-    const learnMoreHref = candidate.learnMoreHref.trim()
-    if (learnMoreHref) return learnMoreHref
-
-    const handleHref = candidate.handleHref?.trim()
-    switch (handleHref) {
-        case undefined:
-        case '':
-            return undefined
-        default:
-            return handleHref
-    }
-}
-
-function getElectionStatusBadgeClassName(
-    electionStatus: ElectionStatus
-): string | null {
-    if (electionStatus === 'Won Primary') {
-        return styles.tileStatusWonPrimary
-    }
-
-    if (electionStatus === 'Elected') {
-        return styles.tileStatusElected
-    }
-
-    if (
-        electionStatus === 'Lost Primary' ||
-        electionStatus === 'Lost General'
-    ) {
-        return styles.tileStatusLost
-    }
-
-    if (electionStatus === 'Dropped Out') {
-        return styles.tileStatusDroppedOut
-    }
-
-    return null
-}
-
-function getElectionStatusBadgeIcon(electionStatus: ElectionStatus): ReactNode {
-    switch (electionStatus) {
-        case 'Won Primary':
-            return (
-                <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
-                    <path
-                        d="M4.5 10.5l3.5 3.5 7-7"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
-                </svg>
-            )
-        case 'Elected':
-            return '★'
-        case 'Lost Primary':
-        case 'Lost General':
-            return '✕'
-        case 'Dropped Out':
-            return '−'
-        default:
-            return null
-    }
 }

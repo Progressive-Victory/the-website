@@ -13,11 +13,11 @@ export enum UserStatus {
 }
 
 export enum MembershipDeliverableStatus {
-    NotEligible = 0,
-    NotStarted = 1,
+    NotStarted = 0,
+    Cancelled = 1,
     Printed = 2,
-    InTransit = 3,
-    Recieved = 4,
+    Shipped = 3,
+    Received = 4,
     Returned = 5,
 }
 
