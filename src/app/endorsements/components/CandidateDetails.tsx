@@ -106,7 +106,7 @@ export function CandidateDetails({
                     </ZStack>
                     <VStack align="left" gap={0.25}>
                         <HStack
-                            align="middle"
+                            align="center"
                             gap={0.5}
                             className={styles.nameRow}
                         >
@@ -116,7 +116,7 @@ export function CandidateDetails({
                             />
                         </HStack>
                         <HStack
-                            align="middle"
+                            align="center"
                             gap={0.5}
                             className={styles.tagRow}
                         >
@@ -140,7 +140,7 @@ export function CandidateDetails({
                             )}
                         </HStack>
                         <HStack
-                            align="middle"
+                            align="center"
                             gap={0.5}
                             className={styles.socialRow}
                         >
@@ -185,7 +185,7 @@ export function CandidateDetails({
 
                 <VStack align="left" gap={0.75} className={styles.quoteBox}>
                     <HStack
-                        align="middle"
+                        align="center"
                         gap={1.25}
                         className={styles.infoRow}
                     >
