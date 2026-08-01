@@ -16,21 +16,21 @@ import { stateOptions } from '@/models'
 import { dateService } from '@/services'
 
 const membershipCardShipmentOptions = [
-    { value: 0, label: 'Not Eligible' },
-    { value: 1, label: 'Not Started' },
+    { value: 0, label: 'Not Started' },
+    { value: 1, label: 'Cancelled' },
     { value: 2, label: 'Printed' },
-    { value: 3, label: 'In Transit' },
-    { value: 4, label: 'Recieved' },
-    { value: 5, label: 'Returned' },
+    { value: 3, label: 'Shipped' },
+    { value: 4, label: 'Received' },
+    { value: 5, label: 'Returned (Update Address)' },
 ]
 
 const membershipMerchShipmentOptions = [
-    { value: 0, label: 'Not Eligible' },
-    { value: 1, label: 'Not Started' },
+    { value: 0, label: 'Not Started' },
+    { value: 1, label: 'Cancelled' },
     { value: 2, label: 'Printed' },
-    { value: 3, label: 'In Transit' },
-    { value: 4, label: 'Recieved' },
-    { value: 5, label: 'Returned' },
+    { value: 3, label: 'Shipped' },
+    { value: 4, label: 'Received' },
+    { value: 5, label: 'Returned (Update Address)' },
 ]
 
 const shirtSizeOptions = [
@@ -136,7 +136,7 @@ export function MemberView({
                     readonly
                 />
                 <TextField<User>
-                    label="Discord Id"
+                    label="Discord ID"
                     getter={(form) => form.discordUsers?.[0]?.id}
                     readonly
                 />
@@ -147,11 +147,6 @@ export function MemberView({
                     required
                 />
                 <PhoneField label="Phone Number" field="phone" required />
-                <TextField
-                    label="Preferred Name"
-                    field="preferredName"
-                    deprecated
-                />
                 {editing ? (
                     <TextField label="First Name" field="firstName" />
                 ) : (
@@ -188,15 +183,6 @@ export function MemberView({
                     }
                 />
                 <DateField label="Date Created" field="createdAtUtc" readonly />
-                <SelectManyField<User>
-                    label="Aliases"
-                    field="aliases"
-                    options={(user.aliases ?? []).map((alias) => ({
-                        value: alias,
-                        label: alias,
-                    }))}
-                    readonly
-                />
             </FormGroup>
 
             <FormGroup title="Address">
@@ -274,7 +260,7 @@ export function MemberView({
                 />
             </FormGroup>
 
-            <FormGroup title="Membership Fulfillment (Mock)">
+            <FormGroup title="Membership Fulfillment">
                 <DropDownField<User>
                     label="Membership Card Shipped"
                     field="membershipCardStatus"
@@ -293,6 +279,12 @@ export function MemberView({
                 <CheckboxField<User>
                     label="Dues Paying Member"
                     field="duesPayingMember"
+                    readonly
+                />
+                <CheckboxField<User>
+                    label="Qualifies for Membership Benefits"
+                    field="membershipBenefitEligible"
+                    readonly
                 />
                 <DropDownField<User>
                     label="Membership Fulfillment Status"
