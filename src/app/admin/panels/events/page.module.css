@@ -283,3 +283,7 @@
     flex-basis: 2rem;
     aspect-ratio: 1 / 1;
 }
+
+.chungus {
+    content: 'trigger vercel push';
+}
