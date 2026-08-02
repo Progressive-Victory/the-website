@@ -1,7 +1,7 @@
 import styles from './Form.module.css'
 import { DynamicFormFieldProps, FieldConfiguration } from './FormField'
 import { HStack, Spacer, VStack } from '@/components/layout'
-import cx from 'classnames'
+import { cn } from '@/util'
 import deepEqual from 'deep-equal'
 import React, { useCallback, useEffect, useState } from 'react'
 import { FaPlus, FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
@@ -244,7 +244,7 @@ export function Form<T>({
                         {onCreate && (
                             <button
                                 onClick={handleCreate}
-                                className={cx(styles.button)}
+                                className={cn(styles.button)}
                             >
                                 <FaPlus /> Create
                             </button>
@@ -312,7 +312,7 @@ export function Form<T>({
                                 </button>
                                 <button
                                     onClick={handleCancel}
-                                    className={cx(
+                                    className={cn(
                                         styles.button,
                                         styles.discardButton
                                     )}
@@ -339,7 +339,7 @@ export function Form<T>({
                                 {onDelete && (
                                     <button
                                         onClick={handleDelete}
-                                        className={cx(
+                                        className={cn(
                                             styles.button,
                                             styles.discardButton
                                         )}

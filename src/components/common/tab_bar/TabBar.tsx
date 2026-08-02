@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './TabBar.module.css'
-import cx from 'classnames'
+import { cn } from '@/util'
 import { useMemo } from 'react'
 
 export interface TabSpec {
@@ -37,7 +37,7 @@ export function TabBar({
 
     return (
         <div
-            className={cx(styles.tabBar, className)}
+            className={cn(styles.tabBar, className)}
             role="tablist"
             aria-label={ariaLabel}
             style={
@@ -63,7 +63,7 @@ export function TabBar({
                         aria-selected={active}
                         aria-disabled={disabled}
                         disabled={disabled}
-                        className={cx(styles.tabButton, {
+                        className={cn(styles.tabButton, {
                             [styles.tabButtonActive]: active,
                             [styles.tabButtonDisabled]: disabled,
                         })}

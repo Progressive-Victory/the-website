@@ -1,6 +1,6 @@
 import styles from './MultiSelect.module.css'
+import { cn } from '@/util'
 import { useClickAway } from '@/util/hooks'
-import cx from 'classnames'
 import { useMemo, useRef, useState } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 
@@ -65,7 +65,7 @@ export function MultiSelect({
                     type="button"
                     id={`remove-${value}`}
                     key={`remove-${value}`}
-                    className={cx(
+                    className={cn(
                         styles.option,
                         !readonly && styles.removeButton
                     )}

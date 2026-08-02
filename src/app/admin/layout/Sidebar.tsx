@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './Sidebar.module.css'
-import classNames from 'classnames'
+import { cn } from '@/util'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { FaUsers, FaUserShield, FaUserTag, FaDonate } from 'react-icons/fa'
@@ -31,7 +31,7 @@ export default function Sidebar({
 
     return (
         <div
-            className={classNames(styles.nav, {
+            className={cn(styles.nav, {
                 [styles.navOpen]: open,
                 [styles.navClosed]: !open,
             })}
@@ -104,7 +104,7 @@ export default function Sidebar({
             >
                 <FiChevronLeft
                     size={20}
-                    className={classNames(styles.toggleIcon, {
+                    className={cn(styles.toggleIcon, {
                         [styles.toggleIconClosed]: !open,
                     })}
                 />
@@ -129,7 +129,7 @@ function NavLink({ title, href, icon: Icon, count, open }: NavLinkProps) {
 
     return (
         <li
-            className={classNames(styles.item, {
+            className={cn(styles.item, {
                 [styles.itemActive]: active,
                 [styles.itemInactive]: !active,
             })}

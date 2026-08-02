@@ -22,7 +22,7 @@ import {
 } from '../endorsements.utils'
 import { ElectionStatusBadge } from './ElectionStatusBadge'
 import { ImageWithFallback } from '@/components/common'
-import cx from 'classnames'
+import { cn } from '@/util'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
 import { memo } from 'react'
 
@@ -168,7 +168,7 @@ export function CandidateGallery({
                                     <motion.section
                                         key={sectionLabel}
                                         layout
-                                        className={cx(
+                                        className={cn(
                                             styles.gallerySection,
                                             isPastElectionSection &&
                                                 styles.pastElectionSection
@@ -177,7 +177,7 @@ export function CandidateGallery({
                                     >
                                         <motion.header
                                             layout="position"
-                                            className={cx(
+                                            className={cn(
                                                 styles.sectionHeader,
                                                 isPastElectionSection &&
                                                     styles.centeredSectionHeader
