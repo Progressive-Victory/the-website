@@ -1,6 +1,6 @@
 import { Field, SupportNote } from '.'
+import { cn } from '@/util'
 import { useInit } from '@/util/hooks'
-import classNames from 'classnames'
 import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
@@ -82,7 +82,7 @@ export function PhoneVerifyStage({
                         <button
                             type="button"
                             disabled={codeTimer > 0 || requestIsPending}
-                            className={classNames(
+                            className={cn(
                                 `flex w-fit items-center whitespace-nowrap rounded-lg bg-steel-blue px-4 py-3 text-center text-sm text-white transition-all duration-100 disabled:cursor-not-allowed [&:not(:disabled)]:hover:scale-[103%]`,
                                 requestIsPending
                                     ? ''

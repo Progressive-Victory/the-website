@@ -1,6 +1,6 @@
 'use client'
 
-import cx from 'classnames'
+import { cn } from '@/util'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
@@ -41,7 +41,7 @@ export function ImageWithFallback({
             alt={alt}
             width={width}
             height={height}
-            className={cx('aspect-square rounded-full object-cover', className)}
+            className={cn('aspect-square rounded-full object-cover', className)}
             onError={() => setHasErrored(true)}
             loading={priority ? undefined : loading}
             priority={priority}

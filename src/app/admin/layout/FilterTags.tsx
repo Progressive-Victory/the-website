@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './FilterTags.module.css'
-import cx from 'classnames'
+import { cn } from '@/util'
 import {
     ReactNode,
     useRef,
@@ -52,7 +52,7 @@ function TagButton({
     return (
         <button
             type="button"
-            className={cx(styles.tag, isActive && styles.active)}
+            className={cn(styles.tag, isActive && styles.active)}
             style={
                 isActive
                     ? {
@@ -66,7 +66,7 @@ function TagButton({
         >
             <span className={styles.icon}>{tag.icon}</span>
             <div
-                className={cx(
+                className={cn(
                     styles.labelWrapper,
                     isActive && styles.labelWrapperActive
                 )}
@@ -74,7 +74,7 @@ function TagButton({
             >
                 <span
                     ref={labelRef}
-                    className={cx(
+                    className={cn(
                         styles.label,
                         isActive ? styles.labelFadeIn : styles.labelFadeOut
                     )}
