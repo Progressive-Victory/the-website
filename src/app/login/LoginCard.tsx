@@ -1,5 +1,7 @@
 'use client'
 
+import styles from './login.module.css'
+import { cn } from '@/util'
 import { useAuth } from '@/util/hooks'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
@@ -25,28 +27,24 @@ export function LoginCard() {
     }
 
     return (
-        <div className="flex max-w-[30rem] flex-col items-center justify-center gap-6 rounded-md bg-black-pearl-dark p-8 text-center shadow-lg">
-            <h1 className="text-2xl font-bold text-white">
-                Log In to Continue
-            </h1>
+        <div className={styles.card}>
+            <h1 className={styles.cardTitle}>Log In to Continue</h1>
             {errorMessage && (
-                <p className="rounded-md border-2 border-red-600 p-2 font-bold text-red-500">
-                    ERROR: {errorMessage}
-                </p>
+                <p className={styles.cardError}>ERROR: {errorMessage}</p>
             )}
-            <p className="text-sm font-medium text-white">
+            <p className={styles.cardText}>
                 Click the button below to log in. If you haven&apos;t completed
                 the onboarding form yet, you&apos;ll be prompted to do that
                 before you can join the server.
                 <br />
                 <br />
-                <strong className="text-yellow-300">
+                <strong className={styles.highlight}>
                     NOTE: Your Discord account MUST have a verified email
                 </strong>
             </p>
             <button
                 onClick={() => void onLogin(redirect)}
-                className="mb-0.5 flex w-full flex-row items-center justify-center gap-x-4 rounded-lg bg-[#5865F2] px-4 py-2 font-bold text-white transition duration-300 ease-in-out"
+                className={cn(styles.cardLoginButton, styles.discord)}
             >
                 <Image
                     src="/images/discord-white-icon.png"
