@@ -2,8 +2,7 @@
 
 import styles from './account.module.css'
 
-export const RedirectBanner = ({
-}) => {
+export const RedirectBanner = () => {
   return (
     <div className={styles.redirectBanner}>
       <div className={styles.redirectBannerContent}>
