@@ -30,7 +30,7 @@ jobs:
        with:
          context: .
          push: true
-         tags: ghcr.io/${{ env.OWNER_NAME }}/${{ env.TAG }}:latest
+         tags: ghcr.io/${{ env.OWNER_NAME }}/${{ env.TAG }}
      - name: Execute remote SSH commands using SSH key
        uses: appleboy/ssh-action@v1
        with:
