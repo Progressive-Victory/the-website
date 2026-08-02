@@ -26,7 +26,7 @@ export default async function Page({ searchParams }: Props) {
     return (
         <MainLayout>
             <HalftoneBackground />
-            { wasForceRedirected && <RedirectBanner /> }
+            {wasForceRedirected && <RedirectBanner />}
             <AccountPage />
         </MainLayout>
     )
