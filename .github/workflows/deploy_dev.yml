@@ -22,13 +22,15 @@ jobs:
          registry: ghcr.io
          username: ${{ github.actor }}
          password: ${{ secrets.GITHUB_TOKEN }}
+     - name: lowercase github.repository 
+       run:  echo "OWNER_NAME=`echo ${{github.repository_owner}} | tr '[:upper:]' '[:lower:]'`" >>${GITHUB_ENV}
      - name: Build and push Docker images
        id: push
        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
        with:
          context: .
          push: true
-         tags: ghcr.io/${{ github.repository_owner }}/${{ env.TAG }}:latest
+         tags: ghcr.io/${{ env.OWNER_NAME }}/${{ env.TAG }}:latest
      - name: Execute remote SSH commands using SSH key
        uses: appleboy/ssh-action@v1
        with:
