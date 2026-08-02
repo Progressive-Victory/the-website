@@ -2,7 +2,8 @@ name: Deploy to Dev
 on:
   push:
     branches: [dev]
-
+  workflow_dispatch:
+  
 jobs:
   build-publish:
     runs-on: ubuntu-latest
