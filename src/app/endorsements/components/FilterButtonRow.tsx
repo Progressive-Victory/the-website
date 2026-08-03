@@ -11,7 +11,7 @@ import {
     type SectionGroupingMode,
     type SectionSortOrder,
 } from '../endorsements.types'
-import cn from 'classnames'
+import { cn } from '@/util'
 import { AnimatePresence, motion } from 'motion/react'
 import {
     type FocusEvent,
