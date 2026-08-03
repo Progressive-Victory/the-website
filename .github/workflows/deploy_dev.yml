@@ -14,7 +14,7 @@ jobs:
       DOCKERFILE: Dockerfile
       REPLACE_ENV_FILE: deployment/deployment.env
       ENV_FILE: .env
-      TAG: api_dev
+      TAG: the_website_dev
     steps:
      - uses: actions/checkout@v2
      - name: Replace Appsettings
