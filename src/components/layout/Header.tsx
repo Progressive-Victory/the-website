@@ -9,14 +9,14 @@ import { LoginButton } from '@/components/common/buttons/button_types/LoginButto
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
-import { DiscordUser, TokenClaims, zDiscordUser } from '@/contracts/data'
+import { TokenClaims, zDiscordUser } from '@/contracts/data'
 import { useAuth, useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import NextLink from 'next/link'
 import type React from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import z from 'zod'
 
 /**
@@ -83,6 +83,15 @@ const navitems: NavItem[] = [
         href: '/endorsements',
         subnav: {
             columns: [
+                // {
+                //     title: 'Criteria',
+                //     items: [
+                //         {
+                //             name: 'PV Pledge',
+                //             href: 'https://www.progress.win/pledge',
+                //         },
+                //     ],
+                // },
                 {
                     title: 'Endorsements',
                     items: [
@@ -97,19 +106,19 @@ const navitems: NavItem[] = [
         href: '/',
         subnav: {
             columns: [
-                {
-                    title: 'Initiatives',
-                    items: [
-                        {
-                            name: 'Section 230 Initiative',
-                            href: '/initiatives/section-230',
-                        },
-                        {
-                            name: 'Jackson Franklin Initiative',
-                            href: '/initiatives/franklin',
-                        },
-                    ],
-                },
+                // {
+                //     title: 'Initiatives',
+                //     items: [
+                //         {
+                //             name: 'Section 230 Initiative',
+                //             href: '/initiatives/section-230',
+                //         },
+                //         {
+                //             name: 'Jackson Franklin Initiative',
+                //             href: '/initiatives/franklin',
+                //         },
+                //     ],
+                // },
                 {
                     title: 'Join',
                     items: [
@@ -125,7 +134,7 @@ const navitems: NavItem[] = [
                     items: [
                         {
                             name: 'Dues Paying Membership',
-                            href: 'https://secure.actblue.com/donate/pvmember',
+                            href: 'https://secure.actblue.com/donate/pvmember?refcode=Website%20Header',
                         },
                         {
                             name: 'Merch',
@@ -611,14 +620,45 @@ export function Header() {
         queryKey: [`/discordUsers/${session?.userId}`],
         queryFn:
             session?.discordUserId != null && ready
-                ? async () => {
-                      return await onGet<DiscordUser[]>(
-                          `/discordUsers/${session?.userId}`,
-                          z.array(zDiscordUser)
+                ? ({ signal }) =>
+                      onGet(
+                          '/discordUsers/:discordUserId',
+                          z.array(zDiscordUser),
+                          { params: { discordUserId: session?.userId }, signal }
                       )
-                  }
                 : skipToken,
     })
+
+    const resolvedNavitems = useMemo(() => {
+        const discordId = discordUsers?.[0]?.id
+        return navitems.map((item) => {
+            if (!item.subnav?.columns) return item
+            return {
+                ...item,
+                subnav: {
+                    ...item.subnav,
+                    columns: item.subnav.columns.map((col) => ({
+                        ...col,
+                        items: col.items.map((child) => {
+                            if (
+                                child.href.startsWith(
+                                    'https://secure.actblue.com/donate/pvmember'
+                                )
+                            ) {
+                                return {
+                                    ...child,
+                                    href: discordId
+                                        ? `${child.href}&refcode2=${discordId}`
+                                        : child.href,
+                                }
+                            }
+                            return child
+                        }),
+                    })),
+                },
+            }
+        })
+    }, [discordUsers])
 
     useEffect(() => {
         if (!isOpen) return
@@ -757,7 +797,7 @@ export function Header() {
                     className={styles.headerCenterNav}
                     aria-label="Primary navigation"
                 >
-                    {navitems.map((item) => {
+                    {resolvedNavitems.map((item) => {
                         const hasChildren = !!item.subnav?.columns?.length
                         const isActive = activeSubnav?.name === item.name
                         const shouldDim = !!activeSubnav && !isActive
@@ -829,29 +869,46 @@ export function Header() {
                     )}
                 </div>
 
-                <motion.button
-                    type="button"
-                    className={styles.headerMenuButton}
-                    onClick={() => {
-                        closeSubnav()
-                        setIsOpen((prev) => !prev)
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
                     }}
-                    initial={false}
-                    animate={isOpen ? 'open' : 'closed'}
-                    whileHover="hover"
-                    whileTap="tap"
-                    variants={menuButtonVariants}
-                    transition={{ type: 'spring', stiffness: 520, damping: 32 }}
-                    aria-label={
-                        isOpen
-                            ? 'Close navigation menu'
-                            : 'Open navigation menu'
-                    }
-                    aria-expanded={isOpen}
-                    aria-controls="site-nav-drawer"
                 >
-                    <HamburgerIcon isOpen={isOpen} />
-                </motion.button>
+                    <DonateButton
+                        label="Donate"
+                        className={`${styles.mobileDonateButton} ${isOpen && styles.fadeOutTop}`}
+                    />
+
+                    <motion.button
+                        type="button"
+                        className={styles.headerMenuButton}
+                        onClick={() => {
+                            closeSubnav()
+                            setIsOpen((prev) => !prev)
+                        }}
+                        initial={false}
+                        animate={isOpen ? 'open' : 'closed'}
+                        whileHover="hover"
+                        whileTap="tap"
+                        variants={menuButtonVariants}
+                        transition={{
+                            type: 'spring',
+                            stiffness: 520,
+                            damping: 32,
+                        }}
+                        aria-label={
+                            isOpen
+                                ? 'Close navigation menu'
+                                : 'Open navigation menu'
+                        }
+                        aria-expanded={isOpen}
+                        aria-controls="site-nav-drawer"
+                    >
+                        <HamburgerIcon isOpen={isOpen} />
+                    </motion.button>
+                </div>
             </header>
 
             <AnimatePresence>
@@ -918,7 +975,7 @@ export function Header() {
 
             <NavDrawer
                 isOpen={isOpen}
-                navitems={navitems}
+                navitems={resolvedNavitems}
                 mobileSubnavItem={mobileSubnavItem}
                 setMobileSubnavItem={setMobileSubnavItem}
                 isSessionLoading={isSessionLoading}

@@ -27,6 +27,7 @@ export default function EndorsementsPage() {
                     <div className={styles.headingWrap}>
                         <p className={styles.heading}>
                             Endorsements{' '}
+                            {/* Will update to not hardcode 2026 in next revision */}
                             <span className={styles.headingHighlight}>
                                 for 2026
                             </span>

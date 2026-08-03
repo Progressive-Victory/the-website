@@ -59,8 +59,6 @@ const GetElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
     return { nodes: newNodes, edges }
 }
 
-// const { initialNodes, initialEdges } = BuildGraphNodes(orgchartData)
-
 const nodeTypes = {
     positionNode: PositionNode,
     groupNode: GroupNode,

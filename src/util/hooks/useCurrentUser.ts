@@ -1,26 +1,21 @@
-import { useFetch } from './useFetch'
-import { User, zUser } from '@/contracts/data'
-import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
+import { User } from '@/contracts/data'
+import { useUserQueries } from '@/queries'
+import {
+    keepPreviousData,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query'
 
-interface DataState {
-    data: User | undefined
-    isLoading: boolean
-    error: string | null
-    onRefetch: () => Promise<User | undefined>
-}
-
-export function useCurrentUser(): DataState {
-    const { ready, onGet } = useFetch()
+export function useCurrentUser() {
+    const queryClient = useQueryClient()
+    const { getCurrentUser } = useUserQueries()
 
     const user = useQuery({
         queryKey: ['/users/current'],
-        queryFn: ready
-            ? async () => {
-                  return onGet<User>('/users/current', zUser, {
-                      query: { includeDiscordUsers: true },
-                  })
-              }
-            : skipToken,
+        queryFn: getCurrentUser({
+            includeDiscordUsers: true,
+            includeDonors: true,
+        }),
         placeholderData: keepPreviousData,
     })
 
@@ -29,11 +24,16 @@ export function useCurrentUser(): DataState {
         return res.data
     }
 
+    const handleInvalidate = async () => {
+        await queryClient.invalidateQueries({ queryKey: ['/users/current'] })
+    }
+
     return {
         data: user.data,
         isLoading: user.isLoading,
-        error: user.error?.message ?? null,
+        error: user.error,
         onRefetch: handleRefetch,
+        onInvalidate: handleInvalidate,
     }
 }
 

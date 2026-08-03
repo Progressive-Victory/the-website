@@ -8,6 +8,7 @@ export interface TextFieldProps<T> extends FormFieldProps<
     string | null | undefined
 > {
     autocomplete?: HTMLInputAutoCompleteAttribute
+    readonlyClassName?: string
 }
 
 export function TextField<T>(props: TextFieldProps<T>) {
@@ -29,7 +30,9 @@ export function TextField<T>(props: TextFieldProps<T>) {
     return (
         <FormField {...props}>
             {readonly ? (
-                <div className={styles.readonly}>{value}</div>
+                <div className={cx(styles.readonly, props.readonlyClassName)}>
+                    {value}
+                </div>
             ) : (
                 <input
                     type="text"

@@ -9,7 +9,7 @@ import {
     TextField,
 } from '@/components/common/forms'
 import { Permission, zPermission } from '@/contracts/data'
-import { UpdatePermissionRequest } from '@/contracts/requests'
+import { SortDirection, UpdatePermissionRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
@@ -31,7 +31,9 @@ export default function Page() {
         query: searchQuery,
         search,
         onSearch,
-    } = usePaginatedSearch<Permission>('/permissions', zPermission)
+    } = usePaginatedSearch('/permissions', zPermission, {
+        search: { sort: SortDirection.ASC },
+    })
 
     const updateMutation = useMutation<
         Permission,
@@ -44,7 +46,9 @@ export default function Page() {
         Permission | undefined
     >({
         mutationFn: ({ id, request }) =>
-            onPatch<Permission>(`/permissions/${id}`, request, zPermission),
+            onPatch('/permissions/:permissionId', request, zPermission, {
+                params: { permissionId: id },
+            }),
         onMutate: ({ id, permission }) => {
             const prev = searchQuery.data?.data?.find((prev) => prev.id == id)
             setSelectedPermission(permission)

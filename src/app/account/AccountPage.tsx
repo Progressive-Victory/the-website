@@ -1,10 +1,12 @@
 'use client'
 
-import { AccountInfoForm } from './AccountInfoForm'
+import {
+    AccountContributionsSection,
+    AccountDetailsSection,
+    ManualDonorLinkRequest,
+} from './sections/index'
 import styles from '@/app/account/account.module.css'
-import { DiscordAvatar } from '@/components/common'
-import { BaseButton } from '@/components/common/buttons/Button'
-import { User } from '@/contracts/data'
+import { OnboardingStage, User } from '@/contracts/data'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
 import { useMemo } from 'react'
@@ -23,10 +25,12 @@ export function AccountPage() {
         void onLogout()
     }
 
-    const updateMutation = useUpdatedUser({ loggedInUser: loggedInUser.data })
+    const { updateUser, linkUser } = useUpdatedUser({
+        loggedInUser: loggedInUser.data,
+    })
 
     const onSave = (user: User) => {
-        updateMutation.mutate({
+        updateUser.mutate({
             id: user.id,
             user,
             request: {
@@ -47,82 +51,55 @@ export function AccountPage() {
                     state: user.address.state,
                     zip: user.address.zip,
                 },
+                shirtSize: user.shirtSize,
+                addressConfirmed: user.addressConfirmed,
+                nameConfirmed: user.nameConfirmed,
             },
         })
     }
 
-    if (isSessionLoading) return null
+    const onLinkFormSubmit = (donorLinkForm: ManualDonorLinkRequest) => {
+        if (!loggedInUser.data) return
 
-    if (!session) return null
+        linkUser.mutate({
+            id: loggedInUser.data.id,
+            user: loggedInUser.data,
+            donorLinkRequest: donorLinkForm,
+        })
+    }
+
+    if (isSessionLoading || !session) return null
+
+    if (
+        loggedInUser.data &&
+        loggedInUser.data.onboardingStage != OnboardingStage.JOINED
+    ) {
+        window.location.href = '/volunteer'
+        return null
+    }
 
     return (
         <div className={styles.root}>
             <div className={styles.main}>
-                <section className={styles.content}>
-                    <header className={styles.contentHeader}>
-                        <div className={styles.headerTopRow}>
-                            <div className={styles.headerTextBlock}>
-                                <p className={styles.pageTitle}>
-                                    Account Dashboard
-                                </p>
-
-                                <p className={styles.pageSubtitle}>
-                                    View and update your personal account
-                                    information. We use this info to create and
-                                    ship membership cards.
-                                </p>
-                            </div>
-
-                            <div className={styles.headerActions}>
-                                {canAccessAdminPanel && (
-                                    <BaseButton
-                                        label="Admin Panel"
-                                        href="/admin"
-                                        className={styles.secondaryButton}
-                                    />
-                                )}
-
-                                <BaseButton
-                                    label="Sign Out"
-                                    onClick={handleSignOut}
-                                    className={styles.primaryButton}
-                                />
-                            </div>
-                        </div>
-                    </header>
-
-                    <div className={styles.contentPanel}>
-                        {loggedInUser.data && (
-                            <AccountInfoForm
+                {loggedInUser.data && (
+                    <>
+                        <AccountDetailsSection
+                            userData={loggedInUser.data}
+                            canAccessAdminPanel={canAccessAdminPanel}
+                            handleSignOut={handleSignOut}
+                            onSave={onSave}
+                            donorLinkError={linkUser.error}
+                            onDonorLinkSubmit={onLinkFormSubmit}
+                        />
+                        {!!loggedInUser.data.donors?.length && (
+                            <AccountContributionsSection
                                 user={loggedInUser.data}
-                                onSave={onSave}
-                                subtitle={
-                                    loggedInUser.data.discordUsers?.[0]
-                                        ?.username
-                                        ? `@${loggedInUser.data.discordUsers[0].username}`
-                                        : undefined
-                                }
-                                avatar={
-                                    <DiscordAvatar
-                                        discordUserId={
-                                            loggedInUser.data.discordUsers?.[0]
-                                                ?.id
-                                        }
-                                        imageId={
-                                            loggedInUser.data.discordUsers?.[0]
-                                                ?.image
-                                        }
-                                        size={48}
-                                    />
-                                }
-                                title={
-                                    `${loggedInUser.data.firstName ?? ''} ${loggedInUser.data.lastName ?? ''}`.trim() ||
-                                    'Account'
-                                }
+                                error={linkUser.error}
+                                onSubmit={onLinkFormSubmit}
                             />
                         )}
-                    </div>
-                </section>
+                    </>
+                )}
             </div>
         </div>
     )
