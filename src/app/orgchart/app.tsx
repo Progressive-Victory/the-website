@@ -1,5 +1,10 @@
 import '../../../tailwind.config'
 import styles from './app.module.css'
+import {
+    orgchartData,
+    orgchartEdges,
+    Tags,
+} from './chartData/orgchartGraphData'
 import { BlankNode } from './components/blankNode'
 import OrgChartEdge from './components/edge'
 import { GroupNode } from './components/group'
@@ -9,7 +14,6 @@ import {
     PositionData,
     PositionBubble,
 } from './components/position'
-import { orgchartData, orgchartEdges, Tags } from './data/orgchartGraphData'
 import dagre from '@dagrejs/dagre'
 import {
     type Node,
