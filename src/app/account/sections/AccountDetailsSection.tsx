@@ -61,12 +61,12 @@ export function AccountDetailsSection({
         MembershipDeliverableStatus,
         string
     > = {
-        [MembershipDeliverableStatus.NotEligible]: 'Not Eligible',
         [MembershipDeliverableStatus.NotStarted]: 'Not Started',
+        [MembershipDeliverableStatus.Cancelled]: 'Cancelled',
         [MembershipDeliverableStatus.Printed]: 'Printed',
-        [MembershipDeliverableStatus.InTransit]: 'In Transit',
-        [MembershipDeliverableStatus.Recieved]: 'Received',
-        [MembershipDeliverableStatus.Returned]: 'Returned',
+        [MembershipDeliverableStatus.Shipped]: 'Shipped',
+        [MembershipDeliverableStatus.Received]: 'Received',
+        [MembershipDeliverableStatus.Returned]: 'Returned (Update Address)',
     }
 
     const normalizeEmail = (value?: string | null) =>
@@ -511,33 +511,7 @@ export function AccountDetailsSection({
                                                         className={
                                                             formFieldStyles.fieldHeader
                                                         }
-                                                    >
-                                                        <span
-                                                            className={
-                                                                formFieldStyles.fieldLabel
-                                                            }
-                                                        >
-                                                            Membership Benefits
-                                                        </span>
-                                                        <div
-                                                            className={
-                                                                formFieldStyles.fieldValue
-                                                            }
-                                                        >
-                                                            <div
-                                                                className={
-                                                                    formFieldStyles.readonly
-                                                                }
-                                                            >
-                                                                {
-                                                                    membershipDeliverableLabels[
-                                                                        userData
-                                                                            .membershipMerchStatus
-                                                                    ]
-                                                                }
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    ></div>
                                                 </>
                                             ) : (
                                                 <>
@@ -561,15 +535,6 @@ export function AccountDetailsSection({
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <p
-                                                        className={
-                                                            styles.membershipStatusManualNotice
-                                                        }
-                                                    >
-                                                        This must be set
-                                                        manually, please check
-                                                        back later.
-                                                    </p>
                                                     <p
                                                         className={
                                                             styles.membershipStatusManualNotice

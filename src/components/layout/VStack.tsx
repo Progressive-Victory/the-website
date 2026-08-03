@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { type MouseEventHandler, ReactNode } from 'react'
 
 type VFlexAlignment = 'center' | 'left' | 'right'
 
@@ -8,6 +8,7 @@ export interface VStackProps {
     grow?: boolean | number
     className?: string
     children: ReactNode
+    onClick?: MouseEventHandler<HTMLDivElement>
 }
 
 export function VStack({
@@ -16,6 +17,7 @@ export function VStack({
     grow = 0,
     className,
     children,
+    onClick,
 }: VStackProps) {
     const gapStyle = `${Number(gap)}rem`
     const flexGrow = Number(grow)
@@ -32,6 +34,7 @@ export function VStack({
                 alignItems,
             }}
             className={className}
+            onClick={onClick}
         >
             {children}
         </div>

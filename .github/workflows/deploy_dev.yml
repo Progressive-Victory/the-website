@@ -2,15 +2,19 @@ name: Deploy to Dev
 on:
   push:
     branches: [dev]
-
+  workflow_dispatch:
+  
 jobs:
   build-publish:
     runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+      packages: write
     env:
       DOCKERFILE: Dockerfile
       REPLACE_ENV_FILE: deployment/deployment.env
       ENV_FILE: .env
-      TAG: api_dev
+      TAG: the_website_dev
     steps:
      - uses: actions/checkout@v2
      - name: Replace Appsettings
@@ -21,13 +25,16 @@ jobs:
          registry: ghcr.io
          username: ${{ github.actor }}
          password: ${{ secrets.GITHUB_TOKEN }}
+     - name: lowercase github.repository 
+       run:  echo "OWNER_NAME=`echo ${{github.repository_owner}} | tr '[:upper:]' '[:lower:]'`" >>${GITHUB_ENV}
      - name: Build and push Docker images
        id: push
        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
        with:
          context: .
          push: true
-         tags: ghcr.io/${{ github.repository_owner }}/${{ env.TAG }}:latest
+         tags: ghcr.io/${{ env.OWNER_NAME }}/${{ env.TAG }}
+
      - name: Execute remote SSH commands using SSH key
        uses: appleboy/ssh-action@v1
        with:

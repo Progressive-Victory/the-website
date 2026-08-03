@@ -1,3 +1,7 @@
+.listWidth {
+    --list-width: 25.5rem;
+}
+
 .detailsHeader {
     --banner-cover-height: 3.5rem;
     --banner-cover-gradient:

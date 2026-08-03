@@ -1,5 +1,9 @@
 export type InitiativeType = 'national' | 'state' | ''
-export type EndorsementType = 'PV Pledge' | 'Endorsement' | 'Recommendation'
+export type EndorsementType =
+    | 'PV Pledge'
+    | 'Endorsement'
+    | 'Recommendation'
+    | 'Unendorsed'
 export type AvatarBackgroundColor = 'blue' | 'yellow'
 export type ElectionStatus =
     | ''
@@ -14,20 +18,26 @@ export interface CandidateConfig {
     name: string
     state: string
     electionStatus: ElectionStatus
+    jurisdiction?: string
     primaryElection?: Date
     generalElection?: Date
+    endorsementDate?: Date
+    endorsementReason?: string
+    incumbent?: boolean
 
     handle: string
     handleHref?: string
     bodyText: string
 
     image: string
-    learnMoreHref: string
+    websiteHref: string
+    donateHref?: string
 
     initiativeType: InitiativeType
     endorsementType: EndorsementType
     showPvMember: boolean
     avatarBackgroundColor: AvatarBackgroundColor
+    relatedCandidateId?: string
 }
 
 export const CANDIDATES: CandidateConfig[] = [
@@ -42,7 +52,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/BaileePolitics',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Aaron Bailey.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
 
         endorsementType: 'PV Pledge',
@@ -55,14 +65,15 @@ export const CANDIDATES: CandidateConfig[] = [
         name: 'Abdul El-Sayed',
         state: 'Michigan',
         electionStatus: '',
+        jurisdiction: 'U.S. Senate',
         primaryElection: new Date('08/04/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@abdulelsayed',
+        handle: 'abdulelsayed',
         handleHref: 'https://x.com/AbdulElSayed',
         bodyText:
             ' is challenging the status quo by embracing new ways to reach voters! With RFK and Trump’s attacks on medicine, a doctor like him is exactly what we need to pass Medicare For All!',
         image: '/images/endorsement_images/2026/Silhouette/Abdul El-Sayed.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
 
         endorsementType: 'Endorsement',
@@ -80,7 +91,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Abdun Matin.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -97,7 +108,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Abel Chavez.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -115,7 +126,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/bojak4assembly',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Adam Bojak.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'PV Pledge',
@@ -133,7 +144,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Adam Hamawy.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
         endorsementType: 'PV Pledge',
         showPvMember: false,
@@ -147,12 +158,12 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: '',
         primaryElection: new Date('08/04/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@murphy4va',
+        handle: 'murphy4va',
         handleHref: 'https://x.com/Murphy4VA',
         bodyText:
             ' has quickly become a beloved presence in the PV community. We are proud to endorse him for Virginia’s 9th Congressional District.',
         image: '/images/endorsement_images/2026/Silhouette/Adam Murphy.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
 
         endorsementType: 'PV Pledge',
@@ -170,7 +181,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Ali Aljarrah.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'PV Pledge',
         showPvMember: false,
@@ -181,15 +192,17 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '11',
         name: 'Analilia Mejia',
         state: 'New Jersey',
-        electionStatus: 'Won Primary',
+        electionStatus: 'Elected',
+        jurisdiction: 'CD11',
         primaryElection: new Date('06/02/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@analilia_mejia',
+        handle: 'analilia_mejia',
         handleHref: 'https://x.com/Analilia_Mejia',
         bodyText:
             ' is a life long organizer who will be instrumental in organizing the progressive movement from within congress! We are thrilled to endorse her, and to see her take the PV Pledge.',
         image: '/images/endorsement_images/2026/Silhouette/Analilia Mejia.png',
-        learnMoreHref: '',
+        websiteHref: 'https://www.analiliafornj.com',
+        donateHref: 'https://secure.actblue.com/donate/analiliafornj',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
@@ -207,7 +220,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Audrey Denny.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -225,7 +238,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/beth4ma',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Beth Andres-Beck.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'Endorsement',
@@ -244,7 +257,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/BrachtforAZ5',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Blake Bracht.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'PV Pledge',
@@ -262,7 +275,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://www.instagram.com/bobby4tempe/',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Bobby Nichols.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'PV Pledge',
@@ -277,11 +290,11 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: 'Won Primary',
         primaryElection: new Date('06/23/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@bradlander',
+        handle: 'bradlander',
         handleHref: 'https://x.com/bradlander',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Brad Lander.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'Endorsement',
@@ -300,7 +313,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/bhennrich',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Brent Hennrich.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
 
         endorsementType: 'PV Pledge',
@@ -318,7 +331,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Charles Booker.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
         endorsementType: 'PV Pledge',
         showPvMember: false,
@@ -335,7 +348,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Chelsey Hockett.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -352,7 +365,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Chris Rabb.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
         endorsementType: 'PV Pledge',
         showPvMember: false,
@@ -369,7 +382,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Christopher Ahuja.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'PV Pledge',
         showPvMember: false,
@@ -386,7 +399,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Chuck Park.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -400,12 +413,12 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: '',
         primaryElection: new Date('08/04/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@coribush',
+        handle: 'coribush',
         handleHref: 'https://x.com/CoriBush',
         bodyText:
             ' is back to finish what she started! Her passion and tenacity have repeatedly shown that she is a powerful progressive voice ready to take on whatever battle is needed.',
         image: '/images/endorsement_images/2026/Silhouette/Cori Bush.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
 
         endorsementType: 'Endorsement',
@@ -423,7 +436,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Darializa Avila Chevalier.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -440,7 +453,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Demi Palecek.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -457,7 +470,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Dylan Blaha.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -471,12 +484,12 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: 'Won Primary',
         primaryElection: new Date('06/16/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@erica4ok',
+        handle: 'erica4ok',
         handleHref: 'https://x.com/erica4ok',
         bodyText:
             " stands apart not just as someone who will take on the machine, but someone with bold ideas to fight Oklahoma's poverty and exploitation.",
         image: '/images/endorsement_images/2026/Silhouette/Erica Watkins.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
 
         endorsementType: 'PV Pledge',
@@ -494,7 +507,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Erin Petrey.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -512,7 +525,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/ethanformd',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Ethan Wechtaluk.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'PV Pledge',
@@ -530,7 +543,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Evan Smith.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -548,7 +561,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/gregcasar',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Greg Casar.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'Endorsement',
@@ -568,7 +581,7 @@ export const CANDIDATES: CandidateConfig[] = [
         bodyText:
             ' is a bold progressive proving that even in the deepest depths of Republican controlled Missouri, a platform of economic and social justice can make its mark.',
         image: '/images/endorsement_images/2026/Silhouette/Hartzell Gray.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'Endorsement',
@@ -583,11 +596,11 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: '',
         primaryElection: new Date('09/08/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@heathhowardnh',
+        handle: 'heathhowardnh',
         handleHref: 'https://x.com/HeathHowardNH',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Heath Howard.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
@@ -605,7 +618,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Heidi Hall.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -623,7 +636,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/hunter4wa',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Hunter Gordon.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
 
         endorsementType: 'PV Pledge',
@@ -641,7 +654,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Imara Crooms.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -660,7 +673,7 @@ export const CANDIDATES: CandidateConfig[] = [
         bodyText:
             " has a passionate voice committed to fighting for a better world not just in the U.S. but around the world. We are proud to endorse him for Indiana's 5th Congressional District!",
         image: '/images/endorsement_images/2026/Silhouette/Jackson Franklin.png',
-        learnMoreHref: 'https://jacksonfranklinforcongress.com/',
+        websiteHref: 'https://jacksonfranklinforcongress.com/',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
@@ -679,7 +692,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://www.instagram.com/jakeya_hq',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Jakeya Johnson.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'PV Pledge',
@@ -694,12 +707,12 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: 'Won Primary',
         primaryElection: new Date('03/03/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@jamestalarico',
+        handle: 'jamestalarico',
         handleHref: 'https://x.com/jamestalarico',
         bodyText:
             "'s time has come to turn Texas blue. PV is proud to endorse him for the US Senate Seat in Texas! He is exctly what is needed.",
         image: '/images/endorsement_images/2026/Silhouette/James Talarico.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
 
         endorsementType: 'Endorsement',
@@ -714,12 +727,12 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: '',
         primaryElection: new Date('09/01/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@jeromiewhalen',
+        handle: 'jeromiewhalen',
         handleHref: 'https://www.whalenforcongressma.com/',
         bodyText:
             ' is not only a passionate progressive voice, he is also a powerful member of our community! There is nobody we are more excited to endorse this midterm season!',
         image: '/images/endorsement_images/2026/Silhouette/Jeromie Whalen.png',
-        learnMoreHref: 'https://www.whalenforcongressma.com/platform',
+        websiteHref: 'https://www.whalenforcongressma.com/platform',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
@@ -737,7 +750,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Jesse Brewer.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -754,7 +767,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Jillian Gilchrest.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -771,7 +784,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Jo Bennett.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -789,7 +802,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/PadoraforCO',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/John Padora.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'PV Pledge',
@@ -808,7 +821,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/josieformd',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Josie Caballero.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
 
         endorsementType: 'Endorsement',
@@ -826,7 +839,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Julie Gonzales.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -843,7 +856,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Junaid Ahmed.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -857,11 +870,11 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: '',
         primaryElection: new Date('09/08/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@karishma4senate',
+        handle: 'karishma4senate',
         handleHref: 'https://x.com/Karishma4Senate',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Karishma Manzur.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
@@ -876,12 +889,12 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: 'Lost Primary',
         primaryElection: new Date('03/17/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@katabughazaleh',
+        handle: 'katabughazaleh',
         handleHref: 'https://x.com/KatAbughazaleh',
         bodyText:
             ' is exactly what we are looking for at PV. A young, media savvy firebrand willing to tackle any challenge that gets in her way.',
         image: '/images/endorsement_images/2026/Silhouette/Kat Abughazaleh.png',
-        learnMoreHref:
+        websiteHref:
             '/images/endorsement_images/2026/Silhouette/Kat Abughazaleh.png',
         initiativeType: 'national',
 
@@ -901,7 +914,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/katiebansil4nj',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Katie Bansil.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
@@ -919,7 +932,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Kyle Gauck.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -933,11 +946,11 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: 'Dropped Out',
         primaryElection: new Date('06/23/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@luis4utah',
+        handle: 'luis4utah',
         handleHref: 'https://x.com/Luis4Utah',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Luis Villarreal.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
 
         endorsementType: 'PV Pledge',
@@ -955,7 +968,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Mai Vang.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -969,12 +982,12 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: '',
         primaryElection: new Date('08/18/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@marypeltola',
+        handle: 'marypeltola',
         handleHref: 'https://x.com/MaryPeltola',
         bodyText:
             " is America's first Native Alaskan representative and a fierce advocate for her community. We are proud to endorse her Alaska's Senate Seat!",
         image: '/images/endorsement_images/2026/Silhouette/Mary Peltola.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
 
         endorsementType: 'Endorsement',
@@ -993,7 +1006,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/ConroyForIL',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Matt Conroy.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'PV Pledge',
@@ -1012,7 +1025,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/MattForCarolina',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Matt Fulmer.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
 
         endorsementType: 'PV Pledge',
@@ -1030,7 +1043,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Matt Ortega.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
         endorsementType: 'PV Pledge',
         showPvMember: true,
@@ -1048,7 +1061,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://www.instagram.com/electmauricebrown',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Maurice Brown.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'PV Pledge',
@@ -1067,7 +1080,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/VoteMaxDiaz',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Max Diaz.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
 
         endorsementType: 'PV Pledge',
@@ -1086,7 +1099,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/MaxwellFrostFL',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Alejandro Maxwell-Frost.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'Endorsement',
@@ -1105,7 +1118,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://www.instagram.com/melissabirdforcongress/',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Melissa Bird.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'PV Pledge',
@@ -1120,15 +1133,15 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: 'Won Primary',
         primaryElection: new Date('06/30/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@MelatKirosCO',
+        handle: 'MelatKirosCO',
         handleHref: 'https://x.com/MelatKirosCO',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Melat Kiros.png',
-        learnMoreHref: 'https://www.kirosforco.com',
+        websiteHref: 'https://www.kirosforco.com',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
-        showPvMember: true,
+        showPvMember: false,
         avatarBackgroundColor: 'blue',
     },
 
@@ -1139,12 +1152,12 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: 'Lost Primary',
         primaryElection: new Date('06/23/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@MrMikeBlake',
+        handle: 'MrMikeBlake',
         handleHref: 'https://x.com/MrMikeBlake',
         bodyText:
             ' is an authentic, progressive fighter who has a deep love for his community. The progressive movement won in New Jersey and he will bring that momentum to New York!',
         image: '/images/endorsement_images/2026/Silhouette/Michael Blake.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'PV Pledge',
@@ -1163,7 +1176,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/NidaAllam',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Nida Allam.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'Endorsement',
@@ -1178,12 +1191,12 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: '',
         primaryElection: new Date('08/18/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@oliveralarkin',
+        handle: 'oliveralarkin',
         handleHref: 'https://x.com/OliverALarkin',
         bodyText:
             ' is proving Progressive politics is alive and well even in places like Florida! We are proud to endorse him and to do our part to help him win.',
         image: '/images/endorsement_images/2026/Silhouette/Oliver Larkin.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
@@ -1201,7 +1214,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Oliver Ma.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -1218,7 +1231,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Omar Mohamad.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -1235,7 +1248,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Paige Loud.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -1252,7 +1265,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Raj Goyle.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -1266,12 +1279,12 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: 'Won Primary',
         primaryElection: new Date('06/02/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@rokhanna',
+        handle: 'rokhanna',
         handleHref: 'https://x.com/RoKhanna',
         bodyText:
             ' is the leader our party needs! His commitment to new media politics has made him an outstanding voice capable of real change.',
         image: '/images/endorsement_images/2026/Silhouette/Ro Khanna.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'Endorsement',
@@ -1290,7 +1303,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/RobertArnoldSD',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Robert Arnold.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
 
         endorsementType: 'Endorsement',
@@ -1308,7 +1321,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Rose Penelope Yee.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -1322,12 +1335,12 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: 'Lost Primary',
         primaryElection: new Date('06/02/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@saikatc',
+        handle: 'saikatc',
         handleHref: 'https://x.com/saikatc',
         bodyText:
             " founded the Justice Democrats because he belives in the left's ability to come togeather to fight establishment power. In congress, he will continue that energy!",
         image: '/images/endorsement_images/2026/Silhouette/Saikat Chakrabarti.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
@@ -1342,16 +1355,16 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: '',
         primaryElection: new Date('08/04/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@salaambhattiva',
+        handle: 'salaambhattiva',
         handleHref: 'https://x.com/SalaamBhattiVA',
         bodyText:
             ' is a candidate whose advocacy for Medicare for All and drive to fight to get money out of politics will bring us one step closer to free healthcare once he wins his district.',
         image: '/images/endorsement_images/2026/Silhouette/Salaam Bhatti.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
-        showPvMember: false,
+        showPvMember: true,
         avatarBackgroundColor: 'yellow',
     },
 
@@ -1365,7 +1378,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Tammy Honeywell.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -1378,11 +1391,11 @@ export const CANDIDATES: CandidateConfig[] = [
         state: 'Texas',
         electionStatus: 'Elected',
         generalElection: new Date('01/31/26'),
-        handle: '@taylorrehmettx',
+        handle: 'taylorrehmettx',
         handleHref: 'https://x.com/TaylorRehmetTX',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Taylor Rehmet.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'state',
 
         endorsementType: 'Endorsement',
@@ -1400,7 +1413,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Tessa Lynn Hodge.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -1417,7 +1430,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Tom Steyer.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -1435,7 +1448,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/valfornevada',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Val Thomason.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: '',
 
         endorsementType: 'PV Pledge',
@@ -1454,7 +1467,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/Compton4KY2024',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/William Compton.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
@@ -1472,7 +1485,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: '',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/William Lawrence.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -1486,12 +1499,12 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: 'Lost Primary',
         primaryElection: new Date('03/03/26'),
         generalElection: new Date('11/03/26'),
-        handle: '@zeeshanfortexas',
+        handle: 'zeeshanfortexas',
         handleHref: '',
         bodyText:
             " is going to bring a fire to Texa's 33rd Congressional District. We are excited to see a bold progressive like him making all the right waves in all the right places!",
         image: '/images/endorsement_images/2026/Silhouette/Zeeshan Hafeez.png',
-        learnMoreHref: '',
+        websiteHref: '',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
@@ -1506,11 +1519,11 @@ export const CANDIDATES: CandidateConfig[] = [
     //     electionStatus: 'Elected',
     //     primaryElection: new Date('08/05/25'),
     //     generalElection: new Date('11/04/25'),
-    //     handle: '@MayorofSeattle',
+    //     handle: 'MayorofSeattle',
     //     handleHref: 'https://x.com/MayorofSeattle',
     //     bodyText: '',
     //     image: '',
-    //     learnMoreHref: '',
+    //     websiteHref: '',
     //     initiativeType: 'national',
 
     //     endorsementType: 'Endorsement',
@@ -1529,7 +1542,7 @@ export const CANDIDATES: CandidateConfig[] = [
     //     handleHref: '',
     //     bodyText: '',
     //     image: '',
-    //     learnMoreHref: '',
+    //     websiteHref: '',
     //     initiativeType: 'national',
 
     //     endorsementType: 'Endorsement',
@@ -1548,7 +1561,7 @@ export const CANDIDATES: CandidateConfig[] = [
     //     handleHref: '',
     //     bodyText: '',
     //     image: '',
-    //     learnMoreHref: '',
+    //     websiteHref: '',
     //     initiativeType: 'national',
 
     //     endorsementType: 'Endorsement',
@@ -1567,7 +1580,7 @@ export const CANDIDATES: CandidateConfig[] = [
     //     handleHref: '',
     //     bodyText: '',
     //     image: '',
-    //     learnMoreHref: '',
+    //     websiteHref: '',
     //     initiativeType: 'national',
 
     //     endorsementType: 'Recommendation',
@@ -1585,7 +1598,7 @@ export const CANDIDATES: CandidateConfig[] = [
     //     handleHref: '',
     //     bodyText: '',
     //     image: '',
-    //     learnMoreHref: '',
+    //     websiteHref: '',
     //     initiativeType: 'national',
 
     //     endorsementType: 'Endorsement',
@@ -1603,7 +1616,7 @@ export const CANDIDATES: CandidateConfig[] = [
     //     handleHref: '',
     //     bodyText: '',
     //     image: '',
-    //     learnMoreHref: '',
+    //     websiteHref: '',
     //     initiativeType: 'state',
 
     //     endorsementType: 'Endorsement',
@@ -1621,7 +1634,7 @@ export const CANDIDATES: CandidateConfig[] = [
     //     handleHref: '',
     //     bodyText: '',
     //     image: '',
-    //     learnMoreHref: '',
+    //     websiteHref: '',
     //     initiativeType: 'national',
 
     //     endorsementType: 'Endorsement',
@@ -1639,7 +1652,7 @@ export const CANDIDATES: CandidateConfig[] = [
     //     handleHref: '',
     //     bodyText: '',
     //     image: '',
-    //     learnMoreHref: '',
+    //     websiteHref: '',
     //     initiativeType: 'national',
 
     //     endorsementType: 'Endorsement',
@@ -1657,7 +1670,7 @@ export const CANDIDATES: CandidateConfig[] = [
     //     handleHref: '',
     //     bodyText: '',
     //     image: '',
-    //     learnMoreHref: '',
+    //     websiteHref: '',
     //     initiativeType: 'national',
 
     //     endorsementType: 'Endorsement',
@@ -1675,7 +1688,7 @@ export const CANDIDATES: CandidateConfig[] = [
     //     handleHref: '',
     //     bodyText: '',
     //     image: '',
-    //     learnMoreHref: '',
+    //     websiteHref: '',
     //     initiativeType: 'national',
 
     //     endorsementType: 'Endorsement',
@@ -1690,12 +1703,12 @@ export const CANDIDATES: CandidateConfig[] = [
     //     electionStatus: 'Lost General',
     //     primaryElection: new Date('08/20/24'),
     //     generalElection: new Date('11/05/24'),
-    //     handle: '@marypeltola',
+    //     handle: 'marypeltola',
     //     handleHref: 'https://x.com/MaryPeltola',
     //     bodyText:
     //         " is America's first Native Alaskan representative and a fierce advocate for her community. We are proud to endorse her for re-election in Alaska's at-large congressional district!",
     //     image: '/images/endorsement_images/2026/Silhouette/Mary Peltola.png',
-    //     learnMoreHref: '',
+    //     websiteHref: '',
     //     initiativeType: 'state',
 
     //     endorsementType: 'Endorsement',
@@ -1716,12 +1729,12 @@ export const CANDIDATES: CandidateConfig[] = [
     //     electionStatus: '',
     //     primaryElection: new Date('11/07/28'),
     //     generalElection: new Date('11/07/28'),
-    //     handle: '@jonstewart',
+    //     handle: 'jonstewart',
     //     handleHref: 'https://x.com/jonstewart',
     //     bodyText:
     //         ' isn’t perfect, but his decades long track record of integrity and progressivism make him the decisive pick. We urge him to serve his country by running for the office.',
     //     image: '/images/endorsement_images/2026/Silhouette/Jon Stewart.png',
-    //     learnMoreHref: '',
+    //     websiteHref: '',
     //     initiativeType: '',
     //     endorsementType: 'Endorsement',
     //     showPvMember: false,
