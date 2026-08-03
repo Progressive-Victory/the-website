@@ -1,3 +1,8 @@
+/**
+ * This component has been deprecated. It uses Tailwind, which is no longer
+ * a part of our stack, so it will not work in its current state.
+ */
+
 const CTA = ({
     askText,
     buttonText,
