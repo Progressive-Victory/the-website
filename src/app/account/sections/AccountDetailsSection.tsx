@@ -10,9 +10,9 @@ import formStyles from '@/components/common/forms/Form.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
 import { MembershipDeliverableStatus, User } from '@/contracts/data'
 import { zDiscordUserIsInServerResponse } from '@/contracts/responses'
+import { cn } from '@/util'
 import { useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
-import cx from 'classnames'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { IoClose } from 'react-icons/io5'
 
@@ -213,14 +213,14 @@ export function AccountDetailsSection({
     const renderDonorLinkForm = () => {
         return (
             <form
-                className={cx(
+                className={cn(
                     styles.linkActBlueFormContainer,
                     styles.detailsLinkForm
                 )}
                 onSubmit={submitLinkForm}
             >
                 <div
-                    className={cx(
+                    className={cn(
                         styles.linkActBlueFormInputContainer,
                         styles.detailsLinkFormInputs
                     )}
@@ -357,10 +357,10 @@ export function AccountDetailsSection({
 
             <div className={styles.contentPanel}>
                 <div
-                    className={cx(styles.contentRow, styles.detailsContentRow)}
+                    className={cn(styles.contentRow, styles.detailsContentRow)}
                 >
                     <div
-                        className={cx(
+                        className={cn(
                             styles.contentBackground,
                             styles.detailsCardPanel,
                             !userHasDonor &&
@@ -369,7 +369,7 @@ export function AccountDetailsSection({
                         )}
                     >
                         <div
-                            className={cx(
+                            className={cn(
                                 styles.cardColumn,
                                 styles.detailsCardColumn,
                                 styles.detailsCardMobileLast
@@ -558,7 +558,7 @@ export function AccountDetailsSection({
                                     )}
                                     {!userHasDonor && (
                                         <div
-                                            className={cx(
+                                            className={cn(
                                                 styles.detailsMembershipCta,
                                                 styles.detailsConnectCta
                                             )}
@@ -590,7 +590,7 @@ export function AccountDetailsSection({
                                                 onClick={() =>
                                                     setShowDonorLinkForm(true)
                                                 }
-                                                className={cx(
+                                                className={cn(
                                                     styles.secondaryButton,
                                                     styles.buttonHover
                                                 )}
