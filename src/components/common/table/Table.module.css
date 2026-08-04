@@ -1,0 +1,85 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    border-radius: 0.85rem;
+    overflow: hidden;
+    background: #ffffff;
+    min-width: fit-content;
+}
+
+.header,
+.row {
+    display: grid;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.65rem 0.9rem;
+}
+
+.header {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.78);
+    background: rgba(15, 23, 42, 0.06);
+    border-bottom: 1px solid rgba(17, 24, 39, 0.1);
+}
+
+.sortableHeader {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.sortIcon {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    color: rgba(15, 23, 42, 0.4);
+}
+
+.sortableHeader:hover .sortIcon {
+    color: rgba(15, 23, 42, 0.7);
+}
+
+.row {
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+    font-size: 0.9rem;
+    color: rgba(15, 23, 42, 0.9);
+    transition: background-color 0.12s ease;
+}
+
+.row:hover {
+    background-color: rgba(15, 23, 42, 0.04);
+}
+
+.row:last-child {
+    border-bottom: 0;
+}
+
+.cell {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dotCell {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.bullet {
+    color: rgba(15, 23, 42, 0.35);
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+}

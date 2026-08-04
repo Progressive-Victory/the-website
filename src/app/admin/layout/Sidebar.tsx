@@ -1,10 +1,17 @@
 'use client'
 
 import styles from './Sidebar.module.css'
+import { members } from '@/app/admin/panels/membership/membership.data'
 import { cn } from '@/util'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FaUsers, FaUserShield, FaUserTag, FaDonate } from 'react-icons/fa'
+import {
+    FaUsers,
+    FaUserShield,
+    FaUserTag,
+    FaDonate,
+    FaIdCard,
+} from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 import { FiChevronLeft } from 'react-icons/fi'
 import type { IconType } from 'react-icons/lib'
@@ -89,6 +96,13 @@ export default function Sidebar({
                     href="/admin/panels/fundraising"
                     icon={FaDonate}
                     count={2}
+                    open={open}
+                />
+                <NavLink
+                    title="Membership"
+                    href="/admin/panels/membership"
+                    icon={FaIdCard}
+                    count={members.length}
                     open={open}
                 />
             </ul>

@@ -1,0 +1,230 @@
+.panelContents {
+    width: 100%;
+    min-width: 0;
+    height: calc(100dvh - 100px);
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+}
+
+.scrollView {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0 0 1rem;
+}
+
+.panelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.35rem 1.25rem;
+    background-color: #f9fafb;
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    border-bottom: 2px solid #e5e7eb;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
+}
+
+.panelTimestamp {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.breadcrumbs {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.86rem;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.72);
+    user-select: none;
+}
+
+.prominentBreadcrumb {
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.72);
+}
+
+.breadcrumbSeperator {
+    color: rgba(15, 23, 42, 0.35);
+    font-weight: 700;
+}
+
+.panelBreadcrumb {
+    font-weight: 650;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.galleryHeader {
+    padding: 1.15rem 1.05rem 0.35rem;
+}
+
+.galleryTitle {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: rgba(9, 34, 58, 0.9);
+}
+
+.gallerySubTitle {
+    margin: 0.35rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.tableWrapper {
+    padding: 0.75rem 1.05rem 1.5rem;
+    overflow-x: auto;
+}
+
+.tableToolbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.5rem 1.05rem 0;
+}
+
+.tableOptionsBox {
+    min-width: 14rem;
+    background: rgba(255, 255, 255, 0.96);
+}
+
+.tableOptionsBody {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+}
+
+.tableOptionRow {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0 0.15rem;
+}
+
+.tableOptionLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.58);
+}
+
+.nameCell {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.nameVerified {
+    color: rgba(17, 115, 75, 1);
+    font-size: 0.6rem;
+    flex-shrink: 0;
+    background: rgba(112, 195, 32, 0.3);
+    border-radius: 50%;
+    padding: 0.15rem;
+}
+
+.nameUnverified {
+    color: rgba(177, 2, 2, 1);
+    font-size: 0.6rem;
+    flex-shrink: 0;
+    background: rgba(255, 95, 75, 0.3);
+    border-radius: 50%;
+    padding: 0.15rem;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.8rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.tagRed {
+    background: rgba(255, 95, 75, 0.3);
+    color: rgba(177, 2, 2, 1);
+}
+.tagOrange {
+    background: rgba(255, 72, 0, 0.3);
+    color: rgba(117, 56, 0, 1);
+}
+.tagYellow {
+    background: rgba(255, 168, 0, 0.3);
+    color: rgba(71, 56, 33, 1);
+}
+.tagGreen {
+    background: rgba(112, 195, 32, 0.3);
+    color: rgba(17, 115, 75, 1);
+}
+.tagBlue {
+    background: rgba(42, 155, 225, 0.3);
+    color: rgba(10, 83, 168, 1);
+}
+.tagPurple {
+    background: rgba(172, 95, 212, 0.3);
+    color: rgba(90, 50, 134, 1);
+}
+.tagDarkRed {
+    background: rgba(177, 2, 2, 1);
+    color: rgba(255, 207, 201, 1);
+}
+.tagMember {
+    background: #ffe5ec;
+    color: rgba(177, 2, 2, 1);
+}
+.tagPremium {
+    background: #ffe5ec;
+    color: rgb(223, 40, 76);
+}
+.tagSignature {
+    background: #ffa7cd;
+    color: rgba(177, 2, 2, 1);
+}
+.tagInnerCircle {
+    background: #da93ff;
+    color: rgba(90, 50, 134, 1);
+}
+
+.tagTier {
+    width: 10rem;
+}
+
+.tagWide {
+    min-width: 6.5rem;
+    font-size: 0.65rem;
+    padding: 0.1rem 0.5rem;
+    position: relative;
+    top: -2px;
+}
+
+.tagFulfilled {
+    min-width: auto;
+    width: calc(100% - 8px);
+    font-size: 0.65rem;
+    padding: 0.1rem 0.5rem;
+    position: relative;
+    top: -2px;
+}
+
+@media (max-width: 53rem) {
+    .panelHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+}
