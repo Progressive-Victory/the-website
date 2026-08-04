@@ -1,7 +1,7 @@
 import styles from './stages.module.css'
 import { cn } from '@/util'
-import { FaBan } from 'react-icons/fa6'
 import { useInit } from '@/util/hooks'
+import { FaBan } from 'react-icons/fa6'
 
 interface BannedStageProps {
     isPending: boolean
