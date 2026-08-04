@@ -1,4 +1,5 @@
 import './globals.css'
+import './tw.css'
 import QueryClientWrapper from '@/app/QueryClientWrapper'
 import { Analytics } from '@vercel/analytics/react'
 import 'leaflet/dist/leaflet.css'
