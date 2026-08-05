@@ -1,5 +1,3 @@
-import styles from './stages.module.css'
-import { cn } from '@/util'
 import { useInit } from '@/util/hooks'
 import { CalendarIcon } from '@heroicons/react/24/solid'
 
@@ -12,16 +10,16 @@ export function UnderageStage({ isPending, onAgeUp }: UnderageStageProps) {
     useInit(() => onAgeUp())
 
     return (
-        <div className={styles.container}>
-            <CalendarIcon className={cn(styles.icon, styles.success)} />
-            <p className={styles.subtitle}>
+        <div className="flex min-h-[200px] max-w-[40vw] flex-col items-center justify-center p-4">
+            <CalendarIcon className="size-12 text-steel-blue" />
+            <p className="mb-3 mt-6 text-center text-lg font-bold text-white">
                 Sorry! You have to be 18 years old or older to volunteer with
                 Progressive Victory.
             </p>
             <button
                 disabled={isPending}
                 onClick={onAgeUp}
-                className={styles.button}
+                className="flex w-fit items-center whitespace-nowrap rounded-lg bg-steel-blue px-4 py-3 text-center text-sm text-white transition-all duration-100 disabled:cursor-not-allowed [&:not(:disabled)]:hover:scale-[103%]"
             >
                 Check again
             </button>

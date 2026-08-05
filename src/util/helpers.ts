@@ -35,21 +35,3 @@ export function areOverlayStylesEqual(
 
     return true
 }
-
-/**
- * Concatenates an array of class names into one valid HTML class name
- * @param classes List of values to evaluate and concatenate.
- * @example
- * cn("title", "widget", styles.container, true && "bold", false && "italic")
- * // output: "title widget page_container__00000 bold"
- * @example
- * // if you need to supply a falsy value as a valid class name, stringify it:
- * cn("myClass", 0, "false")
- * // output: "myClass false"
- */
-export function cn(...classes: unknown[]) {
-    return classes
-        .filter((className) => className)
-        .map((className) => String(className))
-        .join(' ')
-}

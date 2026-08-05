@@ -10,9 +10,9 @@ import {
     User,
     zDiscordUser,
 } from '@/contracts/data'
-import { cn } from '@/util'
 import { useFetch } from '@/util/hooks'
 import { useQueries } from '@tanstack/react-query'
+import cx from 'classnames'
 import { ReactNode, useMemo } from 'react'
 import z from 'zod'
 
@@ -225,7 +225,7 @@ export function HistoryView({
             <div className={styles.section}>
                 <div className={styles.historyContainer}>
                     <div
-                        className={cn(
+                        className={cx(
                             styles.historyEntry,
                             styles.historyEntryUi
                         )}
@@ -242,7 +242,7 @@ export function HistoryView({
             <div className={styles.section}>
                 <div className={styles.historyContainer}>
                     <div
-                        className={cn(
+                        className={cx(
                             styles.historyEntry,
                             styles.historyEntryUi
                         )}
@@ -359,7 +359,7 @@ function UnifiedHistoryField({
                             <button
                                 type="button"
                                 onClick={handleSelect}
-                                className={cn(
+                                className={cx(
                                     styles.historyEntry,
                                     isSelected && styles.historyEntrySelected
                                 )}

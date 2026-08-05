@@ -1,15 +1,14 @@
 'use client'
 
-import styles from './page.module.css'
 import {
-    BannedStage,
     CollectInfoStage,
     CompleteStage,
     IOnboardingForm,
     JoiningStage,
     PhoneVerifyStage,
     UnderageStage,
-} from './stages'
+} from '.'
+import { BannedStage } from './BannedStage'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import { OnboardingStage } from '@/contracts/data'
@@ -197,13 +196,22 @@ export default function VolunteerPage() {
 
     return (
         <MainLayout>
-            <div className={styles.container}>
-                <div className={styles.backgroundCover} />
+            <div className="relative flex min-h-screen flex-col items-center justify-center">
+                <div
+                    className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
+                    style={{
+                        backgroundImage: "url('/images/blend_test.png')",
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'right',
+                        mixBlendMode: 'lighten',
+                        transform: 'scaleX(-1)',
+                    }}
+                />
                 <HalftoneBackground />
-                <div className={styles.body}>
+                <div className="flex w-full justify-center">
                     <form
                         onSubmit={(e) => e.preventDefault()}
-                        className={styles.form}
+                        className="z-0 m-4 flex h-auto flex-col gap-y-4 rounded-lg bg-black-pearl-dark p-4 shadow-md md:m-8 md:p-6"
                     >
                         {currentStage === OnboardingStage.NOT_STARTED && (
                             <CollectInfoStage

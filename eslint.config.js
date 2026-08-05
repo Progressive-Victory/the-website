@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
 import nextTypescript from 'eslint-config-next/typescript'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
+import tailwind from 'eslint-plugin-tailwindcss'
 import { defineConfig } from 'eslint/config'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
@@ -20,6 +21,7 @@ export default defineConfig([
     tseslint.configs.stylisticTypeChecked,
     ...nextCoreWebVitals,
     ...nextTypescript,
+    ...tailwind.configs['flat/recommended'],
     {
         languageOptions: {
             parserOptions: {
@@ -37,6 +39,7 @@ export default defineConfig([
             '@typescript-eslint/no-unsafe-enum-comparison': 'off',
             '@typescript-eslint/no-unsafe-call': 'warn',
             '@typescript-eslint/no-unsafe-return': 'warn',
+            'tailwindcss/no-custom-classname': 'off',
             'react-hooks/set-state-in-effect': 'off', //temp
             'react-hooks/preserve-manual-memoization': 'off', //temp
             'react-hooks/refs': 'off', //temp

@@ -11,7 +11,7 @@ import {
     type SectionGroupingMode,
     type SectionSortOrder,
 } from '../endorsements.types'
-import { cn } from '@/util'
+import cx from 'classnames'
 import { AnimatePresence, motion } from 'motion/react'
 import {
     type FocusEvent,
@@ -527,7 +527,7 @@ export function FilterButtonRow({
                             <button
                                 ref={searchToggleButtonRef}
                                 type="button"
-                                className={cn(
+                                className={cx(
                                     styles.searchToggleButton,
                                     !isMobile &&
                                         isSearchOpen &&
@@ -596,7 +596,7 @@ export function FilterButtonRow({
                                         />
                                     </svg>
                                     <svg
-                                        className={cn(
+                                        className={cx(
                                             styles.searchIcon,
                                             !isMobile &&
                                                 isSearchOpen &&
@@ -695,7 +695,7 @@ function DropdownGroup<T extends string>({
                         {selectedLabel}
                     </span>
                     <span
-                        className={cn(
+                        className={cx(
                             styles.dropdownChevron,
                             isOpen && styles.dropdownChevronOpen
                         )}
@@ -733,7 +733,7 @@ function DropdownGroup<T extends string>({
                                     type="button"
                                     role="option"
                                     aria-selected={isActive}
-                                    className={cn(
+                                    className={cx(
                                         styles.dropdownOption,
                                         isActive && styles.dropdownOptionActive
                                     )}
@@ -811,7 +811,7 @@ function TagsDropdownGroup<T extends string>({
                         {selectedLabel}
                     </span>
                     <span
-                        className={cn(
+                        className={cx(
                             styles.dropdownChevron,
                             isOpen && styles.dropdownChevronOpen
                         )}
@@ -855,7 +855,7 @@ function TagsDropdownGroup<T extends string>({
                                     type="button"
                                     role="option"
                                     aria-selected={isActive}
-                                    className={cn(
+                                    className={cx(
                                         styles.dropdownOption,
                                         isActive && styles.dropdownOptionActive
                                     )}
@@ -867,7 +867,7 @@ function TagsDropdownGroup<T extends string>({
                                         {option.label}
                                     </span>
                                     <span
-                                        className={cn(
+                                        className={cx(
                                             styles.dropdownCheckmark,
                                             isActive &&
                                                 styles.dropdownCheckmarkVisible
@@ -912,7 +912,7 @@ function TagsDropdownGroup<T extends string>({
                                     type="button"
                                     role="option"
                                     aria-selected={isActive}
-                                    className={cn(
+                                    className={cx(
                                         styles.dropdownOption,
                                         isActive && styles.dropdownOptionActive
                                     )}
@@ -925,7 +925,7 @@ function TagsDropdownGroup<T extends string>({
                                         {option.label}
                                     </span>
                                     <span
-                                        className={cn(
+                                        className={cx(
                                             styles.dropdownCheckmark,
                                             isActive &&
                                                 styles.dropdownCheckmarkVisible

@@ -1,7 +1,7 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import { dateService } from '@/services'
-import { cn } from '@/util'
+import cx from 'classnames'
 import { ChangeEvent, useCallback } from 'react'
 
 export interface DateFieldProps<T> extends FormFieldProps<
@@ -61,7 +61,7 @@ export function DateField<T>(props: DateFieldProps<T>) {
                     }
                     onChange={handleChange}
                     onFocus={handleFocus}
-                    className={cn(
+                    className={cx(
                         styles.textField,
                         !validator(value) && styles.invalid
                     )}

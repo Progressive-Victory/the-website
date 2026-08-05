@@ -4,7 +4,7 @@ import { DiscordAvatar } from '../../DiscordAvatar'
 import { BaseButton } from '../Button'
 import type { BaseVisualProps } from '../Button'
 import styles from '@/components/common/buttons/Button.module.css'
-import { cn } from '@/util'
+import cx from 'classnames'
 
 export type AccountButtonProps = BaseVisualProps & {
     href: string
@@ -23,7 +23,7 @@ export function AccountButton({
     const isLongVariant = buttonVariant === 'long'
     const isAccountCompact = !isLongVariant
 
-    const mergedClassName = cn(
+    const mergedClassName = cx(
         styles.primary,
         isAccountCompact && styles.accountCompact,
         className

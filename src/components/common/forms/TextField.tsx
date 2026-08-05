@@ -1,6 +1,6 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
-import { cn } from '@/util'
+import cx from 'classnames'
 import { ChangeEvent, HTMLInputAutoCompleteAttribute, useCallback } from 'react'
 
 export interface TextFieldProps<T> extends FormFieldProps<
@@ -30,7 +30,7 @@ export function TextField<T>(props: TextFieldProps<T>) {
     return (
         <FormField {...props}>
             {readonly ? (
-                <div className={cn(styles.readonly, props.readonlyClassName)}>
+                <div className={cx(styles.readonly, props.readonlyClassName)}>
                     {value}
                 </div>
             ) : (
@@ -43,7 +43,7 @@ export function TextField<T>(props: TextFieldProps<T>) {
                     required={props.required}
                     value={value}
                     onInput={handleInput}
-                    className={cn(
+                    className={cx(
                         styles.textField,
                         !validator(value) && styles.invalid
                     )}

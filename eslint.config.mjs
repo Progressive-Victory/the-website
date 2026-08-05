@@ -1,6 +1,7 @@
 import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
+import tailwind from 'eslint-plugin-tailwindcss'
 import { defineConfig } from 'eslint/config'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
@@ -23,6 +24,7 @@ export default defineConfig([
     tseslint.configs.recommendedTypeChecked,
     tseslint.configs.stylisticTypeChecked,
     ...compat.extends('next/core-web-vitals', 'next/typescript'),
+    ...tailwind.configs['flat/recommended'],
     {
         languageOptions: {
             parserOptions: {
@@ -40,6 +42,7 @@ export default defineConfig([
             '@typescript-eslint/no-unsafe-enum-comparison': 'off',
             '@typescript-eslint/no-unsafe-call': 'warn',
             '@typescript-eslint/no-unsafe-return': 'warn',
+            'tailwindcss/no-custom-classname': 'off',
         },
     },
     {
