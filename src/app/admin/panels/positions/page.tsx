@@ -2,24 +2,33 @@
 
 import styles from './page.module.css'
 import { ListElement, List } from '@/app/admin/layout/List'
+import { SearchModal } from '@/app/admin/layout/SearchModal'
 import {
     Form,
     FormGroup,
     FormState,
-    SelectManyField,
     TextField,
 } from '@/components/common/forms'
-import { Position } from '@/contracts/data'
-import { SortDirection } from '@/contracts/requests'
-import { PositionHierarchyResponse } from '@/contracts/responses'
+import {
+    FormFieldProps,
+    useConfigure,
+} from '@/components/common/forms/FormField'
+import { Position, UserProfile, zUserProfile } from '@/contracts/data'
+import { SearchRequest, SortDirection } from '@/contracts/requests'
+import {
+    PaginatedResponse,
+    PositionHierarchyResponse,
+} from '@/contracts/responses'
 import { usePositionQueries } from '@/queries'
 import {
     useOptimisticDelete,
     useOptimisticUpdate,
+    usePaginatedSearch,
     useUnpaginatedSearch,
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
+import cx from 'classnames'
+import { ChangeEvent, useCallback, useState } from 'react'
 
 const blankPosition: Position = {
     id: -1,
@@ -44,6 +53,14 @@ export default function Page() {
     })
 
     const {
+        query: userSearchQuery,
+        search: userSearch,
+        onSearch: onUserSearch,
+    } = usePaginatedSearch('/users', zUserProfile, {
+        search: { sort: SortDirection.ASC },
+    })
+
+    const {
         items: positions,
         count: positionCount,
         search,
@@ -58,16 +75,18 @@ export default function Page() {
         onSort: (a, b) => a.name.localeCompare(b.name),
     })
 
-    const positionOptions = useMemo(() => {
-        const options = (positionHierarchy.data?.positions ?? []).map((p) => ({
-            label: p.name,
-            value: p.id,
-        }))
+    const positionMap = new Map<number, string>()
+    for (const p of positionHierarchy.data?.positions ?? []) {
+        positionMap.set(p.id, p.name)
+    }
 
-        options.sort((a, b) => a.label.localeCompare(b.label))
-
-        return options
-    }, [positionHierarchy.data])
+    const pageUserMap = new Map<number, UserProfile>()
+    for (const u of positionHierarchy.data?.users ?? []) {
+        pageUserMap.set(u.id, u)
+    }
+    for (const u of userSearchQuery.data?.data ?? []) {
+        pageUserMap.set(u.id, u)
+    }
 
     const handleSelectItem = (value: Position) => {
         if (value.id === selectedPosition?.id) return
@@ -119,6 +138,7 @@ export default function Page() {
             positionQueries.updatePosition(newValue.id, {
                 name: newValue.name,
                 childIds: newValue.childIds,
+                userIds: newValue.userIds,
             }),
         onChange: (value) => {
             setSelectedPosition(value)
@@ -208,16 +228,337 @@ export default function Page() {
                 >
                     <FormGroup title="Details">
                         <TextField label="Name" field="name" required />
-                        {formState?.mode !== 'create' && (
-                            <SelectManyField
-                                label="Sub-Positions"
-                                field="childIds"
-                                options={positionOptions}
-                            />
-                        )}
                     </FormGroup>
+                    {formState?.mode !== 'create' && selectedPosition && (
+                        <FormGroup title="People">
+                            <OccupantsField
+                                label="People"
+                                field="userIds"
+                                allUsers={positionHierarchy.data?.users ?? []}
+                                userSearchQuery={userSearchQuery}
+                                userSearch={userSearch}
+                                onUserSearch={onUserSearch}
+                                editing={formState?.mode === 'edit'}
+                            />
+                        </FormGroup>
+                    )}
+                    {formState?.mode !== 'create' && selectedPosition && (
+                        <FormGroup title="Subordinates">
+                            <SubordinatesField
+                                label="Subordinates"
+                                field="childIds"
+                                positionMap={positionMap}
+                                allPositions={
+                                    positionHierarchy.data?.positions ?? []
+                                }
+                                currentPositionId={selectedPosition.id}
+                                editing={formState?.mode === 'edit'}
+                                userMap={pageUserMap}
+                            />
+                        </FormGroup>
+                    )}
                 </Form>
             </div>
         </>
+    )
+}
+
+interface SubordinatesFieldProps extends FormFieldProps<Position, number[]> {
+    positionMap: Map<number, string>
+    allPositions: Position[]
+    currentPositionId: number
+    editing: boolean
+    userMap: Map<number, UserProfile>
+}
+
+function SubordinatesField(props: SubordinatesFieldProps) {
+    const { getter, onChange } = useConfigure(
+        props,
+        useCallback(() => true, [])
+    )
+
+    const childIds = getter(props.dynamic!.form) ?? []
+    const [pickerOpen, setPickerOpen] = useState(false)
+    const [searchQuery, setSearchQuery] = useState('')
+
+    const handleRemove = (idToRemove: number) => {
+        onChange(childIds.filter((id) => id !== idToRemove))
+    }
+
+    const handleAdd = (id: number) => {
+        if (!childIds.includes(id)) {
+            onChange([...childIds, id])
+        }
+        setPickerOpen(false)
+        setSearchQuery('')
+    }
+
+    const filteredPositions = (() => {
+        const excluded = new Set([props.currentPositionId, ...childIds])
+        return props.allPositions
+            .filter((p) => !excluded.has(p.id))
+            .filter((p) =>
+                p.name.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .sort((a, b) => a.name.localeCompare(b.name))
+    })()
+
+    return (
+        <div className={styles.subPositions}>
+            <div className={styles.subPositionsContainer}>
+                {childIds.length === 0 && !props.editing && (
+                    <div className={styles.subPositionEntryEmpty}>
+                        No subordinates
+                    </div>
+                )}
+                {childIds.map((id) => {
+                    const pos = props.allPositions.find((p) => p.id === id)
+                    const assignedUsers = (pos?.userIds ?? [])
+                        .map((uid) => props.userMap.get(uid))
+                        .filter(Boolean)
+                    return (
+                        <div
+                            key={id}
+                            className={cx(
+                                styles.subPositionEntry,
+                                props.editing && styles.subPositionEntryEditing
+                            )}
+                        >
+                            <button
+                                type="button"
+                                className={styles.deleteButton}
+                                onClick={() => handleRemove(id)}
+                                aria-label={`Remove ${props.positionMap.get(id) ?? 'position'}`}
+                            >
+                                −
+                            </button>
+                            <span className={styles.subPositionEntryText}>
+                                {props.positionMap.get(id) ?? `Unknown (${id})`}
+                            </span>
+                            <span className={styles.subPositionTags}>
+                                {assignedUsers.length > 0 ? (
+                                    assignedUsers.map((u) => (
+                                        <span
+                                            key={u!.id}
+                                            className={styles.subPositionTag}
+                                        >
+                                            {u!.firstName && u!.lastName
+                                                ? `${u!.firstName} ${u!.lastName}`
+                                                : u!.discordUsers?.[0]?.username
+                                                  ? `@${u!.discordUsers[0].username}`
+                                                  : (u!.preferredName ??
+                                                    u!.email ??
+                                                    `User #${u!.id}`)}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className={styles.subPositionTag}>
+                                        Unfilled
+                                    </span>
+                                )}
+                            </span>
+                        </div>
+                    )
+                })}
+                {props.editing && (
+                    <button
+                        type="button"
+                        className={styles.addRow}
+                        onClick={() => setPickerOpen(true)}
+                    >
+                        <span className={styles.addIcon}>+</span>
+                        Add Subordinate Positions
+                    </button>
+                )}
+            </div>
+
+            <SearchModal
+                open={pickerOpen}
+                onClose={() => {
+                    setPickerOpen(false)
+                    setSearchQuery('')
+                }}
+                title="Add Subordinates"
+                subtitle="Search for a position to add as a subordinate."
+                searchValue={searchQuery}
+                onSearchChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setSearchQuery(e.target.value)
+                }
+            >
+                {filteredPositions.map((p) => (
+                    <button
+                        key={p.id}
+                        type="button"
+                        className={styles.pickerItem}
+                        onClick={() => handleAdd(p.id)}
+                    >
+                        {p.name}
+                    </button>
+                ))}
+                {filteredPositions.length === 0 && (
+                    <div className={styles.pickerEmpty}>
+                        No positions available
+                    </div>
+                )}
+            </SearchModal>
+        </div>
+    )
+}
+
+interface OccupantsFieldProps extends FormFieldProps<Position, number[]> {
+    allUsers: UserProfile[]
+    userSearchQuery: {
+        data?: PaginatedResponse<UserProfile>
+        isPending: boolean
+    }
+    userSearch: SearchRequest
+    onUserSearch: (req: SearchRequest) => void
+    editing: boolean
+}
+
+function OccupantsField(props: OccupantsFieldProps) {
+    const { getter, onChange } = useConfigure(
+        props,
+        useCallback(() => true, [])
+    )
+
+    const userIds = getter(props.dynamic!.form) ?? []
+    const [pickerOpen, setPickerOpen] = useState(false)
+
+    const userMap = new Map<number, UserProfile>()
+    for (const u of props.allUsers) {
+        userMap.set(u.id, u)
+    }
+    for (const u of props.userSearchQuery.data?.data ?? []) {
+        userMap.set(u.id, u)
+    }
+
+    const getUserDisplayName = (user: UserProfile | undefined) => {
+        if (!user) return 'Unknown'
+        if (user.firstName && user.lastName)
+            return `${user.firstName} ${user.lastName}`
+        const discord = user.discordUsers?.[0]?.username
+        if (discord) return `@${discord}`
+        if (user.preferredName) return user.preferredName
+        if (user.email) return user.email
+        return `User #${user.id}`
+    }
+
+    const handleRemove = (idToRemove: number) => {
+        onChange(userIds.filter((id) => id !== idToRemove))
+    }
+
+    const handleAdd = (id: number) => {
+        if (!userIds.includes(id)) {
+            onChange([...userIds, id])
+        }
+        setPickerOpen(false)
+        props.onUserSearch({ ...props.userSearch, query: '' })
+    }
+
+    const searchResults = (() => {
+        const excluded = new Set(userIds)
+        return (props.userSearchQuery.data?.data ?? []).filter(
+            (u) => !excluded.has(u.id)
+        )
+    })()
+
+    const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+        props.onUserSearch({ ...props.userSearch, query: e.target.value })
+    }
+
+    return (
+        <div className={styles.subPositions}>
+            <div className={styles.subPositionsContainer}>
+                {userIds.length === 0 && !props.editing && (
+                    <div className={styles.subPositionEntryEmpty}>
+                        Unfilled Position
+                    </div>
+                )}
+                {userIds.map((id) => (
+                    <div
+                        key={id}
+                        className={cx(
+                            styles.subPositionEntry,
+                            props.editing && styles.subPositionEntryEditing
+                        )}
+                    >
+                        <button
+                            type="button"
+                            className={styles.deleteButton}
+                            onClick={() => handleRemove(id)}
+                            aria-label={`Remove ${getUserDisplayName(userMap.get(id))}`}
+                        >
+                            −
+                        </button>
+                        <span
+                            className={
+                                userMap.get(id)?.firstName &&
+                                userMap.get(id)?.lastName
+                                    ? styles.subPositionEntryText
+                                    : styles.subPositionEntryTextSub
+                            }
+                        >
+                            {getUserDisplayName(userMap.get(id))}
+                        </span>
+                    </div>
+                ))}
+                {props.editing && (
+                    <button
+                        type="button"
+                        className={styles.addRow}
+                        onClick={() => setPickerOpen(true)}
+                    >
+                        <span className={styles.addIcon}>+</span>
+                        Assign Member
+                    </button>
+                )}
+            </div>
+
+            <SearchModal
+                open={pickerOpen}
+                onClose={() => {
+                    setPickerOpen(false)
+                    props.onUserSearch({ ...props.userSearch, query: '' })
+                }}
+                title="Assign Member"
+                subtitle="Search for a member to assign to this position."
+                searchValue={props.userSearch.query ?? ''}
+                onSearchChange={handleSearchChange}
+            >
+                {searchResults.map((u) => {
+                    const hasName = !!(u.firstName && u.lastName)
+                    const discord = u.discordUsers?.[0]?.username
+                    return (
+                        <button
+                            key={u.id}
+                            type="button"
+                            className={styles.pickerItem}
+                            onClick={() => handleAdd(u.id)}
+                        >
+                            {hasName && (
+                                <span className={styles.pickerItemName}>
+                                    {`${u.firstName} ${u.lastName}`}
+                                </span>
+                            )}
+                            <span className={styles.pickerItemSub}>
+                                {discord
+                                    ? `@${discord}`
+                                    : (u.email ?? `User #${u.id}`)}
+                            </span>
+                        </button>
+                    )
+                })}
+                {searchResults.length === 0 &&
+                    !props.userSearchQuery.isPending && (
+                        <div className={styles.pickerEmpty}>
+                            No members available
+                        </div>
+                    )}
+                {props.userSearchQuery.isPending && (
+                    <div className={styles.pickerEmpty}>Loading...</div>
+                )}
+            </SearchModal>
+        </div>
     )
 }
