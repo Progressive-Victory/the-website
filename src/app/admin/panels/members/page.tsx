@@ -29,6 +29,7 @@ import {
 } from '@/contracts/requests'
 import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
+import { usePositionQueries } from '@/queries'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -37,6 +38,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import cx from 'classnames'
 import { useCallback, useMemo, useState } from 'react'
 import { FaUsers, FaUserTag } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign, FaAddressCard } from 'react-icons/fa6'
@@ -141,6 +143,7 @@ export default function Page() {
     }
 
     const loggedInUser = useCurrentUser()
+    const positionQueries = usePositionQueries()
 
     const {
         query: searchQuery,
@@ -173,6 +176,12 @@ export default function Page() {
         placeholderData: keepPreviousData,
     })
     const donorCount = donorCountQuery.data?.count
+
+    const positionHierarchy = useQuery({
+        queryKey: ['positionHierarchy'],
+        queryFn: positionQueries.getPositionHierarchy,
+        enabled: positionQueries.ready,
+    })
 
     const roles = rolesQuery.data?.data ?? []
     const roleOptions = useMemo(
@@ -682,20 +691,33 @@ export default function Page() {
                                     </div>
                                 </div>
                                 <div className={styles.roleList}>
-                                    {userQuery.data.roles?.length ? (
-                                        userQuery.data.roles.map((role) => (
-                                            <span
-                                                key={role.id}
-                                                className={styles.rolePill}
-                                            >
-                                                {role.name}
+                                    {(() => {
+                                        const userPositions = (
+                                            positionHierarchy.data?.positions ??
+                                            []
+                                        ).filter((p) =>
+                                            p.userIds.includes(
+                                                userQuery.data.id
+                                            )
+                                        )
+                                        return userPositions.length ? (
+                                            userPositions.map((pos) => (
+                                                <span
+                                                    key={pos.id}
+                                                    className={cx(
+                                                        styles.rolePill,
+                                                        styles.rolePillActive
+                                                    )}
+                                                >
+                                                    {pos.name}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className={styles.rolePill}>
+                                                Community Member
                                             </span>
-                                        ))
-                                    ) : (
-                                        <span className={styles.roleEmpty}>
-                                            No roles assigned
-                                        </span>
-                                    )}
+                                        )
+                                    })()}
                                 </div>
                                 <TabBar
                                     tabs={tabs}
