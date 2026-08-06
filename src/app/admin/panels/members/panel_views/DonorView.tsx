@@ -2,6 +2,7 @@
 
 import styles from './DonorView.module.css'
 import { ListBody } from '@/app/admin/layout/List'
+import { SearchModal } from '@/app/admin/layout/SearchModal'
 import {
     DateField,
     Form,
@@ -19,9 +20,8 @@ import type { SearchRequest } from '@/contracts/requests'
 import type { PaginatedResponse } from '@/contracts/responses'
 import { cn } from '@/util'
 import type { UseQueryResult } from '@tanstack/react-query'
-import { motion } from 'motion/react'
 import Link from 'next/link'
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import React, { ChangeEvent } from 'react'
 
 export interface DonorViewProps {
     selectedId: number
@@ -133,60 +133,11 @@ export function DonorView({
         }
     }
 
-    const queryValue = useMemo(
-        () => donorSearch.query ?? '',
-        [donorSearch.query]
-    )
+    const queryValue = donorSearch.query ?? ''
 
     const handleOverlaySearch = (e: ChangeEvent<HTMLInputElement>) => {
         onDonorSearch({ ...donorSearch, query: e.target.value })
     }
-
-    const [overlayMounted, setOverlayMounted] = useState(false)
-    const [overlayOpen, setOverlayOpen] = useState(false)
-
-    useEffect(() => {
-        if (pickingDonor) {
-            setOverlayMounted(true)
-            requestAnimationFrame(() => setOverlayOpen(true))
-        } else if (overlayMounted) {
-            setOverlayOpen(false)
-        }
-    }, [pickingDonor, overlayMounted])
-
-    const backdropVariants = {
-        open: {
-            opacity: 1,
-            backdropFilter: 'blur(10px) saturate(140%)',
-        },
-        closed: {
-            opacity: 0,
-            backdropFilter: 'blur(0px) saturate(140%)',
-        },
-    } as const
-
-    const modalVariants = {
-        open: {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-        },
-        closed: {
-            opacity: 0,
-            y: 10,
-            scale: 0.985,
-        },
-    } as const
-
-    const backdropTransition = {
-        duration: 0.22,
-        ease: [0.2, 0.9, 0.2, 1],
-    } as const
-
-    const modalTransition = {
-        duration: 0.26,
-        ease: [0.22, 1, 0.36, 1],
-    } as const
 
     return (
         <div className={styles.root}>
@@ -550,85 +501,24 @@ export function DonorView({
                 </div>
             )}
 
-            {overlayMounted ? (
-                <motion.div
-                    className={styles.modalBackdrop}
-                    role="presentation"
-                    initial="closed"
-                    animate={overlayOpen ? 'open' : 'closed'}
-                    variants={backdropVariants}
-                    transition={backdropTransition}
-                    onAnimationComplete={() => {
-                        if (!overlayOpen) setOverlayMounted(false)
-                    }}
-                    onMouseDown={(e) => {
-                        if (e.target === e.currentTarget) closePicker()
-                    }}
+            <SearchModal
+                open={pickingDonor}
+                onClose={closePicker}
+                title="Link Donors"
+                subtitle="Search ActBlue donors and link one to this user."
+                searchValue={queryValue}
+                onSearchChange={handleOverlaySearch}
+            >
+                <ListBody
+                    count={donorSearchQuery.data?.count}
+                    isPending={donorSearchQuery.isPending}
+                    error={donorSearchQuery.error}
                 >
-                    <motion.div
-                        className={styles.modal}
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label="Link donor"
-                        initial="closed"
-                        animate={overlayOpen ? 'open' : 'closed'}
-                        variants={modalVariants}
-                        transition={modalTransition}
-                    >
-                        <div className={styles.modalHeader}>
-                            <div className={styles.modalHeaderLeft}>
-                                <div className={styles.modalTitle}>
-                                    Link Donors
-                                </div>
-                                <div className={styles.modalSubtitle}>
-                                    Search ActBlue donors and link one to this
-                                    user.
-                                </div>
-                            </div>
-
-                            <div className={styles.modalHeaderRight}>
-                                <div className={styles.modalSearch}>
-                                    <div className={styles.searchInputBare}>
-                                        <input
-                                            type="text"
-                                            name="donorSearch"
-                                            id="donorSearch"
-                                            placeholder="Search..."
-                                            value={queryValue}
-                                            onChange={handleOverlaySearch}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={styles.modalBody}>
-                            <ListBody
-                                count={donorSearchQuery.data?.count}
-                                isPending={donorSearchQuery.isPending}
-                                error={donorSearchQuery.error}
-                            >
-                                {donorSearchQuery.data?.data.map((donor) =>
-                                    renderDonorItem(donor, selectedId)
-                                )}
-                            </ListBody>
-                        </div>
-
-                        <div className={styles.modalFooter}>
-                            <button
-                                type="button"
-                                className={cn(
-                                    styles.ghostButton,
-                                    styles.modalFooterButton
-                                )}
-                                onClick={closePicker}
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </motion.div>
-                </motion.div>
-            ) : null}
+                    {donorSearchQuery.data?.data.map((donor) =>
+                        renderDonorItem(donor, selectedId)
+                    )}
+                </ListBody>
+            </SearchModal>
         </div>
     )
 }
