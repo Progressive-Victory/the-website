@@ -1,9 +1,9 @@
 import styles from './components.module.css'
 import { PositionBubble, PositionData } from './position'
-import Tag from './tag'
+import { Tag, Tags } from './tag'
 import { XYPosition, Node, NodeProps, Position, Handle } from '@xyflow/react'
 import { motion } from 'motion/react'
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type GroupData = {
@@ -17,21 +17,21 @@ export type GroupData = {
 
 export type GroupNode = Node<GroupData, 'groupNode'>
 
+const GroupLeads = ({ data }: { data: GroupData }) => {
+    let leadNumber = -1
+    return data.leads?.map(RenderLead)
+    function RenderLead(lead: PositionData) {
+        leadNumber++
+        return <PositionBubble key={leadNumber} data={lead} />
+    }
+}
+
 export function GroupNode({
     data,
     sourcePosition,
     targetPosition,
 }: NodeProps<GroupNode>) {
     const [leadsHeight, setLeadsHeight] = useState<number>(0)
-
-    const GroupLeads = () => {
-        let leadNumber = -1
-        return data.leads?.map(RenderLead)
-        function RenderLead(lead: PositionData) {
-            leadNumber++
-            return <PositionBubble key={leadNumber} data={lead} />
-        }
-    }
 
     return (
         <div
@@ -59,7 +59,7 @@ export function GroupNode({
                     type: false,
                 }}
             >
-                <GroupLeads />
+                <GroupLeads data={data} />
             </motion.div>
             <Handle
                 type="source"
@@ -73,57 +73,13 @@ export function GroupNode({
 
 export function GroupBubble({ data }: { data: GroupData }) {
     const nameContainer = useRef<HTMLDivElement>(null)
-    const [textboxWidth, setBoxWidth] = useState<number>(310)
-
-    const Nameplate = useCallback(() => {
-        return (
-            <motion.div
-                initial={{
-                    translateX: 0,
-                }}
-            >
-                {data.name.toUpperCase()}
-            </motion.div>
-        )
-    }, [data, textboxWidth])
-
-    const Tags = useCallback(() => {
-        if (!data.tags) return
-        const pairs: Tag[][] = []
-        data.tags.forEach((tag: Tag, index: number) => {
-            if (index % 2 == 0) {
-                pairs.push([tag])
-            } else pairs[Math.floor(index / 2)][1] = tag
-        })
-        return (
-            <div className={styles.tags}>
-                {pairs.map((pair) => {
-                    return (
-                        <div className={styles.tagContainer} key={pair[0].name}>
-                            {pair.map((tag) => {
-                                return (
-                                    <div
-                                        key={tag.name}
-                                        className={styles.tag}
-                                        title={tag.tooltip ?? tag.name}
-                                    >
-                                        {tag.graphic}
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    )
-                })}
-            </div>
-        )
-    }, [data])
 
     return (
         <div className={styles.yellowBubble}>
             <div className={styles.groupNameContainer} ref={nameContainer}>
-                <Nameplate />
+                <Nameplate data={data} />
             </div>
-            {data.tags ? <Tags /> : null}
+            {data.tags ? <Tags data={data} /> : null}
         </div>
     )
 }
@@ -158,4 +114,16 @@ export function CreateGroupNode({
             tags,
         },
     }
+}
+
+const Nameplate = ({ data }: { data: GroupData }) => {
+    return (
+        <motion.div
+            initial={{
+                translateX: 0,
+            }}
+        >
+            {data.name.toUpperCase()}
+        </motion.div>
+    )
 }

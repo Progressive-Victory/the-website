@@ -1,9 +1,10 @@
 /* A number of committees can be defined up to the number of icons. */
+import { Banner } from '../components/banner'
 import { CreateBlankNode } from '../components/blankNode'
 import { CreateEdge } from '../components/edge'
 import { CreateGroupNode } from '../components/group'
-import { Banner, CreatePositionNode } from '../components/position'
-import Tag from '../components/tag'
+import { CreatePositionNode } from '../components/position'
+import { Tag } from '../components/tag'
 import { Edge, type Node } from '@xyflow/react'
 
 export const Tags: Tag[] = [

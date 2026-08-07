@@ -5,10 +5,10 @@ import {
     orgchartEdges,
     Tags,
 } from './chartData/orgchartGraphData'
+import { Banner } from './components/banner'
 import { BlankNode } from './components/blankNode'
 import OrgChartEdge from './components/edge'
 import { GroupNode } from './components/group'
-import { Banner } from './components/position'
 import {
     PositionNode,
     PositionData,
