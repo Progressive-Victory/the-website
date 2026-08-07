@@ -200,12 +200,7 @@ export function MiniCalendar({
                         <button
                             key={idx}
                             type="button"
-                            className={cn(
-                                ...classNames,
-                                'string',
-                                'class',
-                                'ftofanhtofatofitnoafihtfoehn'
-                            )}
+                            className={cn(...classNames)}
                             disabled={state.disabled}
                             onMouseEnter={() => {
                                 if (!hasPreviewSelection || state.disabled) {
