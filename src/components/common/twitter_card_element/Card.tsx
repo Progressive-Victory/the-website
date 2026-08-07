@@ -306,11 +306,10 @@ export function Message({
                                         <Image
                                             src={avatar}
                                             alt={username}
-                                            className={
-                                                avatarRounded
-                                                    ? styles.avatarRounded
-                                                    : ''
-                                            }
+                                            className={cn(
+                                                avatarRounded &&
+                                                    styles.avatarRounded
+                                            )}
                                             width={38}
                                             height={38}
                                             unoptimized

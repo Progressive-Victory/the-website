@@ -574,11 +574,12 @@ export function FilterButtonRow({
                                     aria-hidden="true"
                                 >
                                     <svg
-                                        className={
-                                            !isMobile && isSearchOpen
-                                                ? styles.searchIcon
-                                                : `${styles.searchIcon} ${styles.searchIconVisible}`
-                                        }
+                                        className={cn(
+                                            styles.searchIcon,
+                                            isMobile ||
+                                                (!isSearchOpen &&
+                                                    styles.searchIconVisible)
+                                        )}
                                         width="20"
                                         height="20"
                                         viewBox="0 0 24 24"
