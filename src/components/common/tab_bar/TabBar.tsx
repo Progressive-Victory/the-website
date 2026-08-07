@@ -63,10 +63,11 @@ export function TabBar({
                         aria-selected={active}
                         aria-disabled={disabled}
                         disabled={disabled}
-                        className={cn(styles.tabButton, {
-                            [styles.tabButtonActive]: active,
-                            [styles.tabButtonDisabled]: disabled,
-                        })}
+                        className={cn(
+                            styles.tabButton,
+                            active && styles.tabButtonActive,
+                            disabled && styles.tabButtonDisabled
+                        )}
                         onClick={() => !disabled && onChange(tab.key)}
                     >
                         <span className={styles.tabButtonLabel}>

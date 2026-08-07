@@ -31,10 +31,7 @@ export default function Sidebar({
 
     return (
         <div
-            className={cn(styles.nav, {
-                [styles.navOpen]: open,
-                [styles.navClosed]: !open,
-            })}
+            className={cn(styles.nav, open ? styles.navOpen : styles.navClosed)}
         >
             <h1 className={styles.heading}>
                 {open ? 'Volunteer Dashboard' : null}
@@ -104,9 +101,10 @@ export default function Sidebar({
             >
                 <FiChevronLeft
                     size={20}
-                    className={cn(styles.toggleIcon, {
-                        [styles.toggleIconClosed]: !open,
-                    })}
+                    className={cn(
+                        styles.toggleIcon,
+                        !open && styles.toggleIconClosed
+                    )}
                 />
             </button>
         </div>
@@ -129,10 +127,10 @@ function NavLink({ title, href, icon: Icon, count, open }: NavLinkProps) {
 
     return (
         <li
-            className={cn(styles.item, {
-                [styles.itemActive]: active,
-                [styles.itemInactive]: !active,
-            })}
+            className={cn(
+                styles.item,
+                active ? styles.itemActive : styles.itemInactive
+            )}
         >
             <Link href={href} title={title} className={styles.link}>
                 <Icon size={22} />

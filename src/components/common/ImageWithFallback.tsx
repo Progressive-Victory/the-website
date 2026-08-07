@@ -1,5 +1,6 @@
 'use client'
 
+import styles from './ImageWithFallback.module.css'
 import { cn } from '@/util'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
@@ -41,7 +42,7 @@ export function ImageWithFallback({
             alt={alt}
             width={width}
             height={height}
-            className={cn('aspect-square rounded-full object-cover', className)}
+            className={cn(styles.image, className)}
             onError={() => setHasErrored(true)}
             loading={priority ? undefined : loading}
             priority={priority}
