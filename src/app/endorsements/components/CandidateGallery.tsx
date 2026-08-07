@@ -103,7 +103,10 @@ export function CandidateGallery({
                             exit="exit"
                         >
                             <motion.header
-                                className={`${styles.sectionHeader} ${styles.centeredSectionHeader}`}
+                                className={cn(
+                                    styles.sectionHeader,
+                                    styles.centeredSectionHeader
+                                )}
                                 variants={headingVariants}
                                 initial="hidden"
                                 animate="visible"
@@ -124,7 +127,10 @@ export function CandidateGallery({
 
                             <motion.div
                                 layout
-                                className={`${styles.finderGrid} ${styles.finderGridLarge}`}
+                                className={cn(
+                                    styles.finderGrid,
+                                    styles.finderGridLarge
+                                )}
                                 transition={galleryLayoutTransition}
                             >
                                 {orderedFlatCandidates.map((candidate) => (
@@ -297,7 +303,7 @@ function CandidateCardImpl({
 
     const tileContent = (
         <>
-            <div className={`${styles.tileImageFrame} ${avatarFrameClassName}`}>
+            <div className={cn(styles.tileImageFrame, avatarFrameClassName)}>
                 <CandidateAvatar
                     imageSrc={candidate.image}
                     name={candidate.name}

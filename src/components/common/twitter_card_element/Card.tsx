@@ -2,6 +2,7 @@
 
 import styles from './Card.module.css'
 import { BaseButton } from '@/components/common/buttons/Button'
+import { cn } from '@/util'
 import {
     HeartIcon,
     ChatBubbleLeftRightIcon,
@@ -400,7 +401,11 @@ export function Message({
                                     >
                                         {clickedBubble ? (
                                             <SolidChatBubbleLeftRightIcon
-                                                className={`${styles.iconSolid} ${styles.bubbleActive} ${styles.iconGrowPop}`}
+                                                className={cn(
+                                                    styles.iconSolid,
+                                                    styles.bubbleActive,
+                                                    styles.iconGrowPop
+                                                )}
                                             />
                                         ) : (
                                             <ChatBubbleLeftRightIcon
@@ -420,7 +425,11 @@ export function Message({
                                     >
                                         {clickedShare ? (
                                             <SolidArrowUpOnSquareIcon
-                                                className={`${styles.iconSolid} ${styles.shareActive} ${styles.iconGrowPop}`}
+                                                className={cn(
+                                                    styles.iconSolid,
+                                                    styles.shareActive,
+                                                    styles.iconGrowPop
+                                                )}
                                             />
                                         ) : (
                                             <ArrowUpOnSquareIcon
@@ -440,7 +449,11 @@ export function Message({
                                     >
                                         {clickedHeart ? (
                                             <SolidHeartIcon
-                                                className={`${styles.iconSolid} ${styles.heartActive} ${styles.iconGrowPop}`}
+                                                className={cn(
+                                                    styles.iconSolid,
+                                                    styles.heartActive,
+                                                    styles.iconGrowPop
+                                                )}
                                             />
                                         ) : (
                                             <HeartIcon

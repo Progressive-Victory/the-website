@@ -4,6 +4,7 @@ import styles from '@/app/account/account.module.css'
 import formStyles from '@/components/common/forms/Form.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
 import { ActBlueContribution, User } from '@/contracts/data'
+import { cn } from '@/util'
 import React, { ChangeEvent, useState } from 'react'
 
 export interface ManualDonorLinkRequest {
@@ -20,7 +21,7 @@ const RecurrenceTag = ({ type }: { type: RecurrencePeriod }) => {
     }
 
     return (
-        <div className={`${styles.recurringTag} ${styles[type]}`}>
+        <div className={cn(styles.recurringTag, styles[type])}>
             {nameMap[type]}
         </div>
     )

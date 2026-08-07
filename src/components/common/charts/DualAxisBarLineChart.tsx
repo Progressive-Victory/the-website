@@ -8,6 +8,7 @@ import {
     roundRect,
     type PlotGeometry,
 } from './chartMath.helpers'
+import { cn } from '@/util'
 import {
     useEffect,
     useLayoutEffect,
@@ -941,7 +942,7 @@ export function Chart({
                 {showLine && (
                     <span className={styles.legendItem}>
                         <span
-                            className={`${styles.swatch} ${styles.lineSwatch}`}
+                            className={cn(styles.swatch, styles.lineSwatch)}
                             style={{ background: palette.line }}
                             aria-hidden="true"
                         />
@@ -975,9 +976,11 @@ export function Chart({
                 {hoverPoint && hoverPos && (
                     <div
                         ref={tooltipRef}
-                        className={`${styles.tooltip} ${styles.tooltipVisible} ${
-                            tooltipSide === 'right' ? styles.tooltipRight : ''
-                        }`}
+                        className={cn(
+                            styles.tooltip,
+                            styles.tooltipVisible,
+                            tooltipSide === 'right' && styles.tooltipRight
+                        )}
                         style={{
                             left: `${tooltipPos?.x ?? hoverPos.x}px`,
                             top: `${tooltipPos?.y ?? hoverPos.y}px`,

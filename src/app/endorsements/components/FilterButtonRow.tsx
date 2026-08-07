@@ -496,7 +496,10 @@ export function FilterButtonRow({
                     >
                         {showSearchLabel && (
                             <p
-                                className={`${styles.controlLabel} ${styles.searchControlLabel}`}
+                                className={cn(
+                                    styles.controlLabel,
+                                    styles.searchControlLabel
+                                )}
                             >
                                 Search
                             </p>
