@@ -220,33 +220,37 @@ export const AccountInfoForm = ({
                     />
                     {hasMatchedDonor &&
                         (isEditing ? (
-                        <DropDownField<User>
-                            label="Shirt Size"
-                            getter={(user) => user.shirtSize ?? ''}
-                            setter={(user, field) => ({
-                                ...user,
-                                shirtSize: field ? (field as ShirtSize) : null,
-                            })}
-                            options={shirtSizeOptions}
-                        />
-                    ) : user.shirtSize ? (
-                        <TextField<User>
-                            label="Shirt Size"
-                            getter={(user) =>
-                                user.shirtSize
-                                    ? shirtSizeLabels[user.shirtSize]
-                                    : null
-                            }
-                            readonly
-                        />
-                    ) : (
-                        <TextField<User>
-                            label="Shirt Size"
-                            getter={() => missingShirtSizeInfoText}
-                            readonly
-                            readonlyClassName={styles.shippingInfoWarningText}
-                        />
-                    ))}
+                            <DropDownField<User>
+                                label="Shirt Size"
+                                getter={(user) => user.shirtSize ?? ''}
+                                setter={(user, field) => ({
+                                    ...user,
+                                    shirtSize: field
+                                        ? (field as ShirtSize)
+                                        : null,
+                                })}
+                                options={shirtSizeOptions}
+                            />
+                        ) : user.shirtSize ? (
+                            <TextField<User>
+                                label="Shirt Size"
+                                getter={(user) =>
+                                    user.shirtSize
+                                        ? shirtSizeLabels[user.shirtSize]
+                                        : null
+                                }
+                                readonly
+                            />
+                        ) : (
+                            <TextField<User>
+                                label="Shirt Size"
+                                getter={() => missingShirtSizeInfoText}
+                                readonly
+                                readonlyClassName={
+                                    styles.shippingInfoWarningText
+                                }
+                            />
+                        ))}
                 </FormGroup>
             </Form>
         </div>
