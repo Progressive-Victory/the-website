@@ -20,6 +20,7 @@ interface AccountInfoFormProps {
     avatar?: React.ReactNode
     title?: string
     hasMatchedDonor?: boolean
+    showShirtSize?: boolean
 }
 
 //Need to move these to API
@@ -58,6 +59,7 @@ export const AccountInfoForm = ({
     avatar,
     title = 'Account Information',
     hasMatchedDonor = false,
+    showShirtSize = false,
 }: AccountInfoFormProps) => {
     const [isEditing, setIsEditing] = useState(false)
 
@@ -220,6 +222,7 @@ export const AccountInfoForm = ({
                         options={stateOptionsWithEmpty}
                     />
                     {hasMatchedDonor &&
+                        showShirtSize &&
                         (isEditing ? (
                             <DropDownField<User>
                                 label="Shirt Size"
