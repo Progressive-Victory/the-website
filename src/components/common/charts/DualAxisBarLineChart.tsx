@@ -237,12 +237,13 @@ export function Chart({
         }
     }, [])
 
+    if (tooltipPos && (hoverIdx == null || !hoverPos)) {
+        setTooltipPos(null)
+    }
     useLayoutEffect(() => {
         if (hoverIdx == null || !hoverPos) {
-            setTooltipPos(null)
             return
         }
-
         const wrapNode = wrapRef.current
         const tooltipNode = tooltipRef.current
         if (!wrapNode || !tooltipNode) return

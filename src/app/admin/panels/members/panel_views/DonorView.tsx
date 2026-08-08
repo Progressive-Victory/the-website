@@ -21,7 +21,7 @@ import type { UseQueryResult } from '@tanstack/react-query'
 import cx from 'classnames'
 import { motion } from 'motion/react'
 import Link from 'next/link'
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import React, { ChangeEvent, useMemo, useState } from 'react'
 
 export interface DonorViewProps {
     selectedId: number
@@ -144,15 +144,12 @@ export function DonorView({
 
     const [overlayMounted, setOverlayMounted] = useState(false)
     const [overlayOpen, setOverlayOpen] = useState(false)
-
-    useEffect(() => {
-        if (pickingDonor) {
-            setOverlayMounted(true)
-            requestAnimationFrame(() => setOverlayOpen(true))
-        } else if (overlayMounted) {
-            setOverlayOpen(false)
-        }
-    }, [pickingDonor, overlayMounted])
+    if (pickingDonor) {
+        setOverlayMounted(true)
+        requestAnimationFrame(() => setOverlayOpen(true))
+    } else if (overlayMounted) {
+        setOverlayOpen(false)
+    }
 
     const backdropVariants = {
         open: {

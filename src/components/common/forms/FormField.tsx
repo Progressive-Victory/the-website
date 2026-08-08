@@ -1,5 +1,5 @@
 import styles from './FormField.module.css'
-import { ReactElement, useEffect, useMemo } from 'react'
+import { ReactElement, useCallback, useEffect, useMemo } from 'react'
 
 /**
  * Properties for the FormField component. All form fields extend their
@@ -165,34 +165,41 @@ export function useConfigure<FormType, FieldType>(
     const id = props.id
     const onConfigure = props.dynamic?.onConfigure
 
+    // Props object changing will re-trigger Callback, so we need to grab the values beforehand
+    // So that we only regenerate on change
+    const propGetter = props.getter
+    const propSetter = props.setter
+    const propField = props.field
     // Use the provided getter if available, or default to `form[props.field]`.
     // If no field is provided either, be sad and return undefined.
-    const getter = useMemo(() => {
-        const getter = props.getter
-        if (getter) return getter
+    const getter = useCallback(
+        (form: FormType): FieldType | undefined => {
+            if (propGetter) return propGetter(form)
 
-        const key = props.field
-        if (key)
-            return (form: FormType) => (form as Record<string, FieldType>)[key]
+            const key = propField
+            if (!key) return undefined
 
-        return () => undefined
-    }, [props.getter, props.field])
-
+            return (form as Record<string, FieldType>)[key]
+        },
+        [propGetter, propField]
+    )
     // Use the provided setter if available, or default to `form[props.field]`.
     // If no field is provided either, be sad and return undefined.
-    const setter = useMemo(() => {
-        const setter = props.setter
-        if (setter) return setter
 
-        const key = props.field
-        if (key)
-            return (form: FormType, field: FieldType) => ({
+    const setter = useCallback(
+        (form: FormType, field: FieldType): FormType => {
+            if (propSetter) return propSetter(form, field)
+
+            const key = propField
+            if (!key) return form
+
+            return {
                 ...form,
                 [key]: field,
-            })
-
-        return (form: FormType) => form
-    }, [props.setter, props.field])
+            }
+        },
+        [propSetter, propField]
+    )
 
     // Use the provided validator if available, or default to the, well,
     // default one. We can't be sad here because it can't be undefined.

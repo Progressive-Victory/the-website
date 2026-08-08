@@ -25,7 +25,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 export default function VolunteerPage() {
     const queryClient = useQueryClient()
@@ -172,23 +172,21 @@ export default function VolunteerPage() {
 
     const currentStage = overrideStage ?? user.data?.onboardingStage
 
-    useEffect(() => {
-        if (
-            currentStage === OnboardingStage.JOINED &&
-            (!user.data?.firstName ||
-                !user.data?.lastName ||
-                !user.data?.birthdate ||
-                !user.data?.address?.zip ||
-                !user.data?.phone)
-        ) {
-            setOverrideStage(OnboardingStage.NOT_STARTED)
-        }
-    }, [user.data, currentStage])
+    if (
+        currentStage === OnboardingStage.JOINED &&
+        (!user.data?.firstName ||
+            !user.data?.lastName ||
+            !user.data?.birthdate ||
+            !user.data?.address?.zip ||
+            !user.data?.phone)
+    ) {
+        setOverrideStage(OnboardingStage.NOT_STARTED)
+    }
 
     if (isSessionLoading) return null
 
     if (!session) {
-        window.location.href = '/login?redirect=/volunteer'
+        window.location.replace('/login?redirect=/volunteer')
         return null
     }
 

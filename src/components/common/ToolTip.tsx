@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, RefObject } from 'react'
+import { useOutsideDetector } from '@/util/hooks'
+import { useEffect, useRef, useState } from 'react'
 
 /*
 preliminary notes: component that generates a button which upon being clicked displays an 
@@ -25,24 +26,6 @@ export function ToolTip({
     const [closerList, setCloserList] = useState<Element[]>([])
     const wrapperRef = useRef<HTMLDivElement>(null)
 
-    function useOutsideDetector(ref: RefObject<HTMLDivElement | null>) {
-        useEffect(() => {
-            function handleClickOutside(event: MouseEvent) {
-                if (
-                    ref.current &&
-                    !ref.current.contains(event.target as HTMLElement)
-                ) {
-                    setOpen(false)
-                }
-            }
-
-            document.addEventListener('mousedown', handleClickOutside)
-            return () => {
-                document.removeEventListener('mousedown', handleClickOutside)
-            }
-        }, [ref])
-    }
-
     useEffect(() => {
         if (!wrapperRef.current) return
         const closers = Array.from(
@@ -52,7 +35,7 @@ export function ToolTip({
         setCloserList(closers)
     }, [open])
 
-    useOutsideDetector(wrapperRef)
+    useOutsideDetector(wrapperRef, setOpen)
 
     closerList?.map((element: Element) => {
         if (element instanceof HTMLButtonElement) {

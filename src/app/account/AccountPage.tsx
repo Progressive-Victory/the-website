@@ -74,7 +74,7 @@ export function AccountPage() {
         loggedInUser.data &&
         loggedInUser.data.onboardingStage != OnboardingStage.JOINED
     ) {
-        window.location.href = '/volunteer'
+        window.location.assign('/volunteer')
         return null
     }
 

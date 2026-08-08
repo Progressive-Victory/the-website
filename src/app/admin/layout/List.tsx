@@ -457,10 +457,10 @@ function PageSelect({
         if (0 <= newPage && newPage <= maxPage) onChange(newPage)
         else setValue((page + 1).toString())
     }
-
-    useEffect(() => {
-        setValue((page + 1).toString())
-    }, [page])
+    const pageStr = (page + 1).toString()
+    if (value != pageStr) {
+        setValue(pageStr)
+    }
 
     useEffect(() => {
         if (page < 0) onChange(0)

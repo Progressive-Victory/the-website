@@ -16,7 +16,7 @@ import {
 import { SortDirection } from '@/contracts/requests'
 import { useActblueQueries } from '@/queries'
 import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 type ChartBarDisplayMode = 'grouped' | 'stacked'
 
@@ -291,16 +291,6 @@ export function useFundraisingDashboardController() {
         ]
     )
 
-    useEffect(() => {
-        setChartViewOverrideRange(null)
-    }, [startDate, endDate, committedPreset])
-
-    useEffect(() => {
-        if (!zoomEnabled) {
-            setChartViewOverrideRange(null)
-        }
-    }, [zoomEnabled])
-
     const chartBucketQueries = useQueries({
         queries: chartBuckets.map((bucket) => ({
             queryKey: [
@@ -340,11 +330,12 @@ export function useFundraisingDashboardController() {
         })
     }, [chartBuckets, chartBucketQueries])
 
-    useEffect(() => {
-        if (!validGranularityModes.includes(granularityMode)) {
-            setGranularityMode('auto')
-        }
-    }, [validGranularityModes, granularityMode])
+    if (
+        granularityMode != 'auto' &&
+        !validGranularityModes.includes(granularityMode)
+    ) {
+        setGranularityMode('auto')
+    }
 
     const selectedRangeLabel = useMemo(
         () => getSelectedRangeLabel(committedPreset, startDate, endDate),
@@ -398,7 +389,6 @@ export function useFundraisingDashboardController() {
                 return
             }
         }
-
         setChartViewOverrideRange(range)
     }
 

@@ -3,6 +3,7 @@
 import { useAuth } from '@/util/hooks'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
 
 export function LoginCard() {
     const { session, onLogin } = useAuth()
@@ -19,10 +20,11 @@ export function LoginCard() {
               ? 'An unknown error occurred. Please try again later.'
               : null
 
-    if (session) {
-        window.location.href = redirect
-        return null
-    }
+    useEffect(() => {
+        if (session) {
+            window.location.href = redirect
+        }
+    }, [session, redirect])
 
     return (
         <div className="flex max-w-[30rem] flex-col items-center justify-center gap-6 rounded-md bg-black-pearl-dark p-8 text-center shadow-lg">

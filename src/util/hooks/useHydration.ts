@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
 export function useHydration() {
-    const [hydrated, setHydrated] = useState(false)
-
-    useEffect(() => {
-        setHydrated(true)
-    }, [])
-
-    return hydrated
+    return useSyncExternalStore(
+        () => () => null,
+        () => true,
+        () => false
+    )
 }

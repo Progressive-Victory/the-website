@@ -187,6 +187,12 @@ export function FilterButtonRow({
                         })
                     })
                 }
+                if (!mobile && prev) {
+                    // If we're transitioning from mobile to non-mobile, reset the layout
+                    setMobileSearchWidth(null)
+                    setSingleColumnLayout(false)
+                    setShowSearchLabel(false)
+                }
                 return mobile
             })
             if (mobile) {
@@ -207,9 +213,6 @@ export function FilterButtonRow({
 
     useLayoutEffect(() => {
         if (!isMobile) {
-            setMobileSearchWidth(null)
-            setSingleColumnLayout(false)
-            setShowSearchLabel(false)
             return
         }
 

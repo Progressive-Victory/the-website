@@ -32,18 +32,22 @@ export default defineConfig([
     },
     {
         rules: {
+            // Show stoppers
+            '@typescript-eslint/no-unsafe-assignment': 'error',
+            '@typescript-eslint/no-unsafe-member-access': 'error',
+            '@typescript-eslint/no-unsafe-argument': 'error',
+            '@typescript-eslint/no-unsafe-call': 'error',
+
+            // Keep track of
             'object-shorthand': 'warn',
-            '@typescript-eslint/no-unsafe-assignment': 'warn',
-            '@typescript-eslint/no-unsafe-member-access': 'warn',
-            '@typescript-eslint/no-unsafe-argument': 'warn',
-            '@typescript-eslint/no-unsafe-enum-comparison': 'off',
-            '@typescript-eslint/no-unsafe-call': 'warn',
             '@typescript-eslint/no-unsafe-return': 'warn',
+            '@typescript-eslint/no-unsafe-enum-comparison': 'warn',
+            'react-hooks/set-state-in-effect': 'warn', // Should go back to (default) error when current set are dealt with
             'tailwindcss/no-custom-classname': 'off',
-            'react-hooks/set-state-in-effect': 'off', //temp
-            'react-hooks/preserve-manual-memoization': 'off', //temp
-            'react-hooks/refs': 'off', //temp
-            'react-hooks/immutability': 'off', //temp
+
+            // React Compiler rules (for testing)
+            'react-hooks/refs': 'warn',
+            'react-hooks/immutability': 'warn',
         },
     },
     {

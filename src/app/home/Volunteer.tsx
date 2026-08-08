@@ -3,7 +3,7 @@
 import styles from './volunteer.module.css'
 import { motion } from 'motion/react'
 import Image from 'next/image'
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const actions = [
     {
@@ -35,9 +35,7 @@ export function Volunteer() {
         if (divRef.current) observe(divRef.current)
     }, [observe])
 
-    useEffect(() => {
-        if (inView) setVisible(true)
-    }, [inView])
+    if (!visible && inView) setVisible(true)
 
     return (
         <div className={styles.container}>

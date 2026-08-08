@@ -13,7 +13,7 @@ import { zDiscordUserIsInServerResponse } from '@/contracts/responses'
 import { useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
 import cx from 'classnames'
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useState } from 'react'
 import { IoClose } from 'react-icons/io5'
 
 interface AccountDetailsSectionProps {
@@ -35,8 +35,9 @@ export function AccountDetailsSection({
     onSave,
     donorLinkError,
     onDonorLinkSubmit,
-}: AccountDetailsSectionProps) {
+}: Readonly<AccountDetailsSectionProps>) {
     const { ready, onGet } = useFetch()
+    const [lastUserData, setLastUserData] = useState(userData)
     const [updatedUser, setUpdatedUser] = useState(userData)
     const discordUserId = userData.discordUsers?.[0]?.id ?? null
 
@@ -53,9 +54,10 @@ export function AccountDetailsSection({
                 : skipToken,
     })
 
-    useEffect(() => {
+    if (lastUserData !== userData) {
         setUpdatedUser(userData)
-    }, [userData])
+        setLastUserData(userData)
+    }
 
     const membershipDeliverableLabels: Record<
         MembershipDeliverableStatus,
@@ -168,10 +170,17 @@ export function AccountDetailsSection({
         shirtSize: userData.shirtSize ?? null,
     })
     const userHasDonor = !!userData.donors?.length
+    const [prevUserAddress, setPrevUserAddress] = useState(userData.address)
+    const [prevUserDonors, setPrevUserDonors] = useState(userData.donors)
 
-    useEffect(() => {
-        if (!pendingLinkEmail) return
-
+    // Possibly deprecated - pendingLinkEmail is only set within this statement, which will never run with it's default value
+    if (
+        pendingLinkEmail &&
+        (userData.address !== prevUserAddress ||
+            userData.donors !== prevUserDonors)
+    ) {
+        setPrevUserAddress(userData.address)
+        setPrevUserDonors(userData.donors)
         const matchedDonor = userData.donors?.find(
             (donor) => normalizeEmail(donor.email) === pendingLinkEmail
         )
@@ -188,7 +197,7 @@ export function AccountDetailsSection({
         setShowDonorLinkForm(false)
         setShowAddressConfirmModal(true)
         setPendingLinkEmail(null)
-    }, [pendingLinkEmail, userData.address, userData.donors])
+    }
 
     const handleChangeDonorEmail = (e: ChangeEvent<HTMLInputElement>) => {
         setDonorLinkForm({
