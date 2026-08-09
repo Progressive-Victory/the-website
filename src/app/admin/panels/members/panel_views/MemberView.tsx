@@ -11,7 +11,7 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
-import { Role, UpdateHistory, User } from '@/contracts/data'
+import { Role, ShirtSize, UpdateHistory, User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
 
@@ -34,6 +34,7 @@ const membershipMerchShipmentOptions = [
 ]
 
 const shirtSizeOptions = [
+    { value: '', label: 'None' },
     { value: 'XS', label: 'Extra Small' },
     { value: 'S', label: 'Small' },
     { value: 'M', label: 'Medium' },
@@ -273,7 +274,11 @@ export function MemberView({
                 />
                 <DropDownField<User>
                     label="Shirt Size"
-                    field="shirtSize"
+                    getter={(form) => form.shirtSize ?? ''}
+                    setter={(form, field) => ({
+                        ...form,
+                        shirtSize: field ? (field as ShirtSize) : null,
+                    })}
                     options={shirtSizeOptions}
                 />
                 <CheckboxField<User>
