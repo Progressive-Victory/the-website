@@ -2,7 +2,7 @@ import styles from './List.module.css'
 import { DropdownButton, DropdownOverlay } from '@/components/common'
 import { MultiSelect, MultiSelectOption } from '@/components/common'
 import { SearchRequest, SortDirection } from '@/contracts/requests'
-import cx from 'classnames'
+import { cn } from '@/util'
 import Link from 'next/link'
 import React, { ChangeEvent, ReactNode, useEffect, useState } from 'react'
 import {
@@ -120,7 +120,7 @@ export function ListTop({
     }
 
     return (
-        <div className={cx(styles.searchPanel, className)}>
+        <div className={cn(styles.searchPanel, className)}>
             <div className={styles.searchRow}>
                 {backHref ? (
                     <Link
@@ -259,7 +259,7 @@ export function ListElement({
 }: ListElementProps) {
     return (
         <li className={className} onClick={onClick}>
-            <div className={cx(styles.element, selected && styles.selected)}>
+            <div className={cn(styles.element, selected && styles.selected)}>
                 {children}
             </div>
         </li>
@@ -543,7 +543,7 @@ function PaginationArrow({
 }: PaginationArrowProps) {
     return (
         <a
-            className={cx(
+            className={cn(
                 styles.arrow,
                 enabled ? styles.enabled : styles.disabled
             )}

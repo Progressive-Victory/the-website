@@ -1,6 +1,6 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
-import cx from 'classnames'
+import { cn } from '@/util'
 import phone from 'phone'
 import { ChangeEvent, useCallback } from 'react'
 
@@ -78,7 +78,7 @@ export function PhoneField<T>(
                         onInput={handleInput}
                         placeholder="2345556789"
                         maxLength={10}
-                        className={cx(
+                        className={cn(
                             styles.textField,
                             storedValue?.trim() &&
                                 !validator(storedValue) &&

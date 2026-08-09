@@ -10,6 +10,7 @@ import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
 import { TokenClaims, zDiscordUser } from '@/contracts/data'
+import { cn } from '@/util'
 import { useAuth, useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
@@ -878,7 +879,10 @@ export function Header() {
                 >
                     <DonateButton
                         label="Donate"
-                        className={`${styles.mobileDonateButton} ${isOpen && styles.fadeOutTop}`}
+                        className={cn(
+                            styles.mobileDonateButton,
+                            isOpen && styles.fadeOutTop
+                        )}
                     />
 
                     <motion.button

@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './ProgressBar.module.css'
+import { cn } from '@/util'
 
 function defaultValueFormatter(value: number | null | undefined) {
     if (value == null || !Number.isFinite(value)) return '—'
@@ -27,10 +28,7 @@ export function ProgressBar({
     ...props
 }: ProgressBarProps) {
     return (
-        <div
-            className={[styles.container, className].filter(Boolean).join(' ')}
-            {...props}
-        >
+        <div className={cn(styles.container, className)} {...props}>
             <div className={styles.row}>
                 <span>{label}</span>
                 <span>{valueText ?? valueFormatter(value)}</span>

@@ -11,7 +11,7 @@ import {
     type SectionGroupingMode,
     type SectionSortOrder,
 } from '../endorsements.types'
-import cx from 'classnames'
+import { cn } from '@/util'
 import { AnimatePresence, motion } from 'motion/react'
 import {
     type FocusEvent,
@@ -496,7 +496,10 @@ export function FilterButtonRow({
                     >
                         {showSearchLabel && (
                             <p
-                                className={`${styles.controlLabel} ${styles.searchControlLabel}`}
+                                className={cn(
+                                    styles.controlLabel,
+                                    styles.searchControlLabel
+                                )}
                             >
                                 Search
                             </p>
@@ -527,7 +530,7 @@ export function FilterButtonRow({
                             <button
                                 ref={searchToggleButtonRef}
                                 type="button"
-                                className={cx(
+                                className={cn(
                                     styles.searchToggleButton,
                                     !isMobile &&
                                         isSearchOpen &&
@@ -571,11 +574,12 @@ export function FilterButtonRow({
                                     aria-hidden="true"
                                 >
                                     <svg
-                                        className={
-                                            !isMobile && isSearchOpen
-                                                ? styles.searchIcon
-                                                : `${styles.searchIcon} ${styles.searchIconVisible}`
-                                        }
+                                        className={cn(
+                                            styles.searchIcon,
+                                            isMobile ||
+                                                (!isSearchOpen &&
+                                                    styles.searchIconVisible)
+                                        )}
                                         width="20"
                                         height="20"
                                         viewBox="0 0 24 24"
@@ -596,7 +600,7 @@ export function FilterButtonRow({
                                         />
                                     </svg>
                                     <svg
-                                        className={cx(
+                                        className={cn(
                                             styles.searchIcon,
                                             !isMobile &&
                                                 isSearchOpen &&
@@ -695,7 +699,7 @@ function DropdownGroup<T extends string>({
                         {selectedLabel}
                     </span>
                     <span
-                        className={cx(
+                        className={cn(
                             styles.dropdownChevron,
                             isOpen && styles.dropdownChevronOpen
                         )}
@@ -733,7 +737,7 @@ function DropdownGroup<T extends string>({
                                     type="button"
                                     role="option"
                                     aria-selected={isActive}
-                                    className={cx(
+                                    className={cn(
                                         styles.dropdownOption,
                                         isActive && styles.dropdownOptionActive
                                     )}
@@ -811,7 +815,7 @@ function TagsDropdownGroup<T extends string>({
                         {selectedLabel}
                     </span>
                     <span
-                        className={cx(
+                        className={cn(
                             styles.dropdownChevron,
                             isOpen && styles.dropdownChevronOpen
                         )}
@@ -855,7 +859,7 @@ function TagsDropdownGroup<T extends string>({
                                     type="button"
                                     role="option"
                                     aria-selected={isActive}
-                                    className={cx(
+                                    className={cn(
                                         styles.dropdownOption,
                                         isActive && styles.dropdownOptionActive
                                     )}
@@ -867,7 +871,7 @@ function TagsDropdownGroup<T extends string>({
                                         {option.label}
                                     </span>
                                     <span
-                                        className={cx(
+                                        className={cn(
                                             styles.dropdownCheckmark,
                                             isActive &&
                                                 styles.dropdownCheckmarkVisible
@@ -912,7 +916,7 @@ function TagsDropdownGroup<T extends string>({
                                     type="button"
                                     role="option"
                                     aria-selected={isActive}
-                                    className={cx(
+                                    className={cn(
                                         styles.dropdownOption,
                                         isActive && styles.dropdownOptionActive
                                     )}
@@ -925,7 +929,7 @@ function TagsDropdownGroup<T extends string>({
                                         {option.label}
                                     </span>
                                     <span
-                                        className={cx(
+                                        className={cn(
                                             styles.dropdownCheckmark,
                                             isActive &&
                                                 styles.dropdownCheckmarkVisible
