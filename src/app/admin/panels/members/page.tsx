@@ -29,6 +29,7 @@ import {
 } from '@/contracts/requests'
 import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
+import { usePositionQueries } from '@/queries'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -141,6 +142,7 @@ export default function Page() {
     }
 
     const loggedInUser = useCurrentUser()
+    const positionQueries = usePositionQueries()
 
     const {
         query: searchQuery,
@@ -173,6 +175,12 @@ export default function Page() {
         placeholderData: keepPreviousData,
     })
     const donorCount = donorCountQuery.data?.count
+
+    const positionHierarchy = useQuery({
+        queryKey: ['positionHierarchy'],
+        queryFn: positionQueries.getPositionHierarchy,
+        enabled: positionQueries.ready,
+    })
 
     const roles = rolesQuery.data?.data ?? []
     const roleOptions = useMemo(
@@ -445,12 +453,9 @@ export default function Page() {
             return (
                 <ListElement
                     key={item.email}
-                    selected={false}
                     onClick={() => void handleSelectDonorItem(item, userId)}
                 >
-                    <div>
-                        <span>{`${item.firstname} ${item.lastname}`}</span>
-                    </div>
+                    <span>{`${item.firstname} ${item.lastname}`}</span>
                 </ListElement>
             )
         },
@@ -477,6 +482,22 @@ export default function Page() {
                 </div>
             </ListElement>
         )
+    }
+
+    const renderPositionPills = () => {
+        const userPositions = (positionHierarchy.data?.positions ?? []).filter(
+            (p) => p.userIds.includes(userQuery.data!.id)
+        )
+
+        if (userPositions.length) {
+            return userPositions.map((pos) => (
+                <span key={pos.id} className={styles.rolePill}>
+                    {pos.name}
+                </span>
+            ))
+        }
+
+        return <span className={styles.rolePill}>Community Member</span>
     }
 
     const renderPage = () => {
@@ -682,20 +703,7 @@ export default function Page() {
                                     </div>
                                 </div>
                                 <div className={styles.roleList}>
-                                    {userQuery.data.roles?.length ? (
-                                        userQuery.data.roles.map((role) => (
-                                            <span
-                                                key={role.id}
-                                                className={styles.rolePill}
-                                            >
-                                                {role.name}
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span className={styles.roleEmpty}>
-                                            No roles assigned
-                                        </span>
-                                    )}
+                                    {renderPositionPills()}
                                 </div>
                                 <TabBar
                                     tabs={tabs}

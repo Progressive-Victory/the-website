@@ -332,7 +332,7 @@ export function MemberView({
                 />
             </FormGroup>
 
-            <FormGroup title="Roles">
+            <FormGroup title="Positions & Roles">
                 <SelectManyField<User>
                     label="Roles"
                     options={roleOptions}
