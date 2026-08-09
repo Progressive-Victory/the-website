@@ -18,7 +18,6 @@ import {
 } from '@/contracts/data'
 import type { SearchRequest } from '@/contracts/requests'
 import type { PaginatedResponse } from '@/contracts/responses'
-import { cn } from '@/util'
 import type { UseQueryResult } from '@tanstack/react-query'
 import Link from 'next/link'
 import React, { ChangeEvent } from 'react'
