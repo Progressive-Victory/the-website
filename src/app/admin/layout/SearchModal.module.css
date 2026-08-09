@@ -50,7 +50,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 0.95rem 1rem;
+    padding: 1rem;
     border-bottom: 1px solid rgba(17, 24, 39, 0.1);
     background: rgba(255, 255, 255, 0.6);
 }
@@ -63,16 +63,15 @@
 }
 
 .modalTitle {
-    font-size: 1.05rem;
-    font-weight: 650;
-    letter-spacing: -0.01em;
+    font-size: 1rem;
+    font-weight: 600;
     color: #0f172a;
 }
 
 .modalSubtitle {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     color: #475569;
-    line-height: 1.35;
+    line-height: 1.25rem;
 }
 
 .modalHeaderRight {
@@ -93,28 +92,6 @@
     backdrop-filter: blur(18px) saturate(160%);
     -webkit-backdrop-filter: blur(18px) saturate(160%);
     font-weight: 500;
-    padding-inline: 0.25rem;
-}
-
-.modalBody > * {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    padding: 0.85rem 1rem;
-    border-radius: 0.75rem;
-    margin: 0.15rem 0;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    text-align: left;
-    width: 100%;
-    font: inherit;
-    color: inherit;
-    transition: background-color 140ms ease;
-}
-
-.modalBody > *:hover {
-    background-color: #e5e7eb;
 }
 
 .modalBody :global(.pinned),
@@ -157,7 +134,7 @@
 }
 
 .modalSearch {
-    width: min(22rem, 52vw);
+    width: min(22rem, 52dvw);
 }
 
 .searchInputBare {

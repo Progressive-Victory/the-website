@@ -38,7 +38,6 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import cx from 'classnames'
 import { useCallback, useMemo, useState } from 'react'
 import { FaUsers, FaUserTag } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign, FaAddressCard } from 'react-icons/fa6'
@@ -454,12 +453,9 @@ export default function Page() {
             return (
                 <ListElement
                     key={item.email}
-                    selected={false}
                     onClick={() => void handleSelectDonorItem(item, userId)}
                 >
-                    <div>
-                        <span>{`${item.firstname} ${item.lastname}`}</span>
-                    </div>
+                    <span>{`${item.firstname} ${item.lastname}`}</span>
                 </ListElement>
             )
         },
@@ -486,6 +482,22 @@ export default function Page() {
                 </div>
             </ListElement>
         )
+    }
+
+    const renderPositionPills = () => {
+        const userPositions = (positionHierarchy.data?.positions ?? []).filter(
+            (p) => p.userIds.includes(userQuery.data!.id)
+        )
+
+        if (userPositions.length) {
+            return userPositions.map((pos) => (
+                <span key={pos.id} className={styles.rolePill}>
+                    {pos.name}
+                </span>
+            ))
+        }
+
+        return <span className={styles.rolePill}>Community Member</span>
     }
 
     const renderPage = () => {
@@ -691,33 +703,7 @@ export default function Page() {
                                     </div>
                                 </div>
                                 <div className={styles.roleList}>
-                                    {(() => {
-                                        const userPositions = (
-                                            positionHierarchy.data?.positions ??
-                                            []
-                                        ).filter((p) =>
-                                            p.userIds.includes(
-                                                userQuery.data.id
-                                            )
-                                        )
-                                        return userPositions.length ? (
-                                            userPositions.map((pos) => (
-                                                <span
-                                                    key={pos.id}
-                                                    className={cx(
-                                                        styles.rolePill,
-                                                        styles.rolePillActive
-                                                    )}
-                                                >
-                                                    {pos.name}
-                                                </span>
-                                            ))
-                                        ) : (
-                                            <span className={styles.rolePill}>
-                                                Community Member
-                                            </span>
-                                        )
-                                    })()}
+                                    {renderPositionPills()}
                                 </div>
                                 <TabBar
                                     tabs={tabs}

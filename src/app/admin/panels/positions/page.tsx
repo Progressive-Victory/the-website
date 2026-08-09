@@ -20,6 +20,7 @@ import {
     PositionHierarchyResponse,
 } from '@/contracts/responses'
 import { usePositionQueries } from '@/queries'
+import { cn } from '@/util'
 import {
     useOptimisticDelete,
     useOptimisticUpdate,
@@ -27,8 +28,18 @@ import {
     useUnpaginatedSearch,
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import cx from 'classnames'
 import { ChangeEvent, useCallback, useState } from 'react'
+
+function getUserDisplayName(user: UserProfile | undefined): string {
+    if (!user) return 'Unknown'
+    if (user.firstName && user.lastName)
+        return `${user.firstName} ${user.lastName}`
+    const discord = user.discordUsers?.[0]?.username
+    if (discord) return `@${discord}`
+    if (user.preferredName) return user.preferredName
+    if (user.email) return user.email
+    return `User #${user.id}`
+}
 
 const blankPosition: Position = {
     id: -1,
@@ -296,9 +307,10 @@ function SubordinatesField(props: SubordinatesFieldProps) {
     const filteredPositions = (() => {
         const excluded = new Set([props.currentPositionId, ...childIds])
         return props.allPositions
-            .filter((p) => !excluded.has(p.id))
-            .filter((p) =>
-                p.name.toLowerCase().includes(searchQuery.toLowerCase())
+            .filter(
+                (p) =>
+                    !excluded.has(p.id) &&
+                    p.name.toLowerCase().includes(searchQuery.toLowerCase())
             )
             .sort((a, b) => a.name.localeCompare(b.name))
     })()
@@ -319,7 +331,7 @@ function SubordinatesField(props: SubordinatesFieldProps) {
                     return (
                         <div
                             key={id}
-                            className={cx(
+                            className={cn(
                                 styles.subPositionEntry,
                                 props.editing && styles.subPositionEntryEditing
                             )}
@@ -342,13 +354,7 @@ function SubordinatesField(props: SubordinatesFieldProps) {
                                             key={u!.id}
                                             className={styles.subPositionTag}
                                         >
-                                            {u!.firstName && u!.lastName
-                                                ? `${u!.firstName} ${u!.lastName}`
-                                                : u!.discordUsers?.[0]?.username
-                                                  ? `@${u!.discordUsers[0].username}`
-                                                  : (u!.preferredName ??
-                                                    u!.email ??
-                                                    `User #${u!.id}`)}
+                                            {getUserDisplayName(u)}
                                         </span>
                                     ))
                                 ) : (
@@ -386,14 +392,13 @@ function SubordinatesField(props: SubordinatesFieldProps) {
                 }
             >
                 {filteredPositions.map((p) => (
-                    <button
+                    <ListElement
                         key={p.id}
-                        type="button"
                         className={styles.pickerItem}
                         onClick={() => handleAdd(p.id)}
                     >
                         {p.name}
-                    </button>
+                    </ListElement>
                 ))}
                 {filteredPositions.length === 0 && (
                     <div className={styles.pickerEmpty}>
@@ -433,17 +438,6 @@ function OccupantsField(props: OccupantsFieldProps) {
         userMap.set(u.id, u)
     }
 
-    const getUserDisplayName = (user: UserProfile | undefined) => {
-        if (!user) return 'Unknown'
-        if (user.firstName && user.lastName)
-            return `${user.firstName} ${user.lastName}`
-        const discord = user.discordUsers?.[0]?.username
-        if (discord) return `@${discord}`
-        if (user.preferredName) return user.preferredName
-        if (user.email) return user.email
-        return `User #${user.id}`
-    }
-
     const handleRemove = (idToRemove: number) => {
         onChange(userIds.filter((id) => id !== idToRemove))
     }
@@ -478,7 +472,7 @@ function OccupantsField(props: OccupantsFieldProps) {
                 {userIds.map((id) => (
                     <div
                         key={id}
-                        className={cx(
+                        className={cn(
                             styles.subPositionEntry,
                             props.editing && styles.subPositionEntryEditing
                         )}
@@ -530,9 +524,8 @@ function OccupantsField(props: OccupantsFieldProps) {
                     const hasName = !!(u.firstName && u.lastName)
                     const discord = u.discordUsers?.[0]?.username
                     return (
-                        <button
+                        <ListElement
                             key={u.id}
-                            type="button"
                             className={styles.pickerItem}
                             onClick={() => handleAdd(u.id)}
                         >
@@ -546,7 +539,7 @@ function OccupantsField(props: OccupantsFieldProps) {
                                     ? `@${discord}`
                                     : (u.email ?? `User #${u.id}`)}
                             </span>
-                        </button>
+                        </ListElement>
                     )
                 })}
                 {searchResults.length === 0 &&

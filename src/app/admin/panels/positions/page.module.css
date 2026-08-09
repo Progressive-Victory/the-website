@@ -62,13 +62,12 @@
     border-bottom: 1px solid rgba(17, 24, 39, 0.08);
     font-size: 0.92rem;
     font-weight: 550;
-    letter-spacing: -0.01em;
     color: rgba(15, 23, 42, 0.85);
     overflow: hidden;
-}
 
-.subPositionEntry:last-child {
-    border-bottom: 0;
+    &:last-child {
+        border-bottom: 0;
+    }
 }
 
 .subPositionTags {
@@ -128,20 +127,20 @@
         opacity 200ms cubic-bezier(0.25, 1, 0.5, 1),
         transform 200ms cubic-bezier(0.25, 1, 0.5, 1);
     pointer-events: none;
+
+    &:hover {
+        background: #dc2626;
+    }
+
+    &:active {
+        transform: scale(0.9);
+    }
 }
 
 .subPositionEntryEditing .deleteButton {
     opacity: 1;
     transform: scale(1);
     pointer-events: auto;
-}
-
-.deleteButton:hover {
-    background: #dc2626;
-}
-
-.deleteButton:active {
-    transform: scale(0.9);
 }
 
 .addRow {
@@ -179,10 +178,10 @@
     margin-right: 0.5rem;
 }
 
-.pickerItem {
+.pickerItem > div {
     flex-direction: column;
-    align-items: flex-start !important;
-    gap: 0.15rem !important;
+    align-items: flex-start;
+    gap: 0.15rem;
 }
 
 .pickerItemName {

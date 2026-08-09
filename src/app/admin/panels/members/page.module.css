@@ -176,10 +176,6 @@
     background: rgba(15, 23, 42, 0.06);
 }
 
-.rolePillActive {
-    /* placeholder for now will return to this on future enhancements */
-}
-
 .roleEmpty {
     font-size: 0.82rem;
     color: #64748b;
