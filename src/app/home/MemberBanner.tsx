@@ -5,6 +5,7 @@ import MembershipCardFront from './MembershipCardFront'
 import styles from './membership.module.css'
 import { BaseButton } from '@/components/common/buttons/Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
+import { cn } from '@/util'
 import { useCurrentUser, useInView } from '@/util/hooks'
 import { motion, useSpring, useTransform } from 'motion/react'
 import Image, { StaticImageData } from 'next/image'
@@ -219,7 +220,10 @@ export function MemberBanner() {
                                 <BaseButton
                                     href={donateHref}
                                     label="Become a Member"
-                                    className={`${buttonStyles.prominent} ${styles.buttonHover}`}
+                                    className={cn(
+                                        buttonStyles.prominent,
+                                        styles.buttonHover
+                                    )}
                                 />
                             </div>
                         </div>

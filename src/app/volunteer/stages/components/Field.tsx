@@ -1,3 +1,5 @@
+import styles from './components.module.css'
+import { cn } from '@/util'
 import { ChangeEvent, KeyboardEvent } from 'react'
 
 export function Field({
@@ -6,6 +8,7 @@ export function Field({
     onChange,
     onInput,
     onBlur,
+    label,
     placeholder,
     disabled,
     error,
@@ -20,6 +23,7 @@ export function Field({
     onChange?: (e: ChangeEvent<HTMLInputElement>) => void
     onInput?: (e: ChangeEvent<HTMLInputElement>) => void
     onBlur?: (e: ChangeEvent<HTMLInputElement>) => void
+    label?: string
     placeholder?: string
     disabled?: boolean
     error?: boolean
@@ -30,12 +34,14 @@ export function Field({
     children?: React.ReactNode
 }) {
     return (
-        <div className={`flex w-full flex-col items-start justify-center`}>
-            <label className="mb-[3px] inline-block text-sm text-gray-300">
-                {placeholder}
-                {required && <span className="ml-1 text-red-500">*</span>}
+        <div className={styles.fieldContainer}>
+            <label className={styles.label}>
+                {label}
+                {required && (
+                    <span className={styles.requiredIndicator}> *</span>
+                )}
             </label>
-            <div className="flex w-full flex-wrap gap-2">
+            <div className={styles.inputContainer}>
                 <input
                     type={type}
                     value={value}
@@ -47,23 +53,23 @@ export function Field({
                         }
                     }}
                     disabled={disabled !== null && disabled}
-                    placeholder={placeholder ?? ''}
+                    placeholder={placeholder ?? label ?? ''}
                     onChange={onChange}
                     onInput={onInput}
                     onBlur={onBlur}
-                    className={`grow rounded-md bg-white px-4 py-2 ring-steel-blue ${
-                        error !== null && value !== '' && !!error
-                            ? 'border-2 border-red-500'
-                            : ''
-                    }`}
+                    className={cn(
+                        styles.input,
+                        error !== null &&
+                            value !== '' &&
+                            !!error &&
+                            styles.error
+                    )}
                     required={required}
                 />
                 {children}
             </div>
             {!!error && value !== '' && (
-                <div className="my-1 h-4 text-left text-xs text-red-500">
-                    {errorText}
-                </div>
+                <div className={styles.error}>{errorText}</div>
             )}
         </div>
     )

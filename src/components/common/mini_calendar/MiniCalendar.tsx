@@ -8,6 +8,7 @@ import {
     normalizeMaxDateTs,
     normalizeMinDateTs,
 } from './miniCalendar.helpers'
+import { cn } from '@/util'
 import { useState } from 'react'
 import { FiCalendar, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 
@@ -199,7 +200,7 @@ export function MiniCalendar({
                         <button
                             key={idx}
                             type="button"
-                            className={classNames.join(' ')}
+                            className={cn(...classNames)}
                             disabled={state.disabled}
                             onMouseEnter={() => {
                                 if (!hasPreviewSelection || state.disabled) {

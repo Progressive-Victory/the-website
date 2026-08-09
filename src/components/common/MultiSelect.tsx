@@ -1,7 +1,7 @@
 import styles from './MultiSelect.module.css'
+import { cn } from '@/util'
 import { useClickAway } from '@/util/hooks'
-import cx from 'classnames'
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 
 export interface MultiSelectOption {
@@ -34,16 +34,15 @@ export function MultiSelect({
         if (!contains) setMenuOpen(false)
     })
 
-    const optionMap = useMemo(
-        () => new Map(options.map((option) => [option.value, option.label])),
-        [options]
+    const optionMap = new Map(
+        options.map((option) => [option.value, option.label])
     )
 
-    const available = useMemo(() => {
+    const available = (() => {
         const availableMap = new Map(optionMap.entries())
         for (const value of selected) availableMap.delete(value)
-        return availableMap.entries().toArray()
-    }, [optionMap, selected])
+        return Array.from(availableMap.entries())
+    })()
 
     const handleToggleMenu = () => {
         setMenuOpen((open) => !open)
@@ -55,7 +54,7 @@ export function MultiSelect({
     }
 
     const handleRemove = (value: string | number) => {
-        onUpdate(selected.filter((selection) => selection != value))
+        onUpdate(selected.filter((selection) => selection !== value))
     }
 
     return (
@@ -65,12 +64,16 @@ export function MultiSelect({
                     type="button"
                     id={`remove-${value}`}
                     key={`remove-${value}`}
-                    className={cx(
+                    className={cn(
                         styles.option,
                         !readonly && styles.removeButton
                     )}
                     disabled={!!disabled || readonly}
-                    onClick={() => handleRemove(value)}
+                    onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleRemove(value)
+                    }}
                 >
                     {optionMap.get(value)}
                 </button>
@@ -86,7 +89,11 @@ export function MultiSelect({
                             className={styles.menuButton}
                             disabled={disabled}
                             title={`Add ${name}`}
-                            onClick={handleToggleMenu}
+                            onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                handleToggleMenu()
+                            }}
                         >
                             <FaPlus size={11} />
                         </button>
@@ -99,7 +106,11 @@ export function MultiSelect({
                                     id={`add-${value}`}
                                     key={`add-${value}`}
                                     className={styles.addButton}
-                                    onClick={() => handleAdd(value)}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        handleAdd(value)
+                                    }}
                                 >
                                     {label}
                                 </button>

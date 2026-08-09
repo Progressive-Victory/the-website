@@ -1,5 +1,6 @@
 import { type ElectionStatus } from '../endorsements.data'
 import styles from './ElectionStatusBadge.module.css'
+import { cn } from '@/util'
 
 interface ElectionStatusBadgeProps {
     electionStatus: ElectionStatus
@@ -49,7 +50,7 @@ export function ElectionStatusBadge({
 
     return (
         <span
-            className={`${styles.badge} ${className}`}
+            className={cn(styles.badge, className)}
             aria-label={`Election status: ${electionStatus}`}
         >
             <span aria-hidden="true">{icon}</span>

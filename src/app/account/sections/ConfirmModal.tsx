@@ -3,6 +3,7 @@
 import styles from '@/app/account/account.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
 import { ShirtSize } from '@/contracts/data'
+import { cn } from '@/util'
 import { FormEvent, useState } from 'react'
 import { IoClose } from 'react-icons/io5'
 
@@ -65,14 +66,20 @@ function NameConfirmationPage({
             </div>
 
             <form
-                className={`${styles.linkActBlueFormContainer} ${styles.detailsLinkForm}`}
+                className={cn(
+                    styles.linkActBlueFormContainer,
+                    styles.detailsLinkForm
+                )}
                 onSubmit={(e) => {
                     e.preventDefault()
                     onConfirmName(nameDraft)
                 }}
             >
                 <div
-                    className={`${styles.linkActBlueFormInputContainer} ${styles.detailsLinkFormInputs}`}
+                    className={cn(
+                        styles.linkActBlueFormInputContainer,
+                        styles.detailsLinkFormInputs
+                    )}
                 >
                     <label>
                         <span className={formFieldStyles.fieldLabel}>
@@ -135,7 +142,10 @@ function NameConfirmationPage({
                 <div className={styles.detailsModalActions}>
                     <button
                         type="submit"
-                        className={`${styles.secondaryButton} ${styles.detailsConfirmAddressButton}`}
+                        className={cn(
+                            styles.secondaryButton,
+                            styles.detailsConfirmAddressButton
+                        )}
                     >
                         Continue
                     </button>
@@ -179,11 +189,17 @@ function AddressConfirmationPage({
             </div>
 
             <form
-                className={`${styles.linkActBlueFormContainer} ${styles.detailsLinkForm}`}
+                className={cn(
+                    styles.linkActBlueFormContainer,
+                    styles.detailsLinkForm
+                )}
                 onSubmit={onSubmit}
             >
                 <div
-                    className={`${styles.linkActBlueFormInputContainer} ${styles.detailsLinkFormInputs}`}
+                    className={cn(
+                        styles.linkActBlueFormInputContainer,
+                        styles.detailsLinkFormInputs
+                    )}
                 >
                     <label>
                         <span className={formFieldStyles.fieldLabel}>
@@ -252,7 +268,10 @@ function AddressConfirmationPage({
                 <div className={styles.detailsModalActions}>
                     <button
                         type="submit"
-                        className={`${styles.secondaryButton} ${styles.detailsConfirmAddressButton}`}
+                        className={cn(
+                            styles.secondaryButton,
+                            styles.detailsConfirmAddressButton
+                        )}
                     >
                         Connect ActBlue
                     </button>

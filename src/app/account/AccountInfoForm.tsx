@@ -132,43 +132,7 @@ export const AccountInfoForm = ({
                             dateStyle: 'medium',
                         }}
                     />
-                    {hasMatchedDonor &&
-                        showShirtSize &&
-                        (isEditing ? (
-                            <DropDownField<User>
-                                label="Shirt Size"
-                                getter={(user) => user.shirtSize ?? ''}
-                                setter={(user, field) => ({
-                                    ...user,
-                                    shirtSize: field
-                                        ? (field as ShirtSize)
-                                        : null,
-                                })}
-                                options={shirtSizeOptions}
-                            />
-                        ) : user.shirtSize ? (
-                            <TextField<User>
-                                label="Shirt Size"
-                                getter={(user) =>
-                                    user.shirtSize
-                                        ? shirtSizeLabels[user.shirtSize]
-                                        : null
-                                }
-                                readonly
-                            />
-                        ) : (
-                            <TextField<User>
-                                label="Shirt Size"
-                                getter={() => missingShirtSizeInfoText}
-                                readonly
-                                readonlyClassName={
-                                    styles.shippingInfoWarningText
-                                }
-                            />
-                        ))}
-                    {hasMatchedDonor &&
-                    !isEditing &&
-                    !hasAddressForShipping(user) ? (
+                    {!isEditing && !hasAddressForShipping(user) ? (
                         <TextField<User>
                             label={
                                 showAddressLine2 ? 'Address Line 1' : 'Address'
@@ -256,6 +220,40 @@ export const AccountInfoForm = ({
                         })}
                         options={stateOptionsWithEmpty}
                     />
+                    {hasMatchedDonor &&
+                        showShirtSize &&
+                        (isEditing ? (
+                            <DropDownField<User>
+                                label="Shirt Size"
+                                getter={(user) => user.shirtSize ?? ''}
+                                setter={(user, field) => ({
+                                    ...user,
+                                    shirtSize: field
+                                        ? (field as ShirtSize)
+                                        : null,
+                                })}
+                                options={shirtSizeOptions}
+                            />
+                        ) : user.shirtSize ? (
+                            <TextField<User>
+                                label="Shirt Size"
+                                getter={(user) =>
+                                    user.shirtSize
+                                        ? shirtSizeLabels[user.shirtSize]
+                                        : null
+                                }
+                                readonly
+                            />
+                        ) : (
+                            <TextField<User>
+                                label="Shirt Size"
+                                getter={() => missingShirtSizeInfoText}
+                                readonly
+                                readonlyClassName={
+                                    styles.shippingInfoWarningText
+                                }
+                            />
+                        ))}
                 </FormGroup>
             </Form>
         </div>

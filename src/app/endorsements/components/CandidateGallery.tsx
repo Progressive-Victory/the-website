@@ -22,7 +22,7 @@ import {
 } from '../endorsements.utils'
 import { ElectionStatusBadge } from './ElectionStatusBadge'
 import { ImageWithFallback } from '@/components/common'
-import cx from 'classnames'
+import { cn } from '@/util'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
 import { memo } from 'react'
 
@@ -103,7 +103,10 @@ export function CandidateGallery({
                             exit="exit"
                         >
                             <motion.header
-                                className={`${styles.sectionHeader} ${styles.centeredSectionHeader}`}
+                                className={cn(
+                                    styles.sectionHeader,
+                                    styles.centeredSectionHeader
+                                )}
                                 variants={headingVariants}
                                 initial="hidden"
                                 animate="visible"
@@ -124,7 +127,10 @@ export function CandidateGallery({
 
                             <motion.div
                                 layout
-                                className={`${styles.finderGrid} ${styles.finderGridLarge}`}
+                                className={cn(
+                                    styles.finderGrid,
+                                    styles.finderGridLarge
+                                )}
                                 transition={galleryLayoutTransition}
                             >
                                 {orderedFlatCandidates.map((candidate) => (
@@ -168,7 +174,7 @@ export function CandidateGallery({
                                     <motion.section
                                         key={sectionLabel}
                                         layout
-                                        className={cx(
+                                        className={cn(
                                             styles.gallerySection,
                                             isPastElectionSection &&
                                                 styles.pastElectionSection
@@ -177,7 +183,7 @@ export function CandidateGallery({
                                     >
                                         <motion.header
                                             layout="position"
-                                            className={cx(
+                                            className={cn(
                                                 styles.sectionHeader,
                                                 isPastElectionSection &&
                                                     styles.centeredSectionHeader
@@ -297,7 +303,7 @@ function CandidateCardImpl({
 
     const tileContent = (
         <>
-            <div className={`${styles.tileImageFrame} ${avatarFrameClassName}`}>
+            <div className={cn(styles.tileImageFrame, avatarFrameClassName)}>
                 <CandidateAvatar
                     imageSrc={candidate.image}
                     name={candidate.name}
