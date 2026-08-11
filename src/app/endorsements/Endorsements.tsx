@@ -1,5 +1,6 @@
 'use client'
 
+import { CandidateCarousel } from './components/CandidateCarousel'
 import { CandidateDetails } from './components/CandidateDetails'
 import { CandidateGallery } from './components/CandidateGallery'
 import { FilterButtonRow } from './components/FilterButtonRow'
@@ -108,10 +109,53 @@ export function Endorsements() {
                             Learn about each of the candidates we are
                             supporting.
                         </p>
+                        {/* <p className={styles.subheading}>
+                            Learn more about our endorsement criteria.
+                        </p>
+
+                        <p className={styles.subheading}>
+                            PV Pledge: The candidates we LOVE. Candidates
+                            invited to take the PV Pledge personify our values
+                            and represent true political leaders who rise above
+                            the rest.
+                        </p>
+                        <p className={styles.subheading}>
+                            Endorsement: The candidates we LIKE. When a
+                            candidate has the endorsed label, it means they
+                            align with our values and that we are proud to
+                            support them.
+                        </p>
+                        <p className={styles.subheading}>
+                            Recommendation: The candidates we TOLERATE. We will
+                            support these candidates, but we won&apos;t pretend
+                            they are anything more than just better than the
+                            Republican. We still endorse them, but they tend not
+                            to appreciate how...
+                        </p>
+                        <p className={styles.subheading}>
+                            During the Primary, we focus on fighting
+                            Establishment Democrats by supporting the left most
+                            viable candidate that aligns with our values.
+                        </p>
+                        <p className={styles.subheading}>
+                            During the General we focus on fighting Republicans
+                            and support even the candidates we don&apos;t like
+                            if it means protecting our country from fascism.
+                        </p> */}
                     </div>
                 }
             >
                 <div className={styles.hero}>
+                    {/* <CandidateCarousel
+                        gap={175}
+                        candidates={filteredCandidates.filter(
+                            (c) =>
+                                c.endorsementType === 'PV Pledge' &&
+                                (c.electionStatus === '' ||
+                                    c.electionStatus === 'Elected' ||
+                                    c.electionStatus === 'Won Primary')
+                        )}
+                    /> */}
                     <FilterButtonRow
                         filter={filter}
                         setFilter={setFilter}

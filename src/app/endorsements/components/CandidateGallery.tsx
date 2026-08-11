@@ -21,12 +21,11 @@ import {
     sortSectionCandidates,
 } from '../endorsements.utils'
 import { ElectionStatusBadge } from './ElectionStatusBadge'
-import { ImageWithFallback } from '@/components/common'
+import { PersonCard } from '@/components/common'
 import { cn } from '@/util'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
 import { memo } from 'react'
 
-//TODO break out each candidate button into its own component
 interface CandidateGalleryProps {
     filteredCandidates: CandidateConfig[]
     filter: FilterType | null
@@ -301,65 +300,29 @@ function CandidateCardImpl({
             ? styles.tileImageFramePledge
             : styles.tileImageFrameNoPledge
 
-    const tileContent = (
-        <>
-            <div className={cn(styles.tileImageFrame, avatarFrameClassName)}>
-                <CandidateAvatar
-                    imageSrc={candidate.image}
-                    name={candidate.name}
-                    size={92}
-                    className={styles.tileImage}
-                />
-                <ElectionStatusBadge
-                    electionStatus={candidate.electionStatus}
-                />
-            </div>
-            <div className={styles.tileMeta}>
-                <div className={styles.tileNameRow}>
-                    <p className={styles.tileName}>{candidate.name}</p>
-                </div>
-                {subtitleText && (
-                    <p className={styles.tileDate}>{subtitleText}</p>
-                )}
-            </div>
-        </>
-    )
-
     return (
         <motion.article
             layout
-            className={styles.candidateTile}
             transition={galleryLayoutTransition}
             variants={waveItemVariants}
             whileHover={{ y: -4, scale: 1.03 }}
             onClick={onSelect}
             style={{ cursor: 'pointer' }}
         >
-            {tileContent}
+            <PersonCard
+                name={candidate.name}
+                imageSrc={candidate.image}
+                imageSize={92}
+                subtitle={subtitleText ?? undefined}
+                imageFrameClassName={avatarFrameClassName}
+                badge={
+                    <ElectionStatusBadge
+                        electionStatus={candidate.electionStatus}
+                    />
+                }
+            />
         </motion.article>
     )
 }
 
 const CandidateCard = memo(CandidateCardImpl)
-
-function CandidateAvatar({
-    imageSrc,
-    name,
-    size,
-    className,
-}: {
-    imageSrc: string
-    name: string
-    size: number
-    className?: string
-}) {
-    return (
-        <ImageWithFallback
-            src={imageSrc}
-            alt={`${name} profile image`}
-            width={size}
-            height={size}
-            className={className}
-        />
-    )
-}
