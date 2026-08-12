@@ -1,6 +1,5 @@
 'use client'
 
-import { CandidateCarousel } from './components/CandidateCarousel'
 import { CandidateDetails } from './components/CandidateDetails'
 import { CandidateGallery } from './components/CandidateGallery'
 import { FilterButtonRow } from './components/FilterButtonRow'
@@ -109,20 +108,6 @@ export function Endorsements() {
                             Learn about each of the candidates we are
                             supporting.
                         </p>
-                        {/* <p className={styles.subheading}>
-                            Learn more about our endorsement criteria.
-                        </p> */}
-
-                        {/* <p className={styles.subheading}>
-                            During the Primary, we focus on fighting
-                            Establishment Democrats by supporting the left most
-                            viable candidate that aligns with our values.
-                        </p>
-                        <p className={styles.subheading}>
-                            During the General we focus on fighting Republicans
-                            and support even the candidates we don&apos;t like
-                            if it means protecting our country from fascism.
-                        </p> */}
                     </div>
                 }
             >
