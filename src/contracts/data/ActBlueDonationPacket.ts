@@ -1,7 +1,6 @@
 import { zActBlueContributionCustomField } from './ActBlueContributionCustomField'
 import z from 'zod'
 
-//cock
 export const zActBlueDonationPacket = z.object({
     sequence: z.number(),
     amount: z.number(),
