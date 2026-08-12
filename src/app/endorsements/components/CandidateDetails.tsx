@@ -90,7 +90,7 @@ export function CandidateDetails({
                 <HStack align="top" gap={1.25} className={styles.header}>
                     <ZStack align="center" className={styles.avatarWrap}>
                         <ImageWithFallback
-                            src="/images/endorsement_images/background_blue.png"
+                            src={`/images/endorsement_images/background_${candidate.avatarBackgroundColor}.png`}
                             alt=""
                             width={100}
                             height={100}

@@ -158,7 +158,7 @@ export const CANDIDATES: CandidateConfig[] = [
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
-        showPvMember: false,
+        showPvMember: true,
         avatarBackgroundColor: 'blue',
     },
 
@@ -258,7 +258,7 @@ export const CANDIDATES: CandidateConfig[] = [
         websiteHref: '',
         initiativeType: 'state',
 
-        endorsementType: 'Endorsement',
+        endorsementType: 'Recommendation',
         showPvMember: false,
         avatarBackgroundColor: 'blue',
     },
@@ -454,7 +454,7 @@ export const CANDIDATES: CandidateConfig[] = [
         initiativeType: 'state',
 
         endorsementType: 'PV Pledge',
-        showPvMember: false,
+        showPvMember: true,
         avatarBackgroundColor: 'yellow',
     },
 

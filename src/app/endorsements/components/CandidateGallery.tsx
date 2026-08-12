@@ -112,7 +112,7 @@ export function CandidateGallery({
                                 exit="exit"
                             >
                                 <div
-                                    className={styles.sectionDivider}
+                                    className={styles.sectionDividerLeft}
                                     aria-hidden="true"
                                 />
                                 <h3 className={styles.sectionTitle}>
@@ -142,6 +142,7 @@ export function CandidateGallery({
                                     />
                                 ))}
                             </motion.div>
+                            <DisclaimerCard />
                         </motion.section>
                     </AnimatePresence>
                 </motion.div>
@@ -165,9 +166,11 @@ export function CandidateGallery({
                         exit="exit"
                     >
                         {groupedCandidates.map(
-                            ([sectionLabel, sectionCandidates]) => {
+                            ([sectionLabel, sectionCandidates], groupIndex) => {
                                 const isPastElectionSection =
                                     sectionLabel === PAST_ELECTION_LABEL
+                                const isLastGroup =
+                                    groupIndex === groupedCandidates.length - 1
 
                                 return (
                                     <motion.section
@@ -197,7 +200,7 @@ export function CandidateGallery({
                                                 <>
                                                     <div
                                                         className={
-                                                            styles.sectionDivider
+                                                            styles.sectionDividerLeft
                                                         }
                                                         aria-hidden="true"
                                                     />
@@ -253,6 +256,7 @@ export function CandidateGallery({
                                                 )
                                             )}
                                         </motion.div>
+                                        {isLastGroup && <DisclaimerCard />}
                                     </motion.section>
                                 )
                             }
@@ -326,3 +330,32 @@ function CandidateCardImpl({
 }
 
 const CandidateCard = memo(CandidateCardImpl)
+
+function DisclaimerCard() {
+    return (
+        <motion.div
+            className={styles.disclaimerCard}
+            variants={waveItemVariants}
+        >
+            <p className={styles.disclaimerItem}>
+                <strong>PV Pledge:</strong> The candidates we LOVE.
+                <br />
+                Candidates invited to take the PV Pledge personify our values
+                and represent true political leaders who rise above the rest.
+            </p>
+            <p className={styles.disclaimerItem}>
+                <strong>Endorsement:</strong> The candidates we LIKE.
+                <br />
+                When a candidate has the endorsed label, it means they align
+                with our values and that we are proud to support them.
+            </p>
+            <p className={styles.disclaimerItem}>
+                <strong>Recommendation:</strong> The candidates we TOLERATE.
+                <br />
+                We will support these candidates, but we won&apos;t pretend they
+                are anything more than just better than the Republican. We still
+                endorse them, but they tend not to appreciate how...
+            </p>
+        </motion.div>
+    )
+}

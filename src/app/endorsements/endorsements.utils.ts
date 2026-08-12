@@ -105,7 +105,7 @@ export function getFlatSubtitleText(candidate: CandidateConfig): string {
 }
 
 export function getCandidateSubtitleText(candidate: CandidateConfig): string {
-    return getCandidateStateLabel(candidate)
+    return candidate.endorsementType
 }
 
 export function getSectionLabel(

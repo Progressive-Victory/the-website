@@ -111,28 +111,9 @@ export function Endorsements() {
                         </p>
                         {/* <p className={styles.subheading}>
                             Learn more about our endorsement criteria.
-                        </p>
+                        </p> */}
 
-                        <p className={styles.subheading}>
-                            PV Pledge: The candidates we LOVE. Candidates
-                            invited to take the PV Pledge personify our values
-                            and represent true political leaders who rise above
-                            the rest.
-                        </p>
-                        <p className={styles.subheading}>
-                            Endorsement: The candidates we LIKE. When a
-                            candidate has the endorsed label, it means they
-                            align with our values and that we are proud to
-                            support them.
-                        </p>
-                        <p className={styles.subheading}>
-                            Recommendation: The candidates we TOLERATE. We will
-                            support these candidates, but we won&apos;t pretend
-                            they are anything more than just better than the
-                            Republican. We still endorse them, but they tend not
-                            to appreciate how...
-                        </p>
-                        <p className={styles.subheading}>
+                        {/* <p className={styles.subheading}>
                             During the Primary, we focus on fighting
                             Establishment Democrats by supporting the left most
                             viable candidate that aligns with our values.
