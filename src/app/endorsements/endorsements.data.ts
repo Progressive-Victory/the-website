@@ -266,7 +266,7 @@ export const CANDIDATES: CandidateConfig[] = [
         handle: 'marypeltola',
         handleHref: 'https://x.com/MaryPeltola',
         bodyText:
-            " is America's first Native Alaskan representative and a fierce advocate for her community. We are proud to endorse her Alaska's Senate Seat!",
+            " is America's first Native Alaskan representative and a fierce advocate for her community. While not someone who represents our values, we remain proud to help her win Alaska's Senate Seat and to regain control of the Senate! ",
         image: '/images/endorsement_images/2026/Silhouette/Mary Peltola.png',
         websiteHref: 'https://marypeltola.com/',
         donateHref: 'https://secure.actblue.com/donate/marypeltola',
@@ -289,7 +289,8 @@ export const CANDIDATES: CandidateConfig[] = [
         bodyText:
             " stands apart not just as someone who will take on the machine, but someone with bold ideas to fight Oklahoma's poverty and exploitation.",
         image: '/images/endorsement_images/2026/Silhouette/Erica Watkins.png',
-        websiteHref: '',
+        websiteHref: 'https://erica4ok.com/',
+        donateHref: 'https://secure.actblue.com/donate/erica4okcd1',
         initiativeType: 'state',
 
         endorsementType: 'PV Pledge',
@@ -890,7 +891,8 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/Compton4KY2024',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/William Compton.png',
-        websiteHref: '',
+        websiteHref: 'https://www.williamcompton.com/',
+        donateHref: 'https://www.williamcompton.com/donate',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
@@ -1473,10 +1475,13 @@ export const CANDIDATES: CandidateConfig[] = [
         electionStatus: 'Lost Primary',
         primaryElection: new Date('06/02/26'),
         generalElection: new Date('11/03/26'),
-        handle: '',
-        bodyText: '',
+        handle: 'tomsteyer',
+        handleHref: 'https://x.com/tomsteyer',
+        bodyText:
+            'is our favorite kind of billionaire, the kind that hates other billionaires! He will make a fantastic California Governer that will usher in a new age of progress for the state.',
         image: '/images/endorsement_images/2026/Silhouette/Tom Steyer.png',
-        websiteHref: '',
+        websiteHref: 'https://www.tomsteyer.com/',
+        donateHref: '',
         initiativeType: '',
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -1552,6 +1557,7 @@ export const CANDIDATES: CandidateConfig[] = [
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Melat Kiros.png',
         websiteHref: 'https://www.kirosforco.com',
+        donateHref: 'https://secure.actblue.com/donate/melat-kiros-1',
         initiativeType: 'national',
 
         endorsementType: 'PV Pledge',
@@ -1796,9 +1802,30 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/Justinjpearson',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Justin Pearson.png',
-        websiteHref:
-            'https://wapp.capitol.tn.gov/apps/LegislatorInfo/member?district=h86',
+        websiteHref: 'https://www.votejustinj.com',
+        donateHref: 'https://secure.actblue.com/donate/justinjpearson_website',
         initiativeType: '',
+
+        endorsementType: 'Endorsement',
+        showPvMember: false,
+        avatarBackgroundColor: 'yellow',
+    },
+    {
+        id: '107',
+        name: 'Troy Jackson',
+        state: 'Maine',
+        electionStatus: 'Won Primary',
+        primaryElection: new Date('08/06/26'),
+        generalElection: new Date('11/03/26'),
+        handle: 'troyjackson207',
+        handleHref: 'https://x.com/troyjackson207',
+        bodyText:
+            'will make an exceptional senator which is why we couldn’t be more excited to endorse and organize on behalf of him.',
+        image: '/images/endorsement_images/2026/Silhouette/Troy Jackson.png',
+        websiteHref: 'https://www.jacksonformaine.com/',
+        donateHref:
+            'https://secure.actblue.com/donate/loc_tdj_fr_web?refcode=top-nav',
+        initiativeType: 'national',
 
         endorsementType: 'Endorsement',
         showPvMember: false,
@@ -1988,7 +2015,7 @@ export const CANDIDATES: CandidateConfig[] = [
     // },
 
     // {
-    //     id: '95',
+    //     id: '108',
     //     name: 'Mary Peltola',
     //     state: 'Alaska',
     //     electionStatus: 'Lost General',
@@ -2000,7 +2027,7 @@ export const CANDIDATES: CandidateConfig[] = [
     //         " is America's first Native Alaskan representative and a fierce advocate for her community. We are proud to endorse her for re-election in Alaska's at-large congressional district!",
     //     image: '/images/endorsement_images/2026/Silhouette/Mary Peltola.png',
     //     websiteHref: '',
-    //     initiativeType: 'state',
+    //     initiativeType: 'national',
 
     //     endorsementType: 'Endorsement',
     //     showPvMember: false,
@@ -2018,7 +2045,7 @@ export const CANDIDATES: CandidateConfig[] = [
     //     name: 'Jon Stewart',
     //     state: 'President',
     //     electionStatus: '',
-    //     primaryElection: new Date('11/07/28'),
+    //     primaryElection: new Date('01/22/28'),
     //     generalElection: new Date('11/07/28'),
     //     handle: 'jonstewart',
     //     handleHref: 'https://x.com/jonstewart',
@@ -2027,7 +2054,7 @@ export const CANDIDATES: CandidateConfig[] = [
     //     image: '/images/endorsement_images/2026/Silhouette/Jon Stewart.png',
     //     websiteHref: '',
     //     initiativeType: '',
-    //     endorsementType: 'Endorsement',
+    //     endorsementType: 'Recommendation',
     //     showPvMember: false,
     //     avatarBackgroundColor: 'yellow',
     // },
