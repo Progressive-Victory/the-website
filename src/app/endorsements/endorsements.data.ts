@@ -1768,7 +1768,8 @@ export const CANDIDATES: CandidateConfig[] = [
         handleHref: 'https://x.com/Justinjpearson',
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Justin Pearson.png',
-        websiteHref: 'https://wapp.capitol.tn.gov/apps/LegislatorInfo/member?district=h86',
+        websiteHref:
+            'https://wapp.capitol.tn.gov/apps/LegislatorInfo/member?district=h86',
         initiativeType: '',
 
         endorsementType: 'Endorsement',
