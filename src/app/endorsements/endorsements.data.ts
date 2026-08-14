@@ -381,7 +381,7 @@ export const CANDIDATES: CandidateConfig[] = [
             ' is back to finish what she started! Her passion and tenacity have repeatedly shown that she is a powerful progressive voice ready to take on whatever battle is needed.',
         image: '/images/endorsement_images/2026/Silhouette/Cori Bush.png',
         websiteHref: '',
-        initiativeType: 'state',
+        initiativeType: 'national',
 
         endorsementType: 'Endorsement',
         showPvMember: false,
