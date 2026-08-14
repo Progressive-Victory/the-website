@@ -280,7 +280,6 @@ export function AccountDetailsSection({
 
     const submitAddressConfirmation = (e: FormEvent) => {
         e.preventDefault()
-
         const shouldUseMatchedEmail = !normalizeEmail(userData.email)
         const normalizeText = (value?: string | null) => {
             const trimmed = value?.trim() ?? ''
