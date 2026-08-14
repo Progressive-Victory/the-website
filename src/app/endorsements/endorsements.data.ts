@@ -1803,7 +1803,6 @@ export const CANDIDATES: CandidateConfig[] = [
     //     image: '',
     //     websiteHref: '',
     //     initiativeType: 'national',
-https://vercel.com/progress-win/pv-frontpage-redux/AN3AjHzZ9CN797JaKRpSfXdcXMw3
     //     endorsementType: 'Endorsement',
     //     showPvMember: false,
     //     avatarBackgroundColor: 'yellow',
