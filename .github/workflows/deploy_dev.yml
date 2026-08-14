@@ -41,4 +41,4 @@ jobs:
          host: ${{ secrets.HOST }}
          username: ${{ secrets.USERNAME }}
          key: ${{ secrets.PRIVATE_KEY }}
-         script: ./deployscript.sh ${{ secrets.DOCKER_REGISTRY_PASSWORD }} ${{ env.TAG }}
+         script: ./deployscript.sh ${{ secrets.GITHUB_TOKEN }} ${{ env.TAG }}
