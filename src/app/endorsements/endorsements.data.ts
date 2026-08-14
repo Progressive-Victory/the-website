@@ -690,7 +690,7 @@ export const CANDIDATES: CandidateConfig[] = [
         bodyText: '',
         image: '/images/endorsement_images/2026/Silhouette/Katie Bansil.png',
         websiteHref: '',
-        initiativeType: 'national',
+        initiativeType: 'state',
 
         endorsementType: 'PV Pledge',
         showPvMember: true,
