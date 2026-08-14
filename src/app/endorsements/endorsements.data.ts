@@ -1534,7 +1534,7 @@ export const CANDIDATES: CandidateConfig[] = [
         id: '94',
         name: 'Francesca Hong',
         state: 'Wisconsin',
-        electionStatus: '',
+        electionStatus: 'Lost Primary',
         primaryElection: new Date('08/11/26'),
         generalElection: new Date('11/03/26'),
         handle: 'FrancescaHongWI',
