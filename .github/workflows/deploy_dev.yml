@@ -14,7 +14,7 @@ jobs:
       DOCKERFILE: Dockerfile
       REPLACE_ENV_FILE: deployment/deployment.env
       ENV_FILE: .env
-      TAG: the_website
+      TAG: the_website_dev
     steps:
      - uses: actions/checkout@v2
      - name: Replace Appsettings
@@ -33,7 +33,7 @@ jobs:
        with:
          context: .
          push: true
-         tags: ${{ secrets.DOCKER_REGISTRY_URL}}/${{ env.TAG }}:dev
+         tags: ${{ secrets.DOCKER_REGISTRY_URL}}/${{ env.TAG }}:now
 
      - name: Execute remote SSH commands using SSH key
        uses: appleboy/ssh-action@v1
