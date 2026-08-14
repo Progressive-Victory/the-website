@@ -14,7 +14,7 @@ jobs:
       DOCKERFILE: Dockerfile
       REPLACE_ENV_FILE: deployment/deployment.env
       ENV_FILE: .env
-      TAG: the_website_dev
+      TAG: the_website
     steps:
      - uses: actions/checkout@v2
      - name: Replace Appsettings
@@ -22,9 +22,9 @@ jobs:
      - name: Log in to the Container registry
        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
        with:
-         registry: ghcr.io
-         username: ${{ github.actor }}
-         password: ${{ secrets.GITHUB_TOKEN }}
+         registry: ${{ secrets.DOCKER_REGISTRY_URL }}
+         username: ${{ secrets.DOCKER_REGISTRY_USER }}
+         password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
      - name: lowercase github.repository 
        run:  echo "OWNER_NAME=`echo ${{github.repository_owner}} | tr '[:upper:]' '[:lower:]'`" >>${GITHUB_ENV}
      - name: Build and push Docker images
@@ -33,7 +33,7 @@ jobs:
        with:
          context: .
          push: true
-         tags: ghcr.io/${{ env.OWNER_NAME }}/${{ env.TAG }}
+         tags: ${{ secrets.DOCKER_REGISTRY_URL}}/${{ env.TAG }}:dev
 
      - name: Execute remote SSH commands using SSH key
        uses: appleboy/ssh-action@v1
@@ -41,4 +41,4 @@ jobs:
          host: ${{ secrets.HOST }}
          username: ${{ secrets.USERNAME }}
          key: ${{ secrets.PRIVATE_KEY }}
-         script: ./deployscript.sh ${{ secrets.GITHUB_TOKEN }} ${{ env.TAG }}
+         script: ./deployscript.sh ${{ secrets.DOCKER_REGISTRY_PASSWORD }} ${{ env.TAG }}
