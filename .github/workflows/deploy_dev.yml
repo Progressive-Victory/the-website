@@ -22,9 +22,9 @@ jobs:
      - name: Log in to the Container registry
        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
        with:
-         registry: ${{ secrets.DOCKER_REGISTRY_URL }}
-         username: ${{ secrets.DOCKER_REGISTRY_USER }}
-         password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+         registry: ghcr.io
+         username: ${{ github.actor }}
+         password: ${{ secrets.GITHUB_TOKEN }}
      - name: lowercase github.repository 
        run:  echo "OWNER_NAME=`echo ${{github.repository_owner}} | tr '[:upper:]' '[:lower:]'`" >>${GITHUB_ENV}
      - name: Build and push Docker images
@@ -33,12 +33,12 @@ jobs:
        with:
          context: .
          push: true
-         tags: ${{ secrets.DOCKER_REGISTRY_URL}}/${{ env.TAG }}:now
-
+         tags: ghcr.io/${{ env.OWNER_NAME }}/${{ env.TAG }}
+         
      - name: Execute remote SSH commands using SSH key
        uses: appleboy/ssh-action@v1
        with:
          host: ${{ secrets.HOST }}
          username: ${{ secrets.USERNAME }}
          key: ${{ secrets.PRIVATE_KEY }}
-         script: ./deployscript.sh ${{ secrets.DOCKER_REGISTRY_PASSWORD }} ${{ env.TAG }}
+         script: ./deployscript.sh ${{ secrets.GITHUB_TOKEN }} ${{ env.TAG }}
