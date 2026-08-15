@@ -12,7 +12,7 @@ import {
     type SectionSortOrder,
 } from '../endorsements.types'
 import { cn } from '@/util'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
 import {
     type FocusEvent,
     useEffect,
@@ -281,6 +281,52 @@ export function FilterButtonRow({
         closeSearch()
     }
 
+    const sectionedInitial = isMobile
+        ? { opacity: 0, scale: 0.95, filter: 'blur(4px)' }
+        : {
+              opacity: 0,
+              scaleY: 0.6,
+              y: 12,
+              width: '0.05rem',
+              filter: 'blur(8px)',
+          }
+
+    const sectionedAnimate = hideFiltersForSearch
+        ? { opacity: 0, scale: 0.985, filter: 'blur(3px)' }
+        : isMobile
+          ? { opacity: 1, scale: 1, filter: 'blur(0px)' }
+          : { opacity: 1, scaleY: 1, y: 0, width: 'auto', filter: 'blur(0px)' }
+
+    const sectionedExit = isMobile
+        ? { opacity: 0, scale: 0.95, filter: 'blur(4px)' }
+        : {
+              opacity: 0,
+              scaleY: 0.6,
+              y: 12,
+              width: '0.05rem',
+              filter: 'blur(8px)',
+          }
+
+    const sectionedTransition = isMobile
+        ? {
+              duration: 0.2,
+              ease: [0.2, 0, 0, 1] as [number, number, number, number],
+          }
+        : {
+              type: 'spring' as const,
+              stiffness: 380,
+              damping: 24,
+              mass: 0.6,
+              delay: 0.04,
+              width: {
+                  type: 'spring' as const,
+                  stiffness: 340,
+                  damping: 26,
+                  mass: 0.65,
+                  delay: 0.06,
+              },
+          }
+
     return (
         <div className={styles.buttonRowWrap}>
             <motion.div
@@ -292,366 +338,369 @@ export function FilterButtonRow({
                         ? { duration: 0 }
                         : {
                               type: 'spring',
-                              stiffness: 320,
-                              damping: 30,
-                              mass: 0.72,
+                              stiffness: 380,
+                              damping: 32,
+                              mass: 0.7,
                           }
                 }
             >
-                <motion.div
-                    layout
-                    className={[
-                        styles.controlsPanelDefault,
-                        hideFiltersForSearch ? styles.controlsPanelCovered : '',
-                        displayMode === 'sectioned'
-                            ? styles.controlsPanelSectionedMobile
-                            : '',
-                    ]
-                        .filter(Boolean)
-                        .join(' ')}
-                    ref={controlsRowRef}
-                    transition={
-                        skipLayoutAnim
-                            ? { duration: 0 }
-                            : {
-                                  duration: 0.2,
-                                  ease: [0.22, 1, 0.36, 1],
-                              }
-                    }
-                >
+                <LayoutGroup id="filter-controls">
                     <motion.div
-                        animate={
-                            hideFiltersForSearch
-                                ? {
-                                      opacity: 0,
-                                      scale: 0.985,
-                                      filter: 'blur(3px)',
-                                  }
+                        layout
+                        className={cn(
+                            styles.controlsPanelDefault,
+                            hideFiltersForSearch && styles.controlsPanelCovered,
+                            displayMode === 'sectioned' &&
+                                styles.controlsPanelSectionedMobile
+                        )}
+                        ref={controlsRowRef}
+                        transition={
+                            skipLayoutAnim
+                                ? { duration: 0 }
                                 : {
-                                      opacity: 1,
-                                      scale: 1,
-                                      filter: 'blur(0px)',
+                                      type: 'spring',
+                                      stiffness: 380,
+                                      damping: 32,
+                                      mass: 0.7,
                                   }
                         }
-                        transition={{
-                            duration: 0.22,
-                            ease: [0.2, 0, 0, 1],
-                        }}
                     >
-                        <div
-                            ref={leftMostControlRef}
-                            className={styles.leftMostControlAnchor}
-                        >
-                            <TagsDropdownGroup
-                                dropdownId="filter"
-                                label="Tags"
-                                options={FILTER_OPTIONS}
-                                value={filter}
-                                onChange={setFilter}
-                                isOpen={openDropdown === 'filter'}
-                                setIsOpen={(isOpen) =>
-                                    setOpenDropdown(isOpen ? 'filter' : null)
-                                }
-                                requiredSection={{
-                                    label: 'Year',
-                                    value: String(year),
-                                    options: yearOptions,
-                                    onChange: (value) => setYear(Number(value)),
-                                }}
-                            />
-                        </div>
-                    </motion.div>
-                    <motion.div
-                        animate={
-                            hideFiltersForSearch
-                                ? {
-                                      opacity: 0,
-                                      scale: 0.985,
-                                      filter: 'blur(3px)',
-                                  }
-                                : {
-                                      opacity: 1,
-                                      scale: 1,
-                                      filter: 'blur(0px)',
-                                  }
-                        }
-                        transition={{
-                            duration: 0.24,
-                            ease: [0.2, 0, 0, 1],
-                            delay: hideFiltersForSearch ? 0.012 : 0,
-                        }}
-                    >
-                        <DropdownGroup
-                            dropdownId="layout"
-                            label="Layout"
-                            options={DISPLAY_OPTIONS}
-                            value={displayMode}
-                            onChange={setDisplayMode}
-                            isOpen={openDropdown === 'layout'}
-                            setIsOpen={(isOpen) =>
-                                setOpenDropdown(isOpen ? 'layout' : null)
-                            }
-                        />
-                    </motion.div>
-                    <AnimatePresence initial={false} mode="popLayout">
-                        {displayMode === 'sectioned' && (
-                            <motion.div
-                                layout
-                                key="grouping-control"
-                                initial={{ opacity: 0, x: 14 }}
-                                animate={
-                                    hideFiltersForSearch
-                                        ? {
-                                              opacity: 0,
-                                              x: 4,
-                                              scale: 0.985,
-                                              filter: 'blur(3px)',
-                                          }
-                                        : {
-                                              opacity: 1,
-                                              x: 0,
-                                              scale: 1,
-                                              filter: 'blur(0px)',
-                                          }
-                                }
-                                exit={{ opacity: 0, x: 14 }}
-                                transition={{
-                                    duration: 0.24,
-                                    ease: [0.2, 0, 0, 1],
-                                }}
-                            >
-                                <DropdownGroup
-                                    dropdownId="grouping"
-                                    label="Sort"
-                                    options={SECTION_OPTIONS}
-                                    value={sectionMode}
-                                    onChange={setSectionMode}
-                                    isOpen={openDropdown === 'grouping'}
-                                    setIsOpen={(isOpen) =>
-                                        setOpenDropdown(
-                                            isOpen ? 'grouping' : null
-                                        )
-                                    }
-                                />
-                            </motion.div>
-                        )}
-                        {displayMode === 'sectioned' && (
-                            <motion.div
-                                layout
-                                key="order-control"
-                                initial={{ opacity: 0, x: 14 }}
-                                animate={
-                                    hideFiltersForSearch
-                                        ? {
-                                              opacity: 0,
-                                              x: 4,
-                                              scale: 0.985,
-                                              filter: 'blur(3px)',
-                                          }
-                                        : {
-                                              opacity: 1,
-                                              x: 0,
-                                              scale: 1,
-                                              filter: 'blur(0px)',
-                                          }
-                                }
-                                exit={{ opacity: 0, x: 14 }}
-                                transition={{
-                                    duration: 0.24,
-                                    ease: [0.2, 0, 0, 1],
-                                }}
-                            >
-                                <DropdownGroup
-                                    dropdownId="order"
-                                    label="Order"
-                                    options={SECTION_SORT_OPTIONS}
-                                    value={sectionSortOrder}
-                                    onChange={setSectionSortOrder}
-                                    isOpen={openDropdown === 'order'}
-                                    setIsOpen={(isOpen) =>
-                                        setOpenDropdown(isOpen ? 'order' : null)
-                                    }
-                                />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    <motion.div
-                        initial={false}
-                        layout="position"
-                        ref={searchControlRef}
-                        className={[
-                            styles.searchControl,
-                            searchIsExpanded && !isMobile
-                                ? styles.searchControlExpanded
-                                : '',
-                            singleColumnLayout || showSearchLabel
-                                ? styles.searchControlStacked
-                                : '',
-                        ]
-                            .filter(Boolean)
-                            .join(' ')}
-                        onPointerDownCapture={() => setOpenDropdown(null)}
-                        onBlur={handleSearchBlur}
-                    >
-                        {showSearchLabel && (
-                            <p
-                                className={cn(
-                                    styles.controlLabel,
-                                    styles.searchControlLabel
-                                )}
-                            >
-                                Search
-                            </p>
-                        )}
                         <motion.div
-                            initial={false}
-                            className={styles.searchMorph}
-                            animate={{
-                                width: isMobile
-                                    ? mobileSearchWidth
-                                        ? `${mobileSearchWidth}px`
-                                        : 'var(--search-control-size)'
-                                    : isSearchOpen && searchExpandedWidth
-                                      ? `${searchExpandedWidth}px`
-                                      : 'var(--search-control-size)',
-                            }}
-                            transition={
-                                skipLayoutAnim
-                                    ? { duration: 0 }
+                            layout
+                            animate={
+                                hideFiltersForSearch
+                                    ? {
+                                          opacity: 0,
+                                          scale: 0.985,
+                                          filter: 'blur(3px)',
+                                      }
                                     : {
-                                          type: 'spring',
-                                          stiffness: 360,
-                                          damping: 34,
-                                          mass: 0.68,
+                                          opacity: 1,
+                                          scale: 1,
+                                          filter: 'blur(0px)',
                                       }
                             }
+                            transition={{
+                                layout: {
+                                    type: 'spring',
+                                    stiffness: 380,
+                                    damping: 32,
+                                    mass: 0.7,
+                                },
+                                duration: 0.22,
+                                ease: [0.2, 0, 0, 1],
+                            }}
                         >
-                            <button
-                                ref={searchToggleButtonRef}
-                                type="button"
-                                className={cn(
-                                    styles.searchToggleButton,
-                                    !isMobile &&
-                                        isSearchOpen &&
-                                        styles.searchToggleButtonClose
-                                )}
-                                onPointerDown={(event) => {
-                                    if (!isMobile && isSearchOpen) {
-                                        event.preventDefault()
+                            <div
+                                ref={leftMostControlRef}
+                                className={styles.leftMostControlAnchor}
+                            >
+                                <TagsDropdownGroup
+                                    dropdownId="filter"
+                                    label="Tags"
+                                    options={FILTER_OPTIONS}
+                                    value={filter}
+                                    onChange={setFilter}
+                                    isOpen={openDropdown === 'filter'}
+                                    setIsOpen={(isOpen) =>
+                                        setOpenDropdown(
+                                            isOpen ? 'filter' : null
+                                        )
                                     }
-                                }}
-                                onClick={() => {
-                                    setOpenDropdown(null)
-
-                                    if (isMobile) {
-                                        if (searchQuery) {
-                                            setSearchQuery('')
-                                        } else {
-                                            searchInputRef.current?.focus()
+                                    requiredSection={{
+                                        label: 'Year',
+                                        value: String(year),
+                                        options: yearOptions,
+                                        onChange: (value) =>
+                                            setYear(Number(value)),
+                                    }}
+                                />
+                            </div>
+                        </motion.div>
+                        <motion.div
+                            layout
+                            animate={
+                                hideFiltersForSearch
+                                    ? {
+                                          opacity: 0,
+                                          scale: 0.985,
+                                          filter: 'blur(3px)',
+                                      }
+                                    : {
+                                          opacity: 1,
+                                          scale: 1,
+                                          filter: 'blur(0px)',
+                                      }
+                            }
+                            transition={{
+                                layout: {
+                                    type: 'spring',
+                                    stiffness: 380,
+                                    damping: 32,
+                                    mass: 0.7,
+                                },
+                                duration: 0.24,
+                                ease: [0.2, 0, 0, 1],
+                                delay: hideFiltersForSearch ? 0.012 : 0,
+                            }}
+                        >
+                            <DropdownGroup
+                                dropdownId="layout"
+                                label="Layout"
+                                options={DISPLAY_OPTIONS}
+                                value={displayMode}
+                                onChange={setDisplayMode}
+                                isOpen={openDropdown === 'layout'}
+                                setIsOpen={(isOpen) =>
+                                    setOpenDropdown(isOpen ? 'layout' : null)
+                                }
+                            />
+                        </motion.div>
+                        <AnimatePresence initial={false} mode="popLayout">
+                            {displayMode === 'sectioned' && (
+                                <motion.div
+                                    layout
+                                    key="grouping-control"
+                                    style={
+                                        isMobile
+                                            ? undefined
+                                            : { originX: 1, originY: 0.5 }
+                                    }
+                                    initial={sectionedInitial}
+                                    animate={sectionedAnimate}
+                                    exit={sectionedExit}
+                                    transition={sectionedTransition}
+                                >
+                                    <DropdownGroup
+                                        dropdownId="grouping"
+                                        label="Sort"
+                                        options={SECTION_OPTIONS}
+                                        value={sectionMode}
+                                        onChange={setSectionMode}
+                                        isOpen={openDropdown === 'grouping'}
+                                        setIsOpen={(isOpen) =>
+                                            setOpenDropdown(
+                                                isOpen ? 'grouping' : null
+                                            )
                                         }
-                                        return
+                                    />
+                                </motion.div>
+                            )}
+                            {displayMode === 'sectioned' && (
+                                <motion.div
+                                    layout
+                                    key="order-control"
+                                    style={
+                                        isMobile
+                                            ? undefined
+                                            : { originX: 0, originY: 0.5 }
                                     }
+                                    initial={sectionedInitial}
+                                    animate={sectionedAnimate}
+                                    exit={sectionedExit}
+                                    transition={sectionedTransition}
+                                >
+                                    <DropdownGroup
+                                        dropdownId="order"
+                                        label="Order"
+                                        options={SECTION_SORT_OPTIONS}
+                                        value={sectionSortOrder}
+                                        onChange={setSectionSortOrder}
+                                        isOpen={openDropdown === 'order'}
+                                        setIsOpen={(isOpen) =>
+                                            setOpenDropdown(
+                                                isOpen ? 'order' : null
+                                            )
+                                        }
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                                    if (isSearchOpen) {
-                                        closeSearch()
-                                    } else {
-                                        openSearch()
-                                    }
+                        <motion.div
+                            initial={false}
+                            layout="position"
+                            ref={searchControlRef}
+                            className={cn(
+                                styles.searchControl,
+                                searchIsExpanded &&
+                                    !isMobile &&
+                                    styles.searchControlExpanded,
+                                (singleColumnLayout || showSearchLabel) &&
+                                    styles.searchControlStacked
+                            )}
+                            transition={{
+                                layout: {
+                                    type: 'spring',
+                                    stiffness: 380,
+                                    damping: 32,
+                                    mass: 0.7,
+                                },
+                            }}
+                            onPointerDownCapture={() => setOpenDropdown(null)}
+                            onBlur={handleSearchBlur}
+                        >
+                            {showSearchLabel && (
+                                <p
+                                    className={cn(
+                                        styles.controlLabel,
+                                        styles.searchControlLabel
+                                    )}
+                                >
+                                    Search
+                                </p>
+                            )}
+                            <motion.div
+                                initial={false}
+                                className={styles.searchMorph}
+                                animate={{
+                                    width: isMobile
+                                        ? mobileSearchWidth
+                                            ? `${mobileSearchWidth}px`
+                                            : 'var(--search-control-size)'
+                                        : isSearchOpen && searchExpandedWidth
+                                          ? `${searchExpandedWidth}px`
+                                          : 'var(--search-control-size)',
                                 }}
-                                aria-label={
-                                    isMobile
-                                        ? searchQuery
-                                            ? 'Clear search'
-                                            : 'Search endorsements'
-                                        : isSearchOpen
-                                          ? 'Close search'
-                                          : 'Open search'
+                                transition={
+                                    skipLayoutAnim
+                                        ? { duration: 0 }
+                                        : {
+                                              type: 'spring',
+                                              stiffness: 360,
+                                              damping: 34,
+                                              mass: 0.68,
+                                          }
                                 }
                             >
-                                <span
-                                    className={styles.searchIconWrap}
-                                    aria-hidden="true"
-                                >
-                                    <svg
-                                        className={cn(
-                                            styles.searchIcon,
-                                            isMobile ||
-                                                (!isSearchOpen &&
-                                                    styles.searchIconVisible)
-                                        )}
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                    >
-                                        <circle
-                                            cx="11"
-                                            cy="11"
-                                            r="7"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                        />
-                                        <path
-                                            d="M20 20l-4.1-4.1"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                        />
-                                    </svg>
-                                    <svg
-                                        className={cn(
-                                            styles.searchIcon,
-                                            !isMobile &&
-                                                isSearchOpen &&
-                                                styles.searchIconVisible
-                                        )}
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                    >
-                                        <path
-                                            d="M6 6l12 12M18 6L6 18"
-                                            stroke="currentColor"
-                                            strokeWidth="2.2"
-                                            strokeLinecap="round"
-                                        />
-                                    </svg>
-                                </span>
-                            </button>
-                            <AnimatePresence initial={false}>
-                                {searchIsExpanded && (
-                                    <motion.input
-                                        ref={searchInputRef}
-                                        type="text"
-                                        className={styles.searchInput}
-                                        value={searchQuery}
-                                        onChange={(event) =>
-                                            setSearchQuery(event.target.value)
+                                <button
+                                    ref={searchToggleButtonRef}
+                                    type="button"
+                                    className={cn(
+                                        styles.searchToggleButton,
+                                        !isMobile &&
+                                            isSearchOpen &&
+                                            styles.searchToggleButtonClose
+                                    )}
+                                    onPointerDown={(event) => {
+                                        if (!isMobile && isSearchOpen) {
+                                            event.preventDefault()
                                         }
-                                        onKeyDown={(event) => {
-                                            if (event.key === 'Escape') {
-                                                closeSearch()
-                                                return
-                                            }
+                                    }}
+                                    onClick={() => {
+                                        setOpenDropdown(null)
 
-                                            if (event.key === 'Enter') {
-                                                searchInputRef.current?.blur()
+                                        if (isMobile) {
+                                            if (searchQuery) {
+                                                setSearchQuery('')
+                                            } else {
+                                                searchInputRef.current?.focus()
                                             }
-                                        }}
-                                        placeholder="Search"
-                                        aria-label="Search endorsements"
-                                        initial={{ opacity: 0, x: -8 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -8 }}
-                                        transition={{ duration: 0.16 }}
-                                    />
-                                )}
-                            </AnimatePresence>
+                                            return
+                                        }
+
+                                        if (isSearchOpen) {
+                                            closeSearch()
+                                        } else {
+                                            openSearch()
+                                        }
+                                    }}
+                                    aria-label={
+                                        isMobile
+                                            ? searchQuery
+                                                ? 'Clear search'
+                                                : 'Search endorsements'
+                                            : isSearchOpen
+                                              ? 'Close search'
+                                              : 'Open search'
+                                    }
+                                >
+                                    <span
+                                        className={styles.searchIconWrap}
+                                        aria-hidden="true"
+                                    >
+                                        <svg
+                                            className={cn(
+                                                styles.searchIcon,
+                                                isMobile ||
+                                                    (!isSearchOpen &&
+                                                        styles.searchIconVisible)
+                                            )}
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                        >
+                                            <circle
+                                                cx="11"
+                                                cy="11"
+                                                r="7"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                            />
+                                            <path
+                                                d="M20 20l-4.1-4.1"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                            />
+                                        </svg>
+                                        <svg
+                                            className={cn(
+                                                styles.searchIcon,
+                                                !isMobile &&
+                                                    isSearchOpen &&
+                                                    styles.searchIconVisible
+                                            )}
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                        >
+                                            <path
+                                                d="M6 6l12 12M18 6L6 18"
+                                                stroke="currentColor"
+                                                strokeWidth="2.2"
+                                                strokeLinecap="round"
+                                            />
+                                        </svg>
+                                    </span>
+                                </button>
+                                <AnimatePresence initial={false}>
+                                    {searchIsExpanded && (
+                                        <motion.input
+                                            ref={searchInputRef}
+                                            type="text"
+                                            className={styles.searchInput}
+                                            value={searchQuery}
+                                            onChange={(event) =>
+                                                setSearchQuery(
+                                                    event.target.value
+                                                )
+                                            }
+                                            onKeyDown={(event) => {
+                                                if (event.key === 'Escape') {
+                                                    closeSearch()
+                                                    return
+                                                }
+
+                                                if (event.key === 'Enter') {
+                                                    searchInputRef.current?.blur()
+                                                }
+                                            }}
+                                            placeholder="Search"
+                                            aria-label="Search endorsements"
+                                            initial={{ opacity: 0, x: -8 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -8 }}
+                                            transition={{ duration: 0.16 }}
+                                        />
+                                    )}
+                                </AnimatePresence>
+                            </motion.div>
                         </motion.div>
                     </motion.div>
-                </motion.div>
+                </LayoutGroup>
             </motion.div>
         </div>
     )

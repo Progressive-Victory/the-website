@@ -6,6 +6,27 @@
     bottom: 0;
     z-index: 50;
     background: rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 200ms ease;
+    pointer-events: none;
+
+    &.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+.panel {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+    transition:
+        opacity 250ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.open {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .container {

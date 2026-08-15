@@ -112,6 +112,16 @@ export function Endorsements() {
                 }
             >
                 <div className={styles.hero}>
+                    {/* <CandidateCarousel
+                        gap={175}
+                        candidates={filteredCandidates.filter(
+                            (c) =>
+                                c.endorsementType === 'PV Pledge' &&
+                                (c.electionStatus === '' ||
+                                    c.electionStatus === 'Elected' ||
+                                    c.electionStatus === 'Won Primary')
+                        )}
+                    /> */}
                     <FilterButtonRow
                         filter={filter}
                         setFilter={setFilter}
