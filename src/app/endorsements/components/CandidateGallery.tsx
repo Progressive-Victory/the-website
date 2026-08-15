@@ -16,7 +16,6 @@ import {
 import {
     compareFlatCandidates,
     compareSectionEntries,
-    getCandidateSubtitleText,
     getSectionLabel,
     sortSectionCandidates,
 } from '../endorsements.utils'
@@ -165,6 +164,7 @@ export function CandidateGallery({
                         animate="visible"
                         exit="exit"
                     >
+                        {/* Will Abstract to reduce nesting in next revision */}
                         {groupedCandidates.map(
                             ([sectionLabel, sectionCandidates], groupIndex) => {
                                 const isPastElectionSection =
@@ -298,7 +298,7 @@ function CandidateCardImpl({
     candidate: CandidateConfig
     onSelect: () => void
 }) {
-    const subtitleText = getCandidateSubtitleText(candidate)
+    const subtitleText = candidate.endorsementType
     const avatarFrameClassName =
         candidate.avatarBackgroundColor === 'blue'
             ? styles.tileImageFramePledge

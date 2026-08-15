@@ -281,6 +281,52 @@ export function FilterButtonRow({
         closeSearch()
     }
 
+    const sectionedInitial = isMobile
+        ? { opacity: 0, scale: 0.95, filter: 'blur(4px)' }
+        : {
+              opacity: 0,
+              scaleY: 0.6,
+              y: 12,
+              width: '0.05rem',
+              filter: 'blur(8px)',
+          }
+
+    const sectionedAnimate = hideFiltersForSearch
+        ? { opacity: 0, scale: 0.985, filter: 'blur(3px)' }
+        : isMobile
+          ? { opacity: 1, scale: 1, filter: 'blur(0px)' }
+          : { opacity: 1, scaleY: 1, y: 0, width: 'auto', filter: 'blur(0px)' }
+
+    const sectionedExit = isMobile
+        ? { opacity: 0, scale: 0.95, filter: 'blur(4px)' }
+        : {
+              opacity: 0,
+              scaleY: 0.6,
+              y: 12,
+              width: '0.05rem',
+              filter: 'blur(8px)',
+          }
+
+    const sectionedTransition = isMobile
+        ? {
+              duration: 0.2,
+              ease: [0.2, 0, 0, 1] as [number, number, number, number],
+          }
+        : {
+              type: 'spring' as const,
+              stiffness: 380,
+              damping: 24,
+              mass: 0.6,
+              delay: 0.04,
+              width: {
+                  type: 'spring' as const,
+                  stiffness: 340,
+                  damping: 26,
+                  mass: 0.65,
+                  delay: 0.06,
+              },
+          }
+
     return (
         <div className={styles.buttonRowWrap}>
             <motion.div
@@ -301,17 +347,12 @@ export function FilterButtonRow({
                 <LayoutGroup id="filter-controls">
                     <motion.div
                         layout
-                        className={[
+                        className={cn(
                             styles.controlsPanelDefault,
-                            hideFiltersForSearch
-                                ? styles.controlsPanelCovered
-                                : '',
-                            displayMode === 'sectioned'
-                                ? styles.controlsPanelSectionedMobile
-                                : '',
-                        ]
-                            .filter(Boolean)
-                            .join(' ')}
+                            hideFiltersForSearch && styles.controlsPanelCovered,
+                            displayMode === 'sectioned' &&
+                                styles.controlsPanelSectionedMobile
+                        )}
                         ref={controlsRowRef}
                         transition={
                             skipLayoutAnim
@@ -423,83 +464,12 @@ export function FilterButtonRow({
                                     style={
                                         isMobile
                                             ? undefined
-                                            : {
-                                                  originX: 1,
-                                                  originY: 0.5,
-                                              }
+                                            : { originX: 1, originY: 0.5 }
                                     }
-                                    initial={
-                                        isMobile
-                                            ? {
-                                                  opacity: 0,
-                                                  scale: 0.95,
-                                                  filter: 'blur(4px)',
-                                              }
-                                            : {
-                                                  opacity: 0,
-                                                  scaleY: 0.6,
-                                                  y: 12,
-                                                  width: '0.05rem',
-                                                  filter: 'blur(8px)',
-                                              }
-                                    }
-                                    animate={
-                                        hideFiltersForSearch
-                                            ? {
-                                                  opacity: 0,
-                                                  scale: 0.985,
-                                                  filter: 'blur(3px)',
-                                              }
-                                            : isMobile
-                                              ? {
-                                                    opacity: 1,
-                                                    scale: 1,
-                                                    filter: 'blur(0px)',
-                                                }
-                                              : {
-                                                    opacity: 1,
-                                                    scaleY: 1,
-                                                    y: 0,
-                                                    width: 'auto',
-                                                    filter: 'blur(0px)',
-                                                }
-                                    }
-                                    exit={
-                                        isMobile
-                                            ? {
-                                                  opacity: 0,
-                                                  scale: 0.95,
-                                                  filter: 'blur(4px)',
-                                              }
-                                            : {
-                                                  opacity: 0,
-                                                  scaleY: 0.6,
-                                                  y: 12,
-                                                  width: '0.05rem',
-                                                  filter: 'blur(8px)',
-                                              }
-                                    }
-                                    transition={
-                                        isMobile
-                                            ? {
-                                                  duration: 0.2,
-                                                  ease: [0.2, 0, 0, 1],
-                                              }
-                                            : {
-                                                  type: 'spring',
-                                                  stiffness: 380,
-                                                  damping: 24,
-                                                  mass: 0.6,
-                                                  delay: 0.04,
-                                                  width: {
-                                                      type: 'spring',
-                                                      stiffness: 340,
-                                                      damping: 26,
-                                                      mass: 0.65,
-                                                      delay: 0.06,
-                                                  },
-                                              }
-                                    }
+                                    initial={sectionedInitial}
+                                    animate={sectionedAnimate}
+                                    exit={sectionedExit}
+                                    transition={sectionedTransition}
                                 >
                                     <DropdownGroup
                                         dropdownId="grouping"
@@ -523,83 +493,12 @@ export function FilterButtonRow({
                                     style={
                                         isMobile
                                             ? undefined
-                                            : {
-                                                  originX: 0,
-                                                  originY: 0.5,
-                                              }
+                                            : { originX: 0, originY: 0.5 }
                                     }
-                                    initial={
-                                        isMobile
-                                            ? {
-                                                  opacity: 0,
-                                                  scale: 0.95,
-                                                  filter: 'blur(4px)',
-                                              }
-                                            : {
-                                                  opacity: 0,
-                                                  scaleY: 0.6,
-                                                  y: 12,
-                                                  width: '0.05rem',
-                                                  filter: 'blur(8px)',
-                                              }
-                                    }
-                                    animate={
-                                        hideFiltersForSearch
-                                            ? {
-                                                  opacity: 0,
-                                                  scale: 0.985,
-                                                  filter: 'blur(3px)',
-                                              }
-                                            : isMobile
-                                              ? {
-                                                    opacity: 1,
-                                                    scale: 1,
-                                                    filter: 'blur(0px)',
-                                                }
-                                              : {
-                                                    opacity: 1,
-                                                    scaleY: 1,
-                                                    y: 0,
-                                                    width: 'auto',
-                                                    filter: 'blur(0px)',
-                                                }
-                                    }
-                                    exit={
-                                        isMobile
-                                            ? {
-                                                  opacity: 0,
-                                                  scale: 0.95,
-                                                  filter: 'blur(4px)',
-                                              }
-                                            : {
-                                                  opacity: 0,
-                                                  scaleY: 0.6,
-                                                  y: 12,
-                                                  width: '0.05rem',
-                                                  filter: 'blur(8px)',
-                                              }
-                                    }
-                                    transition={
-                                        isMobile
-                                            ? {
-                                                  duration: 0.2,
-                                                  ease: [0.2, 0, 0, 1],
-                                              }
-                                            : {
-                                                  type: 'spring',
-                                                  stiffness: 380,
-                                                  damping: 24,
-                                                  mass: 0.6,
-                                                  delay: 0.04,
-                                                  width: {
-                                                      type: 'spring',
-                                                      stiffness: 340,
-                                                      damping: 26,
-                                                      mass: 0.65,
-                                                      delay: 0.06,
-                                                  },
-                                              }
-                                    }
+                                    initial={sectionedInitial}
+                                    animate={sectionedAnimate}
+                                    exit={sectionedExit}
+                                    transition={sectionedTransition}
                                 >
                                     <DropdownGroup
                                         dropdownId="order"
@@ -622,17 +521,14 @@ export function FilterButtonRow({
                             initial={false}
                             layout="position"
                             ref={searchControlRef}
-                            className={[
+                            className={cn(
                                 styles.searchControl,
-                                searchIsExpanded && !isMobile
-                                    ? styles.searchControlExpanded
-                                    : '',
-                                singleColumnLayout || showSearchLabel
-                                    ? styles.searchControlStacked
-                                    : '',
-                            ]
-                                .filter(Boolean)
-                                .join(' ')}
+                                searchIsExpanded &&
+                                    !isMobile &&
+                                    styles.searchControlExpanded,
+                                (singleColumnLayout || showSearchLabel) &&
+                                    styles.searchControlStacked
+                            )}
                             transition={{
                                 layout: {
                                     type: 'spring',
