@@ -1,8 +1,11 @@
 'use client'
 
 import styles from './account.module.css'
+import { useSearchParams } from 'next/navigation'
 
 export const RedirectBanner = () => {
+    const searchParams = useSearchParams()
+    if (!(searchParams.get('redirect') === 'true')) return null
     return (
         <div className={styles.redirectBanner}>
             <div className={styles.redirectBannerContent}>
