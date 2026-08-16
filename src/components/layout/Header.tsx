@@ -636,7 +636,7 @@ export function Header() {
         return navitems.map((item) => {
             if (!item.subnav?.columns) return item
 
-            const nextItem = {
+            return {
                 ...item,
                 href: item.name === 'Volunteer' ? volunteerHref : item.href,
                 subnav: {
@@ -668,8 +668,6 @@ export function Header() {
                     })),
                 },
             }
-
-            return nextItem
         })
     }, [discordUsers, session])
 
