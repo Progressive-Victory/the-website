@@ -53,7 +53,7 @@ export default function Page() {
             ready && selectedEventId != null
                 ? async ({ signal }) => {
                       const discordEvent = await onGet(
-                          '/discordEvents/:eventId',
+                          '/v2/discordEvents/:eventId',
                           zDiscordEventDetailsResponse,
                           {
                               params: { eventId: selectedEventId },
