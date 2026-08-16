@@ -3,17 +3,17 @@ import styles from './app.module.css'
 import {
     orgchartData,
     orgchartEdges,
-    Tags,
+    tags,
 } from './chartData/orgchartGraphData'
-import { Banner } from './components/banner'
-import { BlankNode } from './components/blankNode'
-import OrgChartEdge from './components/edge'
-import { GroupNode } from './components/group'
 import {
+    Banner,
+    BlankNode,
+    OrgChartEdge,
+    GroupNode,
     PositionNode,
     PositionData,
     PositionBubble,
-} from './components/position'
+} from './components'
 import dagre from '@dagrejs/dagre'
 import {
     type Node,
@@ -32,59 +32,61 @@ import React, { useState } from 'react'
 
 /* A number of committees can be defined up to the number of icons. */
 
-const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
-
-const nWidth = 340
-const nHeight = 280
-
-const GetElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
-    const isHorizontal = direction === 'LR'
-    dagreGraph.setGraph({ rankdir: direction, ranksep: 80, nodesep: 25 })
-    nodes.forEach((node) => {
-        dagreGraph.setNode(node.id, { width: nWidth, height: nHeight })
-    })
-    edges.forEach((edge) => {
-        dagreGraph.setEdge(edge.source, edge.target)
-    })
-    dagre.layout(dagreGraph)
-    const newNodes = nodes.map((node) => {
-        const nodeWithPosition = dagreGraph.node(node.id)
-        const newNode: Node = {
-            ...node,
-            targetPosition: isHorizontal ? Position.Left : Position.Top,
-            sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
-            position: {
-                x: nodeWithPosition.x - nWidth / 2,
-                y: nodeWithPosition.y - nHeight / 2,
-            },
-        }
-        return newNode
-    })
-    return { nodes: newNodes, edges }
-}
-
-const nodeTypes = {
-    positionNode: PositionNode,
-    groupNode: GroupNode,
-    blankNode: BlankNode,
-}
-
-const edgeTypes = {
-    'custom-edge': OrgChartEdge,
-}
-
-const { nodes: layoutedNodes, edges: layoutedEdges } = GetElements(
-    orgchartData,
-    orgchartEdges
-)
-
 export default function OrgChartApp() {
     const [legendEnabled, toggleLegend] = useState(false)
 
-    const LegendPanel = () => {
+    const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(
+        () => ({})
+    )
+
+    const nWidth = 340
+    const nHeight = 280
+
+    const getElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
+        const isHorizontal = direction === 'LR'
+        dagreGraph.setGraph({ rankdir: direction, ranksep: 80, nodesep: 25 })
+        nodes.forEach((node) => {
+            dagreGraph.setNode(node.id, { width: nWidth, height: nHeight })
+        })
+        edges.forEach((edge) => {
+            dagreGraph.setEdge(edge.source, edge.target)
+        })
+        dagre.layout(dagreGraph)
+        const newNodes = nodes.map((node) => {
+            const nodeWithPosition = dagreGraph.node(node.id)
+            const newNode: Node = {
+                ...node,
+                targetPosition: isHorizontal ? Position.Left : Position.Top,
+                sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
+                position: {
+                    x: nodeWithPosition.x - nWidth / 2,
+                    y: nodeWithPosition.y - nHeight / 2,
+                },
+            }
+            return newNode
+        })
+        return { nodes: newNodes, edges }
+    }
+
+    const nodeTypes = {
+        positionNode: PositionNode,
+        groupNode: GroupNode,
+        blankNode: BlankNode,
+    }
+
+    const edgeTypes = {
+        'custom-edge': OrgChartEdge,
+    }
+
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getElements(
+        orgchartData,
+        orgchartEdges
+    )
+
+    const legendPanel = () => {
         return (
             <Panel position="top-left">
-                {!legendEnabled ? null : (
+                {legendEnabled && (
                     <div className={styles.legend}>
                         <div className={styles.colorSampleContainer}>
                             <div className={styles.juniorColorSample}></div>
@@ -104,7 +106,7 @@ export default function OrgChartApp() {
                                 title: 'Position Name',
                                 name: 'Holder Name',
                                 banner: Banner.RED,
-                                tags: [Tags[0], Tags[1]],
+                                tags: [tags[0], tags[1]],
                             }}
                             mini={true}
                         />
@@ -134,17 +136,17 @@ export default function OrgChartApp() {
         leads?: PositionData[]
         members?: PositionData[]
     }) => {
-        const MemberList = () => {
-            let memberNumber = -1
-            if (leads && members) {
-                return leads.concat(members).map(CreateMini)
-            } else if (leads) {
-                return leads.map(CreateMini)
-            } else if (members) {
-                return members.map(CreateMini)
-            } else return null
-            function CreateMini(position: PositionData) {
-                memberNumber++
+        const renderMemberList = () => {
+            if (!leads && !members) return null
+
+            const memberList: PositionData[] = [
+                ...(leads ?? []),
+                ...(members ?? []),
+            ]
+
+            if (memberList.length <= 0) return null
+
+            return memberList.map((position, memberNumber) => {
                 return (
                     <PositionBubble
                         key={memberNumber}
@@ -152,37 +154,35 @@ export default function OrgChartApp() {
                         mini={true}
                     />
                 )
-            }
+            })
         }
 
         return (
-            <Panel
-                className={styles.detailPanel}
-                style={{ display: `${name ? 'block' : 'none'}` }}
-                position="center-right"
-            >
-                <button
-                    className={styles.closeButton}
-                    onClick={() => setCurrentDetails(<DetailPanel />)}
-                >
-                    {'< Close'}
-                </button>
-                <p className={styles.detailTitle}>{name}</p>
-                {!desc ? null : (
-                    <div className={styles.descriptionContainer}>
-                        <p className={styles.description}>{desc}</p>
-                    </div>
-                )}
-                {!leads && !members ? null : (
-                    <div className={styles.memberList}>
-                        <MemberList />
-                    </div>
-                )}
-            </Panel>
+            name && (
+                <Panel className={styles.detailPanel} position="center-right">
+                    <button
+                        className={styles.closeButton}
+                        onClick={() => setCurrentDetails(<DetailPanel />)}
+                    >
+                        {'< Close'}
+                    </button>
+                    <p className={styles.detailTitle}>{name}</p>
+                    {desc && (
+                        <div className={styles.descriptionContainer}>
+                            <p className={styles.description}>{desc}</p>
+                        </div>
+                    )}
+                    {(leads || members) && (
+                        <div className={styles.memberList}>
+                            {renderMemberList()}
+                        </div>
+                    )}
+                </Panel>
+            )
         )
     }
 
-    const RefreshButton = () => {
+    const refreshButton = () => {
         return (
             <Panel position="bottom-right">
                 <button
@@ -218,7 +218,7 @@ export default function OrgChartApp() {
 
     // Add back the legend panel
     return (
-        <div className={styles.background} /*ref={viewportRef}*/>
+        <div className={styles.background}>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -233,10 +233,10 @@ export default function OrgChartApp() {
                 maxZoom={1.0}
                 minZoom={0.25}
             >
-                <LegendPanel />
+                {legendPanel()}
                 {currentDetails}
                 <Controls />
-                <RefreshButton />
+                {refreshButton()}
             </ReactFlow>
         </div>
     )

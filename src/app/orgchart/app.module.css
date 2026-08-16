@@ -57,6 +57,7 @@
     background-color: #fffbeb;
     padding: 0.5rem;
     font-weight: 800;
+    display: 'block';
 }
 
 .closeButton {
@@ -86,7 +87,7 @@
 }
 
 .description {
-    padding: 0.25rem 0 0.25rem 0;
+    padding: 0.25rem 0;
     font-size: 0.875rem;
     line-height: 1.25rem;
     font-weight: 600;
@@ -100,5 +101,5 @@
     overflow: auto;
     border-top-width: 4px;
     border-color: #dc2626;
-    padding: 0.25rem 0 0.25rem 0;
+    padding: 0.25rem 0;
 }

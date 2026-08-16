@@ -19,7 +19,6 @@
         "@auth/core": "^0.40.0",
         "@dagrejs/dagre": "^1.0.4",
         "@dagrejs/graphlib": "^3.0.2",
-        "@discordjs/rest": "^2.6.0",
         "@headlessui/react": "^2.2.9",
         "@heroicons/react": "^2.2.0",
         "@react-three/postprocessing": "^3.0.4",

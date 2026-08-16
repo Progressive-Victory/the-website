@@ -1,13 +1,13 @@
 /* A number of committees can be defined up to the number of icons. */
 import { Banner } from '../components/banner'
 import { CreateBlankNode } from '../components/blankNode'
-import { CreateEdge } from '../components/edge'
-import { CreateGroupNode } from '../components/group'
+import { createEdge } from '../components/edge'
+import { createGroupNode } from '../components/group'
 import { CreatePositionNode } from '../components/position'
 import { Tag } from '../components/tag'
 import { Edge, type Node } from '@xyflow/react'
 
-export const Tags: Tag[] = [
+export const tags: Tag[] = [
     {
         name: 'Community Team',
         graphic: (
@@ -78,7 +78,7 @@ export const orgchartData: Node[] = [
         banner: Banner.RED,
         bannerTitle: 'Senior Leadership',
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 2,
         name: 'Community Department',
         leads: [
@@ -95,21 +95,21 @@ export const orgchartData: Node[] = [
                 name: 'Jenywlfersn',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[0], Tags[1]],
+                tags: [tags[0], tags[1]],
             },
             {
                 id: 5,
                 title: 'Community Manager',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[0], Tags[1]],
+                tags: [tags[0], tags[1]],
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 6,
         name: 'Welcome Team',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 7,
@@ -117,14 +117,14 @@ export const orgchartData: Node[] = [
                 name: 'Monarch',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[0]],
+                tags: [tags[0]],
             },
             {
                 id: 8,
                 title: 'Welcome Team Lead',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[0]],
+                tags: [tags[0]],
             },
 
             {
@@ -133,10 +133,10 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 10,
         name: 'Events Team',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 11,
@@ -144,14 +144,14 @@ export const orgchartData: Node[] = [
                 name: 'BrewMasterCraft',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[0]],
+                tags: [tags[0]],
             },
             {
                 id: 12,
                 title: 'Events Team Lead',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[0]],
+                tags: [tags[0]],
             },
             {
                 id: 13,
@@ -160,7 +160,7 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 14,
         name: 'Media Department',
         leads: [
@@ -186,10 +186,10 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 18,
         name: 'Writing Team',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 19,
@@ -197,7 +197,7 @@ export const orgchartData: Node[] = [
                 name: 'Dynas',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[0], Tags[1]],
+                tags: [tags[0], tags[1]],
             },
             {
                 id: 20,
@@ -205,20 +205,20 @@ export const orgchartData: Node[] = [
                 name: 'AJ',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[0], Tags[1]],
+                tags: [tags[0], tags[1]],
             },
             {
                 id: 21,
                 title: 'Writing Team Deputy',
                 name: 'Jam',
-                tags: [Tags[0], Tags[1]],
+                tags: [tags[0], tags[1]],
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 22,
         name: 'Audio-Video Team',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 23,
@@ -226,14 +226,14 @@ export const orgchartData: Node[] = [
                 name: 'Vezanmatics',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[1]],
+                tags: [tags[1]],
             },
             {
                 id: 24,
                 title: 'Audio-Video Team Lead',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[1]],
+                tags: [tags[1]],
             },
             {
                 id: 25,
@@ -241,10 +241,10 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 26,
         name: 'Design Team',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 27,
@@ -252,7 +252,7 @@ export const orgchartData: Node[] = [
                 name: 'Unfilled',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[1]],
+                tags: [tags[1]],
             },
             {
                 id: 28,
@@ -260,7 +260,7 @@ export const orgchartData: Node[] = [
                 name: 'Unfilled',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[1]],
+                tags: [tags[1]],
             },
             {
                 id: 29,
@@ -269,7 +269,7 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 30,
         name: 'Operations Department',
         leads: [
@@ -296,10 +296,10 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 34,
         name: 'Fundraising Team',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 35,
@@ -320,10 +320,10 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 38,
         name: 'Documentation Team',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 39,
@@ -343,7 +343,7 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 42,
         name: 'Infrastructure Department',
         leads: [
@@ -368,10 +368,10 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 46,
         name: 'Research Team',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 47,
@@ -392,7 +392,7 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 50,
         name: 'Organizing Department',
         leads: [
@@ -418,10 +418,10 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 54,
         name: 'Recruitment Team',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 55,
@@ -429,7 +429,7 @@ export const orgchartData: Node[] = [
                 name: 'Gunga',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
             {
                 id: 56,
@@ -437,7 +437,7 @@ export const orgchartData: Node[] = [
                 name: 'Damon',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
             {
                 id: 57,
@@ -446,10 +446,10 @@ export const orgchartData: Node[] = [
         ],
     }),
     CreateBlankNode({ id: 108 }),
-    CreateGroupNode({
+    createGroupNode({
         id: 58,
         name: 'Mobilization Team',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 59,
@@ -457,7 +457,7 @@ export const orgchartData: Node[] = [
                 name: 'Frankie',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
             {
                 id: 60,
@@ -465,19 +465,19 @@ export const orgchartData: Node[] = [
                 title: 'Mobilization Team Lead',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
             {
                 id: 61,
                 title: 'Mobilization Deputy',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 62,
         name: 'Western Coalition',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 63,
@@ -485,7 +485,7 @@ export const orgchartData: Node[] = [
                 name: 'Dynas',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
             {
                 id: 64,
@@ -493,7 +493,7 @@ export const orgchartData: Node[] = [
                 name: 'Finnegan',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
             {
                 id: 65,
@@ -502,14 +502,14 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 66,
         name: 'Western State Teams',
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 67,
         name: 'Midwest Coalition',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 68,
@@ -517,12 +517,12 @@ export const orgchartData: Node[] = [
                 name: 'Sam WI',
                 banner: Banner.BLUE,
                 bannerTitle: 'Junior Leadership',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
             {
                 id: 69,
                 title: 'Midwest Coalition Lead',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
             {
                 id: 70,
@@ -531,26 +531,26 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 71,
         name: 'Midwest State Teams',
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 72,
         name: 'Northeastern Coalition',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 73,
                 title: 'Northeastern Coalition Lead',
                 name: 'Matt',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
             {
                 id: 74,
                 title: 'Northeastern Coalition Lead',
                 name: 'Gyd',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
             {
                 id: 75,
@@ -558,24 +558,24 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 76,
         name: 'Northeast State Teams',
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 77,
         name: 'Southern Coalition',
-        desc: 'Yada yada yada',
+        desc: '',
         leads: [
             {
                 id: 78,
                 title: 'Southern Coalition Lead',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
             {
                 id: 79,
                 title: 'Southern Coalition Lead',
-                tags: [Tags[3]],
+                tags: [tags[3]],
             },
             {
                 id: 80,
@@ -583,11 +583,11 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 81,
         name: 'Southern State Teams',
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 82,
         name: 'Technology Department',
         leads: [
@@ -614,7 +614,7 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 86,
         name: 'Discord Engineering Team',
         desc: 'Manages the development of the Progressive Victory Discord bot.',
@@ -623,12 +623,12 @@ export const orgchartData: Node[] = [
                 id: 87,
                 title: 'Discord Eng. Team Lead',
                 name: 'Sh3llhound',
-                tags: [Tags[2]],
+                tags: [tags[2]],
             },
             {
                 id: 88,
                 title: 'Discord Eng. Team Lead',
-                tags: [Tags[2]],
+                tags: [tags[2]],
             },
             {
                 id: 89,
@@ -637,7 +637,7 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 90,
         name: 'Database Engineering Team',
         desc: 'Manages the development of the Progressive Victory database.',
@@ -646,12 +646,12 @@ export const orgchartData: Node[] = [
                 id: 91,
                 title: 'Database Eng. Team Lead',
                 name: 'Rexrath',
-                tags: [Tags[2]],
+                tags: [tags[2]],
             },
             {
                 id: 92,
                 title: 'Database Eng. Team Lead',
-                tags: [Tags[2]],
+                tags: [tags[2]],
             },
             {
                 id: 93,
@@ -659,7 +659,7 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 94,
         name: 'Website Engineering Team',
         desc: 'Manages the development of the Progressive Victory website.',
@@ -667,12 +667,12 @@ export const orgchartData: Node[] = [
             {
                 id: 95,
                 title: 'Website Eng. Team Lead',
-                tags: [Tags[2]],
+                tags: [tags[2]],
             },
             {
                 id: 96,
                 title: 'Website Eng. Team Lead',
-                tags: [Tags[2]],
+                tags: [tags[2]],
             },
             {
                 id: 97,
@@ -680,7 +680,7 @@ export const orgchartData: Node[] = [
             },
         ],
     }),
-    CreateGroupNode({
+    createGroupNode({
         id: 98,
         name: 'Moderation Team',
         members: [
@@ -732,7 +732,7 @@ export const orgchartData: Node[] = [
         ],
     }),
 
-    CreateGroupNode({
+    createGroupNode({
         id: 109,
         name: 'This Week at PV Strike Team',
         desc: 'Manages the weekly publication of the This Week at Progressive Victory newsletter.',
@@ -740,37 +740,37 @@ export const orgchartData: Node[] = [
 ]
 
 export const orgchartEdges: Edge[] = [
-    CreateEdge({ source: 0, target: 1 }),
-    CreateEdge({ source: 1, target: 2 }),
-    CreateEdge({ source: 1, target: 14 }),
-    CreateEdge({ source: 1, target: 30 }),
-    CreateEdge({ source: 1, target: 42 }),
-    CreateEdge({ source: 1, target: 50 }),
-    CreateEdge({ source: 1, target: 82 }),
-    CreateEdge({ source: 2, target: 6 }),
-    CreateEdge({ source: 2, target: 10 }),
-    CreateEdge({ source: 2, target: 98 }),
-    CreateEdge({ source: 2, target: 18 }),
-    CreateEdge({ source: 14, target: 18 }),
-    CreateEdge({ source: 14, target: 22 }),
-    CreateEdge({ source: 14, target: 26 }),
-    CreateEdge({ source: 30, target: 34 }),
-    CreateEdge({ source: 30, target: 38 }),
-    CreateEdge({ source: 42, target: 38 }),
-    CreateEdge({ source: 42, target: 46 }),
-    CreateEdge({ source: 50, target: 54 }),
-    CreateEdge({ source: 50, target: 58 }),
-    CreateEdge({ source: 62, target: 66 }),
-    CreateEdge({ source: 67, target: 71 }),
-    CreateEdge({ source: 72, target: 76 }),
-    CreateEdge({ source: 77, target: 81 }),
-    CreateEdge({ source: 82, target: 86 }),
-    CreateEdge({ source: 82, target: 90 }),
-    CreateEdge({ source: 82, target: 94 }),
-    CreateEdge({ source: 50, target: 108 }),
-    CreateEdge({ source: 108, target: 62 }),
-    CreateEdge({ source: 108, target: 67 }),
-    CreateEdge({ source: 108, target: 72 }),
-    CreateEdge({ source: 108, target: 77 }),
-    CreateEdge({ source: 18, target: 109 }),
+    createEdge({ source: 0, target: 1 }),
+    createEdge({ source: 1, target: 2 }),
+    createEdge({ source: 1, target: 14 }),
+    createEdge({ source: 1, target: 30 }),
+    createEdge({ source: 1, target: 42 }),
+    createEdge({ source: 1, target: 50 }),
+    createEdge({ source: 1, target: 82 }),
+    createEdge({ source: 2, target: 6 }),
+    createEdge({ source: 2, target: 10 }),
+    createEdge({ source: 2, target: 98 }),
+    createEdge({ source: 2, target: 18 }),
+    createEdge({ source: 14, target: 18 }),
+    createEdge({ source: 14, target: 22 }),
+    createEdge({ source: 14, target: 26 }),
+    createEdge({ source: 30, target: 34 }),
+    createEdge({ source: 30, target: 38 }),
+    createEdge({ source: 42, target: 38 }),
+    createEdge({ source: 42, target: 46 }),
+    createEdge({ source: 50, target: 54 }),
+    createEdge({ source: 50, target: 58 }),
+    createEdge({ source: 62, target: 66 }),
+    createEdge({ source: 67, target: 71 }),
+    createEdge({ source: 72, target: 76 }),
+    createEdge({ source: 77, target: 81 }),
+    createEdge({ source: 82, target: 86 }),
+    createEdge({ source: 82, target: 90 }),
+    createEdge({ source: 82, target: 94 }),
+    createEdge({ source: 50, target: 108 }),
+    createEdge({ source: 108, target: 62 }),
+    createEdge({ source: 108, target: 67 }),
+    createEdge({ source: 108, target: 72 }),
+    createEdge({ source: 108, target: 77 }),
+    createEdge({ source: 18, target: 109 }),
 ]

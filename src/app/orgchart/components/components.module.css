@@ -82,6 +82,14 @@
     line-height: 1.5rem;
 }
 
+.positionNameplateWhite {
+    color: #ffffff;
+}
+
+.positionNameplateRed {
+    color: #dc2626;
+}
+
 .yellowBubble {
     display: flex;
     flex-wrap: nowrap;
@@ -128,6 +136,7 @@
 .handle {
     border-color: #fcd34d;
     background-color: #1b4568;
+    opacity: 0;
 }
 
 .blankNode {
@@ -135,4 +144,9 @@
     background-color: #1b4568;
     width: 1px;
     height: 1px;
+}
+
+.edgeTest {
+    stroke: '#1b4568';
+    stroke-width: 3;
 }

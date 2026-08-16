@@ -42,7 +42,7 @@ export interface BannerObject {
     title?: string
 }
 
-export const DefaultBanners: BannerObject[] = [
+export const defaultBanners: BannerObject[] = [
     { color: '#60a5fa', title: 'Junior' },
     { color: '#dc2626', title: 'Senior' },
 ]

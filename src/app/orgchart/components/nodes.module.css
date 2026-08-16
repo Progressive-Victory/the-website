@@ -21,3 +21,8 @@
     background-color: #1b4568;
     opacity: 0;
 }
+
+.edgeTest {
+    stroke: '#1b4568';
+    stroke-width: 3;
+}

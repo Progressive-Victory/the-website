@@ -17,13 +17,11 @@ export type GroupData = {
 
 export type GroupNode = Node<GroupData, 'groupNode'>
 
-const GroupLeads = ({ data }: { data: GroupData }) => {
+const renderGroupLeads = ({ data }: { data: GroupData }) => {
     let leadNumber = -1
-    return data.leads?.map(RenderLead)
-    function RenderLead(lead: PositionData) {
-        leadNumber++
-        return <PositionBubble key={leadNumber} data={lead} />
-    }
+    return data.leads?.map((lead) => (
+        <PositionBubble key={leadNumber++} data={lead} />
+    ))
 }
 
 export function GroupNode({
@@ -47,7 +45,6 @@ export function GroupNode({
                 type="target"
                 position={targetPosition ?? Position.Left}
                 className={styles.handle}
-                style={{ opacity: 0 }}
             />
             <GroupBubble data={data} />
             <motion.div
@@ -59,13 +56,12 @@ export function GroupNode({
                     type: false,
                 }}
             >
-                <GroupLeads data={data} />
+                {renderGroupLeads({ data })}
             </motion.div>
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}
                 className={styles.handle}
-                style={{ opacity: 0 }}
             />
         </div>
     )
@@ -77,14 +73,14 @@ export function GroupBubble({ data }: { data: GroupData }) {
     return (
         <div className={styles.yellowBubble}>
             <div className={styles.groupNameContainer} ref={nameContainer}>
-                <Nameplate data={data} />
+                {renderNameplate({ data })}
             </div>
-            {data.tags ? <Tags data={data} /> : null}
+            {data.tags && <Tags data={data} />}
         </div>
     )
 }
 
-export function CreateGroupNode({
+export function createGroupNode({
     id,
     position = { x: 0, y: 0 },
     name,
@@ -106,7 +102,7 @@ export function CreateGroupNode({
         type: 'groupNode',
         position,
         data: {
-            id: id.toString,
+            id: id.toString(),
             name,
             desc,
             leads,
@@ -116,7 +112,7 @@ export function CreateGroupNode({
     }
 }
 
-const Nameplate = ({ data }: { data: GroupData }) => {
+const renderNameplate = ({ data }: { data: GroupData }) => {
     return (
         <motion.div
             initial={{

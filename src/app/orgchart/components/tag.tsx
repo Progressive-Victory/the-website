@@ -9,9 +9,7 @@ export interface Tag {
     graphic?: React.ReactNode
 }
 
-export const Tags = ({
-    data,
-}: { data: PositionData } | { data: GroupData }) => {
+export const Tags = ({ data }: { data: PositionData | GroupData }) => {
     if (!data.tags) return
     const pairs: Tag[][] = []
     data.tags.forEach((tag: Tag, index: number) => {
@@ -21,23 +19,19 @@ export const Tags = ({
     })
     return (
         <div className={styles.tags}>
-            {pairs.map((pair) => {
-                return (
-                    <div className={styles.tagContainer} key={pair[0].name}>
-                        {pair.map((tag) => {
-                            return (
-                                <div
-                                    key={tag.name}
-                                    className={styles.tag}
-                                    title={tag.tooltip ?? tag.name}
-                                >
-                                    {tag.graphic}
-                                </div>
-                            )
-                        })}
-                    </div>
-                )
-            })}
+            {pairs.map((pair) => (
+                <div className={styles.tagContainer} key={pair[0].name}>
+                    {pair.map((tag) => (
+                        <div
+                            key={tag.name}
+                            className={styles.tag}
+                            title={tag.tooltip ?? tag.name}
+                        >
+                            {tag.graphic}
+                        </div>
+                    ))}
+                </div>
+            ))}
         </div>
     )
 }

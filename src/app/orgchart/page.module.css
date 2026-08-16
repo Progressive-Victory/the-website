@@ -17,7 +17,7 @@
     flex-direction: column;
     align-items: center;
     row-gap: 2.5rem;
-    padding: 2.5rem 0 4rem 0;
+    padding-block: 2.5rem 4rem;
     @media (min-width: 1280px) {
         min-height: unset;
     }
@@ -30,6 +30,10 @@
     line-height: 2.5rem;
     font-weight: 700;
     color: #ffffff;
+}
+
+.header .chart {
+    color: #09223a;
 }
 
 .appContainer {

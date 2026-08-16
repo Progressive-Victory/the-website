@@ -24,7 +24,7 @@ export function PositionNode({
     targetPosition,
 }: NodeProps<PositionNode>) {
     return (
-        <div className={styles.nodeContainer} key={data.id}>
+        <div className={styles.nodeContainer}>
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
@@ -59,10 +59,10 @@ export function PositionBubble({
             <PositionBanner data={data} />
             <div className={styles.textbox}>
                 <div className={styles.titleContainer} ref={titleRef}>
-                    <Titleplate data={data} />
+                    {renderTitleplate({ data })}
                 </div>
                 <div className={styles.nameplateContainer}>
-                    <Nameplate data={data} />
+                    {renderNameplate({ data })}
                 </div>
             </div>
             <Tags data={data} />
@@ -105,30 +105,29 @@ export function CreatePositionNode({
     }
 }
 
-const Titleplate = ({ data }: { data: PositionData }) => {
+const renderTitleplate = ({ data }: { data: PositionData }) => {
     return (
         <motion.div
             initial={{
                 translateX: 0,
             }}
         >
-            {data.title != null ? data.title.toUpperCase() : 'VOLUNTEER'}
+            {data?.title?.toUpperCase() ?? 'VOLUNTEER'}
         </motion.div>
     )
 }
 
-const Nameplate = ({ data }: { data: PositionData }) => {
-    let newName: string
-    if (data.redacted) {
-        newName = 'REDACTED'
-    } else if (data.name == null) {
-        newName = 'UNFILLED'
-    } else newName = data.name.toUpperCase()
+const renderNameplate = ({ data }: { data: PositionData }) => {
+    const newName = data.redacted
+        ? 'REDACTED'
+        : (data.name?.toUpperCase() ?? 'UNFILLED')
     return (
         <motion.div
-            style={{
-                color: `${newName == 'REDACTED' || newName == 'UNFILLED' ? '#dc2626' : '#ffffff'}`,
-            }}
+            className={
+                newName === 'REDACTED' || newName == 'UNFILLED'
+                    ? styles.positionNameplateRed
+                    : styles.positionNameplateWhite
+            }
         >
             {newName}
         </motion.div>
