@@ -22,9 +22,9 @@ import {
 } from '@/contracts/data'
 import { zDiscordEventDetailsResponse } from '@/contracts/responses'
 import { dateService } from '@/services'
+import { cn } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
-import cx from 'classnames'
 import Image from 'next/image'
 import { redirect, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
@@ -123,7 +123,7 @@ export default function Page() {
             >
                 <div className={styles.eventContainer}>
                     <div
-                        className={cx(
+                        className={cn(
                             styles.eventStatus,
                             styles[
                                 getStatusName(event.status).toLocaleLowerCase()
@@ -220,7 +220,7 @@ export default function Page() {
                                     }
                                 >
                                     <span
-                                        className={cx(
+                                        className={cn(
                                             styles.statusPill,
                                             styles[
                                                 getStatusName(
@@ -235,7 +235,7 @@ export default function Page() {
                                     </span>
                                     {eventQuery.data.event.recurrent && (
                                         <span
-                                            className={cx(
+                                            className={cn(
                                                 styles.statusPill,
                                                 styles.recurrent
                                             )}
@@ -262,7 +262,7 @@ export default function Page() {
                                 />
                                 <FormField label="Status">
                                     <div
-                                        className={cx(
+                                        className={cn(
                                             styles.detailsStatusField,
                                             styles[
                                                 getStatusName(
