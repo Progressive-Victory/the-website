@@ -67,7 +67,7 @@ export default function Page() {
                           z.array(zDiscordEventAttendee),
                           {
                               params: { eventId: selectedEventId },
-                              query: { includeDiscordUser: true },
+                              query: { includeDiscordUsers: true },
                               signal,
                           }
                       )
