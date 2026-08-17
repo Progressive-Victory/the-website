@@ -573,6 +573,17 @@ export default function Page() {
                     count={searchQuery.data?.count}
                     isPending={searchQuery.isPending}
                     error={searchQuery.error}
+                    listLabel={
+                        activeFilterTag === 'members'
+                            ? 'Members'
+                            : activeFilterTag === 'server'
+                              ? 'Server Members'
+                              : activeFilterTag === 'donors'
+                                ? 'Donors'
+                                : activeFilterTag === 'dues'
+                                  ? 'Dues Paying Members'
+                                  : 'Users'
+                    }
                     headerContent={
                         <div className={styles.filterTagsWrapper}>
                             <FilterTags
@@ -626,16 +637,6 @@ export default function Page() {
                                 label: role.name,
                                 value: role.id,
                             })),
-                        },
-                        {
-                            label: 'Donors',
-                            value: 'isDonor',
-                            options: [
-                                {
-                                    label: `Show ${donorCount ?? '...'} Matched Donors`,
-                                    value: 'true',
-                                },
-                            ],
                         },
                     ]}
                     pinnedContent={
