@@ -172,7 +172,7 @@ export default function OrgChartApp() {
                             <p className={styles.description}>{desc}</p>
                         </div>
                     )}
-                    {(leads || members) && (
+                    {(leads ?? members) && (
                         <div className={styles.memberList}>
                             {renderMemberList()}
                         </div>

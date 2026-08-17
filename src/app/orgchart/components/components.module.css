@@ -39,6 +39,14 @@
     width: 20px;
     border-right-width: 2px;
     border-color: #fcd34d;
+
+    &.blue {
+        background-color: #60a5fa;
+    }
+
+    &.red {
+        background-color: #dc2626;
+    }
 }
 
 .textbox {

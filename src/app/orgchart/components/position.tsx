@@ -70,7 +70,7 @@ export function PositionBubble({
     )
 }
 
-export function CreatePositionNode({
+export function createPositionNode({
     id,
     position = { x: 0, y: 0 },
     title,

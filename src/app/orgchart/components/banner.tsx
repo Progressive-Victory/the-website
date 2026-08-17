@@ -1,5 +1,6 @@
 import styles from './components.module.css'
 import { PositionData } from './position'
+import { cn } from '@/util'
 
 type RGB = `rgb(${number}, ${number}, ${number})`
 type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`
@@ -19,16 +20,14 @@ export const PositionBanner = ({ data }: { data: PositionData }) => {
         case 1:
             return (
                 <div
-                    className={styles.banner}
-                    style={{ backgroundColor: '#60a5fa' }}
+                    className={cn(styles.banner, styles.blue)}
                     title={data.bannerTitle}
                 />
             )
         case 2:
             return (
                 <div
-                    className={styles.banner}
-                    style={{ backgroundColor: '#dc2626' }}
+                    className={cn(styles.banner, styles.red)}
                     title={data.bannerTitle}
                 />
             )

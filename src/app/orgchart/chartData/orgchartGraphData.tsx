@@ -3,7 +3,7 @@ import { Banner } from '../components/banner'
 import { CreateBlankNode } from '../components/blankNode'
 import { createEdge } from '../components/edge'
 import { createGroupNode } from '../components/group'
-import { CreatePositionNode } from '../components/position'
+import { createPositionNode } from '../components/position'
 import { Tag } from '../components/tag'
 import { Edge, type Node } from '@xyflow/react'
 
@@ -64,14 +64,14 @@ export const tags: Tag[] = [
 ]
 
 export const orgchartData: Node[] = [
-    CreatePositionNode({
+    createPositionNode({
         id: 0,
         title: 'Executive Director',
         name: 'Sam Dryzmala',
         banner: Banner.RED,
         bannerTitle: 'Senior Leadership',
     }),
-    CreatePositionNode({
+    createPositionNode({
         id: 1,
         title: 'Deputy Executive Director',
         name: 'Benjamin Gilbert-Lif',
