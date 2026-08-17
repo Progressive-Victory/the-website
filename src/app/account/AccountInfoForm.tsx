@@ -119,7 +119,7 @@ export const AccountInfoForm = ({
                         }
                         readonly
                     />
-                    <PhoneField label="Phone Number" field="phone" />
+                    <PhoneField label="Phone Number" field="phone" required />
                     <TextField label="Email" field="email" readonly />
                     <DateField<User>
                         label="Date of Birth"
