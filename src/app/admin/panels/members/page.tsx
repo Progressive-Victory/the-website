@@ -5,6 +5,7 @@ import styles from './page.module.css'
 import { DonorView } from './panel_views/DonorView'
 import { HistoryView } from './panel_views/HistoryView'
 import { MemberView } from './panel_views/MemberView'
+import { FilterTags, FilterTag } from '@/app/admin/layout/FilterTags'
 import { ListElement } from '@/app/admin/layout/List'
 import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
@@ -42,6 +43,8 @@ import {
 } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { FaUsers, FaUserTag } from 'react-icons/fa'
+import { FaClipboardUser, FaDollarSign, FaAddressCard } from 'react-icons/fa6'
 import { useMediaQuery } from 'usehooks-ts'
 import z from 'zod'
 
@@ -523,22 +526,6 @@ export default function Page() {
         setSelectedId(Number.isFinite(nextSelectedId) ? nextSelectedId : null)
     }, [navUserId])
 
-    const renderPositionPills = () => {
-        const userPositions = (positionHierarchy.data?.positions ?? []).filter(
-            (p) => p.userIds.includes(userQuery.data!.id)
-        )
-
-        if (userPositions.length) {
-            return userPositions.map((pos) => (
-                <span key={pos.id} className={styles.rolePill}>
-                    {pos.name}
-                </span>
-            ))
-        }
-
-        return <span className={styles.rolePill}>Community Member</span>
-    }
-
     const renderPage = () => {
         if (!selectedId || !userQuery.data) return null
 
@@ -645,43 +632,62 @@ export default function Page() {
                                 value: role.id,
                             })),
                         },
+                        {
+                            label: 'Donors',
+                            value: 'isDonor',
+                            options: [
+                                {
+                                    label: `Show ${donorCount ?? '...'} Matched Donors`,
+                                    value: 'true',
+                                },
+                            ],
+                        },
                     ],
                 },
             }}
             sidebarBody={
-                <SidebarBody<User | UserProfile>
-                    items={users}
-                    pinnedItems={pinnedUsers}
-                    isLoading={searchQuery.isPending}
-                    error={searchQuery.error}
-                    selectedKey={selectedId}
-                    renderItem={(user) => ({
-                        key: user.id,
-                        label: makeTitle(user),
-                        subtitle: user.discordUsers?.[0]?.username
-                            ? `@${user.discordUsers[0].username}`
-                            : 'NOT FOUND',
-                        tagLabel:
-                            user.id === loggedInUser.data?.id
-                                ? 'You'
-                                : undefined,
-                        iconNode: (
-                            <DiscordAvatar
-                                discordUserId={user.discordUsers?.[0]?.id}
-                                imageId={user.discordUsers?.[0]?.image}
-                                size={40}
-                            />
-                        ),
-                        href: `/admin/panels/members?userId=${user.id}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            handleSelectItem(user)
-                            if (!isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
-                        },
-                    })}
-                />
+                <>
+                    <div className={styles.filterTagsWrapper}>
+                        <FilterTags
+                            tags={memberFilterTags}
+                            activeTag={activeFilterTag}
+                            onChange={handleFilterTagChange}
+                        />
+                    </div>
+                    <SidebarBody<User | UserProfile>
+                        items={users}
+                        pinnedItems={pinnedUsers}
+                        isLoading={searchQuery.isPending}
+                        error={searchQuery.error}
+                        selectedKey={selectedId}
+                        renderItem={(user) => ({
+                            key: user.id,
+                            label: makeTitle(user),
+                            subtitle: user.discordUsers?.[0]?.username
+                                ? `@${user.discordUsers[0].username}`
+                                : 'NOT FOUND',
+                            tagLabel:
+                                user.id === loggedInUser.data?.id
+                                    ? 'You'
+                                    : undefined,
+                            iconNode: (
+                                <DiscordAvatar
+                                    discordUserId={user.discordUsers?.[0]?.id}
+                                    imageId={user.discordUsers?.[0]?.image}
+                                    size={40}
+                                />
+                            ),
+                            href: `/admin/panels/members?userId=${user.id}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                handleSelectItem(user)
+                                if (!isDesktop) {
+                                    setSidebarMobileVisible(false)
+                                }
+                            },
+                        })}
+                    />
+                </>
             }
         >
             <div className={styles.detailsPane}>
@@ -729,6 +735,7 @@ export default function Page() {
                                 onTabChange={(key) =>
                                     setSelectedTab(key as MemberTabKey)
                                 }
+                                positions={positionHierarchy.data?.positions}
                             />
                         </div>
                         <div className={styles.detailsContent}>

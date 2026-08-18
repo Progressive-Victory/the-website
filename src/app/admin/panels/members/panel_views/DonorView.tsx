@@ -20,8 +20,8 @@ import {
 import type { SearchRequest } from '@/contracts/requests'
 import type { PaginatedResponse } from '@/contracts/responses'
 import type { UseQueryResult } from '@tanstack/react-query'
-import cx from 'classnames'
 import { motion } from 'motion/react'
+import Link from 'next/link'
 import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
 
 export interface DonorViewProps {

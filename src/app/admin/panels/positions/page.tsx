@@ -1,17 +1,23 @@
 'use client'
 
 import styles from './page.module.css'
+import { ListElement } from '@/app/admin/layout/List'
+import { SearchModal } from '@/app/admin/layout/SearchModal'
 import {
     Form,
     FormGroup,
     FormState,
     TextField,
 } from '@/components/common/forms'
+import {
+    FormFieldProps,
+    useConfigure,
+} from '@/components/common/forms/FormField'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
-import { Position } from '@/contracts/data'
-import { SortDirection } from '@/contracts/requests'
-import { PositionHierarchyResponse } from '@/contracts/responses'
+import { Position, UserProfile, zUserProfile } from '@/contracts/data'
+import { SearchRequest, SortDirection } from '@/contracts/requests'
+import { PaginatedResponse, PositionHierarchyResponse } from '@/contracts/responses'
 import { usePositionQueries } from '@/queries'
 import { cn } from '@/util'
 import {
@@ -21,8 +27,19 @@ import {
     useUnpaginatedSearch,
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
+import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
+
+function getUserDisplayName(user: UserProfile | undefined): string {
+    if (!user) return 'Unknown'
+    if (user.firstName && user.lastName)
+        return `${user.firstName} ${user.lastName}`
+    const discord = user.discordUsers?.[0]?.username
+    if (discord) return `@${discord}`
+    if (user.preferredName) return user.preferredName
+    if (user.email) return user.email
+    return 'Unknown'
+}
 
 const blankPosition: Position = {
     id: -1,

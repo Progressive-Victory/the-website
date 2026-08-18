@@ -1,7 +1,7 @@
 import styles from './MemberBanner.module.css'
 import { DiscordAvatar } from '@/components/common'
 import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
-import { User, UserProfile } from '@/contracts/data'
+import { Position, User, UserProfile } from '@/contracts/data'
 
 interface MemberBannerProps {
     user: User
@@ -9,6 +9,7 @@ interface MemberBannerProps {
     selectedTab: string
     tabs: TabSpec[]
     onTabChange: (key: string) => void
+    positions?: Position[]
 }
 
 export function MemberBanner({
@@ -17,7 +18,12 @@ export function MemberBanner({
     selectedTab,
     tabs,
     onTabChange,
+    positions,
 }: MemberBannerProps) {
+    const userPositions = (positions ?? []).filter((p) =>
+        p.userIds.includes(user.id)
+    )
+
     return (
         <div className={styles.headerTop}>
             <div className={styles.cardStyle}>
@@ -38,14 +44,14 @@ export function MemberBanner({
                 </div>
             </div>
             <div className={styles.roleList}>
-                {user.roles?.length ? (
-                    user.roles.map((role) => (
-                        <span key={role.id} className={styles.rolePill}>
-                            {role.name}
+                {userPositions.length > 0 ? (
+                    userPositions.map((pos) => (
+                        <span key={pos.id} className={styles.rolePill}>
+                            {pos.name}
                         </span>
                     ))
                 ) : (
-                    <span className={styles.roleEmpty}>No roles assigned</span>
+                    <span className={styles.rolePill}>Community Member</span>
                 )}
             </div>
             <TabBar tabs={tabs} value={selectedTab} onChange={onTabChange} />

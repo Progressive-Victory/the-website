@@ -32,16 +32,6 @@ interface DropdownVariantConfig {
 function getDropdownVariantConfig(
     variant: DropdownButtonVariant
 ): DropdownVariantConfig {
-    if (variant === 'icon') {
-        return {
-            ariaHasPopup: 'menu',
-            buttonClassName: styles.buttonIcon,
-            showLabel: false,
-            showEllipsisIcon: false,
-            showCustomIcon: true,
-        }
-    }
-
     if (variant === 'short') {
         return {
             ariaHasPopup: 'menu',
@@ -91,7 +81,6 @@ function getDropdownVariantConfig(
 
 export interface DropdownButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     label?: string
-    icon?: React.ReactNode
     menu?:
         | React.ReactNode
         | ((controls: { closeDropdown: () => void }) => React.ReactNode)
@@ -226,13 +215,7 @@ export const DropdownButton = forwardRef<
                 {...props}
             >
                 {variant.showLabel ? <span>{label}</span> : null}
-                {variant.showCustomIcon ? (
-                    isOpen ? (
-                        <IoClose size={20} aria-hidden="true" />
-                    ) : (
-                        icon
-                    )
-                ) : variant.showEllipsisIcon ? (
+                {variant.showEllipsisIcon ? (
                     <EllipsisVerticalIcon
                         className={styles.shortIcon}
                         aria-hidden="true"
