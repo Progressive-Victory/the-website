@@ -600,7 +600,7 @@ export default function Page() {
             keepSidebarBorderWhenCollapsed
             // includeHeader
             largeTitle
-            sidebarWidth="24rem"
+            sidebarWidth="25.5rem"
             collapsedSidebarWidth="5rem"
             sidebarClassName={styles.sidebarBg}
             sidebarMobileVisible={isDesktop || sidebarMobileVisible}

@@ -52,6 +52,11 @@
     border-width: 1px;
     border-color: #d1d5db;
     padding: 0.25rem 0.75rem;
+    outline: none;
+
+    &:focus {
+        border-color: #0ea5e9;
+    }
 }
 
 .sidebarNavigationButton {
