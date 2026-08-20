@@ -28,7 +28,7 @@ import {
     UpdateUserRequest,
     zUpdateUserRequest,
 } from '@/contracts/requests'
-import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
+import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { usePositionQueries } from '@/queries'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
