@@ -1,5 +1,6 @@
 'use client'
 
+import { MemberBanner } from './MemberBanner'
 import styles from './page.module.css'
 import { DonorView } from './panel_views/DonorView'
 import { HistoryView } from './panel_views/HistoryView'
@@ -8,7 +9,7 @@ import { FilterTags, FilterTag } from '@/app/admin/layout/FilterTags'
 import { ListElement, List } from '@/app/admin/layout/List'
 import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
-import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
+import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ActBlueDonor,
     Role,
@@ -162,19 +163,6 @@ export default function Page() {
         search: donorSearch,
         onSearch: onDonorSearch,
     } = usePaginatedSearch('/actblue/donors', zActBlueDonor)
-
-    const donorCountQuery = useQuery({
-        queryKey: ['/users', 'donorCount'],
-        queryFn: ready
-            ? ({ signal }) =>
-                  onGet('/users', zPaginatedResponse(zUserProfile), {
-                      query: { isDonor: true, limit: 0 },
-                      signal,
-                  })
-            : skipToken,
-        placeholderData: keepPreviousData,
-    })
-    const donorCount = donorCountQuery.data?.count
 
     const positionHierarchy = useQuery({
         queryKey: ['positionHierarchy'],
@@ -484,22 +472,6 @@ export default function Page() {
         )
     }
 
-    const renderPositionPills = () => {
-        const userPositions = (positionHierarchy.data?.positions ?? []).filter(
-            (p) => p.userIds.includes(userQuery.data!.id)
-        )
-
-        if (userPositions.length) {
-            return userPositions.map((pos) => (
-                <span key={pos.id} className={styles.rolePill}>
-                    {pos.name}
-                </span>
-            ))
-        }
-
-        return <span className={styles.rolePill}>Community Member</span>
-    }
-
     const renderPage = () => {
         if (!selectedId || !userQuery.data) return null
 
@@ -667,53 +639,20 @@ export default function Page() {
                 {selectedId == null && (
                     <div className={styles.emptyState}>No user selected</div>
                 )}
-
                 {selectedId && userQuery.data && (
                     <>
                         <div className={styles.detailsHeader}>
                             <div className={styles.bannerCover} />
-                            <div className={styles.headerTop}>
-                                <div className={styles.cardStyle}>
-                                    <div className={styles.cardAvatar}>
-                                        <DiscordAvatar
-                                            discordUserId={
-                                                userQuery.data.discordUsers?.[0]
-                                                    ?.id
-                                            }
-                                            imageId={
-                                                userQuery.data.discordUsers?.[0]
-                                                    ?.image
-                                            }
-                                            size={64}
-                                        />
-                                    </div>
-                                    <div className={styles.userInfo}>
-                                        <h1 className={styles.headerUserName}>
-                                            {makeTitle(userQuery.data)}
-                                        </h1>
-                                        <h2
-                                            className={
-                                                styles.headerUserUsername
-                                            }
-                                        >
-                                            {userQuery.data.discordUsers?.[0]
-                                                ?.username
-                                                ? `@${userQuery.data.discordUsers[0].username}`
-                                                : 'NOT FOUND'}
-                                        </h2>
-                                    </div>
-                                </div>
-                                <div className={styles.roleList}>
-                                    {renderPositionPills()}
-                                </div>
-                                <TabBar
-                                    tabs={tabs}
-                                    value={selectedTab}
-                                    onChange={(key) =>
-                                        setSelectedTab(key as MemberTabKey)
-                                    }
-                                />
-                            </div>
+                            <MemberBanner
+                                user={userQuery.data}
+                                makeTitle={makeTitle}
+                                selectedTab={selectedTab}
+                                tabs={tabs}
+                                onTabChange={(key) =>
+                                    setSelectedTab(key as MemberTabKey)
+                                }
+                                positions={positionHierarchy.data?.positions}
+                            />
                         </div>
                         <div className={styles.detailsContent}>
                             {renderPage()}
