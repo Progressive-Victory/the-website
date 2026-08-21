@@ -42,19 +42,35 @@ export interface ListProps {
 
     onSearch: (search: SearchRequest) => void
 
+    listLabel?: string
+
     // NEW: Optional back button shown in the list header
     backHref?: string
     backLabel?: string
 }
 
 export function List(props: ListProps) {
+    const { search, count } = props
+    const page = search.page ?? 0
+    const limit = search.limit ?? 25
+    const start = count != null ? page * limit + 1 : 0
+    const end = count != null ? Math.min((page + 1) * limit, count) : 0
+
     return (
         <div className={styles.list}>
             <ListTop {...props} />
 
-            <ListBody {...props} />
+            <div className={styles.listBodyWrapper}>
+                <ListBody {...props} />
+            </div>
 
-            <ListBottom {...props} />
+            <ListBottom {...props}>
+                {count != null && (
+                    <span className={styles.pageSelectCount}>
+                        Showing {start}–{end} of {count} Results
+                    </span>
+                )}
+            </ListBottom>
         </div>
     )
 }
@@ -221,11 +237,14 @@ export function ListBottom({
     count,
     isPending,
     onSearch,
-}: Pick<ListProps, 'search' | 'count' | 'isPending' | 'onSearch'>) {
+    children,
+}: Pick<ListProps, 'search' | 'count' | 'isPending' | 'onSearch'> & {
+    children?: React.ReactNode
+}) {
     if (count == null) return null
 
     const page = search.page ?? 0
-    const limit = search.limit
+    const limit = search.limit ?? 25
 
     const handleChangePage = (page: number) => {
         onSearch({ ...search, page })
@@ -233,9 +252,10 @@ export function ListBottom({
 
     return (
         <div className={styles.pageSelectContainer}>
+            {children}
             <PageSelect
                 page={page}
-                pageSize={limit ?? 25}
+                pageSize={limit}
                 count={count}
                 disabled={isPending}
                 onChange={handleChangePage}
