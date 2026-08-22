@@ -1,5 +1,6 @@
 'use client'
 
+import { MemberBanner } from './MemberBanner'
 import styles from './page.module.css'
 import { DonorView } from './panel_views/DonorView'
 import { HistoryView } from './panel_views/HistoryView'
@@ -8,7 +9,7 @@ import { FilterTags, FilterTag } from '@/app/admin/layout/FilterTags'
 import { ListElement, List } from '@/app/admin/layout/List'
 import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
-import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
+import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ActBlueDonor,
     Role,
@@ -27,8 +28,9 @@ import {
     UpdateUserRequest,
     zUpdateUserRequest,
 } from '@/contracts/requests'
-import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
+import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
+import { usePositionQueries } from '@/queries'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -141,6 +143,7 @@ export default function Page() {
     }
 
     const loggedInUser = useCurrentUser()
+    const positionQueries = usePositionQueries()
 
     const {
         query: searchQuery,
@@ -161,18 +164,11 @@ export default function Page() {
         onSearch: onDonorSearch,
     } = usePaginatedSearch('/actblue/donors', zActBlueDonor)
 
-    const donorCountQuery = useQuery({
-        queryKey: ['/users', 'donorCount'],
-        queryFn: ready
-            ? ({ signal }) =>
-                  onGet('/users', zPaginatedResponse(zUserProfile), {
-                      query: { isDonor: true, limit: 0 },
-                      signal,
-                  })
-            : skipToken,
-        placeholderData: keepPreviousData,
+    const positionHierarchy = useQuery({
+        queryKey: ['positionHierarchy'],
+        queryFn: positionQueries.getPositionHierarchy,
+        enabled: positionQueries.ready,
     })
-    const donorCount = donorCountQuery.data?.count
 
     const roles = rolesQuery.data?.data ?? []
     const roleOptions = useMemo(
@@ -445,12 +441,9 @@ export default function Page() {
             return (
                 <ListElement
                     key={item.email}
-                    selected={false}
                     onClick={() => void handleSelectDonorItem(item, userId)}
                 >
-                    <div>
-                        <span>{`${item.firstname} ${item.lastname}`}</span>
-                    </div>
+                    <span>{`${item.firstname} ${item.lastname}`}</span>
                 </ListElement>
             )
         },
@@ -552,6 +545,17 @@ export default function Page() {
                     count={searchQuery.data?.count}
                     isPending={searchQuery.isPending}
                     error={searchQuery.error}
+                    listLabel={
+                        activeFilterTag === 'members'
+                            ? 'Members'
+                            : activeFilterTag === 'server'
+                              ? 'Server Members'
+                              : activeFilterTag === 'donors'
+                                ? 'Donors'
+                                : activeFilterTag === 'dues'
+                                  ? 'Dues Paying Members'
+                                  : 'Users'
+                    }
                     headerContent={
                         <div className={styles.filterTagsWrapper}>
                             <FilterTags
@@ -606,16 +610,6 @@ export default function Page() {
                                 value: role.id,
                             })),
                         },
-                        {
-                            label: 'Donors',
-                            value: 'isDonor',
-                            options: [
-                                {
-                                    label: `Show ${donorCount ?? '...'} Matched Donors`,
-                                    value: 'true',
-                                },
-                            ],
-                        },
                     ]}
                     pinnedContent={
                         loggedInUser.data ? (
@@ -645,66 +639,20 @@ export default function Page() {
                 {selectedId == null && (
                     <div className={styles.emptyState}>No user selected</div>
                 )}
-
                 {selectedId && userQuery.data && (
                     <>
                         <div className={styles.detailsHeader}>
                             <div className={styles.bannerCover} />
-                            <div className={styles.headerTop}>
-                                <div className={styles.cardStyle}>
-                                    <div className={styles.cardAvatar}>
-                                        <DiscordAvatar
-                                            discordUserId={
-                                                userQuery.data.discordUsers?.[0]
-                                                    ?.id
-                                            }
-                                            imageId={
-                                                userQuery.data.discordUsers?.[0]
-                                                    ?.image
-                                            }
-                                            size={64}
-                                        />
-                                    </div>
-                                    <div className={styles.userInfo}>
-                                        <h1 className={styles.headerUserName}>
-                                            {makeTitle(userQuery.data)}
-                                        </h1>
-                                        <h2
-                                            className={
-                                                styles.headerUserUsername
-                                            }
-                                        >
-                                            {userQuery.data.discordUsers?.[0]
-                                                ?.username
-                                                ? `@${userQuery.data.discordUsers[0].username}`
-                                                : 'NOT FOUND'}
-                                        </h2>
-                                    </div>
-                                </div>
-                                <div className={styles.roleList}>
-                                    {userQuery.data.roles?.length ? (
-                                        userQuery.data.roles.map((role) => (
-                                            <span
-                                                key={role.id}
-                                                className={styles.rolePill}
-                                            >
-                                                {role.name}
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span className={styles.roleEmpty}>
-                                            No roles assigned
-                                        </span>
-                                    )}
-                                </div>
-                                <TabBar
-                                    tabs={tabs}
-                                    value={selectedTab}
-                                    onChange={(key) =>
-                                        setSelectedTab(key as MemberTabKey)
-                                    }
-                                />
-                            </div>
+                            <MemberBanner
+                                user={userQuery.data}
+                                makeTitle={makeTitle}
+                                selectedTab={selectedTab}
+                                tabs={tabs}
+                                onTabChange={(key) =>
+                                    setSelectedTab(key as MemberTabKey)
+                                }
+                                positions={positionHierarchy.data?.positions}
+                            />
                         </div>
                         <div className={styles.detailsContent}>
                             {renderPage()}
