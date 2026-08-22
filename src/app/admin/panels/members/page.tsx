@@ -619,16 +619,6 @@ export default function Page() {
                                 value: role.id,
                             })),
                         },
-                        {
-                            label: 'Donors',
-                            value: 'isDonor',
-                            options: [
-                                {
-                                    label: `Show ${donorCount ?? '...'} Matched Donors`,
-                                    value: 'true',
-                                },
-                            ],
-                        },
                     ],
                 },
             }}
