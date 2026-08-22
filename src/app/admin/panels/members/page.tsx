@@ -30,7 +30,7 @@ import {
     UpdateUserRequest,
     zUpdateUserRequest,
 } from '@/contracts/requests'
-import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
+import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { usePositionQueries } from '@/queries'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
@@ -202,19 +202,6 @@ export default function Page() {
         search: donorSearch,
         onSearch: onDonorSearch,
     } = usePaginatedSearch('/actblue/donors', zActBlueDonor)
-
-    const donorCountQuery = useQuery({
-        queryKey: ['/users', 'donorCount'],
-        queryFn: ready
-            ? ({ signal }) =>
-                  onGet('/users', zPaginatedResponse(zUserProfile), {
-                      query: { isDonor: true, limit: 0 },
-                      signal,
-                  })
-            : skipToken,
-        placeholderData: keepPreviousData,
-    })
-    const donorCount = donorCountQuery.data?.count
 
     const positionHierarchy = useQuery({
         queryKey: ['positionHierarchy'],
