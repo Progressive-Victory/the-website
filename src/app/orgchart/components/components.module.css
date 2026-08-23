@@ -1,0 +1,160 @@
+.nodeContainer {
+    display: flex;
+    width: 100px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.tagContainer {
+    display: flex;
+    width: 32px;
+    height: 64px;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.tag {
+    display: flex;
+    justify-content: center;
+}
+
+.pearlBubble {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    border-radius: 1rem 0 0 1rem;
+    border-width: 2px;
+    border-color: #fcd34d;
+    background-color: #09223a;
+    font-weight: 700;
+    width: 100%;
+    height: 64px;
+    justify-content: center;
+}
+
+.banner {
+    flex-grow: 1;
+    position: relative;
+    width: 20px;
+    border-right-width: 2px;
+    border-color: #fcd34d;
+
+    &.blue {
+        background-color: #60a5fa;
+    }
+
+    &.red {
+        background-color: #dc2626;
+    }
+}
+
+.textbox {
+    flex-grow: 1000;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.titleContainer {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    overflow: hidden;
+}
+
+.nameplateContainer {
+    position: relative;
+    width: 100%;
+    height: 25px;
+    overflow: hidden;
+}
+
+.titleContainer > * {
+    position: absolute;
+    font-style: italic;
+    height: 20px;
+    white-space: nowrap;
+    color: #fcd34d;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.nameplateContainer > * {
+    position: absolute;
+    height: 25px;
+    white-space: nowrap;
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+.positionNameplateWhite {
+    color: #ffffff;
+}
+
+.positionNameplateRed {
+    color: #dc2626;
+}
+
+.yellowBubble {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: visible;
+    border-radius: 1rem 0 0 1rem;
+    border-width: 4px;
+    border-color: #fcd34d;
+    background-color: #fffbeb;
+    color: #09223a;
+    font-size: 1.55rem;
+    font-weight: 800;
+    width: 310px;
+    height: 100px;
+    align-items: center;
+    justify-items: center;
+}
+
+.dropdown {
+    overflow: hidden;
+    max-height: 0px;
+}
+
+.groupNameContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+    flex-grow: 1000;
+}
+
+.groupNameContainer > * {
+    position: absolute;
+    white-space: wrap;
+    padding: 0.5rem;
+}
+
+.tags {
+    display: flex;
+    flex-direction: row-reverse;
+    border-left-width: 2px;
+    border-color: #fcd34d;
+}
+
+.handle {
+    border-color: #fcd34d;
+    background-color: #1b4568;
+    opacity: 0;
+}
+
+.blankNode {
+    border-color: #fcd34d;
+    background-color: #1b4568;
+    width: 1px;
+    height: 1px;
+}
+
+.edgeTest {
+    stroke: '#1b4568';
+    stroke-width: 3;
+}
