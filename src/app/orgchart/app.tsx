@@ -1,4 +1,3 @@
-import '../../../tailwind.config'
 import styles from './app.module.css'
 import {
     orgchartData,
