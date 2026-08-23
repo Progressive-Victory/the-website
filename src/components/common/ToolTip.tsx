@@ -1,3 +1,5 @@
+import styles from './ToolTip.module.css'
+import { cn } from '@/util'
 import { useState, useEffect, useRef, RefObject } from 'react'
 
 /*
@@ -73,15 +75,13 @@ export function ToolTip({
             >
                 {label}
             </button>
-            {open ? (
+            {open && (
                 <div
                     ref={wrapperRef}
-                    className={'absolute right-0 ' + containerClasses}
+                    className={cn(styles.container, containerClasses)}
                 >
                     {children}
                 </div>
-            ) : (
-                <></>
             )}
         </>
     )

@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './DashboardWidget.module.css'
+import { cn } from '@/util'
 import { forwardRef } from 'react'
 
 export interface DashboardWidgetProps extends React.HTMLAttributes<HTMLElement> {
@@ -23,7 +24,7 @@ export const DashboardWidget = forwardRef<HTMLElement, DashboardWidgetProps>(
         return (
             <article
                 ref={ref}
-                className={[styles.card, className].filter(Boolean).join(' ')}
+                className={cn(styles.card, className)}
                 {...props}
             >
                 <div className={styles.title}>{title}</div>
