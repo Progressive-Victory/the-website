@@ -242,7 +242,7 @@
     gap: 1rem;
     border-top: 2px solid #e5e7eb;
     background-color: #f9fafb;
-    overflow: hidden;
+    overflow: visible;
     white-space: nowrap;
     min-width: max-content;
     max-height: 10rem;

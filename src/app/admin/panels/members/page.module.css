@@ -125,3 +125,7 @@
 .filterTagsWrapper {
     border-bottom: 1px solid rgba(17, 24, 39, 0.08);
 }
+
+:global([data-sidebar-collapsed='true']) .filterTagsWrapper {
+    display: none;
+}

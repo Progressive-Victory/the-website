@@ -281,8 +281,16 @@ export function SidebarListFooter({
 
     if (count == null) return null
 
+    const startItem = page * pageSize + 1
+    const endItem = Math.min((page + 1) * pageSize, totalCount)
+
     return (
         <div className={styles.pageSelectContainer}>
+            <span className={styles.resultCount}>
+                {totalCount === 0
+                    ? 'No results'
+                    : `Showing ${startItem}–${endItem} of ${totalCount.toLocaleString()} Results`}
+            </span>
             <div className={styles.pageSelect}>
                 <div className={styles.pageSelectButtons}>
                     <PaginationArrow
