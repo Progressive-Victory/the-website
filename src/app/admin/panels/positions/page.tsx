@@ -17,7 +17,10 @@ import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { Position, UserProfile, zUserProfile } from '@/contracts/data'
 import { SearchRequest, SortDirection } from '@/contracts/requests'
-import { PaginatedResponse, PositionHierarchyResponse } from '@/contracts/responses'
+import {
+    PaginatedResponse,
+    PositionHierarchyResponse,
+} from '@/contracts/responses'
 import { usePositionQueries } from '@/queries'
 import { cn } from '@/util'
 import {
@@ -27,7 +30,7 @@ import {
     useUnpaginatedSearch,
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChangeEvent, useCallback, useMemo, useState } from 'react'
+import { ChangeEvent, useCallback, useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
 function getUserDisplayName(user: UserProfile | undefined): string {

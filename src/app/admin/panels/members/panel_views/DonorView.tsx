@@ -20,9 +20,8 @@ import {
 import type { SearchRequest } from '@/contracts/requests'
 import type { PaginatedResponse } from '@/contracts/responses'
 import type { UseQueryResult } from '@tanstack/react-query'
-import { motion } from 'motion/react'
 import Link from 'next/link'
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import React, { ChangeEvent } from 'react'
 
 export interface DonorViewProps {
     selectedId: number
