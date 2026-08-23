@@ -153,44 +153,53 @@ interface SidebarSlotElementProps {
     children?: ReactNode
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SidebarHeaderSlot(_: SidebarHeaderSlotProps): ReactElement | null {
     return null
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SidebarHeaderLeftSlot(_: SidebarNamedSlotProps): ReactElement | null {
     return null
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SidebarHeaderRightSlot(_: SidebarNamedSlotProps): ReactElement | null {
     return null
 }
 
 function SidebarHeaderContentSlot(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _: SidebarNamedSlotProps
 ): ReactElement | null {
     return null
 }
 
 function SidebarHeaderSearchSlot(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _: SidebarNamedSlotProps
 ): ReactElement | null {
     return null
 }
 
 function SidebarHeaderFiltersSlot(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _: SidebarHeaderFiltersSlotProps
 ): ReactElement | null {
     return null
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SidebarFeaturedSlot(_: SidebarNamedSlotProps): ReactElement | null {
     return null
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SidebarBodySlot(_: SidebarNamedSlotProps): ReactElement | null {
     return null
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SidebarFooterSlot(_: SidebarNamedSlotProps): ReactElement | null {
     return null
 }
