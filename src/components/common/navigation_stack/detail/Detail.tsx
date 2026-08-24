@@ -2,6 +2,7 @@
 
 import { readPanelHistory, writePanelHistory } from '../panelHistory'
 import styles from './Detail.module.css'
+import { cn } from '@/util'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState, type ReactElement, type ReactNode } from 'react'
 import { FiChevronLeft } from 'react-icons/fi'
@@ -117,9 +118,7 @@ export function PanelBackButton({
 
     return (
         <button
-            className={[styles.panelBackButton, className]
-                .filter(Boolean)
-                .join(' ')}
+            className={cn(styles.panelBackButton, className)}
             onClick={handleBackNavigation}
             type="button"
             aria-label={backButtonText}
@@ -146,7 +145,7 @@ export function Detail({
     return (
         <section
             data-mobile-visible={mobileVisible}
-            className={[styles.detail, className].filter(Boolean).join(' ')}
+            className={cn(styles.detail, className)}
         >
             {showDetailHeader ? (
                 <div className={styles.header}>
