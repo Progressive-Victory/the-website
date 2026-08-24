@@ -15,6 +15,7 @@ jobs:
       REPLACE_ENV_FILE: deployment/deployment.env
       ENV_FILE: .env
       TAG: the_website_dev
+      INPUT_HOST: ${{ secrets.HOST }}
     steps:
      - uses: actions/checkout@v2
      - name: Replace Appsettings
