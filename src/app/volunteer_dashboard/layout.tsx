@@ -17,7 +17,7 @@ export default function Layout(/*({ children }: { children: React.ReactNode }) *
                     // isSelected={isPanelSelected}
                     sidebar={<div>Place Holder Sidebar content</div>}
                     detail={<div>Place Holder Detail content</div>}
-                    unSelected={<div>Place Holder Unselected content</div>}
+                    unselected={<div>Place Holder Unselected content</div>}
                 />
             </div>
         </ProtectedPage>
