@@ -38,7 +38,7 @@ jobs:
      - name: Execute remote SSH commands using SSH key
        uses: appleboy/ssh-action@v1
        with:
-         host: ${{ secrets.HOST }}
+         host: ${{ secrets.LINODE_HOST }}
          username: ${{ secrets.USERNAME }}
          key: ${{ secrets.PRIVATE_KEY }}
          script: ./deployscript.sh ${{ secrets.GITHUB_TOKEN }} ${{ env.TAG }}
