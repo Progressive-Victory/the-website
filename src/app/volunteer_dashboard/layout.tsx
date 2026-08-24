@@ -5,16 +5,13 @@ import { ProtectedPage } from '@/components/ProtectedPage'
 import { NavigationStack } from '@/components/common/navigation_stack/NavigationStack'
 import { Header } from '@/components/layout/Header'
 
-export default function Layout(/*({ children }: { children: React.ReactNode }) */) {
-    // const isPanelSelected = pathname.startsWith('/volunteer_dashboard/panels/')
-
+export default function Layout() {
     return (
         <ProtectedPage requiredRoles={['Superadmin']}>
             <div className={styles.root}>
                 <Header />
                 <NavigationStack
                     className={styles.navigationStack}
-                    // isSelected={isPanelSelected}
                     sidebar={<div>Place Holder Sidebar content</div>}
                     detail={<div>Place Holder Detail content</div>}
                     unselected={<div>Place Holder Unselected content</div>}
