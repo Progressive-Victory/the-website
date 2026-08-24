@@ -2,17 +2,20 @@
 
 import { readPanelHistory, writePanelHistory } from '../panelHistory'
 import styles from './Detail.module.css'
+import { cn } from '@/util'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState, type ReactElement, type ReactNode } from 'react'
 import { FiChevronLeft } from 'react-icons/fi'
 import { useMediaQuery } from 'usehooks-ts'
 
 function formatPanelLabelFromPath(path: string): string {
-    if (!path.startsWith('/admin/panels/')) {
+    if (!path.startsWith('/volunteer_dashboard/panels/')) {
         return 'Back'
     }
 
-    const panelSlug = path.slice('/admin/panels/'.length).split('/')[0]
+    const panelSlug = path
+        .slice('/volunteer_dashboard/panels/'.length)
+        .split('/')[0]
 
     if (!panelSlug) {
         return 'Back'
@@ -44,7 +47,7 @@ function usePanelBackNavigation() {
     const isDesktop = useMediaQuery('(min-width: 64rem)')
     const [hasPanelHistory, setHasPanelHistory] = useState(false)
     const [backTargetPanelLabel, setBackTargetPanelLabel] = useState('Back')
-    const isPanelRoute = pathname.startsWith('/admin/panels/')
+    const isPanelRoute = pathname.startsWith('/volunteer_dashboard/panels/')
 
     useEffect(() => {
         if (typeof window === 'undefined') {
@@ -86,7 +89,7 @@ function usePanelBackNavigation() {
             return
         }
 
-        router.push('/admin')
+        router.push('/volunteer_dashboard')
     }
 
     const backButtonText =
@@ -117,9 +120,7 @@ export function PanelBackButton({
 
     return (
         <button
-            className={[styles.panelBackButton, className]
-                .filter(Boolean)
-                .join(' ')}
+            className={cn(styles.panelBackButton, className)}
             onClick={handleBackNavigation}
             type="button"
             aria-label={backButtonText}
@@ -146,7 +147,7 @@ export function Detail({
     return (
         <section
             data-mobile-visible={mobileVisible}
-            className={[styles.detail, className].filter(Boolean).join(' ')}
+            className={cn(styles.detail, className)}
         >
             {showDetailHeader ? (
                 <div className={styles.header}>

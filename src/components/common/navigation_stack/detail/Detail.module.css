@@ -29,28 +29,25 @@
         background-color 140ms ease,
         color 140ms ease,
         transform 140ms ease;
+
+    &:hover {
+        color: #549ed6;
+        background: rgba(15, 23, 42, 0.05);
+    }
+
+    &:active {
+        color: #1b4568;
+    }
+
+    &:focus-visible {
+        outline: 2px solid rgba(41, 134, 204, 0.28);
+        outline-offset: 0.2rem;
+        border-radius: 999px;
+    }
 }
 
 .backButton {
     font-size: 1.06rem;
-}
-
-.backButton:hover,
-.panelBackButton:hover {
-    color: #549ed6;
-    background: rgba(15, 23, 42, 0.05);
-}
-
-.backButton:active,
-.panelBackButton:active {
-    color: #1b4568;
-}
-
-.backButton:focus-visible,
-.panelBackButton:focus-visible {
-    outline: 2px solid rgba(41, 134, 204, 0.28);
-    outline-offset: 0.2rem;
-    border-radius: 999px;
 }
 
 .label {
