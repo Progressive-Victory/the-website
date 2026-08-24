@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './NavigationStack.module.css'
+import { cn } from '@/util'
 import type { ReactElement, ReactNode } from 'react'
 
 export interface NavigationStackProps {
@@ -30,17 +31,14 @@ export function NavigationStack({
     className,
     overlay,
 }: NavigationStackProps): ReactElement {
-    const hasSelectedDetail =
-        isSelected ?? (detail !== null && detail !== undefined)
+    const hasSelectedDetail = Boolean(isSelected ?? detail)
     const activeDetailContent = hasSelectedDetail ? detail : unSelected
 
     return (
-        <div className={[styles.root, className].filter(Boolean).join(' ')}>
+        <div className={cn(styles.root, className)}>
             {sidebar}
             {activeDetailContent}
-            {overlay ? <div className={styles.overlay}>{overlay}</div> : null}
+            {overlay && <div className={styles.overlay}>{overlay}</div>}
         </div>
     )
 }
-
-export default NavigationStack
