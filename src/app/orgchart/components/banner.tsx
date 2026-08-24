@@ -9,31 +9,23 @@ type HSLA = `hsla(${number},${number}%,${number}%,${number})`
 type HEX = `#${string}`
 type Color = RGB | RGBA | HSL | HSLA | HEX
 
-export enum Banner {
-    NONE,
-    BLUE,
-    RED,
+export enum BannerColor {
+    NONE = 0,
+    BLUE = 1,
+    RED = 2,
 }
 
 export const PositionBanner = ({ data }: { data: PositionData }) => {
-    switch (data.banner) {
-        case 1:
-            return (
-                <div
-                    className={cn(styles.banner, styles.blue)}
-                    title={data.bannerTitle}
-                />
-            )
-        case 2:
-            return (
-                <div
-                    className={cn(styles.banner, styles.red)}
-                    title={data.bannerTitle}
-                />
-            )
-        default:
-            return <div className={styles.banner} style={{ display: 'none' }} />
-    }
+    return (
+        <div
+            className={cn(
+                styles.banner,
+                data.bannerColor === BannerColor.BLUE && styles.blue,
+                data.bannerColor === BannerColor.RED && styles.red
+            )}
+            title={data.bannerTitle}
+        ></div>
+    )
 }
 
 export interface BannerObject {

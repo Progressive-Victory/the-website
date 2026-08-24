@@ -104,7 +104,7 @@ export default function OrgChartApp() {
                                 id: -1,
                                 title: 'Position Name',
                                 name: 'Holder Name',
-                                bannerColor: BannerColor.RED,
+                                banner: BannerColor.RED,
                                 tags: [tags[0], tags[1]],
                             }}
                             mini={true}

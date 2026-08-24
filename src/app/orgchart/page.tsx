@@ -1,6 +1,6 @@
 'use client'
 
-import OrgChartApp from './app'
+import OrgChartApp from './OrgChart'
 import styles from './page.module.css'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'

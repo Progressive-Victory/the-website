@@ -5,6 +5,7 @@ import { XYPosition, Node, NodeProps, Position, Handle } from '@xyflow/react'
 import { motion } from 'motion/react'
 import React, { useRef, useState } from 'react'
 
+// TODO - Resolve the line below
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type GroupData = {
     id: string | number

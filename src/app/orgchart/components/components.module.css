@@ -31,6 +31,13 @@
     width: 100%;
     height: 64px;
     justify-content: center;
+
+    &.bubbleSmall {
+        width: 290px;
+    }
+    &.bubbleLarge {
+        width: 360px;
+    }
 }
 
 .banner {
@@ -39,13 +46,16 @@
     width: 20px;
     border-right-width: 2px;
     border-color: #fcd34d;
+    display: none;
 
     &.blue {
         background-color: #60a5fa;
+        display: block;
     }
 
     &.red {
         background-color: #dc2626;
+        display: block;
     }
 }
 
@@ -154,7 +164,7 @@
     height: 1px;
 }
 
-.edgeTest {
+.edge {
     stroke: '#1b4568';
     stroke-width: 3;
 }

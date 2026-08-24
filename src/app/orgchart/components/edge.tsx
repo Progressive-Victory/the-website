@@ -20,7 +20,7 @@ export function OrgChartEdge({
         <BaseEdge
             id={id}
             path={edgePath}
-            className={styles.edgeTest}
+            className={styles.edge}
             style={{ stroke: '#1b4568', strokeWidth: 3 }}
         />
     )

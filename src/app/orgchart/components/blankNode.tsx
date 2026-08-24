@@ -19,7 +19,7 @@ export function BlankNode({ targetPosition, sourcePosition }: NodeProps) {
     )
 }
 
-export function CreateBlankNode({
+export function createBlankNode({
     id,
     position = { x: 0, y: 0 },
 }: {
