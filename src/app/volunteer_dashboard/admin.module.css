@@ -24,3 +24,7 @@
         ),
         linear-gradient(180deg, #f8fafc 0%, #f3f4f6 100%);
 }
+
+.navigationStack {
+    --navigation-stack-height: calc(100dvh - 100px);
+}
