@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, List } from '@/app/admin/layout/List'
+import { MultiSelectOption } from '@/components/common'
 import {
     Form,
     FormGroup,
@@ -9,6 +9,8 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
+import Panel from '@/components/common/panel/Panel'
+import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { Role, zPermission, zRole } from '@/contracts/data'
 import { SortDirection, UpdateRoleRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
@@ -22,6 +24,7 @@ import {
     useQueryClient,
 } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
+import { useMediaQuery } from 'usehooks-ts'
 
 export default function Page() {
     const queryClient = useQueryClient()
@@ -29,6 +32,8 @@ export default function Page() {
 
     const [selectedId, setSelectedId] = useState<number | null>(null)
     const [formState, setFormState] = useState<FormState<Role> | null>(null)
+    const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
+    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const {
         query: searchQuery,
@@ -157,43 +162,93 @@ export default function Page() {
         })
     }
 
-    return (
-        <>
-            <List
-                search={search}
-                count={searchQuery.data?.count}
-                isPending={searchQuery.isPending}
-                error={searchQuery.error}
-                filters={[
-                    {
-                        value: 'permissionIds',
-                        label: 'Permissions',
-                        options: permissions.map((permission) => ({
-                            value: permission.id,
-                            label: permission.name,
-                        })),
-                    },
-                ]}
-                onSearch={onSearch}
-            >
-                {searchQuery.data?.data?.map((item) => (
-                    <ListElement
-                        key={item.id}
-                        selected={selectedId == item.id}
-                        onClick={() => handleSelectItem(item)}
-                    >
-                        <span className={styles.roleListItemName}>
-                            {item.name}
-                        </span>
-                    </ListElement>
-                ))}
-            </List>
+    const roles = searchQuery.data?.data ?? []
+    const resultCount = searchQuery.data?.count
 
-            <div className={styles.rightPane}>
+    const filterOptions = useMemo<FilterOption[]>(
+        () => [
+            {
+                value: 'permissionIds',
+                label: 'Permissions',
+                options: permissionOptions,
+            },
+        ],
+        [permissionOptions]
+    )
+
+    return (
+        <Panel
+            includeSidebar
+            largeTitle
+            sidebarWidth="24rem"
+            sidebarClassName={styles.sidebarBg}
+            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            label="Roles"
+            showScrollbar={false}
+            sidebarList={{
+                search: { search, onSearch },
+                footer: {
+                    page: search.page ?? 0,
+                    pageSize: search.limit ?? 25,
+                    count: resultCount,
+                    isPending: searchQuery.isPending,
+                    onPageChange: (nextPage: number) =>
+                        onSearch({ ...search, page: nextPage }),
+                },
+                filters: {
+                    search,
+                    onSearch,
+                    options: filterOptions,
+                },
+            }}
+            sidebarBody={
+                <SidebarBody<Role>
+                    items={roles}
+                    isLoading={searchQuery.isPending}
+                    error={searchQuery.error}
+                    selectedKey={selectedId}
+                    renderItem={(role) => ({
+                        key: role.id,
+                        label: role.name,
+                        href: `/admin/panels/roles?roleId=${role.id}`,
+                        onClick: (event) => {
+                            event.preventDefault()
+                            handleSelectItem(role)
+                            if (!isDesktop) {
+                                setSidebarMobileVisible(false)
+                            }
+                        },
+                    })}
+                />
+            }
+        >
+            <div className={styles.detailPane}>
+                {!isDesktop && !sidebarMobileVisible ? (
+                    <button
+                        className={styles.mobileBackButton}
+                        onClick={() => setSidebarMobileVisible(true)}
+                        type="button"
+                    >
+                        Roles
+                    </button>
+                ) : null}
                 {selectedId == null && (
                     <div className={styles.emptyState}>No role selected</div>
                 )}
-                {selectedId != null && roleQuery.data && (
+                {selectedId != null && roleQuery.isPending && (
+                    <div className={styles.emptyState}>
+                        Loading role details...
+                    </div>
+                )}
+                {selectedId != null && roleQuery.error && (
+                    <div
+                        className={styles.emptyState}
+                        style={{ color: '#ef4444' }}
+                    >
+                        Error: {roleQuery.error.message}
+                    </div>
+                )}
+                {selectedId != null && roleQuery.data ? (
                     <Form<Role>
                         key={selectedId}
                         form={roleQuery.data}
@@ -224,8 +279,16 @@ export default function Page() {
                             />
                         </FormGroup>
                     </Form>
+                ) : (
+                    <div className={styles.emptyState}>No role selected</div>
                 )}
             </div>
-        </>
+        </Panel>
     )
+}
+
+interface FilterOption {
+    value: string
+    label: string
+    options: MultiSelectOption[]
 }

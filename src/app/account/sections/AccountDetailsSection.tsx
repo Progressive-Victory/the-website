@@ -336,7 +336,7 @@ export function AccountDetailsSection({
                         {canAccessAdminPanel ? (
                             <BaseButton
                                 label="Volunteer Dashboard"
-                                href="/admin"
+                                href="/admin?from=welcome"
                                 className={styles.secondaryButton}
                             />
                         ) : isInServerResult.data?.isInServer === false ? (

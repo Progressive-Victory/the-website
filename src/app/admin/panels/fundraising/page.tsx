@@ -24,45 +24,12 @@ import {
 } from '@/components/common'
 import { Chart } from '@/components/common/charts/DualAxisBarLineChart'
 import { type ChartGranularityMode } from '@/components/common/charts/timeBuckets'
-import Link from 'next/link'
+import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import Panel from '@/components/common/panel/Panel'
 import { useEffect, useRef, useState } from 'react'
 import { FaDonate } from 'react-icons/fa'
 import { FaDollarSign } from 'react-icons/fa6'
 import { FiCheck } from 'react-icons/fi'
-
-interface FundraisingCardProps {
-    title: string
-    description: string
-    href: string
-    icon: React.ComponentType<{ size?: number }>
-    count?: number
-}
-
-function FundraisingCard({
-    title,
-    description,
-    href,
-    icon: Icon,
-    count,
-}: FundraisingCardProps) {
-    return (
-        <Link href={href} className={styles.card} aria-label={`${title} panel`}>
-            <div className={styles.cardTop}>
-                <div className={styles.cardLeft}>
-                    <div className={styles.iconPill} aria-hidden="true">
-                        <Icon size={20} />
-                    </div>
-
-                    <div className={styles.cardTitle}>{title}</div>
-                </div>
-
-                <div className={styles.cardCount}>{formatCount(count)}</div>
-            </div>
-
-            <div className={styles.cardDescription}>{description}</div>
-        </Link>
-    )
-}
 
 export default function Page() {
     const [dateRangeOverlayMaxHeight, setDateRangeOverlayMaxHeight] =
@@ -200,462 +167,415 @@ export default function Page() {
     }, [draftStartDate, draftEndDate, committedPreset])
 
     return (
-        <div className={styles.panelContents}>
-            <div className={styles.panelHeader}>
-                <div className={styles.breadcrumbs}>
-                    <span className={styles.prominentBreadcrumb}>Admin</span>
-                    <span className={styles.breadcrumbSeperator}>/</span>
-                    <span className={styles.panelBreadcrumb}>Fundraising</span>
-                </div>
+        <Panel includeHeader label="Fundraising">
+            <div className={styles.panelContents}>
+                <div className={styles.scrollView}>
+                    <div className={styles.galleryHeader}>
+                        <h1 className={styles.galleryTitle}>Fundraising</h1>
+                        <p className={styles.gallerySubTitle}>
+                            Manage ActBlue donors and contribution records.
+                        </p>
+                    </div>
 
-                {/* logic will eventually need to be reworked to show last api fetch and not most recent contribution date */}
-                <div className={styles.panelTimestamp}>Last Updated: N/A</div>
-            </div>
-            <div className={styles.scrollView}>
-                <div className={styles.galleryHeader}>
-                    <h1 className={styles.galleryTitle}>Fundraising</h1>
-                    <p className={styles.gallerySubTitle}>
-                        Manage ActBlue donors and contribution records.
-                    </p>
-                </div>
-
-                <div className={styles.dashboard}>
-                    <div className={styles.dashboardTopRow}>
-                        <div className={styles.dashboardSummaryGroup}>
-                            <div className={styles.dashboardKicker}>
-                                {raisedKickerLabel}
+                    <div className={styles.dashboard}>
+                        <div className={styles.dashboardTopRow}>
+                            <div className={styles.dashboardSummaryGroup}>
+                                <div className={styles.dashboardKicker}>
+                                    {raisedKickerLabel}
+                                </div>
+                                <div className={styles.heroValue}>
+                                    {formatCurrency(
+                                        statsQuery.data?.totalDollarsRaised
+                                    )}
+                                </div>
                             </div>
-                            <div className={styles.heroValue}>
-                                {formatCurrency(
-                                    statsQuery.data?.totalDollarsRaised
-                                )}
-                            </div>
-                        </div>
 
-                        <div className={styles.dashboardDateGroup}>
-                            <div className={styles.dateContainer}>
-                                <div className={styles.dateFilterControls}>
-                                    <label
-                                        htmlFor="fundraising-date-range-trigger"
-                                        className={styles.dateFilterLabel}
-                                    >
-                                        Date Range
-                                    </label>
+                            <div className={styles.dashboardDateGroup}>
+                                <div className={styles.dateContainer}>
+                                    <div className={styles.dateFilterControls}>
+                                        <label
+                                            htmlFor="fundraising-date-range-trigger"
+                                            className={styles.dateFilterLabel}
+                                        >
+                                            Date Range
+                                        </label>
 
-                                    <DropdownButton
-                                        id="fundraising-date-range-trigger"
-                                        type="button"
-                                        ref={dateRangeTriggerRef}
-                                        className={
-                                            styles.dateRangeTriggerButton
-                                        }
-                                        buttonVariant="long"
-                                        label={selectedRangeLabel}
-                                        onClick={() => {
-                                            setDraftStartDate(startDate)
-                                            setDraftEndDate(endDate)
-                                            setDraftPreset(committedPreset)
-                                        }}
-                                        menu={({ closeDropdown }) => (
-                                            <DropdownOverlay
-                                                ref={dateRangeOverlayRef}
-                                                className={
-                                                    styles.customDateRangeBox
-                                                }
-                                                narrowLayoutMode="flow"
-                                                style={{
-                                                    maxHeight:
-                                                        dateRangeOverlayMaxHeight !=
-                                                        null
-                                                            ? `${dateRangeOverlayMaxHeight}px`
-                                                            : undefined,
-                                                    transform: `translateY(-${dateRangeOverlayOffset}px)`,
-                                                    marginTop:
-                                                        isNarrowDateRangeLayout
-                                                            ? '0.35rem'
-                                                            : undefined,
-                                                }}
-                                                label="Select date range"
-                                                onClose={() => {
-                                                    closeDropdown()
-                                                }}
-                                                body={
-                                                    <>
-                                                        <div
-                                                            className={
-                                                                styles.dateRangePresetCol
-                                                            }
-                                                        >
-                                                            {PRESETS.map(
-                                                                (preset) => {
-                                                                    const isCommitted =
-                                                                        committedPreset ===
-                                                                        preset
-                                                                    const isDraft =
-                                                                        draftPreset ===
-                                                                        preset
-                                                                    const classes =
-                                                                        [
-                                                                            styles.dateRangePresetButton,
-                                                                        ]
-                                                                    if (
-                                                                        isCommitted
-                                                                    )
-                                                                        classes.push(
-                                                                            styles.dateRangePresetButtonCommitted
-                                                                        )
-                                                                    if (isDraft)
-                                                                        classes.push(
-                                                                            styles.dateRangePresetButtonDraft
-                                                                        )
-                                                                    return (
-                                                                        <button
-                                                                            key={
-                                                                                preset
-                                                                            }
-                                                                            type="button"
-                                                                            className={classes.join(
-                                                                                ' '
-                                                                            )}
-                                                                            onClick={() => {
-                                                                                const [
-                                                                                    s,
-                                                                                    e,
-                                                                                ] =
-                                                                                    getResolvedPresetRange(
-                                                                                        preset,
-                                                                                        allTimeFirst
-                                                                                    )
-                                                                                setDraftStartDate(
-                                                                                    s
-                                                                                )
-                                                                                setDraftEndDate(
-                                                                                    e
-                                                                                )
-                                                                                setDraftPreset(
-                                                                                    preset
-                                                                                )
-                                                                            }}
-                                                                            aria-pressed={
-                                                                                isDraft
-                                                                            }
-                                                                            aria-current={
-                                                                                isCommitted
-                                                                                    ? 'true'
-                                                                                    : undefined
-                                                                            }
-                                                                        >
-                                                                            <span>
-                                                                                {
-                                                                                    preset
-                                                                                }
-                                                                            </span>
-                                                                            <span
-                                                                                className={
-                                                                                    styles.dateRangePresetCheck
-                                                                                }
-                                                                                aria-hidden="true"
-                                                                            >
-                                                                                {isCommitted ? (
-                                                                                    <FiCheck
-                                                                                        size={
-                                                                                            14
-                                                                                        }
-                                                                                    />
-                                                                                ) : null}
-                                                                            </span>
-                                                                        </button>
-                                                                    )
+                                        <DropdownButton
+                                            id="fundraising-date-range-trigger"
+                                            type="button"
+                                            ref={dateRangeTriggerRef}
+                                            className={
+                                                styles.dateRangeTriggerButton
+                                            }
+                                            buttonVariant="long"
+                                            label={selectedRangeLabel}
+                                            onClick={() => {
+                                                setDraftStartDate(startDate)
+                                                setDraftEndDate(endDate)
+                                                setDraftPreset(committedPreset)
+                                            }}
+                                            menu={({ closeDropdown }) => (
+                                                <DropdownOverlay
+                                                    ref={dateRangeOverlayRef}
+                                                    className={
+                                                        styles.customDateRangeBox
+                                                    }
+                                                    narrowLayoutMode="flow"
+                                                    style={{
+                                                        maxHeight:
+                                                            dateRangeOverlayMaxHeight !=
+                                                            null
+                                                                ? `${dateRangeOverlayMaxHeight}px`
+                                                                : undefined,
+                                                        transform: `translateY(-${dateRangeOverlayOffset}px)`,
+                                                        marginTop:
+                                                            isNarrowDateRangeLayout
+                                                                ? '0.35rem'
+                                                                : undefined,
+                                                    }}
+                                                    label="Select date range"
+                                                    onClose={() => {
+                                                        closeDropdown()
+                                                    }}
+                                                    body={
+                                                        <>
+                                                            <div
+                                                                className={
+                                                                    styles.dateRangePresetCol
                                                                 }
-                                                            )}
-                                                        </div>
+                                                            >
+                                                                {PRESETS.map(
+                                                                    (
+                                                                        preset
+                                                                    ) => {
+                                                                        const isCommitted =
+                                                                            committedPreset ===
+                                                                            preset
+                                                                        const isDraft =
+                                                                            draftPreset ===
+                                                                            preset
+                                                                        const classes =
+                                                                            [
+                                                                                styles.dateRangePresetButton,
+                                                                            ]
+                                                                        if (
+                                                                            isCommitted
+                                                                        )
+                                                                            classes.push(
+                                                                                styles.dateRangePresetButtonCommitted
+                                                                            )
+                                                                        if (
+                                                                            isDraft
+                                                                        )
+                                                                            classes.push(
+                                                                                styles.dateRangePresetButtonDraft
+                                                                            )
+                                                                        return (
+                                                                            <button
+                                                                                key={
+                                                                                    preset
+                                                                                }
+                                                                                type="button"
+                                                                                className={classes.join(
+                                                                                    ' '
+                                                                                )}
+                                                                                onClick={() => {
+                                                                                    const [
+                                                                                        s,
+                                                                                        e,
+                                                                                    ] =
+                                                                                        getResolvedPresetRange(
+                                                                                            preset,
+                                                                                            allTimeFirst
+                                                                                        )
+                                                                                    setDraftStartDate(
+                                                                                        s
+                                                                                    )
+                                                                                    setDraftEndDate(
+                                                                                        e
+                                                                                    )
+                                                                                    setDraftPreset(
+                                                                                        preset
+                                                                                    )
+                                                                                }}
+                                                                                aria-pressed={
+                                                                                    isDraft
+                                                                                }
+                                                                                aria-current={
+                                                                                    isCommitted
+                                                                                        ? 'true'
+                                                                                        : undefined
+                                                                                }
+                                                                            >
+                                                                                <span>
+                                                                                    {
+                                                                                        preset
+                                                                                    }
+                                                                                </span>
+                                                                                <span
+                                                                                    className={
+                                                                                        styles.dateRangePresetCheck
+                                                                                    }
+                                                                                    aria-hidden="true"
+                                                                                >
+                                                                                    {isCommitted ? (
+                                                                                        <FiCheck
+                                                                                            size={
+                                                                                                14
+                                                                                            }
+                                                                                        />
+                                                                                    ) : null}
+                                                                                </span>
+                                                                            </button>
+                                                                        )
+                                                                    }
+                                                                )}
+                                                            </div>
 
-                                                        <DateRangePicker
-                                                            startDate={
-                                                                draftStartDate
-                                                            }
-                                                            endDate={
-                                                                draftEndDate
-                                                            }
-                                                            onRangeChange={(
-                                                                nextStartDate: Date | null,
-                                                                nextEndDate: Date | null
-                                                            ) => {
-                                                                setDraftStartDate(
-                                                                    nextStartDate
-                                                                )
-                                                                setDraftEndDate(
-                                                                    nextEndDate
-                                                                )
-                                                                setDraftPreset(
-                                                                    inferPresetFromRange(
-                                                                        nextStartDate,
-                                                                        nextEndDate,
-                                                                        allTimeFirst
+                                                            <DateRangePicker
+                                                                startDate={
+                                                                    draftStartDate
+                                                                }
+                                                                endDate={
+                                                                    draftEndDate
+                                                                }
+                                                                onRangeChange={(
+                                                                    nextStartDate: Date | null,
+                                                                    nextEndDate: Date | null
+                                                                ) => {
+                                                                    setDraftStartDate(
+                                                                        nextStartDate
                                                                     )
-                                                                )
-                                                            }}
-                                                        />
-                                                    </>
-                                                }
-                                                bodyClassName={
-                                                    styles.dateRangePopBody
-                                                }
-                                                footerButtonLabel={
-                                                    isAwaitingDraftEndDate
-                                                        ? 'Select End Date'
-                                                        : 'Select'
-                                                }
-                                                footerButtonDisabled={
-                                                    !canApplyCustomRange
-                                                }
-                                                footerButtonOnClick={() => {
-                                                    if (!canApplyCustomRange)
-                                                        return
-                                                    setStartDate(draftStartDate)
-                                                    setEndDate(draftEndDate)
-                                                    setCommittedPreset(
-                                                        draftPreset
-                                                    )
-                                                    closeDropdown()
-                                                }}
-                                            />
-                                        )}
-                                    />
+                                                                    setDraftEndDate(
+                                                                        nextEndDate
+                                                                    )
+                                                                    setDraftPreset(
+                                                                        inferPresetFromRange(
+                                                                            nextStartDate,
+                                                                            nextEndDate,
+                                                                            allTimeFirst
+                                                                        )
+                                                                    )
+                                                                }}
+                                                            />
+                                                        </>
+                                                    }
+                                                    bodyClassName={
+                                                        styles.dateRangePopBody
+                                                    }
+                                                    footerButtonLabel={
+                                                        isAwaitingDraftEndDate
+                                                            ? 'Select End Date'
+                                                            : 'Select'
+                                                    }
+                                                    footerButtonDisabled={
+                                                        !canApplyCustomRange
+                                                    }
+                                                    footerButtonOnClick={() => {
+                                                        if (
+                                                            !canApplyCustomRange
+                                                        )
+                                                            return
+                                                        setStartDate(
+                                                            draftStartDate
+                                                        )
+                                                        setEndDate(draftEndDate)
+                                                        setCommittedPreset(
+                                                            draftPreset
+                                                        )
+                                                        closeDropdown()
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className={styles.metricGrid}>
-                        <DashboardWidget
-                            title="Recurring"
-                            value={formatCurrency(
-                                statsQuery.data?.recurringDollarsRaised
-                            )}
-                            valueChange={
-                                recurringChangeLabel != null ? (
-                                    <span
-                                        className={
-                                            recurringChangeAmount != null &&
-                                            recurringChangeAmount < 0
-                                                ? styles.metricChangeNegative
-                                                : styles.metricChangePositive
-                                        }
-                                    >
-                                        {recurringChangeLabel}
-                                    </span>
-                                ) : null
-                            }
-                            stat1={
-                                recurringPct != null &&
-                                statsQuery.data?.recurringContributionCount !=
+                        <div className={styles.metricGrid}>
+                            <DashboardWidget
+                                title="Recurring"
+                                value={formatCurrency(
+                                    statsQuery.data?.recurringDollarsRaised
+                                )}
+                                valueChange={
+                                    recurringChangeLabel != null ? (
+                                        <span
+                                            className={
+                                                recurringChangeAmount != null &&
+                                                recurringChangeAmount < 0
+                                                    ? styles.metricChangeNegative
+                                                    : styles.metricChangePositive
+                                            }
+                                        >
+                                            {recurringChangeLabel}
+                                        </span>
+                                    ) : null
+                                }
+                                stat1={
+                                    recurringPct != null &&
+                                    statsQuery.data
+                                        ?.recurringContributionCount != null
+                                        ? `${recurringPct}% of total`
+                                        : '—'
+                                }
+                                stat2={
+                                    statsQuery.data
+                                        ?.recurringContributionCount != null
+                                        ? formatDonationCountLabel(
+                                              statsQuery.data
+                                                  .recurringContributionCount
+                                          )
+                                        : '—'
+                                }
+                            />
+
+                            <DashboardWidget
+                                title="One-Time"
+                                value={formatCurrency(
+                                    statsQuery.data?.oneTimeDollarsRaised
+                                )}
+                                stat1={
+                                    oneTimePct != null &&
+                                    statsQuery.data?.oneTimeContributionCount !=
+                                        null
+                                        ? `${oneTimePct}% of total`
+                                        : '—'
+                                }
+                                stat2={
+                                    statsQuery.data?.oneTimeContributionCount !=
                                     null
-                                    ? `${recurringPct}% of total`
-                                    : '—'
-                            }
-                            stat2={
-                                statsQuery.data?.recurringContributionCount !=
-                                null
-                                    ? formatDonationCountLabel(
-                                          statsQuery.data
-                                              .recurringContributionCount
-                                      )
-                                    : '—'
-                            }
-                        />
+                                        ? formatDonationCountLabel(
+                                              statsQuery.data
+                                                  .oneTimeContributionCount
+                                          )
+                                        : '—'
+                                }
+                            />
 
-                        <DashboardWidget
-                            title="One-Time"
-                            value={formatCurrency(
-                                statsQuery.data?.oneTimeDollarsRaised
-                            )}
-                            stat1={
-                                oneTimePct != null &&
-                                statsQuery.data?.oneTimeContributionCount !=
-                                    null
-                                    ? `${oneTimePct}% of total`
-                                    : '—'
-                            }
-                            stat2={
-                                statsQuery.data?.oneTimeContributionCount !=
-                                null
-                                    ? formatDonationCountLabel(
-                                          statsQuery.data
-                                              .oneTimeContributionCount
-                                      )
-                                    : '—'
-                            }
-                        />
+                            <DashboardWidget
+                                title="Donors"
+                                value={formatCount(
+                                    statsQuery.data?.totalDonorCount
+                                )}
+                                stat1={`Recurring ${formatCount(
+                                    statsQuery.data?.recurringDonorCount
+                                )}`}
+                                stat2={`One-Time ${formatCount(
+                                    statsQuery.data?.oneTimeDonorCount
+                                )}`}
+                            />
 
-                        <DashboardWidget
-                            title="Donors"
-                            value={formatCount(
-                                statsQuery.data?.totalDonorCount
-                            )}
-                            stat1={`Recurring ${formatCount(
-                                statsQuery.data?.recurringDonorCount
-                            )}`}
-                            stat2={`One-Time ${formatCount(
-                                statsQuery.data?.oneTimeDonorCount
-                            )}`}
-                        />
+                            <DashboardWidget
+                                title="Contributions"
+                                value={formatCount(
+                                    statsQuery.data?.totalContributionCount
+                                )}
+                                stat1={`Recurring ${formatCount(
+                                    statsQuery.data?.recurringContributionCount
+                                )}`}
+                                stat2={`One-Time ${formatCount(
+                                    statsQuery.data?.oneTimeContributionCount
+                                )}`}
+                            />
+                        </div>
 
-                        <DashboardWidget
-                            title="Contributions"
-                            value={formatCount(
-                                statsQuery.data?.totalContributionCount
-                            )}
-                            stat1={`Recurring ${formatCount(
-                                statsQuery.data?.recurringContributionCount
-                            )}`}
-                            stat2={`One-Time ${formatCount(
-                                statsQuery.data?.oneTimeContributionCount
-                            )}`}
-                        />
-                    </div>
-
-                    <Chart
-                        title="Fundraising Volume"
-                        hint="Date Range"
-                        points={chartPoints}
-                        smoothLine={smoothLine}
-                        showAreaFill={showAreaFill}
-                        showLine={showDonationsLine}
-                        barDisplayMode={chartBarDisplayMode}
-                        seriesLabels={{
-                            primaryBar: 'One-Time Amount',
-                            secondaryBar: 'Recurring Amount',
-                            line: 'Total Donations',
-                        }}
-                        valueFormatters={{
-                            primaryBar: (value) => formatCurrency(value),
-                            secondaryBar: (value) => formatCurrency(value),
-                            line: (value) => formatCount(value),
-                        }}
-                        axisFormatters={{
-                            left: formatCurrencyAxis,
-                            right: formatCountAxis,
-                        }}
-                        ariaLabel="Fundraising volume by period: one-time and recurring dollars with total donations"
-                        chartAriaLabel={`Fundraising volume across ${chartPoints.length} periods`}
-                        tableConfig={{
-                            caption: 'Fundraising volume per period',
-                            periodHeader: 'Period',
-                            primaryBarHeader: 'One-Time',
-                            secondaryBarHeader: 'Recurring',
-                            lineHeader: 'Donations',
-                        }}
-                        onRangeSelect={
-                            zoomEnabled
-                                ? ({
-                                      start,
-                                      end,
-                                  }: {
-                                      start: Date
-                                      end: Date
-                                  }) => {
-                                      const oneDayMs = 24 * 60 * 60 * 1000
-                                      const inclusiveRangeMs =
-                                          end.getTime() - start.getTime() + 1000
-
-                                      if (
-                                          Number.isNaN(start.getTime()) ||
-                                          Number.isNaN(end.getTime())
-                                      ) {
-                                          return
-                                      }
-
-                                      if (inclusiveRangeMs < oneDayMs) {
-                                          return
-                                      }
-
-                                      applyChartViewOverrideRange({
+                        <Chart
+                            title="Fundraising Volume"
+                            hint="Date Range"
+                            points={chartPoints}
+                            smoothLine={smoothLine}
+                            showAreaFill={showAreaFill}
+                            showLine={showDonationsLine}
+                            barDisplayMode={chartBarDisplayMode}
+                            seriesLabels={{
+                                primaryBar: 'One-Time Amount',
+                                secondaryBar: 'Recurring Amount',
+                                line: 'Total Donations',
+                            }}
+                            valueFormatters={{
+                                primaryBar: (value) => formatCurrency(value),
+                                secondaryBar: (value) => formatCurrency(value),
+                                line: (value) => formatCount(value),
+                            }}
+                            axisFormatters={{
+                                left: formatCurrencyAxis,
+                                right: formatCountAxis,
+                            }}
+                            ariaLabel="Fundraising volume by period: one-time and recurring dollars with total donations"
+                            chartAriaLabel={`Fundraising volume across ${chartPoints.length} periods`}
+                            tableConfig={{
+                                caption: 'Fundraising volume per period',
+                                periodHeader: 'Period',
+                                primaryBarHeader: 'One-Time',
+                                secondaryBarHeader: 'Recurring',
+                                lineHeader: 'Donations',
+                            }}
+                            onRangeSelect={
+                                zoomEnabled
+                                    ? ({
                                           start,
                                           end,
-                                      })
-                                  }
-                                : undefined
-                        }
-                        cornerTopRight={
-                            chartViewOverrideActive ? (
-                                <button
-                                    type="button"
-                                    className={styles.resetViewButton}
-                                    onClick={resetChartViewToSelectedRange}
-                                >
-                                    Reset
-                                </button>
-                            ) : null
-                        }
-                        headerRight={
-                            <div className={styles.chartOptionsControl}>
-                                <DropdownButton
-                                    type="button"
-                                    label="Chart Options"
-                                    buttonVariant="minimal"
-                                    menu={({ closeDropdown }) => (
-                                        <DropdownOverlay
-                                            className={styles.chartOptionsBox}
-                                            label="Chart Options"
-                                            onClose={() => {
-                                                closeDropdown()
-                                            }}
-                                            bodyClassName={
-                                                styles.chartOptionsBody
-                                            }
-                                            body={
-                                                <>
-                                                    <div
-                                                        className={
-                                                            styles.chartOptionRow
-                                                        }
-                                                    >
-                                                        <span
-                                                            className={
-                                                                styles.chartOptionLabel
-                                                            }
-                                                        >
-                                                            Time scale
-                                                        </span>
-                                                        <ToggleGroup<ChartGranularityMode>
-                                                            ariaLabel="Time scale"
-                                                            orientation="horizontal"
-                                                            value={
-                                                                granularityMode
-                                                            }
-                                                            options={(
-                                                                [
-                                                                    'auto',
-                                                                    'year',
-                                                                    'quarter',
-                                                                    'month',
-                                                                    'week',
-                                                                    'day',
-                                                                    'hour',
-                                                                ] as ChartGranularityMode[]
-                                                            )
-                                                                .filter(
-                                                                    (mode) =>
-                                                                        validGranularityModes.includes(
-                                                                            mode
-                                                                        )
-                                                                )
-                                                                .map(
-                                                                    (mode) => ({
-                                                                        value: mode,
-                                                                        label: CHART_GRANULARITY_LABELS[
-                                                                            mode
-                                                                        ],
-                                                                    })
-                                                                )}
-                                                            onChange={
-                                                                setGranularityMode
-                                                            }
-                                                        />
-                                                    </div>
+                                      }: {
+                                          start: Date
+                                          end: Date
+                                      }) => {
+                                          const oneDayMs = 24 * 60 * 60 * 1000
+                                          const inclusiveRangeMs =
+                                              end.getTime() -
+                                              start.getTime() +
+                                              1000
 
-                                                    {isXToDateSpanOptionRelevant && (
+                                          if (
+                                              Number.isNaN(start.getTime()) ||
+                                              Number.isNaN(end.getTime())
+                                          ) {
+                                              return
+                                          }
+
+                                          if (inclusiveRangeMs < oneDayMs) {
+                                              return
+                                          }
+
+                                          applyChartViewOverrideRange({
+                                              start,
+                                              end,
+                                          })
+                                      }
+                                    : undefined
+                            }
+                            cornerTopRight={
+                                chartViewOverrideActive ? (
+                                    <button
+                                        type="button"
+                                        className={styles.resetViewButton}
+                                        onClick={resetChartViewToSelectedRange}
+                                    >
+                                        Reset
+                                    </button>
+                                ) : null
+                            }
+                            headerRight={
+                                <div className={styles.chartOptionsControl}>
+                                    <DropdownButton
+                                        type="button"
+                                        label="Chart Options"
+                                        buttonVariant="minimal"
+                                        menu={({ closeDropdown }) => (
+                                            <DropdownOverlay
+                                                className={
+                                                    styles.chartOptionsBox
+                                                }
+                                                label="Chart Options"
+                                                onClose={() => {
+                                                    closeDropdown()
+                                                }}
+                                                bodyClassName={
+                                                    styles.chartOptionsBody
+                                                }
+                                                body={
+                                                    <>
                                                         <div
                                                             className={
                                                                 styles.chartOptionRow
@@ -666,249 +586,315 @@ export default function Page() {
                                                                     styles.chartOptionLabel
                                                                 }
                                                             >
-                                                                Show{' '}
-                                                                {getXToDatePeriodName(
-                                                                    committedPreset,
-                                                                    granularityMode
-                                                                )}{' '}
-                                                                To Date
+                                                                Time scale
                                                             </span>
-                                                            <ToggleGroup<boolean>
-                                                                ariaLabel="X-to-date span"
+                                                            <ToggleGroup<ChartGranularityMode>
+                                                                ariaLabel="Time scale"
                                                                 orientation="horizontal"
                                                                 value={
-                                                                    showFullXToDateSpan
+                                                                    granularityMode
+                                                                }
+                                                                options={(
+                                                                    [
+                                                                        'auto',
+                                                                        'year',
+                                                                        'quarter',
+                                                                        'month',
+                                                                        'week',
+                                                                        'day',
+                                                                        'hour',
+                                                                    ] as ChartGranularityMode[]
+                                                                )
+                                                                    .filter(
+                                                                        (
+                                                                            mode
+                                                                        ) =>
+                                                                            validGranularityModes.includes(
+                                                                                mode
+                                                                            )
+                                                                    )
+                                                                    .map(
+                                                                        (
+                                                                            mode
+                                                                        ) => ({
+                                                                            value: mode,
+                                                                            label: CHART_GRANULARITY_LABELS[
+                                                                                mode
+                                                                            ],
+                                                                        })
+                                                                    )}
+                                                                onChange={
+                                                                    setGranularityMode
+                                                                }
+                                                            />
+                                                        </div>
+
+                                                        {isXToDateSpanOptionRelevant && (
+                                                            <div
+                                                                className={
+                                                                    styles.chartOptionRow
+                                                                }
+                                                            >
+                                                                <span
+                                                                    className={
+                                                                        styles.chartOptionLabel
+                                                                    }
+                                                                >
+                                                                    Show{' '}
+                                                                    {getXToDatePeriodName(
+                                                                        committedPreset,
+                                                                        granularityMode
+                                                                    )}{' '}
+                                                                    To Date
+                                                                </span>
+                                                                <ToggleGroup<boolean>
+                                                                    ariaLabel="X-to-date span"
+                                                                    orientation="horizontal"
+                                                                    value={
+                                                                        showFullXToDateSpan
+                                                                    }
+                                                                    options={[
+                                                                        {
+                                                                            value: true,
+                                                                            label: 'Hide',
+                                                                        },
+                                                                        {
+                                                                            value: false,
+                                                                            label: 'Show',
+                                                                        },
+                                                                    ]}
+                                                                    onChange={
+                                                                        setShowFullXToDateSpan
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        )}
+
+                                                        <div
+                                                            className={
+                                                                styles.chartOptionRow
+                                                            }
+                                                        >
+                                                            <span
+                                                                className={
+                                                                    styles.chartOptionLabel
+                                                                }
+                                                            >
+                                                                Contributions
+                                                                line
+                                                            </span>
+                                                            <ToggleGroup<boolean>
+                                                                ariaLabel="Contributions line"
+                                                                orientation="horizontal"
+                                                                value={
+                                                                    showDonationsLine
                                                                 }
                                                                 options={[
                                                                     {
                                                                         value: true,
-                                                                        label: 'Hide',
+                                                                        label: 'Show',
                                                                     },
                                                                     {
                                                                         value: false,
-                                                                        label: 'Show',
+                                                                        label: 'Hide',
                                                                     },
                                                                 ]}
                                                                 onChange={
-                                                                    setShowFullXToDateSpan
+                                                                    setShowDonationsLine
                                                                 }
                                                             />
                                                         </div>
-                                                    )}
 
-                                                    <div
-                                                        className={
-                                                            styles.chartOptionRow
-                                                        }
-                                                    >
-                                                        <span
-                                                            className={
-                                                                styles.chartOptionLabel
-                                                            }
-                                                        >
-                                                            Contributions line
-                                                        </span>
-                                                        <ToggleGroup<boolean>
-                                                            ariaLabel="Contributions line"
-                                                            orientation="horizontal"
-                                                            value={
-                                                                showDonationsLine
-                                                            }
-                                                            options={[
-                                                                {
-                                                                    value: true,
-                                                                    label: 'Show',
-                                                                },
-                                                                {
-                                                                    value: false,
-                                                                    label: 'Hide',
-                                                                },
-                                                            ]}
-                                                            onChange={
-                                                                setShowDonationsLine
-                                                            }
-                                                        />
-                                                    </div>
-
-                                                    {showDonationsLine && (
-                                                        <>
-                                                            <div
-                                                                className={
-                                                                    styles.chartOptionRow
-                                                                }
-                                                            >
-                                                                <span
+                                                        {showDonationsLine && (
+                                                            <>
+                                                                <div
                                                                     className={
-                                                                        styles.chartOptionLabel
+                                                                        styles.chartOptionRow
                                                                     }
                                                                 >
-                                                                    Line style
-                                                                </span>
-                                                                <ToggleGroup<boolean>
-                                                                    ariaLabel="Line style"
-                                                                    orientation="horizontal"
-                                                                    value={
-                                                                        smoothLine
-                                                                    }
-                                                                    options={[
-                                                                        {
-                                                                            value: true,
-                                                                            label: 'Curved',
-                                                                        },
-                                                                        {
-                                                                            value: false,
-                                                                            label: 'Straight',
-                                                                        },
-                                                                    ]}
-                                                                    onChange={
-                                                                        setSmoothLine
-                                                                    }
-                                                                />
-                                                            </div>
+                                                                    <span
+                                                                        className={
+                                                                            styles.chartOptionLabel
+                                                                        }
+                                                                    >
+                                                                        Line
+                                                                        style
+                                                                    </span>
+                                                                    <ToggleGroup<boolean>
+                                                                        ariaLabel="Line style"
+                                                                        orientation="horizontal"
+                                                                        value={
+                                                                            smoothLine
+                                                                        }
+                                                                        options={[
+                                                                            {
+                                                                                value: true,
+                                                                                label: 'Curved',
+                                                                            },
+                                                                            {
+                                                                                value: false,
+                                                                                label: 'Straight',
+                                                                            },
+                                                                        ]}
+                                                                        onChange={
+                                                                            setSmoothLine
+                                                                        }
+                                                                    />
+                                                                </div>
 
-                                                            <div
-                                                                className={
-                                                                    styles.chartOptionRow
-                                                                }
-                                                            >
-                                                                <span
+                                                                <div
                                                                     className={
-                                                                        styles.chartOptionLabel
+                                                                        styles.chartOptionRow
                                                                     }
                                                                 >
-                                                                    Area fill
-                                                                </span>
-                                                                <ToggleGroup<boolean>
-                                                                    ariaLabel="Area fill"
-                                                                    orientation="horizontal"
-                                                                    value={
-                                                                        showAreaFill
-                                                                    }
-                                                                    options={[
-                                                                        {
-                                                                            value: true,
-                                                                            label: 'Show',
-                                                                        },
-                                                                        {
-                                                                            value: false,
-                                                                            label: 'Hide',
-                                                                        },
-                                                                    ]}
-                                                                    onChange={
-                                                                        setShowAreaFill
-                                                                    }
-                                                                />
-                                                            </div>
-                                                        </>
-                                                    )}
+                                                                    <span
+                                                                        className={
+                                                                            styles.chartOptionLabel
+                                                                        }
+                                                                    >
+                                                                        Area
+                                                                        fill
+                                                                    </span>
+                                                                    <ToggleGroup<boolean>
+                                                                        ariaLabel="Area fill"
+                                                                        orientation="horizontal"
+                                                                        value={
+                                                                            showAreaFill
+                                                                        }
+                                                                        options={[
+                                                                            {
+                                                                                value: true,
+                                                                                label: 'Show',
+                                                                            },
+                                                                            {
+                                                                                value: false,
+                                                                                label: 'Hide',
+                                                                            },
+                                                                        ]}
+                                                                        onChange={
+                                                                            setShowAreaFill
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                            </>
+                                                        )}
 
-                                                    <div
-                                                        className={
-                                                            styles.chartOptionRow
-                                                        }
-                                                    >
-                                                        <span
+                                                        <div
                                                             className={
-                                                                styles.chartOptionLabel
+                                                                styles.chartOptionRow
                                                             }
                                                         >
-                                                            Drag To Zoom
-                                                        </span>
-                                                        <ToggleGroup<boolean>
-                                                            ariaLabel="Chart zoom"
-                                                            orientation="horizontal"
-                                                            value={zoomEnabled}
-                                                            options={[
-                                                                {
-                                                                    value: true,
-                                                                    label: 'Enabled',
-                                                                },
-                                                                {
-                                                                    value: false,
-                                                                    label: 'Disabled',
-                                                                },
-                                                            ]}
-                                                            onChange={
-                                                                setZoomEnabled
-                                                            }
-                                                        />
-                                                    </div>
+                                                            <span
+                                                                className={
+                                                                    styles.chartOptionLabel
+                                                                }
+                                                            >
+                                                                Drag To Zoom
+                                                            </span>
+                                                            <ToggleGroup<boolean>
+                                                                ariaLabel="Chart zoom"
+                                                                orientation="horizontal"
+                                                                value={
+                                                                    zoomEnabled
+                                                                }
+                                                                options={[
+                                                                    {
+                                                                        value: true,
+                                                                        label: 'Enabled',
+                                                                    },
+                                                                    {
+                                                                        value: false,
+                                                                        label: 'Disabled',
+                                                                    },
+                                                                ]}
+                                                                onChange={
+                                                                    setZoomEnabled
+                                                                }
+                                                            />
+                                                        </div>
 
-                                                    <div
-                                                        className={
-                                                            styles.chartOptionRow
-                                                        }
-                                                    >
-                                                        <span
+                                                        <div
                                                             className={
-                                                                styles.chartOptionLabel
+                                                                styles.chartOptionRow
                                                             }
                                                         >
-                                                            Bar layout
-                                                        </span>
-                                                        <ToggleGroup<
-                                                            | 'grouped'
-                                                            | 'stacked'
-                                                        >
-                                                            ariaLabel="Bar layout"
-                                                            orientation="horizontal"
-                                                            value={
-                                                                chartBarDisplayMode
-                                                            }
-                                                            options={[
-                                                                {
-                                                                    value: 'stacked',
-                                                                    label: 'Stacked',
-                                                                },
-                                                                {
-                                                                    value: 'grouped',
-                                                                    label: 'Seperate',
-                                                                },
-                                                            ]}
-                                                            onChange={
-                                                                setChartBarDisplayMode
-                                                            }
-                                                        />
-                                                    </div>
-                                                </>
-                                            }
-                                        />
-                                    )}
-                                />
-                            </div>
-                        }
-                    />
+                                                            <span
+                                                                className={
+                                                                    styles.chartOptionLabel
+                                                                }
+                                                            >
+                                                                Bar layout
+                                                            </span>
+                                                            <ToggleGroup<
+                                                                | 'grouped'
+                                                                | 'stacked'
+                                                            >
+                                                                ariaLabel="Bar layout"
+                                                                orientation="horizontal"
+                                                                value={
+                                                                    chartBarDisplayMode
+                                                                }
+                                                                options={[
+                                                                    {
+                                                                        value: 'stacked',
+                                                                        label: 'Stacked',
+                                                                    },
+                                                                    {
+                                                                        value: 'grouped',
+                                                                        label: 'Seperate',
+                                                                    },
+                                                                ]}
+                                                                onChange={
+                                                                    setChartBarDisplayMode
+                                                                }
+                                                            />
+                                                        </div>
+                                                    </>
+                                                }
+                                            />
+                                        )}
+                                    />
+                                </div>
+                            }
+                        />
 
-                    <ProgressBar
-                        label="One-Time Share"
-                        value={oneTimePct}
-                        fill="linear-gradient(90deg, #9fb9e1 0%, #7f9fd4 52%, #6d95d1 100%)"
-                    />
-                    <ProgressBar
-                        label="Recurring Share"
-                        value={recurringPct}
-                        fill="linear-gradient(90deg, #b8da72 0%, #94c92d 48%, #7fb800 100%)"
-                    />
-                </div>
+                        <ProgressBar
+                            label="One-Time Share"
+                            value={oneTimePct}
+                            fill="linear-gradient(90deg, #9fb9e1 0%, #7f9fd4 52%, #6d95d1 100%)"
+                        />
+                        <ProgressBar
+                            label="Recurring Share"
+                            value={recurringPct}
+                            fill="linear-gradient(90deg, #b8da72 0%, #94c92d 48%, #7fb800 100%)"
+                        />
+                    </div>
 
-                <div className={styles.grid}>
-                    <FundraisingCard
-                        title="Donors"
-                        description="ActBlue donors, totals, and donor records."
-                        href="/admin/panels/donors"
-                        icon={FaDonate}
-                        count={allTimeStatsQuery.data?.totalDonorCount}
-                    />
+                    <div className={styles.grid}>
+                        <NavigationButton
+                            label="Donors"
+                            description="ActBlue donors, totals, and donor records."
+                            href="/admin/panels/donors"
+                            icon={FaDonate}
+                            count={allTimeStatsQuery.data?.totalDonorCount}
+                            buttonType="card"
+                            trackPanelHistory
+                        />
 
-                    <FundraisingCard
-                        title="Contributions"
-                        description="Contribution lineitems, payment info, and details."
-                        href="/admin/panels/contributions"
-                        icon={FaDollarSign}
-                        count={allTimeStatsQuery.data?.totalContributionCount}
-                    />
+                        <NavigationButton
+                            label="Contributions"
+                            description="Contribution lineitems, payment info, and details."
+                            href="/admin/panels/contributions"
+                            icon={FaDollarSign}
+                            count={
+                                allTimeStatsQuery.data?.totalContributionCount
+                            }
+                            buttonType="card"
+                            trackPanelHistory
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
+        </Panel>
     )
 }

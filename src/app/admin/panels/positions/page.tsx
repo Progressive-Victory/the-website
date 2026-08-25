@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, List } from '@/app/admin/layout/List'
+import { ListElement } from '@/app/admin/layout/List'
 import { SearchModal } from '@/app/admin/layout/SearchModal'
 import {
     Form,
@@ -13,6 +13,8 @@ import {
     FormFieldProps,
     useConfigure,
 } from '@/components/common/forms/FormField'
+import Panel from '@/components/common/panel/Panel'
+import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { Position, UserProfile, zUserProfile } from '@/contracts/data'
 import { SearchRequest, SortDirection } from '@/contracts/requests'
 import {
@@ -29,6 +31,7 @@ import {
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChangeEvent, useCallback, useState } from 'react'
+import { useMediaQuery } from 'usehooks-ts'
 
 function getUserDisplayName(user: UserProfile | undefined): string {
     if (!user) return 'Unknown'
@@ -38,7 +41,7 @@ function getUserDisplayName(user: UserProfile | undefined): string {
     if (discord) return `@${discord}`
     if (user.preferredName) return user.preferredName
     if (user.email) return user.email
-    return `User #${user.id}`
+    return 'Unknown'
 }
 
 const blankPosition: Position = {
@@ -56,6 +59,8 @@ export default function Page() {
         null
     )
     const [formState, setFormState] = useState<FormState<Position> | null>(null)
+    const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
+    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const positionHierarchy = useQuery({
         queryKey: ['positionHierarchy'],
@@ -73,7 +78,6 @@ export default function Page() {
 
     const {
         items: positions,
-        count: positionCount,
         search,
         onSearch,
     } = useUnpaginatedSearch({
@@ -99,17 +103,18 @@ export default function Page() {
         pageUserMap.set(u.id, u)
     }
 
-    const handleSelectItem = (value: Position) => {
-        if (value.id === selectedPosition?.id) return
+    const handleSelectItem = (value: Position): boolean => {
+        if (value.id === selectedPosition?.id) return false
 
         if (formState?.dirty) {
             const proceed = confirm(
                 'You have unsaved changes! Selecting a new list element will discard them.'
             )
-            if (!proceed) return
+            if (!proceed) return false
         }
 
         setSelectedPosition(value)
+        return true
     }
 
     const updatePositionInHierarchyCache = (
@@ -203,26 +208,54 @@ export default function Page() {
     }
 
     return (
-        <>
-            <List
-                search={search}
-                count={positionCount}
-                isPending={positionHierarchy.isPending}
-                error={positionHierarchy.error}
-                onSearch={onSearch}
-            >
-                {positions.map((item) => (
-                    <ListElement
-                        key={item.id}
-                        selected={selectedPosition?.id == item.id}
-                        onClick={() => handleSelectItem(item)}
-                    >
-                        <span className={styles.listItemText}>{item.name}</span>
-                    </ListElement>
-                ))}
-            </List>
-
+        <Panel
+            includeSidebar
+            largeTitle
+            sidebarWidth="24rem"
+            sidebarClassName={styles.sidebarBg}
+            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            label="Positions"
+            showScrollbar={false}
+            sidebarList={{
+                search: { search, onSearch },
+                filters: {
+                    search,
+                    onSearch,
+                    showSort: true,
+                    showLimit: false,
+                },
+            }}
+            sidebarBody={
+                <SidebarBody<Position>
+                    items={positions}
+                    isLoading={positionHierarchy.isPending}
+                    error={positionHierarchy.error}
+                    selectedKey={selectedPosition?.id}
+                    renderItem={(position) => ({
+                        key: position.id,
+                        label: position.name,
+                        href: `/admin/panels/positions?positionId=${position.id}`,
+                        onClick: (event) => {
+                            event.preventDefault()
+                            const selected = handleSelectItem(position)
+                            if (selected && !isDesktop) {
+                                setSidebarMobileVisible(false)
+                            }
+                        },
+                    })}
+                />
+            }
+        >
             <div className={styles.detailPane}>
+                {!isDesktop && !sidebarMobileVisible ? (
+                    <button
+                        className={styles.mobileBackButton}
+                        onClick={() => setSidebarMobileVisible(true)}
+                        type="button"
+                    >
+                        Positions
+                    </button>
+                ) : null}
                 <Form<Position>
                     key={selectedPosition?.id}
                     form={selectedPosition}
@@ -231,7 +264,11 @@ export default function Page() {
                             ? 'New Position'
                             : (selectedPosition?.name ?? 'Position')
                     }
-                    saving={updateMutation.isPending}
+                    saving={
+                        createMutation.isPending ||
+                        updateMutation.isPending ||
+                        deleteMutation.isPending
+                    }
                     onUpdate={setFormState}
                     onSave={handleSave}
                     onCreate={handleCreate}
@@ -270,7 +307,7 @@ export default function Page() {
                     )}
                 </Form>
             </div>
-        </>
+        </Panel>
     )
 }
 

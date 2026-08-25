@@ -1,5 +1,41 @@
-.listWidth {
-    --list-width: 25.5rem;
+.sidebarBg {
+    --navigation-stack-sidebar-bg: #f9fafb;
+    --navigation-stack-sidebar-padding: 0rem;
+    --navigation-stack-sidebar-gap: 0rem;
+}
+
+.mobileBackButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0 1rem 1rem;
+    border: 0;
+    background: transparent;
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.65rem;
+    color: #2986cc;
+    font: inherit;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.mobileBackButton::before {
+    content: '';
+    display: inline-block;
+    width: 0.58rem;
+    height: 0.58rem;
+    border-left: 0.14rem solid currentColor;
+    border-bottom: 0.14rem solid currentColor;
+    transform: rotate(45deg);
+    position: relative;
+    top: -0.5px;
+    border-bottom-left-radius: 0.04rem;
+}
+
+.mobileBackButton:hover {
+    color: #549ed6;
+    background: rgba(15, 23, 42, 0.05);
 }
 
 .detailsHeader {
@@ -65,35 +101,11 @@
         rgba(241, 245, 249, 0.98) 38%,
         rgba(14, 165, 233, 0.04) 100%
     );
+    z-index: 0;
 }
 
 .detailsContent {
     margin: 1rem;
-}
-
-.userMeta {
-    display: flex;
-    flex-direction: column;
-}
-
-.rolePill {
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding-inline: 1rem;
-    padding-block: 0.45rem;
-    border-radius: 9999px;
-    white-space: nowrap;
-    color: rgba(15, 23, 42, 0.72);
-    background: rgba(15, 23, 42, 0.06);
-}
-
-.userName {
-    font-weight: 500;
-    color: #000;
-}
-
-.userUsername {
-    color: #6b7280;
 }
 
 .emptyState {
@@ -101,6 +113,8 @@
     height: 100%;
     align-items: center;
     justify-content: center;
+    color: rgba(15, 23, 42, 0.5);
+    font-weight: 500;
 }
 
 .loading {
@@ -108,13 +122,10 @@
     align-items: center;
 }
 
-@media (max-width: 720px) {
-    .detailsHeader {
-        --banner-cover-height: 4rem;
-        padding: 0.45rem 0.45rem 0.35rem;
-    }
+.filterTagsWrapper {
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+}
 
-    .bannerCover {
-        height: var(--banner-cover-height);
-    }
+:global([data-sidebar-collapsed='true']) .filterTagsWrapper {
+    display: none;
 }

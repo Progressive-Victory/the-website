@@ -6,9 +6,11 @@ import { DonorView } from './panel_views/DonorView'
 import { HistoryView } from './panel_views/HistoryView'
 import { MemberView } from './panel_views/MemberView'
 import { FilterTags, FilterTag } from '@/app/admin/layout/FilterTags'
-import { ListElement, List } from '@/app/admin/layout/List'
+import { ListElement } from '@/app/admin/layout/List'
 import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
+import Panel from '@/components/common/panel/Panel'
+import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ActBlueDonor,
@@ -39,10 +41,11 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { useCallback, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FaUsers, FaUserTag } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign, FaAddressCard } from 'react-icons/fa6'
-import { PulseLoader } from 'react-spinners'
+import { useMediaQuery } from 'usehooks-ts'
 import z from 'zod'
 
 type MemberTabKey = 'overview' | 'donorMatching' | 'history'
@@ -53,11 +56,44 @@ const tabs: TabSpec[] = [
     { key: 'history', label: 'History' },
 ]
 
+const MEMBER_FIELD_OPTIONS = [
+    { value: 'email', label: 'Email' },
+    { value: 'phone', label: 'Phone Number' },
+    { value: 'zip', label: 'Zip Code' },
+    { value: 'county', label: 'County' },
+    { value: 'city', label: 'City' },
+    { value: 'state', label: 'State' },
+    { value: 'preferred_name', label: 'Preferred Name' },
+    { value: 'first_name', label: 'First Name' },
+    { value: 'last_name', label: 'Last Name' },
+    { value: 'birthdate', label: 'Birthdate' },
+    { value: 'accepted_alerts', label: 'Accepted Notifications' },
+    { value: 'onboarding_stage', label: 'Onboarding Stage' },
+    { value: 'created_at_utc', label: 'Date Created' },
+    { value: 'joined_at_utc', label: 'Date Joined Server' },
+    { value: 'completed_intake_utc', label: 'Date Intake Done' },
+    { value: 'aliases', label: 'Aliases' },
+    { value: 'discord_usernames', label: 'Discord Usernames' },
+]
+
+const MEMBER_SORT_FIELD_OPTIONS = [
+    { value: 'email', label: 'Email' },
+    { value: 'first_name', label: 'First Name' },
+    { value: 'last_name', label: 'Last Name' },
+    { value: 'created_at_utc', label: 'Created At' },
+    { value: 'updated_at_utc', label: 'Recently Edited' },
+]
+
 export default function Page() {
     const queryClient = useQueryClient()
     const { ready, onGet, onPatch, onPost } = useFetch()
+    const navParams = useSearchParams()
+    const navUserId = navParams.get('userId')
 
-    const [selectedId, setSelectedId] = useState<number | null>(null)
+    const initialUserId = navUserId ? Number(navUserId) : null
+    const [selectedId, setSelectedId] = useState<number | null>(
+        Number.isFinite(initialUserId) ? initialUserId : null
+    )
 
     const [selectedHistory, setSelectedHistory] =
         useState<UpdateHistory<User> | null>(null)
@@ -141,6 +177,9 @@ export default function Page() {
         tagFilters.isDuesPaying = [key === 'dues']
         onSearch({ ...rest, page: 0, ...tagFilters })
     }
+
+    const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
+    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const loggedInUser = useCurrentUser()
     const positionQueries = usePositionQueries()
@@ -450,27 +489,29 @@ export default function Page() {
         [handleSelectDonorItem]
     )
 
-    const renderItem = (item: User | UserProfile) => {
-        return (
-            <ListElement
-                key={item.id}
-                selected={selectedId == item.id}
-                onClick={() => handleSelectItem(item)}
-            >
-                <DiscordAvatar
-                    discordUserId={item.discordUsers?.[0]?.id}
-                    imageId={item.discordUsers?.[0]?.image}
-                    size={48}
-                />
-                <div className={styles.userMeta}>
-                    <span className={styles.userName}>{makeTitle(item)}</span>
-                    <span className={styles.userUsername}>
-                        {item.discordUsers?.[0]?.username ?? 'NOT FOUND'}
-                    </span>
-                </div>
-            </ListElement>
-        )
-    }
+    const pinnedUsers = useMemo(() => {
+        const currentUser = loggedInUser.data
+        return currentUser ? [currentUser] : []
+    }, [loggedInUser.data])
+
+    const users = useMemo(() => {
+        const fetchedUsers = searchQuery.data?.data ?? []
+        const currentUser = loggedInUser.data
+
+        if (!currentUser) return fetchedUsers
+
+        return fetchedUsers.filter((user) => user.id !== currentUser.id)
+    }, [searchQuery.data?.data, loggedInUser.data])
+
+    useEffect(() => {
+        if (navUserId == null) {
+            return
+        }
+
+        const nextSelectedId = Number(navUserId)
+
+        setSelectedId(Number.isFinite(nextSelectedId) ? nextSelectedId : null)
+    }, [navUserId])
 
     const renderPage = () => {
         if (!selectedId || !userQuery.data) return null
@@ -538,70 +579,38 @@ export default function Page() {
     }
 
     return (
-        <>
-            <div className={styles.listWidth}>
-                <List
-                    search={search}
-                    count={searchQuery.data?.count}
-                    isPending={searchQuery.isPending}
-                    error={searchQuery.error}
-                    listLabel={
-                        activeFilterTag === 'members'
-                            ? 'Members'
-                            : activeFilterTag === 'server'
-                              ? 'Server Members'
-                              : activeFilterTag === 'donors'
-                                ? 'Donors'
-                                : activeFilterTag === 'dues'
-                                  ? 'Dues Paying Members'
-                                  : 'Users'
-                    }
-                    headerContent={
-                        <div className={styles.filterTagsWrapper}>
-                            <FilterTags
-                                tags={memberFilterTags}
-                                activeTag={activeFilterTag}
-                                onChange={handleFilterTagChange}
-                            />
-                        </div>
-                    }
-                    searchFields={[
-                        { value: 'first_name', label: 'First Name' },
-                        { value: 'last_name', label: 'Last Name' },
-                        {
-                            value: 'discord_usernames',
-                            label: 'Discord Username',
-                        },
-                        { value: 'email', label: 'Email' },
-                        { value: 'phone', label: 'Phone Number' },
-                        { value: 'zip', label: 'Zip Code' },
-                        { value: 'birthdate', label: 'Birthdate' },
-                        { value: 'created_at_utc', label: 'Join Date' },
-                        // { value: 'county', label: 'County' },
-                        // { value: 'city', label: 'City' },
-                        // { value: 'state', label: 'State' },
-                        // { value: 'preferred_name', label: 'Preferred Name' },
-
-                        // {
-                        //     value: 'accepted_alerts',
-                        //     label: 'Accepted Notifications',
-                        // },
-                        // { value: 'onboarding_stage', label: 'Onboarding Stage' },
-                        // { value: 'joined_at_utc', label: 'Date Joined Server' },
-                        // {
-                        //     value: 'completed_intake_utc',
-                        //     label: 'Date Intake Done',
-                        // },
-                        // { value: 'aliases', label: 'Aliases' },
-                    ]}
-                    sortFields={[
-                        { value: 'email', label: 'Email' },
-                        { value: 'first_name', label: 'First Name' },
-                        { value: 'last_name', label: 'Last Name' },
-                        { value: 'created_at_utc', label: 'Created At' },
-                        { value: 'updated_at_utc', label: 'Date Modified' },
-                    ]}
-                    filters={[
+        <Panel
+            includeSidebar
+            collapsedSidebarMode="compact"
+            sidebarTogglePlacement="header"
+            hideSidebarFooterWhenCollapsed
+            keepSidebarBorderWhenCollapsed
+            // includeHeader
+            largeTitle
+            sidebarWidth="25.5rem"
+            collapsedSidebarWidth="5rem"
+            sidebarClassName={styles.sidebarBg}
+            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            label="Members"
+            showScrollbar={false}
+            sidebarList={{
+                search: { search, onSearch },
+                footer: {
+                    page: search.page ?? 0,
+                    pageSize: search.limit ?? 25,
+                    count: searchQuery.data?.count,
+                    isPending: searchQuery.isPending,
+                    onPageChange: (nextPage: number) =>
+                        onSearch({ ...search, page: nextPage }),
+                },
+                filters: {
+                    search,
+                    onSearch,
+                    searchFieldOptions: MEMBER_FIELD_OPTIONS,
+                    sortFieldOptions: MEMBER_SORT_FIELD_OPTIONS,
+                    showSort: true,
+                    showLimit: true,
+                    options: [
                         {
                             label: 'Role',
                             value: 'roleIds',
@@ -610,35 +619,87 @@ export default function Page() {
                                 value: role.id,
                             })),
                         },
-                    ]}
-                    pinnedContent={
-                        loggedInUser.data ? (
-                            renderItem(loggedInUser.data)
-                        ) : (
-                            <ul>
-                                <ListElement>
-                                    <DiscordAvatar
-                                        discordUserId={undefined}
-                                        imageId={undefined}
-                                        size={48}
-                                    />
-                                    <div className={styles.loading}>
-                                        <PulseLoader size={8} color="#bbb" />
-                                    </div>
-                                </ListElement>
-                            </ul>
-                        )
-                    }
-                    onSearch={onSearch}
-                >
-                    {searchQuery.data?.data?.map((item) => renderItem(item))}
-                </List>
-            </div>
-
+                    ],
+                },
+            }}
+            sidebarBody={
+                <>
+                    <div className={styles.filterTagsWrapper}>
+                        <FilterTags
+                            tags={memberFilterTags}
+                            activeTag={activeFilterTag}
+                            onChange={handleFilterTagChange}
+                        />
+                    </div>
+                    <SidebarBody<User | UserProfile>
+                        items={users}
+                        pinnedItems={pinnedUsers}
+                        isLoading={searchQuery.isPending}
+                        error={searchQuery.error}
+                        selectedKey={selectedId}
+                        renderItem={(user) => ({
+                            key: user.id,
+                            label: makeTitle(user),
+                            subtitle: user.discordUsers?.[0]?.username
+                                ? `@${user.discordUsers[0].username}`
+                                : 'NOT FOUND',
+                            tagLabel:
+                                user.id === loggedInUser.data?.id
+                                    ? 'You'
+                                    : undefined,
+                            iconNode: (
+                                <DiscordAvatar
+                                    discordUserId={user.discordUsers?.[0]?.id}
+                                    imageId={user.discordUsers?.[0]?.image}
+                                    size={40}
+                                />
+                            ),
+                            href: `/admin/panels/members?userId=${user.id}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                handleSelectItem(user)
+                                if (!isDesktop) {
+                                    setSidebarMobileVisible(false)
+                                }
+                            },
+                        })}
+                    />
+                </>
+            }
+        >
             <div className={styles.detailsPane}>
+                {!isDesktop && !sidebarMobileVisible ? (
+                    <button
+                        className={styles.mobileBackButton}
+                        onClick={() => setSidebarMobileVisible(true)}
+                        type="button"
+                    >
+                        Members
+                    </button>
+                ) : null}
+
                 {selectedId == null && (
                     <div className={styles.emptyState}>No user selected</div>
                 )}
+
+                {selectedId != null && userQuery.isPending && (
+                    <div className={styles.emptyState}>
+                        Loading user details...
+                    </div>
+                )}
+
+                {selectedId != null && userQuery.error && (
+                    <div
+                        className={styles.emptyState}
+                        style={{ color: '#ef4444' }}
+                    >
+                        Error:{' '}
+                        {userQuery.error instanceof Error
+                            ? userQuery.error.message
+                            : 'Unknown error'}
+                    </div>
+                )}
+
                 {selectedId && userQuery.data && (
                     <>
                         <div className={styles.detailsHeader}>
@@ -660,6 +721,6 @@ export default function Page() {
                     </>
                 )}
             </div>
-        </>
+        </Panel>
     )
 }
