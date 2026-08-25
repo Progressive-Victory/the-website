@@ -9,11 +9,13 @@ import { FiChevronLeft } from 'react-icons/fi'
 import { useMediaQuery } from 'usehooks-ts'
 
 function formatPanelLabelFromPath(path: string): string {
-    if (!path.startsWith('/admin/panels/')) {
+    if (!path.startsWith('/volunteer_dashboard/panels/')) {
         return 'Back'
     }
 
-    const panelSlug = path.slice('/admin/panels/'.length).split('/')[0]
+    const panelSlug = path
+        .slice('/volunteer_dashboard/panels/'.length)
+        .split('/')[0]
 
     if (!panelSlug) {
         return 'Back'
@@ -45,7 +47,7 @@ function usePanelBackNavigation() {
     const isDesktop = useMediaQuery('(min-width: 64rem)')
     const [hasPanelHistory, setHasPanelHistory] = useState(false)
     const [backTargetPanelLabel, setBackTargetPanelLabel] = useState('Back')
-    const isPanelRoute = pathname.startsWith('/admin/panels/')
+    const isPanelRoute = pathname.startsWith('/volunteer_dashboard/panels/')
 
     useEffect(() => {
         if (typeof window === 'undefined') {
@@ -87,7 +89,7 @@ function usePanelBackNavigation() {
             return
         }
 
-        router.push('/admin')
+        router.push('/volunteer_dashboard')
     }
 
     const backButtonText =
@@ -138,8 +140,8 @@ export function Detail({
     const pathname = usePathname()
     const { backButtonText, handleBackNavigation, isPanelRoute } =
         usePanelBackNavigation()
-    const isAdminRootRoute = pathname === '/admin'
-    const mobileVisible = isPanelRoute || isAdminRootRoute
+    const isDashboardRootRoute = pathname === '/volunteer_dashboard'
+    const mobileVisible = isPanelRoute || isDashboardRootRoute
     const showDetailHeader = bodyType === 'blank'
 
     return (

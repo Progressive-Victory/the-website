@@ -170,7 +170,7 @@ export function NavigationButton({
             return
         }
 
-        if (!pathname.startsWith('/admin/panels/')) {
+        if (!pathname.startsWith('/volunteer_dashboard/panels/')) {
             return
         }
 

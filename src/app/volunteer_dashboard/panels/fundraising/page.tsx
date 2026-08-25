@@ -874,7 +874,7 @@ export default function Page() {
                         <NavigationButton
                             label="Donors"
                             description="ActBlue donors, totals, and donor records."
-                            href="/admin/panels/donors"
+                            href="/volunteer_dashboard/panels/donors"
                             icon={FaDonate}
                             count={allTimeStatsQuery.data?.totalDonorCount}
                             buttonType="card"
@@ -884,7 +884,7 @@ export default function Page() {
                         <NavigationButton
                             label="Contributions"
                             description="Contribution lineitems, payment info, and details."
-                            href="/admin/panels/contributions"
+                            href="/volunteer_dashboard/panels/contributions"
                             icon={FaDollarSign}
                             count={
                                 allTimeStatsQuery.data?.totalContributionCount

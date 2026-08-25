@@ -141,7 +141,7 @@ export default function Page() {
                         tagLabel: contribution.isRecurring
                             ? 'Recurring'
                             : undefined,
-                        href: `/admin/panels/contributions?lineitemId=${contribution.lineitemId}`,
+                        href: `/volunteer_dashboard/panels/contributions?lineitemId=${contribution.lineitemId}`,
                         onClick: (event) => {
                             event.preventDefault()
                             setSelectedLineitemId(contribution.lineitemId)
@@ -254,7 +254,7 @@ export default function Page() {
                             <TextField label="Email" field="email" />
                             <NavigationButton
                                 className={styles.detailsNavigationButton}
-                                href={`/admin/panels/donors?email=${encodeURIComponent(contributionQuery.data.email)}`}
+                                href={`/volunteer_dashboard/panels/donors?email=${encodeURIComponent(contributionQuery.data.email)}`}
                                 label="Full Details"
                                 trackPanelHistory
                             />

@@ -1,4 +1,4 @@
-import styles from './admin.module.css'
+import styles from './page.module.css'
 import { DiscordAvatar } from '@/components/common'
 import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
@@ -18,7 +18,7 @@ function renderUnselectedGridHeader(label: string): ReactElement {
     )
 }
 
-export function renderAdminUnselectedDetail({
+export function renderVolunteerDashboardUnselectedDetail({
     showWelcome,
     currentUserName,
     currentUserHandle,
@@ -69,7 +69,7 @@ export function renderAdminUnselectedDetail({
                                     : undefined) ??
                                     (currentUserHandle
                                         ? `@${currentUserHandle}`
-                                        : 'Admin User')}
+                                        : 'User')}
                             </h2>
                             {currentUserHandle ? (
                                 <div className={styles.unselectedProfileHandle}>
@@ -83,7 +83,7 @@ export function renderAdminUnselectedDetail({
                         <NavigationButton
                             label="Members"
                             description="Member accounts and profiles."
-                            href="/admin/panels/members"
+                            href="/volunteer_dashboard/panels/members"
                             icon={FaUsers}
                             count={userCount}
                             buttonType="card"
@@ -93,7 +93,7 @@ export function renderAdminUnselectedDetail({
                         <NavigationButton
                             label="Positions"
                             description="Staff and volunteer position records."
-                            href="/admin/panels/positions"
+                            href="/volunteer_dashboard/panels/positions"
                             icon={FaClipboardUser}
                             count={positionCount}
                             buttonType="card"
@@ -105,7 +105,7 @@ export function renderAdminUnselectedDetail({
                         <NavigationButton
                             label="Fundraising"
                             description="Donors, contributions, and fundraising stats."
-                            href="/admin/panels/fundraising"
+                            href="/volunteer_dashboard/panels/fundraising"
                             icon={FaDonate}
                             buttonType="card"
                             resetPanelHistoryOnClick
@@ -113,7 +113,7 @@ export function renderAdminUnselectedDetail({
                         <NavigationButton
                             label="Donors"
                             description="ActBlue donors, totals, and records."
-                            href="/admin/panels/donors"
+                            href="/volunteer_dashboard/panels/donors"
                             icon={FaDonate}
                             count={donorCount}
                             buttonType="card"
@@ -122,7 +122,7 @@ export function renderAdminUnselectedDetail({
                         <NavigationButton
                             label="Contributions"
                             description="Contribution lineitems and payment info."
-                            href="/admin/panels/contributions"
+                            href="/volunteer_dashboard/panels/contributions"
                             icon={FaDollarSign}
                             count={contributionCount}
                             buttonType="card"
@@ -134,7 +134,7 @@ export function renderAdminUnselectedDetail({
                         <NavigationButton
                             label="Roles"
                             description="User roles and access levels."
-                            href="/admin/panels/roles"
+                            href="/volunteer_dashboard/panels/roles"
                             icon={FaUserTag}
                             count={roleCount}
                             buttonType="card"
@@ -143,7 +143,7 @@ export function renderAdminUnselectedDetail({
                         <NavigationButton
                             label="Permissions"
                             description="Granular permission definitions."
-                            href="/admin/panels/permissions"
+                            href="/volunteer_dashboard/panels/permissions"
                             icon={FaUserShield}
                             count={permissionCount}
                             buttonType="card"

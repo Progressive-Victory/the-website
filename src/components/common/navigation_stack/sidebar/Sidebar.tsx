@@ -670,7 +670,7 @@ function MinimalSidebar({
         useSidebarIndicator(pathname, isDesktop, isOpen, showSelectionIndicator)
     const hiddenCollapsed = isDesktop && !isOpen && collapsedMode === 'hidden'
     const resolvedMobileVisible =
-        mobileVisible ?? !pathname.startsWith('/admin/panels/')
+        mobileVisible ?? !pathname.startsWith('/volunteer_dashboard/panels/')
     const sidebarInlineStyle = getSidebarInlineStyle(width, collapsedWidth)
 
     return (
@@ -975,13 +975,15 @@ function ProminentSidebarHeader({
 
 export function SidebarFeatured(): ReactElement {
     const isDesktop = useMediaQuery('(min-width: 64rem)')
-    const featuredHref = isDesktop ? '/admin' : '/admin/panels/members'
+    const featuredHref = isDesktop
+        ? '/volunteer_dashboard'
+        : '/volunteer_dashboard/panels/members'
     const currentUser = useCurrentUser()
     const displayName =
         `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim() ||
         (currentUser.data?.discordUsers?.[0]?.username
             ? `@${currentUser.data.discordUsers[0].username}`
-            : 'Admin User')
+            : 'User')
     const discordUser = currentUser.data?.discordUsers?.[0]
 
     return (

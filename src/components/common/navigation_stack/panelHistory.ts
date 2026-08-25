@@ -1,4 +1,4 @@
-const PANEL_HISTORY_STORAGE_KEY = 'pv.admin.panel.history'
+const PANEL_HISTORY_STORAGE_KEY = 'pv.volunteer_dashboard.panel.history'
 
 export function readPanelHistory(): string[] {
     if (typeof window === 'undefined') {

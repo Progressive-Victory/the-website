@@ -447,7 +447,7 @@ export function DonorView({
                                                             className={
                                                                 styles.detailsNavigationButton
                                                             }
-                                                            href={`/admin/panels/contributions?lineitemId=${lineitem.lineitemId}`}
+                                                            href={`/volunteer_dashboard/panels/contributions?lineitemId=${lineitem.lineitemId}`}
                                                             label="Full Details"
                                                             trackPanelHistory
                                                             linkClassName={
@@ -466,7 +466,7 @@ export function DonorView({
                                                     className={
                                                         styles.detailsNavigationButton
                                                     }
-                                                    href={`/admin/panels/donors?email=${donor.email}`}
+                                                    href={`/volunteer_dashboard/panels/donors?email=${donor.email}`}
                                                     label="Open in Donors Panel"
                                                     trackPanelHistory
                                                     linkClassName={
@@ -579,7 +579,7 @@ export function DonorView({
                                                                 <Link
                                                                     href={{
                                                                         pathname:
-                                                                            '/admin/panels/contributions',
+                                                                            '/volunteer_dashboard/panels/contributions',
                                                                         query: {
                                                                             lineitemId:
                                                                                 lineitem.lineitemId,

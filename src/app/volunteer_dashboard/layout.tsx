@@ -1,7 +1,7 @@
 'use client'
 
-import { renderAdminUnselectedDetail } from './admin'
-import styles from './admin.module.css'
+import { renderVolunteerDashboardUnselectedDetail } from './home'
+import styles from './page.module.css'
 import { ProtectedPage } from '@/components/ProtectedPage'
 import { NavigationStack } from '@/components/common/navigation_stack/NavigationStack'
 import { Detail } from '@/components/common/navigation_stack/detail/Detail'
@@ -28,22 +28,22 @@ import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 import type { IconType } from 'react-icons/lib'
 
-interface AdminGroupChildConfigItem {
+interface DashboardGroupChildConfigItem {
     key: string
     label: string
-    href: `/admin/panels/${string}`
+    href: `/volunteer_dashboard/panels/${string}`
     icon?: IconType
     count?: number
 }
 
-interface AdminPanelConfigItem {
-    href: `/admin/panels/${string}`
+interface DashboardPanelConfigItem {
+    href: `/volunteer_dashboard/panels/${string}`
     key: string
     label: string
     icon: IconType
     count?: number
     buttonType?: 'default' | 'group'
-    groupChildren?: AdminGroupChildConfigItem[]
+    groupChildren?: DashboardGroupChildConfigItem[]
 }
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -79,32 +79,32 @@ export default function Layout({ children }: { children: ReactNode }) {
 
     const currentUser = useCurrentUser()
 
-    const adminPanelConfig: AdminPanelConfigItem[] = [
+    const dashboardPanelConfig: DashboardPanelConfigItem[] = [
         {
             key: 'members',
             label: 'Members',
-            href: '/admin/panels/members',
+            href: '/volunteer_dashboard/panels/members',
             icon: FaUsers,
             count: users.query.data?.count,
         },
         {
             key: 'fundraising',
             label: 'Fundraising',
-            href: '/admin/panels/fundraising',
+            href: '/volunteer_dashboard/panels/fundraising',
             icon: FaDonate,
             buttonType: 'group',
             groupChildren: [
                 {
                     key: 'donors',
                     label: 'Donors',
-                    href: '/admin/panels/donors',
+                    href: '/volunteer_dashboard/panels/donors',
                     icon: FaDonate,
                     count: donors.query.data?.count,
                 },
                 {
                     key: 'contributions',
                     label: 'Contributions',
-                    href: '/admin/panels/contributions',
+                    href: '/volunteer_dashboard/panels/contributions',
                     icon: FaDollarSign,
                     count: contributions.query.data?.count,
                 },
@@ -113,21 +113,21 @@ export default function Layout({ children }: { children: ReactNode }) {
         {
             key: 'positions',
             label: 'Positions',
-            href: '/admin/panels/positions',
+            href: '/volunteer_dashboard/panels/positions',
             icon: FaClipboardUser,
             count: positionCount,
         },
         {
             key: 'roles',
             label: 'Roles',
-            href: '/admin/panels/roles',
+            href: '/volunteer_dashboard/panels/roles',
             icon: FaUserTag,
             count: roles.query.data?.count,
         },
         {
             key: 'permissions',
             label: 'Permissions',
-            href: '/admin/panels/permissions',
+            href: '/volunteer_dashboard/panels/permissions',
             icon: FaUserShield,
             count: permissions.query.data?.count,
         },
@@ -137,14 +137,14 @@ export default function Layout({ children }: { children: ReactNode }) {
         previousPathnameRef.current = pathname
     }, [pathname])
 
-    const currentTopLevelIndex = adminPanelConfig.findIndex(
+    const currentTopLevelIndex = dashboardPanelConfig.findIndex(
         (panel) => panel.href === pathname
     )
-    const previousTopLevelIndex = adminPanelConfig.findIndex(
+    const previousTopLevelIndex = dashboardPanelConfig.findIndex(
         (panel) => panel.href === previousPathname
     )
 
-    const activePanelLabel = adminPanelConfig
+    const activePanelLabel = dashboardPanelConfig
         .flatMap((panel) => [
             { href: panel.href, label: panel.label },
             ...(panel.groupChildren ?? []).map((groupChild) => ({
@@ -154,7 +154,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         ])
         .find((panel) => panel.href === pathname)?.label
 
-    const isPanelSelected = pathname.startsWith('/admin/panels/')
+    const isPanelSelected = pathname.startsWith('/volunteer_dashboard/panels/')
 
     return (
         <ProtectedPage requiredRoles={['Superadmin']}>
@@ -177,7 +177,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                             </Sidebar.Featured>
 
                             <Sidebar.Body>
-                                {adminPanelConfig.map((panel) => (
+                                {dashboardPanelConfig.map((panel) => (
                                     <NavigationButton
                                         key={panel.key}
                                         active={pathname === panel.href}
@@ -232,7 +232,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                             body={children}
                         />
                     }
-                    unselected={renderAdminUnselectedDetail({
+                    unselected={renderVolunteerDashboardUnselectedDetail({
                         showWelcome: showWelcomeRef.current,
                         currentUserName:
                             `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim(),

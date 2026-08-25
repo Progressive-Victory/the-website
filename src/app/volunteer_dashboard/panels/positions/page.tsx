@@ -234,7 +234,7 @@ export default function Page() {
                     renderItem={(position) => ({
                         key: position.id,
                         label: position.name,
-                        href: `/admin/panels/positions?positionId=${position.id}`,
+                        href: `/volunteer_dashboard/panels/positions?positionId=${position.id}`,
                         onClick: (event) => {
                             event.preventDefault()
                             const selected = handleSelectItem(position)

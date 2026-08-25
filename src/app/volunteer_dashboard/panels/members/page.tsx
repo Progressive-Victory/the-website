@@ -654,7 +654,7 @@ export default function Page() {
                                     size={40}
                                 />
                             ),
-                            href: `/admin/panels/members?userId=${user.id}`,
+                            href: `/volunteer_dashboard/panels/members?userId=${user.id}`,
                             onClick: (event) => {
                                 event.preventDefault()
                                 handleSelectItem(user)

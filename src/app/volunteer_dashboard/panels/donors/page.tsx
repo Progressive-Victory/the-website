@@ -197,7 +197,7 @@ export default function Page() {
                     renderItem={(donor) => ({
                         key: donor.email,
                         label: makeTitle(donor),
-                        href: `/admin/panels/donors?email=${donor.email}`,
+                        href: `/volunteer_dashboard/panels/donors?email=${donor.email}`,
                         onClick: (event) => {
                             event.preventDefault()
                             handleSelectItem(donor)
@@ -384,7 +384,7 @@ export default function Page() {
                                             className={
                                                 styles.detailsNavigationButton
                                             }
-                                            href={`/admin/panels/contributions?lineitemId=${lineitem.lineitemId}`}
+                                            href={`/volunteer_dashboard/panels/contributions?lineitemId=${lineitem.lineitemId}`}
                                             label="Full Details"
                                             trackPanelHistory
                                             linkClassName={

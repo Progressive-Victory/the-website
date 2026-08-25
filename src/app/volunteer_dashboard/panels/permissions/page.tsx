@@ -156,7 +156,7 @@ export default function Page() {
                     renderItem={(permission) => ({
                         key: permission.id,
                         label: permission.name,
-                        href: `/admin/panels/permissions?permissionId=${permission.id}`,
+                        href: `/volunteer_dashboard/panels/permissions?permissionId=${permission.id}`,
                         onClick: (event) => {
                             event.preventDefault()
                             const selected = handleSelectItem(permission)

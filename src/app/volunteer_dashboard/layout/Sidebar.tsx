@@ -27,7 +27,10 @@ export default function Sidebar({
     roleCount,
     permissionCount,
 }: SidebarProps) {
-    const [open, setOpen] = useLocalStorage('pv.admin-nav-open', true)
+    const [open, setOpen] = useLocalStorage(
+        'pv.volunteer-dashboard-nav-open',
+        true
+    )
 
     return (
         <div
@@ -40,14 +43,14 @@ export default function Sidebar({
             <ul className={styles.list}>
                 <NavLink
                     title="Members"
-                    href="/admin/panels/members"
+                    href="/volunteer_dashboard/panels/members"
                     icon={FaUsers}
                     count={userCount}
                     open={open}
                 />
                 <NavLink
                     title="Donors"
-                    href="/admin/panels/donors"
+                    href="/volunteer_dashboard/panels/donors"
                     icon={FaDonate}
                     count={donorCount}
                     open={open}
@@ -55,7 +58,7 @@ export default function Sidebar({
 
                 <NavLink
                     title="Contributions"
-                    href="/admin/panels/contributions"
+                    href="/volunteer_dashboard/panels/contributions"
                     icon={FaDollarSign}
                     count={contributionCount}
                     open={open}
@@ -63,7 +66,7 @@ export default function Sidebar({
 
                 <NavLink
                     title="Positions"
-                    href="/admin/panels/positions"
+                    href="/volunteer_dashboard/panels/positions"
                     icon={FaClipboardUser}
                     count={positionCount}
                     open={open}
@@ -71,7 +74,7 @@ export default function Sidebar({
 
                 <NavLink
                     title="Roles"
-                    href="/admin/panels/roles"
+                    href="/volunteer_dashboard/panels/roles"
                     icon={FaUserTag}
                     count={roleCount}
                     open={open}
@@ -79,14 +82,14 @@ export default function Sidebar({
 
                 <NavLink
                     title="Permissions"
-                    href="/admin/panels/permissions"
+                    href="/volunteer_dashboard/panels/permissions"
                     icon={FaUserShield}
                     count={permissionCount}
                     open={open}
                 />
                 <NavLink
                     title="Fundraising"
-                    href="/admin/panels/fundraising"
+                    href="/volunteer_dashboard/panels/fundraising"
                     icon={FaDonate}
                     count={2}
                     open={open}
