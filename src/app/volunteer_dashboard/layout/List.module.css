@@ -1,0 +1,308 @@
+.list {
+    display: flex;
+    width: var(--list-width, 24rem);
+    height: 100%;
+    flex-direction: column;
+    align-self: stretch;
+    border-right: 2px solid;
+    border-color: #e5e7eb;
+    background-color: #f9fafb;
+}
+
+@media (min-width: 96rem) {
+    .list {
+        width: var(--list-width, 28rem);
+    }
+}
+
+.searchPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border-bottom: 2px solid rgba(17, 24, 39, 0.1);
+
+    padding-block: 0.85rem;
+    padding-right: 0.85rem;
+    padding-left: 0.6rem;
+}
+
+.searchRow {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.searchRowMain {
+    flex: 1;
+    min-width: 0;
+}
+
+.backIconButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 0.85rem;
+    padding: 0.45rem;
+
+    font-weight: 600;
+    cursor: pointer;
+
+    color: rgba(15, 23, 42, 0.62);
+    text-decoration: none;
+
+    transition:
+        background-color 140ms ease,
+        transform 140ms ease,
+        color 140ms ease,
+        box-shadow 140ms ease;
+}
+
+.backIconButton:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.backIconButton:active {
+    transform: translateY(0px) scale(0.99);
+}
+
+.searchPanelTop {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.searchInput {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.searchInput > input {
+    width: 100%;
+    border-radius: 0.6rem;
+    border-width: 1px;
+    border-color: #d1d5db;
+    padding: 0.25rem 0.75rem;
+}
+
+.select {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.select > span {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.7);
+    gap: 0.5rem;
+}
+
+.select > select {
+    border-radius: 0.85rem;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+
+    background: rgba(255, 255, 255, 0.75);
+    padding: 0.35rem 0.55rem;
+
+    color: rgba(15, 23, 42, 0.8);
+    outline: none;
+    gap: 0.5rem;
+}
+
+.filterSelect {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filterSelect > strong {
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.75);
+    gap: 0.5rem;
+}
+
+.listStatus {
+    display: flex;
+    flex: 1 1 0%;
+    align-items: center;
+    justify-content: center;
+}
+
+.pinned {
+    border-bottom-width: 3px;
+    border-bottom-style: solid;
+}
+
+.pinned .element {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    gap: 0.5rem;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    border-radius: 0rem;
+
+    margin: 0rem;
+}
+
+.elementList {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-bottom: 0;
+    padding-bottom: 0;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    mask-image: linear-gradient(
+        to bottom,
+        black calc(100% - 1.5rem),
+        transparent
+    );
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        black calc(100% - 1.5rem),
+        transparent
+    );
+}
+
+.elementList::-webkit-scrollbar {
+    display: none;
+}
+
+.pageSelectContainer {
+    position: relative;
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-top: 2px solid rgba(17, 24, 39, 0.1);
+    padding-right: 2px;
+}
+
+.listBodyWrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.pageSelectCount {
+    position: absolute;
+    top: 0;
+    left: calc(50% - 1px);
+    transform: translate(-50%, -50%);
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.55);
+    background-color: #f9fafb;
+    border: 0.12rem solid rgba(17, 24, 39, 0.1);
+    padding: 0.15rem 0.6rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.element {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    margin: 0.25rem;
+}
+
+.element:hover {
+    background-color: #e5e7eb;
+}
+
+.element.selected {
+    background-color: #e5e7eb;
+}
+
+.element.selected:hover {
+    background-color: #d1d5db;
+}
+
+.pageSelect {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pageSelectButtons {
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.9rem;
+}
+
+.pageSelectForm {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    color: rgba(15, 23, 42, 0.72);
+}
+
+.pageSelectInput {
+    width: 6ch;
+    max-width: min-content;
+    border-radius: 0.65rem;
+    border-width: 1px;
+    border-color: #d1d5db;
+    padding: 0.125rem 0.5rem;
+    text-align: center;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.pageSelectInput:focus {
+    border-color: rgba(14, 165, 233, 0.35);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+.arrow {
+    display: flex;
+    user-select: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.85rem;
+    padding: 0.45rem;
+
+    font-weight: 600;
+}
+
+.arrow.disabled {
+    cursor: not-allowed;
+    color: rgba(15, 23, 42, 0.28);
+}
+
+.arrow.enabled {
+    cursor: pointer;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.arrow.enabled:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.arrow.enabled:active {
+    background-color: #f3f4f6;
+}

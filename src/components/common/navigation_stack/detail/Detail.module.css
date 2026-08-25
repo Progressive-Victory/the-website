@@ -1,0 +1,138 @@
+.detail {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    background: var(--navigation-stack-detail-bg, transparent);
+    overflow-y: auto;
+}
+
+.backButton,
+.panelBackButton {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    border: 0;
+    margin: 0 0 0 0rem;
+    padding: 0.6rem 0.5rem 0.6rem 0.25rem;
+    background: transparent;
+    color: #2986cc;
+    font: inherit;
+    font-weight: 500;
+    font-size: 0.92rem;
+    line-height: 1;
+    border-radius: 0.7rem;
+    cursor: pointer;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+        background-color 140ms ease,
+        color 140ms ease,
+        transform 140ms ease;
+
+    &:hover {
+        color: #549ed6;
+        background: rgba(15, 23, 42, 0.05);
+    }
+
+    &:active {
+        color: #1b4568;
+    }
+
+    &:focus-visible {
+        outline: 2px solid rgba(41, 134, 204, 0.28);
+        outline-offset: 0.2rem;
+        border-radius: 999px;
+    }
+}
+
+.backButton {
+    font-size: 1.06rem;
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.86);
+    padding: 0 0 0.25rem;
+    user-select: none;
+}
+
+.header {
+    display: contents;
+}
+
+.body {
+    display: contents;
+}
+
+.panelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.35rem 1.25rem;
+    background-color: #f9fafb;
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    border-bottom: 2px solid #e5e7eb;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
+}
+
+.panelTimestamp {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.panelHeaderLeft {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.breadcrumbs {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.86rem;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.72);
+    user-select: none;
+}
+
+.prominentBreadcrumb {
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.72);
+}
+
+.breadcrumbSeperator {
+    color: rgba(15, 23, 42, 0.35);
+    font-weight: 700;
+}
+
+.panelBreadcrumb {
+    font-weight: 650;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.footer {
+    display: contents;
+}
+
+@media (max-width: 63.999rem) {
+    .detail[data-mobile-visible='true'] {
+        display: flex;
+    }
+}
+
+@media (min-width: 64rem) {
+    .backButton {
+        display: none;
+    }
+
+    .detail {
+        display: flex;
+    }
+}

@@ -343,7 +343,7 @@ export function AccountDetailsSection({
                                 />
                                 <BaseButton
                                     label="Volunteer Dashboard"
-                                    href="/volunteer_dashboard"
+                                    href="/volunteer_dashboard?from=welcome"
                                     className={styles.secondaryButton}
                                 />
                             </div>

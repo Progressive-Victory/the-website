@@ -1,0 +1,162 @@
+.sidebarBg {
+    --navigation-stack-sidebar-bg: #f9fafb;
+    --navigation-stack-sidebar-padding: 0rem;
+    --navigation-stack-sidebar-gap: 0rem;
+}
+
+.detailsPane {
+    height: calc(100dvh - 100px);
+    flex: 1;
+    overflow-y: auto;
+    padding-block: 1rem;
+}
+
+.userMeta {
+    display: flex;
+    flex-direction: column;
+}
+
+.userName {
+    font-weight: 500;
+    color: #000;
+}
+
+.userUsername {
+    color: #6b7280;
+    font-size: small;
+}
+
+.emptyState {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: rgba(15, 23, 42, 0.5);
+    font-weight: 500;
+}
+
+.mobileBackButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0 1rem 1rem;
+    border: 0;
+    background: transparent;
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.65rem;
+    color: #2986cc;
+    font: inherit;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.mobileBackButton::before {
+    content: '';
+    display: inline-block;
+    width: 0.58rem;
+    height: 0.58rem;
+    border-left: 0.14rem solid currentColor;
+    border-bottom: 0.14rem solid currentColor;
+    transform: rotate(45deg);
+    position: relative;
+    top: -0.5px;
+    border-bottom-left-radius: 0.04rem;
+}
+
+.mobileBackButton:hover {
+    color: #549ed6;
+    background: rgba(15, 23, 42, 0.05);
+}
+
+.detailsNavigationButton {
+    width: auto;
+    display: inline-block;
+    margin-top: 0.35rem;
+}
+
+.detailsNavigationLink {
+    display: inline-flex;
+    width: auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0.28rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    background: rgba(14, 165, 233, 0.12);
+    color: rgba(2, 132, 199, 1);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.78) inset;
+}
+
+.detailsNavigationLink:hover {
+    background: rgba(14, 165, 233, 0.18);
+    border-color: rgba(14, 165, 233, 0.2);
+}
+
+.detailsNavigationLink:active {
+    transform: translateY(0) scale(0.99);
+}
+
+.detailsNavigationLabel {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none;
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    white-space: nowrap;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+}
+
+.historyContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 2px solid #e5e7eb;
+    width: 92%;
+    margin-left: 1.5rem;
+}
+
+.historyEntry {
+    padding: 0.125rem 0.5rem;
+    text-align: left;
+    border-bottom-width: 1px;
+    width: 100%;
+}
+
+.historyEntry > code {
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        Liberation Mono,
+        Courier New,
+        monospace;
+}
+
+.historyEntryDate {
+    font-weight: 500;
+}
+
+.historyEntry:hover {
+    background-color: #e5e7eb;
+}
+
+.historyEntry.selected {
+    background-color: #e5e7eb;
+}
+
+.historyEntry.selected:hover {
+    background-color: #d1d5db;
+}
