@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 
+// TODO this is going to be refactored in a later PR on this branch
 export function usePanelBackNavigation() {
     const pathname = usePathname()
     const router = useRouter()

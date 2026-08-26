@@ -1,6 +1,6 @@
 'use client'
 
-import styles from './Detail.module.css'
+import styles from './PanelBackButton.module.css'
 import { BackButton } from '@/components/common/buttons'
 import { cn } from '@/util'
 import { usePanelBackNavigation } from '@/util/hooks'
