@@ -5,6 +5,7 @@ import { DiscordAvatar } from '@/components/common/DiscordAvatar'
 import { DropdownButton } from '@/components/common/dropdown/DropdownButton'
 import { DropdownOverlay } from '@/components/common/dropdown/DropdownOverlay'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import { cn } from '@/util'
 import { useCurrentUser } from '@/util/hooks'
 import { usePathname } from 'next/navigation'
 import { Children, isValidElement, useEffect, useRef, useState } from 'react'
@@ -334,10 +335,6 @@ function resolveSidebarProps(props: SidebarRootProps): ResolvedSidebarProps {
         body,
         footer,
     }
-}
-
-function cx(...parts: (string | false | undefined)[]): string {
-    return parts.filter(Boolean).join(' ')
 }
 
 function getSidebarInlineStyle(
@@ -683,11 +680,11 @@ function MinimalSidebar({
             data-sidebar-variant="minimal"
             data-sidebar-visual-mode={visualMode}
             style={sidebarInlineStyle}
-            className={cx(
+            className={cn(
                 styles.sidebar,
                 styles.sidebarMinimal,
                 isOpen ? styles.sidebarOpen : styles.sidebarClosed,
-                hiddenCollapsed ? styles.sidebarHiddenCollapsed : '',
+                hiddenCollapsed && styles.sidebarHiddenCollapsed,
                 className
             )}
         >
@@ -696,7 +693,7 @@ function MinimalSidebar({
             {featured}
 
             <div
-                className={cx(
+                className={cn(
                     styles.sidebarBodyWrapper,
                     !showScrollbar && styles.sidebarBodyWrapperHideScrollbar
                 )}
@@ -784,12 +781,12 @@ function ProminentSidebar({
             data-sidebar-variant="prominent"
             data-sidebar-visual-mode={visualMode}
             style={sidebarInlineStyle}
-            className={cx(
+            className={cn(
                 styles.sidebar,
                 shellClassName,
                 styles.sidebarWithProminentHeader,
                 isOpen ? styles.sidebarOpen : styles.sidebarClosed,
-                hiddenCollapsed ? styles.sidebarHiddenCollapsed : '',
+                hiddenCollapsed && styles.sidebarHiddenCollapsed,
                 className
             )}
         >
@@ -806,7 +803,7 @@ function ProminentSidebar({
             />
             <div
                 ref={scrollRef}
-                className={cx(
+                className={cn(
                     styles.sidebarBodyWrapper,
                     !showScrollbar && styles.sidebarBodyWrapperHideScrollbar
                 )}
@@ -869,7 +866,7 @@ function MinimalSidebarHeader({
         <div className={styles.header}>
             {label ? (
                 <div
-                    className={cx(
+                    className={cn(
                         styles.label,
                         !isOpen && styles.labelCollapsed
                     )}
@@ -944,7 +941,7 @@ function ProminentSidebarHeader({
     return (
         <div className={styles.panelHeader}>
             <div
-                className={cx(
+                className={cn(
                     styles.panelHeaderLeft,
                     reserveToggleSpace && styles.panelHeaderLeftShifted
                 )}
@@ -961,7 +958,7 @@ function ProminentSidebarHeader({
             </div>
 
             <div
-                className={cx(
+                className={cn(
                     styles.panelHeaderRight,
                     usesGeneratedFilterToggle &&
                         styles.panelHeaderRightFilterToggle
@@ -1051,12 +1048,10 @@ function SidebarFooter({
                 type="button"
             >
                 <FiChevronLeft
-                    className={[
+                    className={cn(
                         styles.toggleIcon,
-                        !isOpen ? styles.toggleIconClosed : '',
-                    ]
-                        .filter(Boolean)
-                        .join(' ')}
+                        !isOpen && styles.toggleIconClosed
+                    )}
                     size={20}
                 />
             </button>
@@ -1080,9 +1075,7 @@ export function SidebarToggleButton({
     return (
         <button
             aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-            className={[styles.panelToggleButton, className]
-                .filter(Boolean)
-                .join(' ')}
+            className={cn(styles.panelToggleButton, className)}
             onClick={onToggle}
             title={isOpen ? 'Collapse' : 'Expand'}
             type="button"
