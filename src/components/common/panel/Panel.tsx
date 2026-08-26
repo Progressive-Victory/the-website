@@ -15,10 +15,8 @@ import {
     NavigationStack,
     SidebarToggleButton,
 } from '@/components/common/navigation_stack'
-import {
-    Detail,
-    PanelBackButton,
-} from '@/components/common/navigation_stack/detail/Detail'
+import { Detail } from '@/components/common/navigation_stack/detail/Detail'
+import { PanelBackButton } from '@/components/common/navigation_stack/detail/PanelBackButton'
 import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
