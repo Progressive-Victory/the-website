@@ -1,13 +1,8 @@
 'use client'
 
-import {
-    readPanelHistory,
-    writePanelHistory,
-    clearPanelHistory,
-} from '../panelHistory'
 import styles from './NavigationButton.module.css'
+import { cn } from '@/util'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import {
     useEffect,
     useLayoutEffect,
@@ -65,8 +60,6 @@ export function NavigationButton({
     groupContent,
     hasActiveGroupChild = false,
     indicatorDirection = 'none',
-    trackPanelHistory = false,
-    resetPanelHistoryOnClick = false,
     onClick,
     showIndicator = true,
     active = false,
@@ -82,7 +75,6 @@ export function NavigationButton({
     const hasIcon = Boolean(iconNode ?? Icon)
     const isAccountButton = buttonType === 'account'
     const hasSubtitle = subtitle != null && subtitle !== ''
-    const pathname = usePathname()
     const formattedCount = (count ?? 0).toLocaleString()
     const [isGroupOpen, setIsGroupOpen] = useState(false)
     const [shouldRenderGroupChildren, setShouldRenderGroupChildren] =
@@ -156,41 +148,9 @@ export function NavigationButton({
         })
     }
 
-    function handleNavigationClick() {
-        if (typeof window === 'undefined') {
-            return
-        }
-
-        if (resetPanelHistoryOnClick) {
-            clearPanelHistory()
-            return
-        }
-
-        if (!trackPanelHistory) {
-            return
-        }
-
-        if (!pathname.startsWith('/volunteer_dashboard/panels/')) {
-            return
-        }
-
-        const panelHistory = readPanelHistory()
-
-        const nextHistory =
-            panelHistory[panelHistory.length - 1] === pathname
-                ? panelHistory
-                : [...panelHistory, pathname]
-
-        writePanelHistory(nextHistory)
-    }
-
     if (buttonType === 'card') {
         return (
-            <div
-                className={[styles.item, styles.cardItem, className]
-                    .filter(Boolean)
-                    .join(' ')}
-            >
+            <div className={cn(styles.item, styles.cardItem, className)}>
                 <div className={styles.itemHeader}>
                     <Link
                         aria-current={active ? 'page' : undefined}
@@ -200,7 +160,6 @@ export function NavigationButton({
                         }
                         href={href}
                         onClick={(event) => {
-                            handleNavigationClick()
                             onClick?.(event)
                         }}
                         title={label}
@@ -239,32 +198,24 @@ export function NavigationButton({
 
     return (
         <div
-            className={[
+            className={cn(
                 styles.item,
-                isAccountButton ? styles.accountItem : null,
+                isAccountButton && styles.accountItem,
                 active ? styles.itemActive : styles.itemInactive,
-                active && indicatorDirection === 'up'
-                    ? styles.itemActiveFromUp
-                    : null,
-                active && indicatorDirection === 'down'
-                    ? styles.itemActiveFromDown
-                    : null,
+                active && indicatorDirection === 'up' && styles.itemActiveFromUp,
+                active && indicatorDirection === 'down' && styles.itemActiveFromDown,
                 className,
-            ]
-                .filter(Boolean)
-                .join(' ')}
+            )}
             style={style}
         >
             <div className={styles.itemHeader}>
                 <Link
                     aria-current={active ? 'page' : undefined}
-                    className={[
+                    className={cn(
                         styles.link,
-                        isAccountButton ? styles.accountLink : null,
+                        isAccountButton && styles.accountLink,
                         linkClassName,
-                    ]
-                        .filter(Boolean)
-                        .join(' ')}
+                    )}
                     data-indicator-target={
                         showIndicator && hasActiveGroupChild && !isGroupOpen
                             ? 'true'
@@ -273,53 +224,38 @@ export function NavigationButton({
                     data-show-indicator={showIndicator ? undefined : 'false'}
                     href={href}
                     onClick={(event) => {
-                        handleNavigationClick()
                         onClick?.(event)
                     }}
                     title={label}
                 >
                     {hasIcon ? (
                         <span
-                            className={[
+                            className={cn(
                                 styles.iconSection,
-                                isAccountButton
-                                    ? styles.accountIconSection
-                                    : null,
+                                isAccountButton && styles.accountIconSection,
                                 iconSectionClassName,
-                            ]
-                                .filter(Boolean)
-                                .join(' ')}
+                            )}
                         >
                             {iconNode ?? (Icon ? <Icon size={19} /> : null)}
                         </span>
                     ) : null}
 
                     <span
-                        className={[
+                        className={cn(
                             styles.labelSection,
-                            hasSubtitle && !isAccountButton
-                                ? styles.labelSectionWithSubtitle
-                                : null,
-                            isAccountButton ? styles.accountText : null,
+                            hasSubtitle && !isAccountButton && styles.labelSectionWithSubtitle,
+                            isAccountButton && styles.accountText,
                             labelClassName,
-                        ]
-                            .filter(Boolean)
-                            .join(' ')}
+                        )}
                     >
                         {label}
                         {subtitle ? (
                             <span
-                                className={[
-                                    !isAccountButton
-                                        ? styles.subtitleSection
-                                        : null,
-                                    isAccountButton
-                                        ? styles.accountSubtitle
-                                        : null,
+                                className={cn(
+                                    !isAccountButton && styles.subtitleSection,
+                                    isAccountButton && styles.accountSubtitle,
                                     subtitleClassName,
-                                ]
-                                    .filter(Boolean)
-                                    .join(' ')}
+                                )}
                             >
                                 {subtitle}
                             </span>
@@ -327,14 +263,12 @@ export function NavigationButton({
                     </span>
 
                     <span
-                        className={[
+                        className={cn(
                             styles.tagSection,
-                            tagLabel ? styles.tagSectionWithLabel : null,
-                            isAccountButton ? styles.accountTagSection : null,
+                            tagLabel && styles.tagSectionWithLabel,
+                            isAccountButton && styles.accountTagSection,
                             tagSectionClassName,
-                        ]
-                            .filter(Boolean)
-                            .join(' ')}
+                        )}
                     >
                         {buttonType === 'group' ? (
                             <span
