@@ -3,6 +3,11 @@ on:
   push:
     branches: [dev]
   workflow_dispatch:
+    inputs:
+      acceptance:
+        description: 'Deploy to Acceptance (yes/no)?'
+        required: true
+        default: 'no'
   
 jobs:
   build-publish:
