@@ -12,6 +12,8 @@ export interface DetailProps {
     label?: string
     className?: string
     bodyType?: 'blank' | 'panel'
+    isPanelRoute?: (pathname: string) => boolean
+    onNavigateBack?: () => void
 }
 
 export function Detail({
@@ -19,9 +21,14 @@ export function Detail({
     label,
     className,
     bodyType = 'blank',
+    isPanelRoute: isPanelRouteFn = () => false,
+    onNavigateBack = () => {},
 }: DetailProps) {
     const pathname = usePathname()
-    const { handleNavigateBack, isPanelRoute } = usePanelBackNavigation()
+    const { handleNavigateBack, isPanelRoute } = usePanelBackNavigation({
+        isPanelRoute: isPanelRouteFn,
+        onNavigateBack,
+    })
     const isDashboardRootRoute = pathname === '/volunteer_dashboard'
     const mobileVisible = isPanelRoute || isDashboardRootRoute
     const showDetailHeader = bodyType === 'blank'
