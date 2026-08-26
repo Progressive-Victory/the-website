@@ -1,6 +1,6 @@
 'use client'
 
-import styles from './PanelBackButton.module.css'
+import styles from './Detail.module.css'
 import { BackButton } from '@/components/common/buttons'
 import { cn } from '@/util'
 import { usePanelBackNavigation } from '@/util/hooks'
@@ -10,21 +10,14 @@ interface PanelBackButtonProps {
     className?: string
     showOnDesktop?: boolean
     showOnMobile?: boolean
-    isPanelRoute?: (pathname: string) => boolean
-    onNavigateBack?: () => void
 }
 
 export function PanelBackButton({
     className,
     showOnDesktop = false,
     showOnMobile = true,
-    isPanelRoute: isPanelRouteFn = () => false,
-    onNavigateBack = () => {},
 }: PanelBackButtonProps) {
-    const { handleNavigateBack, isPanelRoute } = usePanelBackNavigation({
-        isPanelRoute: isPanelRouteFn,
-        onNavigateBack,
-    })
+    const { handleNavigateBack, isPanelRoute } = usePanelBackNavigation()
     const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const shouldShowForViewport =

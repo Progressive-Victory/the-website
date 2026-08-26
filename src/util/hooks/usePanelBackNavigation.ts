@@ -1,20 +1,18 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
-interface UsePanelBackNavigationOptions {
-    isPanelRoute: (pathname: string) => boolean
-    onNavigateBack: () => void
-}
-
-export function usePanelBackNavigation({
-    isPanelRoute,
-    onNavigateBack,
-}: UsePanelBackNavigationOptions) {
+export function usePanelBackNavigation() {
     const pathname = usePathname()
+    const router = useRouter()
+    const isPanelRoute = pathname.startsWith('/volunteer_dashboard/panels/')
+
+    function handleNavigateBack() {
+        router.push('/volunteer_dashboard')
+    }
 
     return {
-        handleNavigateBack: onNavigateBack,
-        isPanelRoute: isPanelRoute(pathname),
+        handleNavigateBack,
+        isPanelRoute,
     }
 }

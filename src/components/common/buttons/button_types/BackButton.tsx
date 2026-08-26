@@ -19,7 +19,7 @@ export function BackButton({ label, onClick, className }: BackButtonProps) {
             aria-label={label}
         >
             <FiChevronLeft size={18} />
-            {label}
+            <span>{label}</span>
         </button>
     )
 }
