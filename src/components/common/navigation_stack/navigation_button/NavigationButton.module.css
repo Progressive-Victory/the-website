@@ -1,0 +1,511 @@
+.item {
+    position: relative;
+    width: var(--navigation-button-item-width, 100%);
+    cursor: pointer;
+    margin: var(--navigation-button-item-margin, 0);
+    border-radius: var(--navigation-button-item-radius, 0.85rem);
+    --group-scaffold-offset: 0.8rem;
+}
+
+.cardItem {
+    width: auto;
+    border-radius: 1rem;
+}
+
+.itemHeader {
+    position: relative;
+    display: block;
+
+    & > .link:hover {
+        background: var(
+            --navigation-button-link-hover-bg,
+            rgba(15, 23, 42, 0.05)
+        );
+    }
+}
+
+.itemActive > .itemHeader > .link {
+    color: var(--navigation-button-link-active-color, rgba(2, 132, 199, 1));
+    background: var(
+        --navigation-button-link-active-bg,
+        rgba(14, 165, 233, 0.14)
+    );
+
+    &:hover {
+        background: var(
+            --navigation-button-link-active-hover-bg,
+            rgba(15, 23, 42, 0.05)
+        );
+    }
+
+    &:active {
+        transform: scale(0.99);
+    }
+}
+
+.itemInactive {
+    font-weight: 500;
+}
+
+.accountItem {
+    margin-top: 0;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 1rem;
+    transition:
+        opacity 160ms ease,
+        margin-top 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.link {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: var(--navigation-button-link-gap, 0.65rem);
+    padding: var(--navigation-button-link-padding, 0.6rem 0.65rem);
+    background-color: transparent;
+    color: var(--navigation-button-link-color, rgba(15, 23, 42, 0.78));
+    text-decoration: none;
+    border-radius: var(--navigation-button-link-radius, 0.85rem);
+    transition:
+        gap 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        padding 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 220ms cubic-bezier(0.22, 0.61, 0.36, 1),
+        transform 140ms ease,
+        color 140ms ease,
+        box-shadow 140ms ease;
+
+    &:active {
+        transform: scale(0.99);
+    }
+}
+
+.accountLink {
+    gap: 0.65rem;
+    padding: 0.55rem 0.65rem;
+    border-radius: 1rem;
+    background-color: transparent;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        gap 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        padding 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 180ms ease,
+        border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        transform 140ms ease;
+
+    &:hover {
+        background: rgba(15, 23, 42, 0.05);
+        border-color: transparent;
+        box-shadow: none;
+    }
+
+    &:active {
+        transform: translateY(0) scale(0.99);
+    }
+}
+
+.cardLink {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    text-decoration: none;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.74);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 22px 55px rgba(15, 23, 42, 0.12);
+    transition:
+        transform 160ms ease,
+        box-shadow 160ms ease,
+        background-color 160ms ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.78) inset,
+            0 26px 70px rgba(15, 23, 42, 0.16);
+    }
+
+    &:active {
+        transform: translateY(0) scale(0.995);
+    }
+}
+
+.cardTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.cardLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cardIconPill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.85rem;
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.72);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+.cardTitle {
+    margin-left: auto;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: rgba(9, 34, 58, 0.9);
+    text-align: right;
+}
+
+.cardCount {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 1rem;
+    border-radius: 1rem;
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.7);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.cardDescription {
+    font-size: 0.93rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.52);
+    line-height: 1.35;
+}
+
+.iconSection {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.accountIconSection {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    & > * {
+        flex-shrink: 0;
+        box-sizing: border-box;
+        width: 39px;
+        height: 39px;
+        min-width: 39px;
+        min-height: 39px;
+        aspect-ratio: 1 / 1;
+        display: block;
+        border-radius: 999px;
+        border: 1.5px solid rgba(15, 23, 42, 0.1);
+        object-fit: cover;
+        transition:
+            border-color 180ms ease,
+            transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+}
+
+.labelSection {
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+    font-size: var(--navigation-button-label-font-size, 0.95rem);
+    font-weight: var(--navigation-button-label-font-weight, 600);
+    letter-spacing: var(--navigation-button-label-letter-spacing, -0.01em);
+    color: var(--navigation-button-label-color, inherit);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition:
+        max-width 200ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 160ms ease;
+}
+
+.labelSectionWithSubtitle {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    white-space: normal;
+    line-height: 1.15;
+}
+
+.subtitleSection {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.48);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.accountText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.03rem;
+    min-width: 0;
+    max-height: 2.2rem;
+    overflow: hidden;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: rgba(9, 34, 58, 0.92);
+    transition:
+        max-height 200ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 160ms ease;
+}
+
+.accountSubtitle {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.48);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tagSection {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    max-width: 5rem;
+    overflow: hidden;
+    transition:
+        max-width 200ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 160ms ease;
+}
+
+.tagSectionWithLabel {
+    max-width: none;
+    overflow: visible;
+    margin-left: auto;
+}
+
+.accountTagSection {
+    display: none;
+}
+
+.count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding-inline: 0.75rem;
+    border-radius: 9999px;
+    padding-block: 0.15rem;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.tagLabel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding-inline: 0.7rem;
+    padding-block: 0.18rem;
+    border-radius: 9999px;
+    color: rgba(2, 132, 199, 1);
+    background: rgba(14, 165, 233, 0.14);
+}
+
+.groupTagButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    border-radius: 9999px;
+    padding-inline: 0.75rem;
+    padding-block: 0.55rem;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+    cursor: pointer;
+    transition:
+        background-color 140ms ease,
+        color 140ms ease;
+
+    &:hover {
+        background: rgba(15, 23, 42, 0.1);
+    }
+
+    &[data-collapsed-active-child='true'] {
+        color: rgba(2, 132, 199, 1);
+        background: rgba(14, 165, 233, 0.14);
+    }
+
+    &[data-open='true'] .groupTagChevron {
+        transform: rotate(45deg);
+    }
+}
+
+.groupTagChevron {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(135deg);
+    transition: transform 200ms ease;
+}
+
+.groupChildrenClip {
+    overflow: hidden;
+    max-height: 0;
+    margin-right: -1rem;
+    padding-right: 1rem;
+    transition: max-height 220ms ease;
+
+    &[data-open='true'] {
+        max-height: var(--group-children-open-height, 0px);
+
+        & .groupChildren {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+            pointer-events: auto;
+
+            & > .item {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+
+                &:nth-child(1) {
+                    transition-delay: 30ms;
+                }
+                &:nth-child(2) {
+                    transition-delay: 55ms;
+                }
+                &:nth-child(3) {
+                    transition-delay: 80ms;
+                }
+                &:nth-child(4) {
+                    transition-delay: 105ms;
+                }
+                &:nth-child(5) {
+                    transition-delay: 130ms;
+                }
+            }
+        }
+    }
+}
+
+.groupChildren {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding-top: 0.3rem;
+    margin-left: var(--group-scaffold-offset);
+    padding-left: 1.05rem;
+    overflow: visible;
+    opacity: 0;
+    transform: translate3d(0, -4px, 0);
+    will-change: opacity, transform;
+    pointer-events: none;
+    transition:
+        opacity 200ms ease,
+        transform 220ms ease;
+
+    & > .item {
+        position: relative;
+        opacity: 0;
+        transform: translate3d(0, -3px, 0);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        transition:
+            opacity 160ms ease,
+            transform 220ms ease;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: -1.05rem;
+            top: -0.2rem;
+            width: 1.05rem;
+            height: calc(50% + 0.2rem);
+            transform: translateY(1px);
+            border-left: 2px solid rgba(15, 23, 42, 0.18);
+            border-bottom: 2px solid rgba(15, 23, 42, 0.18);
+            border-bottom-left-radius: 0.45rem;
+            box-sizing: border-box;
+        }
+
+        &:first-child::before {
+            top: 0;
+            height: 50%;
+        }
+
+        & .link {
+            margin-left: 0.2rem;
+            padding: 0.6rem 0.65rem;
+            border-radius: 0.85rem;
+        }
+
+        & .labelSection {
+            font-size: 0.95rem;
+        }
+    }
+}
+
+[data-sidebar-collapsed='true'] .accountItem {
+    margin-top: 0.35rem;
+}
+
+[data-sidebar-collapsed='true'] .accountLink {
+    justify-content: center;
+    gap: 0;
+    padding: 0.05rem;
+    border-color: transparent;
+    box-shadow: none;
+
+    &:hover {
+        background: transparent;
+        border-color: transparent;
+        box-shadow: none;
+
+        & .accountIconSection > * {
+            border-color: #1b4568;
+        }
+    }
+}
+
+[data-sidebar-collapsed='true'] .accountText {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+:global([data-sidebar-collapsed='true']) .labelSection,
+:global([data-sidebar-collapsed='true']) .tagSection {
+    max-width: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+:global([data-sidebar-collapsed='true']) .link {
+    justify-content: flex-start;
+    gap: 0;
+}
+
+:global([data-sidebar-collapsed='true']) .groupChildrenClip {
+    display: none;
+}
