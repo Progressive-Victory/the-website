@@ -202,9 +202,13 @@ export function NavigationButton({
                 styles.item,
                 isAccountButton && styles.accountItem,
                 active ? styles.itemActive : styles.itemInactive,
-                active && indicatorDirection === 'up' && styles.itemActiveFromUp,
-                active && indicatorDirection === 'down' && styles.itemActiveFromDown,
-                className,
+                active &&
+                    indicatorDirection === 'up' &&
+                    styles.itemActiveFromUp,
+                active &&
+                    indicatorDirection === 'down' &&
+                    styles.itemActiveFromDown,
+                className
             )}
             style={style}
         >
@@ -214,7 +218,7 @@ export function NavigationButton({
                     className={cn(
                         styles.link,
                         isAccountButton && styles.accountLink,
-                        linkClassName,
+                        linkClassName
                     )}
                     data-indicator-target={
                         showIndicator && hasActiveGroupChild && !isGroupOpen
@@ -233,7 +237,7 @@ export function NavigationButton({
                             className={cn(
                                 styles.iconSection,
                                 isAccountButton && styles.accountIconSection,
-                                iconSectionClassName,
+                                iconSectionClassName
                             )}
                         >
                             {iconNode ?? (Icon ? <Icon size={19} /> : null)}
@@ -243,9 +247,11 @@ export function NavigationButton({
                     <span
                         className={cn(
                             styles.labelSection,
-                            hasSubtitle && !isAccountButton && styles.labelSectionWithSubtitle,
+                            hasSubtitle &&
+                                !isAccountButton &&
+                                styles.labelSectionWithSubtitle,
                             isAccountButton && styles.accountText,
-                            labelClassName,
+                            labelClassName
                         )}
                     >
                         {label}
@@ -254,7 +260,7 @@ export function NavigationButton({
                                 className={cn(
                                     !isAccountButton && styles.subtitleSection,
                                     isAccountButton && styles.accountSubtitle,
-                                    subtitleClassName,
+                                    subtitleClassName
                                 )}
                             >
                                 {subtitle}
@@ -267,7 +273,7 @@ export function NavigationButton({
                             styles.tagSection,
                             tagLabel && styles.tagSectionWithLabel,
                             isAccountButton && styles.accountTagSection,
-                            tagSectionClassName,
+                            tagSectionClassName
                         )}
                     >
                         {buttonType === 'group' ? (
