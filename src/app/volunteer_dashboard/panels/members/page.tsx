@@ -647,7 +647,7 @@ export default function Page() {
                                 user.id === loggedInUser.data?.id
                                     ? 'You'
                                     : undefined,
-                            iconNode: (
+                            icon: (
                                 <DiscordAvatar
                                     discordUserId={user.discordUsers?.[0]?.id}
                                     imageId={user.discordUsers?.[0]?.image}

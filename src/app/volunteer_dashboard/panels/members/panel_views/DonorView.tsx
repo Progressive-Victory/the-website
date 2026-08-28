@@ -450,15 +450,14 @@ export function DonorView({
                                                             href={`/volunteer_dashboard/panels/contributions?lineitemId=${lineitem.lineitemId}`}
                                                             label="Full Details"
                                                             trackPanelHistory
-                                                            linkClassName={
-                                                                styles.detailsNavigationLink
-                                                            }
-                                                            labelClassName={
-                                                                styles.detailsNavigationLabel
-                                                            }
-                                                            tagSectionClassName={
-                                                                styles.detailsNavigationTagSection
-                                                            }
+                                                            classNames={{
+                                                                link: styles.detailsNavigationLink,
+                                                                label: styles.detailsNavigationLabel,
+                                                            }}
+                                                            tag={{
+                                                                className:
+                                                                    styles.detailsNavigationTagSection,
+                                                            }}
                                                         />
                                                     </FormGroup>
                                                 ))}
@@ -469,15 +468,14 @@ export function DonorView({
                                                     href={`/volunteer_dashboard/panels/donors?email=${donor.email}`}
                                                     label="Open in Donors Panel"
                                                     trackPanelHistory
-                                                    linkClassName={
-                                                        styles.detailsNavigationLink
-                                                    }
-                                                    labelClassName={
-                                                        styles.detailsNavigationLabel
-                                                    }
-                                                    tagSectionClassName={
-                                                        styles.detailsNavigationTagSection
-                                                    }
+                                                    classNames={{
+                                                        link: styles.detailsNavigationLink,
+                                                        label: styles.detailsNavigationLabel,
+                                                    }}
+                                                    tag={{
+                                                        className:
+                                                            styles.detailsNavigationTagSection,
+                                                    }}
                                                 />
                                             </FormGroup>
                                         </Form>

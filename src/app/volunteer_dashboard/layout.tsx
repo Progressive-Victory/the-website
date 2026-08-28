@@ -184,7 +184,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                                         href={panel.href}
                                         label={panel.label}
                                         icon={panel.icon}
-                                        count={panel.count}
+                                        tag={{ count: panel.count }}
                                         buttonType={panel.buttonType}
                                         indicatorDirection={
                                             pathname === panel.href &&
@@ -214,7 +214,9 @@ export default function Layout({ children }: { children: ReactNode }) {
                                                     href={groupChild.href}
                                                     label={groupChild.label}
                                                     icon={groupChild.icon}
-                                                    count={groupChild.count}
+                                                    tag={{
+                                                        count: groupChild.count,
+                                                    }}
                                                     resetPanelHistoryOnClick
                                                 />
                                             )

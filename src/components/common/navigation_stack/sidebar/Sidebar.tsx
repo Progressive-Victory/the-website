@@ -1,5 +1,7 @@
 'use client'
 
+import { SelectionIndicator, useSelectionIndicator } from './SelectionIndicator'
+import type { IndicatorStyle } from './SelectionIndicator'
 import styles from './Sidebar.module.css'
 import { DiscordAvatar } from '@/components/common/DiscordAvatar'
 import { DropdownButton } from '@/components/common/dropdown/DropdownButton'
@@ -18,12 +20,6 @@ import { useMediaQuery } from 'usehooks-ts'
 type SidebarVariant = 'minimal' | 'prominent'
 type SidebarVisualMode = 'minimal' | 'prominent' | 'prominent-bare'
 type SidebarHeaderMode = 'shown' | 'hidden'
-
-interface IndicatorStyle {
-    top: number
-    height: number
-    visible: boolean
-}
 
 interface SidebarBodyProps {
     bodyRef: React.RefObject<HTMLDivElement | null>
@@ -381,172 +377,6 @@ function useSidebarOpenState(
     return { isDesktop, isOpen, desktopOpen, toggle }
 }
 
-function useSidebarIndicator(
-    pathname: string,
-    isDesktop: boolean,
-    isOpen: boolean,
-    enabled: boolean
-): {
-    bodyRef: React.RefObject<HTMLDivElement | null>
-    indicatorLayoutSyncing: boolean
-    indicatorStyle: IndicatorStyle
-} {
-    const [indicatorLayoutSyncing, setIndicatorLayoutSyncing] = useState(false)
-    const [indicatorStyle, setIndicatorStyle] = useState<IndicatorStyle>({
-        top: 0,
-        height: 0,
-        visible: false,
-    })
-    const bodyRef = useRef<HTMLDivElement | null>(null)
-    const indicatorLayoutSyncTimeoutRef = useRef<ReturnType<
-        typeof setTimeout
-    > | null>(null)
-
-    useEffect(() => {
-        if (!enabled) {
-            setIndicatorLayoutSyncing(false)
-            setIndicatorStyle((previous) =>
-                previous.visible ? { ...previous, visible: false } : previous
-            )
-            return
-        }
-
-        let frameId: number | null = null
-
-        function syncIndicatorToLayout() {
-            if (indicatorLayoutSyncTimeoutRef.current !== null) {
-                clearTimeout(indicatorLayoutSyncTimeoutRef.current)
-            }
-
-            setIndicatorLayoutSyncing(true)
-            indicatorLayoutSyncTimeoutRef.current = setTimeout(() => {
-                setIndicatorLayoutSyncing(false)
-                indicatorLayoutSyncTimeoutRef.current = null
-            }, 140)
-        }
-
-        function getActiveLink(bodyElement: HTMLDivElement) {
-            return (
-                bodyElement.querySelector<HTMLElement>(
-                    '[data-indicator-target="true"]:not([data-show-indicator="false"])'
-                ) ??
-                bodyElement.querySelector<HTMLElement>(
-                    '[aria-current="page"]:not([data-show-indicator="false"])'
-                )
-            )
-        }
-
-        function updateIndicator() {
-            const bodyElement = bodyRef.current
-
-            if (!bodyElement) {
-                return
-            }
-
-            const activeLink = getActiveLink(bodyElement)
-
-            if (!activeLink) {
-                setIndicatorStyle((previous) =>
-                    previous.visible
-                        ? { ...previous, visible: false }
-                        : previous
-                )
-                return
-            }
-
-            let nextTop = 0
-            let node: HTMLElement | null = activeLink
-
-            while (node && node !== bodyElement) {
-                nextTop += node.offsetTop
-                node = node.offsetParent as HTMLElement | null
-            }
-
-            const nextHeight = activeLink.offsetHeight
-
-            setIndicatorStyle((previous) => {
-                const topChanged = Math.abs(previous.top - nextTop) > 0.5
-                const heightChanged =
-                    Math.abs(previous.height - nextHeight) > 0.5
-
-                if (!topChanged && !heightChanged && previous.visible) {
-                    return previous
-                }
-
-                return {
-                    top: nextTop,
-                    height: nextHeight,
-                    visible: true,
-                }
-            })
-        }
-
-        function scheduleIndicatorSync() {
-            if (frameId !== null) {
-                return
-            }
-
-            frameId = requestAnimationFrame(() => {
-                frameId = null
-                updateIndicator()
-            })
-        }
-
-        updateIndicator()
-        window.addEventListener('resize', updateIndicator)
-
-        const bodyElement = bodyRef.current
-        const resizeObserver =
-            typeof ResizeObserver === 'undefined' || !bodyElement
-                ? null
-                : new ResizeObserver(() => {
-                      syncIndicatorToLayout()
-                      scheduleIndicatorSync()
-                  })
-        const mutationObserver = bodyElement
-            ? new MutationObserver(scheduleIndicatorSync)
-            : null
-
-        if (bodyElement) {
-            resizeObserver?.observe(bodyElement)
-        }
-
-        if (bodyElement && mutationObserver) {
-            mutationObserver.observe(bodyElement, {
-                attributes: true,
-                attributeFilter: [
-                    'data-open',
-                    'aria-current',
-                    'data-indicator-target',
-                    'class',
-                ],
-                childList: true,
-                subtree: true,
-            })
-        }
-
-        return () => {
-            window.removeEventListener('resize', updateIndicator)
-            resizeObserver?.disconnect()
-            mutationObserver?.disconnect()
-
-            if (indicatorLayoutSyncTimeoutRef.current !== null) {
-                clearTimeout(indicatorLayoutSyncTimeoutRef.current)
-            }
-
-            if (frameId !== null) {
-                cancelAnimationFrame(frameId)
-            }
-        }
-    }, [pathname, isDesktop, isOpen, enabled])
-
-    return {
-        bodyRef,
-        indicatorLayoutSyncing,
-        indicatorStyle,
-    }
-}
-
 function useLargeTitleScroll(
     scrollRef: React.RefObject<HTMLDivElement | null>,
     titleRef: React.RefObject<HTMLElement | null>,
@@ -664,7 +494,12 @@ function MinimalSidebar({
         onOpenChange
     )
     const { bodyRef, indicatorLayoutSyncing, indicatorStyle } =
-        useSidebarIndicator(pathname, isDesktop, isOpen, showSelectionIndicator)
+        useSelectionIndicator(
+            pathname,
+            isDesktop,
+            isOpen,
+            showSelectionIndicator
+        )
     const hiddenCollapsed = isDesktop && !isOpen && collapsedMode === 'hidden'
     const resolvedMobileVisible =
         mobileVisible ?? !pathname.startsWith('/volunteer_dashboard/panels/')
@@ -746,7 +581,12 @@ function ProminentSidebar({
         onOpenChange
     )
     const { bodyRef, indicatorLayoutSyncing, indicatorStyle } =
-        useSidebarIndicator(pathname, isDesktop, isOpen, showSelectionIndicator)
+        useSelectionIndicator(
+            pathname,
+            isDesktop,
+            isOpen,
+            showSelectionIndicator
+        )
     const scrollRef = useRef<HTMLDivElement | null>(null)
     const largeTitleRef = useRef<HTMLHeadingElement | null>(null)
     const collapsed = isDesktop && !isOpen
@@ -987,7 +827,7 @@ export function SidebarFeatured(): ReactElement {
         <NavigationButton
             buttonType="account"
             href={featuredHref}
-            iconNode={
+            icon={
                 <DiscordAvatar
                     discordUserId={discordUser?.id}
                     imageId={discordUser?.image}
@@ -1013,15 +853,9 @@ function SidebarBody({
     return (
         <div className={styles.body} ref={bodyRef}>
             {showSelectionIndicator ? (
-                <div
-                    aria-hidden="true"
-                    className={styles.selectionIndicator}
-                    data-layout-syncing={indicatorLayoutSyncing}
-                    data-visible={indicatorStyle.visible}
-                    style={{
-                        top: `${indicatorStyle.top}px`,
-                        height: `${indicatorStyle.height}px`,
-                    }}
+                <SelectionIndicator
+                    layoutSyncing={indicatorLayoutSyncing}
+                    style={indicatorStyle}
                 />
             ) : null}
             {children}

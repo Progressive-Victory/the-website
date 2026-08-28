@@ -1,6 +1,7 @@
 export * from './useAuth'
 export * from './useAfterEffectsSettle'
 export * from './useClickAway'
+export * from './useCollapse'
 export * from './useCurrentUser'
 export * from './useFetch'
 export * from './useHydration'

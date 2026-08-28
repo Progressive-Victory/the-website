@@ -1,0 +1,28 @@
+.selectionIndicator {
+    position: absolute;
+    right: calc(
+        -1 * var(--navigation-stack-sidebar-padding, 0.9rem) -
+            var(--navigation-stack-indicator-overhang, 0.1rem)
+    );
+    width: 0.25rem;
+    background: #0ea5e9;
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+    opacity: 0;
+    transition:
+        top 220ms ease,
+        height 220ms ease,
+        opacity 160ms ease;
+    pointer-events: none;
+
+    &[data-visible='true'] {
+        opacity: 1;
+    }
+
+    &[data-layout-syncing='true'] {
+        transition:
+            top 90ms ease-out,
+            height 90ms ease-out,
+            opacity 160ms ease;
+    }
+}

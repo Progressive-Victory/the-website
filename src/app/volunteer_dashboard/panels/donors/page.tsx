@@ -387,15 +387,14 @@ export default function Page() {
                                             href={`/volunteer_dashboard/panels/contributions?lineitemId=${lineitem.lineitemId}`}
                                             label="Full Details"
                                             trackPanelHistory
-                                            linkClassName={
-                                                styles.detailsNavigationLink
-                                            }
-                                            labelClassName={
-                                                styles.detailsNavigationLabel
-                                            }
-                                            tagSectionClassName={
-                                                styles.detailsNavigationTagSection
-                                            }
+                                            classNames={{
+                                                link: styles.detailsNavigationLink,
+                                                label: styles.detailsNavigationLabel,
+                                            }}
+                                            tag={{
+                                                className:
+                                                    styles.detailsNavigationTagSection,
+                                            }}
                                         />
                                     </FormGroup>
                                 )

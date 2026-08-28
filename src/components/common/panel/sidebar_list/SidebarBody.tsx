@@ -10,7 +10,7 @@ export interface SidebarBodyItemConfig {
     label: string
     subtitle?: string
     tagLabel?: string
-    iconNode?: ReactNode
+    icon?: ReactNode
     href: string
     onClick: (event: React.MouseEvent) => void
 }
@@ -67,8 +67,8 @@ export function SidebarBody<T>({
                 href={config.href}
                 label={config.label}
                 subtitle={config.subtitle}
-                tagLabel={config.tagLabel}
-                iconNode={config.iconNode}
+                tag={config.tagLabel ? { label: config.tagLabel } : undefined}
+                icon={config.icon}
                 onClick={config.onClick}
                 showIndicator={false}
                 className={styles.sidebarNavigationButton}

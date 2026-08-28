@@ -85,7 +85,7 @@ export function renderVolunteerDashboardUnselectedDetail({
                             description="Member accounts and profiles."
                             href="/volunteer_dashboard/panels/members"
                             icon={FaUsers}
-                            count={userCount}
+                            tag={{ count: userCount }}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />
@@ -95,7 +95,7 @@ export function renderVolunteerDashboardUnselectedDetail({
                             description="Staff and volunteer position records."
                             href="/volunteer_dashboard/panels/positions"
                             icon={FaClipboardUser}
-                            count={positionCount}
+                            tag={{ count: positionCount }}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />
@@ -115,7 +115,7 @@ export function renderVolunteerDashboardUnselectedDetail({
                             description="ActBlue donors, totals, and records."
                             href="/volunteer_dashboard/panels/donors"
                             icon={FaDonate}
-                            count={donorCount}
+                            tag={{ count: donorCount }}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />
@@ -124,7 +124,7 @@ export function renderVolunteerDashboardUnselectedDetail({
                             description="Contribution lineitems and payment info."
                             href="/volunteer_dashboard/panels/contributions"
                             icon={FaDollarSign}
-                            count={contributionCount}
+                            tag={{ count: contributionCount }}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />
@@ -136,7 +136,7 @@ export function renderVolunteerDashboardUnselectedDetail({
                             description="User roles and access levels."
                             href="/volunteer_dashboard/panels/roles"
                             icon={FaUserTag}
-                            count={roleCount}
+                            tag={{ count: roleCount }}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />
@@ -145,7 +145,7 @@ export function renderVolunteerDashboardUnselectedDetail({
                             description="Granular permission definitions."
                             href="/volunteer_dashboard/panels/permissions"
                             icon={FaUserShield}
-                            count={permissionCount}
+                            tag={{ count: permissionCount }}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />

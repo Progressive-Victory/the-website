@@ -876,7 +876,9 @@ export default function Page() {
                             description="ActBlue donors, totals, and donor records."
                             href="/volunteer_dashboard/panels/donors"
                             icon={FaDonate}
-                            count={allTimeStatsQuery.data?.totalDonorCount}
+                            tag={{
+                                count: allTimeStatsQuery.data?.totalDonorCount,
+                            }}
                             buttonType="card"
                             trackPanelHistory
                         />
@@ -886,9 +888,10 @@ export default function Page() {
                             description="Contribution lineitems, payment info, and details."
                             href="/volunteer_dashboard/panels/contributions"
                             icon={FaDollarSign}
-                            count={
-                                allTimeStatsQuery.data?.totalContributionCount
-                            }
+                            tag={{
+                                count: allTimeStatsQuery.data
+                                    ?.totalContributionCount,
+                            }}
                             buttonType="card"
                             trackPanelHistory
                         />
