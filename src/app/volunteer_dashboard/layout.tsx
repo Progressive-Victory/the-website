@@ -3,13 +3,11 @@
 import { renderVolunteerDashboardUnselectedDetail } from './home'
 import styles from './page.module.css'
 import { ProtectedPage } from '@/components/ProtectedPage'
+import { DiscordAvatar } from '@/components/common/DiscordAvatar'
 import { NavigationStack } from '@/components/common/navigation_stack/NavigationStack'
 import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
-import {
-    Sidebar,
-    SidebarFeatured,
-} from '@/components/common/navigation_stack/sidebar/Sidebar'
+import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { Header } from '@/components/layout/Header'
 import {
     zActBlueDonationPacket,
@@ -27,6 +25,7 @@ import type { ReactNode } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 import type { IconType } from 'react-icons/lib'
+import { useMediaQuery } from 'usehooks-ts'
 
 interface DashboardGroupChildConfigItem {
     key: string
@@ -78,6 +77,11 @@ export default function Layout({ children }: { children: ReactNode }) {
     const positionCount = positionHierarchy.data?.positions?.length
 
     const currentUser = useCurrentUser()
+    const isDesktop = useMediaQuery('(min-width: 64rem)')
+    const discordUser = currentUser.data?.discordUsers?.[0]
+    const displayName =
+        `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim() ||
+        (discordUser?.username ? `@${discordUser.username}` : 'User')
 
     const dashboardPanelConfig: DashboardPanelConfigItem[] = [
         {
@@ -171,60 +175,77 @@ export default function Layout({ children }: { children: ReactNode }) {
                             showScrollbar={false}
                             showSelectionIndicator
                             label="Volunteer Dashboard"
+                            featured={
+                                <NavigationButton
+                                    buttonType="account"
+                                    href={
+                                        isDesktop
+                                            ? '/volunteer_dashboard'
+                                            : '/volunteer_dashboard/panels/members'
+                                    }
+                                    icon={
+                                        <DiscordAvatar
+                                            discordUserId={discordUser?.id}
+                                            imageId={discordUser?.image}
+                                            size={40}
+                                        />
+                                    }
+                                    label={displayName}
+                                    resetPanelHistoryOnClick={!isDesktop}
+                                    subtitle={
+                                        discordUser?.username
+                                            ? `@${discordUser.username}`
+                                            : undefined
+                                    }
+                                />
+                            }
                         >
-                            <Sidebar.Featured>
-                                <SidebarFeatured />
-                            </Sidebar.Featured>
-
-                            <Sidebar.Body>
-                                {dashboardPanelConfig.map((panel) => (
-                                    <NavigationButton
-                                        key={panel.key}
-                                        active={pathname === panel.href}
-                                        href={panel.href}
-                                        label={panel.label}
-                                        icon={panel.icon}
-                                        tag={{ count: panel.count }}
-                                        buttonType={panel.buttonType}
-                                        indicatorDirection={
-                                            pathname === panel.href &&
-                                            currentTopLevelIndex !== -1 &&
-                                            previousTopLevelIndex !== -1 &&
-                                            previousPathname !== pathname
-                                                ? currentTopLevelIndex >
-                                                  previousTopLevelIndex
-                                                    ? 'down'
-                                                    : 'up'
-                                                : 'none'
-                                        }
-                                        hasActiveGroupChild={Boolean(
-                                            panel.groupChildren?.some(
-                                                (groupChild) =>
+                            {dashboardPanelConfig.map((panel) => (
+                                <NavigationButton
+                                    key={panel.key}
+                                    active={pathname === panel.href}
+                                    href={panel.href}
+                                    label={panel.label}
+                                    icon={panel.icon}
+                                    tag={{ count: panel.count }}
+                                    buttonType={panel.buttonType}
+                                    indicatorDirection={
+                                        pathname === panel.href &&
+                                        currentTopLevelIndex !== -1 &&
+                                        previousTopLevelIndex !== -1 &&
+                                        previousPathname !== pathname
+                                            ? currentTopLevelIndex >
+                                              previousTopLevelIndex
+                                                ? 'down'
+                                                : 'up'
+                                            : 'none'
+                                    }
+                                    hasActiveGroupChild={Boolean(
+                                        panel.groupChildren?.some(
+                                            (groupChild) =>
+                                                pathname === groupChild.href
+                                        )
+                                    )}
+                                    groupContent={panel.groupChildren?.map(
+                                        (groupChild) => (
+                                            <NavigationButton
+                                                key={groupChild.key}
+                                                active={
                                                     pathname === groupChild.href
-                                            )
-                                        )}
-                                        groupContent={panel.groupChildren?.map(
-                                            (groupChild) => (
-                                                <NavigationButton
-                                                    key={groupChild.key}
-                                                    active={
-                                                        pathname ===
-                                                        groupChild.href
-                                                    }
-                                                    href={groupChild.href}
-                                                    label={groupChild.label}
-                                                    icon={groupChild.icon}
-                                                    tag={{
-                                                        count: groupChild.count,
-                                                    }}
-                                                    resetPanelHistoryOnClick
-                                                />
-                                            )
-                                        )}
-                                        resetPanelHistoryOnClick
-                                    />
-                                ))}
-                            </Sidebar.Body>
+                                                }
+                                                href={groupChild.href}
+                                                label={groupChild.label}
+                                                icon={groupChild.icon}
+                                                tag={{
+                                                    count: groupChild.count,
+                                                }}
+                                                resetPanelHistoryOnClick
+                                            />
+                                        )
+                                    )}
+                                    resetPanelHistoryOnClick
+                                />
+                            ))}
                         </Sidebar>
                     }
                     detail={

@@ -167,48 +167,26 @@ export function Panel({
                                 resolvedSidebarTogglePlacement === 'header'
                             }
                             label={panelLabel}
+                            header={{
+                                mode: includeHeader ? 'shown' : 'hidden',
+                                label: panelLabel,
+                                largeTitle,
+                                search: resolvedSidebarSearch,
+                                filters: resolvedSidebarFilterContent
+                                    ? {
+                                          open: sidebarFilterOpen,
+                                          onOpenChange:
+                                              onSidebarFilterOpenChange,
+                                          content: resolvedSidebarFilterContent,
+                                      }
+                                    : undefined,
+                                content: prominentHeader,
+                                left: resolvedProminentHeaderLeft,
+                                right: prominentHeaderRight,
+                            }}
+                            footer={resolvedSidebarFooter}
                         >
-                            <Sidebar.Header
-                                mode={includeHeader ? 'shown' : 'hidden'}
-                                label={panelLabel}
-                                largeTitle={largeTitle}
-                            >
-                                {resolvedSidebarSearch ? (
-                                    <Sidebar.HeaderSearch>
-                                        {resolvedSidebarSearch}
-                                    </Sidebar.HeaderSearch>
-                                ) : null}
-                                {resolvedSidebarFilterContent ? (
-                                    <Sidebar.HeaderFilters
-                                        open={sidebarFilterOpen}
-                                        onOpenChange={onSidebarFilterOpenChange}
-                                        content={resolvedSidebarFilterContent}
-                                    />
-                                ) : null}
-                                {prominentHeader ? (
-                                    <Sidebar.HeaderContent>
-                                        {prominentHeader}
-                                    </Sidebar.HeaderContent>
-                                ) : null}
-                                {resolvedProminentHeaderLeft ? (
-                                    <Sidebar.HeaderLeft>
-                                        {resolvedProminentHeaderLeft}
-                                    </Sidebar.HeaderLeft>
-                                ) : null}
-                                {prominentHeaderRight ? (
-                                    <Sidebar.HeaderRight>
-                                        {prominentHeaderRight}
-                                    </Sidebar.HeaderRight>
-                                ) : null}
-                            </Sidebar.Header>
-
-                            {resolvedSidebarFooter ? (
-                                <Sidebar.Footer>
-                                    {resolvedSidebarFooter}
-                                </Sidebar.Footer>
-                            ) : null}
-
-                            <Sidebar.Body>{sidebarBody}</Sidebar.Body>
+                            {sidebarBody}
                         </Sidebar>
                     }
                     detail={
