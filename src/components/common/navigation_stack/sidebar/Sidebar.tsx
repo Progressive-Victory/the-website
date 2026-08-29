@@ -3,50 +3,19 @@
 import { SelectionIndicator } from './SelectionIndicator'
 import type { IndicatorStyle } from './SelectionIndicator'
 import styles from './Sidebar.module.css'
+import { SidebarToggleButton } from './SidebarToggleButton'
 import { useLargeTitleScroll, useSidebarState } from './hooks'
 import { DropdownButton } from '@/components/common/dropdown/DropdownButton'
 import { DropdownOverlay } from '@/components/common/dropdown/DropdownOverlay'
 import { cn } from '@/util'
 import { useRef } from 'react'
 import type { ReactElement, ReactNode } from 'react'
-import { FiChevronLeft } from 'react-icons/fi'
 import { IoMdOptions } from 'react-icons/io'
 import { IoClose } from 'react-icons/io5'
 
 type SidebarVariant = 'minimal' | 'prominent'
 type SidebarVisualMode = 'minimal' | 'prominent' | 'prominent-bare'
 type SidebarHeaderMode = 'shown' | 'hidden'
-
-interface SidebarBodyProps {
-    bodyRef: React.RefObject<HTMLDivElement | null>
-    indicatorLayoutSyncing: boolean
-    indicatorStyle: IndicatorStyle
-    showSelectionIndicator: boolean
-    children?: ReactNode
-}
-
-interface MinimalSidebarHeaderProps {
-    label?: string
-    isOpen: boolean
-}
-
-interface ProminentSidebarHeaderProps {
-    label?: string
-    prominentHeader?: ReactNode
-    prominentHeaderLeft?: ReactNode
-    prominentHeaderRight?: ReactNode
-    filterOpen?: boolean
-    onFilterOpenChange?: (open: boolean) => void
-    filterContent?: ReactNode
-    reserveToggleSpace: boolean
-    largeTitle?: boolean
-}
-
-interface SidebarFooterProps {
-    isOpen: boolean
-    hiddenCollapsed: boolean
-    onToggle: () => void
-}
 
 export interface SidebarFiltersConfig {
     open?: boolean
@@ -408,6 +377,11 @@ function ProminentSidebar({
     )
 }
 
+interface MinimalSidebarHeaderProps {
+    label?: string
+    isOpen: boolean
+}
+
 function MinimalSidebarHeader({
     label,
     isOpen,
@@ -484,6 +458,18 @@ function resolveHeaderRight(
     return { element: null, isGenerated: false }
 }
 
+interface ProminentSidebarHeaderProps {
+    label?: string
+    prominentHeader?: ReactNode
+    prominentHeaderLeft?: ReactNode
+    prominentHeaderRight?: ReactNode
+    filterOpen?: boolean
+    onFilterOpenChange?: (open: boolean) => void
+    filterContent?: ReactNode
+    reserveToggleSpace: boolean
+    largeTitle?: boolean
+}
+
 function ProminentSidebarHeader({
     label,
     prominentHeader,
@@ -537,6 +523,14 @@ function ProminentSidebarHeader({
     )
 }
 
+interface SidebarBodyProps {
+    bodyRef: React.RefObject<HTMLDivElement | null>
+    indicatorLayoutSyncing: boolean
+    indicatorStyle: IndicatorStyle
+    showSelectionIndicator: boolean
+    children?: ReactNode
+}
+
 function SidebarBody({
     bodyRef,
     indicatorLayoutSyncing,
@@ -557,6 +551,12 @@ function SidebarBody({
     )
 }
 
+interface SidebarFooterProps {
+    isOpen: boolean
+    hiddenCollapsed: boolean
+    onToggle: () => void
+}
+
 function SidebarFooter({
     isOpen,
     hiddenCollapsed,
@@ -568,63 +568,11 @@ function SidebarFooter({
 
     return (
         <div className={styles.footer}>
-            <button
-                aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-                className={styles.toggleButton}
-                onClick={onToggle}
-                title={isOpen ? 'Collapse' : 'Expand'}
-                type="button"
-            >
-                <FiChevronLeft
-                    className={cn(
-                        styles.toggleIcon,
-                        !isOpen && styles.toggleIconClosed
-                    )}
-                    size={20}
-                />
-            </button>
+            <SidebarToggleButton
+                isOpen={isOpen}
+                onToggle={onToggle}
+                variant="chevron"
+            />
         </div>
-    )
-}
-
-interface SidebarToggleButtonProps {
-    isOpen: boolean
-    onToggle: () => void
-    className?: string
-    size?: number
-}
-
-export function SidebarToggleButton({
-    isOpen,
-    onToggle,
-    className,
-    size = 22,
-}: SidebarToggleButtonProps): ReactElement {
-    return (
-        <button
-            aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-            className={cn(styles.panelToggleButton, className)}
-            onClick={onToggle}
-            title={isOpen ? 'Collapse' : 'Expand'}
-            type="button"
-        >
-            <svg
-                className={styles.sidebarIcon}
-                fill="none"
-                height={size}
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-                width={size}
-            >
-                <rect height="18" rx="3" width="20" x="2" y="3" />
-                <line x1="9" x2="9" y1="3" y2="21" />
-                <line x1="4.5" x2="7" y1="7.5" y2="7.5" />
-                <line x1="4.5" x2="7" y1="11" y2="11" />
-                <line x1="4.5" x2="7" y1="14.5" y2="14.5" />
-            </svg>
-        </button>
     )
 }
