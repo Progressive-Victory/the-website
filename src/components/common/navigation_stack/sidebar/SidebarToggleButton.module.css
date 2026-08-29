@@ -1,0 +1,94 @@
+.toggleButton {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+
+    display: flex;
+    width: 2.25rem;
+    height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+    border-radius: 9999px;
+
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.7) inset,
+        0 10px 24px rgba(15, 23, 42, 0.14);
+
+    color: rgba(15, 23, 42, 0.6);
+
+    transition:
+        transform 140ms ease,
+        box-shadow 140ms ease,
+        background-color 140ms ease,
+        color 140ms ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        color: rgba(15, 23, 42, 0.8);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.75) inset,
+            0 14px 32px rgba(15, 23, 42, 0.18);
+    }
+
+    &:active {
+        transform: translateY(0px) scale(0.98);
+    }
+}
+
+.toggleIcon {
+    transition: transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1);
+    transform-origin: center;
+}
+
+.toggleIconClosed {
+    transform: rotate(180deg);
+}
+
+@media (min-width: 64rem) {
+    .toggleButton {
+        display: inline-flex;
+    }
+}
+
+.panelToggleButton {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    background: transparent;
+    border-radius: 0.85rem;
+    padding: 0.5rem;
+
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+    color: #696d79;
+    -webkit-tap-highlight-color: transparent;
+
+    transition:
+        background-color 140ms ease,
+        color 140ms ease;
+
+    &:hover {
+        background: rgba(15, 23, 42, 0.06);
+        color: #696d79;
+    }
+
+    &:active {
+        background: rgba(15, 23, 42, 0.1);
+    }
+}
+
+.sidebarIcon {
+    transition: opacity 200ms ease;
+    transform: translateY(-0.5px);
+}
