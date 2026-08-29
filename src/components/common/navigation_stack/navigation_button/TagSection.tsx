@@ -29,8 +29,7 @@ export function TagSection({
     onGroupTagClick,
 }: TagSectionProps): ReactElement {
     const { label, count, className } = tag ?? {}
-    const formattedCount =
-        count !== undefined ? count.toLocaleString() : undefined
+    const formattedCount = count?.toLocaleString()
 
     return (
         <span
