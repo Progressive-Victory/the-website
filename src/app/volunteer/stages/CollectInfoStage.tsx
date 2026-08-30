@@ -1,3 +1,4 @@
+import { cn } from '@/util'
 import { Field, Toggle } from './components'
 import styles from './stages.module.css'
 import { zLocation } from '@/contracts/data'
@@ -264,7 +265,7 @@ export function CollectInfoStage({
                     void handleSubmit()
                 }}
                 disabled={!isValid || isPending}
-                className={styles.iconFormButton}
+                className={cn(styles.button, styles.submit)}
             >
                 Join Now
             </button>
