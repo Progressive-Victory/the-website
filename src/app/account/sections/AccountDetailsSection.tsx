@@ -334,11 +334,19 @@ export function AccountDetailsSection({
 
                     <div className={styles.headerActions}>
                         {canAccessAdminPanel ? (
-                            <BaseButton
-                                label="Volunteer Dashboard"
-                                href="/admin"
-                                className={styles.secondaryButton}
-                            />
+                            //Temporary Toggle for Admin Panel and Volunteer Dashboard for PR review only
+                            <div>
+                                <BaseButton
+                                    label="Admin Panel"
+                                    href="/admin"
+                                    className={styles.secondaryButton}
+                                />
+                                <BaseButton
+                                    label="Volunteer Dashboard"
+                                    href="/volunteer_dashboard"
+                                    className={styles.secondaryButton}
+                                />
+                            </div>
                         ) : isInServerResult.data?.isInServer === false ? (
                             <BaseButton
                                 label="Join Community"
