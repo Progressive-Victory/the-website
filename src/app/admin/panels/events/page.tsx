@@ -185,13 +185,13 @@ export default function Page() {
                     <>
                         <div className={styles.detailsHeader}>
                             {/* <div className={memberStyles.bannerCover} /> */}
-                            <Image
+                            {eventQuery.data.event.thumbnailUrl ? <Image
                                 src={eventQuery.data.event.thumbnailUrl}
                                 alt={eventQuery.data.event.name}
                                 width={807}
                                 height={323}
                                 className={styles.detailsEventThumbnail}
-                            />
+                            /> : <div className={cn(styles.detailsEventThumbnail, styles.placeholder)} />}
                             <div className={memberStyles.headerTop}>
                                 <div className={memberStyles.cardStyle}>
                                     <div className={memberStyles.userInfo}>

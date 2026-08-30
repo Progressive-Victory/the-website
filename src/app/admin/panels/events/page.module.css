@@ -147,6 +147,27 @@
     margin: 0 1rem;
     object-fit: cover;
     border-radius: 1rem;
+
+    &.placeholder {
+        --banner-cover-gradient:
+            radial-gradient(
+                circle at 18% 30%,
+                rgba(2, 132, 199, 0.24),
+                transparent 35%
+            ),
+            radial-gradient(
+                circle at 82% 20%,
+                rgba(41, 134, 204, 0.28),
+                transparent 40%
+            ),
+            linear-gradient(120deg, rgba(9, 34, 58, 0.96), rgba(27, 69, 104, 0.9));
+
+        content: '';
+        background: var(--banner-cover-gradient);
+        background-repeat: no-repeat;
+        pointer-events: none;
+        z-index: -1;
+    }
 }
 
 .detailsEventDecorationContainer {
