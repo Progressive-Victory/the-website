@@ -1,17 +1,17 @@
 .backButton {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: var(--back-button-gap, 0.25rem);
     border: 0;
-    margin: 0;
-    padding: 0.6rem 0.5rem 0.6rem 0.25rem;
+    margin: var(--back-button-margin, 0);
+    padding: var(--back-button-padding, 0.6rem 0.5rem 0.6rem 0.25rem);
     background: transparent;
-    color: #2986cc;
+    color: var(--back-button-color, #2986cc);
     font: inherit;
-    font-weight: 500;
-    font-size: 0.92rem;
+    font-weight: var(--back-button-font-weight, 500);
+    font-size: var(--back-button-font-size, 0.92rem);
     line-height: 1;
-    border-radius: 0.7rem;
+    border-radius: var(--back-button-border-radius, 0.7rem);
     cursor: pointer;
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
@@ -21,12 +21,12 @@
         transform 140ms ease;
 
     &:hover {
-        color: #549ed6;
-        background: rgba(15, 23, 42, 0.05);
+        color: var(--back-button-hover-color, #549ed6);
+        background: var(--back-button-hover-bg, rgba(15, 23, 42, 0.05));
     }
 
     &:active {
-        color: #1b4568;
+        color: var(--back-button-active-color, #1b4568);
     }
 
     &:focus-visible {

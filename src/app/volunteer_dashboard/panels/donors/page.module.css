@@ -146,40 +146,6 @@
     padding-block: 1rem;
 }
 
-.mobileBackButton {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    margin: 0 1rem 1rem;
-    border: 0;
-    background: transparent;
-    border-radius: 0.5rem;
-    padding: 0.6rem 0.65rem;
-    color: #2986cc;
-    font: inherit;
-    font-weight: 500;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.mobileBackButton::before {
-    content: '';
-    display: inline-block;
-    width: 0.58rem;
-    height: 0.58rem;
-    border-left: 0.14rem solid currentColor;
-    border-bottom: 0.14rem solid currentColor;
-    transform: rotate(45deg);
-    position: relative;
-    top: -0.5px;
-    border-bottom-left-radius: 0.04rem;
-}
-
-.mobileBackButton:hover {
-    color: #549ed6;
-    background: rgba(15, 23, 42, 0.05);
-}
-
 .element {
     display: flex;
 

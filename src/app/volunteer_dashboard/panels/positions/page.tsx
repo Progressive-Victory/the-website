@@ -3,6 +3,7 @@
 import styles from './page.module.css'
 import { ListElement } from '@/app/admin/layout/List'
 import { SearchModal } from '@/app/admin/layout/SearchModal'
+import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import {
     Form,
     FormGroup,
@@ -247,15 +248,11 @@ export default function Page() {
             }
         >
             <div className={styles.detailPane}>
-                {!isDesktop && !sidebarMobileVisible ? (
-                    <button
-                        className={styles.mobileBackButton}
-                        onClick={() => setSidebarMobileVisible(true)}
-                        type="button"
-                    >
-                        Positions
-                    </button>
-                ) : null}
+                <MobileSidebarBackButton
+                    label="Positions"
+                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    onBack={() => setSidebarMobileVisible(true)}
+                />
                 <Form<Position>
                     key={selectedPosition?.id}
                     form={selectedPosition}

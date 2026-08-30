@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
+import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { MultiSelectOption } from '@/components/common'
 import {
     Form,
@@ -223,15 +224,11 @@ export default function Page() {
             }
         >
             <div className={styles.detailPane}>
-                {!isDesktop && !sidebarMobileVisible ? (
-                    <button
-                        className={styles.mobileBackButton}
-                        onClick={() => setSidebarMobileVisible(true)}
-                        type="button"
-                    >
-                        Roles
-                    </button>
-                ) : null}
+                <MobileSidebarBackButton
+                    label="Roles"
+                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    onBack={() => setSidebarMobileVisible(true)}
+                />
                 {selectedId == null && (
                     <div className={styles.emptyState}>No role selected</div>
                 )}

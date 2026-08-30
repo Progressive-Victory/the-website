@@ -7,6 +7,7 @@ import { HistoryView } from './panel_views/HistoryView'
 import { MemberView } from './panel_views/MemberView'
 import { FilterTags, FilterTag } from '@/app/admin/layout/FilterTags'
 import { ListElement } from '@/app/admin/layout/List'
+import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
@@ -667,15 +668,12 @@ export default function Page() {
             }
         >
             <div className={styles.detailsPane}>
-                {!isDesktop && !sidebarMobileVisible ? (
-                    <button
-                        className={styles.mobileBackButton}
-                        onClick={() => setSidebarMobileVisible(true)}
-                        type="button"
-                    >
-                        Members
-                    </button>
-                ) : null}
+                <MobileSidebarBackButton
+                    label="Members"
+                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    onBack={() => setSidebarMobileVisible(true)}
+                    className={styles.backButton}
+                />
 
                 {selectedId == null && (
                     <div className={styles.emptyState}>No user selected</div>

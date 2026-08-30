@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
+import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import {
     Form,
     FormGroup,
@@ -169,15 +170,11 @@ export default function Page() {
             }
         >
             <div className={styles.detailPane}>
-                {!isDesktop && !sidebarMobileVisible ? (
-                    <button
-                        className={styles.mobileBackButton}
-                        onClick={() => setSidebarMobileVisible(true)}
-                        type="button"
-                    >
-                        Permissions
-                    </button>
-                ) : null}
+                <MobileSidebarBackButton
+                    label="Permissions"
+                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    onBack={() => setSidebarMobileVisible(true)}
+                />
                 {selectedPermission ? (
                     <Form<Permission>
                         key={selectedPermission.id}

@@ -1,0 +1,4 @@
+.wrapper {
+    margin-left: var(--sidebar-back-margin-left, 1rem);
+    margin-bottom: var(--sidebar-back-margin-bottom, 1rem);
+}

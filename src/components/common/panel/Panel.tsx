@@ -101,18 +101,16 @@ export function Panel({
         resolvedSidebarTogglePlacement === 'header' &&
         isDesktop
     const shiftHeaderLeftForToggle = showOverlaySidebarToggle && !isSidebarOpen
-    const resolvedHeaderLead =
-        headerLead ??
-        (includeSidebar ? (
-            isDesktop ? (
-                <PanelBackButton showOnDesktop />
-            ) : null
-        ) : (
-            <PanelBackButton />
-        ))
+    // Back button: in prominent header on mobile with sidebar, otherwise in detail header
+    const mobileSidebar = includeSidebar && !isDesktop
+    const defaultHeaderLead = mobileSidebar ? null : includeSidebar ? (
+        <PanelBackButton showOnDesktop />
+    ) : (
+        <PanelBackButton />
+    )
+    const resolvedHeaderLead = headerLead ?? defaultHeaderLead
     const resolvedProminentHeaderLeft =
-        prominentHeaderLeft ??
-        (includeSidebar && !isDesktop ? <PanelBackButton /> : undefined)
+        prominentHeaderLeft ?? (mobileSidebar ? <PanelBackButton /> : undefined)
     const resolvedSidebarFooter =
         sidebarFooter ??
         (sidebarList?.footer ? (
@@ -266,7 +264,7 @@ function PanelHeader({
                 {headerLeft ?? (
                     <div className={styles.breadcrumbs}>
                         <span className={styles.prominentBreadcrumb}>
-                            Admin
+                            Volunteer Dashboard
                         </span>
                         <span className={styles.breadcrumbSeperator}>/</span>
                         <span className={styles.panelBreadcrumb}>

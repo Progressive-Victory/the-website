@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
+import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import {
     FormState,
     Form,
@@ -210,15 +211,11 @@ export default function Page() {
             }
         >
             <div className={styles.detailPane}>
-                {!isDesktop && !sidebarMobileVisible ? (
-                    <button
-                        className={styles.mobileBackButton}
-                        onClick={() => setSidebarMobileVisible(true)}
-                        type="button"
-                    >
-                        Donors
-                    </button>
-                ) : null}
+                <MobileSidebarBackButton
+                    label="Donors"
+                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    onBack={() => setSidebarMobileVisible(true)}
+                />
                 {selectedEmail == null && (
                     <div className={styles.emptyState}>No donor selected</div>
                 )}
