@@ -191,9 +191,9 @@ export default function Page() {
                                 height={323}
                                 className={styles.detailsEventThumbnail}
                             /> : <div className={cn(styles.detailsEventThumbnail, styles.placeholder)} />}
-                            <div className={memberStyles.headerTop}>
-                                <div className={memberStyles.cardStyle}>
-                                    <div className={memberStyles.userInfo}>
+                            <div className={styles.headerTop}>
+                                <div className={styles.cardStyle}>
+                                    <div className={styles.userInfo}>
                                         <h1
                                             className={
                                                 memberStyles.headerUserName

@@ -198,18 +198,6 @@
     gap: 0.75rem;
 }
 
-.cardAvatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 4.5rem;
-    height: 4.5rem;
-    border-radius: 9999px;
-    border: 3px solid #fff;
-    background: #fff;
-    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
-}
-
 .userInfo {
     display: flex;
     flex-direction: column;
