@@ -20,10 +20,12 @@ export default function EventAttendees({ attendees }: EventAttendeesProps) {
         )
     }
 
-    const renderAttendee = (attendee: DiscordEventAttendee) => {
+    const renderAttendee = (attendee: DiscordEventAttendee, index: number) => {
+        // index here is a temporary stopgap while the event attendees are allowed
+        // to be duplicated
         return (
             <div
-                key={attendee.userDiscordId}
+                key={[attendee.userDiscordId, index].join()}
                 className={styles.attendeeListItem}
             >
                 <ListElement onClick={() => handleSelectAttendee(attendee)}>
@@ -55,7 +57,7 @@ export default function EventAttendees({ attendees }: EventAttendeesProps) {
 
     return (
         <div className={styles.attendeesList}>
-            {(attendees ?? []).map((a) => renderAttendee(a))}
+            {(attendees ?? []).map(renderAttendee)}
         </div>
     )
 }

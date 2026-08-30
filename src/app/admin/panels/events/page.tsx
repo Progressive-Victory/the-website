@@ -184,7 +184,6 @@ export default function Page() {
                 {selectedEventId && eventQuery.data && (
                     <>
                         <div className={styles.detailsHeader}>
-                            {/* <div className={memberStyles.bannerCover} /> */}
                             {eventQuery.data.event.thumbnailUrl ? <Image
                                 src={eventQuery.data.event.thumbnailUrl}
                                 alt={eventQuery.data.event.name}
