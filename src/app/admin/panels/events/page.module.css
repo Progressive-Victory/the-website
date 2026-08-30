@@ -170,6 +170,52 @@
     }
 }
 
+.headerTop {
+    border-radius: 0.75rem;
+    margin-top: -2rem;
+    margin-right: 0.9rem;
+    margin-bottom: 0.9rem;
+    margin-left: 0.9rem;
+    padding-top: 0.8rem;
+    padding-bottom: 0.9rem;
+    padding-inline: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.66);
+
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.11);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: space-between;
+}
+
+.cardStyle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cardAvatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 9999px;
+    border: 3px solid #fff;
+    background: #fff;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
+}
+
+.userInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
 .detailsEventDecorationContainer {
     display: flex;
     flex-flow: row wrap;
