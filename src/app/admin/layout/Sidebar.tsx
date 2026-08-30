@@ -5,7 +5,7 @@ import { cn } from '@/util'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { FaUsers, FaUserShield, FaUserTag, FaDonate } from 'react-icons/fa'
-import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
+import { FaClipboardUser, FaDollarSign, FaCalendarDays } from 'react-icons/fa6'
 import { FiChevronLeft } from 'react-icons/fi'
 import type { IconType } from 'react-icons/lib'
 import { useLocalStorage } from 'usehooks-ts'
@@ -17,6 +17,7 @@ interface SidebarProps {
     positionCount?: number
     roleCount?: number
     permissionCount?: number
+    eventCount?: number
 }
 
 export default function Sidebar({
@@ -26,6 +27,7 @@ export default function Sidebar({
     positionCount,
     roleCount,
     permissionCount,
+    eventCount,
 }: SidebarProps) {
     const [open, setOpen] = useLocalStorage('pv.admin-nav-open', true)
 
@@ -84,11 +86,20 @@ export default function Sidebar({
                     count={permissionCount}
                     open={open}
                 />
+
                 <NavLink
                     title="Fundraising"
                     href="/admin/panels/fundraising"
                     icon={FaDonate}
                     count={2}
+                    open={open}
+                />
+
+                <NavLink
+                    title="Events"
+                    href="/admin/panels/events"
+                    icon={FaCalendarDays}
+                    count={eventCount}
                     open={open}
                 />
             </ul>
