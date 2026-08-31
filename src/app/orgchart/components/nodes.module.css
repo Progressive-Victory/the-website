@@ -10,19 +10,7 @@
     overflow: hidden;
 }
 
-.targetHandle {
-    border-color: #fcd34d;
-    background-color: #fffbeb;
-    opacity: 0;
-}
-
-.sourceHandle {
-    border-color: #fcd34d;
-    background-color: #1b4568;
-    opacity: 0;
-}
-
-.edgeTest {
+.edge {
     stroke: '#1b4568';
     stroke-width: 3;
 }

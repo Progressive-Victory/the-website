@@ -89,13 +89,13 @@ export default function OrgChartApp() {
                     <div className={styles.legend}>
                         <div className={styles.colorSampleContainer}>
                             <div className={styles.juniorColorSample}></div>
-                            <p style={{ marginLeft: '0.5rem' }}>
+                            <p className={styles.colorSampleText}>
                                 {'JUNIOR LEADERSHIP'}
                             </p>
                         </div>
                         <div className={styles.colorSampleContainer}>
                             <div className={styles.seniorColorSample}></div>
-                            <p style={{ marginLeft: '0.5rem' }}>
+                            <p className={styles.colorSampleText}>
                                 {'SENIOR LEADERSHIP'}
                             </p>
                         </div>
@@ -104,12 +104,12 @@ export default function OrgChartApp() {
                                 id: -1,
                                 title: 'Position Name',
                                 name: 'Holder Name',
-                                banner: BannerColor.RED,
+                                bannerColor: BannerColor.RED,
                                 tags: [tags[0], tags[1]],
                             }}
                             mini={true}
                         />
-                        <p style={{ marginTop: '0.5rem' }}>
+                        <p className={styles.legendPanelText}>
                             {'SHAPES INDICATE TEAM/COMMITTEE GROUPING'}
                         </p>
                     </div>

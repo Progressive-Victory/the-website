@@ -7,13 +7,13 @@ export function BlankNode({ targetPosition, sourcePosition }: NodeProps) {
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
-                className={styles.targetHandle}
+                className={styles.handle}
             />
             <div className={styles.blankNode} />
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}
-                className={styles.sourceHandle}
+                className={styles.handle}
             />
         </div>
     )

@@ -30,15 +30,13 @@ export function PositionNode({
             <Handle
                 type="target"
                 position={targetPosition ?? Position.Left}
-                className={styles.targetHandle}
-                style={{ opacity: 0 }}
+                className={styles.handle}
             />
             <PositionBubble data={data} />
             <Handle
                 type="source"
                 position={sourcePosition ?? Position.Right}
-                className={styles.sourceHandle}
-                style={{ opacity: 0 }}
+                className={styles.handle}
             />
         </div>
     )

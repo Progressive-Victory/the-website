@@ -17,6 +17,14 @@
     color: #09223a;
 }
 
+.colorSampleText {
+    margin-left: 0.5rem;
+}
+
+.legendPanelText {
+    margin-top: 0.5rem;
+}
+
 .colorSampleContainer {
     margin-bottom: 0.5rem;
     display: flex;

@@ -10,13 +10,12 @@ type HEX = `#${string}`
 type Color = RGB | RGBA | HSL | HSLA | HEX
 
 export enum BannerColor {
-    NONE = 0,
     BLUE = 1,
     RED = 2,
 }
 
-export const PositionBanner = ({ data }: { data: PositionData }) => {
-    return (
+export const PositionBanner = ({ data }: { data: PositionData }) =>
+    data?.bannerColor && (
         <div
             className={cn(
                 styles.banner,
@@ -24,9 +23,8 @@ export const PositionBanner = ({ data }: { data: PositionData }) => {
                 data.bannerColor === BannerColor.RED && styles.red
             )}
             title={data.bannerTitle}
-        ></div>
+        />
     )
-}
 
 export interface BannerObject {
     color?: Color

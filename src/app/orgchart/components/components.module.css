@@ -46,7 +46,6 @@
     width: 20px;
     border-right-width: 2px;
     border-color: #fcd34d;
-    display: none;
 
     &.blue {
         background-color: #60a5fa;
@@ -152,19 +151,12 @@
 }
 
 .handle {
-    border-color: #fcd34d;
-    background-color: #1b4568;
     opacity: 0;
+    pointer-events: none;
 }
-
 .blankNode {
     border-color: #fcd34d;
     background-color: #1b4568;
     width: 1px;
     height: 1px;
-}
-
-.edge {
-    stroke: '#1b4568';
-    stroke-width: 3;
 }
