@@ -17,9 +17,11 @@ export function LoginCard() {
     const errorMessage =
         error == 'DiscordEmailNotVerified'
             ? 'Your Discord email is not verified! Please go verify it and then try again.'
-            : error
-              ? 'An unknown error occurred. Please try again later.'
-              : null
+            : error == '401'
+              ? 'Please log in to view that page.'
+              : error
+                ? 'An unknown error occurred. Please try again later.'
+                : null
 
     if (session) {
         window.location.href = redirect
