@@ -1,9 +1,9 @@
-import { zIntArrayQuery } from '../../util/index.js';
-import { zSearchRequest } from './SearchRequest.js';
-import z from 'zod';
+import { zIntArrayQuery } from '../../util/index'
+import { zSearchRequest } from './SearchRequest'
+import z from 'zod'
 
 export const zGetRolesSearchRequest = zSearchRequest.extend({
-	permissionIds: zIntArrayQuery,
-});
+    permissionIds: zIntArrayQuery,
+})
 
-export type GetRolesSearchRequest = z.infer<typeof zGetRolesSearchRequest>;
+export type GetRolesSearchRequest = z.infer<typeof zGetRolesSearchRequest>
