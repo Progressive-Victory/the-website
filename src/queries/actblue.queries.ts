@@ -1,7 +1,7 @@
 import { zActBlueDonationPacket } from '@/contracts/data'
 import { SearchRequest } from '@/contracts/requests'
 import { zPaginatedResponse } from '@/contracts/responses'
-import { zActBlueFundraisingStatsResponse } from '@/contracts/responses/fundraisingStatsResponse'
+import { zActBlueFundraisingStatsResponse } from '@/contracts/responses/FundraisingStatsResponse'
 import { useFetch } from '@/util/hooks'
 
 export function useActblueQueries() {
