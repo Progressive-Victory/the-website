@@ -1,4 +1,4 @@
-export * from './ActBlueFundraisingStatsResponse'
+export * from './FundraisingStatsResponse'
 export * from './AuthResponse'
 export * from './DiscordEventDetailsResponse'
 export * from './DiscordLoginResponse'
