@@ -1,8 +1,8 @@
-import z from 'zod'
+import z from 'zod';
 
 export const zUpdateRoleRequest = z.object({
-    name: z.string().nonempty().optional(),
-    permissionIds: z.array(z.int()).optional(),
-})
+	name: z.string().nonempty().optional(),
+	permissionIds: z.array(z.int()).optional(),
+});
 
-export type UpdateRoleRequest = z.infer<typeof zUpdateRoleRequest>
+export type UpdateRoleRequest = z.infer<typeof zUpdateRoleRequest>;

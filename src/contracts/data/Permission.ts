@@ -1,8 +1,8 @@
-import z from 'zod'
+import z from 'zod';
 
 export const zPermission = z.object({
-    id: z.int(),
-    name: z.string(),
-})
+	id: z.int(),
+	name: z.string(),
+});
 
-export type Permission = z.infer<typeof zPermission>
+export type Permission = z.infer<typeof zPermission>;

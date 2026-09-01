@@ -1,7 +1,7 @@
-import z from 'zod'
+import z from 'zod';
 
 export const zUpdatePermissionRequest = z.object({
-    name: z.string().nonempty().optional(),
-})
+	name: z.string().nonempty().optional(),
+});
 
-export type UpdatePermissionRequest = z.infer<typeof zUpdatePermissionRequest>
+export type UpdatePermissionRequest = z.infer<typeof zUpdatePermissionRequest>;

@@ -1,8 +1,8 @@
-import { zMetaData } from '../data/MetaData'
-import z from 'zod'
+import { zMetaData } from '../data/MetaData.js';
+import z from 'zod';
 
 export const zMutationRequest = z.object({
-    metaData: zMetaData.optional(),
-})
+	metaData: zMetaData.optional(),
+});
 
-export type BaseRequest = z.infer<typeof zMutationRequest>
+export type BaseRequest = z.infer<typeof zMutationRequest>;
