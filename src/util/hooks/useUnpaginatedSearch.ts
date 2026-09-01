@@ -1,4 +1,4 @@
-import { SearchRequest, SortDirection } from '@/contracts/requests'
+import { SearchRequest, SortDirection } from '/contracts/requests'
 import { useMemo, useState } from 'react'
 
 interface UseUnpaginatedSearchProps<T> {
