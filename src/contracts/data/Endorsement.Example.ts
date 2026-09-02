@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 export enum InitiativeType {
 	State,
@@ -41,6 +41,6 @@ export const zEndorsement = z.object({
 	endorsementLevel: z.enum(EndorsementType),
 	avatarBgColor: z.enum(BackgroundColor),
 	electionStatus: z.enum(ElectionStatus),
-});
+})
 
-export type Endorsement = z.infer<typeof zEndorsement>;
+export type Endorsement = z.infer<typeof zEndorsement>

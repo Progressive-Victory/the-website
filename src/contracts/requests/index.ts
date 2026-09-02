@@ -1,41 +1,41 @@
 export * from './ActBlueDonorLinkRequest'
-// export * from './ActBlueRequest.js';
-// export * from './AuthRequest.js';
-// export * from './CreateDiscordEventAttendeeRequest.js';
-// export * from './CreateDiscordEventRequest.js';
-// export * from './CreateDiscordSkillTeamRoleRequest.js';
-// export * from './CreateDiscordUserRequest.js';
-// export * from './CreateDiscordWarnRequest.js';
-// export * from './CreateEndorsementRequest.js';
-// export * from './CreateNdaFormRequest.js';
-// export * from './CreatePermissionRequest.js';
+// export * from './ActBlueRequest'
+// export * from './AuthRequest'
+// export * from './CreateDiscordEventAttendeeRequest'
+// export * from './CreateDiscordEventRequest'
+// export * from './CreateDiscordSkillTeamRoleRequest'
+// export * from './CreateDiscordUserRequest'
+// export * from './CreateDiscordWarnRequest'
+// export * from './CreateEndorsementRequest'
+// export * from './CreateNdaFormRequest'
+// export * from './CreatePermissionRequest'
 export * from './CreatePositionRequest'
-// export * from './CreateRoleRequest.js';
-// export * from './DeleteDiscordWarnRequest.js';
-// export * from './GetDiscordEventAttendanceRequest.js';
-// export * from './GetDiscordUsersByUsersRequest.js';
-// export * from './GetDiscordWarnsRequest.js';
-// export * from './GetRolesSearchRequest.js';
-// export * from './GetUsersSearchRequest.js';
-// export * from './MembershipEvalBackfillRequest.js';
+// export * from './CreateRoleRequest'
+// export * from './DeleteDiscordWarnRequest'
+// export * from './GetDiscordEventAttendanceRequest'
+// export * from './GetDiscordUsersByUsersRequest'
+// export * from './GetDiscordWarnsRequest'
+// export * from './GetRolesSearchRequest'
+// export * from './GetUsersSearchRequest'
+// export * from './MembershipEvalBackfillRequest'
 export * from './CreateUserRequest'
 export * from './MutationRequest'
 export * from './SearchRequest'
-// export * from './SolidarityPostUserRequest.js';
-// export * from './UpdateDiscordEventRequest.js';
-// export * from './UpdateDiscordSkillTeamRoleRequest.js';
-// export * from './UpdateDiscordStateRoleRequest.js';
-// export * from './UpdateDiscordUserRequest.js';
-// export * from './UpdateDiscordUserImageRequest.js';
-// export * from './UpdateDiscordWarnRequest.js';
-// export * from './UpdateEndorsementRequest.js';
-// export * from './UpdateMembershipRequest.js';
+// export * from './SolidarityPostUserRequest'
+// export * from './UpdateDiscordEventRequest'
+// export * from './UpdateDiscordSkillTeamRoleRequest'
+// export * from './UpdateDiscordStateRoleRequest'
+// export * from './UpdateDiscordUserRequest'
+// export * from './UpdateDiscordUserImageRequest'
+// export * from './UpdateDiscordWarnRequest'
+// export * from './UpdateEndorsementRequest'
+// export * from './UpdateMembershipRequest'
 export * from './UpdatePermissionRequest'
 export * from './UpdatePositionRequest'
 export * from './UpdateRoleRequest'
-// export * from './UpdateSettingRequest.js';
+// export * from './UpdateSettingRequest'
 export * from './UpdateUserAddressRequest'
 export * from './UpdateUserRequest'
-// export * from './UploadImageRequest.js';
+// export * from './UploadImageRequest'
 export * from './UserOnboardingCollectInfoRequest'
 export * from './UserOnboardingVerifyRequest'

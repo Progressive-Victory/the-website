@@ -1,5 +1,5 @@
-import { zSearchRequest } from './SearchRequest.js';
-import z from 'zod';
+import { zSearchRequest } from './SearchRequest'
+import z from 'zod'
 
 export const zGetDiscordWarnsRequest = z
 	.object({
@@ -7,6 +7,6 @@ export const zGetDiscordWarnsRequest = z
 		tgt_discord_id: z.string().optional(),
 		time_window: z.string().optional(),
 	})
-	.extend(zSearchRequest.shape);
+	.extend(zSearchRequest.shape)
 
-export type GetDiscordWarnsRequest = z.infer<typeof zGetDiscordWarnsRequest>;
+export type GetDiscordWarnsRequest = z.infer<typeof zGetDiscordWarnsRequest>

@@ -1,23 +1,23 @@
-import { zActBlueDonor } from './ActBlueDonor.js';
-import { zDiscordUser } from './DiscordUser.js';
-import { zLocation } from './Location.js';
+import { zActBlueDonor } from './ActBlueDonor'
+import { zDiscordUser } from './DiscordUser'
+import { zLocation } from './Location'
 import {
 	zMembershipDeliverableStatus,
 	zMembershipFulfillmentStatus,
 	zShirtSize,
-} from './Membership.js';
-import { zOnboardingStage } from './OnboardingStage.js';
-import { zRole } from './Role.js';
-import { zUpdateHistory } from './UpdateHistory.js';
-import { zUserAddress } from './UserAddress.js';
-import z from 'zod';
+} from './Membership'
+import { zOnboardingStage } from './OnboardingStage'
+import { zRole } from './Role'
+import { zUpdateHistory } from './UpdateHistory'
+import { zUserAddress } from './UserAddress'
+import z from 'zod'
 
 export enum UserStatus {
 	Deleted = 0,
 	Active = 1,
 }
 
-export const zUserStatus = z.enum(UserStatus);
+export const zUserStatus = z.enum(UserStatus)
 
 const zBaseUser = z.object({
 	id: z.int(),
@@ -75,11 +75,11 @@ const zBaseUser = z.object({
 	roles: z.array(zRole).optional(),
 	discordUsers: z.array(zDiscordUser).optional(),
 	donors: z.array(zActBlueDonor).optional(),
-});
+})
 
 export const zUser = zBaseUser.extend({
 	history: z.array(zUpdateHistory(zBaseUser)).optional(),
 	donorHistory: z.array(zUpdateHistory(zActBlueDonor)).optional(),
-});
+})
 
-export type User = z.infer<typeof zUser>;
+export type User = z.infer<typeof zUser>

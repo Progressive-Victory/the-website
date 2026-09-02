@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 export const zDiscordUser = z.object({
 	id: z.string(),
@@ -6,6 +6,6 @@ export const zDiscordUser = z.object({
 	image: z.string(),
 	userId: z.number().nullable(),
 	email: z.string().nullable(),
-});
+})
 
-export type DiscordUser = z.infer<typeof zDiscordUser>;
+export type DiscordUser = z.infer<typeof zDiscordUser>

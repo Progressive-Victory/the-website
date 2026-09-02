@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 export const zSolidarityPostUserRequest = z.object({
 	phone_number: z.string().nullable(),
@@ -20,8 +20,8 @@ export const zSolidarityPostUserRequest = z.object({
 			zip_code: z.string().nullable(),
 		})
 		.nullable(),
-});
+})
 
 export type SolidarityPostUserRequest = z.infer<
 	typeof zSolidarityPostUserRequest
->;
+>

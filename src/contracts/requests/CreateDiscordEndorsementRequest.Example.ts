@@ -3,8 +3,8 @@ import {
 	ElectionStatus,
 	EndorsementType,
 	InitiativeType,
-} from '../data/index.js';
-import z from 'zod';
+} from '../data/index'
+import z from 'zod'
 
 export const zCreateEndorsementRequest = z.object({
 	name: z.string().nonempty().max(100),
@@ -23,8 +23,8 @@ export const zCreateEndorsementRequest = z.object({
 	endorsementLevel: z.enum(EndorsementType),
 	avatarBgColor: z.enum(BackgroundColor),
 	electionStatus: z.enum(ElectionStatus),
-});
+})
 
 export type CreateEndorsementRequest = z.infer<
 	typeof zCreateEndorsementRequest
->;
+>

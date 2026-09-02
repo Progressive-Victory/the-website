@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 export const zCreateNdaFormRequest = z.object({
 	preferredFirstName: z.string(),
@@ -13,6 +13,6 @@ export const zCreateNdaFormRequest = z.object({
 	dateOfBirth: z.coerce.date(),
 	signedStatus: z.boolean(),
 	dateSigned: z.coerce.date().nullable(),
-});
+})
 
-export type CreateNdaFormRequest = z.infer<typeof zCreateNdaFormRequest>;
+export type CreateNdaFormRequest = z.infer<typeof zCreateNdaFormRequest>

@@ -1,5 +1,5 @@
-import { zDiscordEventStatus } from '../data/index.js';
-import z from 'zod';
+import { zDiscordEventStatus } from '../data/index'
+import z from 'zod'
 
 export const zUpdateDiscordEventRequest = z.object({
 	channelId: z.string().nonempty().optional(),
@@ -12,8 +12,8 @@ export const zUpdateDiscordEventRequest = z.object({
 	startedAtUtc: z.coerce.date().nullable().optional(),
 	scheduledEndUtc: z.coerce.date().nullable().optional(),
 	endedAtUtc: z.coerce.date().nullable().optional(),
-});
+})
 
 export type UpdateDiscordEventRequest = z.infer<
 	typeof zUpdateDiscordEventRequest
->;
+>

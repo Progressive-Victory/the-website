@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 export const zDiscordStateRole = z.object({
 	stateAbbreviation: z.string().nonempty(),
@@ -7,6 +7,6 @@ export const zDiscordStateRole = z.object({
 	memberChannelId: z.string().nonempty(),
 	teamRoleId: z.string().nonempty(),
 	teamChannelId: z.string().nonempty(),
-});
+})
 
-export type DiscordStateRole = z.infer<typeof zDiscordStateRole>;
+export type DiscordStateRole = z.infer<typeof zDiscordStateRole>

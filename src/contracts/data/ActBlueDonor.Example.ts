@@ -1,6 +1,6 @@
-import { zActBlueContribution } from './ActBlueContribution.js';
-import { zMembership } from './Membership.js';
-import z from 'zod';
+import { zActBlueContribution } from './ActBlueContribution'
+import { zMembership } from './Membership'
+import z from 'zod'
 
 export const zActBlueDonor = z.object({
 	firstname: z.string(),
@@ -28,6 +28,6 @@ export const zActBlueDonor = z.object({
 	contributions: z.array(zActBlueContribution).optional(),
 	
 	membershipData: zMembership.optional(),
-});
+})
 
-export type ActBlueDonor = z.infer<typeof zActBlueDonor>;
+export type ActBlueDonor = z.infer<typeof zActBlueDonor>

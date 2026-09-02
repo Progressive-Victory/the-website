@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 export const zUserAddress = z.object({
 	addressLine1: z.string().nullable(),
@@ -7,6 +7,6 @@ export const zUserAddress = z.object({
 	county: z.string().nullable(),
 	state: z.string().nullable(),
 	zip: z.string().nullable(),
-});
+})
 
-export type UserAddress = z.infer<typeof zUserAddress>;
+export type UserAddress = z.infer<typeof zUserAddress>

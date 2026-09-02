@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 export const zActBlueFundraisingStatsResponse = z.object({
 	totalDollarsRaised: z.number(),
@@ -11,8 +11,8 @@ export const zActBlueFundraisingStatsResponse = z.object({
 	oneTimeDonorCount: z.number(),
 	recurringDonorCount: z.number(),
 	avgContributionAmount: z.coerce.number(),
-});
+})
 
 export type ActBlueFundraisingStatsResponse = z.infer<
 	typeof zActBlueFundraisingStatsResponse
->;
+>

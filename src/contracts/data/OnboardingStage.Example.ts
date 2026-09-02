@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 // State management enum for join flow
 export enum OnboardingStage {
@@ -24,4 +24,4 @@ export enum OnboardingStage {
 	BANNED = 'banned',
 }
 
-export const zOnboardingStage = z.enum(OnboardingStage);
+export const zOnboardingStage = z.enum(OnboardingStage)

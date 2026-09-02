@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const zNdaForm = z.object({
 	id: z.number(),
@@ -15,6 +15,6 @@ export const zNdaForm = z.object({
 	dateOfBirth: z.coerce.date(),
 	signedStatus: z.boolean(),
 	dateSigned: z.coerce.date().nullable(),
-});
+})
 
-export type NdaForm = z.infer<typeof zNdaForm>;
+export type NdaForm = z.infer<typeof zNdaForm>

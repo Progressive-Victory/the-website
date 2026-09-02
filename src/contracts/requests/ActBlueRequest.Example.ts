@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 /**
  * The webhook request from ActBlue, sent whenever a user donates through them.
@@ -128,6 +128,6 @@ export const zActBlueRequest = z.strictObject({
 		managingEntityName: z.string().nullable(),
 		managingEntityCommitteeName: z.string().nullable(),
 	}),
-});
+})
 
-export type ActBlueRequest = z.infer<typeof zActBlueRequest>;
+export type ActBlueRequest = z.infer<typeof zActBlueRequest>

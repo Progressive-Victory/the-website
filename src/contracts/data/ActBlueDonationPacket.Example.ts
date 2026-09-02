@@ -1,5 +1,5 @@
-import { zActBlueContributionCustomField } from './ActBlueContributionCustomField.js';
-import z from 'zod';
+import { zActBlueContributionCustomField } from './ActBlueContributionCustomField'
+import z from 'zod'
 
 export const zActBlueDonationPacket = z.object({
 	sequence: z.number(),
@@ -22,6 +22,6 @@ export const zActBlueDonationPacket = z.object({
 	email: z.string(),
 	kind: z.string(),
 	customFields: z.array(zActBlueContributionCustomField).optional(),
-});
+})
 
-export type ActBlueDonationPacket = z.infer<typeof zActBlueDonationPacket>;
+export type ActBlueDonationPacket = z.infer<typeof zActBlueDonationPacket>

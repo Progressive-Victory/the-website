@@ -1,5 +1,5 @@
-import { zMutationRequest } from './MutationRequest.js';
-import z from 'zod';
+import { zMutationRequest } from './MutationRequest'
+import z from 'zod'
 
 export const zCreateDiscordUserRequest = zMutationRequest.extend({
 	discordId: z.string().nonempty(),
@@ -7,8 +7,8 @@ export const zCreateDiscordUserRequest = zMutationRequest.extend({
 	discordImage: z.string().nonempty(),
 	userId: z.coerce.number(),
 	email: z.string().nonempty(),
-});
+})
 
 export type CreateDiscordUserRequest = z.infer<
 	typeof zCreateDiscordUserRequest
->;
+>

@@ -1,5 +1,5 @@
-import z from 'zod';
+import z from 'zod'
 
-export const zRedirectResponse = z.object({});
+export const zRedirectResponse = z.object({})
 
-export type RedirectResponse = z.infer<typeof zRedirectResponse>;
+export type RedirectResponse = z.infer<typeof zRedirectResponse>

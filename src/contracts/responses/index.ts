@@ -1,17 +1,17 @@
-// export * from './AuthResponse.js';
-// export * from './DiscordEventDetailsResponse.js';
+// export * from './AuthResponse'
+// export * from './DiscordEventDetailsResponse'
 export * from './DiscordLoginResponse'
-// export * from './DiscordUserHistoryResponse.js';
+// export * from './DiscordUserHistoryResponse'
 export * from './DiscordUserIsInServerResponse'
-// export * from './ErrorResponse.js';
+// export * from './ErrorResponse'
 // export * from './UploadImageResponse.js'
 export * from './MapMemberCountResponse'
-// export * from './MembershipListResponse.js';
-// export * from './NdaFormsResponse.js';
-// export * from './NoContentResponse.js';
+// export * from './MembershipListResponse'
+// export * from './NdaFormsResponse'
+// export * from './NoContentResponse'
 export * from './PaginatedResponse'
 export * from './PositionHierarchyResponse'
-// export * from './RedirectResponse.js';
-// export * from './SettingsResponse.js';
+// export * from './RedirectResponse'
+// export * from './SettingsResponse'
 
 

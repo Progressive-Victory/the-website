@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 export const zActBlueLineitem = z
 	.object({
@@ -9,6 +9,6 @@ export const zActBlueLineitem = z
 		lineitemId: z.number(), // unique identifier for each individual donation
 		amountLessAbFees: z.number(),
 	})
-	.strict();
+	.strict()
 
-export type ActBlueLineitem = z.infer<typeof zActBlueLineitem>;
+export type ActBlueLineitem = z.infer<typeof zActBlueLineitem>

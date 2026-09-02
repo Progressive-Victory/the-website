@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 export enum MembershipDeliverableStatus {
 	NotEligible = 0,
@@ -24,11 +24,11 @@ export enum ShirtSize {
 	DoubleExtraLarge = '2XL',
 }
 
-export const zShirtSize = z.enum(ShirtSize);
+export const zShirtSize = z.enum(ShirtSize)
 
-export const zMembershipFulfillmentStatus = z.enum(MembershipFulfillmentStatus);
+export const zMembershipFulfillmentStatus = z.enum(MembershipFulfillmentStatus)
 
-export const zMembershipDeliverableStatus = z.enum(MembershipDeliverableStatus);
+export const zMembershipDeliverableStatus = z.enum(MembershipDeliverableStatus)
 
 export const zMembership = z.object({
     donorEmail: z.string(),
@@ -40,6 +40,6 @@ export const zMembership = z.object({
 	nameConfirmed: z.boolean(),
 	addressConfirmed: z.boolean(),
 	membershipBenefitEligible: z.boolean(),
-});
+})
 
-export type Membership = z.infer<typeof zMembership>;
+export type Membership = z.infer<typeof zMembership>

@@ -1,6 +1,6 @@
-import { zDiscordEventAttendee } from './DiscordEventAttendee.js';
-import { zDiscordEventStatus } from './DiscordEventStatus.js';
-import z from 'zod';
+import { zDiscordEventAttendee } from './DiscordEventAttendee'
+import { zDiscordEventStatus } from './DiscordEventStatus'
+import z from 'zod'
 
 export const zDiscordEvent = z.object({
 	id: z.number(),
@@ -19,6 +19,6 @@ export const zDiscordEvent = z.object({
 	scheduledEndUtc: z.coerce.date().nullable(),
 	endedAtUtc: z.coerce.date().nullable(),
 	attendees: z.array(zDiscordEventAttendee).optional(),
-});
+})
 
-export type DiscordEvent = z.infer<typeof zDiscordEvent>;
+export type DiscordEvent = z.infer<typeof zDiscordEvent>

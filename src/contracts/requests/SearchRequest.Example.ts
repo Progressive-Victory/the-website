@@ -1,5 +1,5 @@
-import { zEnumQuery, zIntQuery, zStringQuery } from '../../util/index.js';
-import z from 'zod';
+import { zEnumQuery, zIntQuery, zStringQuery } from '../../util/index'
+import z from 'zod'
 
 export enum SortDirection {
 	ASC = 'asc',
@@ -13,6 +13,6 @@ export const zSearchRequest = z.object({
 	sortField: zStringQuery,
 	query: zStringQuery,
 	sort: zEnumQuery(SortDirection).default(SortDirection.DESC),
-});
+})
 
-export type SearchRequest = z.infer<typeof zSearchRequest>;
+export type SearchRequest = z.infer<typeof zSearchRequest>

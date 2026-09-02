@@ -4,10 +4,10 @@ import {
 	zShirtSize,
 	zMembershipDeliverableStatus,
 	zMembershipFulfillmentStatus,
-} from '../data/index.js';
-import { zMutationRequest } from './MutationRequest.js';
-import { zUpdateUserAddressRequest } from './UpdateUserAddressRequest.js';
-import z from 'zod';
+} from '../data/index'
+import { zMutationRequest } from './MutationRequest'
+import { zUpdateUserAddressRequest } from './UpdateUserAddressRequest'
+import z from 'zod'
 
 export const zUpdateUserRequest = zMutationRequest
 	.extend({
@@ -66,6 +66,6 @@ export const zUpdateUserRequest = zMutationRequest
 		aliases: z.array(z.string().max(100).nonempty()).optional(),
 		roles: z.array(z.number()).optional(),
 	})
-	.strict();
+	.strict()
 
-export type UpdateUserRequest = z.infer<typeof zUpdateUserRequest>;
+export type UpdateUserRequest = z.infer<typeof zUpdateUserRequest>

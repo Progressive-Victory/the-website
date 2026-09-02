@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 export const zDonation = z.object({
 	date: z.coerce.date(),
@@ -11,6 +11,6 @@ export const zDonation = z.object({
 
 	recurringDuration: z.string(),
 	recurringPeriod: z.string(),
-});
+})
 
-export type Donation = z.infer<typeof zDonation>;
+export type Donation = z.infer<typeof zDonation>

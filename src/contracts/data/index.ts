@@ -4,25 +4,25 @@ export * from './ActBlueDonationPacket'
 export * from './ActBlueDonor'
 export * from './ActBlueForm'
 export * from './ActBlueLineitem'
-// export * from './DiscordEvent.js';
-// export * from './DiscordEventAttendee.js';
-// export * from './DiscordEventStatus.js';
-// export * from './DiscordSkillTeamRole.js';
-// export * from './DiscordStateRole.js';
+// export * from './DiscordEvent'
+// export * from './DiscordEventAttendee'
+// export * from './DiscordEventStatus'
+// export * from './DiscordSkillTeamRole'
+// export * from './DiscordStateRole'
 export * from './DiscordUser'
-// export * from './DiscordWarn.js';
-// export * from './Donation.js';
-// export * from './DonationTotals.js';
-// export * from './Endorsement.js';
+// export * from './DiscordWarn'
+// export * from './Donation'
+// export * from './DonationTotals'
+// export * from './Endorsement'
 export * from './Location'
-// export * from './Membership.js';
-export * from './MetaData';
-// export * from './NdaForm.js';
+// export * from './Membership'
+export * from './MetaData'
+// export * from './NdaForm'
 export * from './OnboardingStage'
 export * from './Permission'
 export * from './Position'
 export * from './Role'
-// export * from './ShippingStatus.js';
+// export * from './ShippingStatus'
 export * from './TokenClaims'
 export * from './UpdateHistory'
 export * from './User'

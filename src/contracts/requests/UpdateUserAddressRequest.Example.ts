@@ -1,4 +1,4 @@
-import z from 'zod';
+import z from 'zod'
 
 export const zUpdateUserAddressRequest = z
 	.object({
@@ -9,8 +9,8 @@ export const zUpdateUserAddressRequest = z
 		state: z.string().length(2).nullable().optional(),
 		zip: z.string().length(5).nullable().optional(),
 	})
-	.strict();
+	.strict()
 
 export type UpdateUserAddressRequest = z.infer<
 	typeof zUpdateUserAddressRequest
->;
+>

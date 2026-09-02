@@ -1,6 +1,6 @@
-import { zActBlueContributionCustomField } from './ActBlueContributionCustomField.js';
-import { zActBlueLineitem } from './ActBlueLineitem.js';
-import z from 'zod';
+import { zActBlueContributionCustomField } from './ActBlueContributionCustomField'
+import { zActBlueLineitem } from './ActBlueLineitem'
+import z from 'zod'
 
 export const zActBlueContribution = z.strictObject({
 	createdAt: z.coerce.date(),
@@ -51,6 +51,6 @@ export const zActBlueContribution = z.strictObject({
 		})
 		.nullable(),
 	lineitems: z.array(zActBlueLineitem).optional(),
-});
+})
 
-export type ActBlueContribution = z.infer<typeof zActBlueContribution>;
+export type ActBlueContribution = z.infer<typeof zActBlueContribution>

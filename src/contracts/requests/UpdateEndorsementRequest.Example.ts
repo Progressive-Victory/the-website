@@ -3,8 +3,8 @@ import {
 	ElectionStatus,
 	EndorsementType,
 	InitiativeType,
-} from '../data/index.js';
-import z from 'zod';
+} from '../data/index'
+import z from 'zod'
 
 // This is not meaningfully different than CreateEndorsementRequest which isn't meaningfully different than Endorsement
 // So edit all three
@@ -25,8 +25,8 @@ export const zUpdateEndorsementRequest = z.object({
 	endorsementLevel: z.enum(EndorsementType).optional(),
 	avatarBgColor: z.enum(BackgroundColor).optional(),
 	electionStatus: z.enum(ElectionStatus).optional(),
-});
+})
 
 export type UpdateEndorsementRequest = z.infer<
 	typeof zUpdateEndorsementRequest
->;
+>
