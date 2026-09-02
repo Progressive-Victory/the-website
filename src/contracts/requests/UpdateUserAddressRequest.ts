@@ -12,6 +12,4 @@ export const zUpdateUserAddressRequest = zMutationRequest
     })
     .strict()
 
-export type UpdateUserAddressRequest = z.infer<
-    typeof zUpdateUserAddressRequest
->
+export type UpdateUserAddressRequest = z.infer<typeof zUpdateUserAddressRequest>

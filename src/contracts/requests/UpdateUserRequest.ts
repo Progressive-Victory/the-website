@@ -1,3 +1,5 @@
+import { zMutationRequest } from './MutationRequest'
+import { zUpdateUserAddressRequest } from './UpdateUserAddressRequest'
 import {
     zOnboardingStage,
     zUserStatus,
@@ -5,8 +7,6 @@ import {
     zMembershipDeliverableStatus,
     zMembershipFulfillmentStatus,
 } from '@/contracts/data'
-import { zMutationRequest } from './MutationRequest'
-import { zUpdateUserAddressRequest } from './UpdateUserAddressRequest'
 import z from 'zod'
 
 export const zUpdateUserRequest = zMutationRequest
@@ -31,32 +31,32 @@ export const zUpdateUserRequest = zMutationRequest
         completedIntakeUtc: z.coerce.date().nullish(),
 
         /**
-		 * @deprecated
-		 */
+         * @deprecated
+         */
         membershipCardStatus: zMembershipDeliverableStatus.optional(),
-       	/**
-		 * @deprecated
-		 */
+        /**
+         * @deprecated
+         */
         membershipMerchStatus: zMembershipDeliverableStatus.optional(),
         /**
-		 * @deprecated
-		 */
+         * @deprecated
+         */
         shirtSize: zShirtSize.nullish(),
         /**
-		 * @deprecated
-		 */
+         * @deprecated
+         */
         duesPayingMember: z.boolean().optional(),
         /**
-		 * @deprecated
-		 */
+         * @deprecated
+         */
         membershipFulfillmentStatus: zMembershipFulfillmentStatus.nullish(),
         /**
-		 * @deprecated
-		 */
+         * @deprecated
+         */
         nameConfirmed: z.boolean().optional(),
         /**
-		 * @deprecated
-		 */
+         * @deprecated
+         */
         addressConfirmed: z.boolean().optional(),
         /**
          * @deprecated

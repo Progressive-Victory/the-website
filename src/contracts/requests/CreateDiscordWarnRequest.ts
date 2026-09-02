@@ -7,6 +7,4 @@ export const zCreateDiscordWarnRequest = z.object({
     expires_at_utc: z.coerce.date(),
 })
 
-export type CreateDiscordWarnRequest = z.infer<
-    typeof zCreateDiscordWarnRequest
->
+export type CreateDiscordWarnRequest = z.infer<typeof zCreateDiscordWarnRequest>

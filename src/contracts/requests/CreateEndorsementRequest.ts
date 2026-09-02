@@ -25,6 +25,4 @@ export const zCreateEndorsementRequest = z.object({
     electionStatus: z.enum(ElectionStatus),
 })
 
-export type CreateEndorsementRequest = z.infer<
-    typeof zCreateEndorsementRequest
->
+export type CreateEndorsementRequest = z.infer<typeof zCreateEndorsementRequest>

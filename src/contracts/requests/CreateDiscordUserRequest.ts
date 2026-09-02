@@ -9,6 +9,4 @@ export const zCreateDiscordUserRequest = zMutationRequest.extend({
     email: z.string().nonempty(),
 })
 
-export type CreateDiscordUserRequest = z.infer<
-    typeof zCreateDiscordUserRequest
->
+export type CreateDiscordUserRequest = z.infer<typeof zCreateDiscordUserRequest>

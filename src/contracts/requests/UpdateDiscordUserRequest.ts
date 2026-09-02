@@ -5,6 +5,4 @@ export const zUpdateDiscordUserRequest = zCreateDiscordUserRequest
     .omit({ discordId: true })
     .partial()
     .strict()
-export type UpdateDiscordUserRequest = z.infer<
-    typeof zUpdateDiscordUserRequest
->
+export type UpdateDiscordUserRequest = z.infer<typeof zUpdateDiscordUserRequest>

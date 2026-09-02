@@ -2,9 +2,9 @@ import { zActBlueDonor } from './ActBlueDonor'
 import { zDiscordUser } from './DiscordUser'
 import { zLocation } from './Location'
 import {
-	zMembershipDeliverableStatus,
-	zMembershipFulfillmentStatus,
-	zShirtSize,
+    zMembershipDeliverableStatus,
+    zMembershipFulfillmentStatus,
+    zShirtSize,
 } from './Membership'
 import { zOnboardingStage } from './OnboardingStage'
 import { zRole } from './Role'
@@ -74,33 +74,33 @@ const zBaseUser = z.object({
     completedIntakeUtc: z.coerce.date().nullable(),
 
     /**
-	 * @deprecated
-	 */
+     * @deprecated
+     */
     membershipCardStatus: zMembershipDeliverableStatus.default(0),
     /**
-	 * @deprecated
-	 */
+     * @deprecated
+     */
     membershipMerchStatus: zMembershipDeliverableStatus.default(0),
     /**
-	 * @deprecated
-	 */
+     * @deprecated
+     */
     shirtSize: zShirtSize.nullable(),
     duesPayingMember: z.boolean(),
     /**
-	 * @deprecated
-	 */
+     * @deprecated
+     */
     membershipFulfillmentStatus: zMembershipFulfillmentStatus.nullable(),
     /**
-	 * @deprecated
-	 */
+     * @deprecated
+     */
     nameConfirmed: z.boolean(),
     /**
-	 * @deprecated
-	 */
+     * @deprecated
+     */
     addressConfirmed: z.boolean(),
     /**
-	 * @deprecated
-	 */
+     * @deprecated
+     */
     membershipBenefitEligible: z.boolean(),
 
     aliases: z.array(z.string()).optional(),

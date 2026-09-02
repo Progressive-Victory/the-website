@@ -3,8 +3,8 @@ import {
     zShirtSize,
     zMembershipFulfillmentStatus,
 } from '../data/index'
-import z from 'zod'
 import { zMutationRequest } from './MutationRequest'
+import z from 'zod'
 
 export const zUpdateMembershipRequest = zMutationRequest.extend({
     membershipCardStatus: zMembershipDeliverableStatus.optional(),

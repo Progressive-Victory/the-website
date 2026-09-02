@@ -13,5 +13,3 @@ export * from './PaginatedResponse'
 export * from './PositionHierarchyResponse'
 export * from './RedirectResponse'
 export * from './SettingsResponse'
-
-
