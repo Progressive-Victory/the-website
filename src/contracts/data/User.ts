@@ -1,6 +1,11 @@
 import { zActBlueDonor } from './ActBlueDonor'
 import { zDiscordUser } from './DiscordUser'
 import { zLocation } from './Location'
+import {
+	zMembershipDeliverableStatus,
+	zMembershipFulfillmentStatus,
+	zShirtSize,
+} from './Membership'
 import { zOnboardingStage } from './OnboardingStage'
 import { zRole } from './Role'
 import { zUpdateHistory } from './UpdateHistory'
@@ -12,37 +17,39 @@ export enum UserStatus {
     Active = 1,
 }
 
-export enum MembershipDeliverableStatus {
-    NotStarted = 0,
-    Cancelled = 1,
-    Printed = 2,
-    Shipped = 3,
-    Received = 4,
-    Returned = 5,
-}
-
-export enum MembershipFulfillmentStatus {
-    NotEligible = 0,
-    NotFulfilled = 1,
-    Fulfilled = 2,
-}
-
-export enum ShirtSize {
-    ExtraSmall = 'XS',
-    Small = 'S',
-    Medium = 'M',
-    Large = 'L',
-    ExtraLarge = 'XL',
-    DoubleExtraLarge = '2XL',
-}
-
-export const zShirtSize = z.enum(ShirtSize)
-
-export const zMembershipFulfillmentStatus = z.enum(MembershipFulfillmentStatus)
-
-export const zMembershipDeliverableStatus = z.enum(MembershipDeliverableStatus)
-
 export const zUserStatus = z.enum(UserStatus)
+
+// export enum MembershipDeliverableStatus {
+//     NotStarted = 0,
+//     Cancelled = 1,
+//     Printed = 2,
+//     Shipped = 3,
+//     Received = 4,
+//     Returned = 5,
+// }
+
+// export enum MembershipFulfillmentStatus {
+//     NotEligible = 0,
+//     NotFulfilled = 1,
+//     Fulfilled = 2,
+// }
+
+// export enum ShirtSize {
+//     ExtraSmall = 'XS',
+//     Small = 'S',
+//     Medium = 'M',
+//     Large = 'L',
+//     ExtraLarge = 'XL',
+//     DoubleExtraLarge = '2XL',
+// }
+
+// export const zShirtSize = z.enum(ShirtSize)
+
+// export const zMembershipFulfillmentStatus = z.enum(MembershipFulfillmentStatus)
+
+// export const zMembershipDeliverableStatus = z.enum(MembershipDeliverableStatus)
+
+// export const zUserStatus = z.enum(UserStatus)
 
 const zBaseUser = z.object({
     id: z.int(),
@@ -66,13 +73,34 @@ const zBaseUser = z.object({
     joinedAtUtc: z.coerce.date().nullable(),
     completedIntakeUtc: z.coerce.date().nullable(),
 
+    /**
+	 * @deprecated
+	 */
     membershipCardStatus: zMembershipDeliverableStatus.default(0),
+    /**
+	 * @deprecated
+	 */
     membershipMerchStatus: zMembershipDeliverableStatus.default(0),
+    /**
+	 * @deprecated
+	 */
     shirtSize: zShirtSize.nullable(),
     duesPayingMember: z.boolean(),
+    /**
+	 * @deprecated
+	 */
     membershipFulfillmentStatus: zMembershipFulfillmentStatus.nullable(),
+    /**
+	 * @deprecated
+	 */
     nameConfirmed: z.boolean(),
+    /**
+	 * @deprecated
+	 */
     addressConfirmed: z.boolean(),
+    /**
+	 * @deprecated
+	 */
     membershipBenefitEligible: z.boolean(),
 
     aliases: z.array(z.string()).optional(),

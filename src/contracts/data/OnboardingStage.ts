@@ -14,11 +14,14 @@ export enum OnboardingStage {
     // The user is under 18 and isn't allowed to join the server.
     UNDERAGE = 'underage',
 
+    	// The user is neither a US citizen nor resident and isn't allowed to join the server.
+	NOT_CITIZEN = 'not_citizen',
+
+        // The user has joined the server successfully.
+    JOINED = 'joined',
+
     // The user was already banned from the server.
     BANNED = 'banned',
-
-    // The user has joined the server successfully.
-    JOINED = 'joined',
 }
 
 export const zOnboardingStage = z.enum(OnboardingStage)
