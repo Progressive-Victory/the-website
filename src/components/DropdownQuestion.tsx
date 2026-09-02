@@ -1,9 +1,9 @@
 'use client'
 
 import styles from '@/components/content_sections/ContentSections.module.css'
-import { PlusIcon, MinusIcon } from '@heroicons/react/24/solid'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
+import { FaPlus, FaMinus } from 'react-icons/fa6'
 
 export interface DropdownQuestionProps {
     question: string
@@ -58,9 +58,9 @@ export function DropdownQuestion({
 
                 <span style={iconWrapperStyle}>
                     {isOpen ? (
-                        <MinusIcon style={iconStyle} />
+                        <FaMinus style={iconStyle} />
                     ) : (
-                        <PlusIcon style={iconStyle} />
+                        <FaPlus style={iconStyle} />
                     )}
                 </span>
             </div>
