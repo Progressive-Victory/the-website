@@ -310,7 +310,7 @@ export function AccountDetailsSection({
                         className={formStyles.button}
                         disabled={isCheckingContribution}
                     >
-                        {isCheckingContribution ? 'Checking…' : 'Link'}
+                        {isCheckingContribution ? 'Checking...' : 'Link'}
                     </button>
                 </div>
             </form>
@@ -352,9 +352,9 @@ export function AccountDetailsSection({
 
         onSave({
             ...userData,
-            firstName: nameDraft.firstName,
-            lastName: nameDraft.lastName,
-            phone: nameDraft.phone || null,
+            firstName: nameDraft.firstName.trim(),
+            lastName: nameDraft.lastName.trim(),
+            phone: nameDraft.phone.trim() || null,
             shirtSize: nameDraft.shirtSize,
             nameConfirmed: true,
             email: shouldUseMatchedEmail
@@ -370,7 +370,10 @@ export function AccountDetailsSection({
             },
             addressConfirmed: true,
         })
-        onDonorLinkSubmit(donorLinkForm)
+        onDonorLinkSubmit({
+            donorEmail: donorLinkForm.donorEmail.trim(),
+            orderId: donorLinkForm.orderId.trim(),
+        })
         setShowAddressConfirmModal(false)
         setMatchedDonorEmail(null)
     }
