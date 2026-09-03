@@ -1,28 +1,21 @@
-import { useFetch } from './useFetch'
-import { User, zUser } from '@/contracts/data'
+import { User } from '@/contracts/data'
+import { useUserQueries } from '@/queries'
 import {
     keepPreviousData,
-    skipToken,
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
 
 export function useCurrentUser() {
     const queryClient = useQueryClient()
-    const { ready, onGet } = useFetch()
+    const { getCurrentUser } = useUserQueries()
 
     const user = useQuery({
         queryKey: ['/users/current'],
-        queryFn: ready
-            ? ({ signal }) =>
-                  onGet('/users/current', zUser, {
-                      query: {
-                          includeDiscordUsers: true,
-                          includeDonors: true,
-                      },
-                      signal,
-                  })
-            : skipToken,
+        queryFn: getCurrentUser({
+            includeDiscordUsers: true,
+            includeDonors: true,
+        }),
         placeholderData: keepPreviousData,
     })
 
@@ -38,7 +31,7 @@ export function useCurrentUser() {
     return {
         data: user.data,
         isLoading: user.isLoading,
-        error: user.error?.message ?? null,
+        error: user.error,
         onRefetch: handleRefetch,
         onInvalidate: handleInvalidate,
     }

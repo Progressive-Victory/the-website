@@ -1,4 +1,5 @@
 import { zActBlueContribution } from './ActBlueContribution'
+import { zMembership } from './Membership'
 import z from 'zod'
 
 export const zActBlueDonor = z
@@ -26,6 +27,8 @@ export const zActBlueDonor = z
         phone: z.string().nullable(),
         userId: z.number().optional(),
         contributions: z.array(zActBlueContribution).optional(),
+
+        membershipData: zMembership.optional(),
     })
     .strict()
 

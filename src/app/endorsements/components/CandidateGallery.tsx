@@ -1,6 +1,6 @@
 import styles from '../endorsement.module.css'
 import { PAST_ELECTION_LABEL } from '../endorsements.constants'
-import { type CandidateConfig, type ElectionStatus } from '../endorsements.data'
+import { type CandidateConfig } from '../endorsements.data'
 import {
     galleryLayoutTransition,
     headingVariants,
@@ -16,14 +16,14 @@ import {
 import {
     compareFlatCandidates,
     compareSectionEntries,
-    getCandidateSubtitleText,
     getSectionLabel,
     sortSectionCandidates,
 } from '../endorsements.utils'
-import { ImageWithFallback } from '@/components/common'
-import cx from 'classnames'
+import { ElectionStatusBadge } from './ElectionStatusBadge'
+import { PersonCard } from '@/components/common'
+import { cn } from '@/util'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
-import { memo, type ReactNode } from 'react'
+import { memo } from 'react'
 
 interface CandidateGalleryProps {
     filteredCandidates: CandidateConfig[]
@@ -33,6 +33,7 @@ interface CandidateGalleryProps {
     sectionSortOrder: SectionSortOrder
     year: number
     searchQuery: string
+    onSelectCandidate: (candidate: CandidateConfig) => void
 }
 
 export function CandidateGallery({
@@ -43,6 +44,7 @@ export function CandidateGallery({
     sectionSortOrder,
     year,
     searchQuery,
+    onSelectCandidate,
 }: CandidateGalleryProps) {
     const candidateMap = new Map<string, CandidateConfig[]>()
 
@@ -99,14 +101,17 @@ export function CandidateGallery({
                             exit="exit"
                         >
                             <motion.header
-                                className={`${styles.sectionHeader} ${styles.centeredSectionHeader}`}
+                                className={cn(
+                                    styles.sectionHeader,
+                                    styles.centeredSectionHeader
+                                )}
                                 variants={headingVariants}
                                 initial="hidden"
                                 animate="visible"
                                 exit="exit"
                             >
                                 <div
-                                    className={styles.sectionDivider}
+                                    className={styles.sectionDividerLeft}
                                     aria-hidden="true"
                                 />
                                 <h3 className={styles.sectionTitle}>
@@ -120,18 +125,23 @@ export function CandidateGallery({
 
                             <motion.div
                                 layout
-                                className={`${styles.finderGrid} ${styles.finderGridLarge}`}
+                                className={cn(
+                                    styles.finderGrid,
+                                    styles.finderGridLarge
+                                )}
                                 transition={galleryLayoutTransition}
                             >
                                 {orderedFlatCandidates.map((candidate) => (
                                     <CandidateCard
                                         key={candidate.id}
                                         candidate={candidate}
-                                        displayMode={displayMode}
-                                        sectionMode={sectionMode}
+                                        onSelect={() =>
+                                            onSelectCandidate(candidate)
+                                        }
                                     />
                                 ))}
                             </motion.div>
+                            <DisclaimerCard />
                         </motion.section>
                     </AnimatePresence>
                 </motion.div>
@@ -154,16 +164,19 @@ export function CandidateGallery({
                         animate="visible"
                         exit="exit"
                     >
+                        {/* Will Abstract to reduce nesting in next revision */}
                         {groupedCandidates.map(
-                            ([sectionLabel, sectionCandidates]) => {
+                            ([sectionLabel, sectionCandidates], groupIndex) => {
                                 const isPastElectionSection =
                                     sectionLabel === PAST_ELECTION_LABEL
+                                const isLastGroup =
+                                    groupIndex === groupedCandidates.length - 1
 
                                 return (
                                     <motion.section
                                         key={sectionLabel}
                                         layout
-                                        className={cx(
+                                        className={cn(
                                             styles.gallerySection,
                                             isPastElectionSection &&
                                                 styles.pastElectionSection
@@ -172,7 +185,7 @@ export function CandidateGallery({
                                     >
                                         <motion.header
                                             layout="position"
-                                            className={cx(
+                                            className={cn(
                                                 styles.sectionHeader,
                                                 isPastElectionSection &&
                                                     styles.centeredSectionHeader
@@ -187,7 +200,7 @@ export function CandidateGallery({
                                                 <>
                                                     <div
                                                         className={
-                                                            styles.sectionDivider
+                                                            styles.sectionDividerLeft
                                                         }
                                                         aria-hidden="true"
                                                     />
@@ -234,16 +247,16 @@ export function CandidateGallery({
                                                     <CandidateCard
                                                         key={candidate.id}
                                                         candidate={candidate}
-                                                        displayMode={
-                                                            displayMode
-                                                        }
-                                                        sectionMode={
-                                                            sectionMode
+                                                        onSelect={() =>
+                                                            onSelectCandidate(
+                                                                candidate
+                                                            )
                                                         }
                                                     />
                                                 )
                                             )}
                                         </motion.div>
+                                        {isLastGroup && <DisclaimerCard />}
                                     </motion.section>
                                 )
                             }
@@ -280,181 +293,69 @@ function getFlatHeaderTitle(
 
 function CandidateCardImpl({
     candidate,
-    displayMode,
-    sectionMode,
+    onSelect,
 }: {
     candidate: CandidateConfig
-    displayMode: GalleryDisplayMode
-    sectionMode: SectionGroupingMode
+    onSelect: () => void
 }) {
-    const destination = getCandidateDestination(candidate)
-    const statusBadgeClassName = getElectionStatusBadgeClassName(
-        candidate.electionStatus
-    )
-    const statusBadgeIcon = getElectionStatusBadgeIcon(candidate.electionStatus)
-    const subtitleText = getCandidateSubtitleText(
-        candidate,
-        displayMode,
-        sectionMode
-    )
+    const subtitleText = candidate.endorsementType
     const avatarFrameClassName =
         candidate.avatarBackgroundColor === 'blue'
             ? styles.tileImageFramePledge
             : styles.tileImageFrameNoPledge
 
-    const tileContent = (
-        <>
-            <div className={`${styles.tileImageFrame} ${avatarFrameClassName}`}>
-                <CandidateAvatar
-                    imageSrc={candidate.image}
-                    name={candidate.name}
-                    size={92}
-                    className={styles.tileImage}
-                />
-                {statusBadgeClassName && (
-                    <span
-                        className={`${styles.tileStatusBadge} ${statusBadgeClassName}`}
-                        aria-label={`Election status: ${candidate.electionStatus}`}
-                    >
-                        <span aria-hidden="true">{statusBadgeIcon}</span>
-                        <span
-                            className={styles.tileStatusTooltip}
-                            aria-hidden="true"
-                        >
-                            {candidate.electionStatus}
-                        </span>
-                    </span>
-                )}
-            </div>
-            <div className={styles.tileMeta}>
-                <div className={styles.tileNameRow}>
-                    <p className={styles.tileName}>{candidate.name}</p>
-                </div>
-                {subtitleText && (
-                    <p className={styles.tileDate}>{subtitleText}</p>
-                )}
-            </div>
-        </>
-    )
-
-    if (!destination) {
-        return (
-            <motion.article
-                layout
-                className={styles.candidateTile}
-                transition={galleryLayoutTransition}
-                variants={waveItemVariants}
-                whileHover={{ y: -4, scale: 1.03 }}
-            >
-                {tileContent}
-            </motion.article>
-        )
-    }
-
     return (
-        <motion.a
+        <motion.article
             layout
-            href={destination}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.candidateTile}
-            aria-label={`View details for ${candidate.name}`}
             transition={galleryLayoutTransition}
             variants={waveItemVariants}
             whileHover={{ y: -4, scale: 1.03 }}
+            onClick={onSelect}
+            style={{ cursor: 'pointer' }}
         >
-            {tileContent}
-        </motion.a>
+            <PersonCard
+                name={candidate.name}
+                imageSrc={candidate.image}
+                imageSize={92}
+                subtitle={subtitleText ?? undefined}
+                imageFrameClassName={avatarFrameClassName}
+                badge={
+                    <ElectionStatusBadge
+                        electionStatus={candidate.electionStatus}
+                    />
+                }
+            />
+        </motion.article>
     )
 }
 
 const CandidateCard = memo(CandidateCardImpl)
 
-function CandidateAvatar({
-    imageSrc,
-    name,
-    size,
-    className,
-}: {
-    imageSrc: string
-    name: string
-    size: number
-    className?: string
-}) {
+function DisclaimerCard() {
     return (
-        <ImageWithFallback
-            src={imageSrc}
-            alt={`${name} profile image`}
-            width={size}
-            height={size}
-            className={className}
-        />
+        <motion.div
+            className={styles.disclaimerCard}
+            variants={waveItemVariants}
+        >
+            <p className={styles.disclaimerItem}>
+                <strong>PV Pledge:</strong> The candidates we LOVE.
+                <br />
+                Candidates invited to take the PV Pledge personify our values
+                and represent true political leaders who rise above the rest.
+            </p>
+            <p className={styles.disclaimerItem}>
+                <strong>Endorsement:</strong> The candidates we LIKE.
+                <br />
+                When a candidate has the endorsed label, it means they align
+                with our values and that we are proud to support them.
+            </p>
+            <p className={styles.disclaimerItem}>
+                <strong>Recommendation:</strong> The candidates we TOLERATE.
+                <br />
+                We will support these candidates, but we won&apos;t pretend they
+                are anything more than just better than the Republican. We still
+                endorse them, but they tend not to appreciate how...
+            </p>
+        </motion.div>
     )
-}
-
-function getCandidateDestination(
-    candidate: CandidateConfig
-): string | undefined {
-    const learnMoreHref = candidate.learnMoreHref.trim()
-    if (learnMoreHref) return learnMoreHref
-
-    const handleHref = candidate.handleHref?.trim()
-    switch (handleHref) {
-        case undefined:
-        case '':
-            return undefined
-        default:
-            return handleHref
-    }
-}
-
-function getElectionStatusBadgeClassName(
-    electionStatus: ElectionStatus
-): string | null {
-    if (electionStatus === 'Won Primary') {
-        return styles.tileStatusWonPrimary
-    }
-
-    if (electionStatus === 'Elected') {
-        return styles.tileStatusElected
-    }
-
-    if (
-        electionStatus === 'Lost Primary' ||
-        electionStatus === 'Lost General'
-    ) {
-        return styles.tileStatusLost
-    }
-
-    if (electionStatus === 'Dropped Out') {
-        return styles.tileStatusDroppedOut
-    }
-
-    return null
-}
-
-function getElectionStatusBadgeIcon(electionStatus: ElectionStatus): ReactNode {
-    switch (electionStatus) {
-        case 'Won Primary':
-            return (
-                <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
-                    <path
-                        d="M4.5 10.5l3.5 3.5 7-7"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
-                </svg>
-            )
-        case 'Elected':
-            return '★'
-        case 'Lost Primary':
-        case 'Lost General':
-            return '✕'
-        case 'Dropped Out':
-            return '−'
-        default:
-            return null
-    }
 }

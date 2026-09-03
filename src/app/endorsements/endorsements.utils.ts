@@ -9,7 +9,6 @@ import {
 } from './endorsements.constants'
 import { type CandidateConfig, type ElectionStatus } from './endorsements.data'
 import {
-    type GalleryDisplayMode,
     type SectionGroupingMode,
     type SectionSortOrder,
 } from './endorsements.types'
@@ -103,32 +102,6 @@ export function getFlatSubtitleText(candidate: CandidateConfig): string {
     return LOST_OR_DROPPED_STATUSES.has(candidate.electionStatus)
         ? candidate.electionStatus
         : getCandidateStateLabel(candidate)
-}
-
-export function getCandidateSubtitleText(
-    candidate: CandidateConfig,
-    displayMode: GalleryDisplayMode,
-    sectionMode: SectionGroupingMode
-): string | null {
-    const relevantDate = getRelevantElectionDate(candidate)
-    const formattedElectionDate = relevantDate
-        ? electionDateFormatter.format(relevantDate)
-        : null
-    const isPastElectionCandidate =
-        !!relevantDate && relevantDate.getTime() < getStartOfToday()
-
-    if (displayMode === 'flat') {
-        return getFlatSubtitleText(candidate)
-    }
-
-    if (
-        sectionMode === 'name' ||
-        (sectionMode === 'electionDate' && !isPastElectionCandidate)
-    ) {
-        return getCandidateStateLabel(candidate)
-    }
-
-    return formattedElectionDate
 }
 
 export function getSectionLabel(

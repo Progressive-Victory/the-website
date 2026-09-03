@@ -1,5 +1,6 @@
 'use client'
 
+import { CandidateDetails } from './components/CandidateDetails'
 import { CandidateGallery } from './components/CandidateGallery'
 import { FilterButtonRow } from './components/FilterButtonRow'
 import styles from './endorsement.module.css'
@@ -11,6 +12,7 @@ import {
     type SectionSortOrder,
 } from './endorsements.types'
 import { getRelevantElectionDate } from './endorsements.utils'
+import { ContentPageFrame } from '@/components/content_sections/ContentSections'
 import { useDeferredValue, useState } from 'react'
 
 const SORTED_CANDIDATES: CandidateConfig[] = [...CANDIDATES].sort((a, b) => {
@@ -52,6 +54,8 @@ export function Endorsements() {
     const [sectionSortOrder, setSectionSortOrder] =
         useState<SectionSortOrder>('ascending')
     const [year, setYear] = useState(defaultYear)
+    const [selectedCandidate, setSelectedCandidate] =
+        useState<CandidateConfig | null>(null)
 
     const deferredSearchQuery = useDeferredValue(searchQuery)
 
@@ -85,31 +89,66 @@ export function Endorsements() {
     })
 
     return (
-        <div className={styles.hero}>
-            <FilterButtonRow
-                filter={filter}
-                setFilter={setFilter}
-                displayMode={displayMode}
-                setDisplayMode={setDisplayMode}
-                sectionMode={sectionMode}
-                setSectionMode={setSectionMode}
-                sectionSortOrder={sectionSortOrder}
-                setSectionSortOrder={setSectionSortOrder}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                year={year}
-                setYear={setYear}
-                availableYears={availableYears}
+        <>
+            <CandidateDetails
+                candidate={selectedCandidate}
+                onClose={() => setSelectedCandidate(null)}
             />
-            <CandidateGallery
-                filteredCandidates={filteredCandidates}
-                filter={filter}
-                displayMode={displayMode}
-                sectionMode={sectionMode}
-                sectionSortOrder={sectionSortOrder}
-                year={year}
-                searchQuery={deferredSearchQuery}
-            />
-        </div>
+            <ContentPageFrame
+                heading={
+                    <div className={styles.headingWrap}>
+                        <p className={styles.heading}>
+                            Endorsements{' '}
+                            {/* Will update to not hardcode 2026 in next revision */}
+                            <span className={styles.headingHighlight}>
+                                for 2026
+                            </span>
+                        </p>
+                        <p className={styles.subheading}>
+                            Learn about each of the candidates we are
+                            supporting.
+                        </p>
+                    </div>
+                }
+            >
+                <div className={styles.hero}>
+                    {/* <CandidateCarousel
+                        gap={175}
+                        candidates={filteredCandidates.filter(
+                            (c) =>
+                                c.endorsementType === 'PV Pledge' &&
+                                (c.electionStatus === '' ||
+                                    c.electionStatus === 'Elected' ||
+                                    c.electionStatus === 'Won Primary')
+                        )}
+                    /> */}
+                    <FilterButtonRow
+                        filter={filter}
+                        setFilter={setFilter}
+                        displayMode={displayMode}
+                        setDisplayMode={setDisplayMode}
+                        sectionMode={sectionMode}
+                        setSectionMode={setSectionMode}
+                        sectionSortOrder={sectionSortOrder}
+                        setSectionSortOrder={setSectionSortOrder}
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        year={year}
+                        setYear={setYear}
+                        availableYears={availableYears}
+                    />
+                    <CandidateGallery
+                        filteredCandidates={filteredCandidates}
+                        filter={filter}
+                        displayMode={displayMode}
+                        sectionMode={sectionMode}
+                        sectionSortOrder={sectionSortOrder}
+                        year={year}
+                        searchQuery={deferredSearchQuery}
+                        onSelectCandidate={setSelectedCandidate}
+                    />
+                </div>
+            </ContentPageFrame>
+        </>
     )
 }

@@ -10,10 +10,10 @@ import {
     User,
     zDiscordUser,
 } from '@/contracts/data'
+import { cn } from '@/util'
 import { useFetch } from '@/util/hooks'
 import { useQueries } from '@tanstack/react-query'
-import cx from 'classnames'
-import { ReactNode, useMemo } from 'react'
+import { ReactNode } from 'react'
 import z from 'zod'
 
 export interface HistoryViewProps {
@@ -110,50 +110,44 @@ export function HistoryView({
 }: HistoryViewProps) {
     const { ready, onGet } = useFetch()
 
-    const sortedHistory = useMemo(() => {
-        return (user?.history ?? []).slice().sort((a, b) => {
+    const sortedHistory = (user?.history ?? []).slice().sort((a, b) => {
+        return (
+            b.historyWhenUpdatedUtc.getTime() -
+            a.historyWhenUpdatedUtc.getTime()
+        )
+    })
+
+    const sortedDonorHistory = (user?.donorHistory ?? [])
+        .slice()
+        .sort((a, b) => {
             return (
                 b.historyWhenUpdatedUtc.getTime() -
                 a.historyWhenUpdatedUtc.getTime()
             )
         })
-    }, [user?.history])
 
-    const sortedDonorHistory = useMemo(() => {
-        return (user?.donorHistory ?? []).slice().sort((a, b) => {
-            return (
-                b.historyWhenUpdatedUtc.getTime() -
-                a.historyWhenUpdatedUtc.getTime()
-            )
-        })
-    }, [user?.donorHistory])
+    const mergedHistory = [
+        ...sortedHistory.map((update) => ({
+            kind: 'account' as const,
+            update,
+        })),
+        ...sortedDonorHistory.map((update) => ({
+            kind: 'donor' as const,
+            update,
+        })),
+    ].sort(
+        (a, b) =>
+            b.update.historyWhenUpdatedUtc.getTime() -
+            a.update.historyWhenUpdatedUtc.getTime()
+    )
 
-    const mergedHistory = useMemo(() => {
-        return [
-            ...sortedHistory.map((update) => ({
-                kind: 'account' as const,
-                update,
-            })),
-            ...sortedDonorHistory.map((update) => ({
-                kind: 'donor' as const,
-                update,
-            })),
-        ].sort(
-            (a, b) =>
-                b.update.historyWhenUpdatedUtc.getTime() -
-                a.update.historyWhenUpdatedUtc.getTime()
+    const updaterIds = Array.from(
+        new Set(
+            mergedHistory
+                .map((item) => item.update.historyWhoUpdatedId)
+                .filter((id): id is number => id != null)
         )
-    }, [sortedHistory, sortedDonorHistory])
-
-    const updaterIds = useMemo(() => {
-        return Array.from(
-            new Set(
-                mergedHistory
-                    .map((item) => item.update.historyWhoUpdatedId)
-                    .filter((id): id is number => id != null)
-            )
-        )
-    }, [mergedHistory])
+    )
 
     const updaterDiscordQueries = useQueries({
         queries: updaterIds.map((id) => ({
@@ -167,18 +161,13 @@ export function HistoryView({
         })),
     })
 
-    const updaterUsernameById = useMemo(() => {
-        const map = new Map<number, string>()
+    const updaterUsernameById = new Map<number, string>()
+    updaterDiscordQueries.forEach((query, index) => {
+        const id = updaterIds[index]
+        const username = query.data?.[0]?.username
 
-        updaterDiscordQueries.forEach((query, index) => {
-            const id = updaterIds[index]
-            const username = query.data?.[0]?.username
-
-            if (id != null && username) map.set(id, username)
-        })
-
-        return map
-    }, [updaterDiscordQueries, updaterIds])
+        if (id != null && username) updaterUsernameById.set(id, username)
+    })
 
     const updateLabel = (historyWhoUpdatedId: number | null) => {
         if (historyWhoUpdatedId == null) return 'Unknown'
@@ -225,7 +214,7 @@ export function HistoryView({
             <div className={styles.section}>
                 <div className={styles.historyContainer}>
                     <div
-                        className={cx(
+                        className={cn(
                             styles.historyEntry,
                             styles.historyEntryUi
                         )}
@@ -242,7 +231,7 @@ export function HistoryView({
             <div className={styles.section}>
                 <div className={styles.historyContainer}>
                     <div
-                        className={cx(
+                        className={cn(
                             styles.historyEntry,
                             styles.historyEntryUi
                         )}
@@ -359,7 +348,7 @@ function UnifiedHistoryField({
                             <button
                                 type="button"
                                 onClick={handleSelect}
-                                className={cx(
+                                className={cn(
                                     styles.historyEntry,
                                     isSelected && styles.historyEntrySelected
                                 )}

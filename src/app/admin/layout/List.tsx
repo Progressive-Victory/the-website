@@ -1,7 +1,8 @@
 import styles from './List.module.css'
+import { DropdownButton, DropdownOverlay } from '@/components/common'
 import { MultiSelect, MultiSelectOption } from '@/components/common'
 import { SearchRequest, SortDirection } from '@/contracts/requests'
-import cx from 'classnames'
+import { cn } from '@/util'
 import Link from 'next/link'
 import React, { ChangeEvent, ReactNode, useEffect, useState } from 'react'
 import {
@@ -11,7 +12,6 @@ import {
     FiChevronsRight,
 } from 'react-icons/fi'
 import { IoMdOptions } from 'react-icons/io'
-import { IoClose } from 'react-icons/io5'
 import { IconType } from 'react-icons/lib'
 
 export interface FilterOption {
@@ -36,10 +36,13 @@ export interface ListProps {
     sortFields?: FieldOption[]
     filters?: FilterOption[]
 
+    headerContent?: ReactNode
     pinnedContent?: ReactNode
     children?: ReactNode
 
     onSearch: (search: SearchRequest) => void
+
+    listLabel?: string
 
     // NEW: Optional back button shown in the list header
     backHref?: string
@@ -47,24 +50,30 @@ export interface ListProps {
 }
 
 export function List(props: ListProps) {
-    const [searchPanelOpen, setSearchPanelOpen] = useState(false)
+    const { search, count } = props
+    const page = search.page ?? 0
+    const limit = search.limit ?? 25
+    const start = count != null ? page * limit + 1 : 0
+    const end = count != null ? Math.min((page + 1) * limit, count) : 0
 
     return (
         <div className={styles.list}>
-            <ListTop
-                {...props}
-                searchPanelOpen={searchPanelOpen}
-                setSearchPanelOpen={setSearchPanelOpen}
-                mode="full"
-            />
+            <ListTop {...props} />
 
-            <ListBody {...props} />
+            <div className={styles.listBodyWrapper}>
+                <ListBody {...props} />
+            </div>
 
-            <ListBottom {...props} />
+            <ListBottom {...props}>
+                {count != null && (
+                    <span className={styles.pageSelectCount}>
+                        Showing {start}–{end} of {count} Results
+                    </span>
+                )}
+            </ListBottom>
         </div>
     )
 }
-export type ListTopMode = 'full' | 'compact'
 
 export interface ListTopProps extends Pick<
     ListProps,
@@ -76,11 +85,6 @@ export interface ListTopProps extends Pick<
     | 'backHref'
     | 'backLabel'
 > {
-    searchPanelOpen?: boolean
-    setSearchPanelOpen?: (next: boolean) => void
-
-    mode?: ListTopMode
-
     className?: string
 }
 
@@ -90,28 +94,12 @@ export function ListTop({
     sortFields,
     filters,
     onSearch,
-    searchPanelOpen,
-    setSearchPanelOpen,
-    mode = 'full',
     className,
     backHref,
     backLabel = 'Back',
 }: ListTopProps) {
-    const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
-
-    const isControlled =
-        typeof searchPanelOpen === 'boolean' &&
-        typeof setSearchPanelOpen === 'function'
-
-    const panelOpen = isControlled ? searchPanelOpen : uncontrolledOpen
-    const setPanelOpen = isControlled ? setSearchPanelOpen : setUncontrolledOpen
-
     const { query, searchField, sortField, limit, sort, page, ...filter } =
         search
-
-    const handleToggleSearchPanel = () => {
-        setPanelOpen(!panelOpen)
-    }
 
     const handleChangeQuery = (query: string) => {
         onSearch({ ...search, query, page: 0 })
@@ -148,7 +136,7 @@ export function ListTop({
     }
 
     return (
-        <div className={cx(styles.searchPanel, className)}>
+        <div className={cn(styles.searchPanel, className)}>
             <div className={styles.searchRow}>
                 {backHref ? (
                     <Link
@@ -164,59 +152,58 @@ export function ListTop({
                 <div className={styles.searchRowMain}>
                     <SearchInput
                         query={query ?? ''}
-                        panelOpen={panelOpen}
-                        onTogglePanel={handleToggleSearchPanel}
                         onSearch={handleChangeQuery}
+                        filterContent={
+                            <>
+                                <FieldSelect
+                                    label="Search Field"
+                                    field={searchField}
+                                    options={searchFields ?? []}
+                                    onSelect={handleChangeSearchField}
+                                />
+                                <FieldSelect
+                                    label="Sort Field"
+                                    field={sortField}
+                                    options={sortFields ?? []}
+                                    onSelect={handleChangeSortField}
+                                />
+                                <LimitSelect
+                                    limit={limit ?? 25}
+                                    onSelect={handleChangeLimit}
+                                />
+                                <SortSelect
+                                    sort={sort ?? SortDirection.DESC}
+                                    onSelect={handleChangeSort}
+                                />
+                                <FilterSelect
+                                    filters={filter}
+                                    options={filters}
+                                    onChange={handleChangeFilter}
+                                />
+                            </>
+                        }
                     />
                 </div>
             </div>
-
-            {mode === 'full' && panelOpen && (
-                <>
-                    <div className={styles.searchPanelTop}>
-                        <FieldSelect
-                            label="Search Field"
-                            field={searchField}
-                            options={searchFields ?? []}
-                            onSelect={handleChangeSearchField}
-                        />
-                        <FieldSelect
-                            label="Sort Field"
-                            field={sortField}
-                            options={sortFields ?? []}
-                            onSelect={handleChangeSortField}
-                        />
-                        <LimitSelect
-                            limit={limit ?? 25}
-                            onSelect={handleChangeLimit}
-                        />
-                    </div>
-
-                    <SortSelect
-                        sort={sort ?? SortDirection.DESC}
-                        onSelect={handleChangeSort}
-                    />
-
-                    <FilterSelect
-                        filters={filter}
-                        options={filters}
-                        onChange={handleChangeFilter}
-                    />
-                </>
-            )}
         </div>
     )
 }
 
 type ListBodyProps = Pick<
     ListProps,
-    'count' | 'isPending' | 'error' | 'pinnedContent' | 'children'
+    | 'count'
+    | 'isPending'
+    | 'error'
+    | 'headerContent'
+    | 'pinnedContent'
+    | 'children'
 >
 
 export function ListBody({
     count,
     isPending,
     error,
+    headerContent,
     pinnedContent,
     children,
 }: ListBodyProps) {
@@ -236,6 +223,7 @@ export function ListBody({
 
     return (
         <>
+            {headerContent}
             {pinnedContent && (
                 <ul className={styles.pinned}>{pinnedContent}</ul>
             )}
@@ -249,11 +237,14 @@ export function ListBottom({
     count,
     isPending,
     onSearch,
-}: Pick<ListProps, 'search' | 'count' | 'isPending' | 'onSearch'>) {
+    children,
+}: Pick<ListProps, 'search' | 'count' | 'isPending' | 'onSearch'> & {
+    children?: React.ReactNode
+}) {
     if (count == null) return null
 
     const page = search.page ?? 0
-    const limit = search.limit
+    const limit = search.limit ?? 25
 
     const handleChangePage = (page: number) => {
         onSearch({ ...search, page })
@@ -261,9 +252,10 @@ export function ListBottom({
 
     return (
         <div className={styles.pageSelectContainer}>
+            {children}
             <PageSelect
                 page={page}
-                pageSize={limit ?? 25}
+                pageSize={limit}
                 count={count}
                 disabled={isPending}
                 onChange={handleChangePage}
@@ -287,7 +279,7 @@ export function ListElement({
 }: ListElementProps) {
     return (
         <li className={className} onClick={onClick}>
-            <div className={cx(styles.element, selected && styles.selected)}>
+            <div className={cn(styles.element, selected && styles.selected)}>
                 {children}
             </div>
         </li>
@@ -296,17 +288,11 @@ export function ListElement({
 
 interface SearchInputProps {
     query: string
-    panelOpen: boolean
-    onTogglePanel: () => void
     onSearch: (query: string) => void
+    filterContent?: ReactNode
 }
 
-function SearchInput({
-    query,
-    panelOpen,
-    onTogglePanel,
-    onSearch,
-}: SearchInputProps) {
+function SearchInput({ query, onSearch, filterContent }: SearchInputProps) {
     const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
         onSearch(e.target.value)
     }
@@ -321,12 +307,17 @@ function SearchInput({
                 defaultValue={query}
                 onInput={handleSearch}
             />
-            <button
-                title={panelOpen ? 'Hide Filters' : 'Show Filters'}
-                onClick={onTogglePanel}
-            >
-                {panelOpen ? <IoClose size={20} /> : <IoMdOptions size={20} />}
-            </button>
+            <DropdownButton
+                title="Filters"
+                buttonVariant="icon"
+                icon={<IoMdOptions size={20} />}
+                menu={({ closeDropdown }) => (
+                    <DropdownOverlay
+                        onClose={closeDropdown}
+                        body={filterContent}
+                    />
+                )}
+            />
         </div>
     )
 }
@@ -440,7 +431,11 @@ function FilterSelect({ options, filters, onChange }: FilterSelectProps) {
                     <MultiSelect
                         name={option.label}
                         options={option.options}
-                        selected={filters[option.value] ?? []}
+                        selected={
+                            Array.isArray(filters[option.value])
+                                ? filters[option.value]
+                                : []
+                        }
                         onUpdate={(selected) =>
                             handleUpdate(option.value, selected)
                         }
@@ -568,7 +563,7 @@ function PaginationArrow({
 }: PaginationArrowProps) {
     return (
         <a
-            className={cx(
+            className={cn(
                 styles.arrow,
                 enabled ? styles.enabled : styles.disabled
             )}

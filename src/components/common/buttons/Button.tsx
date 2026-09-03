@@ -1,7 +1,7 @@
 'use client'
 
 import styles from '@/components/common/buttons/Button.module.css'
-import cx from 'classnames'
+import { cn } from '@/util'
 import type React from 'react'
 
 export type ButtonVariant = 'default' | 'long' | 'mobile'
@@ -44,7 +44,7 @@ export function BaseButton(props: BaseButtonProps) {
         showChevron === true &&
         (buttonVariant === 'long' || showChevron === true)
 
-    const finalClassName = cx(
+    const finalClassName = cn(
         styles.buttonBase,
         className,
         buttonVariant === 'long'

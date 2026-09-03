@@ -1,0 +1,62 @@
+.badge {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    z-index: 2;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: calc(100% + 0.45rem);
+    left: 50%;
+    transform: translate(-50%, 4px);
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    border-radius: 9999px;
+    padding: 0.3rem 0.55rem;
+    background: rgba(9, 34, 58, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    font-size: 0.66rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
+    transition:
+        opacity 150ms ease,
+        transform 150ms ease;
+}
+
+.badge:hover .tooltip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.wonPrimary {
+    background: #2fbf71;
+}
+
+.elected {
+    background: #2986cc;
+}
+
+.lost {
+    background: #e15241;
+}
+
+.droppedOut {
+    background: #7b8a9c;
+}

@@ -1,6 +1,6 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
-import cx from 'classnames'
+import { cn } from '@/util'
 import phone from 'phone'
 import { ChangeEvent, useCallback } from 'react'
 
@@ -38,7 +38,36 @@ export function PhoneField<T>(
                     strictDetection: true,
                     validateMobilePrefix: true,
                 })
-                return parsed.isValid
+
+                if (!parsed.isValid) return false
+
+                if (
+                    [
+                        '800',
+                        '833',
+                        '844',
+                        '855',
+                        '866',
+                        '877',
+                        '888',
+                        '555',
+                        '880',
+                        '881',
+                        '882',
+                        '883',
+                        '884',
+                        '885',
+                        '886',
+                        '887',
+                        '889',
+                        '311',
+                        '911',
+                        '988',
+                    ].includes(parsed.phoneNumber.substring(2, 5))
+                )
+                    return false
+
+                return true
             },
             [props.required]
         )
@@ -78,7 +107,7 @@ export function PhoneField<T>(
                         onInput={handleInput}
                         placeholder="2345556789"
                         maxLength={10}
-                        className={cx(
+                        className={cn(
                             styles.textField,
                             storedValue?.trim() &&
                                 !validator(storedValue) &&

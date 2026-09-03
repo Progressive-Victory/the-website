@@ -1,13 +1,15 @@
 'use client'
 
+import { MemberBanner } from './MemberBanner'
 import styles from './page.module.css'
 import { DonorView } from './panel_views/DonorView'
 import { HistoryView } from './panel_views/HistoryView'
 import { MemberView } from './panel_views/MemberView'
+import { FilterTags, FilterTag } from '@/app/admin/layout/FilterTags'
 import { ListElement, List } from '@/app/admin/layout/List'
 import { DiscordAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
-import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
+import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ActBlueDonor,
     Role,
@@ -26,8 +28,9 @@ import {
     UpdateUserRequest,
     zUpdateUserRequest,
 } from '@/contracts/requests'
-import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
+import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
+import { usePositionQueries } from '@/queries'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -37,6 +40,8 @@ import {
     useQueryClient,
 } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
+import { FaUsers, FaUserTag } from 'react-icons/fa'
+import { FaClipboardUser, FaDollarSign, FaAddressCard } from 'react-icons/fa6'
 import { PulseLoader } from 'react-spinners'
 import z from 'zod'
 
@@ -62,8 +67,83 @@ export default function Page() {
     const [formState, setFormState] = useState<FormState<User> | null>(null)
     const [pickingDonor, setPickingDonor] = useState<boolean>(false)
     const [selectedTab, setSelectedTab] = useState<MemberTabKey>('overview')
+    const [activeFilterTag, setActiveFilterTag] = useState<string>('all')
+
+    const memberFilterTags: FilterTag[] = [
+        {
+            key: 'members',
+            label: 'Members',
+            icon: <FaUserTag />,
+            color: '#5997E0',
+            width: '11.65rem',
+            activeRedirect: 'all',
+            scrollLeft: 'members',
+            scrollRight: 'all',
+        },
+        {
+            key: 'server',
+            label: 'Server Members',
+            icon: <FaClipboardUser />,
+            color: '#62A46C',
+            width: '11.65rem',
+            activeRedirect: 'all',
+            scrollLeft: 'members',
+            scrollRight: 'all',
+        },
+        {
+            key: 'donors',
+            label: 'Donors',
+            icon: <FaDollarSign />,
+            color: '#7674B3',
+            width: '11.65rem',
+            activeRedirect: 'all',
+            scrollLeft: 'members',
+            scrollRight: 'all',
+        },
+        {
+            key: 'dues',
+            label: 'Membership',
+            icon: <FaAddressCard />,
+            color: '#C65882',
+            width: '11.65rem',
+            activeRedirect: 'all',
+            scrollLeft: 'members',
+            scrollRight: 'all',
+        },
+        {
+            key: 'all',
+            label: 'All Users',
+            icon: <FaUsers />,
+            color: '#3A3A3C',
+            width: '8.4rem',
+            activeRedirect: 'members',
+            scrollLeft: 'members',
+            scrollRight: 'all',
+        },
+    ]
+
+    const handleFilterTagChange = (key: string) => {
+        setActiveFilterTag(key)
+        //others blank on purpose waiting for API side logic to be implemented.
+        const rest = Object.fromEntries(
+            Object.entries(search).filter(
+                ([k]) =>
+                    ![
+                        'isMember',
+                        'isDonor',
+                        'isDuesPaying',
+                        'isServerMember',
+                    ].includes(k)
+            )
+        )
+        const tagFilters: Record<string, (string | number | boolean)[]> = {}
+        tagFilters.isDonor = [key === 'donors']
+        tagFilters.isDuesPaying = [key === 'dues']
+        onSearch({ ...rest, page: 0, ...tagFilters })
+    }
 
     const loggedInUser = useCurrentUser()
+    const positionQueries = usePositionQueries()
 
     const {
         query: searchQuery,
@@ -84,18 +164,11 @@ export default function Page() {
         onSearch: onDonorSearch,
     } = usePaginatedSearch('/actblue/donors', zActBlueDonor)
 
-    const donorCountQuery = useQuery({
-        queryKey: ['/users', 'donorCount'],
-        queryFn: ready
-            ? ({ signal }) =>
-                  onGet('/users', zPaginatedResponse(zUserProfile), {
-                      query: { isDonor: true, limit: 0 },
-                      signal,
-                  })
-            : skipToken,
-        placeholderData: keepPreviousData,
+    const positionHierarchy = useQuery({
+        queryKey: ['positionHierarchy'],
+        queryFn: positionQueries.getPositionHierarchy,
+        enabled: positionQueries.ready,
     })
-    const donorCount = donorCountQuery.data?.count
 
     const roles = rolesQuery.data?.data ?? []
     const roleOptions = useMemo(
@@ -368,12 +441,9 @@ export default function Page() {
             return (
                 <ListElement
                     key={item.email}
-                    selected={false}
                     onClick={() => void handleSelectDonorItem(item, userId)}
                 >
-                    <div>
-                        <span>{`${item.firstname} ${item.lastname}`}</span>
-                    </div>
+                    <span>{`${item.firstname} ${item.lastname}`}</span>
                 </ListElement>
             )
         },
@@ -469,150 +539,120 @@ export default function Page() {
 
     return (
         <>
-            <List
-                search={search}
-                count={searchQuery.data?.count}
-                isPending={searchQuery.isPending}
-                error={searchQuery.error}
-                searchFields={[
-                    { value: 'email', label: 'Email' },
-                    { value: 'phone', label: 'Phone Number' },
-                    { value: 'zip', label: 'Zip Code' },
-                    { value: 'county', label: 'County' },
-                    { value: 'city', label: 'City' },
-                    { value: 'state', label: 'State' },
-                    { value: 'preferred_name', label: 'Preferred Name' },
-                    { value: 'first_name', label: 'First Name' },
-                    { value: 'last_name', label: 'Last Name' },
-                    { value: 'birthdate', label: 'Birthdate' },
-                    {
-                        value: 'accepted_alerts',
-                        label: 'Accepted Notifications',
-                    },
-                    { value: 'onboarding_stage', label: 'Onboarding Stage' },
-                    { value: 'created_at_utc', label: 'Date Created' },
-                    { value: 'joined_at_utc', label: 'Date Joined Server' },
-                    {
-                        value: 'completed_intake_utc',
-                        label: 'Date Intake Done',
-                    },
-                    { value: 'aliases', label: 'Aliases' },
-                    { value: 'discord_usernames', label: 'Discord Usernames' },
-                ]}
-                sortFields={[
-                    { value: 'email', label: 'Email' },
-                    { value: 'first_name', label: 'First Name' },
-                    { value: 'last_name', label: 'Last Name' },
-                    { value: 'created_at_utc', label: 'Created At' },
-                    { value: 'updated_at_utc', label: 'Recently Edited' },
-                ]}
-                filters={[
-                    {
-                        label: 'Role',
-                        value: 'roleIds',
-                        options: roles.map((role) => ({
-                            label: role.name,
-                            value: role.id,
-                        })),
-                    },
-                    {
-                        label: 'Donors',
-                        value: 'isDonor',
-                        options: [
-                            {
-                                label: `Show ${donorCount ?? '...'} Matched Donors`,
-                                value: 'true',
-                            },
-                        ],
-                    },
-                ]}
-                pinnedContent={
-                    loggedInUser.data ? (
-                        renderItem(loggedInUser.data)
-                    ) : (
-                        <ul>
-                            <ListElement>
-                                <DiscordAvatar
-                                    discordUserId={undefined}
-                                    imageId={undefined}
-                                    size={48}
-                                />
-                                <div className={styles.loading}>
-                                    <PulseLoader size={8} color="#bbb" />
-                                </div>
-                            </ListElement>
-                        </ul>
-                    )
-                }
-                onSearch={onSearch}
-            >
-                {searchQuery.data?.data?.map((item) => renderItem(item))}
-            </List>
+            <div className={styles.listWidth}>
+                <List
+                    search={search}
+                    count={searchQuery.data?.count}
+                    isPending={searchQuery.isPending}
+                    error={searchQuery.error}
+                    listLabel={
+                        activeFilterTag === 'members'
+                            ? 'Members'
+                            : activeFilterTag === 'server'
+                              ? 'Server Members'
+                              : activeFilterTag === 'donors'
+                                ? 'Donors'
+                                : activeFilterTag === 'dues'
+                                  ? 'Dues Paying Members'
+                                  : 'Users'
+                    }
+                    headerContent={
+                        <div className={styles.filterTagsWrapper}>
+                            <FilterTags
+                                tags={memberFilterTags}
+                                activeTag={activeFilterTag}
+                                onChange={handleFilterTagChange}
+                            />
+                        </div>
+                    }
+                    searchFields={[
+                        { value: 'first_name', label: 'First Name' },
+                        { value: 'last_name', label: 'Last Name' },
+                        {
+                            value: 'discord_usernames',
+                            label: 'Discord Username',
+                        },
+                        { value: 'email', label: 'Email' },
+                        { value: 'phone', label: 'Phone Number' },
+                        { value: 'zip', label: 'Zip Code' },
+                        { value: 'birthdate', label: 'Birthdate' },
+                        { value: 'created_at_utc', label: 'Join Date' },
+                        // { value: 'county', label: 'County' },
+                        // { value: 'city', label: 'City' },
+                        // { value: 'state', label: 'State' },
+                        // { value: 'preferred_name', label: 'Preferred Name' },
+
+                        // {
+                        //     value: 'accepted_alerts',
+                        //     label: 'Accepted Notifications',
+                        // },
+                        // { value: 'onboarding_stage', label: 'Onboarding Stage' },
+                        // { value: 'joined_at_utc', label: 'Date Joined Server' },
+                        // {
+                        //     value: 'completed_intake_utc',
+                        //     label: 'Date Intake Done',
+                        // },
+                        // { value: 'aliases', label: 'Aliases' },
+                    ]}
+                    sortFields={[
+                        { value: 'email', label: 'Email' },
+                        { value: 'first_name', label: 'First Name' },
+                        { value: 'last_name', label: 'Last Name' },
+                        { value: 'created_at_utc', label: 'Created At' },
+                        { value: 'updated_at_utc', label: 'Date Modified' },
+                    ]}
+                    filters={[
+                        {
+                            label: 'Role',
+                            value: 'roleIds',
+                            options: roles.map((role) => ({
+                                label: role.name,
+                                value: role.id,
+                            })),
+                        },
+                    ]}
+                    pinnedContent={
+                        loggedInUser.data ? (
+                            renderItem(loggedInUser.data)
+                        ) : (
+                            <ul>
+                                <ListElement>
+                                    <DiscordAvatar
+                                        discordUserId={undefined}
+                                        imageId={undefined}
+                                        size={48}
+                                    />
+                                    <div className={styles.loading}>
+                                        <PulseLoader size={8} color="#bbb" />
+                                    </div>
+                                </ListElement>
+                            </ul>
+                        )
+                    }
+                    onSearch={onSearch}
+                >
+                    {searchQuery.data?.data?.map((item) => renderItem(item))}
+                </List>
+            </div>
 
             <div className={styles.detailsPane}>
                 {selectedId == null && (
                     <div className={styles.emptyState}>No user selected</div>
                 )}
-
                 {selectedId && userQuery.data && (
                     <>
                         <div className={styles.detailsHeader}>
                             <div className={styles.bannerCover} />
-                            <div className={styles.headerTop}>
-                                <div className={styles.cardStyle}>
-                                    <div className={styles.cardAvatar}>
-                                        <DiscordAvatar
-                                            discordUserId={
-                                                userQuery.data.discordUsers?.[0]
-                                                    ?.id
-                                            }
-                                            imageId={
-                                                userQuery.data.discordUsers?.[0]
-                                                    ?.image
-                                            }
-                                            size={64}
-                                        />
-                                    </div>
-                                    <div className={styles.userInfo}>
-                                        <h1 className={styles.headerUserName}>
-                                            {makeTitle(userQuery.data)}
-                                        </h1>
-                                        <h2
-                                            className={
-                                                styles.headerUserUsername
-                                            }
-                                        >
-                                            {userQuery.data.discordUsers?.[0]
-                                                ?.username
-                                                ? `@${userQuery.data.discordUsers[0].username}`
-                                                : 'NOT FOUND'}
-                                        </h2>
-                                    </div>
-                                </div>
-                                <div className={styles.roleList}>
-                                    {userQuery.data.roles?.length ? (
-                                        userQuery.data.roles.map((role) => (
-                                            <span
-                                                key={role.id}
-                                                className={styles.rolePill}
-                                            >
-                                                {role.name}
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span className={styles.roleEmpty}>
-                                            No roles assigned
-                                        </span>
-                                    )}
-                                </div>
-                                <TabBar
-                                    tabs={tabs}
-                                    value={selectedTab}
-                                    onChange={(key) =>
-                                        setSelectedTab(key as MemberTabKey)
-                                    }
-                                />
-                            </div>
+                            <MemberBanner
+                                user={userQuery.data}
+                                makeTitle={makeTitle}
+                                selectedTab={selectedTab}
+                                tabs={tabs}
+                                onTabChange={(key) =>
+                                    setSelectedTab(key as MemberTabKey)
+                                }
+                                positions={positionHierarchy.data?.positions}
+                            />
                         </div>
                         <div className={styles.detailsContent}>
                             {renderPage()}

@@ -8,6 +8,7 @@ import { DonateButton } from '@/components/common/buttons/button_types/DonateBut
 import { LoginButton } from '@/components/common/buttons/button_types/LoginButton'
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import styles from '@/components/layout/footer.module.css'
+import { cn } from '@/util'
 import { useAuth } from '@/util/hooks'
 import { motion } from 'motion/react'
 import Image from 'next/image'
@@ -74,7 +75,10 @@ function MobileFooter() {
                             key={item.name}
                             label={item.name}
                             href={item.href}
-                            className={`${buttonStyles.plain} ${styles.mobileTopNavLink}`}
+                            className={cn(
+                                buttonStyles.plain,
+                                styles.mobileTopNavLink
+                            )}
                         />
                     ))}
                 </div>
@@ -125,24 +129,36 @@ function MobileFooter() {
                     <BaseButton
                         label="Contact"
                         href="https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform"
-                        className={`${buttonStyles.plain} ${styles.mobileBottomNavLink}`}
+                        className={cn(
+                            buttonStyles.plain,
+                            styles.mobileBottomNavLink
+                        )}
                     />
                     <BaseButton
                         label="Privacy Policy"
                         href="/privacy"
-                        className={`${buttonStyles.plain} ${styles.mobileBottomNavLink}`}
+                        className={cn(
+                            buttonStyles.plain,
+                            styles.mobileBottomNavLink
+                        )}
                     />
 
                     {session ? (
                         <LogoutButton
                             label="Sign Out"
-                            className={`${buttonStyles.plain} ${styles.mobileBottomNavButton}`}
+                            className={cn(
+                                buttonStyles.plain,
+                                styles.mobileBottomNavButton
+                            )}
                         />
                     ) : (
                         <LoginButton
                             label="Log In"
                             href="/login"
-                            className={`${buttonStyles.plain} ${styles.mobileBottomNavLink}`}
+                            className={cn(
+                                buttonStyles.plain,
+                                styles.mobileBottomNavLink
+                            )}
                         />
                     )}
                 </div>
@@ -166,7 +182,10 @@ function DesktopFooter() {
                                 key={item.name}
                                 label={item.name}
                                 href={item.href}
-                                className={`${buttonStyles.plain} ${styles.topNavButtonAdjustment}`}
+                                className={cn(
+                                    buttonStyles.plain,
+                                    styles.topNavButtonAdjustment
+                                )}
                             />
                         ))}
 
@@ -226,23 +245,35 @@ function DesktopFooter() {
                         <BaseButton
                             label="Contact"
                             href="https://docs.google.com/forms/d/e/1FAIpQLSdBRKV6bbxcx6HtNALWyjAwvEXbGSIG9s7iFEFlCEImVXILHA/viewform"
-                            className={`${buttonStyles.plain} ${styles.bottomNavButtonAdjustment}`}
+                            className={cn(
+                                buttonStyles.plain,
+                                styles.bottomNavButtonAdjustment
+                            )}
                         />
                         <BaseButton
                             label="Privacy Policy"
                             href="/privacy"
-                            className={`${buttonStyles.plain} ${styles.bottomNavButtonAdjustment}`}
+                            className={cn(
+                                buttonStyles.plain,
+                                styles.bottomNavButtonAdjustment
+                            )}
                         />
                         {session ? (
                             <LogoutButton
                                 label="Sign Out"
-                                className={`${buttonStyles.plain} ${styles.bottomNavButtonAdjustment}`}
+                                className={cn(
+                                    buttonStyles.plain,
+                                    styles.bottomNavButtonAdjustment
+                                )}
                             />
                         ) : (
                             <LoginButton
                                 label="Log In"
                                 href="/login"
-                                className={`${buttonStyles.plain} ${styles.bottomNavButtonAdjustment}`}
+                                className={cn(
+                                    buttonStyles.plain,
+                                    styles.bottomNavButtonAdjustment
+                                )}
                             />
                         )}
                     </div>
