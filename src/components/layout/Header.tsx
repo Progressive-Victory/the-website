@@ -632,15 +632,26 @@ export function Header() {
 
     const resolvedNavitems = useMemo(() => {
         const discordId = discordUsers?.[0]?.id
+        const volunteerHref = session ? '/account?redirect=true' : '/volunteer'
+
         return navitems.map((item) => {
             if (!item.subnav?.columns) return item
+
             return {
                 ...item,
+                href: item.name === 'Volunteer' ? volunteerHref : item.href,
                 subnav: {
                     ...item.subnav,
                     columns: item.subnav.columns.map((col) => ({
                         ...col,
                         items: col.items.map((child) => {
+                            if (item.name === 'Volunteer') {
+                                return {
+                                    ...child,
+                                    href: volunteerHref,
+                                }
+                            }
+
                             if (
                                 child.href.startsWith(
                                     'https://secure.actblue.com/donate/pvmember'
@@ -659,7 +670,7 @@ export function Header() {
                 },
             }
         })
-    }, [discordUsers])
+    }, [discordUsers, session])
 
     useEffect(() => {
         if (!isOpen) return
