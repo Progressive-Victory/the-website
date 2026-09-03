@@ -8,11 +8,7 @@ import { DiscordAvatar } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
 import formStyles from '@/components/common/forms/Form.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import {
-    MembershipDeliverableStatus,
-    User,
-    zActBlueDonor,
-} from '@/contracts/data'
+import { MembershipDeliverableStatus, User, zActBlueDonor } from '@/contracts/data'
 import { zDiscordUserIsInServerResponse } from '@/contracts/responses'
 import { cn } from '@/util'
 import { useFetch } from '@/util/hooks'
@@ -233,6 +229,7 @@ export function AccountDetailsSection({
                 zActBlueDonor,
                 { params: { donorEmail } }
             )
+
             const contribution = donor.contributions?.find(
                 (item) => item.orderNumber.trim() === orderId
             )
