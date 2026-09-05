@@ -720,3 +720,29 @@
         text-align: center;
     }
 }
+
+.redirectBanner {
+    width: min(1100px, calc(100% - 2rem));
+    background-color: #7f1d1d;
+    opacity: 0.85;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin: 1rem auto -1rem auto;
+}
+
+.redirectBannerContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    color: #fff;
+}
+
+.redirectBannerContent a {
+    color: #fff;
+    text-decoration: underline;
+    font-weight: 700;
+}
+
+.redirectBannerContent a:hover {
+    text-decoration: none;
+}
