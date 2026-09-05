@@ -1,7 +1,7 @@
 import styles from './stages.module.css'
 import { cn } from '@/util'
 import { useInit } from '@/util/hooks'
-import { ArrowPathIcon } from '@heroicons/react/24/solid'
+import { FaArrowsRotate } from 'react-icons/fa6'
 
 export interface JoiningStageProps {
     isPending: boolean
@@ -33,7 +33,11 @@ export function JoiningStage({ isPending, error, onJoin }: JoiningStageProps) {
                 </>
             ) : (
                 <>
-                    <ArrowPathIcon className={cn(styles.icon, styles.spin)} />
+                    {
+                        <FaArrowsRotate
+                            className={cn(styles.icon, styles.spin)}
+                        />
+                    }
                     <p className={styles.subtitle}>
                         Joining you to the server...
                     </p>
