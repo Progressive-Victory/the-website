@@ -3,9 +3,15 @@
     flex-direction: column;
     border: 1px solid rgba(17, 24, 39, 0.12);
     border-radius: 0.85rem;
-    overflow: hidden;
+    overflow: auto;
+    overscroll-behavior: none;
+    scrollbar-gutter: stable;
+    max-height: 100%;
     background: #ffffff;
-    min-width: fit-content;
+
+    &::-webkit-scrollbar:horizontal {
+        height: 0;
+    }
 }
 
 .header,
@@ -14,14 +20,30 @@
     gap: 0.75rem;
     align-items: center;
     padding: 0.65rem 0.9rem;
+    width: max-content;
+    min-width: 100%;
 }
 
 .header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
     font-size: 0.8rem;
     font-weight: 700;
     color: rgba(15, 23, 42, 0.78);
-    background: rgba(15, 23, 42, 0.06);
+    background: rgb(240, 241, 243);
     border-bottom: 1px solid rgba(17, 24, 39, 0.1);
+    border-radius: calc(0.85rem - 1px) calc(0.85rem - 1px) 0 0;
+}
+
+.menuAnchor {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 0;
+    /* Above sibling rows but below the sticky header. */
+    z-index: 1;
 }
 
 .sortableHeader {
@@ -57,9 +79,33 @@
 
 .row:last-child {
     border-bottom: 0;
+    border-radius: 0 0 calc(0.85rem - 1px) calc(0.85rem - 1px);
 }
 
-.cell {
+/* Negative margins let the cell fill the grid gap and row padding so hover covers the whole cell */
+.cell,
+.cellOverflowVisible,
+.dotCell {
+    position: relative;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    white-space: nowrap;
+    padding: 0.65rem 0.375rem;
+    margin: -0.65rem -0.375rem;
+    transition: background-color 0.12s ease;
+}
+
+.clickable {
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgba(15, 23, 42, 0.03);
+    }
+}
+
+.cellContent {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -67,8 +113,6 @@
 }
 
 .dotCell {
-    display: flex;
-    align-items: center;
     gap: 0.3rem;
 }
 

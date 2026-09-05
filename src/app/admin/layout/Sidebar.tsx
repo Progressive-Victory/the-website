@@ -1,7 +1,6 @@
 'use client'
 
 import styles from './Sidebar.module.css'
-import { members } from '@/app/admin/panels/membership/membership.data'
 import { cn } from '@/util'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -24,6 +23,8 @@ interface SidebarProps {
     positionCount?: number
     roleCount?: number
     permissionCount?: number
+    membershipCount?: number
+    membershipExampleCount?: number
 }
 
 export default function Sidebar({
@@ -33,6 +34,8 @@ export default function Sidebar({
     positionCount,
     roleCount,
     permissionCount,
+    membershipCount,
+    membershipExampleCount,
 }: SidebarProps) {
     const [open, setOpen] = useLocalStorage('pv.admin-nav-open', true)
 
@@ -102,7 +105,20 @@ export default function Sidebar({
                     title="Membership"
                     href="/admin/panels/membership"
                     icon={FaIdCard}
-                    count={members.length}
+                    count={membershipCount}
+                    open={open}
+                />
+                <NavLink
+                    title="Membership Example"
+                    href="/admin/panels/membershipexample"
+                    icon={FaIdCard}
+                    count={membershipExampleCount}
+                    open={open}
+                />
+                <NavLink
+                    title="Membership Test"
+                    href="/admin/panels/membershiptest"
+                    icon={FaIdCard}
                     open={open}
                 />
             </ul>

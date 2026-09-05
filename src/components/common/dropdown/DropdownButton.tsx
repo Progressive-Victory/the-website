@@ -35,7 +35,7 @@ import { IoClose } from 'react-icons/io5'
  *     - 'short': No label shown, only an Ellipsis Icon
  *     - 'icon': No label shown, only a custom Icon
  *     - 'minimal': Shows button label only.
- *
+ *     - 'plain': No predefined styling, you must provide your own styling via className.
  *
  *
  *
@@ -52,7 +52,12 @@ import { IoClose } from 'react-icons/io5'
  *
  */
 
-export type DropdownButtonVariant = 'long' | 'short' | 'minimal' | 'icon'
+export type DropdownButtonVariant =
+    | 'long'
+    | 'short'
+    | 'minimal'
+    | 'icon'
+    | 'plain'
 
 interface DropdownVariantConfig {
     ariaHasPopup: 'menu' | 'dialog'
@@ -62,6 +67,7 @@ interface DropdownVariantConfig {
     showLabel: boolean
     showEllipsisIcon: boolean
     showCustomIcon: boolean
+    showChevron: boolean
 }
 
 function getDropdownVariantConfig(
@@ -74,6 +80,18 @@ function getDropdownVariantConfig(
             showLabel: false,
             showEllipsisIcon: false,
             showCustomIcon: true,
+            showChevron: false,
+        }
+    }
+
+    if (variant === 'plain') {
+        return {
+            ariaHasPopup: 'dialog',
+            buttonClassName: '',
+            showLabel: true,
+            showEllipsisIcon: false,
+            showCustomIcon: false,
+            showChevron: false,
         }
     }
 
@@ -84,6 +102,7 @@ function getDropdownVariantConfig(
             showLabel: false,
             showEllipsisIcon: true,
             showCustomIcon: false,
+            showChevron: false,
         }
     }
 
@@ -96,6 +115,7 @@ function getDropdownVariantConfig(
             showLabel: true,
             showEllipsisIcon: false,
             showCustomIcon: false,
+            showChevron: true,
         }
     }
 
@@ -107,6 +127,7 @@ function getDropdownVariantConfig(
         showLabel: true,
         showEllipsisIcon: false,
         showCustomIcon: false,
+        showChevron: true,
     }
 }
 
@@ -123,7 +144,16 @@ export const DropdownButton = forwardRef<
     HTMLButtonElement,
     DropdownButtonProps
 >(function DropdownButton(
-    { label, icon, menu, buttonVariant = 'long', className, onClick, ...props },
+    {
+        label,
+        icon,
+        menu,
+        buttonVariant = 'long',
+        className,
+        onClick,
+        children,
+        ...props
+    },
     ref
 ) {
     const [isOpen, setIsOpen] = useState(false)
@@ -173,7 +203,10 @@ export const DropdownButton = forwardRef<
     }
 
     return (
-        <div ref={containerRef} style={{ position: 'relative' }}>
+        <div
+            ref={containerRef}
+            style={{ position: 'relative', minWidth: 0, maxWidth: '100%' }}
+        >
             <button
                 type="button"
                 ref={ref}
@@ -185,24 +218,28 @@ export const DropdownButton = forwardRef<
                 onClick={handleButtonClick}
                 {...props}
             >
-                {variant.showLabel ? <span>{label}</span> : null}
-                {variant.showCustomIcon ? (
-                    isOpen ? (
-                        <IoClose size={20} aria-hidden="true" />
-                    ) : (
-                        icon
-                    )
-                ) : variant.showEllipsisIcon ? (
-                    <EllipsisVerticalIcon
-                        className={styles.shortIcon}
-                        aria-hidden="true"
-                    />
-                ) : (
-                    <FiChevronDown
-                        className={variant.chevronClassName}
-                        aria-hidden="true"
-                        size={variant.chevronSize}
-                    />
+                {children ?? (
+                    <>
+                        {variant.showLabel && <span>{label}</span>}
+                        {variant.showCustomIcon ? (
+                            isOpen ? (
+                                <IoClose size={20} aria-hidden="true" />
+                            ) : (
+                                icon
+                            )
+                        ) : variant.showEllipsisIcon ? (
+                            <EllipsisVerticalIcon
+                                className={styles.shortIcon}
+                                aria-hidden="true"
+                            />
+                        ) : variant.showChevron ? (
+                            <FiChevronDown
+                                className={variant.chevronClassName}
+                                aria-hidden="true"
+                                size={variant.chevronSize}
+                            />
+                        ) : null}
+                    </>
                 )}
             </button>
             {isOpen && renderedMenu}

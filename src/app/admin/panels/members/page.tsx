@@ -39,6 +39,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { useSearchParams } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
 import { FaUsers, FaUserTag } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign, FaAddressCard } from 'react-icons/fa6'
@@ -56,8 +57,11 @@ const tabs: TabSpec[] = [
 export default function Page() {
     const queryClient = useQueryClient()
     const { ready, onGet, onPatch, onPost } = useFetch()
+    const navUser = useSearchParams().get('user')
 
-    const [selectedId, setSelectedId] = useState<number | null>(null)
+    const [selectedId, setSelectedId] = useState<number | null>(
+        navUser ? +navUser : null
+    )
 
     const [selectedHistory, setSelectedHistory] =
         useState<UpdateHistory<User> | null>(null)

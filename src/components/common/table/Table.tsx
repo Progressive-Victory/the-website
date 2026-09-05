@@ -1,7 +1,8 @@
 'use client'
 
 import styles from './Table.module.css'
-import React, { useMemo, useState } from 'react'
+import { cn } from '@/util'
+import React, { useEffect, useMemo, useState } from 'react'
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi'
 
 const DEFAULT_COLUMN_WIDTH = '10rem'
@@ -9,8 +10,11 @@ const DEFAULT_COLUMN_WIDTH = '10rem'
 export interface Column<T> {
     key: string
     header: string
-    render: (row: T) => React.ReactNode
+    render: (row: T, index: number) => React.ReactNode
     width?: string
+    allowOverflow?: boolean
+    onCellClick?: (row: T, index: number) => void
+    menu?: (row: T, controls: { closeDropdown: () => void }) => React.ReactNode
     sortValue?: (row: T) => string | number | boolean | null | undefined
 }
 
@@ -33,18 +37,108 @@ export interface TableProps<T> {
     data: T[]
     rowKey: (row: T, index: number) => string | number
     collapsedCategories?: string[]
+    footer?: React.ReactNode
 }
 
 type SortDir = 'asc' | 'desc'
+
+function TableCell<T>({
+    col,
+    row,
+    index,
+    isOpen,
+    onToggle,
+    onClose,
+}: {
+    col: Column<T>
+    row: T
+    index: number
+    isOpen: boolean
+    onToggle: () => void
+    onClose: () => void
+}) {
+    const interactive = Boolean(col.menu ?? col.onCellClick)
+
+    const activate = () => {
+        col.onCellClick?.(row, index)
+        if (col.menu) onToggle()
+    }
+
+    return (
+        <span
+            className={cn(
+                col.allowOverflow ? styles.cellOverflowVisible : styles.cell,
+                interactive && styles.clickable
+            )}
+            data-label={col.header}
+            data-open-cell={isOpen ? 'true' : undefined}
+            role={interactive ? 'button' : undefined}
+            tabIndex={interactive ? 0 : undefined}
+            aria-expanded={col.menu ? isOpen : undefined}
+            onClick={interactive ? activate : undefined}
+            onKeyDown={
+                interactive
+                    ? (event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              activate()
+                          }
+                      }
+                    : undefined
+            }
+        >
+            {col.allowOverflow ? (
+                col.render(row, index)
+            ) : (
+                <span className={styles.cellContent}>
+                    {col.render(row, index)}
+                </span>
+            )}
+            {isOpen && col.menu && (
+                <span
+                    className={styles.menuAnchor}
+                    data-open-cell="true"
+                    onClick={(event) => event.stopPropagation()}
+                >
+                    {col.menu(row, { closeDropdown: onClose })}
+                </span>
+            )}
+        </span>
+    )
+}
 
 export function Table<T>({
     columns,
     data,
     rowKey,
     collapsedCategories = [],
+    footer,
 }: TableProps<T>) {
     const [sortKey, setSortKey] = useState<string | null>(null)
     const [sortDir, setSortDir] = useState<SortDir>('asc')
+    const [openCell, setOpenCell] = useState<string | null>(null)
+
+    useEffect(() => {
+        if (!openCell) return
+
+        const onDocumentMouseDown = (event: MouseEvent) => {
+            const target = event.target as HTMLElement | null
+            if (target?.closest('[data-open-cell="true"]')) return
+            setOpenCell(null)
+        }
+
+        const onDocumentKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') setOpenCell(null)
+        }
+
+        document.addEventListener('mousedown', onDocumentMouseDown)
+        document.addEventListener('keydown', onDocumentKeyDown)
+
+        return () => {
+            document.removeEventListener('mousedown', onDocumentMouseDown)
+            document.removeEventListener('keydown', onDocumentKeyDown)
+        }
+    }, [openCell])
 
     const collapsedSet = useMemo(
         () => new Set(collapsedCategories),
@@ -78,6 +172,10 @@ export function Table<T>({
             if (aVal == null && bVal == null) return 0
             if (aVal == null) return 1
             if (bVal == null) return -1
+            if (typeof aVal === 'string' && typeof bVal === 'string')
+                return aVal.localeCompare(bVal, undefined, {
+                    sensitivity: 'base',
+                })
             if (aVal < bVal) return -1
             if (aVal > bVal) return 1
             return 0
@@ -171,7 +269,6 @@ export function Table<T>({
             </div>
 
             {sortedData.map((row, index) => {
-                // Pre-compute rowRender results for categories
                 const rowOverrides = new Map<string, React.ReactNode>()
                 for (const entry of columns) {
                     if (isCategory(entry) && entry.rowRender) {
@@ -232,7 +329,6 @@ export function Table<T>({
                                         </span>
                                     )
                                 }
-                                // Check if this column belongs to a category with a rowRender override
                                 if (
                                     entry.category &&
                                     rowOverrides.has(entry.category.label)
@@ -250,27 +346,41 @@ export function Table<T>({
                                                 gridColumn: `span ${span}`,
                                             }}
                                         >
-                                            {rowOverrides.get(
-                                                entry.category.label
-                                            )}
+                                            <span
+                                                className={styles.cellContent}
+                                            >
+                                                {rowOverrides.get(
+                                                    entry.category.label
+                                                )}
+                                            </span>
                                         </span>
                                     )
                                 }
                                 const col = entry.col!
+                                const cellId = `${rowKey(row, index)}::${col.key}`
                                 return (
-                                    <span
+                                    <TableCell
                                         key={col.key}
-                                        className={styles.cell}
-                                        data-label={col.header}
-                                    >
-                                        {col.render(row)}
-                                    </span>
+                                        col={col}
+                                        row={row}
+                                        index={index}
+                                        isOpen={openCell === cellId}
+                                        onToggle={() =>
+                                            setOpenCell((current) =>
+                                                current === cellId
+                                                    ? null
+                                                    : cellId
+                                            )
+                                        }
+                                        onClose={() => setOpenCell(null)}
+                                    />
                                 )
                             })
                         })()}
                     </div>
                 )
             })}
+            {footer}
         </div>
     )
 }

@@ -13,8 +13,9 @@
 .scrollView {
     flex: 1 1 auto;
     min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     padding: 0 0 1rem;
 }
 
@@ -62,7 +63,15 @@
 }
 
 .galleryHeader {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
     padding: 1.15rem 1.05rem 0.35rem;
+}
+
+.galleryHeading {
+    min-width: 0;
 }
 
 .galleryTitle {
@@ -82,14 +91,56 @@
 }
 
 .tableWrapper {
+    flex: 1 1 auto;
+    min-height: 0;
     padding: 0.75rem 1.05rem 1.5rem;
-    overflow-x: auto;
+
+    &:has([aria-expanded='true']) .confirmBadge::after {
+        opacity: 0;
+    }
+}
+
+.loadMore {
+    min-height: 1px;
+    padding: 0.75rem 0;
+    color: rgba(15, 23, 42, 0.55);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
 }
 
 .tableToolbar {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
-    padding: 0.5rem 1.05rem 0;
+    gap: 0.5rem;
+}
+
+.toolbarButton {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    border-width: 1px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: white;
+    border-color: #0284c7;
+    background-color: #0ea5e9;
+
+    &:disabled {
+        cursor: not-allowed;
+        border-color: #207aa7;
+        background-color: #1c6287;
+    }
+}
+
+.discardButton {
+    border-color: #dc2626;
+    background-color: #ef4444;
 }
 
 .tableOptionsBox {
@@ -117,10 +168,287 @@
     color: rgba(15, 23, 42, 0.58);
 }
 
+.valueCell {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.phoneOverlay {
+    min-width: 24rem;
+}
+
+.phoneOverlayBody {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.phoneSourceRow {
+    display: grid;
+    grid-template-columns: 1rem 3.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(15, 23, 42, 0.86);
+}
+
+.phoneSourceLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.56);
+    text-transform: uppercase;
+}
+
+.sourceCheck {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    color: rgba(15, 23, 42, 0.56);
+}
+
+.sourceIndicator {
+    font-size: 0.9rem;
+    stroke-width: 3;
+}
+
+.emailOverlay {
+    min-width: 28rem;
+}
+
+.emailOverlayBody {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.emailSourceRow {
+    display: grid;
+    grid-template-columns: 1rem 5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(15, 23, 42, 0.86);
+}
+
+.emailSourceLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.56);
+    text-transform: uppercase;
+}
+
+.nameOverlay {
+    min-width: 28rem;
+}
+
+.nameOverlayBody {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.historySection {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid rgba(17, 24, 39, 0.1);
+}
+
+.historySectionLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: rgba(15, 23, 42, 0.56);
+    text-transform: uppercase;
+}
+
+.historyEmpty {
+    font-size: 0.8rem;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.historyContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.historyEntry {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 0.65rem;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+    color: rgba(15, 23, 42, 0.85);
+    font-size: 0.8rem;
+    font-weight: 550;
+    letter-spacing: -0.01em;
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.historyEntryMain {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.historyEntryPrefix {
+    color: rgba(15, 23, 42, 0.62);
+    font-weight: 550;
+}
+
+.historyEntryName {
+    color: rgba(15, 23, 42, 0.9);
+    font-weight: 650;
+}
+
+.historyEntryDateTag {
+    margin-left: auto;
+    white-space: nowrap;
+    padding-inline: 0.75rem;
+    padding-block: 0.15rem;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.nameSourceRow {
+    display: grid;
+    grid-template-columns: 1rem 4rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(15, 23, 42, 0.86);
+}
+
+.nameSourceLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.56);
+    text-transform: uppercase;
+}
+
+.discordOverlay {
+    min-width: 20rem;
+}
+
+.discordOverlayBody {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.discordSourceRow {
+    display: grid;
+    grid-template-columns: 1rem 6rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(15, 23, 42, 0.86);
+}
+
+.discordSourceLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.56);
+    text-transform: uppercase;
+}
+
+.addressOverlay {
+    min-width: 30rem;
+}
+
+.addressOverlayBody {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.addressSourceRow {
+    display: grid;
+    grid-template-columns: 1rem 4rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(15, 23, 42, 0.86);
+}
+
+.addressSourceLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.56);
+    text-transform: uppercase;
+}
+
 .nameCell {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
+    max-width: 100%;
+    min-width: 0;
+
+    & > span:first-child {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.confirmBadge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    outline: none;
+
+    &::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: calc(100% + 0.6rem);
+        top: 50%;
+
+        padding: 0.35rem 0.5rem;
+        border-radius: 0.45rem;
+        width: max-content;
+        max-width: 20rem;
+
+        color: rgba(241, 245, 249, 0.95);
+        background: rgba(15, 23, 42, 0.92);
+        font-size: 0.72rem;
+        font-weight: 560;
+        line-height: 1.35;
+
+        box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28);
+
+        opacity: 0;
+        transform: translate(-3px, -50%);
+        transition:
+            opacity 100ms ease,
+            transform 100ms ease;
+        pointer-events: none;
+        z-index: 8;
+    }
+
+    &:hover::after,
+    &:focus-visible::after {
+        opacity: 1;
+        transform: translate(0, -50%);
+    }
 }
 
 .nameVerified {
@@ -139,6 +467,11 @@
     background: rgba(255, 95, 75, 0.3);
     border-radius: 50%;
     padding: 0.15rem;
+}
+
+.userMatchedLink {
+    display: inline-flex;
+    cursor: pointer;
 }
 
 .tag {
@@ -183,6 +516,10 @@
     background: rgba(177, 2, 2, 1);
     color: rgba(255, 207, 201, 1);
 }
+.tagGray {
+    background: #e6e6e6;
+    color: #3d3d3d;
+}
 .tagMember {
     background: #ffe5ec;
     color: rgba(177, 2, 2, 1);
@@ -198,6 +535,14 @@
 .tagInnerCircle {
     background: #da93ff;
     color: rgba(90, 50, 134, 1);
+}
+
+.tagGhost {
+    background: transparent;
+    color: rgba(15, 23, 42, 0.4);
+    font-style: italic;
+    outline: 1px dashed rgba(15, 23, 42, 0.2);
+    outline-offset: -1px;
 }
 
 .tagTier {
