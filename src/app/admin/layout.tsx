@@ -4,16 +4,16 @@ import styles from './admin.module.css'
 import Sidebar from './layout/Sidebar'
 import { ProtectedPage } from '@/components/ProtectedPage'
 import { Header } from '@/components/layout/Header'
+import { usePositionQueries } from '@/queries'
+import { usePaginatedSearch } from '@/util/hooks'
+import { useQuery } from '@tanstack/react-query'
 import {
     zActBlueDonationPacket,
     zActBlueDonor,
     zPermission,
     zRole,
     zUser,
-} from '@/contracts/data'
-import { usePositionQueries } from '@/queries'
-import { usePaginatedSearch } from '@/util/hooks'
-import { useQuery } from '@tanstack/react-query'
+} from 'pv-contracts/data'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const positionQueries = usePositionQueries()

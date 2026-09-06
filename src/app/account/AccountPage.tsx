@@ -6,9 +6,10 @@ import {
     ManualDonorLinkRequest,
 } from './sections/index'
 import styles from '@/app/account/account.module.css'
-import { OnboardingStage, User } from '@/contracts/data'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
+import { redirect } from 'next/navigation'
+import { OnboardingStage, User } from 'pv-contracts/data'
 import { useMemo } from 'react'
 
 export function AccountPage() {
@@ -68,14 +69,14 @@ export function AccountPage() {
         })
     }
 
-    if (isSessionLoading || !session) return null
+    if (isSessionLoading) return null
 
     if (
-        loggedInUser.data &&
-        loggedInUser.data.onboardingStage != OnboardingStage.JOINED
+        !session ||
+        (loggedInUser.data &&
+            loggedInUser.data.onboardingStage != OnboardingStage.JOINED)
     ) {
-        window.location.href = '/volunteer'
-        return null
+        redirect('/volunteer')
     }
 
     return (

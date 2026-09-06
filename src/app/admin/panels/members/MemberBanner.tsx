@@ -1,7 +1,7 @@
 import styles from './MemberBanner.module.css'
 import { DiscordAvatar } from '@/components/common'
 import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
-import { Position, User, UserProfile } from '@/contracts/data'
+import { Position, User, UserProfile } from 'pv-contracts/data'
 
 interface MemberBannerProps {
     user: User

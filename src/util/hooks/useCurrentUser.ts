@@ -1,10 +1,10 @@
-import { User } from '@/contracts/data'
 import { useUserQueries } from '@/queries'
 import {
     keepPreviousData,
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { User } from 'pv-contracts/data'
 
 export function useCurrentUser() {
     const queryClient = useQueryClient()

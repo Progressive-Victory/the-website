@@ -1,8 +1,8 @@
-import { zActBlueDonationPacket } from '@/contracts/data'
-import { SearchRequest } from '@/contracts/requests'
-import { zPaginatedResponse } from '@/contracts/responses'
-import { zActBlueFundraisingStatsResponse } from '@/contracts/responses/fundraisingStatsResponse'
 import { useFetch } from '@/util/hooks'
+import { zActBlueDonationPacket } from 'pv-contracts/data'
+import { SearchRequest } from 'pv-contracts/requests'
+import { zPaginatedResponse } from 'pv-contracts/responses'
+import { zActBlueFundraisingStatsResponse } from 'pv-contracts/responses'
 
 export function useActblueQueries() {
     const { ready, onGet } = useFetch()

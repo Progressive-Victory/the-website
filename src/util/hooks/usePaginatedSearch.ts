@@ -1,12 +1,12 @@
 import { RouteParams, useFetch } from './useFetch'
-import { SearchRequest } from '@/contracts/requests'
-import { PaginatedResponse, zPaginatedResponse } from '@/contracts/responses'
 import {
     keepPreviousData,
     skipToken,
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { SearchRequest } from 'pv-contracts/requests'
+import { PaginatedResponse, zPaginatedResponse } from 'pv-contracts/responses'
 import { useEffect, useState } from 'react'
 import z from 'zod'
 

@@ -1,9 +1,6 @@
 export type InitiativeType = 'national' | 'state' | ''
 export type EndorsementType =
-    | 'PV Pledge'
-    | 'Endorsement'
-    | 'Recommendation'
-    | 'Unendorsed'
+    'PV Pledge' | 'Endorsement' | 'Recommendation' | 'Unendorsed'
 export type AvatarBackgroundColor = 'blue' | 'yellow'
 export type ElectionStatus =
     | ''

@@ -1,9 +1,9 @@
 import styles from './List.module.css'
 import { DropdownButton, DropdownOverlay } from '@/components/common'
 import { MultiSelect, MultiSelectOption } from '@/components/common'
-import { SearchRequest, SortDirection } from '@/contracts/requests'
 import { cn } from '@/util'
 import Link from 'next/link'
+import { SearchRequest, SortDirection } from 'pv-contracts/requests'
 import React, { ChangeEvent, ReactNode, useEffect, useState } from 'react'
 import {
     FiChevronLeft,
@@ -293,8 +293,8 @@ interface SearchInputProps {
 }
 
 function SearchInput({ query, onSearch, filterContent }: SearchInputProps) {
-    const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-        onSearch(e.target.value)
+    const handleSearch: React.InputEventHandler = (e) => {
+        onSearch((e.target as HTMLInputElement).value)
     }
 
     return (

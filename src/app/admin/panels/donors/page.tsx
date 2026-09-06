@@ -9,18 +9,18 @@ import {
     FormGroup,
     DateField,
 } from '@/components/common/forms'
+import { useFetch, usePaginatedSearch } from '@/util/hooks'
+import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import {
     ActBlueDonor,
     zActBlueDonor,
     ActBlueContribution,
     ActBlueLineitem,
     ActBlueContributionCustomField,
-} from '@/contracts/data'
-import { SortDirection } from '@/contracts/requests'
-import { useFetch, usePaginatedSearch } from '@/util/hooks'
-import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
-import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+} from 'pv-contracts/data'
+import { SortDirection } from 'pv-contracts/requests'
 import { useState, useMemo } from 'react'
 
 interface contributionData {
@@ -92,8 +92,7 @@ export default function Page() {
                         calcFutureDate(
                             contribution.createdAt,
                             contribution.recurringPeriod as
-                                | 'weekly'
-                                | 'monthly',
+                                'weekly' | 'monthly',
                             contribution.recurringDuration ?? 1
                         ) > new Date())
                 )
