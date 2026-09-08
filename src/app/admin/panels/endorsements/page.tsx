@@ -3,20 +3,12 @@
 import { EndorsementAvatar } from './components/EndorsementAvatar'
 import { EndorsementBanner } from './components/EndorsementBanner'
 import styles from './page.module.css'
+import { DetailView } from './panel_views/DetailView'
+import { HistoryView } from './panel_views/HistoryView'
 import { FilterTag, FilterTags } from '@/app/admin/layout/FilterTags'
 import { ListElement, List } from '@/app/admin/layout/List'
-import {
-    CheckboxField,
-    DateField,
-    DropDownField,
-    Form,
-    FormField,
-    FormFieldProps,
-    FormGroup,
-    FormState,
-    TextField,
-    useConfigure,
-} from '@/components/common/forms'
+import { FormState } from '@/components/common/forms'
+import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     BackgroundColor,
     Endorsement,
@@ -34,7 +26,7 @@ import {
     useUnpaginatedSearch,
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChangeEvent, useCallback, useState } from 'react'
+import { useState } from 'react'
 import { FaClipboard, FaThumbsUp, FaUsers, FaVoteYea } from 'react-icons/fa'
 import { FaClipboardUser } from 'react-icons/fa6'
 import { MdVerified } from 'react-icons/md'
@@ -43,11 +35,10 @@ const blankEndorsement: Endorsement = {
     id: -1,
     name: '',
     state: '',
-    jurisiction: null,
+    jurisdiction: null,
     endorsementDate: null,
     endorsementReason: '',
     endorsementPublished: false,
-    publishEndorsement: false,
     incumbent: false,
     handleHref: null,
     handle: '',
@@ -56,18 +47,13 @@ const blankEndorsement: Endorsement = {
     donateHref: null,
     isPvMember: false,
     imgUrl: '',
-    primaryElectionUtc: null,
-    generalElectionUtc: null,
-    initiativeLevel: InitiativeType.State,
+    primaryElectionDate: null,
+    generalElectionDate: null,
+    initiativeLevel: InitiativeType.None,
     endorsementLevel: EndorsementType.None,
     avatarBgColor: BackgroundColor.Blue,
     electionStatus: ElectionStatus.NoElection,
 }
-
-const stateOptionsWithEmpty = [
-    { value: '', label: 'No state selected' },
-    ...stateOptions,
-]
 
 const stateNames = new Map(
     stateOptions.map((option) => [option.value, option.label])
@@ -80,12 +66,12 @@ const alwaysShowPrimaryDate = new Set([
 ])
 
 function getListElectionDate(endorsement: Endorsement) {
-    const { primaryElectionUtc, generalElectionUtc, electionStatus } =
+    const { primaryElectionDate, generalElectionDate, electionStatus } =
         endorsement
-    if (alwaysShowPrimaryDate.has(electionStatus)) return primaryElectionUtc
-    if (primaryElectionUtc && primaryElectionUtc >= new Date())
-        return primaryElectionUtc
-    return generalElectionUtc ?? primaryElectionUtc
+    if (alwaysShowPrimaryDate.has(electionStatus)) return primaryElectionDate
+    if (primaryElectionDate && primaryElectionDate >= new Date())
+        return primaryElectionDate
+    return generalElectionDate ?? primaryElectionDate
 }
 
 const initiativeLevelOptions = [
@@ -102,25 +88,10 @@ const endorsementLevelOptions = [
     { value: EndorsementType.None, label: 'None' },
 ]
 
-const avatarBgColorOptions = [
-    { value: BackgroundColor.Blue, label: 'Blue' },
-    { value: BackgroundColor.Yellow, label: 'Yellow' },
-]
-
-const electionStatusOptions = [
-    { value: ElectionStatus.Elected, label: 'Elected' },
-    { value: ElectionStatus.WonPrimary, label: 'Won Primary' },
-    { value: ElectionStatus.UpcomingPrimary, label: 'Upcoming Primary' },
-    { value: ElectionStatus.LostGeneral, label: 'Lost General' },
-    { value: ElectionStatus.LostPrimary, label: 'Lost Primary' },
-    { value: ElectionStatus.DroppedOut, label: 'Dropped Out' },
-    { value: ElectionStatus.NoElection, label: 'No Election' },
-]
-
 const endorsementSortFields = [
     { value: 'name', label: 'Name' },
-    { value: 'primaryElectionUtc', label: 'Primary Date' },
-    { value: 'generalElectionUtc', label: 'General Date' },
+    { value: 'primaryElectionDate', label: 'Primary Date' },
+    { value: 'generalElectionDate', label: 'General Date' },
 ]
 
 const endorsementFilterTags: FilterTag[] = [
@@ -182,6 +153,13 @@ function matchesFilterTag(endorsement: Endorsement, tag: string) {
     return true
 }
 
+type EndorsementTabKey = 'detail' | 'history'
+
+const endorsementTabs: TabSpec[] = [
+    { key: 'detail', label: 'Detail' },
+    { key: 'history', label: 'History' },
+]
+
 export default function Page() {
     const queryClient = useQueryClient()
     const endorsementQueries = useEndorsementQueries()
@@ -191,6 +169,7 @@ export default function Page() {
     const [formState, setFormState] = useState<FormState<Endorsement> | null>(
         null
     )
+    const [selectedTab, setSelectedTab] = useState<EndorsementTabKey>('detail')
 
     const endorsementsQuery = useQuery({
         queryKey: ['endorsements'],
@@ -216,18 +195,18 @@ export default function Page() {
                 .includes(query.toLocaleLowerCase()),
         onSort: (a, b, field) => {
             if (
-                field === 'primaryElectionUtc' ||
-                field === 'generalElectionUtc'
+                field === 'primaryElectionDate' ||
+                field === 'generalElectionDate'
             ) {
                 const aDate =
-                    (field === 'primaryElectionUtc'
-                        ? a.primaryElectionUtc
-                        : a.generalElectionUtc
+                    (field === 'primaryElectionDate'
+                        ? a.primaryElectionDate
+                        : a.generalElectionDate
                     )?.getTime() ?? 0
                 const bDate =
-                    (field === 'primaryElectionUtc'
-                        ? b.primaryElectionUtc
-                        : b.generalElectionUtc
+                    (field === 'primaryElectionDate'
+                        ? b.primaryElectionDate
+                        : b.generalElectionDate
                     )?.getTime() ?? 0
                 return aDate - bDate
             }
@@ -250,14 +229,16 @@ export default function Page() {
     const handleSelectItem = (value: Endorsement) => {
         if (value.id === selectedEndorsement?.id) return
 
-        if (formState?.dirty) {
+        if (formState?.mode === 'edit' || formState?.mode === 'create') {
             const proceed = confirm(
-                'You have unsaved changes! Selecting a new list element will discard them.'
+                'Are you sure you want to continue? All progress will be lost.'
             )
             if (!proceed) return
         }
 
+        setFormState(null)
         setSelectedEndorsement(value)
+        setSelectedTab('detail')
     }
 
     const createMutation = useOptimisticUpdate<Endorsement>({
@@ -290,6 +271,32 @@ export default function Page() {
     const handleCreate = () => blankEndorsement
 
     const handleSave = (newEndorsement: Endorsement) => {
+        const originalPublished =
+            formState?.mode === 'create'
+                ? blankEndorsement.endorsementPublished
+                : selectedEndorsement?.endorsementPublished
+
+        if (
+            originalPublished !== undefined &&
+            newEndorsement.endorsementPublished !== originalPublished
+        ) {
+            const proceed = confirm(
+                newEndorsement.endorsementPublished
+                    ? 'You will be publishing this publicly to the endorsement page. Are you sure you want to do that?'
+                    : 'This will remove the endorsement from the public endorsement page. Are you sure you want to do that?'
+            )
+            if (!proceed) return false
+        } else if (
+            formState?.mode === 'edit' &&
+            originalPublished === true &&
+            newEndorsement.endorsementPublished
+        ) {
+            const proceed = confirm(
+                'These changes will be reflected on the public endorsement page. Are you sure you want to do that?'
+            )
+            if (!proceed) return false
+        }
+
         if (formState?.mode === 'create') {
             createMutation.mutate({
                 currentValue: blankEndorsement,
@@ -301,6 +308,8 @@ export default function Page() {
                 newValue: newEndorsement,
             })
         }
+
+        return true
     }
 
     const handleDelete = () => {
@@ -310,6 +319,13 @@ export default function Page() {
             currentValue: selectedEndorsement,
             newValue: undefined,
         })
+    }
+
+    const handleCancel = () => {
+        if (formState?.mode === 'create') {
+            setFormState(null)
+            setSelectedEndorsement(null)
+        }
     }
 
     return (
@@ -351,6 +367,7 @@ export default function Page() {
                                                 className={styles.listItemText}
                                             >
                                                 {item.name}
+                                                {item.incumbent && '*'}
                                                 {item.isPvMember && (
                                                     <MdVerified
                                                         className={
@@ -430,190 +447,56 @@ export default function Page() {
             </div>
 
             <div className={styles.detailsPane}>
-                <Form<Endorsement>
-                    key={selectedEndorsement?.id}
-                    className={styles.detailsContent}
-                    form={selectedEndorsement}
-                    title={
-                        formState?.mode == 'create'
-                            ? 'New Endorsement'
-                            : (selectedEndorsement?.name ?? 'Endorsement')
-                    }
-                    saving={
-                        createMutation.isPending || updateMutation.isPending
-                    }
-                    onUpdate={setFormState}
-                    onSave={handleSave}
-                    onCreate={handleCreate}
-                    onDelete={handleDelete}
-                    beforeHeader={
-                        selectedEndorsement ? (
-                            <EndorsementBanner
-                                endorsement={
-                                    formState?.form ?? selectedEndorsement
-                                }
-                                uploadImage={endorsementQueries.uploadImage}
-                                containerClassName={styles.detailsHeader}
-                                coverClassName={styles.bannerCover}
-                            />
-                        ) : undefined
-                    }
-                >
-                    <FormGroup title="Details">
-                        <TextField label="Name" field="name" required />
-                        <DropDownField<Endorsement>
-                            label="State"
-                            field="state"
-                            required
-                            options={stateOptionsWithEmpty}
-                        />
-                        <TextField
-                            label="Description"
-                            field="endorsementReason"
-                            required
-                        />
-                        <TextField label="Jurisdiction" field="jurisiction" />
-                        <TextField label="Website" field="websiteHref" />
-                        <TextField label="Handle" field="handle" />
-                        <TextField label="Handle URL" field="handleHref" />
-                        <TextField label="Quote" field="quote" />
-                        <TextField label="Donate URL" field="donateHref" />
-                        <ImageField
-                            label="Image"
-                            field="imgUrl"
-                            uploadImage={endorsementQueries.uploadImage}
-                        />
-                    </FormGroup>
-
-                    <FormGroup title="Elections">
-                        <DateField
-                            label="General Election"
-                            field="generalElectionUtc"
-                            format={{ dateStyle: 'medium' }}
-                        />
-                        <DateField
-                            label="Primary Election"
-                            field="primaryElectionUtc"
-                            format={{ dateStyle: 'medium' }}
-                        />
-                    </FormGroup>
-
-                    <FormGroup title="Classification">
-                        <DropDownField<Endorsement>
-                            label="Initiative Level"
-                            getter={(form) => form.initiativeLevel}
-                            setter={(form, field) => {
-                                const initiativeLevel = Number(
-                                    field
-                                ) as InitiativeType
-                                return {
-                                    ...form,
-                                    initiativeLevel,
-                                }
-                            }}
-                            options={initiativeLevelOptions}
-                        />
-                        <DropDownField<Endorsement>
-                            label="Endorsement Level"
-                            getter={(form) => form.endorsementLevel}
-                            setter={(form, field) => {
-                                const endorsementLevel = Number(
-                                    field
-                                ) as EndorsementType
-                                return {
-                                    ...form,
-                                    endorsementLevel,
-                                }
-                            }}
-                            options={endorsementLevelOptions}
-                        />
-                        <DropDownField<Endorsement>
-                            label="Avatar Background"
-                            getter={(form) => form.avatarBgColor}
-                            setter={(form, field) => ({
-                                ...form,
-                                avatarBgColor: Number(field) as BackgroundColor,
-                            })}
-                            options={avatarBgColorOptions}
-                        />
-                        <DropDownField<Endorsement>
-                            label="Election Status"
-                            getter={(form) => form.electionStatus}
-                            setter={(form, field) => ({
-                                ...form,
-                                electionStatus: Number(field) as ElectionStatus,
-                            })}
-                            options={electionStatusOptions}
-                        />
-                        <CheckboxField label="PV Member" field="isPvMember" />
-                        <CheckboxField
-                            label="Publish Endorsement"
-                            field="endorsementPublished"
-                        />
-                        <CheckboxField label="Incumbent" field="incumbent" />
-                    </FormGroup>
-                </Form>
+                {selectedEndorsement && (
+                    <EndorsementBanner
+                        endorsement={formState?.form ?? selectedEndorsement}
+                        uploadImage={endorsementQueries.uploadImage}
+                        editing={
+                            formState?.mode === 'edit' ||
+                            formState?.mode === 'create'
+                        }
+                        saving={
+                            createMutation.isPending || updateMutation.isPending
+                        }
+                        containerClassName={styles.detailsHeader}
+                        coverClassName={styles.bannerCover}
+                        selectedTab={selectedTab}
+                        tabs={endorsementTabs}
+                        onTabChange={(key) =>
+                            setSelectedTab(key as EndorsementTabKey)
+                        }
+                    />
+                )}
+                {selectedTab === 'detail' && (
+                    <DetailView
+                        key={selectedEndorsement?.id ?? 'empty'}
+                        endorsement={
+                            formState?.form ?? selectedEndorsement ?? null
+                        }
+                        title={
+                            formState?.mode === 'create'
+                                ? formState.form.name ||
+                                  'Create New Endorsement'
+                                : (formState?.form?.name ??
+                                  selectedEndorsement?.name ??
+                                  'Endorsement')
+                        }
+                        saving={
+                            createMutation.isPending || updateMutation.isPending
+                        }
+                        onUpdate={setFormState}
+                        onSave={handleSave}
+                        onCreate={handleCreate}
+                        onDelete={handleDelete}
+                        onCancel={handleCancel}
+                        uploadImage={endorsementQueries.uploadImage}
+                        className={styles.detailsContent}
+                    />
+                )}
+                {selectedEndorsement && selectedTab === 'history' && (
+                    <HistoryView />
+                )}
             </div>
         </>
-    )
-}
-
-interface ImageFieldProps extends FormFieldProps<Endorsement, string> {
-    uploadImage: (image: File) => Promise<{ url: string }>
-}
-
-function ImageField(props: ImageFieldProps) {
-    const { onChange, readonly } = useConfigure(
-        props,
-        useCallback(
-            (field: string) => !props.required || !!field?.trim(),
-            [props.required]
-        )
-    )
-    const [uploading, setUploading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-
-    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        event.target.value = ''
-        if (!file) return
-
-        setUploading(true)
-        setError(null)
-
-        try {
-            const { url } = await props.uploadImage(file)
-            onChange(url)
-        } catch (uploadError) {
-            setError(
-                uploadError instanceof Error
-                    ? uploadError.message
-                    : 'Failed to upload image'
-            )
-        } finally {
-            setUploading(false)
-        }
-    }
-
-    return (
-        <FormField {...props}>
-            <div className={styles.imageField}>
-                {!readonly && (
-                    <label className={styles.uploadButton}>
-                        {uploading ? 'Uploading…' : 'Upload Image'}
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(event) => {
-                                void handleFileChange(event)
-                            }}
-                            disabled={uploading}
-                            hidden
-                        />
-                    </label>
-                )}
-                {error && <span className={styles.uploadError}>{error}</span>}
-            </div>
-        </FormField>
     )
 }

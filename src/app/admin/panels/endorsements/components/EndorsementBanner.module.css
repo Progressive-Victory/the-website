@@ -12,17 +12,11 @@
     backdrop-filter: blur(16px) saturate(145%);
     -webkit-backdrop-filter: blur(16px) saturate(145%);
     box-shadow: 0 14px 30px rgba(15, 23, 42, 0.11);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    justify-content: space-between;
 }
 
-.cardStyle {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.75rem;
+.topRow {
+    flex-wrap: wrap;
+    width: 100%;
 }
 
 .avatarButton {
@@ -51,12 +45,6 @@
     pointer-events: none;
 }
 
-.userInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-}
-
 .headerUserName {
     margin: 0;
     font-size: 1.25rem;
@@ -77,13 +65,6 @@
     color: #b91c1c;
 }
 
-.roleList {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
 .rolePill {
     font-size: 0.85rem;
     font-weight: 600;
@@ -95,25 +76,45 @@
     background: rgba(15, 23, 42, 0.06);
 }
 
-.publishedTag {
-    color: #166534;
-    background: rgba(34, 197, 94, 0.16);
+.tagDefault {
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
 }
 
-.notPublishedTag {
-    color: #b91c1c;
-    background: rgba(239, 68, 68, 0.14);
+.tagRed {
+    background: rgba(255, 95, 75, 0.3);
+    color: rgba(177, 2, 2, 1);
+}
+
+.tagOrange {
+    background: rgba(255, 72, 0, 0.3);
+    color: rgba(117, 56, 0, 1);
+}
+
+.tagGreen {
+    background: rgba(112, 195, 32, 0.3);
+    color: rgba(17, 115, 75, 1);
+}
+
+.tagBlue {
+    background: rgba(42, 155, 225, 0.3);
+    color: rgba(10, 83, 168, 1);
+}
+
+.tagPurple {
+    background: rgba(172, 95, 212, 0.3);
+    color: rgba(90, 50, 134, 1);
+}
+
+.tagDarkRed {
+    background: rgba(177, 2, 2, 1);
+    color: rgba(255, 207, 201, 1);
 }
 
 @media (max-width: 720px) {
     .headerTop {
         margin: -1.2rem 0.65rem 0.65rem;
         padding-inline: 0.8rem;
-    }
-
-    .cardAvatar {
-        width: 4rem;
-        height: 4rem;
     }
 
     .headerUserName {

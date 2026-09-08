@@ -72,13 +72,16 @@ export interface FormProps<T> {
     onUpdate?: (state: FormState<T>) => void
 
     /** Callback to save form data. Should correspond to `saving`. */
-    onSave?: (form: T) => void
+    onSave?: (form: T) => void | boolean
 
     /** Callback to create a new form value. */
     onCreate?: () => T
 
     /** Callback to delete a form value. */
     onDelete?: (form: T) => void
+
+    /** Callback when editing is discarded. */
+    onCancel?: () => void
 }
 
 /**
@@ -115,6 +118,7 @@ export function Form<T>({
     onSave,
     onCreate,
     onDelete,
+    onCancel,
 }: FormProps<T>) {
     // Stores the initial state of the form while editing.
     const [baseForm, setBaseForm] = useState<T | null>(null)
@@ -180,12 +184,13 @@ export function Form<T>({
     // Called when 'Save' is pressed. Asks the parent component to save, and
     // then clears edit state.
     const handleSave = () => {
-        if (editForm) onSave?.(editForm)
-        reset()
+        const result = editForm ? onSave?.(editForm) : undefined
+        if (result !== false) reset()
     }
 
     // Called when 'Cancel' is pressed. Clears edit state.
     const handleCancel = () => {
+        onCancel?.()
         reset()
     }
 

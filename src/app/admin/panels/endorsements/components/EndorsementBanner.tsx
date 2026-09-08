@@ -6,6 +6,7 @@ import {
     useConfigure,
 } from '@/components/common/forms'
 import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
+import { HStack, Spacer, VStack, ZStack } from '@/components/layout'
 import { Endorsement, EndorsementType, InitiativeType } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { cn } from '@/util'
@@ -20,6 +21,8 @@ interface EndorsementBannerProps extends Partial<
     tabs?: TabSpec[]
     onTabChange?: (key: string) => void
     uploadImage?: (image: File) => Promise<{ url: string }>
+    editing?: boolean
+    saving?: boolean
     dynamic?: DynamicFormFieldProps<Endorsement, string>
     containerClassName?: string
     coverClassName?: string
@@ -44,6 +47,7 @@ const stateNames = new Map(
 )
 const validImage = () => true
 
+// # TODO Merge EndorsementBanner and MemberBanner into a single HeaderBanner Component as part of Admin Panel Refactor to Volunteer Dashboard
 export function EndorsementBanner({
     endorsement,
     selectedTab,
@@ -51,6 +55,8 @@ export function EndorsementBanner({
     onTabChange,
     id,
     uploadImage,
+    editing = false,
+    saving = false,
     dynamic,
     containerClassName,
     coverClassName,
@@ -61,7 +67,9 @@ export function EndorsementBanner({
     )
     const [uploading, setUploading] = useState(false)
     const [uploadError, setUploadError] = useState<string | null>(null)
-    const canEditImage = dynamic?.editing && !dynamic.saving && uploadImage
+    const isEditing = dynamic?.editing ?? editing
+    const isSaving = dynamic?.saving ?? saving
+    const canEditImage = isEditing && !isSaving && uploadImage
 
     const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
@@ -86,65 +94,106 @@ export function EndorsementBanner({
     }
 
     const content = (
-        <div className={styles.headerTop}>
-            <div className={styles.cardStyle}>
-                {canEditImage ? (
-                    <label className={styles.avatarButton} title="Change image">
-                        <EndorsementAvatar
-                            endorsement={endorsement}
-                            size={72}
-                        />
-                        <span className={styles.imageOverlay}>
-                            <FaCamera />
-                        </span>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(event) => void handleFileChange(event)}
-                            disabled={uploading}
-                            hidden
-                        />
-                    </label>
-                ) : (
-                    <EndorsementAvatar endorsement={endorsement} size={72} />
-                )}
-                <div className={styles.userInfo}>
-                    <h1 className={styles.headerUserName}>
-                        {endorsement.name || 'New Endorsement'}
-                    </h1>
-                    <h2 className={styles.headerUserUsername}>
-                        {stateNames.get(endorsement.state) ??
-                            (endorsement.state
-                                ? endorsement.state
-                                : 'No state selected')}
-                    </h2>
-                    {uploadError && (
-                        <span className={styles.uploadError}>
-                            {uploadError}
-                        </span>
+        <VStack align="left" gap={0.75} className={styles.headerTop}>
+            <HStack gap={0.75} className={styles.topRow}>
+                <HStack gap={0.75}>
+                    {canEditImage ? (
+                        <label
+                            className={styles.avatarButton}
+                            title="Change image"
+                        >
+                            <EndorsementAvatar
+                                endorsement={endorsement}
+                                size={72}
+                            />
+                            <span className={styles.imageOverlay}>
+                                <FaCamera />
+                            </span>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) =>
+                                    void handleFileChange(event)
+                                }
+                                disabled={uploading}
+                                hidden
+                            />
+                        </label>
+                    ) : (
+                        <ZStack>
+                            <EndorsementAvatar
+                                endorsement={endorsement}
+                                size={72}
+                            />
+                        </ZStack>
                     )}
-                </div>
-            </div>
-            <div className={styles.roleList}>
-                <span className={styles.rolePill}>
+                    <VStack align="left" gap={0.2}>
+                        <h1 className={styles.headerUserName}>
+                            {endorsement.name || 'New Endorsement'}
+                            {endorsement.incumbent && '*'}
+                        </h1>
+                        <h2 className={styles.headerUserUsername}>
+                            {[
+                                stateNames.get(endorsement.state) ??
+                                    endorsement.state,
+                                endorsement.jurisdiction,
+                            ]
+                                .filter(Boolean)
+                                .join(' · ') || 'No state selected'}
+                        </h2>
+                        {uploadError && (
+                            <span className={styles.uploadError}>
+                                {uploadError}
+                            </span>
+                        )}
+                    </VStack>
+                </HStack>
+                <Spacer />
+                <HStack gap={0.5}>
+                    <span
+                        className={cn(
+                            styles.rolePill,
+                            endorsement.endorsementPublished
+                                ? styles.tagGreen
+                                : styles.tagDarkRed
+                        )}
+                    >
+                        {endorsement.endorsementPublished
+                            ? 'Published'
+                            : 'Not Published'}
+                    </span>
+                </HStack>
+            </HStack>
+            <HStack gap={0.5}>
+                <span
+                    className={cn(
+                        styles.rolePill,
+                        endorsement.initiativeLevel === InitiativeType.State
+                            ? styles.tagOrange
+                            : endorsement.initiativeLevel ===
+                                InitiativeType.National
+                              ? styles.tagBlue
+                              : styles.tagDefault
+                    )}
+                >
                     {initiativeLevelLabels[endorsement.initiativeLevel]}
-                </span>
-                <span className={styles.rolePill}>
-                    {endorsementLevelLabels[endorsement.endorsementLevel]}
                 </span>
                 <span
                     className={cn(
                         styles.rolePill,
-                        endorsement.endorsementPublished
-                            ? styles.publishedTag
-                            : styles.notPublishedTag
+                        endorsement.endorsementLevel ===
+                            EndorsementType.PVPledge && styles.tagPurple,
+                        endorsement.endorsementLevel ===
+                            EndorsementType.Endorsement && styles.tagGreen,
+                        endorsement.endorsementLevel ===
+                            EndorsementType.Recommendation && styles.tagRed,
+                        endorsement.endorsementLevel === EndorsementType.None &&
+                            styles.tagDefault
                     )}
                 >
-                    {endorsement.endorsementPublished
-                        ? 'Published'
-                        : 'Not Published'}
+                    {endorsementLevelLabels[endorsement.endorsementLevel]}
                 </span>
-            </div>
+            </HStack>
             {tabs && tabs.length > 0 && selectedTab && onTabChange && (
                 <TabBar
                     tabs={tabs}
@@ -152,7 +201,7 @@ export function EndorsementBanner({
                     onChange={onTabChange}
                 />
             )}
-        </div>
+        </VStack>
     )
 
     if (!containerClassName) return content
