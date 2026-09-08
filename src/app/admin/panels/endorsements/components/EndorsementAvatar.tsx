@@ -38,9 +38,13 @@ export function EndorsementAvatar({
             )}
             style={{ width: size, height: size }}
         >
-            {endorsement.imgUrl ? (
+            {endorsement.imgHref ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={endorsement.imgUrl} alt="" className={styles.image} />
+                <img
+                    src={endorsement.imgHref}
+                    alt=""
+                    className={styles.image}
+                />
             ) : (
                 <FaUser className={styles.placeholder} />
             )}

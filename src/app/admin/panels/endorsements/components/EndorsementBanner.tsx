@@ -62,7 +62,7 @@ export function EndorsementBanner({
     coverClassName,
 }: EndorsementBannerProps) {
     const { onChange } = useConfigure(
-        { id, label: 'Image', field: 'imgUrl', dynamic },
+        { id, label: 'Image', field: 'imgHref', dynamic },
         validImage
     )
     const [uploading, setUploading] = useState(false)
@@ -165,34 +165,33 @@ export function EndorsementBanner({
                 </HStack>
             </HStack>
             <HStack gap={0.5}>
-                <span
-                    className={cn(
-                        styles.rolePill,
-                        endorsement.initiativeLevel === InitiativeType.State
-                            ? styles.tagOrange
-                            : endorsement.initiativeLevel ===
-                                InitiativeType.National
-                              ? styles.tagBlue
-                              : styles.tagDefault
-                    )}
-                >
-                    {initiativeLevelLabels[endorsement.initiativeLevel]}
-                </span>
-                <span
-                    className={cn(
-                        styles.rolePill,
-                        endorsement.endorsementLevel ===
-                            EndorsementType.PVPledge && styles.tagPurple,
-                        endorsement.endorsementLevel ===
-                            EndorsementType.Endorsement && styles.tagGreen,
-                        endorsement.endorsementLevel ===
-                            EndorsementType.Recommendation && styles.tagRed,
-                        endorsement.endorsementLevel === EndorsementType.None &&
-                            styles.tagDefault
-                    )}
-                >
-                    {endorsementLevelLabels[endorsement.endorsementLevel]}
-                </span>
+                {endorsement.initiativeLevel !== InitiativeType.None && (
+                    <span
+                        className={cn(
+                            styles.rolePill,
+                            endorsement.initiativeLevel === InitiativeType.State
+                                ? styles.tagOrange
+                                : styles.tagBlue
+                        )}
+                    >
+                        {initiativeLevelLabels[endorsement.initiativeLevel]}
+                    </span>
+                )}
+                {endorsement.endorsementLevel !== EndorsementType.None && (
+                    <span
+                        className={cn(
+                            styles.rolePill,
+                            endorsement.endorsementLevel ===
+                                EndorsementType.PVPledge && styles.tagPurple,
+                            endorsement.endorsementLevel ===
+                                EndorsementType.Endorsement && styles.tagGreen,
+                            endorsement.endorsementLevel ===
+                                EndorsementType.Recommendation && styles.tagRed
+                        )}
+                    >
+                        {endorsementLevelLabels[endorsement.endorsementLevel]}
+                    </span>
+                )}
             </HStack>
             {tabs && tabs.length > 0 && selectedTab && onTabChange && (
                 <TabBar

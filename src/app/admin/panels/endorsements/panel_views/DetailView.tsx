@@ -117,7 +117,7 @@ export function DetailView({
                 />
                 <ImageField
                     label="Image"
-                    field="imgUrl"
+                    field="imgHref"
                     uploadImage={uploadImage}
                 />
             </FormGroup>
@@ -159,10 +159,7 @@ export function DetailView({
                     })}
                     options={endorsementLevelOptions}
                 />
-                <TextField
-                    label="Endorsement Reasoning"
-                    field="endorsementReason"
-                />
+                <TextField label="Reason" field="endorsementReason" />
                 <DropDownField<Endorsement>
                     label="Organizing Initiative"
                     getter={(form) => form.initiativeLevel}
@@ -172,7 +169,7 @@ export function DetailView({
                     })}
                     options={initiativeLevelOptions}
                 />
-                <QuoteField label="Announcement Message" required />
+                <QuoteField label="Announcement Message" />
                 <CheckboxField
                     label="Publish Endorsement"
                     field="endorsementPublished"
@@ -196,7 +193,7 @@ function HandleField(
             }}
             setter={(form, field) => ({
                 ...form,
-                handle: String(field ?? '').replace(/^@+/, ''),
+                handle: String(field ?? '').replace(/^@+/, '') || null,
             })}
         />
     )
@@ -216,7 +213,7 @@ function QuoteField(
             }}
             setter={(form, field) => ({
                 ...form,
-                quote: field ?? '',
+                quote: field ?? null,
             })}
         />
     )
@@ -271,7 +268,10 @@ function LinkField(
     )
 }
 
-interface ImageFieldProps extends FormFieldProps<Endorsement, string> {
+interface ImageFieldProps extends FormFieldProps<
+    Endorsement,
+    string | null | undefined
+> {
     uploadImage: (image: File) => Promise<{ url: string }>
 }
 
@@ -279,7 +279,8 @@ function ImageField(props: ImageFieldProps) {
     const { onChange, readonly } = useConfigure(
         props,
         useCallback(
-            (field: string) => !props.required || !!field?.trim(),
+            (field: string | null | undefined) =>
+                !props.required || !!field?.trim(),
             [props.required]
         )
     )
@@ -310,7 +311,7 @@ function ImageField(props: ImageFieldProps) {
 
     if (!props.dynamic?.editing) return null
 
-    const hasImage = !!props.dynamic.form.imgUrl
+    const hasImage = !!props.dynamic.form.imgHref
 
     return (
         <FormField {...props}>

@@ -41,12 +41,12 @@ const blankEndorsement: Endorsement = {
     endorsementPublished: false,
     incumbent: false,
     handleHref: null,
-    handle: '',
-    quote: '',
-    websiteHref: '',
+    handle: null,
+    quote: null,
+    websiteHref: null,
     donateHref: null,
     isPvMember: false,
-    imgUrl: '',
+    imgHref: null,
     primaryElectionDate: null,
     generalElectionDate: null,
     initiativeLevel: InitiativeType.None,
@@ -315,6 +315,13 @@ export default function Page() {
     const handleDelete = () => {
         if (!selectedEndorsement) return
 
+        const proceed = confirm(
+            selectedEndorsement.endorsementPublished
+                ? `This will permanently delete ${selectedEndorsement.name} and remove them from the public endorsement page. Are you sure you want to do that?`
+                : `This will permanently delete ${selectedEndorsement.name}. Are you sure you want to do that?`
+        )
+        if (!proceed) return
+
         deleteMutation.mutate({
             currentValue: selectedEndorsement,
             newValue: undefined,
@@ -425,9 +432,14 @@ export default function Page() {
                                             className={cn(
                                                 styles.levelTag,
                                                 item.initiativeLevel ===
-                                                    InitiativeType.State
-                                                    ? styles.tagOrange
-                                                    : styles.tagBlue
+                                                    InitiativeType.State &&
+                                                    styles.tagOrange,
+                                                item.initiativeLevel ===
+                                                    InitiativeType.National &&
+                                                    styles.tagBlue,
+                                                item.initiativeLevel ===
+                                                    InitiativeType.None &&
+                                                    styles.tagDefault
                                             )}
                                         >
                                             {
