@@ -4,7 +4,13 @@ import styles from './Sidebar.module.css'
 import { cn } from '@/util'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FaUsers, FaUserShield, FaUserTag, FaDonate } from 'react-icons/fa'
+import {
+    FaUsers,
+    FaUserShield,
+    FaUserTag,
+    FaDonate,
+    FaBullhorn,
+} from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 import { FiChevronLeft } from 'react-icons/fi'
 import type { IconType } from 'react-icons/lib'
@@ -17,6 +23,7 @@ interface SidebarProps {
     positionCount?: number
     roleCount?: number
     permissionCount?: number
+    endorsementCount?: number
 }
 
 export default function Sidebar({
@@ -26,6 +33,7 @@ export default function Sidebar({
     positionCount,
     roleCount,
     permissionCount,
+    endorsementCount,
 }: SidebarProps) {
     const [open, setOpen] = useLocalStorage('pv.admin-nav-open', true)
 
@@ -89,6 +97,14 @@ export default function Sidebar({
                     href="/admin/panels/fundraising"
                     icon={FaDonate}
                     count={2}
+                    open={open}
+                />
+
+                <NavLink
+                    title="Endorsements"
+                    href="/admin/panels/endorsements"
+                    icon={FaBullhorn}
+                    count={endorsementCount}
                     open={open}
                 />
             </ul>

@@ -4,6 +4,7 @@ import { cn } from '@/util'
 
 interface ElectionStatusBadgeProps {
     electionStatus: ElectionStatus
+    tooltipPosition?: 'top' | 'bottom'
 }
 
 const badgeClass: Record<ElectionStatus, string | null> = {
@@ -17,6 +18,7 @@ const badgeClass: Record<ElectionStatus, string | null> = {
 
 export function ElectionStatusBadge({
     electionStatus,
+    tooltipPosition = 'top',
 }: ElectionStatusBadgeProps) {
     const className = badgeClass[electionStatus]
 
@@ -54,7 +56,13 @@ export function ElectionStatusBadge({
             aria-label={`Election status: ${electionStatus}`}
         >
             <span aria-hidden="true">{icon}</span>
-            <span className={styles.tooltip} aria-hidden="true">
+            <span
+                className={cn(
+                    styles.tooltip,
+                    tooltipPosition === 'bottom' && styles.tooltipBottom
+                )}
+                aria-hidden="true"
+            >
                 {electionStatus}
             </span>
         </span>

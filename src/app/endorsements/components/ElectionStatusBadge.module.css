@@ -45,6 +45,17 @@
     transform: translate(-50%, 0);
 }
 
+.tooltipBottom {
+    bottom: auto;
+    top: calc(100% + 0.45rem);
+    transform: translate(-50%, -4px);
+}
+
+.badge:hover .tooltipBottom {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
 .wonPrimary {
     background: #2fbf71;
 }
