@@ -28,12 +28,14 @@ interface EndorsementBannerProps extends Partial<
 const initiativeLevelLabels: Record<InitiativeType, string> = {
     [InitiativeType.State]: 'State Initiative',
     [InitiativeType.National]: 'National Initiative',
+    [InitiativeType.None]: 'None',
 }
 
 const endorsementLevelLabels: Record<EndorsementType, string> = {
     [EndorsementType.PVPledge]: 'PV Pledge',
     [EndorsementType.Endorsement]: 'Endorsement',
     [EndorsementType.Recommendation]: 'Recommendation',
+    [EndorsementType.Unendorsed]: 'Unendorsed',
     [EndorsementType.None]: 'None',
 }
 
@@ -133,12 +135,14 @@ export function EndorsementBanner({
                 <span
                     className={cn(
                         styles.rolePill,
-                        endorsement.tookPvPledge
+                        endorsement.endorsementPublished
                             ? styles.publishedTag
                             : styles.notPublishedTag
                     )}
                 >
-                    {endorsement.tookPvPledge ? 'Published' : 'Not Published'}
+                    {endorsement.endorsementPublished
+                        ? 'Published'
+                        : 'Not Published'}
                 </span>
             </div>
             {tabs && tabs.length > 0 && selectedTab && onTabChange && (

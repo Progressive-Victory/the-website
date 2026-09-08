@@ -43,16 +43,21 @@ const blankEndorsement: Endorsement = {
     id: -1,
     name: '',
     state: '',
-    candidateLink: '',
-    linkLabel: '',
-    description: '',
-    isStateInitiative: true,
-    isNationalInitiative: false,
+    jurisiction: null,
+    endorsementDate: null,
+    endorsementReason: '',
+    endorsementPublished: false,
+    publishEndorsement: false,
+    incumbent: false,
+    handleHref: null,
+    handle: '',
+    quote: '',
+    websiteHref: '',
+    donateHref: null,
     isPvMember: false,
-    tookPvPledge: false,
     imgUrl: '',
-    primaryElection: null,
-    generalElection: null,
+    primaryElectionUtc: null,
+    generalElectionUtc: null,
     initiativeLevel: InitiativeType.State,
     endorsementLevel: EndorsementType.None,
     avatarBgColor: BackgroundColor.Blue,
@@ -75,21 +80,25 @@ const alwaysShowPrimaryDate = new Set([
 ])
 
 function getListElectionDate(endorsement: Endorsement) {
-    const { primaryElection, generalElection, electionStatus } = endorsement
-    if (alwaysShowPrimaryDate.has(electionStatus)) return primaryElection
-    if (primaryElection && primaryElection >= new Date()) return primaryElection
-    return generalElection ?? primaryElection
+    const { primaryElectionUtc, generalElectionUtc, electionStatus } =
+        endorsement
+    if (alwaysShowPrimaryDate.has(electionStatus)) return primaryElectionUtc
+    if (primaryElectionUtc && primaryElectionUtc >= new Date())
+        return primaryElectionUtc
+    return generalElectionUtc ?? primaryElectionUtc
 }
 
 const initiativeLevelOptions = [
-    { value: InitiativeType.National, label: 'National Initiative' },
     { value: InitiativeType.State, label: 'State Initiative' },
+    { value: InitiativeType.National, label: 'National Initiative' },
+    { value: InitiativeType.None, label: 'None' },
 ]
 
 const endorsementLevelOptions = [
     { value: EndorsementType.PVPledge, label: 'PV Pledge' },
     { value: EndorsementType.Endorsement, label: 'Endorsement' },
     { value: EndorsementType.Recommendation, label: 'Recommendation' },
+    { value: EndorsementType.Unendorsed, label: 'Unendorsed' },
     { value: EndorsementType.None, label: 'None' },
 ]
 
@@ -110,8 +119,8 @@ const electionStatusOptions = [
 
 const endorsementSortFields = [
     { value: 'name', label: 'Name' },
-    { value: 'primaryElection', label: 'Primary Date' },
-    { value: 'generalElection', label: 'General Date' },
+    { value: 'primaryElectionUtc', label: 'Primary Date' },
+    { value: 'generalElectionUtc', label: 'General Date' },
 ]
 
 const endorsementFilterTags: FilterTag[] = [
@@ -206,9 +215,20 @@ export default function Page() {
                 .toLocaleLowerCase()
                 .includes(query.toLocaleLowerCase()),
         onSort: (a, b, field) => {
-            if (field === 'primaryElection' || field === 'generalElection') {
-                const aDate = a[field]?.getTime() ?? 0
-                const bDate = b[field]?.getTime() ?? 0
+            if (
+                field === 'primaryElectionUtc' ||
+                field === 'generalElectionUtc'
+            ) {
+                const aDate =
+                    (field === 'primaryElectionUtc'
+                        ? a.primaryElectionUtc
+                        : a.generalElectionUtc
+                    )?.getTime() ?? 0
+                const bDate =
+                    (field === 'primaryElectionUtc'
+                        ? b.primaryElectionUtc
+                        : b.generalElectionUtc
+                    )?.getTime() ?? 0
                 return aDate - bDate
             }
 
@@ -449,14 +469,15 @@ export default function Page() {
                         />
                         <TextField
                             label="Description"
-                            field="description"
+                            field="endorsementReason"
                             required
                         />
-                        <TextField
-                            label="Candidate Link"
-                            field="candidateLink"
-                        />
-                        <TextField label="Link Label" field="linkLabel" />
+                        <TextField label="Jurisdiction" field="jurisiction" />
+                        <TextField label="Website" field="websiteHref" />
+                        <TextField label="Handle" field="handle" />
+                        <TextField label="Handle URL" field="handleHref" />
+                        <TextField label="Quote" field="quote" />
+                        <TextField label="Donate URL" field="donateHref" />
                         <ImageField
                             label="Image"
                             field="imgUrl"
@@ -467,12 +488,12 @@ export default function Page() {
                     <FormGroup title="Elections">
                         <DateField
                             label="General Election"
-                            field="generalElection"
+                            field="generalElectionUtc"
                             format={{ dateStyle: 'medium' }}
                         />
                         <DateField
                             label="Primary Election"
-                            field="primaryElection"
+                            field="primaryElectionUtc"
                             format={{ dateStyle: 'medium' }}
                         />
                     </FormGroup>
@@ -488,12 +509,6 @@ export default function Page() {
                                 return {
                                     ...form,
                                     initiativeLevel,
-                                    isStateInitiative:
-                                        initiativeLevel ===
-                                        InitiativeType.State,
-                                    isNationalInitiative:
-                                        initiativeLevel ===
-                                        InitiativeType.National,
                                 }
                             }}
                             options={initiativeLevelOptions}
@@ -533,8 +548,9 @@ export default function Page() {
                         <CheckboxField label="PV Member" field="isPvMember" />
                         <CheckboxField
                             label="Publish Endorsement"
-                            field="tookPvPledge"
+                            field="endorsementPublished"
                         />
+                        <CheckboxField label="Incumbent" field="incumbent" />
                     </FormGroup>
                 </Form>
             </div>
