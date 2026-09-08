@@ -9,6 +9,7 @@ export function SidebarIcon({
     ...props
 }: SidebarIconProps): ReactElement {
     return (
+        // # TODO convert this into an actual SVG file
         // Custom Sidebar Icon made due to dissatisfaction with sidebar icons from common libraries.
         <svg
             fill="none"

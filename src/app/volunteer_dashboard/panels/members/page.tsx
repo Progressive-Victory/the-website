@@ -584,8 +584,8 @@ export default function Page() {
             includeSidebar
             collapsedSidebarMode="compact"
             sidebarTogglePlacement="header"
-            hideSidebarFooterWhenCollapsed
-            keepSidebarBorderWhenCollapsed
+            showSidebarFooterWhenCollapsed={false}
+            showSidebarBorderWhenCollapsed
             largeTitle
             sidebarWidth="25.5rem"
             collapsedSidebarWidth="5rem"

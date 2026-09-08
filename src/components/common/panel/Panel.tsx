@@ -37,8 +37,8 @@ export interface PanelProps {
     sidebarList?: SidebarListConfig
     sidebarSearch?: ReactNode
     sidebarFooter?: ReactNode
-    hideSidebarFooterWhenCollapsed?: boolean
-    keepSidebarBorderWhenCollapsed?: boolean
+    showSidebarFooterWhenCollapsed?: boolean
+    showSidebarBorderWhenCollapsed?: boolean
     sidebarWidth?: string
     collapsedSidebarWidth?: string
     showScrollbar?: boolean
@@ -68,8 +68,8 @@ export function Panel({
     sidebarList,
     sidebarSearch,
     sidebarFooter,
-    hideSidebarFooterWhenCollapsed = false,
-    keepSidebarBorderWhenCollapsed = false,
+    showSidebarFooterWhenCollapsed = true,
+    showSidebarBorderWhenCollapsed = false,
     sidebarWidth,
     collapsedSidebarWidth,
     showScrollbar = true,
@@ -155,11 +155,11 @@ export function Panel({
                             showFooterToggle={
                                 resolvedSidebarTogglePlacement === 'footer'
                             }
-                            hideFooterWhenCollapsed={
-                                hideSidebarFooterWhenCollapsed
+                            showFooterWhenCollapsed={
+                                showSidebarFooterWhenCollapsed
                             }
-                            keepBorderWhenCollapsed={
-                                keepSidebarBorderWhenCollapsed
+                            showBorderWhenCollapsed={
+                                showSidebarBorderWhenCollapsed
                             }
                             reserveHeaderToggleSpace={
                                 resolvedSidebarTogglePlacement === 'header'

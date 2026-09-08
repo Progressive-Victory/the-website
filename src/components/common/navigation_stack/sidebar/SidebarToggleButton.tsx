@@ -19,35 +19,33 @@ export function SidebarToggleButton({
     className,
     size,
 }: SidebarToggleButtonProps): ReactElement {
-    if (variant === 'chevron') {
-        return (
-            <button
-                aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-                className={cn(styles.toggleButton, className)}
-                onClick={onToggle}
-                title={isOpen ? 'Collapse' : 'Expand'}
-                type="button"
-            >
-                <FiChevronLeft
-                    className={cn(
-                        styles.toggleIcon,
-                        !isOpen && styles.toggleIconClosed
-                    )}
-                    size={size ?? 20}
-                />
-            </button>
+    const icon =
+        variant === 'chevron' ? (
+            <FiChevronLeft
+                className={cn(
+                    styles.toggleIcon,
+                    !isOpen && styles.toggleIconClosed
+                )}
+                size={size ?? 20}
+            />
+        ) : (
+            <SidebarIcon className={styles.sidebarIcon} size={size ?? 22} />
         )
-    }
 
     return (
         <button
             aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-            className={cn(styles.panelToggleButton, className)}
+            className={cn(
+                variant === 'chevron'
+                    ? styles.toggleButton
+                    : styles.panelToggleButton,
+                className
+            )}
             onClick={onToggle}
             title={isOpen ? 'Collapse' : 'Expand'}
             type="button"
         >
-            <SidebarIcon className={styles.sidebarIcon} size={size ?? 22} />
+            {icon}
         </button>
     )
 }

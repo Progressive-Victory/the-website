@@ -1,9 +1,9 @@
 'use client'
 
 import { SelectionIndicator } from './SelectionIndicator'
-import type { IndicatorStyle } from './SelectionIndicator'
 import styles from './Sidebar.module.css'
 import { SidebarToggleButton } from './SidebarToggleButton'
+import type { IndicatorStyle } from './hooks'
 import { useLargeTitleScroll, useSidebarState } from './hooks'
 import { DropdownButton } from '@/components/common/dropdown/DropdownButton'
 import { DropdownOverlay } from '@/components/common/dropdown/DropdownOverlay'
@@ -45,8 +45,8 @@ export interface SidebarProps {
     mobileVisible?: boolean
     showScrollbar?: boolean
     showFooterToggle?: boolean
-    hideFooterWhenCollapsed?: boolean
-    keepBorderWhenCollapsed?: boolean
+    showFooterWhenCollapsed?: boolean
+    showBorderWhenCollapsed?: boolean
     reserveHeaderToggleSpace?: boolean
     showSelectionIndicator?: boolean
     className?: string
@@ -71,46 +71,46 @@ interface ResolvedHeaderProps {
     prominentHeaderRight?: ReactNode
 }
 
-interface ResolvedSidebarProps {
+type ResolvedSidebarProps = Omit<
+    SidebarProps,
+    | 'variant'
+    | 'collapsedMode'
+    | 'showScrollbar'
+    | 'showFooterToggle'
+    | 'showFooterWhenCollapsed'
+    | 'showBorderWhenCollapsed'
+    | 'reserveHeaderToggleSpace'
+    | 'showSelectionIndicator'
+    | 'header'
+    | 'children'
+> & {
     variant: SidebarVariant
-    width?: string
-    collapsedWidth?: string
     collapsedMode: 'compact' | 'hidden'
-    open?: boolean
-    onOpenChange?: (open: boolean) => void
-    mobileVisible?: boolean
     showScrollbar: boolean
     showFooterToggle: boolean
-    hideFooterWhenCollapsed: boolean
-    keepBorderWhenCollapsed: boolean
+    showFooterWhenCollapsed: boolean
+    showBorderWhenCollapsed: boolean
     reserveHeaderToggleSpace: boolean
     showSelectionIndicator: boolean
-    className?: string
     header: ResolvedHeaderProps
-    featured?: ReactNode
     body?: ReactNode
-    footer?: ReactNode
 }
 
 function resolveSidebarProps(props: SidebarProps): ResolvedSidebarProps {
+    const { children: body, header: inputHeader, ...rest } = props
     const variant = props.variant ?? 'minimal'
-    const h = props.header
+    const h = inputHeader
 
     return {
+        ...rest,
         variant,
-        width: props.width,
-        collapsedWidth: props.collapsedWidth,
         collapsedMode: props.collapsedMode ?? 'compact',
-        open: props.open,
-        onOpenChange: props.onOpenChange,
-        mobileVisible: props.mobileVisible,
         showScrollbar: props.showScrollbar ?? true,
         showFooterToggle: props.showFooterToggle ?? true,
-        hideFooterWhenCollapsed: props.hideFooterWhenCollapsed ?? false,
-        keepBorderWhenCollapsed: props.keepBorderWhenCollapsed ?? false,
+        showFooterWhenCollapsed: props.showFooterWhenCollapsed ?? true,
+        showBorderWhenCollapsed: props.showBorderWhenCollapsed ?? false,
         reserveHeaderToggleSpace: props.reserveHeaderToggleSpace ?? false,
         showSelectionIndicator: props.showSelectionIndicator ?? false,
-        className: props.className,
         header: {
             mode: h?.mode ?? (variant === 'prominent' ? 'hidden' : 'shown'),
             label: h?.label ?? props.label,
@@ -123,9 +123,7 @@ function resolveSidebarProps(props: SidebarProps): ResolvedSidebarProps {
             prominentHeaderLeft: h?.left,
             prominentHeaderRight: h?.right,
         },
-        featured: props.featured,
-        body: props.children,
-        footer: props.footer,
+        body,
     }
 }
 
@@ -154,8 +152,8 @@ function MinimalSidebar({
     mobileVisible,
     showScrollbar,
     showFooterToggle,
-    hideFooterWhenCollapsed,
-    keepBorderWhenCollapsed,
+    showFooterWhenCollapsed,
+    showBorderWhenCollapsed,
     showSelectionIndicator,
     className,
     header,
@@ -165,7 +163,7 @@ function MinimalSidebar({
     const {
         pathname,
         isDesktop,
-        isOpen,
+        isExpanded,
         toggle,
         bodyRef,
         indicatorLayoutSyncing,
@@ -186,9 +184,9 @@ function MinimalSidebar({
     return (
         <aside
             data-mobile-visible={resolvedMobileVisible}
-            data-sidebar-collapsed={isDesktop && !isOpen}
-            data-hide-footer-when-collapsed={hideFooterWhenCollapsed}
-            data-keep-border-when-collapsed={keepBorderWhenCollapsed}
+            data-sidebar-collapsed={isDesktop && !isExpanded}
+            data-hide-footer-when-collapsed={!showFooterWhenCollapsed}
+            data-keep-border-when-collapsed={showBorderWhenCollapsed}
             data-sidebar-header="minimal"
             data-sidebar-variant="minimal"
             data-sidebar-visual-mode="minimal"
@@ -196,12 +194,12 @@ function MinimalSidebar({
             className={cn(
                 styles.sidebar,
                 styles.sidebarMinimal,
-                isOpen ? styles.sidebarOpen : styles.sidebarClosed,
+                isExpanded ? styles.sidebarOpen : styles.sidebarClosed,
                 hiddenCollapsed && styles.sidebarHiddenCollapsed,
                 className
             )}
         >
-            <MinimalSidebarHeader label={header.label} isOpen={isOpen} />
+            <MinimalSidebarHeader label={header.label} isOpen={isExpanded} />
 
             {featured}
 
@@ -222,8 +220,8 @@ function MinimalSidebar({
             </div>
 
             {showFooterToggle && (
-                <SidebarFooter
-                    isOpen={isOpen}
+                <SidebarToggleFooter
+                    isOpen={isExpanded}
                     hiddenCollapsed={hiddenCollapsed}
                     onToggle={toggle}
                 />
@@ -242,8 +240,8 @@ function ProminentSidebar({
     mobileVisible,
     showScrollbar,
     showFooterToggle,
-    hideFooterWhenCollapsed,
-    keepBorderWhenCollapsed,
+    showFooterWhenCollapsed,
+    showBorderWhenCollapsed,
     reserveHeaderToggleSpace,
     showSelectionIndicator,
     className,
@@ -253,7 +251,7 @@ function ProminentSidebar({
 }: ResolvedSidebarProps): ReactElement {
     const {
         isDesktop,
-        isOpen,
+        isExpanded,
         collapsed,
         toggle,
         bodyRef,
@@ -282,18 +280,14 @@ function ProminentSidebar({
     )
     const reserveProminentHeaderToggleSpace =
         isDesktop && reserveHeaderToggleSpace
-    const shellClassName =
-        visualMode === 'prominent-bare' ? styles.sidebarMinimal : undefined
-    const surfaceClassName =
-        visualMode === 'prominent' ? styles.sidebarProminent : undefined
     const resolvedMobileVisible = mobileVisible ?? true
 
     return (
         <aside
             data-mobile-visible={resolvedMobileVisible}
             data-sidebar-collapsed={collapsed}
-            data-hide-footer-when-collapsed={hideFooterWhenCollapsed}
-            data-keep-border-when-collapsed={keepBorderWhenCollapsed}
+            data-hide-footer-when-collapsed={!showFooterWhenCollapsed}
+            data-keep-border-when-collapsed={showBorderWhenCollapsed}
             data-sidebar-header={includeHeader ? 'prominent' : 'bare'}
             data-sidebar-large-title={largeTitleActive}
             data-sidebar-large-title-collapsed={
@@ -304,9 +298,9 @@ function ProminentSidebar({
             style={sidebarInlineStyle}
             className={cn(
                 styles.sidebar,
-                shellClassName,
+                visualMode === 'prominent-bare' && styles.sidebarMinimal,
                 styles.sidebarWithProminentHeader,
-                isOpen ? styles.sidebarOpen : styles.sidebarClosed,
+                isExpanded ? styles.sidebarOpen : styles.sidebarClosed,
                 hiddenCollapsed && styles.sidebarHiddenCollapsed,
                 className
             )}
@@ -329,7 +323,11 @@ function ProminentSidebar({
                     !showScrollbar && styles.sidebarBodyWrapperHideScrollbar
                 )}
             >
-                <div className={surfaceClassName}>
+                <div
+                    className={cn(
+                        visualMode === 'prominent' && styles.sidebarProminent
+                    )}
+                >
                     {largeTitleActive && (
                         <div
                             className={styles.largeTitleBlock}
@@ -367,8 +365,8 @@ function ProminentSidebar({
             </div>
             {footer && <div className={styles.prominentFooter}>{footer}</div>}
             {showFooterToggle && (
-                <SidebarFooter
-                    isOpen={isOpen}
+                <SidebarToggleFooter
+                    isOpen={isExpanded}
                     hiddenCollapsed={hiddenCollapsed}
                     onToggle={toggle}
                 />
@@ -408,11 +406,9 @@ function resolveHeaderRight(
     filterOpen: boolean | undefined,
     onFilterOpenChange: ((open: boolean) => void) | undefined
 ): { element: ReactNode; isGenerated: boolean } {
-    if (custom != null) {
-        return { element: custom, isGenerated: false }
-    }
+    if (custom != null) return { element: custom, isGenerated: false }
 
-    if (filterContent != null) {
+    if (filterContent != null)
         return {
             element: (
                 <DropdownButton
@@ -431,9 +427,8 @@ function resolveHeaderRight(
             ),
             isGenerated: true,
         }
-    }
 
-    if (typeof filterOpen === 'boolean' && onFilterOpenChange) {
+    if (typeof filterOpen === 'boolean' && onFilterOpenChange)
         return {
             element: (
                 <div className={styles.filterToggleSlot}>
@@ -453,7 +448,6 @@ function resolveHeaderRight(
             ),
             isGenerated: true,
         }
-    }
 
     return { element: null, isGenerated: false }
 }
@@ -551,17 +545,17 @@ function SidebarBody({
     )
 }
 
-interface SidebarFooterProps {
+interface SidebarToggleFooterProps {
     isOpen: boolean
     hiddenCollapsed: boolean
     onToggle: () => void
 }
 
-function SidebarFooter({
+function SidebarToggleFooter({
     isOpen,
     hiddenCollapsed,
     onToggle,
-}: SidebarFooterProps): ReactElement {
+}: SidebarToggleFooterProps): ReactElement {
     if (hiddenCollapsed) {
         return <div className={styles.footer} />
     }
