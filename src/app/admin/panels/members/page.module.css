@@ -108,6 +108,20 @@
     align-items: center;
 }
 
+.filterMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 12rem;
+}
+
+.nestedFilterMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 12rem;
+}
+
 @media (max-width: 720px) {
     .detailsHeader {
         --banner-cover-height: 4rem;
