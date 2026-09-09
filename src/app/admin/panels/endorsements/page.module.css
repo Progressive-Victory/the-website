@@ -175,6 +175,10 @@
     justify-content: center;
 }
 
+.filterTagsWrapper {
+    flex-shrink: 0;
+}
+
 .imageField {
     display: flex;
     align-items: center;

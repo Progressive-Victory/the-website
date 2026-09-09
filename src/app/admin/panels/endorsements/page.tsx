@@ -1,10 +1,11 @@
 'use client'
 
 import { EndorsementBanner } from './components/EndorsementBanner'
+import { useEndorsementFilters } from './endorsementFilters'
 import styles from './page.module.css'
 import { DetailView } from './panel_views/DetailView'
 import { HistoryView } from './panel_views/HistoryView'
-import { FilterTag, FilterTags } from '@/app/admin/layout/FilterTags'
+import { FilterTags } from '@/app/admin/layout/FilterTags'
 import { ListElement, List } from '@/app/admin/layout/List'
 import { EndorsementAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
@@ -32,8 +33,6 @@ import {
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { FaClipboard, FaThumbsUp, FaUsers, FaVoteYea } from 'react-icons/fa'
-import { FaClipboardUser } from 'react-icons/fa6'
 import { MdVerified } from 'react-icons/md'
 
 const blankEndorsement: Endorsement = {
@@ -66,65 +65,6 @@ const endorsementSortFields = [
     { value: 'generalElectionDate', label: 'General Date' },
 ]
 
-const endorsementFilterTags: FilterTag[] = [
-    {
-        key: 'endorsement_level',
-        label: 'Endorsement Tier',
-        icon: <FaThumbsUp />,
-        color: '#5997E0',
-        width: '11.65rem',
-        activeRedirect: 'all',
-        scrollLeft: 'members',
-        scrollRight: 'all',
-    },
-    {
-        key: 'endorsement_status',
-        label: 'Election Status',
-        icon: <FaVoteYea />,
-        color: '#62A46C',
-        width: '11.65rem',
-        activeRedirect: 'all',
-        scrollLeft: 'endorsement_level',
-        scrollRight: 'all',
-    },
-    {
-        key: 'initiative_level',
-        label: 'Initiatives',
-        icon: <FaClipboard />,
-        color: '#7674B3',
-        width: '11.65rem',
-        activeRedirect: 'all',
-        scrollLeft: 'endorsement_level',
-        scrollRight: 'all',
-    },
-    {
-        key: 'isMember',
-        label: 'PV Members',
-        icon: <FaClipboardUser />,
-        color: '#C65882',
-        width: '11.65rem',
-        activeRedirect: 'all',
-        scrollLeft: 'endorsement_level',
-        scrollRight: 'all',
-    },
-    {
-        key: 'all',
-        label: 'All Items',
-        icon: <FaUsers />,
-        color: '#3A3A3C',
-        width: '8.4rem',
-        activeRedirect: 'endorsement_level',
-        scrollLeft: 'endorsement_level',
-        scrollRight: 'all',
-    },
-]
-
-function matchesFilterTag(endorsement: Endorsement, tag: string) {
-    if (tag === 'isMember') return endorsement.isPvMember
-
-    return true
-}
-
 type EndorsementTabKey = 'detail' | 'history'
 
 const endorsementTabs: TabSpec[] = [
@@ -149,7 +89,12 @@ export default function Page() {
         enabled: endorsementQueries.ready,
     })
 
-    const [activeFilterTag, setActiveFilterTag] = useState('all')
+    const {
+        tags: endorsementFilterTags,
+        activeTag: activeFilterTag,
+        setActiveTag: setActiveFilterTag,
+        filteredEndorsements,
+    } = useEndorsementFilters(endorsementsQuery.data ?? [])
 
     const {
         items: endorsements,
@@ -157,9 +102,7 @@ export default function Page() {
         search,
         onSearch,
     } = useUnpaginatedSearch({
-        items: (endorsementsQuery.data ?? []).filter((endorsement) =>
-            matchesFilterTag(endorsement, activeFilterTag)
-        ),
+        items: filteredEndorsements,
         initialSearch: { sort: SortDirection.ASC, sortField: 'name' },
         onFilter: (endorsement, query) =>
             endorsement.name
@@ -337,11 +280,13 @@ export default function Page() {
                     isPending={endorsementsQuery.isPending}
                     error={endorsementsQuery.error}
                     headerContent={
-                        <FilterTags
-                            tags={endorsementFilterTags}
-                            activeTag={activeFilterTag}
-                            onChange={setActiveFilterTag}
-                        />
+                        <div className={styles.filterTagsWrapper}>
+                            <FilterTags
+                                tags={endorsementFilterTags}
+                                activeTag={activeFilterTag}
+                                onChange={setActiveFilterTag}
+                            />
+                        </div>
                     }
                     onSearch={onSearch}
                     sortFields={endorsementSortFields}
