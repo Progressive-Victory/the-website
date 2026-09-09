@@ -171,7 +171,6 @@ export function Endorsements() {
                             Please try again later.
                         </p>
                     )}
-                    {/* Mounting before the data lands leaves the staggered cards stuck in their hidden variant. */}
                     {endorsementsQuery.isSuccess && (
                         <CandidateGallery
                             filteredCandidates={filteredCandidates}

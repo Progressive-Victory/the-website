@@ -20,7 +20,7 @@ import {
     getStateLabel,
 } from '@/models'
 
-/** Statuses that share the "Upcoming" section instead of showing their own label. */
+/** Statuses that share the "Upcoming" section instead of showing their own label. Might Refactor Later */
 const UPCOMING_STATUSES = new Set<ElectionStatus>([
     ElectionStatus.NoElection,
     ElectionStatus.UpcomingPrimary,

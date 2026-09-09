@@ -21,7 +21,6 @@
     }
 }
 
-/* The tile artwork is deliberately oversized and offset so the silhouette sits on the crest of the wave. */
 .tile {
     background-position: -8px -20px;
     background-size: 110%;

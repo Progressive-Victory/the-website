@@ -16,7 +16,7 @@ interface EndorsementAvatarProps {
     className?: string
 }
 
-// Only blue and yellow artwork exists, so Red falls back to blue.
+// # TODO get design team to make red version of the artwork
 const backgroundClass: Record<BackgroundColor, string> = {
     [BackgroundColor.Blue]: styles.blue,
     [BackgroundColor.Yellow]: styles.yellow,

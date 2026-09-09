@@ -250,8 +250,6 @@ export default function Page() {
         }
     }
 
-    // Uploads only work on the instance the Form hydrates via `beforeHeader`,
-    // since that is what wires the avatar back into form state.
     const renderBanner = (formConnected: boolean) =>
         selectedEndorsement ? (
             <EndorsementBanner
