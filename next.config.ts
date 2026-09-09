@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
     },
     // set allowed image hosts
     images: {
+        // Bucket URLs are content-addressed, so optimized output never goes stale.
+        minimumCacheTTL: 60 * 60 * 24 * 31,
         remotePatterns: [
             {
                 protocol: 'https',

@@ -47,8 +47,8 @@ export function EndorsementAvatar({
                 <ImageWithFallback
                     src={endorsement.imgHref}
                     alt={`${endorsement.name} profile image`}
-                    width={size * 2}
-                    height={size * 2}
+                    width={size}
+                    height={size}
                     className={styles.image}
                 />
             ) : (
