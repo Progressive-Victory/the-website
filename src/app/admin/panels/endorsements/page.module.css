@@ -1,0 +1,285 @@
+.listWidth {
+    --list-width: 25.5rem;
+}
+
+.detailsPane {
+    flex: 1;
+    overflow-y: auto;
+    background: linear-gradient(
+        135deg,
+        rgba(248, 250, 252, 0.98) 0%,
+        rgba(241, 245, 249, 0.98) 38%,
+        rgba(14, 165, 233, 0.04) 100%
+    );
+}
+
+.listElement > div {
+    padding-block: 0.6rem;
+}
+
+.detailsHeader {
+    --banner-cover-height: 3.5rem;
+    --banner-cover-gradient:
+        radial-gradient(
+            circle at 18% 30%,
+            rgba(2, 132, 199, 0.24),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 82% 20%,
+            rgba(41, 134, 204, 0.28),
+            transparent 40%
+        ),
+        linear-gradient(120deg, rgba(9, 34, 58, 0.96), rgba(27, 69, 104, 0.9));
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.95) 72%,
+        rgba(255, 255, 255, 0)
+    );
+
+    border-radius: 1rem;
+}
+
+.detailsHeader::before {
+    content: '';
+    position: absolute;
+    top: -100rem;
+    left: 0;
+    right: 0;
+    height: 100rem;
+    background: var(--banner-cover-gradient);
+    background-size: 100% var(--banner-cover-height);
+    background-position: 0 100%;
+    background-repeat: repeat-y;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.bannerCover {
+    height: var(--banner-cover-height);
+    background: var(--banner-cover-gradient);
+    background-size: 100% var(--banner-cover-height);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+}
+
+.detailsContent {
+    margin: 1rem;
+}
+
+@media (max-width: 720px) {
+    .detailsHeader {
+        --banner-cover-height: 4rem;
+    }
+}
+
+.listItemBody {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.listItemTopRow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.listItemMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.listItemText {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 500;
+    color: #000;
+}
+
+.verifiedBadge {
+    flex-shrink: 0;
+    width: 0.85rem;
+    height: 0.85rem;
+    color: #0ea5e9;
+}
+
+.listItemSubtext {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.levelTag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding-inline: 0.55rem;
+    padding-block: 0.1rem;
+    border-radius: 9999px;
+    color: rgba(2, 132, 199, 1);
+    background: rgba(14, 165, 233, 0.14);
+}
+
+.levelTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-self: flex-start;
+    margin-top: 0.65rem;
+}
+
+.levelTagPledge {
+    color: rgba(147, 51, 234, 1);
+    background: rgba(168, 85, 247, 0.14);
+}
+
+.levelTagRecommendation {
+    color: rgba(220, 38, 38, 1);
+    background: rgba(239, 68, 68, 0.14);
+}
+
+.levelTagNone {
+    color: rgba(15, 23, 42, 0.62);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.stateTag {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding-inline: 0.75rem;
+    padding-block: 0.15rem;
+    border-radius: 9999px;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.emptyState {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.imageField {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.imagePreview {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    object-fit: cover;
+    border: 1px solid rgba(17, 24, 39, 0.1);
+}
+
+.uploadButton {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.9rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+    cursor: pointer;
+    transition: background 140ms ease;
+
+    &:hover {
+        color: rgba(2, 132, 199, 1);
+        background: rgba(14, 165, 233, 0.14);
+    }
+}
+
+.uploadError {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #dc2626;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.8rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.tagDefault {
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+.tagRed {
+    background: rgba(255, 95, 75, 0.3);
+    color: rgba(177, 2, 2, 1);
+}
+.tagOrange {
+    background: rgba(255, 72, 0, 0.3);
+    color: rgba(117, 56, 0, 1);
+}
+.tagYellow {
+    background: rgba(255, 168, 0, 0.3);
+    color: rgba(71, 56, 33, 1);
+}
+.tagGreen {
+    background: rgba(112, 195, 32, 0.3);
+    color: rgba(17, 115, 75, 1);
+}
+.tagBlue {
+    background: rgba(42, 155, 225, 0.3);
+    color: rgba(10, 83, 168, 1);
+}
+.tagLightBlue {
+    color: rgba(2, 132, 199, 1);
+    background: rgba(14, 165, 233, 0.14);
+}
+.tagPurple {
+    background: rgba(172, 95, 212, 0.3);
+    color: rgba(90, 50, 134, 1);
+}
+.tagDarkRed {
+    background: rgba(177, 2, 2, 1);
+    color: rgba(255, 207, 201, 1);
+}
+.tagGray {
+    background: #e6e6e6;
+    color: #3d3d3d;
+}
+.tagMember {
+    background: #ffe5ec;
+    color: rgba(177, 2, 2, 1);
+}
+.tagPremium {
+    background: #ffe5ec;
+    color: rgb(223, 40, 76);
+}
+.tagSignature {
+    background: #ffa7cd;
+    color: rgba(177, 2, 2, 1);
+}
+.tagInnerCircle {
+    background: #da93ff;
+    color: rgba(90, 50, 134, 1);
+}

@@ -12,12 +12,13 @@ import {
     zUser,
 } from '@/contracts/data'
 import { zMembershipsResponsePacket } from '@/contracts/responses'
-import { usePositionQueries } from '@/queries'
+import { usePositionQueries, useEndorsementQueries } from '@/queries'
 import { usePaginatedSearch } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const positionQueries = usePositionQueries()
+    const endorsementQueries = useEndorsementQueries()
 
     const users = usePaginatedSearch('/users', zUser, { search: { limit: 0 } })
     const roles = usePaginatedSearch('/roles', zRole, { search: { limit: 0 } })
@@ -42,6 +43,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         queryFn: positionQueries.getPositionHierarchy,
         enabled: positionQueries.ready,
     })
+    const endorsements = useQuery({
+        queryKey: ['endorsements'],
+        queryFn: ({ signal }) => endorsementQueries.getEndorsements({ signal }),
+        enabled: endorsementQueries.ready,
+    })
 
     return (
         <ProtectedPage requiredRoles={['Superadmin']}>
@@ -58,6 +64,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         }
                         donorCount={donors.query.data?.count}
                         contributionCount={contributions.query.data?.count}
+                        endorsementCount={endorsements.data?.length}
                         membershipCount={memberships.query.data?.count}
                         membershipExampleCount={memberships.query.data?.count}
                     />

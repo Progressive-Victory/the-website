@@ -9,6 +9,7 @@ import {
     FaUserShield,
     FaUserTag,
     FaDonate,
+    FaBullhorn,
     FaIdCard,
 } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
@@ -23,6 +24,7 @@ interface SidebarProps {
     positionCount?: number
     roleCount?: number
     permissionCount?: number
+    endorsementCount?: number
     membershipCount?: number
     membershipExampleCount?: number
 }
@@ -34,6 +36,7 @@ export default function Sidebar({
     positionCount,
     roleCount,
     permissionCount,
+    endorsementCount,
     membershipCount,
     membershipExampleCount,
 }: SidebarProps) {
@@ -99,6 +102,14 @@ export default function Sidebar({
                     href="/admin/panels/fundraising"
                     icon={FaDonate}
                     count={2}
+                    open={open}
+                />
+
+                <NavLink
+                    title="Endorsements"
+                    href="/admin/panels/endorsements"
+                    icon={FaBullhorn}
+                    count={endorsementCount}
                     open={open}
                 />
                 <NavLink
