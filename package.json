@@ -16,7 +16,7 @@
         "prettier-ci": "prettier --check --ignore-path .prettierignore ."
     },
     "dependencies": {
-        "@auth/core": "^0.40.0",
+        "@auth/core": "^0.41.3",
         "@headlessui/react": "^2.2.9",
         "@heroicons/react": "^2.2.0",
         "@react-three/postprocessing": "^3.0.4",
