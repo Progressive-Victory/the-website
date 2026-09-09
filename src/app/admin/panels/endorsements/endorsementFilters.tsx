@@ -27,9 +27,9 @@ import {
 import { FaClipboardUser } from 'react-icons/fa6'
 
 export const initiativeLevelOptions = [
-    { value: InitiativeType.State, label: 'State Initiative' },
     { value: InitiativeType.National, label: 'National Initiative' },
-    { value: InitiativeType.None, label: 'None' },
+    { value: InitiativeType.State, label: 'State Initiative' },
+    { value: InitiativeType.None, label: 'No Initiative' },
 ]
 
 export const endorsementLevelOptions = [
@@ -37,7 +37,7 @@ export const endorsementLevelOptions = [
     { value: EndorsementType.Endorsement, label: 'Endorsement' },
     { value: EndorsementType.Recommendation, label: 'Recommendation' },
     { value: EndorsementType.Unendorsed, label: 'Unendorsed' },
-    { value: EndorsementType.None, label: 'None' },
+    { value: EndorsementType.None, label: 'No Endorsement' },
 ]
 
 const endorsementLevelFilterLabels = new Map([
@@ -54,7 +54,7 @@ const endorsementLevelFilterOptions = endorsementLevelOptions.map((option) => ({
 export const electionStatusOptions = [
     { value: ElectionStatus.Elected, label: 'Elected' },
     { value: ElectionStatus.WonPrimary, label: 'Won Primary' },
-    { value: ElectionStatus.UpcomingPrimary, label: 'Upcoming Primary' },
+    { value: ElectionStatus.UpcomingPrimary, label: 'Upcoming' },
     { value: ElectionStatus.LostGeneral, label: 'Lost General' },
     { value: ElectionStatus.LostPrimary, label: 'Lost Primary' },
     { value: ElectionStatus.DroppedOut, label: 'Dropped Out' },
@@ -397,7 +397,7 @@ export function useEndorsementFilters(endorsements: Endorsement[]) {
                                     />
                                 )}
                             >
-                                PV Members
+                                PV Member
                             </DropdownOverlayButton>
                             <DropdownOverlayButton
                                 icon={<FaUserTie />}
