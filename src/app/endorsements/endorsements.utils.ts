@@ -1,80 +1,67 @@
 import {
-    ELECTION_STATUS_SORT_ORDER,
-    LOST_OR_DROPPED_STATUSES,
     NATIONWIDE_STATE_LABEL,
     PAST_ELECTION_LABEL,
     UNSPECIFIED_STATE_LABEL,
     UPCOMING_STATUS_LABEL,
     electionDateFormatter,
 } from './endorsements.constants'
-import { type CandidateConfig, type ElectionStatus } from './endorsements.data'
 import {
     type SectionGroupingMode,
     type SectionSortOrder,
 } from './endorsements.types'
+import { ElectionStatus, type Endorsement } from '@/contracts/data'
+import {
+    ELECTION_STATUS_LABELS,
+    ELECTION_STATUS_SORT_ORDER,
+    LOST_OR_DROPPED_STATUSES,
+    compareEndorsementNames,
+    getRelevantElectionDate,
+    getStartOfToday,
+    getStateLabel,
+} from '@/models'
 
-export function getCandidateStateLabel(candidate: CandidateConfig): string {
-    return candidate.state || UNSPECIFIED_STATE_LABEL
+/** Statuses that share the "Upcoming" section instead of showing their own label. */
+const UPCOMING_STATUSES = new Set<ElectionStatus>([
+    ElectionStatus.NoElection,
+    ElectionStatus.UpcomingPrimary,
+])
+
+const STATUS_SECTION_SORT_VALUES = new Map<string, number>([
+    ...Object.entries(ELECTION_STATUS_LABELS).map(
+        ([status, label]) =>
+            [
+                label,
+                ELECTION_STATUS_SORT_ORDER[Number(status) as ElectionStatus],
+            ] as const
+    ),
+    [
+        UPCOMING_STATUS_LABEL,
+        ELECTION_STATUS_SORT_ORDER[ElectionStatus.NoElection],
+    ],
+])
+
+export function getCandidateStateLabel(candidate: Endorsement): string {
+    return getStateLabel(candidate.state) || UNSPECIFIED_STATE_LABEL
 }
 
-export function getRelevantElectionDate(candidate: CandidateConfig) {
-    const { primaryElection, generalElection, electionStatus } = candidate
-
-    if (electionStatus === 'Lost Primary' && primaryElection) {
-        return primaryElection
-    }
-
-    const startOfToday = getStartOfToday()
-    const primaryHasPassed =
-        !!primaryElection && primaryElection.getTime() < startOfToday
-    const generalIsUpcoming =
-        !!generalElection && generalElection.getTime() >= startOfToday
-    const advancedPastPrimary =
-        electionStatus === 'Won Primary' || electionStatus === 'Elected'
-
-    if (primaryHasPassed && generalIsUpcoming && advancedPastPrimary) {
-        return generalElection
-    }
-
-    return primaryElection ?? generalElection
-}
-
-function getStartOfToday(): number {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    return today.getTime()
-}
-
-export function compareCandidateNames(
-    a: CandidateConfig,
-    b: CandidateConfig
-): number {
-    const nameComparison = a.name.localeCompare(b.name, undefined, {
-        sensitivity: 'base',
-    })
-
-    if (nameComparison !== 0) {
-        return nameComparison
-    }
-
-    return a.id.localeCompare(b.id)
+function getElectionStatusLabel(status: ElectionStatus): string {
+    return UPCOMING_STATUSES.has(status)
+        ? UPCOMING_STATUS_LABEL
+        : ELECTION_STATUS_LABELS[status]
 }
 
 export function sortSectionCandidates(
-    candidates: CandidateConfig[],
+    candidates: Endorsement[],
     sectionMode: SectionGroupingMode
-): CandidateConfig[] {
+): Endorsement[] {
     if (sectionMode !== 'name') {
         return candidates
     }
 
-    return candidates.values().toArray().sort(compareCandidateNames)
+    return candidates.values().toArray().sort(compareEndorsementNames)
 }
 
-export function compareFlatCandidates(
-    a: CandidateConfig,
-    b: CandidateConfig
-): number {
+export function compareFlatCandidates(a: Endorsement, b: Endorsement): number {
     const statusOrderA = ELECTION_STATUS_SORT_ORDER[a.electionStatus]
     const statusOrderB = ELECTION_STATUS_SORT_ORDER[b.electionStatus]
     const statusComparison = statusOrderA - statusOrderB
@@ -95,24 +82,24 @@ export function compareFlatCandidates(
         return stateComparison
     }
 
-    return compareCandidateNames(a, b)
+    return compareEndorsementNames(a, b)
 }
 
-export function getFlatSubtitleText(candidate: CandidateConfig): string {
+export function getFlatSubtitleText(candidate: Endorsement): string {
     return LOST_OR_DROPPED_STATUSES.has(candidate.electionStatus)
-        ? candidate.electionStatus
+        ? ELECTION_STATUS_LABELS[candidate.electionStatus]
         : getCandidateStateLabel(candidate)
 }
 
 export function getSectionLabel(
-    candidate: CandidateConfig,
+    candidate: Endorsement,
     sectionMode: SectionGroupingMode
 ): string {
     switch (sectionMode) {
         case 'state':
             return getCandidateStateLabel(candidate)
         case 'status':
-            return candidate.electionStatus || UPCOMING_STATUS_LABEL
+            return getElectionStatusLabel(candidate.electionStatus)
         case 'electionDate': {
             const relevantDate = getRelevantElectionDate(candidate)
             if (!relevantDate) {
@@ -131,8 +118,8 @@ export function getSectionLabel(
 }
 
 export function compareSectionEntries(
-    [labelA, candidatesA]: [string, CandidateConfig[]],
-    [labelB, candidatesB]: [string, CandidateConfig[]],
+    [labelA, candidatesA]: [string, Endorsement[]],
+    [labelB, candidatesB]: [string, Endorsement[]],
     sectionMode: SectionGroupingMode,
     sectionSortOrder: SectionSortOrder
 ): number {
@@ -184,14 +171,10 @@ export function compareSectionEntries(
 }
 
 export function getElectionStatusSortValue(sectionLabel: string): number {
-    if (sectionLabel === UPCOMING_STATUS_LABEL) {
-        return ELECTION_STATUS_SORT_ORDER['']
-    }
-
-    return ELECTION_STATUS_SORT_ORDER[sectionLabel as ElectionStatus] ?? 99
+    return STATUS_SECTION_SORT_VALUES.get(sectionLabel) ?? 99
 }
 
-function getFirstNameInitial(candidate: CandidateConfig): string {
+function getFirstNameInitial(candidate: Endorsement): string {
     const [firstName] = candidate.name.trim().split(/\s+/)
     const initial = firstName?.charAt(0).toUpperCase()
     return initial && /[A-Z]/.test(initial) ? initial : '#'

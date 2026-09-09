@@ -1,12 +1,12 @@
 'use client'
 
-import { EndorsementAvatar } from './components/EndorsementAvatar'
 import { EndorsementBanner } from './components/EndorsementBanner'
 import styles from './page.module.css'
 import { DetailView } from './panel_views/DetailView'
 import { HistoryView } from './panel_views/HistoryView'
 import { FilterTag, FilterTags } from '@/app/admin/layout/FilterTags'
 import { ListElement, List } from '@/app/admin/layout/List'
+import { EndorsementAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
 import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
@@ -17,7 +17,12 @@ import {
     InitiativeType,
 } from '@/contracts/data'
 import { SortDirection } from '@/contracts/requests'
-import { stateOptions } from '@/models'
+import {
+    ENDORSEMENT_TYPE_LABELS,
+    INITIATIVE_TYPE_LABELS,
+    getRelevantElectionDate,
+    getStateLabel,
+} from '@/models'
 import { useEndorsementQueries } from '@/queries'
 import { cn } from '@/util'
 import {
@@ -54,39 +59,6 @@ const blankEndorsement: Endorsement = {
     avatarBgColor: BackgroundColor.Blue,
     electionStatus: ElectionStatus.NoElection,
 }
-
-const stateNames = new Map(
-    stateOptions.map((option) => [option.value, option.label])
-)
-
-const alwaysShowPrimaryDate = new Set([
-    ElectionStatus.LostPrimary,
-    ElectionStatus.DroppedOut,
-    ElectionStatus.NoElection,
-])
-
-function getListElectionDate(endorsement: Endorsement) {
-    const { primaryElectionDate, generalElectionDate, electionStatus } =
-        endorsement
-    if (alwaysShowPrimaryDate.has(electionStatus)) return primaryElectionDate
-    if (primaryElectionDate && primaryElectionDate >= new Date())
-        return primaryElectionDate
-    return generalElectionDate ?? primaryElectionDate
-}
-
-const initiativeLevelOptions = [
-    { value: InitiativeType.State, label: 'State Initiative' },
-    { value: InitiativeType.National, label: 'National Initiative' },
-    { value: InitiativeType.None, label: 'None' },
-]
-
-const endorsementLevelOptions = [
-    { value: EndorsementType.PVPledge, label: 'PV Pledge' },
-    { value: EndorsementType.Endorsement, label: 'Endorsement' },
-    { value: EndorsementType.Recommendation, label: 'Recommendation' },
-    { value: EndorsementType.Unendorsed, label: 'Unendorsed' },
-    { value: EndorsementType.None, label: 'None' },
-]
 
 const endorsementSortFields = [
     { value: 'name', label: 'Name' },
@@ -335,6 +307,27 @@ export default function Page() {
         }
     }
 
+    // Uploads only work on the instance the Form hydrates via `beforeHeader`,
+    // since that is what wires the avatar back into form state.
+    const renderBanner = (formConnected: boolean) =>
+        selectedEndorsement ? (
+            <EndorsementBanner
+                endorsement={formState?.form ?? selectedEndorsement}
+                uploadImage={
+                    formConnected ? endorsementQueries.uploadImage : undefined
+                }
+                editing={
+                    formState?.mode === 'edit' || formState?.mode === 'create'
+                }
+                saving={createMutation.isPending || updateMutation.isPending}
+                containerClassName={styles.detailsHeader}
+                coverClassName={styles.bannerCover}
+                selectedTab={selectedTab}
+                tabs={endorsementTabs}
+                onTabChange={(key) => setSelectedTab(key as EndorsementTabKey)}
+            />
+        ) : undefined
+
     return (
         <>
             <div className={styles.listWidth}>
@@ -354,7 +347,7 @@ export default function Page() {
                     sortFields={endorsementSortFields}
                 >
                     {endorsements.map((item) => {
-                        const listDate = getListElectionDate(item)
+                        const listDate = getRelevantElectionDate(item)
 
                         return (
                             <ListElement
@@ -368,6 +361,7 @@ export default function Page() {
                                         <EndorsementAvatar
                                             endorsement={item}
                                             size={48}
+                                            badgeTooltipPosition="bottom"
                                         />
                                         <div className={styles.listItemMeta}>
                                             <span
@@ -389,8 +383,7 @@ export default function Page() {
                                                     styles.listItemSubtext
                                                 }
                                             >
-                                                {stateNames.get(item.state) ??
-                                                    item.state}
+                                                {getStateLabel(item.state)}
                                             </span>
                                         </div>
                                         {listDate && (
@@ -421,11 +414,9 @@ export default function Page() {
                                             )}
                                         >
                                             {
-                                                endorsementLevelOptions.find(
-                                                    (option) =>
-                                                        option.value ===
-                                                        item.endorsementLevel
-                                                )?.label
+                                                ENDORSEMENT_TYPE_LABELS[
+                                                    item.endorsementLevel
+                                                ]
                                             }
                                         </span>
                                         <span
@@ -443,11 +434,9 @@ export default function Page() {
                                             )}
                                         >
                                             {
-                                                initiativeLevelOptions.find(
-                                                    (option) =>
-                                                        option.value ===
-                                                        item.initiativeLevel
-                                                )?.label
+                                                INITIATIVE_TYPE_LABELS[
+                                                    item.initiativeLevel
+                                                ]
                                             }
                                         </span>
                                     </div>
@@ -459,29 +448,11 @@ export default function Page() {
             </div>
 
             <div className={styles.detailsPane}>
-                {selectedEndorsement && (
-                    <EndorsementBanner
-                        endorsement={formState?.form ?? selectedEndorsement}
-                        uploadImage={endorsementQueries.uploadImage}
-                        editing={
-                            formState?.mode === 'edit' ||
-                            formState?.mode === 'create'
-                        }
-                        saving={
-                            createMutation.isPending || updateMutation.isPending
-                        }
-                        containerClassName={styles.detailsHeader}
-                        coverClassName={styles.bannerCover}
-                        selectedTab={selectedTab}
-                        tabs={endorsementTabs}
-                        onTabChange={(key) =>
-                            setSelectedTab(key as EndorsementTabKey)
-                        }
-                    />
-                )}
+                {selectedTab !== 'detail' && renderBanner(false)}
                 {selectedTab === 'detail' && (
                     <DetailView
                         key={selectedEndorsement?.id ?? 'empty'}
+                        beforeHeader={renderBanner(true)}
                         endorsement={
                             formState?.form ?? selectedEndorsement ?? null
                         }

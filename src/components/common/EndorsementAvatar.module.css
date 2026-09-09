@@ -3,25 +3,40 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    border-radius: 9999px;
-    border: 3px solid #fff;
-    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
     position: relative;
+    border-radius: 9999px;
     overflow: visible;
     background-repeat: no-repeat;
+    box-sizing: border-box;
+}
+
+.ring {
+    border: 3px solid #fff;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
     background-position: center;
     background-size: cover;
+
+    &.thinBorder {
+        border-width: 2px;
+    }
 }
 
-.avatarThinBorder {
-    border-width: 2px;
+/* The tile artwork is deliberately oversized and offset so the silhouette sits on the crest of the wave. */
+.tile {
+    background-position: -8px -20px;
+    background-size: 110%;
+
+    & .image {
+        border: 2px solid #fff;
+        box-sizing: border-box;
+    }
 }
 
-.avatarBlue {
+.blue {
     background-image: url('/images/endorsement_images/background_blue.png');
 }
 
-.avatarYellow {
+.yellow {
     background-image: url('/images/endorsement_images/background_yellow.png');
 }
 
@@ -45,9 +60,9 @@
     bottom: 0;
     width: 0;
     height: 0;
-}
 
-.badgeAnchorSmall {
-    transform: scale(0.75) translate(4px, 3px);
-    transform-origin: bottom right;
+    &.badgeAnchorSmall {
+        transform: scale(0.75) translate(4px, 3px);
+        transform-origin: bottom right;
+    }
 }
