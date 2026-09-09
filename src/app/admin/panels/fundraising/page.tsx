@@ -18,6 +18,7 @@ import {
     DashboardWidget,
     DropdownButton,
     DropdownOverlay,
+    DropdownOverlayButton,
     DateRangePicker,
     ProgressBar,
     ToggleGroup,
@@ -28,7 +29,6 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { FaDonate } from 'react-icons/fa'
 import { FaDollarSign } from 'react-icons/fa6'
-import { FiCheck } from 'react-icons/fi'
 
 interface FundraisingCardProps {
     title: string
@@ -294,29 +294,11 @@ export default function Page() {
                                                                     const isDraft =
                                                                         draftPreset ===
                                                                         preset
-                                                                    const classes =
-                                                                        [
-                                                                            styles.dateRangePresetButton,
-                                                                        ]
-                                                                    if (
-                                                                        isCommitted
-                                                                    )
-                                                                        classes.push(
-                                                                            styles.dateRangePresetButtonCommitted
-                                                                        )
-                                                                    if (isDraft)
-                                                                        classes.push(
-                                                                            styles.dateRangePresetButtonDraft
-                                                                        )
                                                                     return (
-                                                                        <button
+                                                                        <DropdownOverlayButton
                                                                             key={
                                                                                 preset
                                                                             }
-                                                                            type="button"
-                                                                            className={classes.join(
-                                                                                ' '
-                                                                            )}
                                                                             onClick={() => {
                                                                                 const [
                                                                                     s,
@@ -336,35 +318,17 @@ export default function Page() {
                                                                                     preset
                                                                                 )
                                                                             }}
-                                                                            aria-pressed={
+                                                                            selected={
                                                                                 isDraft
                                                                             }
-                                                                            aria-current={
+                                                                            checked={
                                                                                 isCommitted
-                                                                                    ? 'true'
-                                                                                    : undefined
                                                                             }
                                                                         >
-                                                                            <span>
-                                                                                {
-                                                                                    preset
-                                                                                }
-                                                                            </span>
-                                                                            <span
-                                                                                className={
-                                                                                    styles.dateRangePresetCheck
-                                                                                }
-                                                                                aria-hidden="true"
-                                                                            >
-                                                                                {isCommitted ? (
-                                                                                    <FiCheck
-                                                                                        size={
-                                                                                            14
-                                                                                        }
-                                                                                    />
-                                                                                ) : null}
-                                                                            </span>
-                                                                        </button>
+                                                                            {
+                                                                                preset
+                                                                            }
+                                                                        </DropdownOverlayButton>
                                                                     )
                                                                 }
                                                             )}
