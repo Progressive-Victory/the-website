@@ -133,7 +133,6 @@ interface UseDropdownOverlayResponsiveStyleInput {
     narrowLayoutMode: DropdownOverlayNarrowLayoutMode
 }
 
-// This function figures out the container dimensions and sets the dropdown width and horizontal position to make sure it fits within the container and aligns it with dropdownbutton. It also updates width dynamically on window resize.
 function useDropdownOverlayResponsiveStyle({
     overlayRef,
     narrowLayoutMode,
