@@ -12,7 +12,19 @@
     display: none;
 }
 
+/* An open menu would otherwise be clipped by the container. */
+.containerMenuOpen {
+    overflow: visible;
+}
+
+.tagWrapper {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
 .tag {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -47,6 +59,10 @@
     border-radius: 9999px;
     padding: 0 0.9rem;
     color: #fff;
+}
+
+.active.hasDropdown {
+    padding-right: 1.75rem;
 }
 
 .icon {
@@ -90,4 +106,29 @@
 .labelFadeOut {
     opacity: 0;
     transition: opacity 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chevronWrapper {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: width 0.25s ease;
+}
+
+.chevron {
+    flex-shrink: 0;
+    stroke-width: 3;
+    transition:
+        transform 0.2s ease,
+        opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.08s;
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
 }

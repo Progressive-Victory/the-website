@@ -7,7 +7,11 @@ import { HistoryView } from './panel_views/HistoryView'
 import { MemberView } from './panel_views/MemberView'
 import { FilterTags, FilterTag } from '@/app/admin/layout/FilterTags'
 import { ListElement, List } from '@/app/admin/layout/List'
-import { DiscordAvatar } from '@/components/common'
+import {
+    DiscordAvatar,
+    DropdownOverlay,
+    DropdownOverlayButton,
+} from '@/components/common'
 import { FormState } from '@/components/common/forms'
 import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
@@ -29,7 +33,7 @@ import {
     zUpdateUserRequest,
 } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
-import { FetchError } from '@/models'
+import { FetchError, stateOptions } from '@/models'
 import { usePositionQueries } from '@/queries'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
@@ -41,8 +45,14 @@ import {
 } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
-import { FaUsers, FaUserTag } from 'react-icons/fa'
+import {
+    FaUsers,
+    FaUserTag,
+    FaBirthdayCake,
+    FaMapMarkerAlt,
+} from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign, FaAddressCard } from 'react-icons/fa6'
+import { MdVerified } from 'react-icons/md'
 import { PulseLoader } from 'react-spinners'
 import z from 'zod'
 
@@ -53,6 +63,17 @@ const tabs: TabSpec[] = [
     { key: 'donorMatching', label: 'Donations' },
     { key: 'history', label: 'History' },
 ]
+
+// Behavior is pending API support for these filters.
+const userFilterOptions = [
+    { key: 'verified', label: 'Verified', icon: <MdVerified /> },
+]
+
+const currentYear = new Date().getFullYear()
+const birthYears = Array.from(
+    { length: currentYear - 1899 },
+    (_, index) => currentYear - index
+)
 
 export default function Page() {
     const queryClient = useQueryClient()
@@ -72,6 +93,24 @@ export default function Page() {
     const [pickingDonor, setPickingDonor] = useState<boolean>(false)
     const [selectedTab, setSelectedTab] = useState<MemberTabKey>('overview')
     const [activeFilterTag, setActiveFilterTag] = useState<string>('all')
+    const [selectedState, setSelectedState] = useState<string | null>(null)
+    const [selectedBirthYear, setSelectedBirthYear] = useState<number | null>(
+        null
+    )
+
+    const selectedStateLabel = stateOptions.find(
+        (state) => state.value === selectedState
+    )?.label
+    const selectedFilterLabel =
+        [selectedStateLabel, selectedBirthYear].filter(Boolean).join(' · ') ||
+        'All Users'
+    const selectedFilterIcon = selectedState ? (
+        <FaMapMarkerAlt />
+    ) : selectedBirthYear ? (
+        <FaBirthdayCake />
+    ) : (
+        <FaUsers />
+    )
 
     const memberFilterTags: FilterTag[] = [
         {
@@ -116,13 +155,101 @@ export default function Page() {
         },
         {
             key: 'all',
-            label: 'All Users',
-            icon: <FaUsers />,
+            label: selectedFilterLabel,
+            icon: selectedFilterIcon,
             color: '#3A3A3C',
             width: '8.4rem',
             activeRedirect: 'members',
             scrollLeft: 'members',
             scrollRight: 'all',
+            dropdownOverlay: ({ closeDropdown }) => (
+                <DropdownOverlay
+                    label="Filter by"
+                    onClose={closeDropdown}
+                    narrowLayoutMode="trigger"
+                    body={
+                        <div className={styles.filterMenu}>
+                            <DropdownOverlayButton
+                                icon={<FaUsers />}
+                                checked={
+                                    selectedState === null &&
+                                    selectedBirthYear === null
+                                }
+                                onClick={() => {
+                                    setSelectedState(null)
+                                    setSelectedBirthYear(null)
+                                    closeDropdown()
+                                }}
+                            >
+                                All
+                            </DropdownOverlayButton>
+                            {userFilterOptions.map((option) => (
+                                <DropdownOverlayButton
+                                    key={option.key}
+                                    icon={option.icon}
+                                >
+                                    {option.label}
+                                </DropdownOverlayButton>
+                            ))}
+                            <DropdownOverlayButton
+                                icon={<FaBirthdayCake />}
+                                selected={selectedBirthYear !== null}
+                                menu={({ closeMenu }) => (
+                                    <div className={styles.nestedFilterMenu}>
+                                        {birthYears.map((year) => (
+                                            <DropdownOverlayButton
+                                                key={year}
+                                                checked={
+                                                    selectedBirthYear === year
+                                                }
+                                                onClick={() => {
+                                                    setSelectedState(null)
+                                                    setSelectedBirthYear(year)
+                                                    closeMenu()
+                                                    closeDropdown()
+                                                }}
+                                            >
+                                                {year}
+                                            </DropdownOverlayButton>
+                                        ))}
+                                    </div>
+                                )}
+                            >
+                                Age
+                            </DropdownOverlayButton>
+                            <DropdownOverlayButton
+                                icon={<FaMapMarkerAlt />}
+                                selected={selectedState !== null}
+                                menu={({ closeMenu }) => (
+                                    <div className={styles.nestedFilterMenu}>
+                                        {stateOptions.map((state) => (
+                                            <DropdownOverlayButton
+                                                key={state.value}
+                                                checked={
+                                                    selectedState ===
+                                                    state.value
+                                                }
+                                                onClick={() => {
+                                                    setSelectedBirthYear(null)
+                                                    setSelectedState(
+                                                        state.value
+                                                    )
+                                                    closeMenu()
+                                                    closeDropdown()
+                                                }}
+                                            >
+                                                {state.label}
+                                            </DropdownOverlayButton>
+                                        ))}
+                                    </div>
+                                )}
+                            >
+                                State
+                            </DropdownOverlayButton>
+                        </div>
+                    }
+                />
+            ),
         },
     ]
 
