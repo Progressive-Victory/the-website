@@ -29,6 +29,7 @@ import {
 import {
     ActBlueDonorLinkRequest,
     SortDirection,
+    UpdateMembershipRequest,
     UpdateUserRequest,
     zUpdateUserRequest,
 } from '@/contracts/requests'
@@ -411,24 +412,40 @@ export default function Page() {
         async (value: ActBlueDonor, userId: number) => {
             setPickingDonor(false)
 
+            const metaData = {
+                dataSource: 'Member Panel',
+                userWhoUpdatedId: loggedInUser.data?.id,
+            }
+
             await onPost(
                 '/actblue/donors/:donorEmail/link',
                 {
                     userId,
-                    metaData: {
-                        dataSource: 'Member Panel',
-                        userWhoUpdatedId: loggedInUser.data?.id,
-                    },
+                    metaData,
                 } satisfies ActBlueDonorLinkRequest,
                 null,
                 { params: { donorEmail: value.email } }
             )
 
+            try {
+                await onPatch(
+                    '/actblue/donors/:donorEmail/membership',
+                    {
+                        discordConfirmed: true,
+                        metaData,
+                    } satisfies UpdateMembershipRequest,
+                    null,
+                    { params: { donorEmail: value.email } }
+                )
+            } catch (error) {
+                console.error(error)
+            }
+
             await queryClient.invalidateQueries({
                 queryKey: [`/users/${userId}`],
             })
         },
-        [onPost, queryClient, loggedInUser.data]
+        [onPatch, onPost, queryClient, loggedInUser.data]
     )
 
     const handleDeleteDonorItem = useCallback(

@@ -86,6 +86,10 @@ export const hasNameDraftChange = (member: Member, draft: MemberEdits) =>
         return value != null && value.trim() !== (member[key] ?? '').trim()
     })
 
+export const hasDiscordDraftChange = (member: Member, draft: MemberEdits) =>
+    draft.discordConfirmed != null &&
+    draft.discordConfirmed !== (member.discordConfirmed ?? false)
+
 export const hasAddressDraftChange = (member: Member, draft: MemberEdits) =>
     draft.address != null &&
     addressFields.some((key) => {
@@ -179,18 +183,19 @@ export const mapPacketToMember = (
             ?.toISOString()
             .slice(0, 10),
         numberOfContributions: donor.contributions?.length,
-        discordConfirmed: Boolean(user?.discordUsers?.length),
+        discordConfirmed:
+            membership?.discordConfirmed ?? Boolean(user?.discordUsers?.length),
         nameConfirmed:
             membership?.nameConfirmed ?? user?.nameConfirmed ?? undefined,
         addressConfirmed:
             membership?.addressConfirmed ?? user?.addressConfirmed ?? undefined,
-        cardPrinted: cardStatus != null ? cardStatus >= 2 : undefined,
-        labelPrinted: merchStatus != null ? merchStatus >= 2 : undefined,
-        cardPacked: merchStatus != null ? merchStatus >= 3 : undefined,
-        benefitShipped: merchStatus != null ? merchStatus >= 3 : undefined,
+        cardPrinted: membership?.cardPrinted ?? undefined,
+        labelPrinted: membership?.labelPrinted ?? undefined,
+        cardPacked: membership?.itemsPackaged ?? undefined,
+        benefitShipped: membership?.benefitsShipped ?? undefined,
         membershipCardStatus: cardStatus,
         membershipMerchStatus: merchStatus,
-        packageShipped: packageShippedFromStatus(merchStatus),
+        packageShipped: packageShippedFromStatus(cardStatus),
         userMatched: Boolean(user),
     }
 }
@@ -260,7 +265,7 @@ const resolveShirtSize = (
     return draft.shirtSize == null ? null : toApiShirtSize(draft.shirtSize)
 }
 
-const resolveMerchStatus = (member: Member, draft: MemberEdits) => {
+const resolveCardStatus = (member: Member, draft: MemberEdits) => {
     if (draft.packageShipped !== undefined) {
         if ((draft.packageShipped ?? undefined) === member.packageShipped)
             return undefined
@@ -269,25 +274,7 @@ const resolveMerchStatus = (member: Member, draft: MemberEdits) => {
             : packageShippedStatus[draft.packageShipped]
     }
 
-    const merchFlagEdited =
-        draft.labelPrinted !== undefined ||
-        draft.cardPacked !== undefined ||
-        draft.benefitShipped !== undefined
-    if (!merchFlagEdited) return undefined
-
-    const labelPrinted = draft.labelPrinted ?? member.labelPrinted ?? false
-    const cardPacked = draft.cardPacked ?? member.cardPacked ?? false
-    const benefitShipped =
-        draft.benefitShipped ?? member.benefitShipped ?? false
-
-    const status =
-        benefitShipped || cardPacked
-            ? MembershipDeliverableStatus.InTransit
-            : labelPrinted
-              ? MembershipDeliverableStatus.Printed
-              : MembershipDeliverableStatus.NotStarted
-
-    return status === member.membershipMerchStatus ? undefined : status
+    return undefined
 }
 
 const buildUserRequest = (member: Member, draft: MemberEdits) => {
@@ -314,12 +301,23 @@ const buildUserRequest = (member: Member, draft: MemberEdits) => {
 const buildMembershipRequest = (member: Member, draft: MemberEdits) => {
     const request: UpdateMembershipRequest = {}
 
+    const shirtSize = resolveShirtSize(member, draft)
+    if (shirtSize !== undefined) request.shirtSize = shirtSize
+
     const nameConfirmed = resolveConfirmation(
         draft.nameConfirmed,
         member.nameConfirmed,
         hasNameDraftChange(member, draft)
     )
     if (nameConfirmed !== undefined) request.nameConfirmed = nameConfirmed
+
+    const discordConfirmed = resolveConfirmation(
+        draft.discordConfirmed,
+        member.discordConfirmed,
+        hasDiscordDraftChange(member, draft)
+    )
+    if (discordConfirmed !== undefined)
+        request.discordConfirmed = discordConfirmed
 
     const addressConfirmed = resolveConfirmation(
         draft.addressConfirmed,
@@ -329,16 +327,36 @@ const buildMembershipRequest = (member: Member, draft: MemberEdits) => {
     if (addressConfirmed !== undefined)
         request.addressConfirmed = addressConfirmed
 
+    const cardStatus = resolveCardStatus(member, draft)
+    if (cardStatus !== undefined) request.membershipCardStatus = cardStatus
+
     if (
         draft.cardPrinted !== undefined &&
         draft.cardPrinted !== member.cardPrinted
-    )
-        request.membershipCardStatus = draft.cardPrinted
-            ? MembershipDeliverableStatus.Printed
-            : MembershipDeliverableStatus.NotStarted
+    ) {
+        request.cardPrinted = draft.cardPrinted
+    }
 
-    const merchStatus = resolveMerchStatus(member, draft)
-    if (merchStatus !== undefined) request.membershipMerchStatus = merchStatus
+    if (
+        draft.labelPrinted !== undefined &&
+        draft.labelPrinted !== member.labelPrinted
+    ) {
+        request.labelPrinted = draft.labelPrinted
+    }
+
+    if (
+        draft.cardPacked !== undefined &&
+        draft.cardPacked !== member.cardPacked
+    ) {
+        request.itemsPackaged = draft.cardPacked
+    }
+
+    if (
+        draft.benefitShipped !== undefined &&
+        draft.benefitShipped !== member.benefitShipped
+    ) {
+        request.benefitsShipped = draft.benefitShipped
+    }
 
     return request
 }
@@ -355,21 +373,11 @@ export const buildPendingUpdates = (
             member.userId != null ? buildUserRequest(member, draft) : {}
         const membershipRequest = buildMembershipRequest(member, draft)
 
-        const shirtSize = resolveShirtSize(member, draft)
-        if (shirtSize !== undefined) {
-            if (member.userId != null) userRequest.shirtSize = shirtSize
-            else membershipRequest.shirtSize = shirtSize
-        }
-
-        const user =
-            member.userId != null
-                ? { ...userRequest, ...membershipRequest }
-                : userRequest
-        const membership = member.userId == null ? membershipRequest : undefined
+        const user = userRequest
+        const membership = membershipRequest
 
         const hasUser = Object.keys(user).length > 0
-        const hasMembership =
-            membership != null && Object.keys(membership).length > 0
+        const hasMembership = Object.keys(membership).length > 0
         if (!hasUser && !hasMembership) return []
 
         return [

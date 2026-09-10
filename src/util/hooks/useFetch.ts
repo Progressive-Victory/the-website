@@ -33,7 +33,7 @@ export function useFetch() {
                 `Invalid fetch! Substitution key :${key} does not exist in params (value ${value})`
             )
 
-        return encodeURIComponent(value)
+        return encodeURIComponent(value).replace(/%40/g, '@')
     }
 
     const addQueryParam = (url: URL, key: string, param: QueryParam) => {
@@ -120,12 +120,26 @@ export function useFetch() {
         }
 
         if (!res.ok) {
-            const error = (await res.json()) as ApiError
+            const text = await res.text()
+            let error: ApiError = {
+                message: res.statusText || 'An error occurred',
+                error: null,
+            }
+            if (text.trim().length > 0) {
+                try {
+                    error = JSON.parse(text) as ApiError
+                } catch {
+                    error = { message: text, error: null }
+                }
+            }
             throw new FetchError(error.message, res.status, error.error)
         }
 
+        const text = await res.text()
         const content =
-            res.status === 204 ? undefined : ((await res.json()) as unknown)
+            res.status === 204 || text.trim().length === 0
+                ? undefined
+                : (JSON.parse(text) as unknown)
 
         const parsed = z.parse(schema ?? z.undefined(), content)
         return parsed as S extends null ? void : z.infer<S>

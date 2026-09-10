@@ -3,7 +3,11 @@
 import { BoolTag, EditableBoolTag } from './components/Tags'
 import tags from './components/Tags.module.css'
 import { MembershipTableOptions, useMemberDraft } from './hooks'
-import { hasAddressDraftChange, hasNameDraftChange } from './membership.helpers'
+import {
+    hasAddressDraftChange,
+    hasNameDraftChange,
+    hasDiscordDraftChange,
+} from './membership.helpers'
 import {
     EditController,
     Member,
@@ -67,6 +71,10 @@ interface FlagColumnConfig {
     key: MemberFlag
     header: string
     resolveDraft?: (member: Member, draft: MemberEdits) => boolean
+    menu?: (
+        member: Member,
+        controls: { closeDropdown: () => void }
+    ) => React.ReactNode
 }
 
 const FlagEdit = ({
@@ -103,6 +111,7 @@ const flagColumn = (
     sortValue: (m) => (m[config.key] ? 1 : 0),
     render: (m) => <BoolTag value={m[config.key]} />,
     renderEdit: (m) => <FlagEdit member={m} edit={edit} config={config} />,
+    menu: config.menu,
 })
 
 const readOnlyBoolColumn = (
@@ -124,7 +133,15 @@ const confirmedColumnConfigs: FlagColumnConfig[] = [
             draft.nameConfirmed ??
             (hasNameDraftChange(m, draft) ? false : (m.nameConfirmed ?? false)),
     },
-    { key: 'discordConfirmed', header: 'Discord Confirmed' },
+    {
+        key: 'discordConfirmed',
+        header: 'Discord Confirmed',
+        resolveDraft: (m, draft) =>
+            draft.discordConfirmed ??
+            (hasDiscordDraftChange(m, draft)
+                ? false
+                : (m.discordConfirmed ?? false)),
+    },
     {
         key: 'addressConfirmed',
         header: 'Address Confirmed',
