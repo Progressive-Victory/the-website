@@ -115,60 +115,6 @@
     padding-top: 0.1rem;
 }
 
-.dateRangePresetButton {
-    display: grid;
-    grid-template-columns: 1fr 1.1rem;
-    align-items: center;
-    gap: 0.4rem;
-    border: none;
-    background: transparent;
-    color: rgba(9, 34, 58, 0.88);
-    text-align: left;
-    font-size: 0.8rem;
-    font-weight: 700;
-    padding: 0.5rem 0.45rem;
-    border-radius: 0.54rem;
-    cursor: pointer;
-}
-
-.dateRangePresetButton:hover {
-    background: rgba(15, 23, 42, 0.05);
-}
-
-.dateRangePresetButtonCommitted {
-    color: rgba(2, 132, 199, 1);
-    font-weight: 700;
-}
-
-.dateRangePresetButtonCommitted:hover {
-    background: rgba(14, 165, 233, 0.08);
-}
-
-.dateRangePresetButtonDraft {
-    background: rgba(14, 165, 233, 0.14);
-    color: rgba(2, 132, 199, 1);
-}
-
-.dateRangePresetButtonDraft:hover {
-    background: rgba(14, 165, 233, 0.2);
-}
-
-.dateRangePresetButtonDraft.dateRangePresetButtonCommitted {
-    background: rgba(14, 165, 233, 0.18);
-}
-
-.dateRangePresetCheck {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(2, 132, 199, 1);
-    width: 1.1rem;
-}
-
-.dateRangePresetCheck svg {
-    stroke-width: 3.5;
-}
-
 .panelHeader {
     display: flex;
     align-items: center;
