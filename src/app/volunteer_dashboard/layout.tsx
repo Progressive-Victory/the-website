@@ -16,14 +16,20 @@ import {
     zRole,
     zUser,
 } from '@/contracts/data'
-import { usePositionQueries } from '@/queries'
+import { useEndorsementQueries, usePositionQueries } from '@/queries'
 import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
-import { usePathname } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
-import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
+import {
+    FaClipboardUser,
+    FaDollarSign,
+    FaCheckToSlot,
+    FaMoneyBills,
+    FaMoneyCheckDollar,
+} from 'react-icons/fa6'
 import type { IconType } from 'react-icons/lib'
 import { useMediaQuery } from 'usehooks-ts'
 
@@ -47,12 +53,13 @@ interface DashboardPanelConfigItem {
 
 export default function Layout({ children }: { children: ReactNode }) {
     const pathname = usePathname()
+    const searchParams = useSearchParams()
+    const welcomeParam = searchParams.get('from') === 'welcome'
     const previousPathnameRef = useRef(pathname)
     const positionQueries = usePositionQueries()
-    const showWelcomeRef = useRef(
-        typeof window !== 'undefined' &&
-            new URLSearchParams(window.location.search).get('from') ===
-                'welcome'
+    const endorsementQueries = useEndorsementQueries()
+    const [showWelcome, setShowWelcome] = useState(
+        pathname === '/volunteer_dashboard' && welcomeParam
     )
     const previousPathname = previousPathnameRef.current
     const users = usePaginatedSearch('/users', zUser, { search: { limit: 0 } })
@@ -72,6 +79,11 @@ export default function Layout({ children }: { children: ReactNode }) {
         queryKey: ['positionHierarchy'],
         queryFn: positionQueries.getPositionHierarchy,
         enabled: positionQueries.ready,
+    })
+    const endorsements = useQuery({
+        queryKey: ['endorsements'],
+        queryFn: ({ signal }) => endorsementQueries.getEndorsements({ signal }),
+        enabled: endorsementQueries.ready,
     })
 
     const positionCount = positionHierarchy.data?.positions?.length
@@ -102,15 +114,22 @@ export default function Layout({ children }: { children: ReactNode }) {
                     key: 'donors',
                     label: 'Donors',
                     href: '/volunteer_dashboard/panels/donors',
-                    icon: FaDonate,
+                    icon: FaDollarSign,
                     count: donors.query.data?.count,
                 },
                 {
                     key: 'contributions',
                     label: 'Contributions',
                     href: '/volunteer_dashboard/panels/contributions',
-                    icon: FaDollarSign,
+                    icon: FaMoneyBills,
                     count: contributions.query.data?.count,
+                },
+                {
+                    key: 'membership',
+                    label: 'Membership',
+                    href: '/volunteer_dashboard/panels/membership',
+                    icon: FaMoneyCheckDollar,
+                    // count: insert,
                 },
             ],
         },
@@ -135,11 +154,37 @@ export default function Layout({ children }: { children: ReactNode }) {
             icon: FaUserShield,
             count: permissions.query.data?.count,
         },
+        {
+            key: 'endorsements',
+            label: 'Endorsements',
+            href: '/volunteer_dashboard/panels/endorsements',
+            icon: FaCheckToSlot,
+            count: endorsements.data?.length,
+        },
     ]
 
     useEffect(() => {
         previousPathnameRef.current = pathname
     }, [pathname])
+
+    useEffect(() => {
+        if (pathname !== '/volunteer_dashboard') {
+            setShowWelcome(false)
+            return
+        }
+
+        if (!welcomeParam) return
+
+        const cleanSearchParams = new URLSearchParams(searchParams.toString())
+        cleanSearchParams.delete('from')
+
+        const cleanSearch = cleanSearchParams.toString()
+        window.history.replaceState(
+            window.history.state,
+            '',
+            `${pathname}${cleanSearch ? `?${cleanSearch}` : ''}${window.location.hash}`
+        )
+    }, [pathname, searchParams, welcomeParam])
 
     const currentTopLevelIndex = dashboardPanelConfig.findIndex(
         (panel) => panel.href === pathname
@@ -256,7 +301,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                         />
                     }
                     unselected={renderVolunteerDashboardUnselectedDetail({
-                        showWelcome: showWelcomeRef.current,
+                        showWelcome,
                         currentUserName:
                             `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim(),
                         currentUserHandle:
@@ -271,6 +316,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                         roleCount: roles.query.data?.count,
                         permissionCount: permissions.query.data?.count,
                         positionCount,
+                        endorsementCount: endorsements.data?.length,
                     })}
                 />
             </div>

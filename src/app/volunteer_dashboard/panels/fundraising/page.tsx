@@ -28,7 +28,7 @@ import { NavigationButton } from '@/components/common/navigation_stack/navigatio
 import Panel from '@/components/common/panel/Panel'
 import { useEffect, useRef, useState } from 'react'
 import { FaDonate } from 'react-icons/fa'
-import { FaDollarSign } from 'react-icons/fa6'
+import { FaDollarSign, FaMoneyCheckDollar, FaMoneyBills } from 'react-icons/fa6'
 import { FiCheck } from 'react-icons/fi'
 
 export default function Page() {
@@ -875,7 +875,7 @@ export default function Page() {
                             label="Donors"
                             description="ActBlue donors, totals, and donor records."
                             href="/volunteer_dashboard/panels/donors"
-                            icon={FaDonate}
+                            icon={FaDollarSign}
                             tag={{
                                 count: allTimeStatsQuery.data?.totalDonorCount,
                             }}
@@ -887,13 +887,23 @@ export default function Page() {
                             label="Contributions"
                             description="Contribution lineitems, payment info, and details."
                             href="/volunteer_dashboard/panels/contributions"
-                            icon={FaDollarSign}
+                            icon={FaMoneyBills}
                             tag={{
                                 count: allTimeStatsQuery.data
                                     ?.totalContributionCount,
                             }}
                             buttonType="card"
                             trackPanelHistory
+                        />
+
+                        <NavigationButton
+                            label="Membership"
+                            description="Dues Paying Membership switchboard."
+                            href="/volunteer_dashboard/panels/membership"
+                            icon={FaMoneyCheckDollar}
+                            tag={{ count: 92 }}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
                         />
                     </div>
                 </div>

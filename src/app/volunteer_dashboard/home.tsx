@@ -4,7 +4,13 @@ import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import type { ReactElement } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
-import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
+import {
+    FaCheckToSlot,
+    FaClipboardUser,
+    FaDollarSign,
+    FaMoneyBills,
+    FaMoneyCheckDollar,
+} from 'react-icons/fa6'
 
 function renderUnselectedGridHeader(label: string): ReactElement {
     return (
@@ -30,6 +36,7 @@ export function renderVolunteerDashboardUnselectedDetail({
     roleCount,
     permissionCount,
     positionCount,
+    endorsementCount,
 }: {
     showWelcome?: boolean
     currentUserName?: string
@@ -42,6 +49,7 @@ export function renderVolunteerDashboardUnselectedDetail({
     roleCount?: number
     permissionCount?: number
     positionCount?: number
+    endorsementCount?: number
 }): ReactElement {
     return (
         <Detail
@@ -89,13 +97,12 @@ export function renderVolunteerDashboardUnselectedDetail({
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />
-
                         <NavigationButton
-                            label="Positions"
-                            description="Staff and volunteer position records."
-                            href="/volunteer_dashboard/panels/positions"
-                            icon={FaClipboardUser}
-                            tag={{ count: positionCount }}
+                            label="Endorsements"
+                            description="Endorsement records and candidate details."
+                            href="/volunteer_dashboard/panels/endorsements"
+                            icon={FaCheckToSlot}
+                            tag={{ count: endorsementCount }}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />
@@ -111,19 +118,28 @@ export function renderVolunteerDashboardUnselectedDetail({
                             resetPanelHistoryOnClick
                         />
                         <NavigationButton
+                            label="Memberships"
+                            description="Dues Paying Membership switchboard."
+                            href="/volunteer_dashboard/panels/membership"
+                            icon={FaMoneyCheckDollar}
+                            tag={{ count: 92 }}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                        <NavigationButton
                             label="Donors"
                             description="ActBlue donors, totals, and records."
                             href="/volunteer_dashboard/panels/donors"
-                            icon={FaDonate}
+                            icon={FaDollarSign}
                             tag={{ count: donorCount }}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />
                         <NavigationButton
                             label="Contributions"
-                            description="Contribution lineitems and payment info."
+                            description="Contributions, lineitems, and payment info."
                             href="/volunteer_dashboard/panels/contributions"
-                            icon={FaDollarSign}
+                            icon={FaMoneyBills}
                             tag={{ count: contributionCount }}
                             buttonType="card"
                             resetPanelHistoryOnClick
@@ -146,6 +162,15 @@ export function renderVolunteerDashboardUnselectedDetail({
                             href="/volunteer_dashboard/panels/permissions"
                             icon={FaUserShield}
                             tag={{ count: permissionCount }}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                        <NavigationButton
+                            label="Positions"
+                            description="Staff and volunteer position records."
+                            href="/volunteer_dashboard/panels/positions"
+                            icon={FaClipboardUser}
+                            tag={{ count: positionCount }}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />

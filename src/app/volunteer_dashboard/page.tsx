@@ -15,6 +15,12 @@ export const metadata: Metadata = {
     },
 }
 
-export default function Page() {
+export default async function Page({
+    searchParams,
+}: {
+    searchParams: Promise<{ from?: string }>
+}) {
+    if ((await searchParams).from === 'welcome') return null
+
     redirect('/volunteer_dashboard/panels/members', RedirectType.replace)
 }
