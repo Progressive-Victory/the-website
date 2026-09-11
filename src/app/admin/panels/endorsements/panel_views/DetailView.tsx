@@ -21,7 +21,12 @@ import {
     EndorsementType,
     InitiativeType,
 } from '@/contracts/data'
-import { stateOptions } from '@/models'
+import {
+    electionStatusOptions,
+    endorsementLevelOptions,
+    initiativeLevelOptions,
+    stateOptions,
+} from '@/models'
 import { cn } from '@/util'
 import { ChangeEvent, useCallback, useState } from 'react'
 
@@ -30,33 +35,9 @@ const stateOptionsWithEmpty = [
     ...stateOptions,
 ]
 
-const initiativeLevelOptions = [
-    { value: InitiativeType.National, label: 'National Initiative' },
-    { value: InitiativeType.State, label: 'State Initiative' },
-    { value: InitiativeType.None, label: 'None' },
-]
-
-const endorsementLevelOptions = [
-    { value: EndorsementType.PVPledge, label: 'PV Pledge' },
-    { value: EndorsementType.Endorsement, label: 'Endorsement' },
-    { value: EndorsementType.Recommendation, label: 'Recommendation' },
-    { value: EndorsementType.Unendorsed, label: 'Unendorsed' },
-    { value: EndorsementType.None, label: 'None' },
-]
-
 const avatarBgColorOptions = [
     { value: BackgroundColor.Blue, label: 'Blue' },
     { value: BackgroundColor.Yellow, label: 'Yellow' },
-]
-
-const electionStatusOptions = [
-    { value: ElectionStatus.Elected, label: 'Elected' },
-    { value: ElectionStatus.WonPrimary, label: 'Won Primary' },
-    { value: ElectionStatus.UpcomingPrimary, label: 'Upcoming Primary' },
-    { value: ElectionStatus.LostGeneral, label: 'Lost General' },
-    { value: ElectionStatus.LostPrimary, label: 'Lost Primary' },
-    { value: ElectionStatus.DroppedOut, label: 'Dropped Out' },
-    { value: ElectionStatus.NoElection, label: 'No Election' },
 ]
 
 interface DetailViewProps {
@@ -69,6 +50,7 @@ interface DetailViewProps {
     onDelete: () => void
     onCancel: () => void
     uploadImage: (image: File) => Promise<{ url: string }>
+    beforeHeader?: React.ReactElement
     className?: string
 }
 
@@ -82,6 +64,7 @@ export function DetailView({
     onDelete,
     onCancel,
     uploadImage,
+    beforeHeader,
     className,
 }: DetailViewProps) {
     return (
@@ -90,6 +73,7 @@ export function DetailView({
             form={endorsement}
             title={title}
             saving={saving}
+            beforeHeader={beforeHeader}
             onUpdate={onUpdate}
             onSave={onSave}
             onCreate={onCreate}
