@@ -73,11 +73,13 @@
 .multiTextRoot {
     display: flex;
     flex-flow: row wrap;
+    gap: 0.25rem;
 }
 
 .valueTagContainer {
     display: flex;
     flex-flow: row wrap;
+    gap: 0.25rem;
 }
 
 .valueTag {

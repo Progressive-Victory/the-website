@@ -73,7 +73,9 @@ export function MultiTextField<T>(props: MultiTextProps<T>) {
                 </div>
             ) : (
                 <div className={styles.multiTextRoot}>
-                    {[...value].map((v, i) => renderValue(v, i, readonly))}
+                    <div className={styles.valueTagContainer}>
+                        {[...value].map((v, i) => renderValue(v, i, readonly))}
+                    </div>
                     <input
                         type="text"
                         id={props?.id}
