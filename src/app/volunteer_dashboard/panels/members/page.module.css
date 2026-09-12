@@ -101,6 +101,20 @@
     border-bottom: 1px solid rgba(17, 24, 39, 0.08);
 }
 
+.filterMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 12rem;
+}
+
+.nestedFilterMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 12rem;
+}
+
 :global([data-sidebar-collapsed='true']) .filterTagsWrapper {
     display: none;
 }

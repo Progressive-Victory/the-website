@@ -7,6 +7,7 @@ export interface TagProps {
     label?: string
     count?: number
     className?: string
+    labelClassName?: string
 }
 
 export interface TagSectionProps {
@@ -28,7 +29,7 @@ export function TagSection({
     isGroupOpen,
     onGroupTagClick,
 }: TagSectionProps): ReactElement {
-    const { label, count, className } = tag ?? {}
+    const { label, count, className, labelClassName } = tag ?? {}
     const formattedCount = count?.toLocaleString()
 
     return (
@@ -54,7 +55,9 @@ export function TagSection({
                     <span className={styles.groupTagChevron} />
                 </span>
             ) : label ? (
-                <span className={styles.tagLabel}>{label}</span>
+                <span className={cn(styles.tagLabel, labelClassName)}>
+                    {label}
+                </span>
             ) : (
                 !isAccountButton &&
                 count !== undefined && (

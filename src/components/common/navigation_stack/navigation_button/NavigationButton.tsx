@@ -13,10 +13,16 @@ import type { IconType } from 'react-icons/lib'
 export type NavigationButtonType = 'default' | 'group' | 'card' | 'account'
 export type IndicatorDirection = 'up' | 'down' | 'none'
 
+export interface SubTagProps {
+    label: string
+    className?: string
+}
+
 export interface NavigationButtonProps {
     label: string
     subtitle?: string
     tag?: TagProps
+    subTags?: SubTagProps[]
     href: string
     icon?: IconType | ReactNode
     description?: string
@@ -41,6 +47,7 @@ export function NavigationButton({
     label,
     subtitle,
     tag,
+    subTags,
     href,
     icon,
     description,
@@ -60,6 +67,7 @@ export function NavigationButton({
     const isCardButton = buttonType === 'card'
     const isAccountButton = buttonType === 'account'
     const hasSubtitle = subtitle != null && subtitle !== ''
+    const hasSubTags = !isAccountButton && !!subTags?.length
     const {
         isOpen: isGroupOpen,
         shouldRender: shouldRenderGroupChildren,
@@ -81,7 +89,7 @@ export function NavigationButton({
                 active &&
                     indicatorDirection === 'down' &&
                     styles.itemActiveFromDown,
-                className,
+                className
             )}
             style={style}
         >
@@ -91,7 +99,8 @@ export function NavigationButton({
                     className={cn(
                         isCardButton ? styles.cardLink : styles.link,
                         isAccountButton && styles.accountLink,
-                        classNames?.link,
+                        hasSubTags && styles.linkWithSubTags,
+                        classNames?.link
                     )}
                     data-indicator-target={
                         showIndicator && hasActiveGroupChild && !isGroupOpen
@@ -107,7 +116,7 @@ export function NavigationButton({
                         <span
                             className={cn(
                                 styles.iconSection,
-                                isAccountButton && styles.accountIconSection,
+                                isAccountButton && styles.accountIconSection
                             )}
                             aria-hidden="true"
                         >
@@ -126,7 +135,7 @@ export function NavigationButton({
                                 !isAccountButton &&
                                 styles.labelSectionWithSubtitle,
                             isAccountButton && styles.accountText,
-                            classNames?.label,
+                            classNames?.label
                         )}
                     >
                         {label}
@@ -134,7 +143,7 @@ export function NavigationButton({
                             <span
                                 className={cn(
                                     !isAccountButton && styles.subtitleSection,
-                                    isAccountButton && styles.accountSubtitle,
+                                    isAccountButton && styles.accountSubtitle
                                 )}
                             >
                                 {subtitle}
@@ -155,6 +164,22 @@ export function NavigationButton({
                     {description && (
                         <span className={styles.description}>
                             {description}
+                        </span>
+                    )}
+
+                    {hasSubTags && (
+                        <span className={styles.subTagRow}>
+                            {subTags.map((subTag, index) => (
+                                <span
+                                    key={`${subTag.label}-${index}`}
+                                    className={cn(
+                                        styles.subTag,
+                                        subTag.className
+                                    )}
+                                >
+                                    {subTag.label}
+                                </span>
+                            ))}
                         </span>
                     )}
                 </Link>

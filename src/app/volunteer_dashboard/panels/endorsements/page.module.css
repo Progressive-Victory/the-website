@@ -1,0 +1,142 @@
+.sidebarBg {
+    --navigation-stack-sidebar-bg: #f9fafb;
+    --navigation-stack-sidebar-padding: 0rem;
+    --navigation-stack-sidebar-gap: 0rem;
+}
+
+.backButton {
+    --back-button-hover-color: rgba(255, 255, 255, 0.7);
+    margin-top: 0.5rem;
+    --sidebar-back-margin-bottom: -1rem;
+    position: relative;
+    z-index: 21;
+}
+
+.detailsPane {
+    flex: 1;
+    overflow-y: auto;
+    background: linear-gradient(
+        135deg,
+        rgba(248, 250, 252, 0.98) 0%,
+        rgba(241, 245, 249, 0.98) 38%,
+        rgba(14, 165, 233, 0.04) 100%
+    );
+    z-index: 0;
+}
+
+.detailsHeader {
+    --banner-cover-height: 3.5rem;
+    --banner-cover-gradient:
+        radial-gradient(
+            circle at 18% 30%,
+            rgba(2, 132, 199, 0.24),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 82% 20%,
+            rgba(41, 134, 204, 0.28),
+            transparent 40%
+        ),
+        linear-gradient(120deg, rgba(9, 34, 58, 0.96), rgba(27, 69, 104, 0.9));
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.95) 72%,
+        rgba(255, 255, 255, 0)
+    );
+
+    border-radius: 1rem;
+}
+
+.detailsHeader::before {
+    content: '';
+    position: absolute;
+    top: -100rem;
+    left: 0;
+    right: 0;
+    height: 100rem;
+    background: var(--banner-cover-gradient);
+    background-size: 100% var(--banner-cover-height);
+    background-position: 0 100%;
+    background-repeat: repeat-y;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.bannerCover {
+    height: var(--banner-cover-height);
+    background: var(--banner-cover-gradient);
+    background-size: 100% var(--banner-cover-height);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+}
+
+.detailsContent {
+    margin: 1rem;
+}
+
+@media (max-width: 720px) {
+    .detailsHeader {
+        --banner-cover-height: 4rem;
+    }
+}
+
+.filterTagsWrapper {
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+/* Doubled class outranks the shared .tagLabel styles regardless of stylesheet order */
+.dateTag.dateTag {
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.tagDefault {
+    --navigation-button-sub-tag-color: rgba(15, 23, 42, 0.72);
+    --navigation-button-sub-tag-bg: rgba(15, 23, 42, 0.06);
+}
+
+.tagRed {
+    --navigation-button-sub-tag-color: rgba(177, 2, 2, 1);
+    --navigation-button-sub-tag-bg: rgba(255, 95, 75, 0.3);
+}
+
+.tagOrange {
+    --navigation-button-sub-tag-color: rgba(117, 56, 0, 1);
+    --navigation-button-sub-tag-bg: rgba(255, 72, 0, 0.3);
+}
+
+.tagGreen {
+    --navigation-button-sub-tag-color: rgba(17, 115, 75, 1);
+    --navigation-button-sub-tag-bg: rgba(112, 195, 32, 0.3);
+}
+
+.tagBlue {
+    --navigation-button-sub-tag-color: rgba(10, 83, 168, 1);
+    --navigation-button-sub-tag-bg: rgba(42, 155, 225, 0.3);
+}
+
+.tagPurple {
+    --navigation-button-sub-tag-color: rgba(90, 50, 134, 1);
+    --navigation-button-sub-tag-bg: rgba(172, 95, 212, 0.3);
+}
+
+:global([data-sidebar-collapsed='true']) .filterTagsWrapper {
+    display: none;
+}
+
+:global([data-sidebar-collapsed='true']) .listAvatar {
+    box-shadow: none;
+}

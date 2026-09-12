@@ -217,14 +217,7 @@
 :global([data-sidebar-collapsed='true'])
     .sidebarNavigationButton
     a
-    > span:nth-child(2) {
-    opacity: 0;
-}
-
-:global([data-sidebar-collapsed='true'])
-    .sidebarNavigationButton
-    a
-    > span:last-child {
+    > span:nth-child(n + 2) {
     opacity: 0;
 }
 

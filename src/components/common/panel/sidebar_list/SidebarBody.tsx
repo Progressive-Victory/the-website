@@ -2,6 +2,7 @@
 
 import styles from './SidebarList.module.css'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import type { SubTagProps } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import React from 'react'
 import type { ReactNode } from 'react'
 
@@ -10,6 +11,8 @@ export interface SidebarBodyItemConfig {
     label: string
     subtitle?: string
     tagLabel?: string
+    tagClassName?: string
+    subTags?: SubTagProps[]
     icon?: ReactNode
     href: string
     onClick: (event: React.MouseEvent) => void
@@ -67,7 +70,15 @@ export function SidebarBody<T>({
                 href={config.href}
                 label={config.label}
                 subtitle={config.subtitle}
-                tag={config.tagLabel ? { label: config.tagLabel } : undefined}
+                tag={
+                    config.tagLabel
+                        ? {
+                              label: config.tagLabel,
+                              labelClassName: config.tagClassName,
+                          }
+                        : undefined
+                }
+                subTags={config.subTags}
                 icon={config.icon}
                 onClick={config.onClick}
                 showIndicator={false}
