@@ -1,5 +1,4 @@
-import { zUserProfile } from '../data'
-import { zPosition } from '@/contracts/data/Position'
+import { zUserProfile, zPosition } from '../data'
 import z from 'zod'
 
 export const zPositionHierarchyResponse = z.object({
