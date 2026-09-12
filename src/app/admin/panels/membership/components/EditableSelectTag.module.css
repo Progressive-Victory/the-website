@@ -1,0 +1,87 @@
+.editSelectTag.editSelectTag {
+    position: relative;
+    justify-content: flex-start;
+    gap: 0.15rem;
+    width: 4.25rem;
+    padding-right: 0.45rem;
+    cursor: pointer;
+}
+
+.editSelectLabel {
+    flex: none;
+    width: 1.6rem;
+    text-align: center;
+}
+
+.editSelectChevron {
+    margin-left: auto;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+}
+
+.editPackageShippedTag.editPackageShippedTag {
+    display: flex;
+    position: relative;
+    cursor: pointer;
+}
+
+.editPackageShippedLabel {
+    text-align: center;
+}
+
+.editPackageShippedChevron {
+    position: absolute;
+    right: 0.35rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.65rem;
+    flex-shrink: 0;
+}
+
+.editSelectTag,
+.editPackageShippedTag {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform-origin: center center;
+    transition: transform 0.12s ease;
+
+    &:hover,
+    &:focus-visible {
+        transform: scale(1.05);
+    }
+}
+
+.editSelectOverlay.editSelectOverlay {
+    z-index: 1;
+    min-width: 0;
+    padding: 0.35rem;
+    overflow: visible;
+}
+
+.editSelectMenu {
+    display: grid;
+    gap: 0.25rem;
+    justify-items: start;
+}
+
+.editSelectOption {
+    display: flex;
+    padding: 0.15rem 0.2rem;
+    cursor: pointer;
+
+    & > span {
+        will-change: transform;
+        backface-visibility: hidden;
+        transform-origin: center center;
+        transition: transform 0.12s ease;
+    }
+
+    &:hover > span,
+    &:focus-visible > span {
+        transform: scale(1.05);
+    }
+}
+
+.editSelectDirty.editSelectDirty {
+    box-shadow: 0 0 0 2px rgba(255, 168, 0, 0.3);
+}

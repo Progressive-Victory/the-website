@@ -11,6 +11,7 @@ import {
     zRole,
     zUser,
 } from '@/contracts/data'
+import { zMembershipsResponsePacket } from '@/contracts/responses'
 import { usePositionQueries, useEndorsementQueries } from '@/queries'
 import { usePaginatedSearch } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
@@ -31,6 +32,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         '/actblue/contributions',
         zActBlueDonationPacket,
         { search: { limit: 0 } }
+    )
+    const memberships = usePaginatedSearch(
+        '/actblue/memberships',
+        zMembershipsResponsePacket,
+        { search: { limit: 1 } }
     )
     const positionHierarchy = useQuery({
         queryKey: ['positionHierarchy'],
@@ -59,6 +65,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         donorCount={donors.query.data?.count}
                         contributionCount={contributions.query.data?.count}
                         endorsementCount={endorsements.data?.length}
+                        membershipCount={memberships.query.data?.count}
+                        membershipExampleCount={memberships.query.data?.count}
                     />
 
                     <div className={styles.content}>{children}</div>

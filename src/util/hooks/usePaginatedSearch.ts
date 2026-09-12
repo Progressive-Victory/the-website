@@ -44,7 +44,7 @@ export function usePaginatedSearch<S extends z.ZodObject>(
 
         return await onGet(endpoint, zPaginatedResponse(schema), {
             params: options?.endpointParams,
-            query: { ...search, truePage, limit },
+            query: { ...search, page: truePage, limit },
             signal,
         })
     }

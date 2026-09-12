@@ -229,6 +229,7 @@
     display: flex;
     flex-flow: column nowrap;
     align-items: stretch;
+    overflow-x: auto;
 
     padding: 0 1rem 1rem 1rem;
 }

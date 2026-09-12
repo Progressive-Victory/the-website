@@ -1,0 +1,168 @@
+.tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.8rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.tagRed {
+    background: rgba(255, 95, 75, 0.3);
+    color: rgba(177, 2, 2, 1);
+}
+.tagOrange {
+    background: rgba(255, 72, 0, 0.3);
+    color: rgba(117, 56, 0, 1);
+}
+.tagYellow {
+    background: rgba(255, 168, 0, 0.3);
+    color: rgba(71, 56, 33, 1);
+}
+.tagGreen {
+    background: rgba(112, 195, 32, 0.3);
+    color: rgba(17, 115, 75, 1);
+}
+.tagBlue {
+    background: rgba(42, 155, 225, 0.3);
+    color: rgba(10, 83, 168, 1);
+}
+.tagPurple {
+    background: rgba(172, 95, 212, 0.3);
+    color: rgba(90, 50, 134, 1);
+}
+.tagDarkRed {
+    background: rgba(177, 2, 2, 1);
+    color: rgba(255, 207, 201, 1);
+}
+.tagGray {
+    background: #e6e6e6;
+    color: #3d3d3d;
+}
+.tagMember {
+    background: #ffe5ec;
+    color: rgba(177, 2, 2, 1);
+}
+.tagPremium {
+    background: #ffe5ec;
+    color: rgb(223, 40, 76);
+}
+.tagSignature {
+    background: #ffa7cd;
+    color: rgba(177, 2, 2, 1);
+}
+.tagInnerCircle {
+    background: #da93ff;
+    color: rgba(90, 50, 134, 1);
+}
+
+.tagGhost {
+    background: transparent;
+    color: rgba(15, 23, 42, 0.4);
+    font-style: italic;
+    outline: 1px dashed rgba(15, 23, 42, 0.2);
+    outline-offset: -1px;
+}
+
+.tagTier {
+    width: 10rem;
+}
+
+.tagWide {
+    min-width: 6.5rem;
+    font-size: 0.65rem;
+    padding: 0.1rem 0.5rem;
+    position: relative;
+    top: -2px;
+}
+
+.tagFulfilled {
+    min-width: auto;
+    width: calc(100% - 0.5rem);
+    font-size: 0.65rem;
+    padding: 0.1rem 0.5rem;
+    position: relative;
+    top: -2px;
+}
+
+.editableBoolTag {
+    cursor: pointer;
+    will-change: transform;
+    backface-visibility: hidden;
+    transform-origin: center center;
+    transition: transform 0.12s ease;
+
+    &:hover {
+        transform: scale(1.05);
+    }
+
+    &:focus-visible {
+        outline: 2px solid rgba(14, 165, 233, 0.8);
+        outline-offset: 2px;
+    }
+}
+
+.confirmBadge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    outline: none;
+
+    &::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: calc(100% + 0.6rem);
+        top: 50%;
+
+        padding: 0.35rem 0.5rem;
+        border-radius: 0.45rem;
+        width: max-content;
+        max-width: 20rem;
+
+        color: rgba(241, 245, 249, 0.95);
+        background: rgba(15, 23, 42, 0.92);
+        font-size: 0.72rem;
+        font-weight: 560;
+        line-height: 1.35;
+
+        box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28);
+
+        opacity: 0;
+        transform: translate(-3px, -50%);
+        transition:
+            opacity 100ms ease,
+            transform 100ms ease;
+        pointer-events: none;
+        z-index: 8;
+    }
+
+    &:hover::after,
+    &:focus-visible::after {
+        opacity: var(--confirm-tooltip-opacity, 1);
+        transform: translate(0, -50%);
+    }
+}
+
+.nameVerified {
+    color: rgba(17, 115, 75, 1);
+    font-size: 0.6rem;
+    flex-shrink: 0;
+    background: rgba(112, 195, 32, 0.3);
+    border-radius: 50%;
+    padding: 0.15rem;
+}
+
+.nameUnverified {
+    color: rgba(177, 2, 2, 1);
+    font-size: 0.6rem;
+    flex-shrink: 0;
+    background: rgba(255, 95, 75, 0.3);
+    border-radius: 50%;
+    padding: 0.15rem;
+}

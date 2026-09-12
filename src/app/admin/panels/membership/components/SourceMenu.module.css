@@ -1,0 +1,37 @@
+.sourceOverlay {
+    min-width: var(--source-overlay-width, 24rem);
+}
+
+.sourceOverlayBody {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.sourceRow {
+    display: grid;
+    grid-template-columns: 1rem var(--source-label-width, 4rem) minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(15, 23, 42, 0.86);
+}
+
+.sourceLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.56);
+    text-transform: uppercase;
+}
+
+.sourceCheck {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    color: rgba(15, 23, 42, 0.56);
+}
+
+.sourceIndicator {
+    font-size: 0.9rem;
+    stroke-width: 3;
+}

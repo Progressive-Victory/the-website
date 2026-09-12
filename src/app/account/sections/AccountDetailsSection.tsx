@@ -57,16 +57,19 @@ export function AccountDetailsSection({
         setUpdatedUser(userData)
     }, [userData])
 
+    // Mirrors the admin membership panel's "Package Shipped" values
+    // (Yes / No / Returned / Not Received / Canceled).
     const membershipDeliverableLabels: Record<
         MembershipDeliverableStatus,
         string
     > = {
-        [MembershipDeliverableStatus.NotEligible]: 'Not Eligible',
-        [MembershipDeliverableStatus.NotStarted]: 'Not Started',
-        [MembershipDeliverableStatus.Printed]: 'Printed',
-        [MembershipDeliverableStatus.InTransit]: 'In Transit',
-        [MembershipDeliverableStatus.Recieved]: 'Received',
-        [MembershipDeliverableStatus.Returned]: 'Returned (Update Address)',
+        [MembershipDeliverableStatus.NotEligible]: 'Requested To Cancel',
+        [MembershipDeliverableStatus.NotStarted]: 'Not Shipped Yet',
+        [MembershipDeliverableStatus.Printed]: 'Not Shipped Yet',
+        [MembershipDeliverableStatus.InTransit]:
+            'Delivery Failed - Fix Address',
+        [MembershipDeliverableStatus.Recieved]: 'Card Shipped',
+        [MembershipDeliverableStatus.Returned]: 'Delivery Failed - Fix Address',
     }
 
     const normalizeEmail = (value?: string | null) =>

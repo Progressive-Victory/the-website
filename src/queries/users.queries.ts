@@ -1,6 +1,9 @@
 import { ManualDonorLinkRequest } from '@/app/account/sections'
 import { User, zUser } from '@/contracts/data'
-import { UpdateUserRequest } from '@/contracts/requests'
+import {
+    UpdateMembershipRequest,
+    UpdateUserRequest,
+} from '@/contracts/requests'
 import { FetchError } from '@/models'
 import { useFetch } from '@/util/hooks'
 import { skipToken, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -96,6 +99,25 @@ export function useUpdatedUser({
                 params: { userId: id, donorEmail },
                 query: { orderId },
             })
+
+            // Confirming the donor link also confirms their Discord identity;
+            // don't fail the link if the donor has no membership record.
+            try {
+                await onPatch(
+                    '/actblue/donors/:donorEmail/membership',
+                    {
+                        discordConfirmed: true,
+                        metaData: {
+                            userWhoUpdatedId: id,
+                            dataSource: 'Account Page',
+                        },
+                    } satisfies UpdateMembershipRequest,
+                    null,
+                    { params: { donorEmail } }
+                )
+            } catch (error) {
+                console.error(error)
+            }
 
             return await onGet('/users/:userId', zUser, {
                 params: { userId: id },

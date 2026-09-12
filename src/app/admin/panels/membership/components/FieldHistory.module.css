@@ -1,0 +1,76 @@
+.historySection {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid rgba(17, 24, 39, 0.1);
+}
+
+.historySectionLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: rgba(15, 23, 42, 0.56);
+    text-transform: uppercase;
+}
+
+.historyEmpty {
+    font-size: 0.8rem;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.historyContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.historyEntry {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 0.65rem;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+    color: rgba(15, 23, 42, 0.85);
+    font-size: 0.8rem;
+    font-weight: 550;
+    letter-spacing: -0.01em;
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.historyEntryMain {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.historyEntryPrefix {
+    color: rgba(15, 23, 42, 0.62);
+    font-weight: 550;
+}
+
+.historyEntryName {
+    color: rgba(15, 23, 42, 0.9);
+    font-weight: 650;
+}
+
+.historyEntryDateTag {
+    margin-left: auto;
+    white-space: nowrap;
+    padding-inline: 0.75rem;
+    padding-block: 0.15rem;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
