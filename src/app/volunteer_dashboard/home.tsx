@@ -2,6 +2,7 @@ import styles from './page.module.css'
 import { DiscordAvatar } from '@/components/common'
 import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import { cn } from '@/util'
 import type { ReactElement } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
 import {
@@ -64,7 +65,11 @@ export function renderVolunteerDashboardUnselectedDetail({
                             className={styles.unselectedAvatar}
                         />
                         <div
-                            className={`${styles.unselectedNameSlot}${showWelcome ? '' : ` ${styles.unselectedNameSlotImmediate}`}`}
+                            className={cn(
+                                styles.unselectedNameSlot,
+                                !showWelcome &&
+                                    styles.unselectedNameSlotImmediate
+                            )}
                         >
                             {showWelcome && (
                                 <div className={styles.unselectedWelcome}>

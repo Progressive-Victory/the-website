@@ -152,8 +152,14 @@
     animation: nameIn 0.79s cubic-bezier(0.25, 0.46, 0.45, 0.94) 3.175s both;
 }
 
-.unselectedNameSlotImmediate .unselectedProfileName {
-    animation-delay: 0.75s;
+.unselectedNameSlotImmediate {
+    & .unselectedProfileName {
+        animation-delay: 0.75s;
+    }
+
+    & .unselectedProfileHandle {
+        animation-delay: 0.9s;
+    }
 }
 
 .unselectedAvatar {
@@ -175,10 +181,6 @@
     letter-spacing: -0.01em;
     color: rgba(15, 23, 42, 0.55);
     animation: nameIn 0.79s cubic-bezier(0.25, 0.46, 0.45, 0.94) 3.275s both;
-}
-
-.unselectedNameSlotImmediate .unselectedProfileHandle {
-    animation-delay: 0.9s;
 }
 
 .unselectedGrid {
@@ -220,33 +222,35 @@
     );
 }
 
-.unselectedGrid > * {
-    animation: cardIn 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-}
+.unselectedGrid {
+    & > * {
+        animation: cardIn 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    }
 
-.unselectedGrid > *:nth-child(1) {
-    animation-delay: 0.1s;
-}
-.unselectedGrid > *:nth-child(2) {
-    animation-delay: 0.15s;
-}
-.unselectedGrid > *:nth-child(3) {
-    animation-delay: 0.2s;
-}
-.unselectedGrid > *:nth-child(4) {
-    animation-delay: 0.25s;
-}
-.unselectedGrid > *:nth-child(5) {
-    animation-delay: 0.3s;
-}
-.unselectedGrid > *:nth-child(6) {
-    animation-delay: 0.35s;
-}
-.unselectedGrid > *:nth-child(7) {
-    animation-delay: 0.4s;
-}
-.unselectedGrid > *:nth-child(8) {
-    animation-delay: 0.45s;
+    & > *:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+    & > *:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+    & > *:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+    & > *:nth-child(4) {
+        animation-delay: 0.25s;
+    }
+    & > *:nth-child(5) {
+        animation-delay: 0.3s;
+    }
+    & > *:nth-child(6) {
+        animation-delay: 0.35s;
+    }
+    & > *:nth-child(7) {
+        animation-delay: 0.4s;
+    }
+    & > *:nth-child(8) {
+        animation-delay: 0.45s;
+    }
 }
 
 .unselectedTitle {
