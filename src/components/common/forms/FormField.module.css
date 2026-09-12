@@ -69,3 +69,47 @@
     line-height: 1rem;
     color: #ef4444;
 }
+
+.multiTextRoot {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.valueTagContainer {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.valueTag {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    gap: 0.25rem;
+
+    padding-inline: 1rem;
+    padding-block: 0.45rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+
+    background: rgba(15, 23, 42, 0.06);
+
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: rgba(15, 23, 42, 0.72);
+
+    white-space: nowrap;
+
+    & > .remove {
+        margin: 0.25rem;
+        cursor: pointer;
+
+        transition: all 120ms linear;
+
+        &:hover {
+            border-radius: 100%;
+            border-color: rgba(15, 23, 42, 0.12);
+
+            background-color: rgba(15, 23, 42, 0.09);
+        }
+    }
+}

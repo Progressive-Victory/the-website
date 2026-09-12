@@ -31,7 +31,7 @@ const STATUS_SECTION_SORT_VALUES = new Map<string, number>([
         ([status, label]) =>
             [
                 label,
-                ELECTION_STATUS_SORT_ORDER[Number(status) as ElectionStatus],
+                ELECTION_STATUS_SORT_ORDER[Number(status)],
             ] as const
     ),
     [
