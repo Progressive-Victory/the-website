@@ -8,7 +8,7 @@ import { DiscordAvatar } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
 import formStyles from '@/components/common/forms/Form.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import { MembershipDeliverableStatus, User } from '@/contracts/data'
+import { MembershipDeliverableStatus, User, zActBlueDonor } from '@/contracts/data'
 import { zDiscordUserIsInServerResponse } from '@/contracts/responses'
 import { cn } from '@/util'
 import { useFetch } from '@/util/hooks'
@@ -151,6 +151,8 @@ export function AccountDetailsSection({
         donorEmail: '',
         orderId: '',
     })
+    const [isCheckingContribution, setIsCheckingContribution] = useState(false)
+    const [linkFormError, setLinkFormError] = useState<string | null>(null)
     const [showDonorLinkForm, setShowDonorLinkForm] = useState(false)
     const [pendingLinkEmail, setPendingLinkEmail] = useState<string | null>(
         null
@@ -190,6 +192,14 @@ export function AccountDetailsSection({
         setPendingLinkEmail(null)
     }, [pendingLinkEmail, userData.address, userData.donors])
 
+    useEffect(() => {
+        if (!donorLinkError) return
+
+        setShowAddressConfirmModal(false)
+        setShowDonorLinkForm(true)
+        setLinkFormError(donorLinkError.message)
+    }, [donorLinkError])
+
     const handleChangeDonorEmail = (e: ChangeEvent<HTMLInputElement>) => {
         setDonorLinkForm({
             ...donorLinkForm,
@@ -204,10 +214,53 @@ export function AccountDetailsSection({
         })
     }
 
-    const submitLinkForm = (e: FormEvent) => {
+    const submitLinkForm = async (e: FormEvent) => {
         e.preventDefault()
-        setShowDonorLinkForm(false)
-        setShowAddressConfirmModal(true)
+
+        const donorEmail = donorLinkForm.donorEmail.trim()
+        const orderId = donorLinkForm.orderId.trim()
+
+        setLinkFormError(null)
+        setIsCheckingContribution(true)
+
+        try {
+            const donor = await onGet(
+                '/actblue/donors/:donorEmail',
+                zActBlueDonor,
+                { params: { donorEmail } }
+            )
+
+            const contribution = donor.contributions?.find(
+                (item) => item.orderNumber.trim() === orderId
+            )
+
+            if (!contribution) {
+                setLinkFormError(
+                    'We could not find a contribution with that order number.'
+                )
+                return
+            }
+
+            setDonorLinkForm({ donorEmail, orderId })
+            setAddressDraft({
+                ...userData.address,
+                addressLine1: donor.addr1 ?? userData.address.addressLine1,
+                city: donor.city ?? userData.address.city,
+                state: donor.state ?? userData.address.state,
+                zip: donor.zip ?? userData.address.zip,
+            })
+            setMatchedDonorEmail(donor.email)
+            setShowDonorLinkForm(false)
+            setShowAddressConfirmModal(true)
+        } catch (error) {
+            setLinkFormError(
+                error instanceof Error
+                    ? error.message
+                    : 'We could not verify that contribution.'
+            )
+        } finally {
+            setIsCheckingContribution(false)
+        }
     }
 
     const renderDonorLinkForm = () => {
@@ -246,14 +299,18 @@ export function AccountDetailsSection({
                         />
                     </label>
                 </div>
-                {donorLinkError && (
+                {(linkFormError || donorLinkError) && (
                     <span className={styles.linkActBlueFormErrorText}>
-                        {donorLinkError.message}
+                        {linkFormError || donorLinkError?.message}
                     </span>
                 )}
                 <div className={styles.detailsLinkSubmitRow}>
-                    <button type="submit" className={formStyles.button}>
-                        Link
+                    <button
+                        type="submit"
+                        className={formStyles.button}
+                        disabled={isCheckingContribution}
+                    >
+                        {isCheckingContribution ? 'Checking...' : 'Link'}
                     </button>
                 </div>
             </form>
@@ -295,9 +352,9 @@ export function AccountDetailsSection({
 
         onSave({
             ...userData,
-            firstName: nameDraft.firstName,
-            lastName: nameDraft.lastName,
-            phone: nameDraft.phone || null,
+            firstName: nameDraft.firstName.trim(),
+            lastName: nameDraft.lastName.trim(),
+            phone: nameDraft.phone.trim() || null,
             shirtSize: nameDraft.shirtSize,
             nameConfirmed: true,
             email: shouldUseMatchedEmail
@@ -313,7 +370,10 @@ export function AccountDetailsSection({
             },
             addressConfirmed: true,
         })
-        onDonorLinkSubmit(donorLinkForm)
+        onDonorLinkSubmit({
+            donorEmail: donorLinkForm.donorEmail.trim(),
+            orderId: donorLinkForm.orderId.trim(),
+        })
         setShowAddressConfirmModal(false)
         setMatchedDonorEmail(null)
     }

@@ -172,7 +172,10 @@ export function AccountContributionsSection({
 
     const submitLinkForm = (e: React.FormEvent) => {
         e.preventDefault()
-        onSubmit(donorLinkForm)
+        onSubmit({
+            donorEmail: donorLinkForm.donorEmail.trim(),
+            orderId: donorLinkForm.orderId.trim(),
+        })
     }
 
     return (
