@@ -23,9 +23,7 @@ export function readPanelHistory(): string[] {
 }
 
 export function writePanelHistory(history: string[]): void {
-    if (typeof window === 'undefined') {
-        return
-    }
+    if (typeof window === 'undefined') return
 
     window.sessionStorage.setItem(
         PANEL_HISTORY_STORAGE_KEY,
@@ -34,9 +32,7 @@ export function writePanelHistory(history: string[]): void {
 }
 
 export function clearPanelHistory(): void {
-    if (typeof window === 'undefined') {
-        return
-    }
+    if (typeof window === 'undefined') return
 
     window.sessionStorage.removeItem(PANEL_HISTORY_STORAGE_KEY)
 }

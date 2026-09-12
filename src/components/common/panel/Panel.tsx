@@ -12,6 +12,7 @@ import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { PanelBackButton } from '@/components/common/navigation_stack/detail/PanelBackButton'
 import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { SidebarToggleButton } from '@/components/common/navigation_stack/sidebar/SidebarToggleButton'
+import { cn } from '@/util'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
@@ -107,33 +108,29 @@ export function Panel({
         prominentHeaderLeft ?? (mobileSidebar ? <PanelBackButton /> : undefined)
     const resolvedSidebarFooter =
         sidebarFooter ??
-        (sidebarList?.footer ? (
-            <SidebarListFooter {...sidebarList.footer} />
-        ) : null)
+        (sidebarList?.footer && <SidebarListFooter {...sidebarList.footer} />)
     const resolvedSidebarSearch =
         sidebarSearch ??
-        (sidebarList?.search ? (
-            <SidebarListSearch {...sidebarList.search} />
-        ) : null)
+        (sidebarList?.search && <SidebarListSearch {...sidebarList.search} />)
     const resolvedSidebarFilterContent =
         sidebarFilterContent ??
-        (sidebarList?.filters ? (
+        (sidebarList?.filters && (
             <SidebarListFilters {...sidebarList.filters} />
-        ) : undefined)
+        ))
 
     return (
         <div className={styles.content} aria-label={panelLabel}>
-            {includeSidebar ? (
+            {includeSidebar && (
                 <NavigationStack
                     overlay={
-                        showOverlaySidebarToggle ? (
+                        showOverlaySidebarToggle && (
                             <SidebarToggleButton
                                 isOpen={isSidebarOpen}
                                 onToggle={() =>
                                     setIsSidebarOpen((previous) => !previous)
                                 }
                             />
-                        ) : null
+                        )
                     }
                     sidebar={
                         <Sidebar
@@ -187,7 +184,7 @@ export function Panel({
                             label={panelLabel}
                             body={
                                 <>
-                                    {showHeader ? (
+                                    {showHeader && (
                                         <PanelHeader
                                             panelLabel={panelLabel}
                                             shiftForOverlayToggle={
@@ -197,20 +194,20 @@ export function Panel({
                                             headerLeft={headerLeft}
                                             headerRight={headerRight}
                                         />
-                                    ) : null}
+                                    )}
                                     {children}
-                                    {footer ? (
+                                    {footer && (
                                         <PanelFooter>{footer}</PanelFooter>
-                                    ) : null}
+                                    )}
                                 </>
                             }
                         />
                     }
                 />
-            ) : null}
-            {!includeSidebar ? (
+            )}
+            {!includeSidebar && (
                 <>
-                    {showHeader ? (
+                    {showHeader && (
                         <PanelHeader
                             panelLabel={panelLabel}
                             shiftForOverlayToggle={false}
@@ -218,11 +215,11 @@ export function Panel({
                             headerLeft={headerLeft}
                             headerRight={headerRight}
                         />
-                    ) : null}
+                    )}
                     {children}
-                    {footer ? <PanelFooter>{footer}</PanelFooter> : null}
+                    {footer && <PanelFooter>{footer}</PanelFooter>}
                 </>
-            ) : null}
+            )}
         </div>
     )
 }
@@ -247,18 +244,16 @@ function PanelHeader({
     return (
         <div className={styles.panelHeader}>
             <div
-                className={[
+                className={cn(
                     styles.panelHeaderLeft,
-                    shiftForOverlayToggle ? styles.panelHeaderLeftShifted : '',
-                ]
-                    .filter(Boolean)
-                    .join(' ')}
+                    shiftForOverlayToggle && styles.panelHeaderLeftShifted
+                )}
             >
                 {headerLead}
                 {headerLeft ?? (
                     <div className={styles.breadcrumbs}>
                         <span className={styles.prominentBreadcrumb}>
-                            Volunteer Dashboard
+                            Volunteer Dashboard /
                         </span>
                         <span className={styles.breadcrumbSeperator}>/</span>
                         <span className={styles.panelBreadcrumb}>

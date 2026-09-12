@@ -1,6 +1,7 @@
 import styles from './SidebarList.module.css'
 import { MultiSelect, type MultiSelectOption } from '@/components/common'
 import { type SearchRequest, SortDirection } from '@/contracts/requests'
+import { cn } from '@/util'
 import { useEffect, useState } from 'react'
 import {
     FiChevronLeft,
@@ -96,7 +97,7 @@ export function SidebarListFilters({
 
     return (
         <div className={styles.controls}>
-            {searchFieldOptions?.length ? (
+            {searchFieldOptions && searchFieldOptions.length > 0 && (
                 <label className={styles.select}>
                     <span>Search Field:</span>
                     <select
@@ -116,9 +117,9 @@ export function SidebarListFilters({
                         ))}
                     </select>
                 </label>
-            ) : null}
+            )}
 
-            {sortFieldOptions?.length ? (
+            {sortFieldOptions && sortFieldOptions.length > 0 && (
                 <label className={styles.select}>
                     <span>Sort Field:</span>
                     <select
@@ -138,9 +139,9 @@ export function SidebarListFilters({
                         ))}
                     </select>
                 </label>
-            ) : null}
+            )}
 
-            {showLimit ? (
+            {showLimit && (
                 <label className={styles.select}>
                     <span>Items:</span>
                     <select
@@ -156,9 +157,9 @@ export function SidebarListFilters({
                         ))}
                     </select>
                 </label>
-            ) : null}
+            )}
 
-            {showSort ? (
+            {showSort && (
                 <label className={styles.select}>
                     <span>Sort:</span>
                     <select
@@ -173,7 +174,7 @@ export function SidebarListFilters({
                         <option value={SortDirection.ASC}>Ascending</option>
                     </select>
                 </label>
-            ) : null}
+            )}
 
             {options.map((option) => (
                 <div key={option.label} className={styles.filterSelect}>
@@ -365,7 +366,10 @@ function PaginationArrow({
 }: PaginationArrowProps) {
     return (
         <a
-            className={`${styles.arrow} ${enabled ? styles.enabled : styles.disabled}`}
+            className={cn(
+                styles.arrow,
+                enabled ? styles.enabled : styles.disabled
+            )}
             onClick={() => enabled && onClick()}
             title={title}
         >

@@ -9,21 +9,21 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-}
 
-.select > span {
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    color: rgba(15, 23, 42, 0.7);
-}
+    & > span {
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        color: rgba(15, 23, 42, 0.7);
+    }
 
-.select > select {
-    border-radius: 0.85rem;
-    border: 1px solid rgba(17, 24, 39, 0.12);
-    background: rgba(255, 255, 255, 0.75);
-    padding: 0.35rem 0.55rem;
-    color: rgba(15, 23, 42, 0.8);
-    outline: none;
+    & > select {
+        border-radius: 0.85rem;
+        border: 1px solid rgba(17, 24, 39, 0.12);
+        background: rgba(255, 255, 255, 0.75);
+        padding: 0.35rem 0.55rem;
+        color: rgba(15, 23, 42, 0.8);
+        outline: none;
+    }
 }
 
 .filterSelect {
@@ -31,11 +31,11 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
-}
 
-.filterSelect > strong {
-    font-weight: 500;
-    color: rgba(15, 23, 42, 0.75);
+    & > strong {
+        font-weight: 500;
+        color: rgba(15, 23, 42, 0.75);
+    }
 }
 
 .searchInput {
@@ -137,11 +137,11 @@
     padding: 0.125rem 0.5rem;
     text-align: center;
     color: rgba(15, 23, 42, 0.62);
-}
 
-.pageSelectInput:focus {
-    border-color: rgba(14, 165, 233, 0.35);
-    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+    &:focus {
+        border-color: rgba(14, 165, 233, 0.35);
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+    }
 }
 
 .arrow {
@@ -153,24 +153,24 @@
     padding: 0.45rem;
 
     font-weight: 600;
-}
 
-.arrow.disabled {
-    cursor: not-allowed;
-    color: rgba(15, 23, 42, 0.28);
-}
+    &.disabled {
+        cursor: not-allowed;
+        color: rgba(15, 23, 42, 0.28);
+    }
 
-.arrow.enabled {
-    cursor: pointer;
-    color: rgba(15, 23, 42, 0.62);
-}
+    &.enabled {
+        cursor: pointer;
+        color: rgba(15, 23, 42, 0.62);
 
-.arrow.enabled:hover {
-    background: rgba(15, 23, 42, 0.06);
-}
+        &:hover {
+            background: rgba(15, 23, 42, 0.06);
+        }
 
-.arrow.enabled:active {
-    background-color: #f3f4f6;
+        &:active {
+            background-color: #f3f4f6;
+        }
+    }
 }
 
 .pinnedSection {
@@ -181,28 +181,38 @@
     backdrop-filter: blur(16px) saturate(145%);
     border-bottom: 1px solid transparent;
     transition: border-color 200ms ease;
+
+    & .sidebarNavigationButton {
+        margin-top: 3px;
+        margin-bottom: 2px;
+        transition: margin 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+}
+
+.sidebarNavigationButton {
+    & a {
+        white-space: nowrap;
+        min-width: max-content;
+        transition:
+            padding 280ms cubic-bezier(0.22, 1, 0.36, 1),
+            background-color 220ms cubic-bezier(0.22, 0.61, 0.36, 1),
+            transform 140ms ease,
+            color 140ms ease,
+            box-shadow 140ms ease;
+    }
+
+    & a > span:nth-child(2) {
+        transition: opacity 280ms ease;
+    }
+
+    & a > span:last-child {
+        transition: opacity 280ms 100ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
 }
 
 :global([data-sidebar-large-title-collapsed='true']) .pinnedSection,
 :global([data-sidebar-collapsed='true']) .pinnedSection {
     border-bottom-color: rgba(17, 24, 39, 0.1);
-}
-
-.pinnedSection .sidebarNavigationButton {
-    margin-top: 3px;
-    margin-bottom: 2px;
-    transition: margin 280ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.sidebarNavigationButton a {
-    white-space: nowrap;
-    min-width: max-content;
-    transition:
-        padding 280ms cubic-bezier(0.22, 1, 0.36, 1),
-        background-color 220ms cubic-bezier(0.22, 0.61, 0.36, 1),
-        transform 140ms ease,
-        color 140ms ease,
-        box-shadow 140ms ease;
 }
 
 :global([data-sidebar-collapsed='true']) .sidebarNavigationButton a {
@@ -219,14 +229,6 @@
     a
     > span:nth-child(n + 2) {
     opacity: 0;
-}
-
-.sidebarNavigationButton a > span:nth-child(2) {
-    transition: opacity 280ms ease;
-}
-
-.sidebarNavigationButton a > span:last-child {
-    transition: opacity 280ms 100ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sidebarState {

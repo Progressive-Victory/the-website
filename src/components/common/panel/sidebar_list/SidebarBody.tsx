@@ -3,6 +3,7 @@
 import styles from './SidebarList.module.css'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import type { SubTagProps } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import { parseErrorMessage } from '@/util'
 import React from 'react'
 import type { ReactNode } from 'react'
 
@@ -35,20 +36,10 @@ export function SidebarBody<T>({
     selectedKey = null,
     renderItem,
 }: SidebarBodyProps<T>) {
-    if (isLoading) {
-        return <div className={styles.sidebarState}>Loading...</div>
-    }
+    if (isLoading) return <div className={styles.sidebarState}>Loading...</div>
 
     if (error) {
-        const message =
-            error instanceof Error
-                ? error.message
-                : typeof error === 'object' &&
-                    error !== null &&
-                    'message' in error &&
-                    typeof (error as { message?: unknown }).message === 'string'
-                  ? (error as { message: string }).message
-                  : 'Unknown error'
+        const message = parseErrorMessage(error)
 
         return (
             <div className={styles.sidebarState} style={{ color: '#ef4444' }}>
@@ -57,7 +48,7 @@ export function SidebarBody<T>({
         )
     }
 
-    if (items.length === 0 && (!pinnedItems || pinnedItems.length === 0)) {
+    if (items.length === 0 && !pinnedItems?.length) {
         return <div className={styles.sidebarState}>No items found</div>
     }
 
@@ -89,11 +80,11 @@ export function SidebarBody<T>({
 
     return (
         <>
-            {pinnedItems && pinnedItems.length > 0 ? (
+            {pinnedItems && pinnedItems.length > 0 && (
                 <div className={styles.pinnedSection}>
                     {pinnedItems.map((item) => renderItemButton(item))}
                 </div>
-            ) : null}
+            )}
             {items.map((item) => renderItemButton(item))}
         </>
     )
