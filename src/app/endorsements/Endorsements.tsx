@@ -4,47 +4,73 @@ import { CandidateDetails } from './components/CandidateDetails'
 import { CandidateGallery } from './components/CandidateGallery'
 import { FilterButtonRow } from './components/FilterButtonRow'
 import styles from './endorsement.module.css'
-import { CANDIDATES, type CandidateConfig } from './endorsements.data'
 import {
     type FilterType,
     type GalleryDisplayMode,
     type SectionGroupingMode,
     type SectionSortOrder,
 } from './endorsements.types'
-import { getRelevantElectionDate } from './endorsements.utils'
 import { ContentPageFrame } from '@/components/content_sections/ContentSections'
-import { useDeferredValue, useState } from 'react'
+import {
+    EndorsementType,
+    InitiativeType,
+    type Endorsement,
+} from '@/contracts/data'
+import { getRelevantElectionDate, getStateLabel } from '@/models'
+import { useEndorsementQueries } from '@/queries'
+import { useQuery } from '@tanstack/react-query'
+import { useDeferredValue, useMemo, useState } from 'react'
 
-const SORTED_CANDIDATES: CandidateConfig[] = [...CANDIDATES].sort((a, b) => {
-    const aTime = getRelevantElectionDate(a)?.getTime() ?? Infinity
-    const bTime = getRelevantElectionDate(b)?.getTime() ?? Infinity
-    return aTime - bTime
-})
-
-const FILTER_PREDICATES: Record<FilterType, (c: CandidateConfig) => boolean> = {
-    national: (c) => c.initiativeType === 'national',
-    state: (c) => c.initiativeType === 'state',
-    pledge: (c) => c.endorsementType === 'PV Pledge',
-    member: (c) => c.showPvMember,
+const FILTER_PREDICATES: Record<FilterType, (c: Endorsement) => boolean> = {
+    national: (c) => c.initiativeLevel === InitiativeType.National,
+    state: (c) => c.initiativeLevel === InitiativeType.State,
+    pledge: (c) => c.endorsementLevel === EndorsementType.PVPledge,
+    member: (c) => c.isPvMember,
 }
 
+// Will update to not hardcode 2026 in next revision
+const DEFAULT_YEAR = 2026
+
 export function Endorsements() {
-    const years = new Set<number>()
-    for (const candidate of CANDIDATES) {
-        if (candidate.primaryElection) {
-            years.add(candidate.primaryElection.getFullYear())
+    const { ready, getEndorsements } = useEndorsementQueries()
+
+    const endorsementsQuery = useQuery({
+        queryKey: ['endorsements'],
+        queryFn: ({ signal }) => getEndorsements({ signal }),
+        enabled: ready,
+    })
+
+    const sortedCandidates = useMemo(
+        () =>
+            (endorsementsQuery.data ?? [])
+                .filter((candidate) => candidate.endorsementPublished)
+                .sort((a, b) => {
+                    const aTime =
+                        getRelevantElectionDate(a)?.getTime() ?? Infinity
+                    const bTime =
+                        getRelevantElectionDate(b)?.getTime() ?? Infinity
+                    return aTime - bTime
+                }),
+        [endorsementsQuery.data]
+    )
+
+    const availableYears = useMemo(() => {
+        const years = new Set<number>()
+        for (const candidate of sortedCandidates) {
+            if (candidate.primaryElectionDate) {
+                years.add(candidate.primaryElectionDate.getUTCFullYear())
+            }
+            if (candidate.generalElectionDate) {
+                years.add(candidate.generalElectionDate.getUTCFullYear())
+            }
         }
-        if (candidate.generalElection) {
-            years.add(candidate.generalElection.getFullYear())
-        }
-    }
-    const availableYears = Array.from(years).sort((a, b) => b - a)
+        return Array.from(years).sort((a, b) => b - a)
+    }, [sortedCandidates])
 
     const defaultYear =
-        // Will update to not hardcode 2026 in next revision
-        availableYears.find((year) => year === 2026) ??
+        availableYears.find((year) => year === DEFAULT_YEAR) ??
         availableYears[0] ??
-        2026
+        DEFAULT_YEAR
 
     const [filter, setFilter] = useState<FilterType | null>(null)
     const [searchQuery, setSearchQuery] = useState('')
@@ -53,17 +79,19 @@ export function Endorsements() {
         useState<SectionGroupingMode>('status')
     const [sectionSortOrder, setSectionSortOrder] =
         useState<SectionSortOrder>('ascending')
-    const [year, setYear] = useState(defaultYear)
+    const [selectedYear, setSelectedYear] = useState<number | null>(null)
     const [selectedCandidate, setSelectedCandidate] =
-        useState<CandidateConfig | null>(null)
+        useState<Endorsement | null>(null)
+
+    const year = selectedYear ?? defaultYear
 
     const deferredSearchQuery = useDeferredValue(searchQuery)
 
     const query = deferredSearchQuery.trim().toLowerCase()
 
-    const filteredCandidates = SORTED_CANDIDATES.filter((candidate) => {
-        const primaryYear = candidate.primaryElection?.getFullYear()
-        const generalYear = candidate.generalElection?.getFullYear()
+    const filteredCandidates = sortedCandidates.filter((candidate) => {
+        const primaryYear = candidate.primaryElectionDate?.getUTCFullYear()
+        const generalYear = candidate.generalElectionDate?.getUTCFullYear()
         const matchesYear = primaryYear === year || generalYear === year
 
         if (!matchesYear) {
@@ -83,8 +111,8 @@ export function Endorsements() {
 
         return (
             candidate.name.toLowerCase().includes(query) ||
-            candidate.state.toLowerCase().includes(query) ||
-            candidate.handle.toLowerCase().includes(query)
+            getStateLabel(candidate.state).toLowerCase().includes(query) ||
+            (candidate.handle?.toLowerCase().includes(query) ?? false)
         )
     })
 
@@ -134,19 +162,27 @@ export function Endorsements() {
                         searchQuery={searchQuery}
                         setSearchQuery={setSearchQuery}
                         year={year}
-                        setYear={setYear}
+                        setYear={setSelectedYear}
                         availableYears={availableYears}
                     />
-                    <CandidateGallery
-                        filteredCandidates={filteredCandidates}
-                        filter={filter}
-                        displayMode={displayMode}
-                        sectionMode={sectionMode}
-                        sectionSortOrder={sectionSortOrder}
-                        year={year}
-                        searchQuery={deferredSearchQuery}
-                        onSelectCandidate={setSelectedCandidate}
-                    />
+                    {endorsementsQuery.error && (
+                        <p className={styles.subheading}>
+                            We couldn&apos;t load our endorsements right now.
+                            Please try again later.
+                        </p>
+                    )}
+                    {endorsementsQuery.isSuccess && (
+                        <CandidateGallery
+                            filteredCandidates={filteredCandidates}
+                            filter={filter}
+                            displayMode={displayMode}
+                            sectionMode={sectionMode}
+                            sectionSortOrder={sectionSortOrder}
+                            year={year}
+                            searchQuery={deferredSearchQuery}
+                            onSelectCandidate={setSelectedCandidate}
+                        />
+                    )}
                 </div>
             </ContentPageFrame>
         </>
