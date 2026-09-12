@@ -14,13 +14,7 @@ import {
     useConfigure,
 } from '@/components/common/forms'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import {
-    BackgroundColor,
-    ElectionStatus,
-    Endorsement,
-    EndorsementType,
-    InitiativeType,
-} from '@/contracts/data'
+import { BackgroundColor, Endorsement } from '@/contracts/data'
 import {
     electionStatusOptions,
     endorsementLevelOptions,
