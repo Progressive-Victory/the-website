@@ -29,10 +29,7 @@ const UPCOMING_STATUSES = new Set<ElectionStatus>([
 const STATUS_SECTION_SORT_VALUES = new Map<string, number>([
     ...Object.entries(ELECTION_STATUS_LABELS).map(
         ([status, label]) =>
-            [
-                label,
-                ELECTION_STATUS_SORT_ORDER[Number(status)],
-            ] as const
+            [label, ELECTION_STATUS_SORT_ORDER[Number(status)]] as const
     ),
     [
         UPCOMING_STATUS_LABEL,
