@@ -6,6 +6,8 @@ export { Button, Logo, Message }
 
 export * from './CollapsibleSection'
 export * from './DiscordAvatar'
+export * from './ElectionStatusBadge'
+export * from './EndorsementAvatar'
 export * from './ImageWithFallback'
 export * from './Logo'
 export * from './mini_calendar'
