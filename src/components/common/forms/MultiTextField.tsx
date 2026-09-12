@@ -1,5 +1,6 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
+import tagStyles from '@/app/admin/panels/endorsements/page.module.css'
 import { cn } from '@/util'
 import { ChangeEvent, KeyboardEventHandler, useCallback, useState } from 'react'
 import { FaXmark } from 'react-icons/fa6'
@@ -47,14 +48,16 @@ export function MultiTextField<T>(props: MultiTextProps<T>) {
 
     const renderValue = (val: string, idx: number, readonly: boolean) => {
         return (
-            <span key={`${val}-${idx}`} className={styles.valueTag}>
-                {val}
-                {!readonly && (
-                    <FaXmark
-                        onClick={() => handleRemoveValue(val)}
-                        className={styles.remove}
-                    />
+            <span
+                key={`${val}-${idx}`}
+                className={cn(
+                    styles.valueTag,
+                    tagStyles.tagGray,
+                    !readonly && styles.mutable
                 )}
+                onClick={!readonly ? () => handleRemoveValue(val) : undefined}
+            >
+                {val}
             </span>
         )
     }
@@ -72,7 +75,7 @@ export function MultiTextField<T>(props: MultiTextProps<T>) {
                     {[...value].map((v, i) => renderValue(v, i, readonly))}
                 </div>
             ) : (
-                <div className={styles.multiTextRoot}>
+                <div className={cn(styles.multiTextRoot, styles.textField)}>
                     <div className={styles.valueTagContainer}>
                         {[...value].map((v, i) => renderValue(v, i, readonly))}
                     </div>
@@ -85,7 +88,8 @@ export function MultiTextField<T>(props: MultiTextProps<T>) {
                         value={inputValue}
                         onKeyDown={handleKeyDown}
                         onChange={handleInputChange}
-                        className={cn(styles.textField)}
+                        className={styles.blendInput}
+                        placeholder={'Type and press Enter...'}
                     />
                 </div>
             )}

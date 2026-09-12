@@ -74,44 +74,64 @@
     display: flex;
     flex-flow: row wrap;
     gap: 0.25rem;
+    padding-inline: 0.25rem;
+
+    &.textField {
+        border-radius: 0.66rem;
+        background-color: white;
+    }
+}
+
+.blendInput {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex-shrink: 1;
+    margin: 0.33rem;
+
+    &:active,
+    &:focus-within,
+    &:focus-visible,
+    &:focus {
+        border: none;
+        outline: none;
+        background: transparent;
+    }
 }
 
 .valueTagContainer {
     display: flex;
     flex-flow: row wrap;
     gap: 0.25rem;
+    padding: 0.25rem;
 }
 
 .valueTag {
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: center;
-    gap: 0.25rem;
+    position: relative;
+    max-width: 100%;
 
     padding-inline: 1rem;
     padding-block: 0.45rem;
     border-radius: 9999px;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-
-    background: rgba(15, 23, 42, 0.06);
 
     font-weight: 600;
     font-size: 0.85rem;
-    color: rgba(15, 23, 42, 0.72);
 
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: start;
 
-    & > .remove {
-        margin: 0.25rem;
+    transition: all 120ms linear;
+
+    &.mutable {
+        text-decoration: line-through;
+        text-decoration-inset: -0.25rem;
         cursor: pointer;
 
-        transition: all 120ms linear;
-
         &:hover {
-            border-radius: 100%;
-            border-color: rgba(15, 23, 42, 0.12);
-
-            background-color: rgba(15, 23, 42, 0.09);
+            background: rgba(255, 95, 75, 0.3);
+            color: rgba(177, 2, 2, 1);
         }
     }
 }
