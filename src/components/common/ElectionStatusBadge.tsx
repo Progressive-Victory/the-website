@@ -1,5 +1,6 @@
-import { type ElectionStatus } from '../endorsements.data'
 import styles from './ElectionStatusBadge.module.css'
+import { ElectionStatus } from '@/contracts/data'
+import { ELECTION_STATUS_LABELS } from '@/models'
 import { cn } from '@/util'
 
 interface ElectionStatusBadgeProps {
@@ -8,12 +9,13 @@ interface ElectionStatusBadgeProps {
 }
 
 const badgeClass: Record<ElectionStatus, string | null> = {
-    '': null,
-    'Won Primary': styles.wonPrimary,
-    Elected: styles.elected,
-    'Lost Primary': styles.lost,
-    'Lost General': styles.lost,
-    'Dropped Out': styles.droppedOut,
+    [ElectionStatus.NoElection]: null,
+    [ElectionStatus.UpcomingPrimary]: null,
+    [ElectionStatus.WonPrimary]: styles.wonPrimary,
+    [ElectionStatus.Elected]: styles.elected,
+    [ElectionStatus.LostPrimary]: styles.lost,
+    [ElectionStatus.LostGeneral]: styles.lost,
+    [ElectionStatus.DroppedOut]: styles.droppedOut,
 }
 
 export function ElectionStatusBadge({
@@ -24,9 +26,11 @@ export function ElectionStatusBadge({
 
     if (!className) return null
 
+    const label = ELECTION_STATUS_LABELS[electionStatus]
+
     const icon = (() => {
         switch (electionStatus) {
-            case 'Won Primary':
+            case ElectionStatus.WonPrimary:
                 return (
                     <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
                         <path
@@ -38,12 +42,12 @@ export function ElectionStatusBadge({
                         />
                     </svg>
                 )
-            case 'Elected':
+            case ElectionStatus.Elected:
                 return '★'
-            case 'Lost Primary':
-            case 'Lost General':
+            case ElectionStatus.LostPrimary:
+            case ElectionStatus.LostGeneral:
                 return '✕'
-            case 'Dropped Out':
+            case ElectionStatus.DroppedOut:
                 return '−'
             default:
                 return null
@@ -53,7 +57,7 @@ export function ElectionStatusBadge({
     return (
         <span
             className={cn(styles.badge, className)}
-            aria-label={`Election status: ${electionStatus}`}
+            aria-label={`Election status: ${label}`}
         >
             <span aria-hidden="true">{icon}</span>
             <span
@@ -63,7 +67,7 @@ export function ElectionStatusBadge({
                 )}
                 aria-hidden="true"
             >
-                {electionStatus}
+                {label}
             </span>
         </span>
     )

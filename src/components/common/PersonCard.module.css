@@ -25,21 +25,7 @@
 }
 
 .imageFrame {
-    position: relative;
-    width: 65px;
-    aspect-ratio: 1;
-    border-radius: 9999px;
-    overflow: visible;
-}
-
-.image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    border: 2px solid #ffffff;
-    border-radius: 9999px;
-    box-sizing: border-box;
+    display: flex;
 }
 
 .meta {
