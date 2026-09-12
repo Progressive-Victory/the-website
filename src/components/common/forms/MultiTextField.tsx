@@ -3,7 +3,6 @@ import styles from './FormField.module.css'
 import tagStyles from '@/app/admin/panels/endorsements/page.module.css'
 import { cn } from '@/util'
 import { ChangeEvent, KeyboardEventHandler, useCallback, useState } from 'react'
-import { FaXmark } from 'react-icons/fa6'
 
 export interface MultiTextProps<T> extends FormFieldProps<
     T,
