@@ -89,11 +89,30 @@ export function useFetch() {
             req.headers['Content-Type'] = 'application/json'
         }
 
-        let res = await fetch(url, req)
+        const request = async () => {
+            try {
+                return await fetch(url, req)
+            } catch (error) {
+                if (
+                    error instanceof DOMException &&
+                    error.name === 'AbortError'
+                )
+                    throw error
+
+                const reason =
+                    error instanceof Error ? `: ${error.message}` : ''
+                throw new Error(
+                    `Request failed (${method} ${url.pathname})${reason}`,
+                    { cause: error }
+                )
+            }
+        }
+
+        let res = await request()
 
         if (session && res.status === 401) {
             await onRefresh()
-            res = await fetch(url, req)
+            res = await request()
         }
 
         if (session && res.status === 401) {

@@ -38,7 +38,36 @@ export function PhoneField<T>(
                     strictDetection: true,
                     validateMobilePrefix: true,
                 })
-                return parsed.isValid
+
+                if (!parsed.isValid) return false
+
+                if (
+                    [
+                        '800',
+                        '833',
+                        '844',
+                        '855',
+                        '866',
+                        '877',
+                        '888',
+                        '555',
+                        '880',
+                        '881',
+                        '882',
+                        '883',
+                        '884',
+                        '885',
+                        '886',
+                        '887',
+                        '889',
+                        '311',
+                        '911',
+                        '988',
+                    ].includes(parsed.phoneNumber.substring(2, 5))
+                )
+                    return false
+
+                return true
             },
             [props.required]
         )
