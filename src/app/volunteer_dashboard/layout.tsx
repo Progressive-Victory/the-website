@@ -20,7 +20,7 @@ import { useEndorsementQueries, usePositionQueries } from '@/queries'
 import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
 import {
@@ -52,6 +52,14 @@ interface DashboardPanelConfigItem {
 }
 
 export default function Layout({ children }: { children: ReactNode }) {
+    return (
+        <Suspense fallback={null}>
+            <LayoutContent>{children}</LayoutContent>
+        </Suspense>
+    )
+}
+
+function LayoutContent({ children }: { children: ReactNode }) {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const welcomeParam = searchParams.get('from') === 'welcome'
