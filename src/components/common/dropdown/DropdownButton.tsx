@@ -1,7 +1,6 @@
 'use client'
 
 import styles from './DropdownButton.module.css'
-import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
 import {
     forwardRef,
     useEffect,
@@ -9,6 +8,7 @@ import {
     useState,
     type MouseEvent as ReactMouseEvent,
 } from 'react'
+import { FaEllipsisVertical } from 'react-icons/fa6'
 import { FiChevronDown } from 'react-icons/fi'
 import { IoClose } from 'react-icons/io5'
 
@@ -193,7 +193,7 @@ export const DropdownButton = forwardRef<
                         icon
                     )
                 ) : variant.showEllipsisIcon ? (
-                    <EllipsisVerticalIcon
+                    <FaEllipsisVertical
                         className={styles.shortIcon}
                         aria-hidden="true"
                     />

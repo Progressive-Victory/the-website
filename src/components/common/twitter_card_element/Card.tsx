@@ -4,17 +4,6 @@ import styles from './Card.module.css'
 import { BaseButton } from '@/components/common/buttons/Button'
 import { cn } from '@/util'
 import {
-    HeartIcon,
-    ChatBubbleLeftRightIcon,
-    ArrowUpOnSquareIcon,
-    EllipsisHorizontalIcon,
-} from '@heroicons/react/24/outline'
-import {
-    HeartIcon as SolidHeartIcon,
-    ChatBubbleLeftRightIcon as SolidChatBubbleLeftRightIcon,
-    ArrowUpOnSquareIcon as SolidArrowUpOnSquareIcon,
-} from '@heroicons/react/24/solid'
-import {
     motion,
     useSpring,
     useTransform,
@@ -24,6 +13,13 @@ import {
 import Image from 'next/image'
 import type React from 'react'
 import { useState, useMemo } from 'react'
+import {
+    FaHeart as SolidHeart,
+    FaRegHeart as Heart,
+    FaRegComment as FaComment,
+    FaRegShareFromSquare as FaShare,
+    FaEllipsis,
+} from 'react-icons/fa6'
 
 interface MotionProps {
     initial?: TargetAndTransition
@@ -350,7 +346,7 @@ export function Message({
                                                     e.stopPropagation()
                                                 }
                                             >
-                                                <EllipsisHorizontalIcon
+                                                <FaEllipsis
                                                     className={
                                                         styles.ellipsisIcon
                                                     }
@@ -399,7 +395,7 @@ export function Message({
                                         aria-label="Comment"
                                     >
                                         {clickedBubble ? (
-                                            <SolidChatBubbleLeftRightIcon
+                                            <FaComment
                                                 className={cn(
                                                     styles.iconSolid,
                                                     styles.bubbleActive,
@@ -407,7 +403,7 @@ export function Message({
                                                 )}
                                             />
                                         ) : (
-                                            <ChatBubbleLeftRightIcon
+                                            <FaComment
                                                 className={styles.icon}
                                             />
                                         )}
@@ -423,7 +419,7 @@ export function Message({
                                         aria-label="Share"
                                     >
                                         {clickedShare ? (
-                                            <SolidArrowUpOnSquareIcon
+                                            <FaShare
                                                 className={cn(
                                                     styles.iconSolid,
                                                     styles.shareActive,
@@ -431,9 +427,7 @@ export function Message({
                                                 )}
                                             />
                                         ) : (
-                                            <ArrowUpOnSquareIcon
-                                                className={styles.icon}
-                                            />
+                                            <FaShare className={styles.icon} />
                                         )}
                                     </button>
 
@@ -447,7 +441,7 @@ export function Message({
                                         aria-label="Like"
                                     >
                                         {clickedHeart ? (
-                                            <SolidHeartIcon
+                                            <SolidHeart
                                                 className={cn(
                                                     styles.iconSolid,
                                                     styles.heartActive,
@@ -455,9 +449,7 @@ export function Message({
                                                 )}
                                             />
                                         ) : (
-                                            <HeartIcon
-                                                className={styles.icon}
-                                            />
+                                            <Heart className={styles.icon} />
                                         )}
                                     </button>
                                 </div>
