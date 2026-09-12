@@ -253,7 +253,7 @@ function PanelHeader({
                 {headerLeft ?? (
                     <div className={styles.breadcrumbs}>
                         <span className={styles.prominentBreadcrumb}>
-                            Volunteer Dashboard /
+                            Volunteer Dashboard
                         </span>
                         <span className={styles.breadcrumbSeperator}>/</span>
                         <span className={styles.panelBreadcrumb}>
