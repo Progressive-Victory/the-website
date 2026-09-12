@@ -25,6 +25,21 @@ function renderUnselectedGridHeader(label: string): ReactElement {
     )
 }
 
+export interface VolunteerDashboardUnselectedDetailProps {
+    showWelcome?: boolean
+    currentUserName?: string
+    currentUserHandle?: string
+    currentUserDiscordId?: string
+    currentUserDiscordImage?: string
+    userCount?: number
+    donorCount?: number
+    contributionCount?: number
+    roleCount?: number
+    permissionCount?: number
+    positionCount?: number
+    endorsementCount?: number
+}
+
 export function renderVolunteerDashboardUnselectedDetail({
     showWelcome,
     currentUserName,
@@ -38,20 +53,13 @@ export function renderVolunteerDashboardUnselectedDetail({
     permissionCount,
     positionCount,
     endorsementCount,
-}: {
-    showWelcome?: boolean
-    currentUserName?: string
-    currentUserHandle?: string
-    currentUserDiscordId?: string
-    currentUserDiscordImage?: string
-    userCount?: number
-    donorCount?: number
-    contributionCount?: number
-    roleCount?: number
-    permissionCount?: number
-    positionCount?: number
-    endorsementCount?: number
-}): ReactElement {
+}: VolunteerDashboardUnselectedDetailProps): ReactElement {
+    const displayName = currentUserName?.trim()
+        ? currentUserName
+        : currentUserHandle
+          ? `@${currentUserHandle}`
+          : 'User'
+
     return (
         <Detail
             bodyType="blank"
@@ -77,18 +85,13 @@ export function renderVolunteerDashboardUnselectedDetail({
                                 </div>
                             )}
                             <h2 className={styles.unselectedProfileName}>
-                                {(currentUserName?.trim()
-                                    ? currentUserName
-                                    : undefined) ??
-                                    (currentUserHandle
-                                        ? `@${currentUserHandle}`
-                                        : 'User')}
+                                {displayName}
                             </h2>
-                            {currentUserHandle ? (
+                            {currentUserHandle && (
                                 <div className={styles.unselectedProfileHandle}>
                                     @{currentUserHandle}
                                 </div>
-                            ) : null}
+                            )}
                         </div>
                     </div>
                     <div className={styles.unselectedGrid}>
