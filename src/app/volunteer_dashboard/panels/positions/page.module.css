@@ -1,14 +1,15 @@
+.sidebarBg {
+    --navigation-stack-sidebar-bg: #f9fafb;
+    --navigation-stack-sidebar-padding: 0rem;
+    --navigation-stack-sidebar-gap: 0rem;
+}
+
 .detailPane {
     height: calc(100dvh - 100px);
     flex: 1 1 auto;
     overflow-y: auto;
     min-height: 0;
     padding-block: 1rem;
-}
-
-.listItemText {
-    font-weight: 500;
-    color: #000;
 }
 
 .emptyState {
@@ -101,9 +102,17 @@
     color: #6b7280;
 }
 
-.subPositionEntryEditing .subPositionEntryText,
-.subPositionEntryEditing .subPositionEntryTextSub {
-    transform: translateX(2rem);
+.subPositionEntryEditing {
+    & .subPositionEntryText,
+    & .subPositionEntryTextSub {
+        transform: translateX(2rem);
+    }
+
+    & .deleteButton {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: auto;
+    }
 }
 
 .deleteButton {
@@ -137,12 +146,6 @@
     }
 }
 
-.subPositionEntryEditing .deleteButton {
-    opacity: 1;
-    transform: scale(1);
-    pointer-events: auto;
-}
-
 .addRow {
     display: flex;
     align-items: center;
@@ -157,11 +160,11 @@
     color: rgba(15, 23, 42, 0.72);
     cursor: pointer;
     transition: background 140ms ease;
-}
 
-.addRow:hover {
-    color: rgba(2, 132, 199, 1);
-    background: rgba(14, 165, 233, 0.14);
+    &:hover {
+        color: rgba(2, 132, 199, 1);
+        background: rgba(14, 165, 233, 0.14);
+    }
 }
 
 .addIcon {
@@ -178,10 +181,12 @@
     margin-right: 0.5rem;
 }
 
-.pickerItem > div {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.15rem;
+.pickerItem {
+    & > div {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.15rem;
+    }
 }
 
 .pickerItemName {
