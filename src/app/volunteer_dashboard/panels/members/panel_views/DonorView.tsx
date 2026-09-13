@@ -9,7 +9,6 @@ import {
     FormGroup,
     TextField,
 } from '@/components/common/forms'
-import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import {
     ActBlueContribution,
     ActBlueContributionCustomField,
@@ -99,12 +98,6 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
         lineitems: li,
     }
 }
-
-const formatLineitemDate = (value: Date) =>
-    Intl.DateTimeFormat('en-US', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(value)
 
 export function DonorView({
     selectedId,
@@ -373,110 +366,17 @@ export function DonorView({
                                                     />
                                                 </FormGroup>
 
-                                                {(
-                                                    contributionData.lineitems ??
-                                                    []
-                                                ).map((lineitem) => (
-                                                    <FormGroup
-                                                        title={`Donated $${lineitem.amount}`}
-                                                        subtitle={formatLineitemDate(
-                                                            lineitem.paidAt
-                                                        )}
-                                                        key={
-                                                            lineitem.lineitemId
-                                                        }
-                                                        defaultCollapsed
-                                                        subGroup
-                                                    >
-                                                        <DateField<ActBlueDonor>
-                                                            label="Paid At"
-                                                            getter={() =>
-                                                                lineitem.paidAt
-                                                            }
-                                                        />
-                                                        <TextField<ActBlueDonor>
-                                                            label="Sequence"
-                                                            getter={() =>
-                                                                `${lineitem.sequence}`
-                                                            }
-                                                        />
-                                                        <TextField<ActBlueDonor>
-                                                            label="Amount"
-                                                            getter={() =>
-                                                                `$${lineitem.amount}`
-                                                            }
-                                                        />
-                                                        <TextField<ActBlueDonor>
-                                                            label="Recurring Amount"
-                                                            getter={() =>
-                                                                `$${lineitem.recurringAmount}`
-                                                            }
-                                                        />
-                                                        <TextField<ActBlueDonor>
-                                                            label="Amount Less AB Fees"
-                                                            getter={() =>
-                                                                `$${lineitem.amountLessAbFees}`
-                                                            }
-                                                        />
-                                                        <TextField
-                                                            label="Form Name"
-                                                            field="contributionForm"
-                                                            getter={() =>
-                                                                donor
-                                                                    .contributions?.[0]
-                                                                    ?.contributionForm
-                                                            }
-                                                        />
-                                                        {contributionData.customFields?.map(
-                                                            (field) => (
-                                                                <TextField
-                                                                    key={
-                                                                        field.id
-                                                                    }
-                                                                    label={
-                                                                        field.label
-                                                                    }
-                                                                    getter={() =>
-                                                                        field.answer
-                                                                    }
-                                                                />
-                                                            )
-                                                        )}
-
-                                                        <NavigationButton
-                                                            className={
-                                                                styles.detailsNavigationButton
-                                                            }
-                                                            href={`/volunteer_dashboard/panels/contributions?lineitemId=${lineitem.lineitemId}`}
-                                                            label="Full Details"
-                                                            trackPanelHistory
-                                                            classNames={{
-                                                                link: styles.detailsNavigationLink,
-                                                                label: styles.detailsNavigationLabel,
-                                                            }}
-                                                            tag={{
-                                                                className:
-                                                                    styles.detailsNavigationTagSection,
-                                                            }}
-                                                        />
-                                                    </FormGroup>
-                                                ))}
-                                                <NavigationButton
-                                                    className={
-                                                        styles.detailsNavigationButton
-                                                    }
-                                                    href={`/volunteer_dashboard/panels/donors?email=${donor.email}`}
-                                                    label="Open in Donors Panel"
-                                                    trackPanelHistory
-                                                    classNames={{
-                                                        link: styles.detailsNavigationLink,
-                                                        label: styles.detailsNavigationLabel,
+                                                <Link
+                                                    href={{
+                                                        pathname:
+                                                            '/admin/panels/donors',
+                                                        query: {
+                                                            email: donor.email,
+                                                        },
                                                     }}
-                                                    tag={{
-                                                        className:
-                                                            styles.detailsNavigationTagSection,
-                                                    }}
-                                                />
+                                                >
+                                                    Open in Donors Panel
+                                                </Link>
                                             </FormGroup>
                                         </Form>
                                     </div>
@@ -577,7 +477,7 @@ export function DonorView({
                                                                 <Link
                                                                     href={{
                                                                         pathname:
-                                                                            '/volunteer_dashboard/panels/contributions',
+                                                                            '/admin/panels/contributions',
                                                                         query: {
                                                                             lineitemId:
                                                                                 lineitem.lineitemId,
