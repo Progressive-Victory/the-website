@@ -29,9 +29,7 @@
     & > input {
         width: 100%;
         border-radius: 0.6rem;
-        border-width: 1px;
-        border-style: solid;
-        border-color: #d1d5db;
+        border: 1px solid #d1d5db;
         padding: 0.25rem 0.75rem;
     }
 
@@ -224,8 +222,7 @@
 }
 
 .pageSelectButtons {
-    margin-left: auto;
-    margin-right: auto;
+    margin-inline: auto;
     display: flex;
     align-items: center;
     justify-content: center;
