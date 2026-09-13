@@ -1,9 +1,0 @@
-.historyView {
-    display: flex;
-    min-height: 12rem;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    color: rgba(15, 23, 42, 0.68);
-    text-align: center;
-}
