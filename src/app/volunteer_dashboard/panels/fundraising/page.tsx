@@ -39,6 +39,7 @@ export default function Page() {
     const dateRangeTriggerRef = useRef<HTMLButtonElement | null>(null)
     const dateRangeOverlayRef = useRef<HTMLDivElement | null>(null)
 
+    // #TODO figure out a better way to handle the large number of returned values from the controller.
     const {
         startDate,
         endDate,
@@ -721,7 +722,7 @@ export default function Page() {
                             description="Dues Paying Membership switchboard."
                             href="/volunteer_dashboard/panels/membership"
                             icon={FaMoneyCheckDollar}
-                            tag={{ count: 92 }}
+                            // tag={{ count: 92 }} will be added once membership stats are available.
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />
