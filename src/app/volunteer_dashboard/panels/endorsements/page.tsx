@@ -6,9 +6,11 @@ import styles from './page.module.css'
 import { DetailView } from './panel_views/DetailView'
 import { HistoryView } from './panel_views/HistoryView'
 import { FilterTags } from '@/app/admin/layout/FilterTags'
-import { ListElement, List } from '@/app/admin/layout/List'
+import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { EndorsementAvatar } from '@/components/common'
 import { FormState } from '@/components/common/forms'
+import Panel from '@/components/common/panel/Panel'
+import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     BackgroundColor,
@@ -25,7 +27,6 @@ import {
     getStateLabel,
 } from '@/models'
 import { useEndorsementQueries } from '@/queries'
-import { cn } from '@/util'
 import {
     useOptimisticDelete,
     useOptimisticUpdate,
@@ -33,7 +34,7 @@ import {
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { MdVerified } from 'react-icons/md'
+import { useMediaQuery } from 'usehooks-ts'
 
 const blankEndorsement: Endorsement = {
     id: -1,
@@ -72,6 +73,43 @@ const endorsementTabs: TabSpec[] = [
     { key: 'history', label: 'History' },
 ]
 
+const electionDateFormat = Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeZone: 'UTC',
+})
+
+const makeDateTag = (endorsement: Endorsement) => {
+    const electionDate = getRelevantElectionDate(endorsement)
+    if (!electionDate) return undefined
+
+    return electionDateFormat.format(electionDate)
+}
+
+const endorsementLevelTagClass: Record<EndorsementType, string | undefined> = {
+    [EndorsementType.PVPledge]: styles.tagPurple,
+    [EndorsementType.Endorsement]: styles.tagGreen,
+    [EndorsementType.Recommendation]: styles.tagRed,
+    [EndorsementType.Unendorsed]: undefined,
+    [EndorsementType.None]: styles.tagDefault,
+}
+
+const initiativeLevelTagClass: Record<InitiativeType, string | undefined> = {
+    [InitiativeType.State]: styles.tagOrange,
+    [InitiativeType.National]: styles.tagBlue,
+    [InitiativeType.None]: styles.tagDefault,
+}
+
+const makeLevelTags = (endorsement: Endorsement) => [
+    {
+        label: ENDORSEMENT_TYPE_LABELS[endorsement.endorsementLevel],
+        className: endorsementLevelTagClass[endorsement.endorsementLevel],
+    },
+    {
+        label: INITIATIVE_TYPE_LABELS[endorsement.initiativeLevel],
+        className: initiativeLevelTagClass[endorsement.initiativeLevel],
+    },
+]
+
 export default function Page() {
     const queryClient = useQueryClient()
     const endorsementQueries = useEndorsementQueries()
@@ -82,6 +120,8 @@ export default function Page() {
         null
     )
     const [selectedTab, setSelectedTab] = useState<EndorsementTabKey>('detail')
+    const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
+    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const endorsementsQuery = useQuery({
         queryKey: ['endorsements'],
@@ -103,7 +143,11 @@ export default function Page() {
         onSearch,
     } = useUnpaginatedSearch({
         items: filteredEndorsements,
-        initialSearch: { sort: SortDirection.ASC, sortField: 'name' },
+        initialSearch: {
+            sort: SortDirection.ASC,
+            sortField: 'name',
+            limit: 25,
+        },
         onFilter: (endorsement, query) =>
             endorsement.name
                 .toLocaleLowerCase()
@@ -142,18 +186,19 @@ export default function Page() {
     }
 
     const handleSelectItem = (value: Endorsement) => {
-        if (value.id === selectedEndorsement?.id) return
+        if (value.id === selectedEndorsement?.id) return true
 
         if (formState?.mode === 'edit' || formState?.mode === 'create') {
             const proceed = confirm(
                 'Are you sure you want to continue? All progress will be lost.'
             )
-            if (!proceed) return
+            if (!proceed) return false
         }
 
         setFormState(null)
         setSelectedEndorsement(value)
         setSelectedTab('detail')
+        return true
     }
 
     const createMutation = useOptimisticUpdate<Endorsement>({
@@ -270,127 +315,87 @@ export default function Page() {
         ) : undefined
 
     return (
-        <>
-            <div className={styles.listWidth}>
-                <List
-                    search={search}
-                    count={endorsementCount}
-                    isPending={endorsementsQuery.isPending}
-                    error={endorsementsQuery.error}
-                    headerContent={
-                        <div className={styles.filterTagsWrapper}>
-                            <FilterTags
-                                tags={endorsementFilterTags}
-                                activeTag={activeFilterTag}
-                                onChange={setActiveFilterTag}
-                            />
-                        </div>
-                    }
-                    onSearch={onSearch}
-                    sortFields={endorsementSortFields}
-                >
-                    {endorsements.map((item) => {
-                        const listDate = getRelevantElectionDate(item)
-
-                        return (
-                            <ListElement
-                                key={item.id}
-                                className={styles.listElement}
-                                selected={selectedEndorsement?.id == item.id}
-                                onClick={() => handleSelectItem(item)}
-                            >
-                                <div className={styles.listItemBody}>
-                                    <div className={styles.listItemTopRow}>
-                                        <EndorsementAvatar
-                                            endorsement={item}
-                                            size={48}
-                                            badgeTooltipPosition="bottom"
-                                        />
-                                        <div className={styles.listItemMeta}>
-                                            <span
-                                                className={styles.listItemText}
-                                            >
-                                                {item.name}
-                                                {item.incumbent && '*'}
-                                                {item.isPvMember && (
-                                                    <MdVerified
-                                                        className={
-                                                            styles.verifiedBadge
-                                                        }
-                                                        title="PV Member"
-                                                    />
-                                                )}
-                                            </span>
-                                            <span
-                                                className={
-                                                    styles.listItemSubtext
-                                                }
-                                            >
-                                                {getStateLabel(item.state)}
-                                            </span>
-                                        </div>
-                                        {listDate && (
-                                            <span className={styles.stateTag}>
-                                                {Intl.DateTimeFormat('en-US', {
-                                                    dateStyle: 'medium',
-                                                    timeZone: 'UTC',
-                                                }).format(listDate)}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className={styles.levelTags}>
-                                        <span
-                                            className={cn(
-                                                styles.levelTag,
-                                                item.endorsementLevel ===
-                                                    EndorsementType.PVPledge &&
-                                                    styles.tagPurple,
-                                                item.endorsementLevel ===
-                                                    EndorsementType.Endorsement &&
-                                                    styles.tagGreen,
-                                                item.endorsementLevel ===
-                                                    EndorsementType.Recommendation &&
-                                                    styles.tagRed,
-                                                item.endorsementLevel ===
-                                                    EndorsementType.None &&
-                                                    styles.tagDefault
-                                            )}
-                                        >
-                                            {
-                                                ENDORSEMENT_TYPE_LABELS[
-                                                    item.endorsementLevel
-                                                ]
-                                            }
-                                        </span>
-                                        <span
-                                            className={cn(
-                                                styles.levelTag,
-                                                item.initiativeLevel ===
-                                                    InitiativeType.State &&
-                                                    styles.tagOrange,
-                                                item.initiativeLevel ===
-                                                    InitiativeType.National &&
-                                                    styles.tagBlue,
-                                                item.initiativeLevel ===
-                                                    InitiativeType.None &&
-                                                    styles.tagDefault
-                                            )}
-                                        >
-                                            {
-                                                INITIATIVE_TYPE_LABELS[
-                                                    item.initiativeLevel
-                                                ]
-                                            }
-                                        </span>
-                                    </div>
-                                </div>
-                            </ListElement>
-                        )
-                    })}
-                </List>
-            </div>
-
+        <Panel
+            includeSidebar
+            collapsedSidebarMode="compact"
+            sidebarTogglePlacement="header"
+            showSidebarFooterWhenCollapsed={false}
+            showSidebarBorderWhenCollapsed
+            largeTitle
+            sidebarWidth="25.5rem"
+            collapsedSidebarWidth="5rem"
+            sidebarClassName={styles.sidebarBg}
+            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            label="Endorsements"
+            showScrollbar={false}
+            sidebarList={{
+                search: { search, onSearch },
+                footer: {
+                    page: search.page ?? 0,
+                    pageSize: search.limit ?? 25,
+                    count: endorsementCount,
+                    isPending: endorsementsQuery.isPending,
+                    onPageChange: (nextPage: number) =>
+                        onSearch({ ...search, page: nextPage }),
+                },
+                filters: {
+                    search,
+                    onSearch,
+                    sortFieldOptions: endorsementSortFields,
+                    showSort: true,
+                    showLimit: true,
+                },
+            }}
+            sidebarBody={
+                <>
+                    <div className={styles.filterTagsWrapper}>
+                        <FilterTags
+                            tags={endorsementFilterTags}
+                            activeTag={activeFilterTag}
+                            onChange={setActiveFilterTag}
+                        />
+                    </div>
+                    <SidebarBody<Endorsement>
+                        items={endorsements}
+                        isLoading={endorsementsQuery.isPending}
+                        error={endorsementsQuery.error}
+                        selectedKey={selectedEndorsement?.id}
+                        renderItem={(item) => ({
+                            key: item.id,
+                            label: `${item.name}${item.incumbent ? '*' : ''}`,
+                            subtitle: getStateLabel(item.state),
+                            tagLabel: makeDateTag(item),
+                            tagClassName: styles.dateTag,
+                            subTags: makeLevelTags(item),
+                            icon: (
+                                <EndorsementAvatar
+                                    endorsement={item}
+                                    size={40}
+                                    badgeTooltipPosition="bottom"
+                                    className={styles.listAvatar}
+                                />
+                            ),
+                            href: `/volunteer_dashboard/panels/endorsements?endorsementId=${item.id}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                const selected = handleSelectItem(item)
+                                if (selected && !isDesktop) {
+                                    setSidebarMobileVisible(false)
+                                }
+                            },
+                        })}
+                    />
+                </>
+            }
+        >
             <div className={styles.detailsPane}>
+                <MobileSidebarBackButton
+                    label="Endorsements"
+                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    onBack={() => setSidebarMobileVisible(true)}
+                    className={styles.backButton}
+                />
+
                 {selectedTab !== 'detail' && renderBanner(false)}
                 {selectedTab === 'detail' && (
                     <DetailView
@@ -423,6 +428,6 @@ export default function Page() {
                     <HistoryView />
                 )}
             </div>
-        </>
+        </Panel>
     )
 }

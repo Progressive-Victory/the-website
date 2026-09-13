@@ -26,9 +26,11 @@
     height: 72px;
     cursor: pointer;
 
-    &:hover .imageOverlay,
-    &:focus-within .imageOverlay {
-        background: rgba(15, 23, 42, 0.56);
+    &:hover,
+    &:focus-within {
+        .imageOverlay {
+            background: rgba(15, 23, 42, 0.56);
+        }
     }
 }
 

@@ -1,5 +1,15 @@
-.listWidth {
-    --list-width: 25.5rem;
+.sidebarBg {
+    --navigation-stack-sidebar-bg: #f9fafb;
+    --navigation-stack-sidebar-padding: 0rem;
+    --navigation-stack-sidebar-gap: 0rem;
+}
+
+.backButton {
+    --back-button-hover-color: rgba(255, 255, 255, 0.7);
+    margin-top: 0.5rem;
+    --sidebar-back-margin-bottom: -1rem;
+    position: relative;
+    z-index: 21;
 }
 
 .detailsPane {
@@ -11,10 +21,7 @@
         rgba(241, 245, 249, 0.98) 38%,
         rgba(14, 165, 233, 0.04) 100%
     );
-}
-
-.listElement > div {
-    padding-block: 0.6rem;
+    z-index: 0;
 }
 
 .detailsHeader {
@@ -46,21 +53,21 @@
     );
 
     border-radius: 1rem;
-}
 
-.detailsHeader::before {
-    content: '';
-    position: absolute;
-    top: -100rem;
-    left: 0;
-    right: 0;
-    height: 100rem;
-    background: var(--banner-cover-gradient);
-    background-size: 100% var(--banner-cover-height);
-    background-position: 0 100%;
-    background-repeat: repeat-y;
-    pointer-events: none;
-    z-index: -1;
+    &::before {
+        content: '';
+        position: absolute;
+        top: -100rem;
+        left: 0;
+        right: 0;
+        height: 100rem;
+        background: var(--banner-cover-gradient);
+        background-size: 100% var(--banner-cover-height);
+        background-position: 0 100%;
+        background-repeat: repeat-y;
+        pointer-events: none;
+        z-index: -1;
+    }
 }
 
 .bannerCover {
@@ -81,209 +88,55 @@
     }
 }
 
-.listItemBody {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    flex: 1 1 auto;
-}
-
-.listItemTopRow {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.listItemMeta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    min-width: 0;
-    flex: 1 1 auto;
-}
-
-.listItemText {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-weight: 500;
-    color: #000;
-}
-
-.verifiedBadge {
-    flex-shrink: 0;
-    width: 0.85rem;
-    height: 0.85rem;
-    color: #0ea5e9;
-}
-
-.listItemSubtext {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #6b7280;
-}
-
-.levelTag {
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding-inline: 0.55rem;
-    padding-block: 0.1rem;
-    border-radius: 9999px;
-    color: rgba(2, 132, 199, 1);
-    background: rgba(14, 165, 233, 0.14);
-}
-
-.levelTags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    align-self: flex-start;
-    margin-top: 0.65rem;
-}
-
-.levelTagPledge {
-    color: rgba(147, 51, 234, 1);
-    background: rgba(168, 85, 247, 0.14);
-}
-
-.levelTagRecommendation {
-    color: rgba(220, 38, 38, 1);
-    background: rgba(239, 68, 68, 0.14);
-}
-
-.levelTagNone {
-    color: rgba(15, 23, 42, 0.62);
-    background: rgba(15, 23, 42, 0.06);
-}
-
-.stateTag {
-    margin-left: auto;
-    flex-shrink: 0;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding-inline: 0.75rem;
-    padding-block: 0.15rem;
-    border-radius: 9999px;
-    color: rgba(15, 23, 42, 0.72);
-    background: rgba(15, 23, 42, 0.06);
-}
-
-.emptyState {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .filterTagsWrapper {
     flex-shrink: 0;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
 }
 
-.imageField {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.imagePreview {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 9999px;
-    object-fit: cover;
-    border: 1px solid rgba(17, 24, 39, 0.1);
-}
-
-.uploadButton {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.4rem 0.9rem;
-    border-radius: 9999px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: rgba(15, 23, 42, 0.72);
-    background: rgba(15, 23, 42, 0.06);
-    cursor: pointer;
-    transition: background 140ms ease;
-
-    &:hover {
-        color: rgba(2, 132, 199, 1);
-        background: rgba(14, 165, 233, 0.14);
-    }
-}
-
-.uploadError {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #dc2626;
-}
-
-.tag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 2.8rem;
+/* Doubled class outranks the shared .tagLabel styles regardless of stylesheet order */
+.dateTag.dateTag {
+    text-transform: none;
+    letter-spacing: normal;
     font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.2rem 0.6rem;
-    border-radius: 9999px;
-    white-space: nowrap;
+    font-weight: 600;
     color: rgba(15, 23, 42, 0.72);
     background: rgba(15, 23, 42, 0.06);
 }
 
 .tagDefault {
-    color: rgba(15, 23, 42, 0.72);
-    background: rgba(15, 23, 42, 0.06);
+    --navigation-button-sub-tag-color: rgba(15, 23, 42, 0.72);
+    --navigation-button-sub-tag-bg: rgba(15, 23, 42, 0.06);
 }
+
 .tagRed {
-    background: rgba(255, 95, 75, 0.3);
-    color: rgba(177, 2, 2, 1);
+    --navigation-button-sub-tag-color: rgba(177, 2, 2, 1);
+    --navigation-button-sub-tag-bg: rgba(255, 95, 75, 0.3);
 }
+
 .tagOrange {
-    background: rgba(255, 72, 0, 0.3);
-    color: rgba(117, 56, 0, 1);
+    --navigation-button-sub-tag-color: rgba(117, 56, 0, 1);
+    --navigation-button-sub-tag-bg: rgba(255, 72, 0, 0.3);
 }
-.tagYellow {
-    background: rgba(255, 168, 0, 0.3);
-    color: rgba(71, 56, 33, 1);
-}
+
 .tagGreen {
-    background: rgba(112, 195, 32, 0.3);
-    color: rgba(17, 115, 75, 1);
+    --navigation-button-sub-tag-color: rgba(17, 115, 75, 1);
+    --navigation-button-sub-tag-bg: rgba(112, 195, 32, 0.3);
 }
+
 .tagBlue {
-    background: rgba(42, 155, 225, 0.3);
-    color: rgba(10, 83, 168, 1);
+    --navigation-button-sub-tag-color: rgba(10, 83, 168, 1);
+    --navigation-button-sub-tag-bg: rgba(42, 155, 225, 0.3);
 }
-.tagLightBlue {
-    color: rgba(2, 132, 199, 1);
-    background: rgba(14, 165, 233, 0.14);
-}
+
 .tagPurple {
-    background: rgba(172, 95, 212, 0.3);
-    color: rgba(90, 50, 134, 1);
+    --navigation-button-sub-tag-color: rgba(90, 50, 134, 1);
+    --navigation-button-sub-tag-bg: rgba(172, 95, 212, 0.3);
 }
-.tagDarkRed {
-    background: rgba(177, 2, 2, 1);
-    color: rgba(255, 207, 201, 1);
+
+:global([data-sidebar-collapsed='true']) .filterTagsWrapper {
+    display: none;
 }
-.tagGray {
-    background: #e6e6e6;
-    color: #3d3d3d;
-}
-.tagMember {
-    background: #ffe5ec;
-    color: rgba(177, 2, 2, 1);
-}
-.tagPremium {
-    background: #ffe5ec;
-    color: rgb(223, 40, 76);
-}
-.tagSignature {
-    background: #ffa7cd;
-    color: rgba(177, 2, 2, 1);
-}
-.tagInnerCircle {
-    background: #da93ff;
-    color: rgba(90, 50, 134, 1);
+
+:global([data-sidebar-collapsed='true']) .listAvatar {
+    box-shadow: none;
 }

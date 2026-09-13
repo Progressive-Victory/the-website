@@ -14,14 +14,20 @@ import {
     useConfigure,
 } from '@/components/common/forms'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import { BackgroundColor, Endorsement } from '@/contracts/data'
+import {
+    BackgroundColor,
+    ElectionStatus,
+    Endorsement,
+    EndorsementType,
+    InitiativeType,
+} from '@/contracts/data'
 import {
     electionStatusOptions,
     endorsementLevelOptions,
     initiativeLevelOptions,
     stateOptions,
 } from '@/models'
-import { cn, parseErrorMessage } from '@/util'
+import { cn } from '@/util'
 import { ChangeEvent, useCallback, useState } from 'react'
 
 const stateOptionsWithEmpty = [
@@ -89,7 +95,7 @@ export function DetailView({
                     getter={(form) => form.avatarBgColor}
                     setter={(form, field) => ({
                         ...form,
-                        avatarBgColor: Number(field),
+                        avatarBgColor: Number(field) as BackgroundColor,
                     })}
                     options={avatarBgColorOptions}
                 />
@@ -105,7 +111,7 @@ export function DetailView({
                     getter={(form) => form.electionStatus}
                     setter={(form, field) => ({
                         ...form,
-                        electionStatus: Number(field),
+                        electionStatus: Number(field) as ElectionStatus,
                     })}
                     options={electionStatusOptions}
                 />
@@ -133,7 +139,7 @@ export function DetailView({
                     getter={(form) => form.endorsementLevel}
                     setter={(form, field) => ({
                         ...form,
-                        endorsementLevel: Number(field),
+                        endorsementLevel: Number(field) as EndorsementType,
                     })}
                     options={endorsementLevelOptions}
                 />
@@ -143,7 +149,7 @@ export function DetailView({
                     getter={(form) => form.initiativeLevel}
                     setter={(form, field) => ({
                         ...form,
-                        initiativeLevel: Number(field),
+                        initiativeLevel: Number(field) as InitiativeType,
                     })}
                     options={initiativeLevelOptions}
                 />
@@ -277,7 +283,11 @@ function ImageField(props: ImageFieldProps) {
             const { url } = await props.uploadImage(file)
             onChange(url)
         } catch (uploadError) {
-            setError(parseErrorMessage(uploadError, 'Failed to upload image'))
+            setError(
+                uploadError instanceof Error
+                    ? uploadError.message
+                    : 'Failed to upload image'
+            )
         } finally {
             setUploading(false)
         }

@@ -9,7 +9,7 @@ import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import { HStack, Spacer, VStack, ZStack } from '@/components/layout'
 import { Endorsement, EndorsementType, InitiativeType } from '@/contracts/data'
 import { stateOptions } from '@/models'
-import { cn, parseErrorMessage } from '@/util'
+import { cn } from '@/util'
 import { ChangeEvent, useState } from 'react'
 import { FaCamera } from 'react-icons/fa'
 
@@ -47,7 +47,7 @@ const stateNames = new Map(
 )
 const validImage = () => true
 
-// # TODO Merge EndorsementBanner and MemberBanner into a single HeaderBanner Component as part of Admin Panel Refactor to Volunteer Dashboard
+// # TODO Merge EndorsementBanner and MemberBanner into a single HeaderBanner Component as part of Admin Panel Refactor to Volunteer Dashboard. Use endorsementbanner as inspiration since its already updated to use VStack/HStack for layout.
 export function EndorsementBanner({
     endorsement,
     selectedTab,
@@ -83,7 +83,11 @@ export function EndorsementBanner({
             const { url } = await uploadImage(file)
             onChange(url)
         } catch (error) {
-            setUploadError(parseErrorMessage(error, 'Failed to upload image'))
+            setUploadError(
+                error instanceof Error
+                    ? error.message
+                    : 'Failed to upload image'
+            )
         } finally {
             setUploading(false)
         }
