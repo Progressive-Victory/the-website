@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement, List } from '@/app/admin/layout/List'
+import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import {
     FormState,
     Form,
@@ -9,6 +9,9 @@ import {
     FormGroup,
     DateField,
 } from '@/components/common/forms'
+import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import Panel from '@/components/common/panel/Panel'
+import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import {
     ActBlueDonor,
     zActBlueDonor,
@@ -19,9 +22,9 @@ import {
 import { SortDirection } from '@/contracts/requests'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
-import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useMediaQuery } from 'usehooks-ts'
 
 interface contributionData {
     total: number
@@ -29,6 +32,17 @@ interface contributionData {
     customFields: ActBlueContributionCustomField[]
     lineitems: ActBlueLineitem[]
 }
+
+const DONOR_FIELD_OPTIONS = [
+    { value: 'firstname', label: 'First Name' },
+    { value: 'lastname', label: 'Last Name' },
+    { value: 'email', label: 'Email' },
+    { value: 'state', label: 'State' },
+]
+
+const DONOR_SORT_FIELD_OPTIONS = DONOR_FIELD_OPTIONS.filter(
+    (option) => option.value !== 'state'
+)
 
 export default function Page() {
     const { ready, onGet } = useFetch()
@@ -39,6 +53,8 @@ export default function Page() {
     const [formState, setFormState] = useState<FormState<ActBlueDonor> | null>(
         null
     )
+    const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
+    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const {
         query: searchQuery,
@@ -60,6 +76,10 @@ export default function Page() {
                 : skipToken,
         placeholderData: keepPreviousData,
     })
+
+    useEffect(() => {
+        setSelectedEmail(navEmail)
+    }, [navEmail])
 
     const calcFutureDate = (
         initialTime: Date,
@@ -132,48 +152,85 @@ export default function Page() {
         return `${donor.firstname} ${donor.lastname}`
     }
 
-    const renderItem = (item: ActBlueDonor) => {
-        return (
-            <ListElement
-                key={item.email}
-                selected={selectedEmail == item.email}
-                onClick={() => handleSelectItem(item)}
-            >
-                <div className={styles.userName}>
-                    <span>{makeTitle(item)}</span>
-                </div>
-            </ListElement>
-        )
-    }
+    const formatLineitemDate = (value: Date) =>
+        Intl.DateTimeFormat('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+        }).format(value)
+
+    const donors = searchQuery.data?.data ?? []
+    const resultCount = searchQuery.data?.count
 
     return (
-        <>
-            <List
-                backHref="/admin/panels/fundraising"
-                backLabel="Fundraising"
-                search={search}
-                count={searchQuery.data?.count}
-                isPending={searchQuery.isPending}
-                error={searchQuery.error}
-                searchFields={[
-                    { value: 'email', label: 'Email' },
-                    { value: 'first_name', label: 'First Name' },
-                    { value: 'last_name', label: 'Last Name' },
-                    { value: 'state', label: 'State' },
-                ]}
-                sortFields={[
-                    { value: 'email', label: 'Email' },
-                    { value: 'first_name', label: 'First Name' },
-                    { value: 'last_name', label: 'Last Name' },
-                ]}
-                onSearch={onSearch}
-            >
-                {searchQuery.data?.data?.map((item) => renderItem(item))}
-            </List>
-
-            <div className={styles.detailsPane}>
+        <Panel
+            includeSidebar
+            largeTitle
+            sidebarWidth="24rem"
+            sidebarClassName={styles.sidebarBg}
+            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            label="Donors"
+            showScrollbar={false}
+            sidebarList={{
+                search: { search, onSearch },
+                footer: {
+                    page: search.page ?? 0,
+                    pageSize: search.limit ?? 25,
+                    count: resultCount,
+                    isPending: searchQuery.isPending,
+                    onPageChange: (nextPage: number) =>
+                        onSearch({ ...search, page: nextPage }),
+                },
+                filters: {
+                    search,
+                    onSearch,
+                    searchFieldOptions: DONOR_FIELD_OPTIONS,
+                    sortFieldOptions: DONOR_SORT_FIELD_OPTIONS,
+                    showSort: true,
+                    showLimit: true,
+                },
+            }}
+            sidebarBody={
+                <SidebarBody<ActBlueDonor>
+                    items={donors}
+                    isLoading={searchQuery.isPending}
+                    error={searchQuery.error}
+                    selectedKey={selectedEmail}
+                    renderItem={(donor) => ({
+                        key: donor.email,
+                        label: makeTitle(donor),
+                        href: `/volunteer_dashboard/panels/donors?email=${donor.email}`,
+                        onClick: (event) => {
+                            event.preventDefault()
+                            handleSelectItem(donor)
+                            if (!isDesktop) {
+                                setSidebarMobileVisible(false)
+                            }
+                        },
+                    })}
+                />
+            }
+        >
+            <div className={styles.detailPane}>
+                <MobileSidebarBackButton
+                    label="Donors"
+                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    onBack={() => setSidebarMobileVisible(true)}
+                />
                 {selectedEmail == null && (
-                    <div className={styles.emptyState}>No user selected</div>
+                    <div className={styles.emptyState}>No donor selected</div>
+                )}
+                {selectedEmail && donorQuery.isPending && (
+                    <div className={styles.emptyState}>
+                        Loading donor details...
+                    </div>
+                )}
+                {selectedEmail && donorQuery.error && (
+                    <div
+                        className={styles.emptyState}
+                        style={{ color: '#ef4444' }}
+                    >
+                        Error: {donorQuery.error.message}
+                    </div>
                 )}
                 {selectedEmail && donorQuery.data && (
                     <Form<ActBlueDonor>
@@ -212,40 +269,44 @@ export default function Page() {
                         <FormGroup title="Employer Info">
                             <TextField<ActBlueDonor>
                                 label="Employer Name"
-                                getter={(form) => form.employerData?.employer}
+                                getter={(form) =>
+                                    form.employerData?.employer ?? 'N/A'
+                                }
                             />
                             <TextField<ActBlueDonor>
                                 label="Occupation"
-                                getter={(form) => form.employerData?.occupation}
+                                getter={(form) =>
+                                    form.employerData?.occupation ?? 'N/A'
+                                }
                             />
                             <TextField<ActBlueDonor>
                                 label="Employer Street Address"
                                 getter={(form) =>
-                                    form.employerData?.employerAddr1
+                                    form.employerData?.employerAddr1 ?? 'N/A'
                                 }
                             />
                             <TextField<ActBlueDonor>
                                 label="Employer City"
                                 getter={(form) =>
-                                    form.employerData?.employerCity
+                                    form.employerData?.employerCity ?? 'N/A'
                                 }
                             />
                             <TextField<ActBlueDonor>
                                 label="Employer State"
                                 getter={(form) =>
-                                    form.employerData?.employerState
+                                    form.employerData?.employerState ?? 'N/A'
                                 }
                             />
                             <TextField<ActBlueDonor>
                                 label="Employer Zip Code"
                                 getter={(form) =>
-                                    `${form.employerData?.employerZip ?? ''}`
+                                    `${form.employerData?.employerZip ?? 'N/A'}`
                                 }
                             />
                             <TextField<ActBlueDonor>
                                 label="Employer Country"
                                 getter={(form) =>
-                                    form.employerData?.employerCountry
+                                    form.employerData?.employerCountry ?? 'N/A'
                                 }
                             />
                         </FormGroup>
@@ -271,7 +332,10 @@ export default function Page() {
                             {(contributionData.lineitems ?? []).map(
                                 (lineitem) => (
                                     <FormGroup
-                                        title={`${lineitem.lineitemId}`}
+                                        title={`Donated $${lineitem.amount}`}
+                                        subtitle={formatLineitemDate(
+                                            lineitem.paidAt
+                                        )}
                                         key={lineitem.lineitemId}
                                         defaultCollapsed
                                         subGroup
@@ -313,18 +377,22 @@ export default function Page() {
                                                 />
                                             )
                                         )}
-                                        <br />
-                                        <Link
-                                            href={{
-                                                pathname: `/admin/panels/contributions`,
-                                                query: {
-                                                    lineitemId:
-                                                        lineitem.lineitemId,
-                                                },
+                                        <NavigationButton
+                                            className={
+                                                styles.detailsNavigationButton
+                                            }
+                                            href={`/volunteer_dashboard/panels/contributions?lineitemId=${lineitem.lineitemId}`}
+                                            label="Full Details"
+                                            trackPanelHistory
+                                            classNames={{
+                                                link: styles.detailsNavigationLink,
+                                                label: styles.detailsNavigationLabel,
                                             }}
-                                        >
-                                            Full Details
-                                        </Link>
+                                            tag={{
+                                                className:
+                                                    styles.detailsNavigationTagSection,
+                                            }}
+                                        />
                                     </FormGroup>
                                 )
                             )}
@@ -332,6 +400,6 @@ export default function Page() {
                     </Form>
                 )}
             </div>
-        </>
+        </Panel>
     )
 }
