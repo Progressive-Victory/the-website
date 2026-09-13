@@ -138,10 +138,10 @@
     transition:
         transform 120ms ease,
         background 120ms ease;
-}
 
-.ghostButton:hover {
-    background-color: #e5e7eb;
+    &:hover {
+        background-color: #e5e7eb;
+    }
 }
 
 .ghostDangerButton {
@@ -156,14 +156,14 @@
     transition:
         transform 120ms ease,
         background 120ms ease;
-}
 
-.ghostDangerButton:hover {
-    background: rgba(239, 68, 68, 0.352);
-}
+    &:hover {
+        background: rgba(239, 68, 68, 0.352);
+    }
 
-.ghostDangerButton:active {
-    transform: translateY(0px);
+    &:active {
+        transform: translateY(0px);
+    }
 }
 
 .refetchingPill {
@@ -186,6 +186,10 @@
     backdrop-filter: blur(10px) saturate(140%);
     -webkit-backdrop-filter: blur(10px) saturate(140%);
     will-change: opacity, backdrop-filter;
+
+    @media (prefers-reduced-motion: reduce) {
+        will-change: auto;
+    }
 }
 
 .modal {
@@ -206,19 +210,23 @@
     overflow: hidden;
     transform-origin: 50% 40%;
     will-change: transform, opacity;
-}
 
-.modal::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(
-        to bottom,
-        rgba(255, 255, 255, 0.55),
-        rgba(255, 255, 255, 0) 22%
-    );
-    opacity: 0.35;
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.55),
+            rgba(255, 255, 255, 0) 22%
+        );
+        opacity: 0.35;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        will-change: auto;
+    }
 }
 
 .modalHeader {
@@ -270,17 +278,17 @@
     -webkit-backdrop-filter: blur(18px) saturate(160%);
     font-weight: 500;
     padding-inline: 1rem;
-}
 
-.modalBody :global(.pinned),
-.modalBody :global(.elementList),
-.modalBody :global(.listStatus) {
-    padding: 0.9rem 1rem 1rem;
-}
+    & :global(.pinned),
+    & :global(.elementList),
+    & :global(.listStatus) {
+        padding: 0.9rem 1rem 1rem;
+    }
 
-.modalBody :global(.listStatus) {
-    flex: 1;
-    min-height: 0;
+    & :global(.listStatus) {
+        flex: 1;
+        min-height: 0;
+    }
 }
 
 .modalFooter {
@@ -304,16 +312,16 @@
     display: flex;
     width: 100%;
     align-items: center;
-}
 
-.searchInputBare > input {
-    width: 100%;
-    height: 2.35rem;
-    line-height: 2.35rem;
-    border-radius: 0.6rem;
-    border: 1px solid #d1d5db;
-    padding: 0 0.75rem;
-    background: rgba(255, 255, 255, 0.75);
+    & > input {
+        width: 100%;
+        height: 2.35rem;
+        line-height: 2.35rem;
+        border-radius: 0.6rem;
+        border: 1px solid #d1d5db;
+        padding: 0 0.75rem;
+        background: rgba(255, 255, 255, 0.75);
+    }
 }
 
 .detailsNavigationButton {
@@ -335,14 +343,14 @@
     font-weight: 700;
     letter-spacing: 0.02em;
     text-transform: uppercase;
-}
 
-.detailsNavigationLink:hover {
-    background: rgba(14, 165, 233, 0.18);
-}
+    &:hover {
+        background: rgba(14, 165, 233, 0.18);
+    }
 
-.detailsNavigationLink:active {
-    transform: translateY(0) scale(0.99);
+    &:active {
+        transform: translateY(0) scale(0.99);
+    }
 }
 
 .detailsNavigationLabel {
@@ -358,14 +366,4 @@
 
 .detailsNavigationTagSection {
     display: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .modalBackdrop {
-        will-change: auto;
-    }
-
-    .modal {
-        will-change: auto;
-    }
 }
