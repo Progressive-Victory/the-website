@@ -178,9 +178,9 @@ export function DonorView({
             </div>
 
             <div className={styles.linkedHeaderRight}>
-                {isRefetching ? (
+                {isRefetching && (
                     <span className={styles.refetchingPill}>Loading...</span>
-                ) : null}
+                )}
 
                 <button
                     type="button"
