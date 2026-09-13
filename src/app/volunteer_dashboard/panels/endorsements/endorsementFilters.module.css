@@ -1,0 +1,13 @@
+.filterMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 12rem;
+}
+
+.nestedFilterMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 12rem;
+}
