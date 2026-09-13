@@ -5,8 +5,11 @@ import styles from './page.module.css'
 import { DonorView } from './panel_views/DonorView'
 import { HistoryView } from './panel_views/HistoryView'
 import { MemberView } from './panel_views/MemberView'
-import { FilterTags, FilterTag } from '@/app/admin/layout/FilterTags'
 import { ListElement } from '@/app/admin/layout/List'
+import {
+    FilterTags,
+    FilterTag,
+} from '@/app/volunteer_dashboard/layout/FilterTags'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { DiscordAvatar } from '@/components/common'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
