@@ -714,7 +714,7 @@ export default function Page() {
             sidebarWidth="25.5rem"
             collapsedSidebarWidth="5rem"
             sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop && sidebarMobileVisible}
+            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
             label="Members"
             showScrollbar={false}
             sidebarList={{
