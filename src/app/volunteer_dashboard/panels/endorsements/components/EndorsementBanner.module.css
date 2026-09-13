@@ -1,0 +1,123 @@
+.headerTop {
+    border-radius: 0.75rem;
+    margin-top: -2rem;
+    margin-right: 0.9rem;
+    margin-bottom: 0.9rem;
+    margin-left: 0.9rem;
+    padding-top: 0.8rem;
+    padding-bottom: 0.9rem;
+    padding-inline: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.11);
+}
+
+.topRow {
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.avatarButton {
+    position: relative;
+    display: inline-flex;
+    width: 72px;
+    height: 72px;
+    cursor: pointer;
+
+    &:hover .imageOverlay,
+    &:focus-within .imageOverlay {
+        background: rgba(15, 23, 42, 0.56);
+    }
+}
+
+.imageOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    color: #fff;
+    background: rgba(15, 23, 42, 0.38);
+    transition: background 140ms ease;
+    pointer-events: none;
+}
+
+.headerUserName {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.headerUserUsername {
+    margin: 0;
+    padding: 0;
+    color: #475569;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.uploadError {
+    font-size: 0.75rem;
+    color: #b91c1c;
+}
+
+.rolePill {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding-inline: 1rem;
+    padding-block: 0.45rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.tagDefault {
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.tagRed {
+    background: rgba(255, 95, 75, 0.3);
+    color: rgba(177, 2, 2, 1);
+}
+
+.tagOrange {
+    background: rgba(255, 72, 0, 0.3);
+    color: rgba(117, 56, 0, 1);
+}
+
+.tagGreen {
+    background: rgba(112, 195, 32, 0.3);
+    color: rgba(17, 115, 75, 1);
+}
+
+.tagBlue {
+    background: rgba(42, 155, 225, 0.3);
+    color: rgba(10, 83, 168, 1);
+}
+
+.tagPurple {
+    background: rgba(172, 95, 212, 0.3);
+    color: rgba(90, 50, 134, 1);
+}
+
+.tagDarkRed {
+    background: rgba(177, 2, 2, 1);
+    color: rgba(255, 207, 201, 1);
+}
+
+@media (max-width: 720px) {
+    .headerTop {
+        margin: -1.2rem 0.65rem 0.65rem;
+        padding-inline: 0.8rem;
+    }
+
+    .headerUserName {
+        font-size: 1.1rem;
+    }
+}
