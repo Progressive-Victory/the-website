@@ -93,7 +93,7 @@
     border-bottom: 1px solid rgba(17, 24, 39, 0.08);
 }
 
-/* Doubled class outranks the shared .tagLabel styles regardless of stylesheet order */
+/* Override for selector specificity */
 .dateTag.dateTag {
     text-transform: none;
     letter-spacing: normal;

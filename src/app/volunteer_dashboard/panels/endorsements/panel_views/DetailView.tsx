@@ -27,7 +27,7 @@ import {
     initiativeLevelOptions,
     stateOptions,
 } from '@/models'
-import { cn } from '@/util'
+import { cn, parseErrorMessage } from '@/util'
 import { ChangeEvent, useCallback, useState } from 'react'
 
 const stateOptionsWithEmpty = [
@@ -283,11 +283,7 @@ function ImageField(props: ImageFieldProps) {
             const { url } = await props.uploadImage(file)
             onChange(url)
         } catch (uploadError) {
-            setError(
-                uploadError instanceof Error
-                    ? uploadError.message
-                    : 'Failed to upload image'
-            )
+            setError(parseErrorMessage(uploadError, 'Failed to upload image'))
         } finally {
             setUploading(false)
         }
