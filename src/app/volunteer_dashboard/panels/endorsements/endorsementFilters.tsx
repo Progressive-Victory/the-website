@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './endorsementFilters.module.css'
-import { FilterTag } from '@/app/admin/layout/FilterTags'
+import { FilterTag } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
 import {
     ElectionStatus,
