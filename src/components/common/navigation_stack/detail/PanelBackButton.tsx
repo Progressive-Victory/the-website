@@ -10,12 +10,16 @@ interface PanelBackButtonProps {
     className?: string
     showOnDesktop?: boolean
     showOnMobile?: boolean
+    onClick?: () => void
+    label?: string
 }
 
 export function PanelBackButton({
     className,
     showOnDesktop = false,
     showOnMobile = true,
+    onClick,
+    label = 'Back',
 }: PanelBackButtonProps) {
     const { handleNavigateBack, isPanelRoute } = usePanelBackNavigation()
     const isDesktop = useMediaQuery('(min-width: 64rem)')
@@ -29,8 +33,8 @@ export function PanelBackButton({
 
     return (
         <BackButton
-            label="Back"
-            onClick={handleNavigateBack}
+            label={label}
+            onClick={onClick ?? handleNavigateBack}
             className={cn(styles.panelBackButton, className)}
         />
     )
