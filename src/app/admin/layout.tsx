@@ -66,7 +66,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         contributionCount={contributions.query.data?.count}
                         endorsementCount={endorsements.data?.length}
                         membershipCount={memberships.query.data?.count}
-                        membershipExampleCount={memberships.query.data?.count}
                     />
 
                     <div className={styles.content}>{children}</div>

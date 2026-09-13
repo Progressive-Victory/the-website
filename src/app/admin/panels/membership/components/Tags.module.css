@@ -32,6 +32,10 @@
     background: rgba(42, 155, 225, 0.3);
     color: rgba(10, 83, 168, 1);
 }
+.tagLightBlue {
+    color: rgba(2, 132, 199, 1);
+    background: rgba(14, 165, 233, 0.14);
+}
 .tagPurple {
     background: rgba(172, 95, 212, 0.3);
     color: rgba(90, 50, 134, 1);

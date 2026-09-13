@@ -20,6 +20,35 @@ export type MembershipTier = (typeof membershipTiers)[number]
 
 export type ShirtSize = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
 
+export interface ContributionRecord {
+    orderNumber: string
+    createdAt: string
+    amount: number
+    contributionForm: string
+    lineitemCount: number
+    isRecurring: boolean
+    recurringAmount?: number
+    firstLineitemId?: number
+    mostRecentLineitemDate?: string
+    mostRecentLineitemAmount?: number
+    earliestLineitemDate?: string
+    monthsSpanned?: number
+    monthsWithLineitems?: number
+    lineitemMonths?: string[]
+    lineitemCountsByMonth?: Record<string, number>
+    lineitemsByMonth?: Record<
+        string,
+        { paidAt: string; amount: number; orderNumber: string }[]
+    >
+}
+
+export interface RecurringSummary {
+    monthsWithLineitems: number
+    earliestLineitemDate?: string
+    activeAmount?: number
+    tier?: MembershipTier
+}
+
 export type PackageShipped =
     | 'Yes'
     | 'No'
@@ -63,6 +92,8 @@ export interface Member {
     membershipAmount?: number
     membershipTier?: MembershipTier
     numberOfContributions?: number
+    contributionRecords?: ContributionRecord[]
+    recurringSummary?: RecurringSummary
     nameUpdatedAt?: Date
 
     discordConfirmed?: boolean

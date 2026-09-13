@@ -208,7 +208,7 @@ export default function Page() {
                 </div>
 
                 <div className={styles.panelTimestamp}>
-                    Entries Loaded: {members.length.toLocaleString()}
+                    Showing {members.length.toLocaleString()}
                     {totalEntries != null &&
                         ` of ${totalEntries.toLocaleString()}`}
                 </div>

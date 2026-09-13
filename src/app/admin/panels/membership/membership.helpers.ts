@@ -2,12 +2,15 @@ import {
     addressFields,
     AddressDraft,
     AddressField,
+    ContributionRecord,
     DescribeChange,
     Member,
     MemberEdits,
+    MembershipTier,
     membershipTiers,
     PackageShipped,
     PendingUpdate,
+    RecurringSummary,
     ShirtSize,
 } from './membership.types'
 import {
@@ -128,6 +131,196 @@ const packageShippedFromStatus = (
     return merchStatus >= MembershipDeliverableStatus.Recieved ? 'Yes' : 'No'
 }
 
+const monthSpan = (start: Date, end: Date) =>
+    (end.getUTCFullYear() - start.getUTCFullYear()) * 12 +
+    (end.getUTCMonth() - start.getUTCMonth()) +
+    1
+
+const buildContributionRecords = (
+    donor: MembershipsResponsePacket['donor']
+): ContributionRecord[] | undefined =>
+    donor.contributions?.map((contribution) => {
+        const lineitems = contribution.lineitems ?? []
+        const earliestPaidAt = lineitems.reduce<Date | undefined>(
+            (earliest, lineitem) =>
+                !earliest || lineitem.paidAt < earliest
+                    ? lineitem.paidAt
+                    : earliest,
+            undefined
+        )
+        const mostRecentLineitem = lineitems.reduce<
+            (typeof lineitems)[number] | undefined
+        >(
+            (latest, lineitem) =>
+                !latest || lineitem.paidAt > latest.paidAt ? lineitem : latest,
+            undefined
+        )
+        const mostRecentPaidAt = mostRecentLineitem?.paidAt
+        const monthsWithLineitems = new Set(
+            lineitems.map(
+                (lineitem) =>
+                    `${lineitem.paidAt.getUTCFullYear()}-${lineitem.paidAt.getUTCMonth()}`
+            )
+        ).size
+        const lineitemMonths = [
+            ...new Set(
+                lineitems.map(
+                    (lineitem) =>
+                        `${lineitem.paidAt.getUTCFullYear()}-${lineitem.paidAt.getUTCMonth()}`
+                )
+            ),
+        ]
+        const lineitemCountsByMonth = lineitems.reduce<Record<string, number>>(
+            (counts, lineitem) => {
+                const key = `${lineitem.paidAt.getUTCFullYear()}-${lineitem.paidAt.getUTCMonth()}`
+                counts[key] = (counts[key] ?? 0) + 1
+                return counts
+            },
+            {}
+        )
+        const lineitemsByMonth = lineitems.reduce<
+            Record<
+                string,
+                { paidAt: string; amount: number; orderNumber: string }[]
+            >
+        >((byMonth, lineitem) => {
+            const key = `${lineitem.paidAt.getUTCFullYear()}-${lineitem.paidAt.getUTCMonth()}`
+            byMonth[key] = [
+                ...(byMonth[key] ?? []),
+                {
+                    paidAt: lineitem.paidAt.toISOString(),
+                    amount: lineitem.amount,
+                    orderNumber: contribution.orderNumber,
+                },
+            ]
+            return byMonth
+        }, {})
+        const recurringAmount = lineitems.find(
+            (lineitem) => lineitem.recurringAmount != null
+        )?.recurringAmount
+        const firstLineitemId = lineitems.find(
+            (lineitem) => lineitem.sequence === 0
+        )?.lineitemId
+
+        return {
+            orderNumber: contribution.orderNumber,
+            createdAt: contribution.createdAt.toISOString(),
+            amount: lineitems.reduce(
+                (sum, lineitem) => sum + lineitem.amount,
+                0
+            ),
+            contributionForm: contribution.contributionForm,
+            lineitemCount: lineitems.length,
+            isRecurring: contribution.isRecurring,
+            recurringAmount: recurringAmount ?? undefined,
+            firstLineitemId,
+            mostRecentLineitemDate: mostRecentPaidAt?.toISOString(),
+            mostRecentLineitemAmount: mostRecentLineitem?.amount,
+            earliestLineitemDate: earliestPaidAt?.toISOString(),
+            monthsWithLineitems,
+            lineitemMonths,
+            lineitemCountsByMonth,
+            lineitemsByMonth,
+            monthsSpanned:
+                earliestPaidAt && mostRecentPaidAt
+                    ? monthSpan(earliestPaidAt, mostRecentPaidAt)
+                    : undefined,
+        }
+    })
+
+export const filterRecurringContributions = (
+    records: ContributionRecord[] | undefined
+) => (records ?? []).filter((record) => record.isRecurring)
+
+export const countMonthsWithLineitems = (records: ContributionRecord[]) =>
+    new Set(records.flatMap((record) => record.lineitemMonths ?? [])).size
+
+export const getEarliestLineitemDate = (records: ContributionRecord[]) =>
+    records.reduce<string | undefined>(
+        (earliest, record) =>
+            !earliest ||
+            (record.earliestLineitemDate &&
+                record.earliestLineitemDate < earliest)
+                ? record.earliestLineitemDate
+                : earliest,
+        undefined
+    )
+
+const monthDiff = (from: Date, to: Date) =>
+    (to.getUTCFullYear() - from.getUTCFullYear()) * 12 +
+    (to.getUTCMonth() - from.getUTCMonth())
+
+export const getMembershipTierForAmount = (
+    amount?: number
+): MembershipTier | undefined => {
+    if (amount == null) return undefined
+    if (amount >= 100) return 'Inner Circle Member'
+    if (amount >= 20) return 'Signature Member'
+    if (amount >= 10) return 'Premium Member'
+    if (amount >= 5) return 'Dues Paying Member'
+    return undefined
+}
+
+export const computeRecurringSummary = (
+    records: ContributionRecord[],
+    referenceDate: Date = new Date()
+): RecurringSummary => {
+    const monthKeys = new Set<string>()
+    const amountCandidates: { date: string; amount: number }[] = []
+    let earliestLineitemDate: string | undefined
+    let lastPaidDate: string | undefined
+
+    for (const record of records) {
+        for (const key of record.lineitemMonths ?? []) monthKeys.add(key)
+
+        if (
+            record.earliestLineitemDate != null &&
+            (earliestLineitemDate == null ||
+                record.earliestLineitemDate < earliestLineitemDate)
+        ) {
+            earliestLineitemDate = record.earliestLineitemDate
+        }
+
+        if (
+            record.mostRecentLineitemDate != null &&
+            record.mostRecentLineitemAmount != null
+        ) {
+            amountCandidates.push({
+                date: record.mostRecentLineitemDate,
+                amount: record.mostRecentLineitemAmount,
+            })
+            if (
+                lastPaidDate == null ||
+                record.mostRecentLineitemDate > lastPaidDate
+            ) {
+                lastPaidDate = record.mostRecentLineitemDate
+            }
+        }
+    }
+
+    const activeAmountAsOf = (asOf: Date) => {
+        let best: number | undefined
+        for (const candidate of amountCandidates) {
+            if (monthDiff(new Date(candidate.date), asOf) > 1) continue
+            if (best == null || candidate.amount > best) best = candidate.amount
+        }
+        return best
+    }
+
+    const activeAmount =
+        activeAmountAsOf(referenceDate) ??
+        (lastPaidDate != null
+            ? activeAmountAsOf(new Date(lastPaidDate))
+            : undefined)
+
+    return {
+        monthsWithLineitems: monthKeys.size,
+        earliestLineitemDate,
+        activeAmount,
+        tier: getMembershipTierForAmount(activeAmount),
+    }
+}
+
 export const mapPacketToMember = (
     packet: MembershipsResponsePacket,
     index: number
@@ -138,6 +331,10 @@ export const mapPacketToMember = (
     const merchStatus = membership?.membershipMerchStatus
 
     const contributionDiscord = customField?.answer.trim()
+    const contributionRecords = buildContributionRecords(donor)
+    const recurringSummary = computeRecurringSummary(
+        filterRecurringContributions(contributionRecords)
+    )
 
     return {
         packet,
@@ -183,6 +380,8 @@ export const mapPacketToMember = (
             ?.toISOString()
             .slice(0, 10),
         numberOfContributions: donor.contributions?.length,
+        contributionRecords,
+        recurringSummary,
         discordConfirmed:
             membership?.discordConfirmed ?? Boolean(user?.discordUsers?.length),
         nameConfirmed:

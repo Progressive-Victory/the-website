@@ -1,5 +1,6 @@
 'use client'
 
+import { ContributionsMenu } from './components/ContributionsMenu'
 import { BoolTag, EditableBoolTag } from './components/Tags'
 import tags from './components/Tags.module.css'
 import { MembershipTableOptions, useMemberDraft } from './hooks'
@@ -42,11 +43,53 @@ import { Column, ColumnEntry } from '@/components/common/table'
 import { cn } from '@/util'
 import Link from 'next/link'
 
+const monthAbbreviations = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+]
+
+const ordinalSuffix = (day: number) => {
+    if (day >= 11 && day <= 13) return 'th'
+    switch (day % 10) {
+        case 1:
+            return 'st'
+        case 2:
+            return 'nd'
+        case 3:
+            return 'rd'
+        default:
+            return 'th'
+    }
+}
+
+const formatOrdinalDate = (isoDate: string) => {
+    const [y, mo, d] = isoDate.slice(0, 10).split('-')
+    const day = Number(d)
+    return `${monthAbbreviations[Number(mo) - 1]}. ${day}${ordinalSuffix(day)}, ${y}`
+}
+
 const membershipTierClass: Record<MembershipTier, string> = {
     'Dues Paying Member': tags.tagMember,
     'Premium Member': tags.tagPremium,
     'Signature Member': tags.tagSignature,
     'Inner Circle Member': tags.tagInnerCircle,
+}
+
+const membershipTierRank: Record<MembershipTier, number> = {
+    'Inner Circle Member': 4,
+    'Signature Member': 3,
+    'Premium Member': 2,
+    'Dues Paying Member': 1,
 }
 
 const DOT_COLOR_TRUE = 'rgba(112, 195, 32, 0.6)'
@@ -206,21 +249,28 @@ export const buildColumns = ({
             key: 'membershipTier',
             header: 'Tier',
             width: '11rem',
-            sortValue: (m) => m.membershipTier ?? '',
-            render: (m) =>
-                m.membershipTier ? (
+            sortValue: (m) => {
+                const tier = m.recurringSummary?.tier
+                return tier ? membershipTierRank[tier] : 0
+            },
+            render: (m) => {
+                const tier = m.recurringSummary?.tier
+                return tier ? (
                     <span
                         className={cn(
                             tags.tag,
                             tags.tagTier,
-                            membershipTierClass[m.membershipTier]
+                            membershipTierClass[tier]
                         )}
                     >
-                        {m.membershipTier}
+                        {tier}
                     </span>
                 ) : (
-                    '—'
-                ),
+                    <span className={cn(tags.tag, tags.tagTier, tags.tagGhost)}>
+                        Not Eligible
+                    </span>
+                )
+            },
         },
         {
             label: FULFILLMENT_CATEGORY,
@@ -300,11 +350,26 @@ export const buildColumns = ({
         {
             key: 'beganMembership',
             header: 'Member Since',
-            sortValue: (m) => m.beganMembership ?? '',
+            sortValue: (m) => m.recurringSummary?.earliestLineitemDate ?? '',
             render: (m) => {
-                if (!m.beganMembership) return '—'
-                const [y, mo, d] = m.beganMembership.split('-')
-                return `${mo}-${d}-${y}`
+                const date = m.recurringSummary?.earliestLineitemDate
+                if (!date)
+                    return (
+                        <span
+                            className={cn(
+                                tags.tag,
+                                tags.tagWide,
+                                tags.tagGhost
+                            )}
+                        >
+                            Not A Member
+                        </span>
+                    )
+                return (
+                    <span className={cn(tags.tag, tags.tagWide, tags.tagGray)}>
+                        {formatOrdinalDate(date)}
+                    </span>
+                )
             },
         },
         {
@@ -344,16 +409,26 @@ export const buildColumns = ({
             key: 'membershipAmount',
             header: 'Amount',
             width: '6rem',
-            sortValue: (m) => m.membershipAmount ?? 0,
-            render: (m) =>
-                m.membershipAmount != null ? `$${m.membershipAmount}` : '—',
+            sortValue: (m) => m.recurringSummary?.activeAmount ?? 0,
+            render: (m) => {
+                const amount = m.recurringSummary?.activeAmount
+                return amount != null ? `$${amount}` : '—'
+            },
         },
         {
-            key: 'contributions',
+            key: 'contributionsReal',
             header: 'Contributions',
             width: '6rem',
-            sortValue: (m) => m.numberOfContributions ?? 0,
-            render: (m) => m.numberOfContributions?.toString() ?? '—',
+            sortValue: (m) => m.recurringSummary?.monthsWithLineitems ?? 0,
+            render: (m) =>
+                (m.recurringSummary?.monthsWithLineitems ?? 0).toString(),
+            menu: (m, { closeDropdown }) => (
+                <ContributionsMenu
+                    member={m}
+                    closeDropdown={closeDropdown}
+                    onlyRecurring
+                />
+            ),
         },
         {
             key: 'userMatched',

@@ -26,7 +26,6 @@ interface SidebarProps {
     permissionCount?: number
     endorsementCount?: number
     membershipCount?: number
-    membershipExampleCount?: number
 }
 
 export default function Sidebar({
@@ -38,7 +37,6 @@ export default function Sidebar({
     permissionCount,
     endorsementCount,
     membershipCount,
-    membershipExampleCount,
 }: SidebarProps) {
     const [open, setOpen] = useLocalStorage('pv.admin-nav-open', true)
 
@@ -117,19 +115,6 @@ export default function Sidebar({
                     href="/admin/panels/membership"
                     icon={FaIdCard}
                     count={membershipCount}
-                    open={open}
-                />
-                <NavLink
-                    title="Membership Example"
-                    href="/admin/panels/membershipexample"
-                    icon={FaIdCard}
-                    count={membershipExampleCount}
-                    open={open}
-                />
-                <NavLink
-                    title="Membership Test"
-                    href="/admin/panels/membershiptest"
-                    icon={FaIdCard}
                     open={open}
                 />
             </ul>
