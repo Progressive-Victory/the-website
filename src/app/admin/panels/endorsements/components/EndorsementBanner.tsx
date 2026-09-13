@@ -9,7 +9,7 @@ import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import { HStack, Spacer, VStack, ZStack } from '@/components/layout'
 import { Endorsement, EndorsementType, InitiativeType } from '@/contracts/data'
 import { stateOptions } from '@/models'
-import { cn } from '@/util'
+import { cn, parseErrorMessage } from '@/util'
 import { ChangeEvent, useState } from 'react'
 import { FaCamera } from 'react-icons/fa'
 
@@ -83,11 +83,7 @@ export function EndorsementBanner({
             const { url } = await uploadImage(file)
             onChange(url)
         } catch (error) {
-            setUploadError(
-                error instanceof Error
-                    ? error.message
-                    : 'Failed to upload image'
-            )
+            setUploadError(parseErrorMessage(error, 'Failed to upload image'))
         } finally {
             setUploading(false)
         }
