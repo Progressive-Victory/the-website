@@ -29,9 +29,7 @@
     & > input {
         width: 100%;
         border-radius: 0.6rem;
-        border-width: 1px;
-        border-style: solid;
-        border-color: #d1d5db;
+        border: 1px solid #d1d5db;
         padding: 0.25rem 0.75rem;
     }
 
@@ -170,9 +168,7 @@
         letter-spacing: 0.02em;
         text-transform: uppercase;
         box-shadow: 0 1px 0 rgba(255, 255, 255, 0.78) inset;
-    }
 
-    .detailsNavigationLink {
         &:hover {
             background: rgba(14, 165, 233, 0.18);
             border-color: rgba(14, 165, 233, 0.2);
@@ -226,6 +222,10 @@
     font-weight: 500;
 }
 
+.errorState {
+    color: #ef4444;
+}
+
 .filterOverlay {
     min-width: 16rem;
 }
@@ -272,8 +272,7 @@
 }
 
 .pageSelectButtons {
-    margin-left: auto;
-    margin-right: auto;
+    margin-inline: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -285,8 +284,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-inline: 0.5rem;
     color: rgba(15, 23, 42, 0.72);
 }
 

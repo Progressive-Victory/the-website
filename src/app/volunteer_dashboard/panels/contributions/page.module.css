@@ -35,6 +35,10 @@
     font-weight: 500;
 }
 
+.errorState {
+    color: #ef4444;
+}
+
 .detailsNavigationButton {
     width: auto;
     display: inline-block;

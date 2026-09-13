@@ -20,6 +20,7 @@ import {
     ActBlueContributionCustomField,
 } from '@/contracts/data'
 import { SortDirection } from '@/contracts/requests'
+import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
@@ -225,11 +226,8 @@ export default function Page() {
                     </div>
                 )}
                 {selectedEmail && donorQuery.error && (
-                    <div
-                        className={styles.emptyState}
-                        style={{ color: '#ef4444' }}
-                    >
-                        Error: {donorQuery.error.message}
+                    <div className={cn(styles.emptyState, styles.errorState)}>
+                        Error: {parseErrorMessage(donorQuery.error)}
                     </div>
                 )}
                 {selectedEmail && donorQuery.data && (

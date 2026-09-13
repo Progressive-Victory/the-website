@@ -16,6 +16,7 @@ import { Role, zPermission, zRole } from '@/contracts/data'
 import { SortDirection, UpdateRoleRequest } from '@/contracts/requests'
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
+import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -238,11 +239,8 @@ export default function Page() {
                     </div>
                 )}
                 {selectedId != null && roleQuery.error && (
-                    <div
-                        className={styles.emptyState}
-                        style={{ color: '#ef4444' }}
-                    >
-                        Error: {roleQuery.error.message}
+                    <div className={cn(styles.emptyState, styles.errorState)}>
+                        Error: {parseErrorMessage(roleQuery.error)}
                     </div>
                 )}
                 {selectedId != null && roleQuery.data ? (

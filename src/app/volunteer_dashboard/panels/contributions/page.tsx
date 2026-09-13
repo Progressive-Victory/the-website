@@ -14,6 +14,7 @@ import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { ActBlueDonationPacket, zActBlueDonationPacket } from '@/contracts/data'
 import { SortDirection } from '@/contracts/requests'
 import { dateService } from '@/services'
+import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
@@ -174,14 +175,8 @@ export default function Page() {
                 )}
 
                 {selectedLineitemId != null && contributionQuery.error && (
-                    <div
-                        className={styles.emptyState}
-                        style={{ color: '#ef4444' }}
-                    >
-                        Error:{' '}
-                        {contributionQuery.error instanceof Error
-                            ? contributionQuery.error.message
-                            : 'Unknown error'}
+                    <div className={cn(styles.emptyState, styles.errorState)}>
+                        Error: {parseErrorMessage(contributionQuery.error)}
                     </div>
                 )}
 
