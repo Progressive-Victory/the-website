@@ -532,6 +532,7 @@ export default function Page() {
                 nameConfirmed: user.nameConfirmed,
                 addressConfirmed: user.addressConfirmed,
                 roles: user.roles?.map((role) => role.id),
+                aliases: [...(user.aliases ?? [])],
             } satisfies UpdateUserRequest)
             if (addressIsDirty) request.address = address
 
