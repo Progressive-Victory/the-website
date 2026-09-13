@@ -123,13 +123,13 @@ export function useFetch() {
             const text = await res.text()
             let error: ApiError = {
                 message: res.statusText || 'An error occurred',
-                error: null,
+                error: '',
             }
             if (text.trim().length > 0) {
                 try {
                     error = JSON.parse(text) as ApiError
                 } catch {
-                    error = { message: text, error: null }
+                    error = { message: text, error: '' }
                 }
             }
             throw new FetchError(error.message, res.status, error.error)
