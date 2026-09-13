@@ -1,6 +1,5 @@
 import styles from '../endorsement.module.css'
 import { PAST_ELECTION_LABEL } from '../endorsements.constants'
-import { type CandidateConfig } from '../endorsements.data'
 import {
     galleryLayoutTransition,
     headingVariants,
@@ -19,21 +18,22 @@ import {
     getSectionLabel,
     sortSectionCandidates,
 } from '../endorsements.utils'
-import { ElectionStatusBadge } from './ElectionStatusBadge'
-import { PersonCard } from '@/components/common'
+import { EndorsementAvatar, PersonCard } from '@/components/common'
+import { type Endorsement } from '@/contracts/data'
+import { ENDORSEMENT_TYPE_LABELS } from '@/models'
 import { cn } from '@/util'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
 import { memo } from 'react'
 
 interface CandidateGalleryProps {
-    filteredCandidates: CandidateConfig[]
+    filteredCandidates: Endorsement[]
     filter: FilterType | null
     displayMode: GalleryDisplayMode
     sectionMode: SectionGroupingMode
     sectionSortOrder: SectionSortOrder
     year: number
     searchQuery: string
-    onSelectCandidate: (candidate: CandidateConfig) => void
+    onSelectCandidate: (candidate: Endorsement) => void
 }
 
 export function CandidateGallery({
@@ -46,7 +46,7 @@ export function CandidateGallery({
     searchQuery,
     onSelectCandidate,
 }: CandidateGalleryProps) {
-    const candidateMap = new Map<string, CandidateConfig[]>()
+    const candidateMap = new Map<string, Endorsement[]>()
 
     for (const candidate of filteredCandidates) {
         const sectionLabel = getSectionLabel(candidate, sectionMode)
@@ -66,7 +66,7 @@ export function CandidateGallery({
                 [
                     sectionLabel,
                     sortSectionCandidates(sectionCandidates, sectionMode),
-                ] as [string, CandidateConfig[]]
+                ] as [string, Endorsement[]]
         )
         .sort((a, b) =>
             compareSectionEntries(a, b, sectionMode, sectionSortOrder)
@@ -295,14 +295,10 @@ function CandidateCardImpl({
     candidate,
     onSelect,
 }: {
-    candidate: CandidateConfig
+    candidate: Endorsement
     onSelect: () => void
 }) {
-    const subtitleText = candidate.endorsementType
-    const avatarFrameClassName =
-        candidate.avatarBackgroundColor === 'blue'
-            ? styles.tileImageFramePledge
-            : styles.tileImageFrameNoPledge
+    const subtitleText = ENDORSEMENT_TYPE_LABELS[candidate.endorsementLevel]
 
     return (
         <motion.article
@@ -315,13 +311,12 @@ function CandidateCardImpl({
         >
             <PersonCard
                 name={candidate.name}
-                imageSrc={candidate.image}
-                imageSize={92}
-                subtitle={subtitleText ?? undefined}
-                imageFrameClassName={avatarFrameClassName}
-                badge={
-                    <ElectionStatusBadge
-                        electionStatus={candidate.electionStatus}
+                subtitle={subtitleText}
+                avatar={
+                    <EndorsementAvatar
+                        endorsement={candidate}
+                        variant="tile"
+                        size={65}
                     />
                 }
             />

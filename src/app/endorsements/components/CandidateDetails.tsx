@@ -1,8 +1,8 @@
-import { type CandidateConfig } from '../endorsements.data'
 import styles from './CandidateDetails.module.css'
-import { ElectionStatusBadge } from './ElectionStatusBadge'
-import { ImageWithFallback } from '@/components/common'
+import { ElectionStatusBadge, EndorsementAvatar } from '@/components/common'
 import { HStack, VStack, ZStack } from '@/components/layout'
+import { InitiativeType, type Endorsement } from '@/contracts/data'
+import { ENDORSEMENT_TYPE_LABELS, getStateLabel } from '@/models'
 import { cn } from '@/util'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -17,14 +17,14 @@ import {
 } from 'react-icons/fa'
 
 interface CandidateDetailsProps {
-    candidate: CandidateConfig | null
+    candidate: Endorsement | null
     onClose: () => void
 }
 
 interface CandidateQuoteProps {
-    handle: string
-    handleHref?: string
-    bodyText: string
+    handle: string | null
+    handleHref: string | null
+    quote: string | null
 }
 
 function getSocialIcon(url: string) {
@@ -46,22 +46,23 @@ function getSocialPlatformName(url: string) {
     return 'Social'
 }
 
-function CandidateQuote({ handle, handleHref, bodyText }: CandidateQuoteProps) {
+function CandidateQuote({ handle, handleHref, quote }: CandidateQuoteProps) {
     return (
         <p className={styles.quote}>
-            {handleHref ? (
-                <a
-                    href={handleHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.handleLink}
-                >
-                    @{handle}
-                </a>
-            ) : (
-                <span className={styles.handleLink}>{handle}</span>
-            )}{' '}
-            {bodyText}
+            {handle &&
+                (handleHref ? (
+                    <a
+                        href={handleHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.handleLink}
+                    >
+                        @{handle}
+                    </a>
+                ) : (
+                    <span className={styles.handleLink}>{handle}</span>
+                ))}{' '}
+            {quote}
         </p>
     )
 }
@@ -72,7 +73,7 @@ export function CandidateDetails({
 }: CandidateDetailsProps) {
     const [visible, setVisible] = useState(false)
     const [mounted, setMounted] = useState(false)
-    const lastCandidate = useRef<CandidateConfig | null>(null)
+    const lastCandidate = useRef<Endorsement | null>(null)
 
     useEffect(() => {
         if (candidateProp) {
@@ -106,22 +107,11 @@ export function CandidateDetails({
             >
                 <VStack align="left" gap={1.5} className={styles.container}>
                     <HStack align="top" gap={1.25} className={styles.header}>
-                        <ZStack align="center" className={styles.avatarWrap}>
-                            <ImageWithFallback
-                                src={`/images/endorsement_images/background_${candidate.avatarBackgroundColor}.png`}
-                                alt=""
-                                width={100}
-                                height={100}
-                                className={styles.avatarBg}
-                            />
-                            <ImageWithFallback
-                                src={candidate.image}
-                                alt={`${candidate.name} profile image`}
-                                width={100}
-                                height={100}
-                                className={styles.avatar}
-                            />
-                        </ZStack>
+                        <EndorsementAvatar
+                            endorsement={candidate}
+                            size={100}
+                            showBadge={false}
+                        />
                         <VStack align="left" gap={0.25}>
                             <HStack
                                 align="center"
@@ -141,19 +131,25 @@ export function CandidateDetails({
                                 className={styles.tagRow}
                             >
                                 <span className={styles.badge}>
-                                    {candidate.endorsementType}
+                                    {
+                                        ENDORSEMENT_TYPE_LABELS[
+                                            candidate.endorsementLevel
+                                        ]
+                                    }
                                 </span>
-                                {candidate.initiativeType === 'national' && (
+                                {candidate.initiativeLevel ===
+                                    InitiativeType.National && (
                                     <span className={styles.candidateTag}>
                                         National Initiative
                                     </span>
                                 )}
-                                {candidate.initiativeType === 'state' && (
+                                {candidate.initiativeLevel ===
+                                    InitiativeType.State && (
                                     <span className={styles.candidateTag}>
                                         State Initiative
                                     </span>
                                 )}
-                                {candidate.showPvMember && (
+                                {candidate.isPvMember && (
                                     <span className={styles.candidateTag}>
                                         PV Member
                                     </span>
@@ -216,7 +212,7 @@ export function CandidateDetails({
                             >
                                 <span className={styles.infoLabel}>State</span>
                                 <span className={styles.infoValue}>
-                                    {candidate.state}
+                                    {getStateLabel(candidate.state)}
                                 </span>
                             </VStack>
                             {candidate.jurisdiction && (
@@ -233,7 +229,7 @@ export function CandidateDetails({
                                     </span>
                                 </VStack>
                             )}
-                            {candidate.primaryElection && (
+                            {candidate.primaryElectionDate && (
                                 <VStack
                                     align="left"
                                     gap={0}
@@ -243,11 +239,14 @@ export function CandidateDetails({
                                         Primary
                                     </span>
                                     <span className={styles.infoValue}>
-                                        {candidate.primaryElection.toLocaleDateString()}
+                                        {candidate.primaryElectionDate.toLocaleDateString(
+                                            undefined,
+                                            { timeZone: 'UTC' }
+                                        )}
                                     </span>
                                 </VStack>
                             )}
-                            {candidate.generalElection && (
+                            {candidate.generalElectionDate && (
                                 <VStack
                                     align="left"
                                     gap={0}
@@ -257,7 +256,10 @@ export function CandidateDetails({
                                         General
                                     </span>
                                     <span className={styles.infoValue}>
-                                        {candidate.generalElection.toLocaleDateString()}
+                                        {candidate.generalElectionDate.toLocaleDateString(
+                                            undefined,
+                                            { timeZone: 'UTC' }
+                                        )}
                                     </span>
                                 </VStack>
                             )}
@@ -266,7 +268,7 @@ export function CandidateDetails({
                         <CandidateQuote
                             handle={candidate.handle}
                             handleHref={candidate.handleHref}
-                            bodyText={candidate.bodyText}
+                            quote={candidate.quote}
                         />
                     </VStack>
                 </VStack>

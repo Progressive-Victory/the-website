@@ -1,9 +1,7 @@
-import endorsementStyles from '../endorsement.module.css'
-import { type CandidateConfig } from '../endorsements.data'
 import { waveListVariants } from '../endorsements.motion'
 import styles from './CandidateCarousel.module.css'
-import { ElectionStatusBadge } from './ElectionStatusBadge'
-import { PersonCard } from '@/components/common'
+import { EndorsementAvatar, PersonCard } from '@/components/common'
+import { type Endorsement } from '@/contracts/data'
 import { motion } from 'motion/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -17,7 +15,7 @@ const carouselItemVariants = {
 } as const
 
 interface CandidateCarouselProps {
-    candidates: CandidateConfig[]
+    candidates: Endorsement[]
     gap?: number
     arcSpan?: number
     horizontalRadius?: number
@@ -39,7 +37,7 @@ export function CandidateCarousel({
     const trackLength = candidates.length * gap
 
     const items = useMemo(() => {
-        const result: { candidate: CandidateConfig; index: number }[] = []
+        const result: { candidate: Endorsement; index: number }[] = []
         const copies = Math.ceil((visibleRange * 2) / trackLength) + 1
         for (let c = 0; c < copies; c++) {
             for (let i = 0; i < candidates.length; i++) {
@@ -105,16 +103,11 @@ export function CandidateCarousel({
                     >
                         <PersonCard
                             name={candidate.name}
-                            imageSrc={candidate.image}
-                            imageSize={92}
-                            imageFrameClassName={
-                                candidate.avatarBackgroundColor === 'blue'
-                                    ? endorsementStyles.tileImageFramePledge
-                                    : endorsementStyles.tileImageFrameNoPledge
-                            }
-                            badge={
-                                <ElectionStatusBadge
-                                    electionStatus={candidate.electionStatus}
+                            avatar={
+                                <EndorsementAvatar
+                                    endorsement={candidate}
+                                    variant="tile"
+                                    size={65}
                                 />
                             }
                         />

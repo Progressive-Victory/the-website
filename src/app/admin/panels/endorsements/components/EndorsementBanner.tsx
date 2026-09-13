@@ -1,5 +1,5 @@
-import { EndorsementAvatar } from './EndorsementAvatar'
 import styles from './EndorsementBanner.module.css'
+import { EndorsementAvatar } from '@/components/common'
 import {
     DynamicFormFieldProps,
     FormFieldProps,

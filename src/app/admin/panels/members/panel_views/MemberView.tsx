@@ -11,6 +11,7 @@ import {
     SelectManyField,
     TextField,
 } from '@/components/common/forms'
+import { MultiTextField } from '@/components/common/forms/MultiTextField'
 import { Role, ShirtSize, UpdateHistory, User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
@@ -141,6 +142,7 @@ export function MemberView({
                     getter={(form) => form.discordUsers?.[0]?.id}
                     readonly
                 />
+                <MultiTextField<User> label="Aliases" field="aliases" />
                 <TextField
                     label="Email"
                     field="email"
