@@ -142,7 +142,6 @@ export function MemberView({
                     getter={(form) => form.discordUsers?.[0]?.id}
                     readonly
                 />
-                <MultiTextField<User> label="Aliases" field="aliases" />
                 <TextField
                     label="Email"
                     field="email"
@@ -185,6 +184,7 @@ export function MemberView({
                             : null
                     }
                 />
+                <MultiTextField<User> label="Aliases" field="aliases" />
                 <DateField label="Date Created" field="createdAtUtc" readonly />
             </FormGroup>
 
