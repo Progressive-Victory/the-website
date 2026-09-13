@@ -100,8 +100,6 @@ export function useUpdatedUser({
                 query: { orderId },
             })
 
-            // Confirming the donor link also confirms their Discord identity;
-            // don't fail the link if the donor has no membership record.
             try {
                 await onPatch(
                     '/actblue/donors/:donorEmail/membership',

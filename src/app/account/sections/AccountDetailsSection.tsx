@@ -57,8 +57,6 @@ export function AccountDetailsSection({
         setUpdatedUser(userData)
     }, [userData])
 
-    // Mirrors the admin membership panel's "Package Shipped" values
-    // (Yes / No / Returned / Not Received / Canceled).
     const membershipDeliverableLabels: Record<
         MembershipDeliverableStatus,
         string
