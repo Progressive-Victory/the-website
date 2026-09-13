@@ -92,6 +92,10 @@
     font-weight: 500;
 }
 
+.errorText {
+    color: #ef4444;
+}
+
 .loading {
     display: flex;
     align-items: center;

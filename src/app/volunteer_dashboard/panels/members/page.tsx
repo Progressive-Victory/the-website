@@ -35,6 +35,7 @@ import {
 import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError, stateOptions } from '@/models'
 import { usePositionQueries } from '@/queries'
+import { cn, parseErrorMessage } from '@/util'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -629,9 +630,7 @@ export default function Page() {
     }, [searchQuery.data?.data, loggedInUser.data])
 
     useEffect(() => {
-        if (navUserId == null) {
-            return
-        }
+        if (navUserId == null) return
 
         const nextSelectedId = Number(navUserId)
 
@@ -652,9 +651,9 @@ export default function Page() {
                         saving={updateMutation.isPending}
                         editing={formState?.mode === 'edit'}
                         isInvalid={
-                            (formState?.form?.address?.zip != null &&
-                                locationQuery.data == null) ||
-                            locationQuery.isPending
+                            formState?.form?.address?.zip != null &&
+                            (locationQuery.data == null ||
+                                locationQuery.isPending)
                         }
                         roles={roles}
                         roleOptions={roleOptions}
@@ -810,14 +809,8 @@ export default function Page() {
                 )}
 
                 {selectedId != null && userQuery.error && (
-                    <div
-                        className={styles.emptyState}
-                        style={{ color: '#ef4444' }}
-                    >
-                        Error:{' '}
-                        {userQuery.error instanceof Error
-                            ? userQuery.error.message
-                            : 'Unknown error'}
+                    <div className={cn(styles.emptyState, styles.errorText)}>
+                        Error: {parseErrorMessage(userQuery.error)}
                     </div>
                 )}
 
