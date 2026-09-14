@@ -503,7 +503,7 @@ export default function Page() {
                     locationQuery.data?.state,
                 zip:
                     orNull(user.address.zip?.trim()) ??
-                    locationQuery.data?.zip?.toString(),
+                    locationQuery.data?.zip?.toString().padStart(5, '0'),
             }
 
             const oldAddress = userQuery.data?.address ?? null
