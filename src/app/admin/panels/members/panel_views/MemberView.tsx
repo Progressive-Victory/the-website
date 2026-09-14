@@ -255,7 +255,6 @@ export function MemberView({
                             zip:
                                 field
                                     ?.replace(/[^\d]/, '')
-                                    ?.padStart(5, '0')
                                     ?.slice(-5) ?? null,
                         },
                     })}
