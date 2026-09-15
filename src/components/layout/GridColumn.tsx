@@ -2,7 +2,7 @@ import { type MouseEventHandler, ReactNode } from 'react'
 
 type VFlexAlignment = 'center' | 'left' | 'right'
 
-export interface VStackProps {
+export interface GridColumnProps {
     align?: VFlexAlignment
     gap?: boolean | number
     grow?: boolean | number
@@ -11,14 +11,14 @@ export interface VStackProps {
     onClick?: MouseEventHandler<HTMLDivElement>
 }
 
-export function VStack({
+export function GridColumn({
     align = 'center',
     gap = 0,
     grow = 0,
     className,
     children,
     onClick,
-}: VStackProps) {
+}: GridColumnProps) {
     const gapStyle = `${Number(gap)}rem`
     const flexGrow = Number(grow)
     const alignItems =

@@ -1,6 +1,6 @@
 import { Children, type MouseEventHandler, ReactNode } from 'react'
 
-type ZStackAlignment =
+type GridCellAlignment =
     | 'center'
     | 'topLeft'
     | 'top'
@@ -11,8 +11,8 @@ type ZStackAlignment =
     | 'bottom'
     | 'bottomRight'
 
-export interface ZStackProps {
-    align?: ZStackAlignment
+export interface GridCellProps {
+    align?: GridCellAlignment
     gap?: boolean | number
     grow?: boolean | number
     className?: string
@@ -21,7 +21,7 @@ export interface ZStackProps {
 }
 
 const alignmentMap: Record<
-    ZStackAlignment,
+    GridCellAlignment,
     { justifyItems: string; alignItems: string }
 > = {
     topLeft: { justifyItems: 'start', alignItems: 'start' },
@@ -35,14 +35,14 @@ const alignmentMap: Record<
     bottomRight: { justifyItems: 'end', alignItems: 'end' },
 }
 
-export function ZStack({
+export function GridCell({
     align = 'center',
     gap = 0,
     grow = 0,
     className,
     children,
     onClick,
-}: ZStackProps) {
+}: GridCellProps) {
     const gapStyle = `${Number(gap)}rem`
     const flexGrow = Number(grow)
     const { justifyItems, alignItems } = alignmentMap[align]

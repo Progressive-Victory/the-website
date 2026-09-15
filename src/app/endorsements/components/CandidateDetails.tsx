@@ -1,6 +1,6 @@
 import styles from './CandidateDetails.module.css'
 import { ElectionStatusBadge, EndorsementAvatar } from '@/components/common'
-import { HStack, VStack, ZStack } from '@/components/layout'
+import { GridRow, GridColumn, GridCell } from '@/components/layout'
 import { InitiativeType, type Endorsement } from '@/contracts/data'
 import { ENDORSEMENT_TYPE_LABELS, getStateLabel } from '@/models'
 import { cn } from '@/util'
@@ -95,7 +95,7 @@ export function CandidateDetails({
     if (!mounted || !candidate) return null
 
     return (
-        <ZStack
+        <GridCell
             align="center"
             className={cn(styles.background, visible && styles.open)}
             onClick={onClose}
@@ -105,15 +105,15 @@ export function CandidateDetails({
                 onTransitionEnd={handleTransitionEnd}
                 onClick={(e) => e.stopPropagation()}
             >
-                <VStack align="left" gap={1.5} className={styles.container}>
-                    <HStack align="top" gap={1.25} className={styles.header}>
+                <GridColumn align="left" gap={1.5} className={styles.container}>
+                    <GridRow align="top" gap={1.25} className={styles.header}>
                         <EndorsementAvatar
                             endorsement={candidate}
                             size={100}
                             showBadge={false}
                         />
-                        <VStack align="left" gap={0.25}>
-                            <HStack
+                        <GridColumn align="left" gap={0.25}>
+                            <GridRow
                                 align="center"
                                 gap={0.5}
                                 className={styles.nameRow}
@@ -124,8 +124,8 @@ export function CandidateDetails({
                                 <ElectionStatusBadge
                                     electionStatus={candidate.electionStatus}
                                 />
-                            </HStack>
-                            <HStack
+                            </GridRow>
+                            <GridRow
                                 align="center"
                                 gap={0.5}
                                 className={styles.tagRow}
@@ -154,8 +154,8 @@ export function CandidateDetails({
                                         PV Member
                                     </span>
                                 )}
-                            </HStack>
-                            <HStack
+                            </GridRow>
+                            <GridRow
                                 align="center"
                                 gap={0.5}
                                 className={styles.socialRow}
@@ -195,17 +195,21 @@ export function CandidateDetails({
                                         {getSocialIcon(candidate.handleHref)}
                                     </a>
                                 )}
-                            </HStack>
-                        </VStack>
-                    </HStack>
+                            </GridRow>
+                        </GridColumn>
+                    </GridRow>
 
-                    <VStack align="left" gap={0.75} className={styles.quoteBox}>
-                        <HStack
+                    <GridColumn
+                        align="left"
+                        gap={0.75}
+                        className={styles.quoteBox}
+                    >
+                        <GridRow
                             align="center"
                             gap={1.25}
                             className={styles.infoRow}
                         >
-                            <VStack
+                            <GridColumn
                                 align="left"
                                 gap={0}
                                 className={styles.infoItem}
@@ -214,9 +218,9 @@ export function CandidateDetails({
                                 <span className={styles.infoValue}>
                                     {getStateLabel(candidate.state)}
                                 </span>
-                            </VStack>
+                            </GridColumn>
                             {candidate.jurisdiction && (
-                                <VStack
+                                <GridColumn
                                     align="left"
                                     gap={0}
                                     className={styles.infoItem}
@@ -227,10 +231,10 @@ export function CandidateDetails({
                                     <span className={styles.infoValue}>
                                         {candidate.jurisdiction}
                                     </span>
-                                </VStack>
+                                </GridColumn>
                             )}
                             {candidate.primaryElectionDate && (
-                                <VStack
+                                <GridColumn
                                     align="left"
                                     gap={0}
                                     className={styles.infoItem}
@@ -244,10 +248,10 @@ export function CandidateDetails({
                                             { timeZone: 'UTC' }
                                         )}
                                     </span>
-                                </VStack>
+                                </GridColumn>
                             )}
                             {candidate.generalElectionDate && (
-                                <VStack
+                                <GridColumn
                                     align="left"
                                     gap={0}
                                     className={styles.infoItem}
@@ -261,18 +265,18 @@ export function CandidateDetails({
                                             { timeZone: 'UTC' }
                                         )}
                                     </span>
-                                </VStack>
+                                </GridColumn>
                             )}
-                        </HStack>
+                        </GridRow>
                         <hr className={styles.divider} />
                         <CandidateQuote
                             handle={candidate.handle}
                             handleHref={candidate.handleHref}
                             quote={candidate.quote}
                         />
-                    </VStack>
-                </VStack>
+                    </GridColumn>
+                </GridColumn>
             </div>
-        </ZStack>
+        </GridCell>
     )
 }
