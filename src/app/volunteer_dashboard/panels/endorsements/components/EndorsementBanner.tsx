@@ -47,7 +47,7 @@ const stateNames = new Map(
 )
 const validImage = () => true
 
-// # TODO Merge EndorsementBanner and MemberBanner into a single HeaderBanner Component as part of Admin Panel Refactor to Volunteer Dashboard
+// # TODO Merge EndorsementBanner and MemberBanner into a single HeaderBanner Component as part of Admin Panel Refactor to Volunteer Dashboard. Use endorsementbanner as inspiration since its already updated to use VStack/HStack for layout.
 export function EndorsementBanner({
     endorsement,
     selectedTab,

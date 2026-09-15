@@ -14,7 +14,13 @@ import {
     useConfigure,
 } from '@/components/common/forms'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import { BackgroundColor, Endorsement } from '@/contracts/data'
+import {
+    BackgroundColor,
+    ElectionStatus,
+    Endorsement,
+    EndorsementType,
+    InitiativeType,
+} from '@/contracts/data'
 import {
     electionStatusOptions,
     endorsementLevelOptions,
@@ -89,7 +95,7 @@ export function DetailView({
                     getter={(form) => form.avatarBgColor}
                     setter={(form, field) => ({
                         ...form,
-                        avatarBgColor: Number(field),
+                        avatarBgColor: Number(field) as BackgroundColor,
                     })}
                     options={avatarBgColorOptions}
                 />
@@ -105,7 +111,7 @@ export function DetailView({
                     getter={(form) => form.electionStatus}
                     setter={(form, field) => ({
                         ...form,
-                        electionStatus: Number(field),
+                        electionStatus: Number(field) as ElectionStatus,
                     })}
                     options={electionStatusOptions}
                 />
@@ -133,7 +139,7 @@ export function DetailView({
                     getter={(form) => form.endorsementLevel}
                     setter={(form, field) => ({
                         ...form,
-                        endorsementLevel: Number(field),
+                        endorsementLevel: Number(field) as EndorsementType,
                     })}
                     options={endorsementLevelOptions}
                 />
@@ -143,7 +149,7 @@ export function DetailView({
                     getter={(form) => form.initiativeLevel}
                     setter={(form, field) => ({
                         ...form,
-                        initiativeLevel: Number(field),
+                        initiativeLevel: Number(field) as InitiativeType,
                     })}
                     options={initiativeLevelOptions}
                 />
