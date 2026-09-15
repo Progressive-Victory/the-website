@@ -6,7 +6,7 @@ import {
     useConfigure,
 } from '@/components/common/forms'
 import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
-import { HStack, Spacer, VStack, ZStack } from '@/components/layout'
+import { GridRow, Spacer, GridColumn, GridCell } from '@/components/layout'
 import { Endorsement, EndorsementType, InitiativeType } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { cn, parseErrorMessage } from '@/util'
@@ -90,9 +90,9 @@ export function EndorsementBanner({
     }
 
     const content = (
-        <VStack align="left" gap={0.75} className={styles.headerTop}>
-            <HStack gap={0.75} className={styles.topRow}>
-                <HStack gap={0.75}>
+        <GridColumn align="left" gap={0.75} className={styles.headerTop}>
+            <GridRow gap={0.75} className={styles.topRow}>
+                <GridRow gap={0.75}>
                     {canEditImage ? (
                         <label
                             className={styles.avatarButton}
@@ -116,14 +116,14 @@ export function EndorsementBanner({
                             />
                         </label>
                     ) : (
-                        <ZStack>
+                        <GridCell>
                             <EndorsementAvatar
                                 endorsement={endorsement}
                                 size={72}
                             />
-                        </ZStack>
+                        </GridCell>
                     )}
-                    <VStack align="left" gap={0.2}>
+                    <GridColumn align="left" gap={0.2}>
                         <h1 className={styles.headerUserName}>
                             {endorsement.name || 'New Endorsement'}
                             {endorsement.incumbent && '*'}
@@ -142,10 +142,10 @@ export function EndorsementBanner({
                                 {uploadError}
                             </span>
                         )}
-                    </VStack>
-                </HStack>
+                    </GridColumn>
+                </GridRow>
                 <Spacer />
-                <HStack gap={0.5}>
+                <GridRow gap={0.5}>
                     <span
                         className={cn(
                             styles.rolePill,
@@ -158,9 +158,9 @@ export function EndorsementBanner({
                             ? 'Published'
                             : 'Not Published'}
                     </span>
-                </HStack>
-            </HStack>
-            <HStack gap={0.5}>
+                </GridRow>
+            </GridRow>
+            <GridRow gap={0.5}>
                 {endorsement.initiativeLevel !== InitiativeType.None && (
                     <span
                         className={cn(
@@ -188,7 +188,7 @@ export function EndorsementBanner({
                         {endorsementLevelLabels[endorsement.endorsementLevel]}
                     </span>
                 )}
-            </HStack>
+            </GridRow>
             {tabs && tabs.length > 0 && selectedTab && onTabChange && (
                 <TabBar
                     tabs={tabs}
@@ -196,7 +196,7 @@ export function EndorsementBanner({
                     onChange={onTabChange}
                 />
             )}
-        </VStack>
+        </GridColumn>
     )
 
     if (!containerClassName) return content

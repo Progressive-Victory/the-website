@@ -1,6 +1,6 @@
 import styles from './Form.module.css'
 import { DynamicFormFieldProps, FieldConfiguration } from './FormField'
-import { HStack, Spacer, VStack } from '@/components/layout'
+import { GridRow, Spacer, GridColumn } from '@/components/layout'
 import { cn } from '@/util'
 import deepEqual from 'deep-equal'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -250,8 +250,8 @@ export function Form<T>({
     if (form == null) {
         return (
             <div className={styles.emptyContainer}>
-                <HStack grow>
-                    <VStack grow gap>
+                <GridRow grow>
+                    <GridColumn grow gap>
                         <Spacer />
                         <span>{`No ${title} selected`}</span>
                         {onCreate && (
@@ -263,8 +263,8 @@ export function Form<T>({
                             </button>
                         )}
                         <Spacer />
-                    </VStack>
-                </HStack>
+                    </GridColumn>
+                </GridRow>
             </div>
         )
     }

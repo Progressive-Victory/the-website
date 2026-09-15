@@ -1,9 +1,9 @@
 import { type MouseEventHandler, ReactNode } from 'react'
 
-type HFlexAlignment = 'center' | 'top' | 'bottom'
+type GridRowAlignment = 'center' | 'top' | 'bottom'
 
-export interface HStackProps {
-    align?: HFlexAlignment
+export interface GridRowProps {
+    align?: GridRowAlignment
     gap?: boolean | number
     grow?: boolean | number
     className?: string
@@ -11,14 +11,14 @@ export interface HStackProps {
     onClick?: MouseEventHandler<HTMLDivElement>
 }
 
-export function HStack({
+export function GridRow({
     align = 'center',
     gap = 0,
     grow = 0,
     className,
     children,
     onClick,
-}: HStackProps) {
+}: GridRowProps) {
     const gapStyle = `${Number(gap)}rem`
     const flexGrow = Number(grow)
     const alignItems =
