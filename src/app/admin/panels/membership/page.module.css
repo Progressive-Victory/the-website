@@ -1,0 +1,191 @@
+.panelContents {
+    width: 100%;
+    min-width: 0;
+    height: calc(100dvh - 100px);
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+}
+
+.scrollView {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0 0 1rem;
+}
+
+.panelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.35rem 1.25rem;
+    background-color: #f9fafb;
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    border-bottom: 2px solid #e5e7eb;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
+}
+
+.panelTimestamp {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.breadcrumbs {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.86rem;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.72);
+    user-select: none;
+}
+
+.prominentBreadcrumb {
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.72);
+}
+
+.breadcrumbSeperator {
+    color: rgba(15, 23, 42, 0.35);
+    font-weight: 700;
+}
+
+.panelBreadcrumb {
+    font-weight: 650;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.galleryHeader {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.15rem 1.05rem 0.35rem;
+}
+
+.galleryHeading {
+    min-width: 0;
+}
+
+.galleryTitle {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: rgba(9, 34, 58, 0.9);
+}
+
+.gallerySubTitle {
+    margin: 0.35rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.tableWrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0.75rem 1.05rem 1.5rem;
+
+    &:has([aria-expanded='true']) {
+        --confirm-tooltip-opacity: 0;
+    }
+}
+
+.loadMore {
+    min-height: 1px;
+    padding: 0.75rem 0;
+    color: rgba(15, 23, 42, 0.55);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.tableToolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.toolbarButton {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    border-width: 1px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: white;
+    border-color: #0284c7;
+    background-color: #0ea5e9;
+
+    &:disabled {
+        cursor: not-allowed;
+        border-color: #207aa7;
+        background-color: #1c6287;
+    }
+}
+
+.discardButton {
+    border-color: #dc2626;
+    background-color: #ef4444;
+}
+
+.editStatus {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.6);
+}
+
+.tableOptionsBox {
+    min-width: 14rem;
+    background: rgba(255, 255, 255, 0.96);
+}
+
+.tableOptionsBody {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+}
+
+.tableOptionRow {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0 0.15rem;
+}
+
+.tableOptionLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.58);
+}
+
+.userMatchedLink {
+    display: inline-flex;
+    cursor: pointer;
+    border: 0;
+    padding: 0;
+    background: transparent;
+}
+
+@media (max-width: 53rem) {
+    .panelHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+}

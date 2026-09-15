@@ -3,6 +3,7 @@
 import styles from '@/app/account/account.module.css'
 import formStyles from '@/components/common/forms/Form.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
+import { Table, Column } from '@/components/common/table'
 import { ActBlueContribution, User } from '@/contracts/data'
 import { cn } from '@/util'
 import React, { ChangeEvent, useState } from 'react'
@@ -62,64 +63,53 @@ const getRecurrenceType = (
         : 'monthly'
 }
 
+type ContributionLineitem = ContributionsTableProps['lineitems'][number]
+
+const contributionColumns: Column<ContributionLineitem>[] = [
+    {
+        key: 'recurring',
+        header: 'Recurring',
+        width: '8.5rem',
+        render: (row) => (
+            <RecurrenceTag type={getRecurrenceType(row.contribution)} />
+        ),
+    },
+    {
+        key: 'form',
+        header: 'Contribution Form',
+        render: (row) =>
+            formatContributionForm(row.contribution.contributionForm),
+    },
+    {
+        key: 'orderNumber',
+        header: 'Order Number',
+        width: '9rem',
+        render: (row) => row.contribution.orderNumber,
+    },
+    {
+        key: 'amount',
+        header: 'Amount',
+        width: '7rem',
+        render: (row) => `$${row.amount.toFixed(2)}`,
+    },
+    {
+        key: 'date',
+        header: 'Date',
+        width: '11rem',
+        render: (row) => row.paidAt.toLocaleDateString(),
+    },
+]
+
 const ContributionsTable = ({ lineitems }: ContributionsTableProps) => {
     return (
         <div className={styles.contributionsTableContainer}>
-            <div className={styles.contributionsList}>
-                <div className={styles.contributionsListHeader}>
-                    <span>Recurring</span>
-                    <span>Contribution Form</span>
-                    <span>Order Number</span>
-                    <span>Amount</span>
-                    <span>Date</span>
-                </div>
-
-                {lineitems.map(
-                    ({ contribution, lineitemId, amount, paidAt }) => {
-                        return (
-                            <div
-                                key={`${contribution.uniqueIdentifier}-${lineitemId}`}
-                                className={styles.contributionsListRow}
-                            >
-                                <span
-                                    className={styles.contributionsListCell}
-                                    data-label="Recurring"
-                                >
-                                    <RecurrenceTag
-                                        type={getRecurrenceType(contribution)}
-                                    />
-                                </span>
-                                <span
-                                    className={styles.contributionsListCell}
-                                    data-label="Contribution Form"
-                                >
-                                    {formatContributionForm(
-                                        contribution.contributionForm
-                                    )}
-                                </span>
-                                <span
-                                    className={styles.contributionsListCell}
-                                    data-label="Order Number"
-                                >
-                                    {contribution.orderNumber}
-                                </span>
-                                <span
-                                    className={styles.contributionsListCell}
-                                    data-label="Amount"
-                                >
-                                    ${amount.toFixed(2)}
-                                </span>
-                                <span
-                                    className={styles.contributionsListCell}
-                                    data-label="Date"
-                                >
-                                    {paidAt.toLocaleDateString()}
-                                </span>
-                            </div>
-                        )
-                    }
-                )}
-            </div>
+            <Table
+                columns={contributionColumns}
+                data={lineitems}
+                rowKey={(row) =>
+                    `${row.contribution.uniqueIdentifier}-${row.lineitemId}`
+                }
+            />
         </div>
     )
 }

@@ -29,6 +29,7 @@ import {
 import {
     ActBlueDonorLinkRequest,
     SortDirection,
+    UpdateMembershipRequest,
     UpdateUserRequest,
     zUpdateUserRequest,
 } from '@/contracts/requests'
@@ -43,6 +44,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { useSearchParams } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
 import {
     FaUsers,
@@ -77,8 +79,11 @@ const birthYears = Array.from(
 export default function Page() {
     const queryClient = useQueryClient()
     const { ready, onGet, onPatch, onPost } = useFetch()
+    const navUser = useSearchParams().get('user')
 
-    const [selectedId, setSelectedId] = useState<number | null>(null)
+    const [selectedId, setSelectedId] = useState<number | null>(
+        navUser ? +navUser : null
+    )
 
     const [selectedHistory, setSelectedHistory] =
         useState<UpdateHistory<User> | null>(null)
@@ -407,24 +412,40 @@ export default function Page() {
         async (value: ActBlueDonor, userId: number) => {
             setPickingDonor(false)
 
+            const metaData = {
+                dataSource: 'Member Panel',
+                userWhoUpdatedId: loggedInUser.data?.id,
+            }
+
             await onPost(
                 '/actblue/donors/:donorEmail/link',
                 {
                     userId,
-                    metaData: {
-                        dataSource: 'Member Panel',
-                        userWhoUpdatedId: loggedInUser.data?.id,
-                    },
+                    metaData,
                 } satisfies ActBlueDonorLinkRequest,
                 null,
                 { params: { donorEmail: value.email } }
             )
 
+            try {
+                await onPatch(
+                    '/actblue/donors/:donorEmail/membership',
+                    {
+                        discordConfirmed: true,
+                        metaData,
+                    } satisfies UpdateMembershipRequest,
+                    null,
+                    { params: { donorEmail: value.email } }
+                )
+            } catch (error) {
+                console.error(error)
+            }
+
             await queryClient.invalidateQueries({
                 queryKey: [`/users/${userId}`],
             })
         },
-        [onPost, queryClient, loggedInUser.data]
+        [onPatch, onPost, queryClient, loggedInUser.data]
     )
 
     const handleDeleteDonorItem = useCallback(

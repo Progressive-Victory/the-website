@@ -10,6 +10,7 @@ import {
     FaUserTag,
     FaDonate,
     FaBullhorn,
+    FaIdCard,
 } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign } from 'react-icons/fa6'
 import { FiChevronLeft } from 'react-icons/fi'
@@ -24,6 +25,7 @@ interface SidebarProps {
     roleCount?: number
     permissionCount?: number
     endorsementCount?: number
+    membershipCount?: number
 }
 
 export default function Sidebar({
@@ -34,6 +36,7 @@ export default function Sidebar({
     roleCount,
     permissionCount,
     endorsementCount,
+    membershipCount,
 }: SidebarProps) {
     const [open, setOpen] = useLocalStorage('pv.admin-nav-open', true)
 
@@ -105,6 +108,13 @@ export default function Sidebar({
                     href="/admin/panels/endorsements"
                     icon={FaBullhorn}
                     count={endorsementCount}
+                    open={open}
+                />
+                <NavLink
+                    title="Membership"
+                    href="/admin/panels/membership"
+                    icon={FaIdCard}
+                    count={membershipCount}
                     open={open}
                 />
             </ul>
