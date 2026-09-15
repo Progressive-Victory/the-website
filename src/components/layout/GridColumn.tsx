@@ -1,9 +1,9 @@
 import { type MouseEventHandler, ReactNode } from 'react'
 
-type VFlexAlignment = 'center' | 'left' | 'right'
+type GridColumnAlignment = 'center' | 'left' | 'right'
 
 export interface GridColumnProps {
-    align?: VFlexAlignment
+    align?: GridColumnAlignment
     gap?: boolean | number
     grow?: boolean | number
     className?: string

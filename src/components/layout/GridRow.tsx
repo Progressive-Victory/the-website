@@ -1,9 +1,9 @@
 import { type MouseEventHandler, ReactNode } from 'react'
 
-type HFlexAlignment = 'center' | 'top' | 'bottom'
+type GridRowAlignment = 'center' | 'top' | 'bottom'
 
 export interface GridRowProps {
-    align?: HFlexAlignment
+    align?: GridRowAlignment
     gap?: boolean | number
     grow?: boolean | number
     className?: string
