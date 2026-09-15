@@ -47,6 +47,7 @@ SITE_URL="http://localhost:3000"
 # api vars
 PV_WEBSITE_API_URL="https://devapi.progressivevictory.win"
 ```
+
 **NOTE:** If you have access to `the-local-setup`, the `.env` files are not needed.
 
 ### 4. Run
