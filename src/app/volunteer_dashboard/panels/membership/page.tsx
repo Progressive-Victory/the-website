@@ -62,6 +62,12 @@ const tableOptionRows: {
         choices: showHideChoices,
     },
     {
+        key: 'showZebra',
+        label: 'Zebra striping',
+        ariaLabel: 'Zebra Striping',
+        choices: showHideChoices,
+    },
+    {
         key: 'collapseFulfillment',
         label: 'Fulfillment columns',
         ariaLabel: 'Fulfillment columns',
@@ -295,6 +301,7 @@ export default function Page() {
                             rowKey={(m) => m.id}
                             collapsedCategories={collapsedCategories}
                             mode={tableMode}
+                            zebra={options.showZebra}
                             footer={
                                 hasNextPage && (
                                     <div

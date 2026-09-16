@@ -70,15 +70,19 @@
     font-size: 0.9rem;
     color: rgba(15, 23, 42, 0.9);
     transition: background-color 0.12s ease;
-}
 
-.row:hover {
-    background-color: rgba(15, 23, 42, 0.04);
-}
+    &.rowAlt {
+        background-color: rgba(15, 23, 42, 0.022);
+    }
 
-.row:last-child {
-    border-bottom: 0;
-    border-radius: 0 0 calc(0.85rem - 1px) calc(0.85rem - 1px);
+    &:hover {
+        background-color: rgba(15, 23, 42, 0.04);
+    }
+
+    &:last-child {
+        border-bottom: 0;
+        border-radius: 0 0 calc(0.85rem - 1px) calc(0.85rem - 1px);
+    }
 }
 
 .cell,

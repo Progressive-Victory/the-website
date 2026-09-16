@@ -50,6 +50,7 @@ export interface TableProps<T> {
     rowKey: (row: T, index: number) => string | number
     collapsedCategories?: string[]
     mode?: TableMode
+    zebra?: boolean
     footer?: React.ReactNode
 }
 
@@ -149,6 +150,7 @@ function TableRowInner<T>({
     visibleEntries,
     gridTemplateColumns,
     mode,
+    zebra,
     openColKey,
     setOpenCell,
 }: {
@@ -159,6 +161,7 @@ function TableRowInner<T>({
     visibleEntries: VisibleEntry<T>[]
     gridTemplateColumns: string
     mode: TableMode
+    zebra: boolean
     openColKey: string | null
     setOpenCell: OpenCellSetter
 }) {
@@ -176,7 +179,10 @@ function TableRowInner<T>({
 
     return (
         <div
-            className={styles.row}
+            className={cn(
+                styles.row,
+                zebra && index % 2 === 1 && styles.rowAlt
+            )}
             style={{ gridTemplateColumns }}
             data-table-row="true"
         >
@@ -317,6 +323,7 @@ export function Table<T>({
     rowKey,
     collapsedCategories = [],
     mode = 'view',
+    zebra = false,
     footer,
 }: TableProps<T>) {
     const [sortKey, setSortKey] = useState<string | null>(null)
@@ -537,6 +544,7 @@ export function Table<T>({
                         visibleEntries={visibleEntries}
                         gridTemplateColumns={gridTemplateColumns}
                         mode={mode}
+                        zebra={zebra}
                         openColKey={
                             openCell?.startsWith(openPrefix)
                                 ? openCell.slice(openPrefix.length)

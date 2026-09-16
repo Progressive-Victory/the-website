@@ -17,11 +17,13 @@ import {
     MembershipTableMode,
     MembershipTier,
     PackageShipped,
+    ShirtSize,
 } from './membership.types'
 import {
     AddressEdit,
     AddressMenu,
     AddressValue,
+    AmountValue,
     DiscordMenu,
     DiscordValue,
     EmailEdit,
@@ -91,6 +93,17 @@ const membershipTierRank: Record<MembershipTier, number> = {
     'Premium Member': 2,
     'Dues Paying Member': 1,
 }
+
+const shirtSizeRank: Record<ShirtSize, number> = {
+    XXL: 0,
+    XL: 1,
+    L: 2,
+    M: 3,
+    S: 4,
+    XS: 5,
+}
+
+const NO_SHIRT_SIZE_RANK = Object.keys(shirtSizeRank).length
 
 const DOT_COLOR_TRUE = 'rgba(112, 195, 32, 0.6)'
 const DOT_COLOR_FALSE = 'rgba(255, 95, 75, 0.6)'
@@ -267,7 +280,7 @@ export const buildColumns = ({
                     </span>
                 ) : (
                     <span className={cn(tags.tag, tags.tagTier, tags.tagGhost)}>
-                        Not Eligible
+                        Not A Member
                     </span>
                 )
             },
@@ -401,7 +414,8 @@ export const buildColumns = ({
             header: 'Shirt',
             width: '5rem',
             allowOverflow: true,
-            sortValue: (m) => m.shirtSize ?? '',
+            sortValue: (m) =>
+                m.shirtSize ? shirtSizeRank[m.shirtSize] : NO_SHIRT_SIZE_RANK,
             render: (m) => <ShirtSizeValue member={m} />,
             renderEdit: (m) => <ShirtSizeEdit member={m} edit={edit} />,
         },
@@ -410,10 +424,7 @@ export const buildColumns = ({
             header: 'Amount',
             width: '6rem',
             sortValue: (m) => m.recurringSummary?.activeAmount ?? 0,
-            render: (m) => {
-                const amount = m.recurringSummary?.activeAmount
-                return amount != null ? `$${amount}` : '—'
-            },
+            render: (m) => <AmountValue member={m} />,
         },
         {
             key: 'contributionsReal',

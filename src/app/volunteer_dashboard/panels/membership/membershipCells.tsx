@@ -34,6 +34,8 @@ const NoLinkedUser = () => (
     <span className={styles.editUnavailable}>No linked user</span>
 )
 
+const NoData = () => <span className={styles.editUnavailable}>No Data</span>
+
 export const NameValue = ({ member }: MemberValueProps) => (
     <span className={styles.nameCell}>
         <span>{member.userName ?? member.donorName ?? '—'}</span>
@@ -114,13 +116,11 @@ export const NameMenu = ({ member, closeDropdown }: MemberMenuProps) => (
 export const DiscordValue = ({ member }: MemberValueProps) => {
     const displayedHandle = member.discordUsername ?? member.contributionDiscord
 
+    if (!displayedHandle) return <NoData />
+
     return (
         <span className={styles.nameCell}>
-            <span>
-                {displayedHandle
-                    ? `@${normalizeDiscordHandle(displayedHandle)}`
-                    : '—'}
-            </span>
+            <span>@{normalizeDiscordHandle(displayedHandle)}</span>
             <ConfirmedBadge
                 label="Discord"
                 confirmed={member.discordConfirmed}
@@ -263,11 +263,21 @@ export const AddressMenu = ({ member, closeDropdown }: MemberMenuProps) => (
     />
 )
 
-export const PhoneValue = ({ member }: MemberValueProps) => (
-    <span className={styles.valueCell}>
-        {formatPhone(member.userPhone ?? member.donorPhone)}
-    </span>
-)
+export const PhoneValue = ({ member }: MemberValueProps) => {
+    const phone = member.userPhone ?? member.donorPhone
+
+    if (!phone) return <NoData />
+
+    return <span className={styles.valueCell}>{formatPhone(phone)}</span>
+}
+
+export const AmountValue = ({ member }: MemberValueProps) => {
+    const amount = member.recurringSummary?.activeAmount
+
+    if (amount == null) return <NoData />
+
+    return <span className={styles.valueCell}>${amount}</span>
+}
 
 export const PhoneEdit = ({ member, edit }: MemberEditProps) => {
     const draft = useMemberDraft(edit, member).userPhone

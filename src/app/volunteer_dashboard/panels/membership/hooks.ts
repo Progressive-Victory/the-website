@@ -227,14 +227,16 @@ export interface MembershipTableOptions {
     showStatus: boolean
     showConfirmed: boolean
     showFulfilled: boolean
+    showZebra: boolean
     collapseFulfillment: boolean
 }
 
 const defaultTableOptions: MembershipTableOptions = {
-    showRowNumber: false,
+    showRowNumber: true,
     showStatus: false,
     showConfirmed: false,
     showFulfilled: true,
+    showZebra: false,
     collapseFulfillment: false,
 }
 
