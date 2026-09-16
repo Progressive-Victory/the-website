@@ -93,10 +93,9 @@ export const SourceMenu = ({
             onClose={onClose}
             className={styles.sourceOverlay}
             bodyClassName={styles.sourceOverlayBody}
+            align="start"
             style={
                 {
-                    left: 0,
-                    right: 'auto',
                     '--source-overlay-width': overlayWidth,
                     '--source-label-width': labelWidth,
                 } as CSSProperties

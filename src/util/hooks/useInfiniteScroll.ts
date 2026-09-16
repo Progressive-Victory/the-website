@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { RefCallback, useCallback, useEffect, useState } from 'react'
 
 export interface UseInfiniteScrollOptions {
     hasNextPage: boolean
@@ -31,7 +31,10 @@ export function useInfiniteScroll<T extends HTMLElement = HTMLDivElement>({
         return () => observer.disconnect()
     }, [sentinel, hasNextPage, isFetchingNextPage, fetchNextPage, rootMargin])
 
-    const sentinelRef = useCallback((node: T | null) => setSentinel(node), [])
+    const sentinelRef: RefCallback<T> = useCallback(
+        (node: T | null) => setSentinel(node),
+        []
+    )
 
     return { sentinelRef }
 }

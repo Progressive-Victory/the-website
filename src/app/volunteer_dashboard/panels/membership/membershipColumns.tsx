@@ -438,7 +438,7 @@ export const buildColumns = ({
             render: (m) =>
                 m.userId != null ? (
                     <Link
-                        href={`/admin/panels/members?user=${m.userId}`}
+                        href={`/volunteer_dashboard/panels/members?userId=${m.userId}`}
                         className={styles.userMatchedLink}
                     >
                         <BoolTag value={m.userMatched} />

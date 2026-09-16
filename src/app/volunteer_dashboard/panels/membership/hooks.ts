@@ -38,7 +38,7 @@ import {
 
 const HISTORY_STALE_TIME = 5 * 60 * 1000
 const HISTORY_LIMIT = 5
-const PAGE_SIZE = 25
+const PAGE_SIZE = 250
 const EMPTY_DRAFT: MemberEdits = {}
 const noopUnsubscribe = () => undefined
 
@@ -101,8 +101,6 @@ export function useFieldHistory<T extends HistoryEntry>({
     }
 }
 
-// Edits live outside React state so typing only re-renders the affected cells
-// instead of rebuilding every column and row of the table.
 export function useMemberEdits() {
     const editsRef = useRef<Record<string, MemberEdits>>({})
     const memberListeners = useRef(new Map<string, Set<() => void>>())

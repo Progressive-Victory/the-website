@@ -34,6 +34,7 @@ export interface VolunteerDashboardUnselectedDetailProps {
     userCount?: number
     donorCount?: number
     contributionCount?: number
+    membershipCount?: number
     roleCount?: number
     permissionCount?: number
     positionCount?: number
@@ -49,6 +50,7 @@ export function renderVolunteerDashboardUnselectedDetail({
     userCount,
     donorCount,
     contributionCount,
+    membershipCount,
     roleCount,
     permissionCount,
     positionCount,
@@ -130,7 +132,7 @@ export function renderVolunteerDashboardUnselectedDetail({
                             description="Dues Paying Membership switchboard."
                             href="/volunteer_dashboard/panels/membership"
                             icon={FaMoneyCheckDollar}
-                            tag={{ count: 92 }}
+                            tag={{ count: membershipCount }}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />

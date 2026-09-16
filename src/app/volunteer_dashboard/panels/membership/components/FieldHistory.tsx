@@ -34,21 +34,23 @@ export const FieldHistory = ({
         describeChange,
     })
 
-    const statusMessage = (() => {
-        if (userId == null) return 'No linked user'
-        if (isPending) return 'Loading…'
-        if (isError) return 'Failed to load history'
-        if (history.length === 0) return emptyMessage
-        return undefined
-    })()
+    const statusMessage =
+        userId == null
+            ? 'No linked user'
+            : isPending
+              ? 'Loading…'
+              : isError
+                ? 'Failed to load history'
+                : history.length === 0
+                  ? emptyMessage
+                  : undefined
 
     return (
         <div className={styles.historySection}>
             <span className={styles.historySectionLabel}>{title}</span>
-            {statusMessage && (
+            {statusMessage ? (
                 <div className={styles.historyEmpty}>{statusMessage}</div>
-            )}
-            {!statusMessage && (
+            ) : (
                 <div className={styles.historyContainer}>
                     {history.map(({ update, label, value }) => (
                         <div

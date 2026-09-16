@@ -14,7 +14,9 @@ import {
     type ChartGranularityMode,
 } from '@/components/common/charts/timeBuckets'
 import { SortDirection } from '@/contracts/requests'
+import { zMembershipsResponsePacket } from '@/contracts/responses'
 import { useActblueQueries } from '@/queries'
+import { usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -173,6 +175,12 @@ export function useFundraisingDashboardController() {
         queryFn: ({ signal }) => actblueQueries.getFundraisingStats({ signal }),
         enabled: actblueQueries.ready,
     })
+
+    const membershipCountQuery = usePaginatedSearch(
+        '/actblue/memberships',
+        zMembershipsResponsePacket,
+        { search: { limit: 1 } }
+    ).query
 
     const earliestContributionQuery = useQuery({
         queryKey: ['/actblue/contributions', 'earliest'],
@@ -443,6 +451,7 @@ export function useFundraisingDashboardController() {
         canApplyCustomRange,
         statsQuery,
         allTimeStatsQuery,
+        membershipCountQuery,
         setStartDate,
         setEndDate,
         setCommittedPreset,

@@ -64,7 +64,7 @@ export const EditableSelectTag = <T extends string>({
                     onClose={closeDropdown}
                     className={styles.editSelectOverlay}
                     bodyClassName={styles.editSelectMenu}
-                    style={{ left: 0, right: 'auto' }}
+                    align="start"
                     body={choices.map((choice) => (
                         <button
                             key={choice ?? 'none'}

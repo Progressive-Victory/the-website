@@ -250,15 +250,16 @@ const monthDiff = (from: Date, to: Date) =>
     (to.getUTCFullYear() - from.getUTCFullYear()) * 12 +
     (to.getUTCMonth() - from.getUTCMonth())
 
-export const getMembershipTierForAmount = (
-    amount?: number
-): MembershipTier | undefined => {
+const tierThresholds = [
+    [100, 'Inner Circle Member'],
+    [20, 'Signature Member'],
+    [10, 'Premium Member'],
+    [5, 'Dues Paying Member'],
+] as const satisfies readonly (readonly [number, MembershipTier])[]
+
+export const getMembershipTierForAmount = (amount?: number) => {
     if (amount == null) return undefined
-    if (amount >= 100) return 'Inner Circle Member'
-    if (amount >= 20) return 'Signature Member'
-    if (amount >= 10) return 'Premium Member'
-    if (amount >= 5) return 'Dues Paying Member'
-    return undefined
+    return tierThresholds.find(([min]) => amount >= min)?.[1]
 }
 
 export const computeRecurringSummary = (

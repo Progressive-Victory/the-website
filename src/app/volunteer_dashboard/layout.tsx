@@ -16,6 +16,7 @@ import {
     zRole,
     zUser,
 } from '@/contracts/data'
+import { zMembershipsResponsePacket } from '@/contracts/responses'
 import { useEndorsementQueries, usePositionQueries } from '@/queries'
 import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
@@ -83,6 +84,11 @@ function LayoutContent({ children }: { children: ReactNode }) {
         zActBlueDonationPacket,
         { search: { limit: 0 } }
     )
+    const memberships = usePaginatedSearch(
+        '/actblue/memberships',
+        zMembershipsResponsePacket,
+        { search: { limit: 1 } }
+    )
     const positionHierarchy = useQuery({
         queryKey: ['positionHierarchy'],
         queryFn: positionQueries.getPositionHierarchy,
@@ -137,7 +143,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                     label: 'Membership',
                     href: '/volunteer_dashboard/panels/membership',
                     icon: FaMoneyCheckDollar,
-                    // count: insert,
+                    count: memberships.query.data?.count,
                 },
             ],
         },
@@ -321,6 +327,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                         userCount: users.query.data?.count,
                         donorCount: donors.query.data?.count,
                         contributionCount: contributions.query.data?.count,
+                        membershipCount: memberships.query.data?.count,
                         roleCount: roles.query.data?.count,
                         permissionCount: permissions.query.data?.count,
                         positionCount,

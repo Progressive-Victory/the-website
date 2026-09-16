@@ -4,6 +4,7 @@ import {
     countMonthsWithLineitems,
     filterRecurringContributions,
     getEarliestLineitemDate,
+    getMembershipTierForAmount,
 } from '../membership.helpers'
 import { MemberMenuProps } from '../membership.types'
 import styles from './ContributionsMenu.module.css'
@@ -20,16 +21,22 @@ const formatContributionDate = (value: string) =>
     })
 
 const recurringAmountTagClass = (amount?: number) => {
-    if (amount == null) return undefined
-    if (amount >= 100) return tags.tagInnerCircle
-    if (amount >= 20) return tags.tagSignature
-    if (amount >= 10) return tags.tagPremium
-    if (amount >= 5) return tags.tagMember
-    return undefined
+    switch (getMembershipTierForAmount(amount)) {
+        case 'Inner Circle Member':
+            return tags.tagInnerCircle
+        case 'Signature Member':
+            return tags.tagSignature
+        case 'Premium Member':
+            return tags.tagPremium
+        case 'Dues Paying Member':
+            return tags.tagMember
+        default:
+            return undefined
+    }
 }
 
 const formatAmount = (amount: number) =>
-    `$${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 
 const monthsElapsed = (start: Date, end: Date) =>
     (end.getUTCFullYear() - start.getUTCFullYear()) * 12 +
@@ -160,7 +167,7 @@ export const ContributionsMenu = ({
                                             ? () => {
                                                   closeDropdown()
                                                   router.push(
-                                                      `/admin/panels/contributions?lineitemId=${record.firstLineitemId}`
+                                                      `/volunteer_dashboard/panels/contributions?lineitemId=${record.firstLineitemId}`
                                                   )
                                               }
                                             : undefined
@@ -185,9 +192,7 @@ export const ContributionsMenu = ({
                                             }
                                         >
                                             {record.lineitemCount} lineitem
-                                            {record.lineitemCount === 1
-                                                ? ''
-                                                : 's'}
+                                            {record.lineitemCount !== 1 && 's'}
                                         </span>
                                         {record.mostRecentLineitemDate && (
                                             <span
@@ -209,9 +214,8 @@ export const ContributionsMenu = ({
                                             >
                                                 {record.monthsWithLineitems} of{' '}
                                                 {record.monthsSpanned} month
-                                                {record.monthsSpanned === 1
-                                                    ? ''
-                                                    : 's'}
+                                                {record.monthsSpanned !== 1 &&
+                                                    's'}
                                             </span>
                                         )}
                                     </span>
