@@ -61,20 +61,20 @@ import { FiChevronDown, FiChevronUp } from 'react-icons/fi'
  * import { Table, type ColumnEntry } from '@/components/common/table'
  *
  *
- * const columns: ColumnEntry<Person>[] = [
+ * const columns: ColumnEntry<ExampleData>[] = [
  *     {
  *         key: 'name',
  *         header: 'Name',
  *         width: '14rem',
- *         render: (person) => person.name,
- *         renderEdit: (person) => <NameInput person={person} />,
- *         sortValue: (person) => person.name,
+ *         render: (example) => example.name,
+ *         renderEdit: (example) => <NameInput example={example} />,
+ *         sortValue: (example) => example.name,
  *     },
  *     {
  *         label: 'Contact',
  *         columns: [
- *             { key: 'email', header: 'Email', render: (p) => p.email },
- *             { key: 'phone', header: 'Phone', render: (p) => p.phone },
+ *             { key: 'email', header: 'Email', render: (e) => e.email },
+ *             { key: 'phone', header: 'Phone', render: (e) => e.phone },
  *         ],
  *     },
  * ]
@@ -82,8 +82,8 @@ import { FiChevronDown, FiChevronUp } from 'react-icons/fi'
  *
  * <Table
  *     columns={columns}
- *     data={people}
- *     rowKey={(person) => person.id}
+ *     data={examples}
+ *     rowKey={(example) => example.id}
  *     mode="view"
  *     zebra
  * />
