@@ -9,6 +9,7 @@ import {
     FaCheckToSlot,
     FaClipboardUser,
     FaDollarSign,
+    FaFlask,
     FaMoneyBills,
     FaMoneyCheckDollar,
 } from 'react-icons/fa6'

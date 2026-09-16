@@ -12,6 +12,84 @@ import React, {
 } from 'react'
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi'
 
+/*
+ * How To Use:
+ *
+ * This component is our standardized data table. You describe your data with a
+ * list of column definitions and hand it an array of rows; the table handles
+ * layout, sticky headers, sorting, per-cell dropdown menus, an inline edit
+ * mode, and row virtualization for large datasets.
+ *
+ * The table is generic over your row type <T>, so every callback you provide
+ * receives a fully typed row.
+ *
+ *
+ *
+ * TableProps<T>:
+ * - columns: Column definitions, optionally grouped into categories.
+ * - data: The rows to render.
+ * - rowKey: Returns a stable unique key for each row.
+ * - collapsedCategories: Labels of categories to render collapsed as dots.
+ * - mode: 'view' (default) or 'edit' to swap in the editable cell renderers.
+ * - zebra: Alternating row background colors.
+ * - footer: Rendered below the last row, inside the scroll container.
+ *
+ *
+ * Column<T>:
+ * - key: Unique column identifier, also used as the sort key.
+ * - header: Header label text.
+ * - render: Cell content in view mode.
+ * - renderEdit: Cell content in edit mode. Omit to lock the column while editing.
+ * - width: CSS grid track width. Defaults to 10rem.
+ * - allowOverflow: Let content escape the cell instead of being ellipsized.
+ * - onCellClick: Called when the cell is activated by click or Enter/Space.
+ * - menu: Dropdown content anchored under the cell, opened on activation.
+ * - sortValue: Provide to make the column sortable by clicking its header.
+ *
+ *
+ * ColumnCategory<T>:
+ * - label: Category name, used to target it via collapsedCategories.
+ * - columns: The columns belonging to this category.
+ * - collapsedWidth: Width used while collapsed. Defaults to 5rem.
+ * - dotColor: Dot color per column while collapsed. Return null for a bullet.
+ * - rowRender: Replaces the category's cells for a row with a single spanning cell.
+ *
+ *
+ *
+ * Example usage:
+ *
+ * import { Table, type ColumnEntry } from '@/components/common/table'
+ *
+ *
+ * const columns: ColumnEntry<Person>[] = [
+ *     {
+ *         key: 'name',
+ *         header: 'Name',
+ *         width: '14rem',
+ *         render: (person) => person.name,
+ *         renderEdit: (person) => <NameInput person={person} />,
+ *         sortValue: (person) => person.name,
+ *     },
+ *     {
+ *         label: 'Contact',
+ *         columns: [
+ *             { key: 'email', header: 'Email', render: (p) => p.email },
+ *             { key: 'phone', header: 'Phone', render: (p) => p.phone },
+ *         ],
+ *     },
+ * ]
+ *
+ *
+ * <Table
+ *     columns={columns}
+ *     data={people}
+ *     rowKey={(person) => person.id}
+ *     mode="view"
+ *     zebra
+ * />
+ *
+ */
+
 const DEFAULT_COLUMN_WIDTH = '10rem'
 const VIRTUALIZE_THRESHOLD = 60
 const OVERSCAN = 10

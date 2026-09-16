@@ -28,6 +28,7 @@ import {
     FaClipboardUser,
     FaDollarSign,
     FaCheckToSlot,
+    FaFlask,
     FaMoneyBills,
     FaMoneyCheckDollar,
 } from 'react-icons/fa6'
@@ -174,6 +175,12 @@ function LayoutContent({ children }: { children: ReactNode }) {
             href: '/volunteer_dashboard/panels/endorsements',
             icon: FaCheckToSlot,
             count: endorsements.data?.length,
+        },
+        {
+            key: 'experiment',
+            label: 'Experiment',
+            href: '/volunteer_dashboard/panels/experiment',
+            icon: FaFlask,
         },
     ]
 
