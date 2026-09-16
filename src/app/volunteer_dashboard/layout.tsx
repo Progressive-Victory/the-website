@@ -176,12 +176,6 @@ function LayoutContent({ children }: { children: ReactNode }) {
             icon: FaCheckToSlot,
             count: endorsements.data?.length,
         },
-        {
-            key: 'experiment',
-            label: 'Experiment',
-            href: '/volunteer_dashboard/panels/experiment',
-            icon: FaFlask,
-        },
     ]
 
     useEffect(() => {
