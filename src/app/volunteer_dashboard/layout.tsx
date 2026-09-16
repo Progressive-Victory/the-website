@@ -28,7 +28,6 @@ import {
     FaClipboardUser,
     FaDollarSign,
     FaCheckToSlot,
-    FaFlask,
     FaMoneyBills,
     FaMoneyCheckDollar,
 } from 'react-icons/fa6'
