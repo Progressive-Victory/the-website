@@ -143,10 +143,15 @@ export function MemberView({
                     readonly
                 />
                 <TextField
-                    label="Email"
+                    label="Account Email"
                     field="email"
                     autocomplete="email"
                     required
+                />
+                <TextField<User>
+                    label="Discord Email"
+                    getter={(form) => form.discordUsers?.[0]?.email}
+                    readonly
                 />
                 <PhoneField label="Phone Number" field="phone" required />
                 {editing ? (
