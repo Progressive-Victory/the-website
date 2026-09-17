@@ -2,12 +2,12 @@ import {
     MembershipDeliverableStatus,
     User,
     UserAddress,
-} from '@/contracts/data'
+} from 'pv-contracts/data'
 import {
     UpdateMembershipRequest,
     UpdateUserRequest,
-} from '@/contracts/requests'
-import { MembershipsResponsePacket } from '@/contracts/responses'
+} from 'pv-contracts/requests'
+import { MembershipsResponsePacket } from 'pv-contracts/responses'
 
 export const membershipTiers = [
     'Dues Paying Member',
@@ -50,11 +50,7 @@ export interface RecurringSummary {
 }
 
 export type PackageShipped =
-    | 'Yes'
-    | 'No'
-    | 'Returned'
-    | 'Not Received'
-    | 'Canceled'
+    'Yes' | 'No' | 'Returned' | 'Not Received' | 'Canceled'
 
 export interface Member {
     packet: MembershipsResponsePacket

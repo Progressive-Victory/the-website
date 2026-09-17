@@ -19,9 +19,9 @@ import {
 } from '@/components/common'
 import Panel from '@/components/common/panel/Panel'
 import { Table } from '@/components/common/table'
-import { UserProfile, zUserProfile } from '@/contracts/data'
 import { cn } from '@/util'
 import { usePaginatedSearch } from '@/util/hooks'
+import { UserProfile, zUserProfile } from 'pv-contracts/data'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 

@@ -17,13 +17,13 @@ import {
     MembershipDeliverableStatus,
     ShirtSize as ApiShirtSize,
     UserAddress,
-} from '@/contracts/data'
+} from 'pv-contracts/data'
 import {
     UpdateMembershipRequest,
     UpdateUserAddressRequest,
     UpdateUserRequest,
-} from '@/contracts/requests'
-import { MembershipsResponsePacket } from '@/contracts/responses'
+} from 'pv-contracts/requests'
+import { MembershipsResponsePacket } from 'pv-contracts/responses'
 
 export const joinName = (firstName?: string | null, lastName?: string | null) =>
     [firstName, lastName].filter(Boolean).join(' ').trim() || undefined

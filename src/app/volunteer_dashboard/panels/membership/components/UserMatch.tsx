@@ -10,7 +10,7 @@ import {
 import { formatPhone } from '../membership.helpers'
 import { Member } from '../membership.types'
 import styles from './UserMatch.module.css'
-import { UserProfile } from '@/contracts/data'
+import { UserProfile } from 'pv-contracts/data'
 
 export interface UserMatchProps {
     member: Member

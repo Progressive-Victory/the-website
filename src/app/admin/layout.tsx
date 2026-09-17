@@ -15,9 +15,6 @@ import {
     zUser,
 } from 'pv-contracts/data'
 import { zMembershipsResponsePacket } from 'pv-contracts/responses'
-import { usePositionQueries, useEndorsementQueries } from '@/queries'
-import { usePaginatedSearch } from '@/util/hooks'
-import { useQuery } from '@tanstack/react-query'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const positionQueries = usePositionQueries()

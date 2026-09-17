@@ -19,12 +19,6 @@ import {
     MembershipTableMode,
     PendingUpdate,
 } from './membership.types'
-import { User, UserProfile, zUser, zUserProfile } from '@/contracts/data'
-import { ActBlueDonorLinkRequest } from '@/contracts/requests'
-import {
-    zMembershipsResponsePacket,
-    zPaginatedResponse,
-} from '@/contracts/responses'
 import { useCurrentUser, useFetch, useInfiniteScroll } from '@/util/hooks'
 import {
     skipToken,
@@ -33,6 +27,12 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { User, UserProfile, zUser, zUserProfile } from 'pv-contracts/data'
+import { ActBlueDonorLinkRequest } from 'pv-contracts/requests'
+import {
+    zMembershipsResponsePacket,
+    zPaginatedResponse,
+} from 'pv-contracts/responses'
 import {
     useCallback,
     useMemo,

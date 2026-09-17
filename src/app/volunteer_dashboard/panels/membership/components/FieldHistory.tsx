@@ -3,7 +3,7 @@
 import { useFieldHistory } from '../hooks'
 import { DescribeChange, Member } from '../membership.types'
 import styles from './FieldHistory.module.css'
-import { User } from '@/contracts/data'
+import { User } from 'pv-contracts/data'
 
 export const selectUserHistory = (user: User) => user.history ?? []
 
