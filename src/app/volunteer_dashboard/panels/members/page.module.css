@@ -122,3 +122,10 @@
     gap: 0.15rem;
     min-width: 12rem;
 }
+
+.emptyFilterMenu {
+    margin: 0;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.8rem;
+    color: rgba(17, 24, 39, 0.5);
+}

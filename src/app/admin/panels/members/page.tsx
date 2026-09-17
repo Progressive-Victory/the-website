@@ -165,20 +165,6 @@ export default function Page() {
                     narrowLayoutMode="trigger"
                     body={
                         <div className={styles.filterMenu}>
-                            <DropdownOverlayButton
-                                icon={<FaUsers />}
-                                checked={
-                                    selectedState === null &&
-                                    selectedBirthYear === null
-                                }
-                                onClick={() => {
-                                    setSelectedState(null)
-                                    setSelectedBirthYear(null)
-                                    closeDropdown()
-                                }}
-                            >
-                                All
-                            </DropdownOverlayButton>
                             {userFilterOptions.map((option) => (
                                 <DropdownOverlayButton
                                     key={option.key}
@@ -198,9 +184,11 @@ export default function Page() {
                                                 checked={
                                                     selectedBirthYear === year
                                                 }
-                                                onClick={() => {
+                                                onCheckedChange={(checked) => {
                                                     setSelectedState(null)
-                                                    setSelectedBirthYear(year)
+                                                    setSelectedBirthYear(
+                                                        checked ? year : null
+                                                    )
                                                     closeMenu()
                                                     closeDropdown()
                                                 }}
@@ -225,10 +213,12 @@ export default function Page() {
                                                     selectedState ===
                                                     state.value
                                                 }
-                                                onClick={() => {
+                                                onCheckedChange={(checked) => {
                                                     setSelectedBirthYear(null)
                                                     setSelectedState(
-                                                        state.value
+                                                        checked
+                                                            ? state.value
+                                                            : null
                                                     )
                                                     closeMenu()
                                                     closeDropdown()

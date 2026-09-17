@@ -20,7 +20,6 @@ import {
     FaMapMarkerAlt,
     FaThumbsDown,
     FaThumbsUp,
-    FaUsers,
     FaUserTie,
     FaVoteYea,
 } from 'react-icons/fa'
@@ -86,7 +85,7 @@ function YesNoMenu({
     onSelect,
 }: {
     selected: boolean | null
-    onSelect: (value: boolean) => void
+    onSelect: (value: boolean | null) => void
 }) {
     return (
         <div className={styles.nestedFilterMenu}>
@@ -94,7 +93,9 @@ function YesNoMenu({
                 <DropdownOverlayButton
                     key={option.label}
                     checked={selected === option.value}
-                    onClick={() => onSelect(option.value)}
+                    onCheckedChange={(checked) =>
+                        onSelect(checked ? option.value : null)
+                    }
                 >
                     {option.label}
                 </DropdownOverlayButton>
@@ -197,8 +198,8 @@ function optionDropdown<T>(
                             <DropdownOverlayButton
                                 key={String(option.value)}
                                 checked={selected === option.value}
-                                onClick={() => {
-                                    onSelect(option.value)
+                                onCheckedChange={(checked) => {
+                                    onSelect(checked ? option.value : null)
                                     closeDropdown()
                                 }}
                             >
@@ -260,7 +261,7 @@ export function useEndorsementFilters(endorsements: Endorsement[]) {
             selectedIncumbentLabel,
         ]
             .filter(Boolean)
-            .join(' · ') || 'More'
+            .join(' · ') || 'All'
 
     let selectedFilterIcon = <FaCog />
     if (selectedState) selectedFilterIcon = <FaMapMarkerAlt />
@@ -366,24 +367,6 @@ export function useEndorsementFilters(endorsements: Endorsement[]) {
                     body={
                         <div className={styles.filterMenu}>
                             <DropdownOverlayButton
-                                icon={<FaUsers />}
-                                checked={
-                                    selectedState === null &&
-                                    selectedYear === null &&
-                                    selectedIsPvMember === null &&
-                                    selectedIsIncumbent === null
-                                }
-                                onClick={() => {
-                                    setSelectedState(null)
-                                    setSelectedYear(null)
-                                    setSelectedIsPvMember(null)
-                                    setSelectedIsIncumbent(null)
-                                    closeDropdown()
-                                }}
-                            >
-                                All Items
-                            </DropdownOverlayButton>
-                            <DropdownOverlayButton
                                 icon={<FaClipboardUser />}
                                 selected={selectedIsPvMember !== null}
                                 menu={({ closeMenu }) => (
@@ -427,10 +410,12 @@ export function useEndorsementFilters(endorsements: Endorsement[]) {
                                                     selectedState ===
                                                     state.value
                                                 }
-                                                onClick={() => {
+                                                onCheckedChange={(checked) => {
                                                     setSelectedYear(null)
                                                     setSelectedState(
-                                                        state.value
+                                                        checked
+                                                            ? state.value
+                                                            : null
                                                     )
                                                     closeMenu()
                                                     closeDropdown()
@@ -453,9 +438,11 @@ export function useEndorsementFilters(endorsements: Endorsement[]) {
                                             <DropdownOverlayButton
                                                 key={year}
                                                 checked={selectedYear === year}
-                                                onClick={() => {
+                                                onCheckedChange={(checked) => {
                                                     setSelectedState(null)
-                                                    setSelectedYear(year)
+                                                    setSelectedYear(
+                                                        checked ? year : null
+                                                    )
                                                     closeMenu()
                                                     closeDropdown()
                                                 }}

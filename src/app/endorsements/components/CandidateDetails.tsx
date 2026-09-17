@@ -27,6 +27,8 @@ interface CandidateQuoteProps {
     quote: string | null
 }
 
+const hiddenJurisdictions = new Set(['Nationwide', 'Statewide'])
+
 function getSocialIcon(url: string) {
     if (url.includes('twitter.com') || url.includes('x.com'))
         return <FaTwitter />
@@ -93,6 +95,10 @@ export function CandidateDetails({
 
     const candidate = lastCandidate.current
     if (!mounted || !candidate) return null
+
+    const showJurisdiction =
+        !!candidate.jurisdiction &&
+        !hiddenJurisdictions.has(candidate.jurisdiction)
 
     return (
         <ZStack
@@ -215,7 +221,7 @@ export function CandidateDetails({
                                     {getStateLabel(candidate.state)}
                                 </span>
                             </VStack>
-                            {candidate.jurisdiction && (
+                            {showJurisdiction && (
                                 <VStack
                                     align="left"
                                     gap={0}

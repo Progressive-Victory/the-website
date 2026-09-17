@@ -81,6 +81,7 @@
 .labelWrapper {
     display: inline-flex;
     overflow: hidden;
+    min-width: 0;
     transition: width 0.25s ease;
 }
 
@@ -90,7 +91,8 @@
 
 .label {
     overflow: hidden;
-    flex-shrink: 0;
+    min-width: 0;
+    text-overflow: ellipsis;
     white-space: nowrap;
     transform: translateZ(0);
     -webkit-font-smoothing: antialiased;
