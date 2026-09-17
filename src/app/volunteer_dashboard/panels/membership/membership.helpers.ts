@@ -45,7 +45,6 @@ export const formatUserAddress = (address?: UserAddress) =>
 
 export const normalizePhone = (phone: string) => phone.replace(/\D/g, '')
 
-/** Digits without the US country code, so `+1 555…` and `555…` compare equal. */
 export const phoneKey = (phone: string) =>
     normalizePhone(phone).replace(/^1(?=\d{10}$)/, '')
 

@@ -63,7 +63,6 @@ export interface SourceMenuProps {
     confirmed?: boolean
     confirmedSource?: string
     history?: Omit<FieldHistoryProps, 'member'>
-    /** Replaces the history section while the member has no linked user. */
     unlinked?: ReactNode
 }
 
