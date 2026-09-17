@@ -109,6 +109,30 @@
     text-align: center;
 }
 
+.tableStatus {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2.5rem 1rem;
+    color: rgba(15, 23, 42, 0.55);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.tableStatusTitle {
+    margin: 0;
+    color: rgba(15, 23, 42, 0.8);
+}
+
+.tableStatusDetail {
+    margin: 0;
+    max-width: 48rem;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
 .tableToolbar {
     display: flex;
     align-items: center;

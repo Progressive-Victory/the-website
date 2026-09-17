@@ -45,9 +45,13 @@ export const formatUserAddress = (address?: UserAddress) =>
 
 export const normalizePhone = (phone: string) => phone.replace(/\D/g, '')
 
+/** Digits without the US country code, so `+1 555…` and `555…` compare equal. */
+export const phoneKey = (phone: string) =>
+    normalizePhone(phone).replace(/^1(?=\d{10}$)/, '')
+
 export const formatPhone = (phone?: string) => {
     if (!phone) return '—'
-    const digits = normalizePhone(phone).replace(/^1(?=\d{10}$)/, '')
+    const digits = phoneKey(phone)
     if (digits.length === 10) {
         return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
     }
@@ -58,6 +62,12 @@ export const normalizeEmail = (email: string) => email.trim().toLowerCase()
 
 export const normalizeDiscordHandle = (handle: string) =>
     handle.trim().replace(/^@/, '')
+
+export const discordKey = (handle: string) =>
+    normalizeDiscordHandle(handle).toLowerCase()
+
+export const nameKey = (name: string) =>
+    name.trim().toLowerCase().replace(/\s+/g, ' ')
 
 export const resolveSelectDraft = <T>(
     draft: T | null | undefined,

@@ -5,6 +5,10 @@ import {
     isValidAddressDraft,
     isValidPhone,
     mapPacketToMember,
+    discordKey,
+    nameKey,
+    normalizeEmail,
+    phoneKey,
 } from './membership.helpers'
 import {
     DescribeChange,
@@ -15,7 +19,8 @@ import {
     MembershipTableMode,
     PendingUpdate,
 } from './membership.types'
-import { User, zUser } from '@/contracts/data'
+import { User, UserProfile, zUser, zUserProfile } from '@/contracts/data'
+import { ActBlueDonorLinkRequest } from '@/contracts/requests'
 import {
     zMembershipsResponsePacket,
     zPaginatedResponse,
@@ -38,6 +43,7 @@ import {
 
 const HISTORY_STALE_TIME = 5 * 60 * 1000
 const HISTORY_LIMIT = 5
+const USER_MATCH_LIMIT = 10
 const PAGE_SIZE = 250
 const EMPTY_DRAFT: MemberEdits = {}
 const noopUnsubscribe = () => undefined
@@ -173,6 +179,146 @@ export function useMemberDraft(edit: EditController, member: Member) {
     const getDraft = useCallback(() => edit.draftOf(member), [edit, member])
 
     return useSyncExternalStore(subscribe, getDraft, getDraft)
+}
+
+function useUserSearch(query?: string, searchField?: string) {
+    const { ready, onGet } = useFetch()
+
+    return useQuery({
+        queryKey: ['/users', { query, searchField, limit: USER_MATCH_LIMIT }],
+        queryFn:
+            ready && query
+                ? ({ signal }: { signal: AbortSignal }) =>
+                      onGet('/users', zPaginatedResponse(zUserProfile), {
+                          query: {
+                              query,
+                              searchField,
+                              limit: USER_MATCH_LIMIT,
+                          },
+                          signal,
+                      })
+                : skipToken,
+        staleTime: HISTORY_STALE_TIME,
+    })
+}
+
+export function useUserByEmail(email?: string) {
+    const normalized = email ? normalizeEmail(email) : undefined
+    const query = useUserSearch(normalized)
+
+    const match = query.data?.data.find(
+        (user) =>
+            user.email != null && normalizeEmail(user.email) === normalized
+    )
+
+    return { match, isLoading: query.isLoading, isError: query.isError }
+}
+
+export function useUserByPhone(phone?: string) {
+    const { ready, onGet } = useFetch()
+    const digits = phone ? phoneKey(phone) : undefined
+    const search = useUserSearch(digits, 'phone')
+    const candidate = search.data?.data[0]
+
+    const candidateQuery = useQuery({
+        queryKey: ['/users/:userId', candidate?.id],
+        queryFn:
+            ready && candidate != null
+                ? ({ signal }: { signal: AbortSignal }) =>
+                      onGet('/users/:userId', zUser, {
+                          params: { userId: candidate.id },
+                          signal,
+                      })
+                : skipToken,
+        staleTime: HISTORY_STALE_TIME,
+    })
+
+    const candidatePhone = candidateQuery.data?.phone ?? undefined
+    const matched =
+        candidatePhone != null && phoneKey(candidatePhone) === digits
+
+    return {
+        match: matched ? candidate : undefined,
+        matchedPhone: matched ? candidatePhone : undefined,
+        isLoading: search.isLoading || candidateQuery.isLoading,
+        isError: search.isError || candidateQuery.isError,
+    }
+}
+
+export function useUserByDiscord(handle?: string) {
+    const normalized = handle ? discordKey(handle) : undefined
+    const query = useUserSearch(normalized, 'discord_usernames')
+
+    const matchedHandle = query.data?.data
+        .flatMap((user) =>
+            user.discordUsers.map((discord) => ({ user, discord }))
+        )
+        .find(({ discord }) => discordKey(discord.username) === normalized)
+
+    return {
+        match: matchedHandle?.user,
+        matchedHandle: matchedHandle?.discord.username,
+        isLoading: query.isLoading,
+        isError: query.isError,
+    }
+}
+
+const userNameKeys = (user: UserProfile) =>
+    [
+        user.preferredName,
+        [user.firstName, user.lastName].filter(Boolean).join(' '),
+        ...user.aliases,
+    ].flatMap((name) => (name ? [nameKey(name)] : []))
+
+export function useUserByName(name?: string) {
+    const normalized = name ? nameKey(name) : undefined
+    const query = useUserSearch(normalized)
+
+    const matches =
+        query.data?.data.filter((user) =>
+            userNameKeys(user).includes(normalized ?? '')
+        ) ?? []
+
+    return {
+        match: matches.length === 1 ? matches[0] : undefined,
+        ambiguous: matches.length > 1,
+        isLoading: query.isLoading,
+        isError: query.isError,
+    }
+}
+
+export function useLinkDonorToUser() {
+    const { onPost } = useFetch()
+    const loggedInUser = useCurrentUser()
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: async ({
+            donorEmail,
+            userId,
+        }: {
+            donorEmail: string
+            userId: number
+        }) =>
+            await onPost(
+                '/actblue/donors/:donorEmail/link',
+                {
+                    userId,
+                    metaData: {
+                        dataSource: 'Membership Panel',
+                        userWhoUpdatedId: loggedInUser.data?.id,
+                    },
+                } satisfies ActBlueDonorLinkRequest,
+                null,
+                { params: { donorEmail } }
+            ),
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ['/actblue/memberships'],
+            })
+        },
+        onError: (error) => console.error(error),
+    })
 }
 
 export function useSaveMemberships(onSaved: () => void) {
@@ -316,6 +462,10 @@ export function useMembershipPanel() {
     const { query, members, totalEntries } = useMembershipsQuery()
 
     const { fetchNextPage, hasNextPage, isFetchingNextPage } = query
+    const isPending: boolean = query.isPending
+    const error: Error | null = query.error
+    const refetchQuery = query.refetch
+    const refetch = useCallback(() => void refetchQuery(), [refetchQuery])
     const { sentinelRef } = useInfiniteScroll<HTMLDivElement>({
         hasNextPage,
         isFetchingNextPage,
@@ -350,5 +500,8 @@ export function useMembershipPanel() {
         hasNextPage,
         isFetchingNextPage,
         sentinelRef,
+        isPending,
+        error,
+        refetch,
     }
 }

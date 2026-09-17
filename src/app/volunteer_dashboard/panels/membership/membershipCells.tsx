@@ -4,6 +4,12 @@ import { EditableSelectTag } from './components/EditableSelectTag'
 import { SourceMenu } from './components/SourceMenu'
 import { ConfirmedBadge } from './components/Tags'
 import tags from './components/Tags.module.css'
+import {
+    DiscordUserMatch,
+    EmailUserMatch,
+    NameUserMatch,
+    PhoneUserMatch,
+} from './components/UserMatch'
 import { useMemberDraft } from './hooks'
 import {
     describeAddressChange,
@@ -110,6 +116,7 @@ export const NameMenu = ({ member, closeDropdown }: MemberMenuProps) => (
             emptyMessage: 'No name changes found',
             describeChange: describeNameChange,
         }}
+        unlinked={<NameUserMatch member={member} onLinked={closeDropdown} />}
     />
 )
 
@@ -144,6 +151,7 @@ export const DiscordMenu = ({ member, closeDropdown }: MemberMenuProps) => (
             { label: 'Discord', value: member.discordUsername },
             { label: 'Contribution', value: member.contributionDiscord },
         ]}
+        unlinked={<DiscordUserMatch member={member} onLinked={closeDropdown} />}
     />
 )
 
@@ -331,6 +339,7 @@ export const PhoneMenu = ({ member, closeDropdown }: MemberMenuProps) => (
             emptyMessage: 'No phone changes found',
             describeChange: describePhoneChange,
         }}
+        unlinked={<PhoneUserMatch member={member} onLinked={closeDropdown} />}
     />
 )
 
@@ -385,6 +394,7 @@ export const EmailMenu = ({ member, closeDropdown }: MemberMenuProps) => (
             emptyMessage: 'No email changes found',
             describeChange: describeEmailChange,
         }}
+        unlinked={<EmailUserMatch member={member} onLinked={closeDropdown} />}
     />
 )
 

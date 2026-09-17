@@ -1,6 +1,7 @@
 'use client'
 
 import {
+    useLinkDonorToUser,
     useMembershipPanel,
     usePendingUpdates,
     useSaveMemberships,
@@ -19,10 +20,8 @@ import {
 import Panel from '@/components/common/panel/Panel'
 import { Table } from '@/components/common/table'
 import { UserProfile, zUserProfile } from '@/contracts/data'
-import { ActBlueDonorLinkRequest } from '@/contracts/requests'
 import { cn } from '@/util'
-import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
-import { useQueryClient } from '@tanstack/react-query'
+import { usePaginatedSearch } from '@/util/hooks'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 
@@ -128,10 +127,8 @@ function EditToolbar({
 }
 
 export default function Page() {
-    const { onPost } = useFetch()
-    const loggedInUser = useCurrentUser()
-    const queryClient = useQueryClient()
     const [memberToMatch, setMemberToMatch] = useState<Member | null>(null)
+    const linkMutation = useLinkDonorToUser()
     const {
         members,
         totalEntries,
@@ -145,6 +142,9 @@ export default function Page() {
         hasNextPage,
         isFetchingNextPage,
         sentinelRef,
+        isPending,
+        error,
+        refetch,
     } = useMembershipPanel()
 
     const {
@@ -158,25 +158,10 @@ export default function Page() {
             const donorEmail = memberToMatch?.donorEmail
             if (donorEmail == null) return
 
-            await onPost(
-                '/actblue/donors/:donorEmail/link',
-                {
-                    userId: user.id,
-                    metaData: {
-                        dataSource: 'Membership Panel',
-                        userWhoUpdatedId: loggedInUser.data?.id,
-                    },
-                } satisfies ActBlueDonorLinkRequest,
-                null,
-                { params: { donorEmail } }
-            )
-
+            await linkMutation.mutateAsync({ donorEmail, userId: user.id })
             setMemberToMatch(null)
-            await queryClient.invalidateQueries({
-                queryKey: ['/actblue/memberships'],
-            })
         },
-        [loggedInUser.data?.id, memberToMatch?.donorEmail, onPost, queryClient]
+        [linkMutation, memberToMatch?.donorEmail]
     )
 
     const handleUserSearch = useCallback(
@@ -295,25 +280,47 @@ export default function Page() {
                     </div>
 
                     <div className={styles.tableWrapper}>
-                        <Table
-                            columns={columns}
-                            data={members}
-                            rowKey={(m) => m.id}
-                            collapsedCategories={collapsedCategories}
-                            mode={tableMode}
-                            zebra={options.showZebra}
-                            footer={
-                                hasNextPage && (
-                                    <div
-                                        className={styles.loadMore}
-                                        ref={sentinelRef}
-                                    >
-                                        {isFetchingNextPage &&
-                                            'Loading more membership records...'}
-                                    </div>
-                                )
-                            }
-                        />
+                        {error ? (
+                            <div className={styles.tableStatus} role="alert">
+                                <p className={styles.tableStatusTitle}>
+                                    Could not load membership records.
+                                </p>
+                                <p className={styles.tableStatusDetail}>
+                                    {error.message}
+                                </p>
+                                <button
+                                    type="button"
+                                    className={styles.toolbarButton}
+                                    onClick={refetch}
+                                >
+                                    Retry
+                                </button>
+                            </div>
+                        ) : isPending ? (
+                            <div className={styles.tableStatus}>
+                                Loading membership records...
+                            </div>
+                        ) : (
+                            <Table
+                                columns={columns}
+                                data={members}
+                                rowKey={(m) => m.id}
+                                collapsedCategories={collapsedCategories}
+                                mode={tableMode}
+                                zebra={options.showZebra}
+                                footer={
+                                    hasNextPage && (
+                                        <div
+                                            className={styles.loadMore}
+                                            ref={sentinelRef}
+                                        >
+                                            {isFetchingNextPage &&
+                                                'Loading more membership records...'}
+                                        </div>
+                                    )
+                                }
+                            />
+                        )}
                     </div>
                 </div>
                 <SearchModal

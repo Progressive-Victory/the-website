@@ -6,7 +6,7 @@ import styles from './SourceMenu.module.css'
 import tags from './Tags.module.css'
 import { DropdownOverlay } from '@/components/common'
 import { cn } from '@/util'
-import { CSSProperties } from 'react'
+import { CSSProperties, ReactNode } from 'react'
 import { FiCheck } from 'react-icons/fi'
 
 export interface MemberSource {
@@ -63,6 +63,8 @@ export interface SourceMenuProps {
     confirmed?: boolean
     confirmedSource?: string
     history?: Omit<FieldHistoryProps, 'member'>
+    /** Replaces the history section while the member has no linked user. */
+    unlinked?: ReactNode
 }
 
 export const SourceMenu = ({
@@ -77,11 +79,14 @@ export const SourceMenu = ({
     confirmed,
     confirmedSource,
     history,
+    unlinked,
 }: SourceMenuProps) => {
     const rows = sources.map((source) => ({
         ...source,
         matchKey: source.value ? normalize(source.value) : undefined,
     }))
+
+    const showUnlinked = unlinked != null && member.userId == null
 
     const displayedLabel = rows.find((row) => row.value)?.label
     const allIdentical =
@@ -146,7 +151,10 @@ export const SourceMenu = ({
                             </div>
                         )
                     })}
-                    {history && <FieldHistory member={member} {...history} />}
+                    {showUnlinked && unlinked}
+                    {!showUnlinked && history && (
+                        <FieldHistory member={member} {...history} />
+                    )}
                 </>
             }
         />
