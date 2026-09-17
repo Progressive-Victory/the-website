@@ -19,10 +19,10 @@ import {
     sortSectionCandidates,
 } from '../endorsements.utils'
 import { EndorsementAvatar, PersonCard } from '@/components/common'
-import { type Endorsement } from '@/contracts/data'
 import { ENDORSEMENT_TYPE_LABELS } from '@/models'
 import { cn } from '@/util'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
+import { type Endorsement } from 'pv-contracts/data'
 import { memo } from 'react'
 
 interface CandidateGalleryProps {

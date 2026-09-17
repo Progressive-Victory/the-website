@@ -7,9 +7,9 @@ import {
 } from '@/components/common/forms'
 import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import { HStack, Spacer, VStack, ZStack } from '@/components/layout'
-import { Endorsement, EndorsementType, InitiativeType } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { cn, parseErrorMessage } from '@/util'
+import { Endorsement, EndorsementType, InitiativeType } from 'pv-contracts/data'
 import { ChangeEvent, useState } from 'react'
 import { FaCamera } from 'react-icons/fa'
 

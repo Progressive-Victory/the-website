@@ -1,11 +1,11 @@
-import { zEndorsement } from '@/contracts/data'
+import { ApiError, FetchError } from '@/models'
+import { useAuth, useFetch } from '@/util/hooks'
+import { zEndorsement } from 'pv-contracts/data'
 import {
     CreateEndorsementRequest,
     UpdateEndorsementRequest,
-} from '@/contracts/requests'
-import { zUploadImageResponse } from '@/contracts/responses'
-import { ApiError, FetchError } from '@/models'
-import { useAuth, useFetch } from '@/util/hooks'
+} from 'pv-contracts/requests'
+import { zUploadImageResponse } from 'pv-contracts/responses'
 import z from 'zod'
 
 export function useEndorsementQueries() {

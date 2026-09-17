@@ -2,8 +2,8 @@
 
 import styles from '@/app/account/account.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import { ShirtSize } from '@/contracts/data'
 import { cn } from '@/util'
+import { ShirtSize } from 'pv-contracts/data'
 import { FormEvent, useState } from 'react'
 import { IoClose } from 'react-icons/io5'
 

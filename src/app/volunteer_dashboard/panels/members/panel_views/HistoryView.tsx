@@ -3,16 +3,16 @@
 import styles from './HistoryView.module.css'
 import { MemberView } from './MemberView'
 import { CollapsibleSection } from '@/components/common'
+import { cn } from '@/util'
+import { useFetch } from '@/util/hooks'
+import { useQueries } from '@tanstack/react-query'
 import {
     ActBlueDonor,
     Role,
     UpdateHistory,
     User,
     zDiscordUser,
-} from '@/contracts/data'
-import { cn } from '@/util'
-import { useFetch } from '@/util/hooks'
-import { useQueries } from '@tanstack/react-query'
+} from 'pv-contracts/data'
 import { ReactNode } from 'react'
 import z from 'zod'
 

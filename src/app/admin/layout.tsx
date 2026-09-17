@@ -4,14 +4,17 @@ import styles from './admin.module.css'
 import Sidebar from './layout/Sidebar'
 import { ProtectedPage } from '@/components/ProtectedPage'
 import { Header } from '@/components/layout/Header'
+import { usePositionQueries, useEndorsementQueries } from '@/queries'
+import { usePaginatedSearch } from '@/util/hooks'
+import { useQuery } from '@tanstack/react-query'
 import {
     zActBlueDonationPacket,
     zActBlueDonor,
     zPermission,
     zRole,
     zUser,
-} from '@/contracts/data'
-import { zMembershipsResponsePacket } from '@/contracts/responses'
+} from 'pv-contracts/data'
+import { zMembershipsResponsePacket } from 'pv-contracts/responses'
 import { usePositionQueries, useEndorsementQueries } from '@/queries'
 import { usePaginatedSearch } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'

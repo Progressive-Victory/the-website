@@ -13,12 +13,6 @@ import {
     FormFieldProps,
     useConfigure,
 } from '@/components/common/forms/FormField'
-import { Position, UserProfile, zUserProfile } from '@/contracts/data'
-import { SearchRequest, SortDirection } from '@/contracts/requests'
-import {
-    PaginatedResponse,
-    PositionHierarchyResponse,
-} from '@/contracts/responses'
 import { usePositionQueries } from '@/queries'
 import { cn } from '@/util'
 import {
@@ -28,6 +22,12 @@ import {
     useUnpaginatedSearch,
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Position, UserProfile, zUserProfile } from 'pv-contracts/data'
+import { SearchRequest, SortDirection } from 'pv-contracts/requests'
+import {
+    PaginatedResponse,
+    PositionHierarchyResponse,
+} from 'pv-contracts/responses'
 import { ChangeEvent, useCallback, useState } from 'react'
 
 function getUserDisplayName(user: UserProfile | undefined): string {

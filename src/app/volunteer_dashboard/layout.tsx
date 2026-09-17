@@ -9,18 +9,18 @@ import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { Header } from '@/components/layout/Header'
+import { useEndorsementQueries, usePositionQueries } from '@/queries'
+import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
+import { useQuery } from '@tanstack/react-query'
+import { usePathname, useSearchParams } from 'next/navigation'
 import {
     zActBlueDonationPacket,
     zActBlueDonor,
     zPermission,
     zRole,
     zUser,
-} from '@/contracts/data'
-import { zMembershipsResponsePacket } from '@/contracts/responses'
-import { useEndorsementQueries, usePositionQueries } from '@/queries'
-import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
-import { useQuery } from '@tanstack/react-query'
-import { usePathname, useSearchParams } from 'next/navigation'
+} from 'pv-contracts/data'
+import { zMembershipsResponsePacket } from 'pv-contracts/responses'
 import { Suspense, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'

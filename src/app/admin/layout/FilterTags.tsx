@@ -28,8 +28,7 @@ export interface FilterTag {
      * show a chevron and ignore `activeRedirect`.
      */
     dropdownOverlay?:
-        | ReactNode
-        | ((controls: { closeDropdown: () => void }) => ReactNode)
+        ReactNode | ((controls: { closeDropdown: () => void }) => ReactNode)
 }
 
 interface FilterTagsProps {

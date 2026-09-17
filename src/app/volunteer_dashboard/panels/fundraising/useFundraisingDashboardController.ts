@@ -13,11 +13,11 @@ import {
     getValidChartGranularityModes,
     type ChartGranularityMode,
 } from '@/components/common/charts/timeBuckets'
-import { SortDirection } from '@/contracts/requests'
-import { zMembershipsResponsePacket } from '@/contracts/responses'
 import { useActblueQueries } from '@/queries'
 import { usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
+import { SortDirection } from 'pv-contracts/requests'
+import { zMembershipsResponsePacket } from 'pv-contracts/responses'
 import { useEffect, useMemo, useState } from 'react'
 
 type ChartBarDisplayMode = 'grouped' | 'stacked'

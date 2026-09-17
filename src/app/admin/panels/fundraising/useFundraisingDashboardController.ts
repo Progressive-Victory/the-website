@@ -13,9 +13,9 @@ import {
     getValidChartGranularityModes,
     type ChartGranularityMode,
 } from '@/components/common/charts/timeBuckets'
-import { SortDirection } from '@/contracts/requests'
 import { useActblueQueries } from '@/queries'
 import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
+import { SortDirection } from 'pv-contracts/requests'
 import { useEffect, useMemo, useState } from 'react'
 
 type ChartBarDisplayMode = 'grouped' | 'stacked'

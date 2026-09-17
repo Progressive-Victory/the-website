@@ -4,8 +4,8 @@ import styles from '@/app/account/account.module.css'
 import formStyles from '@/components/common/forms/Form.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
 import { Table, Column } from '@/components/common/table'
-import { ActBlueContribution, User } from '@/contracts/data'
 import { cn } from '@/util'
+import { ActBlueContribution, User } from 'pv-contracts/data'
 import React, { ChangeEvent, useState } from 'react'
 
 export interface ManualDonorLinkRequest {

@@ -1,7 +1,7 @@
 import styles from './SidebarList.module.css'
 import { MultiSelect, type MultiSelectOption } from '@/components/common'
-import { type SearchRequest, SortDirection } from '@/contracts/requests'
 import { cn } from '@/util'
+import { type SearchRequest, SortDirection } from 'pv-contracts/requests'
 import { useEffect, useState } from 'react'
 import {
     FiChevronLeft,
