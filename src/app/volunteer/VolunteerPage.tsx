@@ -12,12 +12,6 @@ import {
 } from './stages'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
-import { OnboardingStage } from '@/contracts/data'
-import {
-    UserOnboardingCollectInfoRequest,
-    UserOnboardingVerifyRequest,
-} from '@/contracts/requests'
-import { zDiscordUserIsInServerResponse } from '@/contracts/responses'
 import { useAuth, useCurrentUser, useFetch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -26,6 +20,12 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { OnboardingStage } from 'pv-contracts/data'
+import {
+    UserOnboardingCollectInfoRequest,
+    UserOnboardingVerifyRequest,
+} from 'pv-contracts/requests'
+import { zDiscordUserIsInServerResponse } from 'pv-contracts/responses'
 import { useEffect, useState } from 'react'
 
 export default function VolunteerPage() {

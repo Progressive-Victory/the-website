@@ -23,8 +23,8 @@ export function TextField<T>(props: TextFieldProps<T>) {
 
     const value = getter(props.dynamic!.form) ?? ''
 
-    const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
-        onChange(event.target.value)
+    const handleInput = (event: React.InputEvent<HTMLInputElement>) => {
+        onChange(event.currentTarget.value)
     }
 
     return (

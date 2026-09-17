@@ -37,7 +37,7 @@
         "next-sitemap": "^4.2.3",
         "phone": "^3.1.72",
         "postal-code-validator": "^1.0.3",
-        "pv-contracts": "github:Progressive-Victory/the-contracts#main",
+        "pv-contracts": "github:Progressive-Victory/the-contracts#main&path:/dist",
         "react": "^19.3.0",
         "react-dom": "^19.3.0",
         "react-icons": "^5.7.0",

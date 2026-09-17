@@ -12,9 +12,9 @@ import {
     TextField,
 } from '@/components/common/forms'
 import { MultiTextField } from '@/components/common/forms/MultiTextField'
-import { Role, ShirtSize, UpdateHistory, User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
+import { Role, ShirtSize, UpdateHistory, User } from 'pv-contracts/data'
 
 const membershipCardShipmentOptions = [
     { value: 0, label: 'Not Started' },

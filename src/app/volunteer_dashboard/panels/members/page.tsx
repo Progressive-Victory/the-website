@@ -17,25 +17,6 @@ import { FormState } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { TabSpec } from '@/components/common/tab_bar/TabBar'
-import {
-    ActBlueDonor,
-    Role,
-    UpdateHistory,
-    User,
-    UserProfile,
-    zActBlueDonor,
-    zLocation,
-    zRole,
-    zUser,
-    zUserProfile,
-} from '@/contracts/data'
-import {
-    ActBlueDonorLinkRequest,
-    SortDirection,
-    UpdateUserRequest,
-    zUpdateUserRequest,
-} from '@/contracts/requests'
-import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError, stateOptions } from '@/models'
 import { usePositionQueries } from '@/queries'
 import { cn, parseErrorMessage } from '@/util'
@@ -48,6 +29,25 @@ import {
     useQueryClient,
 } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
+import {
+    ActBlueDonor,
+    Role,
+    UpdateHistory,
+    User,
+    UserProfile,
+    zActBlueDonor,
+    zLocation,
+    zRole,
+    zUser,
+    zUserProfile,
+} from 'pv-contracts/data'
+import {
+    ActBlueDonorLinkRequest,
+    SortDirection,
+    UpdateUserRequest,
+    zUpdateUserRequest,
+} from 'pv-contracts/requests'
+import { PaginatedResponse } from 'pv-contracts/responses'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
     FaUsers,

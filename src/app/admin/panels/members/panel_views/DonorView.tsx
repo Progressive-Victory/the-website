@@ -9,17 +9,17 @@ import {
     FormGroup,
     TextField,
 } from '@/components/common/forms'
+import type { UseQueryResult } from '@tanstack/react-query'
+import Link from 'next/link'
 import {
     ActBlueContribution,
     ActBlueContributionCustomField,
     ActBlueDonor,
     ActBlueLineitem,
     User,
-} from '@/contracts/data'
-import type { SearchRequest } from '@/contracts/requests'
-import type { PaginatedResponse } from '@/contracts/responses'
-import type { UseQueryResult } from '@tanstack/react-query'
-import Link from 'next/link'
+} from 'pv-contracts/data'
+import type { SearchRequest } from 'pv-contracts/requests'
+import type { PaginatedResponse } from 'pv-contracts/responses'
 import React, { ChangeEvent } from 'react'
 
 export interface DonorViewProps {

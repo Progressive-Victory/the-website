@@ -14,7 +14,6 @@ import {
     useConfigure,
 } from '@/components/common/forms'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import { BackgroundColor, Endorsement } from '@/contracts/data'
 import {
     electionStatusOptions,
     endorsementLevelOptions,
@@ -22,6 +21,7 @@ import {
     stateOptions,
 } from '@/models'
 import { cn, parseErrorMessage } from '@/util'
+import { BackgroundColor, Endorsement } from 'pv-contracts/data'
 import { ChangeEvent, useCallback, useState } from 'react'
 
 const stateOptionsWithEmpty = [

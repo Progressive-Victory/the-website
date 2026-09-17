@@ -11,14 +11,14 @@ import {
     type SectionSortOrder,
 } from './endorsements.types'
 import { ContentPageFrame } from '@/components/content_sections/ContentSections'
+import { getRelevantElectionDate, getStateLabel } from '@/models'
+import { useEndorsementQueries } from '@/queries'
+import { useQuery } from '@tanstack/react-query'
 import {
     EndorsementType,
     InitiativeType,
     type Endorsement,
-} from '@/contracts/data'
-import { getRelevantElectionDate, getStateLabel } from '@/models'
-import { useEndorsementQueries } from '@/queries'
-import { useQuery } from '@tanstack/react-query'
+} from 'pv-contracts/data'
 import { useDeferredValue, useMemo, useState } from 'react'
 
 const FILTER_PREDICATES: Record<FilterType, (c: Endorsement) => boolean> = {

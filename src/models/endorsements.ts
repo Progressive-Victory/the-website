@@ -4,7 +4,7 @@ import {
     Endorsement,
     EndorsementType,
     InitiativeType,
-} from '@/contracts/data'
+} from 'pv-contracts/data'
 
 export const ELECTION_STATUS_LABELS: Record<ElectionStatus, string> = {
     [ElectionStatus.Elected]: 'Elected',

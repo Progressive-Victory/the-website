@@ -13,14 +13,6 @@ import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
-    BackgroundColor,
-    Endorsement,
-    ElectionStatus,
-    EndorsementType,
-    InitiativeType,
-} from '@/contracts/data'
-import { SortDirection } from '@/contracts/requests'
-import {
     ENDORSEMENT_TYPE_LABELS,
     INITIATIVE_TYPE_LABELS,
     getRelevantElectionDate,
@@ -33,6 +25,14 @@ import {
     useUnpaginatedSearch,
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+    BackgroundColor,
+    Endorsement,
+    ElectionStatus,
+    EndorsementType,
+    InitiativeType,
+} from 'pv-contracts/data'
+import { SortDirection } from 'pv-contracts/requests'
 import { useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
