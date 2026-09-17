@@ -20,6 +20,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { RedirectType, redirect } from 'next/navigation'
 import { OnboardingStage } from 'pv-contracts/data'
 import {
     UserOnboardingCollectInfoRequest,
@@ -189,7 +190,7 @@ export default function VolunteerPage() {
     if (isSessionLoading) return null
 
     if (!session) {
-        window.location.href = '/login?redirect=/volunteer'
+        redirect('/login?redirect=/volunteer', RedirectType.replace)
         return null
     }
 
