@@ -395,10 +395,18 @@ function useMembershipsQuery() {
             onGet(
                 '/actblue/memberships',
                 zPaginatedResponse(zMembershipsResponsePacket),
-                { query: { page: pageParam, limit: PAGE_SIZE }, signal }
+                {
+                    query: {
+                        page: pageParam,
+                        limit: PAGE_SIZE,
+                        isMember: true,
+                    },
+                    signal,
+                }
             ),
         initialPageParam: 0,
         getNextPageParam: (lastPage, pages) => {
+            if (lastPage.data.length < PAGE_SIZE) return undefined
             const loadedCount = pages.reduce(
                 (total, page) => total + page.data.length,
                 0
@@ -416,7 +424,12 @@ function useMembershipsQuery() {
         [query.data]
     )
 
-    return { query, members, totalEntries: query.data?.pages[0]?.count }
+    const totalEntries =
+        query.data != null && !query.hasNextPage
+            ? members.length
+            : query.data?.pages[0]?.count
+
+    return { query, members, totalEntries }
 }
 
 export function usePendingUpdates(edit: EditController, members: Member[]) {

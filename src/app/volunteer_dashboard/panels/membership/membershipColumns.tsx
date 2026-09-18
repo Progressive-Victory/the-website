@@ -3,6 +3,7 @@
 import { ContributionsMenu } from './components/ContributionsMenu'
 import { BoolTag, EditableBoolTag } from './components/Tags'
 import tags from './components/Tags.module.css'
+import { TierHistoryMenu } from './components/TierHistoryMenu'
 import { MembershipTableOptions, useMemberDraft } from './hooks'
 import {
     hasAddressDraftChange,
@@ -262,10 +263,14 @@ export const buildColumns = ({
             key: 'membershipTier',
             header: 'Tier',
             width: '11rem',
+            allowOverflow: true,
             sortValue: (m) => {
                 const tier = m.recurringSummary?.tier
                 return tier ? membershipTierRank[tier] : 0
             },
+            menu: (m, { closeDropdown }) => (
+                <TierHistoryMenu member={m} closeDropdown={closeDropdown} />
+            ),
             render: (m) => {
                 const tier = m.recurringSummary?.tier
                 return tier ? (

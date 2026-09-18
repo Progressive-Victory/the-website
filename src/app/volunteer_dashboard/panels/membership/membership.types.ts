@@ -49,6 +49,15 @@ export interface RecurringSummary {
     tier?: MembershipTier
 }
 
+export interface TierSegment {
+    tier?: MembershipTier
+    from: string
+    to: string
+    payments: number
+    minAmount: number
+    maxAmount: number
+}
+
 export type PackageShipped =
     'Yes' | 'No' | 'Returned' | 'Not Received' | 'Canceled'
 

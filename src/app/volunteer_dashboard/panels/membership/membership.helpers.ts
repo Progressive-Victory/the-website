@@ -12,6 +12,7 @@ import {
     PendingUpdate,
     RecurringSummary,
     ShirtSize,
+    TierSegment,
 } from './membership.types'
 import {
     MembershipDeliverableStatus,
@@ -269,6 +270,43 @@ const tierThresholds = [
 export const getMembershipTierForAmount = (amount?: number) => {
     if (amount == null) return undefined
     return tierThresholds.find(([min]) => amount >= min)?.[1]
+}
+
+// collapses each payment's tier into contiguous runs, so a change of recurring amount starts a new segment
+export const buildTierTimeline = (
+    records: ContributionRecord[]
+): TierSegment[] => {
+    const payments = records
+        .flatMap((record) =>
+            Object.values(record.lineitemsByMonth ?? {}).flat()
+        )
+        .sort((a, b) => a.paidAt.localeCompare(b.paidAt))
+
+    const segments: TierSegment[] = []
+
+    for (const payment of payments) {
+        const tier = getMembershipTierForAmount(payment.amount)
+        const current = segments.at(-1)
+
+        if (current && current.tier === tier) {
+            current.to = payment.paidAt
+            current.payments += 1
+            current.minAmount = Math.min(current.minAmount, payment.amount)
+            current.maxAmount = Math.max(current.maxAmount, payment.amount)
+            continue
+        }
+
+        segments.push({
+            tier,
+            from: payment.paidAt,
+            to: payment.paidAt,
+            payments: 1,
+            minAmount: payment.amount,
+            maxAmount: payment.amount,
+        })
+    }
+
+    return segments
 }
 
 export const computeRecurringSummary = (
