@@ -99,12 +99,12 @@ const MEMBER_SORT_FIELD_OPTIONS = [
     { value: 'updated_at_utc', label: 'Recently Edited' },
 ]
 
-// Behavior is pending API support for these filters.
+// # TODO:Behavior is pending API support for these filters.
 const userFilterOptions = [
     { key: 'verified', label: 'Verified', icon: <MdVerified /> },
 ]
 
-// Behavior is pending API support for membership tiers.
+// # TODO: Behavior is pending API support for membership tiers.
 const MEMBERSHIP_TIER_OPTIONS = [
     { value: 'dues_paying', label: 'Dues Paying Members' },
     { value: 'premium', label: 'Premium Members' },
@@ -482,7 +482,7 @@ export default function Page() {
 
     const handleFilterTagChange = (key: string) => {
         setActiveFilterTag(key)
-        //others blank on purpose waiting for API side logic to be implemented.
+        // # TODO others blank on purpose waiting for API side logic to be implemented.
         const rest = Object.fromEntries(
             Object.entries(search).filter(
                 ([k]) =>

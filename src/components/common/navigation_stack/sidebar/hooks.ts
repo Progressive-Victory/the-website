@@ -241,9 +241,6 @@ export function useLargeTitleScroll(
     return collapsed
 }
 
-// Tracks whether the sticky pinned section has actually reached the top of the
-// scroll container, based on real layout position rather than a fixed-duration
-// CSS transition, since that moment depends on how far the user has scrolled.
 export function usePinnedSectionStuck(
     scrollRef: React.RefObject<HTMLDivElement | null>,
     enabled: boolean
@@ -298,8 +295,6 @@ export function usePinnedSectionStuck(
     }, [enabled, scrollRef])
 
     return stuck
-
-    return enabled && collapsed
 }
 
 function getSidebarInlineStyle(
