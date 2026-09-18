@@ -8,6 +8,7 @@ import {
     MemberEdits,
     MembershipTier,
     membershipTiers,
+    MembershipSearchField,
     PackageShipped,
     PendingUpdate,
     RecurringSummary,
@@ -242,6 +243,27 @@ export const filterRecurringContributions = (
     records: ContributionRecord[] | undefined
 ) => (records ?? []).filter((record) => record.isRecurring)
 
+export const memberSearchValues = (
+    member: Member,
+    field: MembershipSearchField
+): (string | undefined)[] => {
+    if (field === 'discord')
+        return [member.discordUsername, member.contributionDiscord]
+    if (field === 'email')
+        return [member.userEmail, member.discordEmail, member.donorEmail]
+    return [member.userName, member.donorName]
+}
+
+export const matchesSearchQuery = (
+    member: Member,
+    normalizedQuery: string,
+    field: MembershipSearchField
+) =>
+    normalizedQuery !== '' &&
+    memberSearchValues(member, field).some((value) =>
+        value?.toLowerCase().includes(normalizedQuery)
+    )
+
 export const countMonthsWithLineitems = (records: ContributionRecord[]) =>
     new Set(records.flatMap((record) => record.lineitemMonths ?? [])).size
 
@@ -272,9 +294,9 @@ export const getMembershipTierForAmount = (amount?: number) => {
     return tierThresholds.find(([min]) => amount >= min)?.[1]
 }
 
-// collapses each payment's tier into contiguous runs, so a change of recurring amount starts a new segment
-export const buildTierTimeline = (
-    records: ContributionRecord[]
+const buildPaymentTimeline = (
+    records: ContributionRecord[],
+    isSameSegment: (current: TierSegment, amount: number) => boolean
 ): TierSegment[] => {
     const payments = records
         .flatMap((record) =>
@@ -285,10 +307,9 @@ export const buildTierTimeline = (
     const segments: TierSegment[] = []
 
     for (const payment of payments) {
-        const tier = getMembershipTierForAmount(payment.amount)
         const current = segments.at(-1)
 
-        if (current && current.tier === tier) {
+        if (current && isSameSegment(current, payment.amount)) {
             current.to = payment.paidAt
             current.payments += 1
             current.minAmount = Math.min(current.minAmount, payment.amount)
@@ -297,7 +318,7 @@ export const buildTierTimeline = (
         }
 
         segments.push({
-            tier,
+            tier: getMembershipTierForAmount(payment.amount),
             from: payment.paidAt,
             to: payment.paidAt,
             payments: 1,
@@ -308,6 +329,18 @@ export const buildTierTimeline = (
 
     return segments
 }
+
+export const buildTierTimeline = (records: ContributionRecord[]) =>
+    buildPaymentTimeline(
+        records,
+        (current, amount) => current.tier === getMembershipTierForAmount(amount)
+    )
+
+export const buildAmountTimeline = (records: ContributionRecord[]) =>
+    buildPaymentTimeline(
+        records,
+        (current, amount) => current.minAmount === amount
+    )
 
 export const computeRecurringSummary = (
     records: ContributionRecord[],
@@ -365,6 +398,7 @@ export const computeRecurringSummary = (
         monthsWithLineitems: monthKeys.size,
         earliestLineitemDate,
         activeAmount,
+        totalAmount: records.reduce((sum, record) => sum + record.amount, 0),
         tier: getMembershipTierForAmount(activeAmount),
     }
 }

@@ -20,6 +20,7 @@ import {
     zRole,
     zUser,
 } from 'pv-contracts/data'
+import { MembershipSearchRequest } from 'pv-contracts/requests'
 import { zMembershipsResponsePacket } from 'pv-contracts/responses'
 import { Suspense, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -50,6 +51,11 @@ interface DashboardPanelConfigItem {
     count?: number
     buttonType?: 'default' | 'group'
     groupChildren?: DashboardGroupChildConfigItem[]
+}
+
+const membershipCountSearch: MembershipSearchRequest = {
+    limit: 1,
+    isMember: true,
 }
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -87,7 +93,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
     const memberships = usePaginatedSearch(
         '/actblue/memberships',
         zMembershipsResponsePacket,
-        { search: { limit: 1 } }
+        { search: membershipCountSearch }
     )
     const positionHierarchy = useQuery({
         queryKey: ['positionHierarchy'],

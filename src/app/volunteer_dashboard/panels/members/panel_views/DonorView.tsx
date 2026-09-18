@@ -3,15 +3,9 @@
 import styles from './DonorView.module.css'
 import { ListBody } from '@/app/admin/layout/List'
 import { SearchModal } from '@/app/admin/layout/SearchModal'
-import {
-    DateField,
-    Form,
-    FormGroup,
-    TextField,
-} from '@/components/common/forms'
+import { Form, FormGroup, TextField } from '@/components/common/forms'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import type { UseQueryResult } from '@tanstack/react-query'
-import Link from 'next/link'
 import {
     ActBlueContribution,
     ActBlueContributionCustomField,
@@ -99,12 +93,6 @@ const calcContributionData = (donor: ActBlueDonor): ContributionData => {
         lineitems: li,
     }
 }
-
-const formatLineitemDate = (value: Date) =>
-    Intl.DateTimeFormat('en-US', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(value)
 
 export function DonorView({
     selectedId,
@@ -196,129 +184,68 @@ export function DonorView({
     const renderDonorSummaryFields = (
         donor: ActBlueDonor,
         contributionData: ContributionData
-    ) => (
-        <>
-            <FormGroup title="Contact Info" subGroup>
-                <TextField label="First Name" field="firstname" required />
-                <TextField label="Last Name" field="lastname" required />
-                <TextField label="Email" field="email" readonly />
-                <TextField label="Phone Number" field="phone" />
-            </FormGroup>
+    ) => [
+        <FormGroup title="Contact Info" key="contact" subGroup>
+            <TextField label="First Name" field="firstname" required />
+            <TextField label="Last Name" field="lastname" required />
+            <TextField label="Email" field="email" readonly />
+            <TextField label="Phone Number" field="phone" />
+        </FormGroup>,
 
-            <FormGroup title="Address" subGroup>
-                <TextField label="Street Address" field="addr1" />
-                <TextField label="City" field="city" />
-                <TextField label="State" field="state" />
-                <TextField label="Zip Code" field="zip" />
-                <TextField label="Country" field="country" />
-            </FormGroup>
+        <FormGroup title="Address" key="address" subGroup>
+            <TextField label="Street Address" field="addr1" />
+            <TextField label="City" field="city" />
+            <TextField label="State" field="state" />
+            <TextField label="Zip Code" field="zip" />
+            <TextField label="Country" field="country" />
+        </FormGroup>,
 
-            <FormGroup title="Employer Info" subGroup>
-                <TextField<ActBlueDonor>
-                    label="Employer Name"
-                    getter={(form) => form.employerData?.employer}
-                />
-                <TextField<ActBlueDonor>
-                    label="Occupation"
-                    getter={(form) => form.employerData?.occupation}
-                />
-                <TextField<ActBlueDonor>
-                    label="Employer Street Address"
-                    getter={(form) => form.employerData?.employerAddr1}
-                />
-                <TextField<ActBlueDonor>
-                    label="Employer City"
-                    getter={(form) => form.employerData?.employerCity}
-                />
-                <TextField<ActBlueDonor>
-                    label="Employer State"
-                    getter={(form) => form.employerData?.employerState}
-                />
-                <TextField<ActBlueDonor>
-                    label="Employer Zip Code"
-                    getter={(form) => `${form.employerData?.employerZip ?? ''}`}
-                />
-                <TextField<ActBlueDonor>
-                    label="Employer Country"
-                    getter={(form) => form.employerData?.employerCountry}
-                />
-            </FormGroup>
+        <FormGroup title="Employer Info" key="employer" subGroup>
+            <TextField<ActBlueDonor>
+                label="Employer Name"
+                getter={(form) => form.employerData?.employer}
+            />
+            <TextField<ActBlueDonor>
+                label="Occupation"
+                getter={(form) => form.employerData?.occupation}
+            />
+            <TextField<ActBlueDonor>
+                label="Employer Street Address"
+                getter={(form) => form.employerData?.employerAddr1}
+            />
+            <TextField<ActBlueDonor>
+                label="Employer City"
+                getter={(form) => form.employerData?.employerCity}
+            />
+            <TextField<ActBlueDonor>
+                label="Employer State"
+                getter={(form) => form.employerData?.employerState}
+            />
+            <TextField<ActBlueDonor>
+                label="Employer Zip Code"
+                getter={(form) => `${form.employerData?.employerZip ?? ''}`}
+            />
+            <TextField<ActBlueDonor>
+                label="Employer Country"
+                getter={(form) => form.employerData?.employerCountry}
+            />
+        </FormGroup>,
 
-            <FormGroup title="All Time Stats" subGroup>
-                <TextField<ActBlueDonor>
-                    label="Total Dollar Donations"
-                    getter={() => `$${contributionData.total}`}
-                />
-                <TextField<ActBlueDonor>
-                    label="Currently Has a Recurring Donation"
-                    getter={() => `${contributionData.hasActiveRecurring}`}
-                />
-                <TextField<ActBlueDonor>
-                    label="Total Contributions"
-                    getter={() => `${contributionData.lineitems.length}`}
-                />
-            </FormGroup>
-
-            {(contributionData.lineitems ?? []).map((lineitem) => (
-                <FormGroup
-                    title={`Donated $${lineitem.amount}`}
-                    subtitle={formatLineitemDate(lineitem.paidAt)}
-                    key={lineitem.lineitemId}
-                    defaultCollapsed
-                    subGroup
-                >
-                    <DateField<ActBlueDonor>
-                        label="Paid At"
-                        getter={() => lineitem.paidAt}
-                    />
-                    <TextField<ActBlueDonor>
-                        label="Sequence"
-                        getter={() => `${lineitem.sequence}`}
-                    />
-                    <TextField<ActBlueDonor>
-                        label="Amount"
-                        getter={() => `$${lineitem.amount}`}
-                    />
-                    <TextField<ActBlueDonor>
-                        label="Recurring Amount"
-                        getter={() => `$${lineitem.recurringAmount}`}
-                    />
-                    <TextField<ActBlueDonor>
-                        label="Amount Less AB Fees"
-                        getter={() => `$${lineitem.amountLessAbFees}`}
-                    />
-                    <TextField
-                        label="Form Name"
-                        field="contributionForm"
-                        getter={() =>
-                            donor.contributions?.[0]?.contributionForm
-                        }
-                    />
-                    {contributionData.customFields?.map((field) => (
-                        <TextField
-                            key={field.id}
-                            label={field.label}
-                            getter={() => field.answer}
-                        />
-                    ))}
-
-                    <NavigationButton
-                        className={styles.detailsNavigationButton}
-                        href={`/volunteer_dashboard/panels/contributions?lineitemId=${lineitem.lineitemId}`}
-                        label="Full Details"
-                        trackPanelHistory
-                        classNames={{
-                            link: styles.detailsNavigationLink,
-                            label: styles.detailsNavigationLabel,
-                        }}
-                        tag={{
-                            className: styles.detailsNavigationTagSection,
-                        }}
-                    />
-                </FormGroup>
-            ))}
-        </>
-    )
+        <FormGroup title="All Time Stats" key="stats" subGroup>
+            <TextField<ActBlueDonor>
+                label="Total Dollar Donations"
+                getter={() => `$${contributionData.total}`}
+            />
+            <TextField<ActBlueDonor>
+                label="Currently Has a Recurring Donation"
+                getter={() => `${contributionData.hasActiveRecurring}`}
+            />
+            <TextField<ActBlueDonor>
+                label="Total Contributions"
+                getter={() => `${contributionData.lineitems.length}`}
+            />
+        </FormGroup>,
+    ]
 
     const renderContributionList = (
         contributionData: ContributionData,
@@ -336,10 +263,6 @@ export function DonorView({
                         defaultCollapsed
                         subGroup
                     >
-                        <DateField<ActBlueDonor>
-                            label="Paid At"
-                            getter={() => lineitem.paidAt}
-                        />
                         <TextField<ActBlueDonor>
                             label="Sequence"
                             getter={() => `${lineitem.sequence}`}
@@ -367,7 +290,7 @@ export function DonorView({
                                 )
                             }
                         />
-                        <br />
+
                         {contributionData.customFields?.map((field) => (
                             <TextField
                                 key={field.id}
@@ -375,16 +298,20 @@ export function DonorView({
                                 getter={() => field.answer}
                             />
                         ))}
-                        <br />
-                        <Link
-                            href={{
-                                pathname:
-                                    '/volunteer_dashboard/panels/contributions',
-                                query: { lineitemId: lineitem.lineitemId },
+
+                        <NavigationButton
+                            className={styles.detailsNavigationButton}
+                            href={`/volunteer_dashboard/panels/contributions?lineitemId=${lineitem.lineitemId}`}
+                            label="Full Details"
+                            trackPanelHistory
+                            classNames={{
+                                link: styles.detailsNavigationLink,
+                                label: styles.detailsNavigationLabel,
                             }}
-                        >
-                            Full Details
-                        </Link>
+                            tag={{
+                                className: styles.detailsNavigationTagSection,
+                            }}
+                        />
                     </FormGroup>
                 ))}
             <br />

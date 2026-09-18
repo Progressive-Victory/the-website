@@ -16,11 +16,18 @@ import {
 import { useActblueQueries } from '@/queries'
 import { usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
+import { zActBlueDonationPacket } from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
+import type { MembershipSearchRequest } from 'pv-contracts/requests'
 import { zMembershipsResponsePacket } from 'pv-contracts/responses'
 import { useEffect, useMemo, useState } from 'react'
 
 type ChartBarDisplayMode = 'grouped' | 'stacked'
+
+const membershipCountSearch: MembershipSearchRequest = {
+    limit: 1,
+    isMember: true,
+}
 
 function getPreviousEquivalentRange(start: Date, end: Date) {
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
@@ -179,7 +186,13 @@ export function useFundraisingDashboardController() {
     const membershipCountQuery = usePaginatedSearch(
         '/actblue/memberships',
         zMembershipsResponsePacket,
-        { search: { limit: 1 } }
+        { search: membershipCountSearch }
+    ).query
+
+    const contributionCountQuery = usePaginatedSearch(
+        '/actblue/contributions',
+        zActBlueDonationPacket,
+        { search: { limit: 0 } }
     ).query
 
     const earliestContributionQuery = useQuery({
@@ -452,6 +465,7 @@ export function useFundraisingDashboardController() {
         statsQuery,
         allTimeStatsQuery,
         membershipCountQuery,
+        contributionCountQuery,
         setStartDate,
         setEndDate,
         setCommittedPreset,

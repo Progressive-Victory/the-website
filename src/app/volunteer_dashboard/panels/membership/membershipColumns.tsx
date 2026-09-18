@@ -3,12 +3,16 @@
 import { ContributionsMenu } from './components/ContributionsMenu'
 import { BoolTag, EditableBoolTag } from './components/Tags'
 import tags from './components/Tags.module.css'
-import { TierHistoryMenu } from './components/TierHistoryMenu'
+import {
+    TierHistoryMenu,
+    AmountHistoryMenu,
+} from './components/TierHistoryMenu'
 import { MembershipTableOptions, useMemberDraft } from './hooks'
 import {
     hasAddressDraftChange,
     hasNameDraftChange,
     hasDiscordDraftChange,
+    matchesSearchQuery,
 } from './membership.helpers'
 import {
     EditController,
@@ -17,6 +21,7 @@ import {
     MemberFlag,
     MembershipTableMode,
     MembershipTier,
+    MembershipSearchField,
     PackageShipped,
     ShirtSize,
 } from './membership.types'
@@ -40,6 +45,7 @@ import {
     PhoneValue,
     ShirtSizeEdit,
     ShirtSizeValue,
+    TotalAmountValue,
 } from './membershipCells'
 import styles from './page.module.css'
 import { Column, ColumnEntry } from '@/components/common/table'
@@ -226,6 +232,7 @@ const rowNumberColumn: Column<Member> = {
     key: 'rowNumber',
     header: '#',
     width: '3rem',
+    reorderable: false,
     render: (_m, index) => index + 1,
 }
 
@@ -247,14 +254,28 @@ export const buildColumns = ({
     tableMode,
     edit,
     onMatchUser,
+    searchQuery = '',
+    searchField = 'name',
 }: {
     options: MembershipTableOptions
     tableMode: MembershipTableMode
     edit: EditController
     onMatchUser: (member: Member) => void
+    searchQuery?: string
+    searchField?: MembershipSearchField
 }): ColumnEntry<Member>[] => {
     const { showConfirmed, showStatus, showRowNumber } = options
     const showFulfilledTag = options.showFulfilled && tableMode === 'view'
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+    const nameQuery = searchField === 'name' ? normalizedQuery : ''
+    const discordQuery = searchField === 'discord' ? normalizedQuery : ''
+    const emailQuery = searchField === 'email' ? normalizedQuery : ''
+    const matchesSearch = (m: Member) =>
+        matchesSearchQuery(m, normalizedQuery, searchField)
+    const searchCellClass = (field: MembershipSearchField) => (m: Member) =>
+        searchField === field && matchesSearch(m)
+            ? styles.nameCellMatch
+            : undefined
 
     return [
         ...(showRowNumber ? [rowNumberColumn] : []),
@@ -336,7 +357,8 @@ export const buildColumns = ({
             width: '11rem',
             allowOverflow: true,
             sortValue: (m) => m.userName ?? m.donorName ?? '',
-            render: (m) => <NameValue member={m} />,
+            render: (m) => <NameValue member={m} searchQuery={nameQuery} />,
+            cellClassName: searchCellClass('name'),
             renderEdit: (m) => <NameEdit member={m} edit={edit} />,
             menu: (m, { closeDropdown }) => (
                 <NameMenu member={m} closeDropdown={closeDropdown} />
@@ -348,7 +370,10 @@ export const buildColumns = ({
             width: '11rem',
             allowOverflow: true,
             sortValue: (m) => m.discordUsername ?? '',
-            render: (m) => <DiscordValue member={m} />,
+            render: (m) => (
+                <DiscordValue member={m} searchQuery={discordQuery} />
+            ),
+            cellClassName: searchCellClass('discord'),
             menu: (m, { closeDropdown }) => (
                 <DiscordMenu member={m} closeDropdown={closeDropdown} />
             ),
@@ -408,7 +433,8 @@ export const buildColumns = ({
             width: '14rem',
             allowOverflow: true,
             sortValue: (m) => m.email ?? '',
-            render: (m) => <EmailValue member={m} />,
+            render: (m) => <EmailValue member={m} searchQuery={emailQuery} />,
+            cellClassName: searchCellClass('email'),
             renderEdit: (m) => <EmailEdit member={m} edit={edit} />,
             menu: (m, { closeDropdown }) => (
                 <EmailMenu member={m} closeDropdown={closeDropdown} />
@@ -428,8 +454,19 @@ export const buildColumns = ({
             key: 'membershipAmount',
             header: 'Amount',
             width: '6rem',
+            allowOverflow: true,
             sortValue: (m) => m.recurringSummary?.activeAmount ?? 0,
             render: (m) => <AmountValue member={m} />,
+            menu: (m, { closeDropdown }) => (
+                <AmountHistoryMenu member={m} closeDropdown={closeDropdown} />
+            ),
+        },
+        {
+            key: 'totalAmount',
+            header: 'Total Amount',
+            width: '7rem',
+            sortValue: (m) => m.recurringSummary?.totalAmount ?? 0,
+            render: (m) => <TotalAmountValue member={m} />,
         },
         {
             key: 'contributionsReal',

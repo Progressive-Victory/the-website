@@ -16,7 +16,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding: 0 0 1rem;
+    padding: 0;
 }
 
 .panelHeader {
@@ -35,6 +35,135 @@
     font-size: 0.78rem;
     font-weight: 700;
     color: rgba(15, 23, 42, 0.45);
+}
+
+.panelHeaderRight {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.nameCellMatch {
+    background: rgba(14, 165, 233, 0.14);
+}
+
+.panelSearch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.panelSearchIcon {
+    position: absolute;
+    left: 0.55rem;
+    color: rgb(158, 162, 169);
+    pointer-events: none;
+}
+
+.panelSearchCount {
+    position: absolute;
+    right: 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.4);
+    pointer-events: none;
+}
+
+.panelSearch:focus-within .panelSearchCount {
+    right: 1.7rem;
+}
+
+.panelSearchClear {
+    position: absolute;
+    right: 0.55rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: content-box;
+    width: 0.85rem;
+    height: 0.85rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    line-height: 0;
+    overflow: visible;
+    cursor: pointer;
+
+    & svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+    }
+
+    & circle {
+        fill: #676767;
+    }
+
+    & path {
+        fill: none;
+        stroke: #ffffff;
+        stroke-width: 1.6;
+        stroke-linecap: round;
+    }
+}
+
+.panelSearch:focus-within .panelSearchClear {
+    display: inline-flex;
+}
+
+.panelSearchFilter {
+    position: absolute;
+    right: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+    color: rgb(158, 162, 169);
+
+    & svg {
+        display: block;
+    }
+}
+
+.panelSearchFilterSelect {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.panelSearchInput {
+    width: 14rem;
+    max-width: 40dvw;
+    padding: 0.35rem 3.6rem 0.35rem 1.85rem;
+    border: 1px solid rgba(17, 24, 39, 0.14);
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.85);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.85);
+
+    &::placeholder {
+        color: rgba(15, 23, 42, 0.4);
+        font-weight: 500;
+    }
+
+    &::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 1);
+    }
 }
 
 .breadcrumbs {
@@ -93,7 +222,7 @@
 .tableWrapper {
     flex: 1 1 auto;
     min-height: 0;
-    padding: 0.75rem 1.05rem 1.5rem;
+    padding: 0.75rem 1.05rem 1rem;
 
     &:has([aria-expanded='true']) {
         --confirm-tooltip-opacity: 0;
@@ -196,6 +325,23 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: rgba(15, 23, 42, 0.58);
+}
+
+.restoreDefaultsButton {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    color: rgba(15, 23, 42, 0.46);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    transition: color 0.15s ease;
+
+    &:hover {
+        background: none;
+        color: rgba(15, 23, 42, 0.8);
+    }
 }
 
 .userMatchedLink {

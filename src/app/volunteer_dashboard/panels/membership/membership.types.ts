@@ -46,6 +46,7 @@ export interface RecurringSummary {
     monthsWithLineitems: number
     earliestLineitemDate?: string
     activeAmount?: number
+    totalAmount: number
     tier?: MembershipTier
 }
 
@@ -117,6 +118,14 @@ export interface Member {
 
 export type MembershipTableMode = 'view' | 'edit'
 
+export const membershipSearchFields = [
+    { value: 'name', label: 'Name' },
+    { value: 'discord', label: 'Discord' },
+    { value: 'email', label: 'Email' },
+] as const
+
+export type MembershipSearchField =
+    (typeof membershipSearchFields)[number]['value']
 export type MemberFlag =
     | 'nameConfirmed'
     | 'discordConfirmed'

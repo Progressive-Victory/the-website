@@ -1,6 +1,7 @@
 'use client'
 
 import {
+    buildAmountTimeline,
     buildTierTimeline,
     filterRecurringContributions,
 } from '../membership.helpers'
@@ -27,70 +28,96 @@ const formatDate = (value: string) =>
 const formatAmount = (amount: number) =>
     amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 
-export const TierHistoryMenu = ({ member, closeDropdown }: MemberMenuProps) => {
-    const segments = buildTierTimeline(
-        filterRecurringContributions(member.contributionRecords)
-    ).reverse()
-
-    return (
-        <DropdownOverlay
-            label="Tier History"
-            onClose={closeDropdown}
-            // Tier sits near the panel's left edge, so grow rightward instead of off-panel
-            align="start"
-            className={styles.tierHistoryOverlay}
-            bodyClassName={styles.tierHistoryBody}
-            body={
-                segments.length === 0 ? (
-                    <span className={styles.tierHistoryEmpty}>
-                        No recurring contributions found
+const HistoryMenu = ({
+    closeDropdown,
+    label,
+    changeNoun,
+    segments,
+}: {
+    closeDropdown: () => void
+    label: string
+    changeNoun: string
+    segments: ReturnType<typeof buildTierTimeline>
+}) => (
+    <DropdownOverlay
+        label={label}
+        onClose={closeDropdown}
+        className={styles.tierHistoryOverlay}
+        bodyClassName={styles.tierHistoryBody}
+        body={
+            segments.length === 0 ? (
+                <span className={styles.tierHistoryEmpty}>
+                    No recurring contributions found
+                </span>
+            ) : (
+                <>
+                    <span className={styles.tierHistorySummary}>
+                        {segments.length} {changeNoun}
+                        {segments.length === 1 ? '' : 's'}
                     </span>
-                ) : (
-                    <>
-                        <span className={styles.tierHistorySummary}>
-                            {segments.length} tier change
-                            {segments.length === 1 ? '' : 's'}
-                        </span>
-                        <div className={styles.listBox}>
-                            {segments.map((segment) => (
-                                <div
-                                    key={`${segment.tier ?? 'none'}-${segment.from}`}
-                                    className={styles.tierRow}
-                                >
-                                    <span className={styles.tierMeta}>
-                                        <span
-                                            className={cn(
-                                                tags.tag,
-                                                tags.tagTier,
-                                                segment.tier
-                                                    ? tierTagClass[segment.tier]
-                                                    : tags.tagGhost
-                                            )}
-                                        >
-                                            {segment.tier ?? 'Not A Member'}
-                                        </span>
-                                        <span className={styles.tierRange}>
-                                            {formatDate(segment.from)}
-                                            {segment.to !== segment.from &&
-                                                ` – ${formatDate(segment.to)}`}
-                                        </span>
-                                        <span className={styles.tierPayments}>
-                                            {segment.payments} payment
-                                            {segment.payments === 1 ? '' : 's'}
-                                        </span>
+                    <div className={styles.listBox}>
+                        {segments.map((segment) => (
+                            <div
+                                key={`${segment.tier ?? 'none'}-${segment.from}`}
+                                className={styles.tierRow}
+                            >
+                                <span className={styles.tierMeta}>
+                                    <span
+                                        className={cn(
+                                            tags.tag,
+                                            tags.tagTier,
+                                            segment.tier
+                                                ? tierTagClass[segment.tier]
+                                                : tags.tagGhost
+                                        )}
+                                    >
+                                        {segment.tier ?? 'Not A Member'}
                                     </span>
-                                    <span className={styles.tierAmount}>
-                                        {formatAmount(segment.minAmount)}
-                                        {segment.maxAmount !==
-                                            segment.minAmount &&
-                                            ` – ${formatAmount(segment.maxAmount)}`}
+                                    <span className={styles.tierRange}>
+                                        {formatDate(segment.from)}
+                                        {segment.to !== segment.from &&
+                                            ` – ${formatDate(segment.to)}`}
                                     </span>
-                                </div>
-                            ))}
-                        </div>
-                    </>
-                )
-            }
-        />
-    )
-}
+                                    <span className={styles.tierPayments}>
+                                        {segment.payments} payment
+                                        {segment.payments === 1 ? '' : 's'}
+                                    </span>
+                                </span>
+                                <span className={styles.tierAmount}>
+                                    {formatAmount(segment.minAmount)}
+                                    {segment.maxAmount !== segment.minAmount &&
+                                        ` – ${formatAmount(segment.maxAmount)}`}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </>
+            )
+        }
+    />
+)
+
+export const TierHistoryMenu = ({ member, closeDropdown }: MemberMenuProps) => (
+    <HistoryMenu
+        closeDropdown={closeDropdown}
+        label="Tier History"
+        changeNoun="tier change"
+        segments={buildTierTimeline(
+            filterRecurringContributions(member.contributionRecords)
+        ).reverse()}
+    />
+)
+
+export const AmountHistoryMenu = ({
+    member,
+    closeDropdown,
+}: MemberMenuProps) => (
+    <HistoryMenu
+        closeDropdown={closeDropdown}
+        label="Amount History"
+        changeNoun="amount change"
+        segments={buildAmountTimeline(
+            filterRecurringContributions(member.contributionRecords)
+        ).reverse()}
+    />
+)

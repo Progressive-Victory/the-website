@@ -45,7 +45,7 @@ export const EditableSelectTag = <T extends string>({
     menuLabel,
 }: EditableSelectTagProps<T>) => {
     const variantClasses = selectVariants[variant]
-    const choices: (T | null)[] = allowClear ? [null, ...options] : [...options]
+    const choices: (T | null)[] = allowClear ? [...options, null] : [...options]
 
     return (
         <DropdownButton

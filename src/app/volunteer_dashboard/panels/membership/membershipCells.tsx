@@ -35,6 +35,7 @@ import {
 } from './membership.types'
 import styles from './membershipCells.module.css'
 import { cn } from '@/util'
+import { Fragment } from 'react'
 
 const NoLinkedUser = () => (
     <span className={styles.editUnavailable}>No linked user</span>
@@ -42,9 +43,33 @@ const NoLinkedUser = () => (
 
 const NoData = () => <span className={styles.editUnavailable}>No Data</span>
 
-export const NameValue = ({ member }: MemberValueProps) => (
+const HighlightedText = ({ text, query }: { text: string; query: string }) => {
+    const index = query === '' ? -1 : text.toLowerCase().indexOf(query)
+
+    if (index === -1) return <>{text}</>
+
+    return (
+        <>
+            {text.slice(0, index)}
+            <span className={styles.nameMatchText}>
+                {text.slice(index, index + query.length)}
+            </span>
+            {text.slice(index + query.length)}
+        </>
+    )
+}
+
+export const NameValue = ({
+    member,
+    searchQuery = '',
+}: MemberValueProps & { searchQuery?: string }) => (
     <span className={styles.nameCell}>
-        <span>{member.userName ?? member.donorName ?? '—'}</span>
+        <span>
+            <HighlightedText
+                text={member.userName ?? member.donorName ?? '—'}
+                query={searchQuery}
+            />
+        </span>
         <ConfirmedBadge label="Name" confirmed={member.nameConfirmed} />
     </span>
 )
@@ -120,14 +145,21 @@ export const NameMenu = ({ member, closeDropdown }: MemberMenuProps) => (
     />
 )
 
-export const DiscordValue = ({ member }: MemberValueProps) => {
+export const DiscordValue = ({
+    member,
+    searchQuery = '',
+}: MemberValueProps & { searchQuery?: string }) => {
     const displayedHandle = member.discordUsername ?? member.contributionDiscord
 
     if (!displayedHandle) return <NoData />
 
+    const handle = `@${normalizeDiscordHandle(displayedHandle)}`
+
     return (
         <span className={styles.nameCell}>
-            <span>@{normalizeDiscordHandle(displayedHandle)}</span>
+            <span>
+                <HighlightedText text={handle} query={searchQuery} />
+            </span>
             <ConfirmedBadge
                 label="Discord"
                 confirmed={member.discordConfirmed}
@@ -155,12 +187,89 @@ export const DiscordMenu = ({ member, closeDropdown }: MemberMenuProps) => (
     />
 )
 
-export const AddressValue = ({ member }: MemberValueProps) => (
-    <span className={styles.nameCell}>
-        <span>{member.userAddress ?? member.donorAddress ?? '—'}</span>
-        <ConfirmedBadge label="Address" confirmed={member.addressConfirmed} />
+const AddressPlaceholder = ({ label }: { label: string }) => (
+    <span className={cn(tags.tag, tags.tagGhost, styles.addressPlaceholderTag)}>
+        {label}
     </span>
 )
+
+export const AddressValue = ({ member }: MemberValueProps) => {
+    const parts = member.userAddressParts
+
+    if (member.userAddress == null)
+        return (
+            <span className={styles.nameCell}>
+                <span>{member.donorAddress ?? '—'}</span>
+                <ConfirmedBadge
+                    label="Address"
+                    confirmed={member.addressConfirmed}
+                />
+            </span>
+        )
+
+    const segments: {
+        node: React.ReactNode
+        startFilled: boolean
+        endFilled: boolean
+    }[] = [
+        {
+            node: parts?.addressLine1 ?? (
+                <AddressPlaceholder label="Address Line 1" />
+            ),
+            startFilled: Boolean(parts?.addressLine1),
+            endFilled: Boolean(parts?.addressLine1),
+        },
+        ...(parts?.addressLine2
+            ? [
+                  {
+                      node: parts.addressLine2,
+                      startFilled: true,
+                      endFilled: true,
+                  },
+              ]
+            : []),
+        {
+            node: parts?.city ?? <AddressPlaceholder label="City" />,
+            startFilled: Boolean(parts?.city),
+            endFilled: Boolean(parts?.city),
+        },
+        {
+            node: (
+                <>
+                    {parts?.state ?? <AddressPlaceholder label="State" />}{' '}
+                    {parts?.zip ?? <AddressPlaceholder label="Zip Code" />}
+                </>
+            ),
+            startFilled: Boolean(parts?.state),
+            endFilled: Boolean(parts?.zip),
+        },
+    ]
+
+    return (
+        <span className={styles.nameCell}>
+            <span>
+                {segments.map((segment, index) => {
+                    const previous = segments[index - 1]
+                    const separatorFilled =
+                        previous != null &&
+                        previous.endFilled &&
+                        segment.startFilled
+
+                    return (
+                        <Fragment key={index}>
+                            {previous != null && (separatorFilled ? ', ' : ' ')}
+                            {segment.node}
+                        </Fragment>
+                    )
+                })}
+            </span>
+            <ConfirmedBadge
+                label="Address"
+                confirmed={member.addressConfirmed}
+            />
+        </span>
+    )
+}
 
 const addressInputs: {
     key: AddressField
@@ -287,6 +396,21 @@ export const AmountValue = ({ member }: MemberValueProps) => {
     return <span className={styles.valueCell}>${amount}</span>
 }
 
+export const TotalAmountValue = ({ member }: MemberValueProps) => {
+    const total = member.recurringSummary?.totalAmount
+
+    if (!total) return <NoData />
+
+    return (
+        <span className={styles.valueCell}>
+            {total.toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'USD',
+            })}
+        </span>
+    )
+}
+
 export const PhoneEdit = ({ member, edit }: MemberEditProps) => {
     const draft = useMemberDraft(edit, member).userPhone
 
@@ -343,9 +467,20 @@ export const PhoneMenu = ({ member, closeDropdown }: MemberMenuProps) => (
     />
 )
 
-export const EmailValue = ({ member }: MemberValueProps) => (
+export const EmailValue = ({
+    member,
+    searchQuery = '',
+}: MemberValueProps & { searchQuery?: string }) => (
     <span className={styles.valueCell}>
-        {member.userEmail ?? member.discordEmail ?? member.donorEmail ?? '—'}
+        <HighlightedText
+            text={
+                member.userEmail ??
+                member.discordEmail ??
+                member.donorEmail ??
+                '—'
+            }
+            query={searchQuery}
+        />
     </span>
 )
 
@@ -398,7 +533,7 @@ export const EmailMenu = ({ member, closeDropdown }: MemberMenuProps) => (
     />
 )
 
-const shirtSizes: ShirtSize[] = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+const shirtSizes: ShirtSize[] = ['XXL', 'XL', 'L', 'M', 'S', 'XS']
 
 const shirtSizeClass: Record<ShirtSize, string> = {
     XS: tags.tagRed,

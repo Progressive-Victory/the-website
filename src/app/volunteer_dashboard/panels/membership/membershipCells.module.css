@@ -24,6 +24,17 @@
     }
 }
 
+.nameMatchText {
+    color: rgba(2, 132, 199, 1);
+}
+
+.addressPlaceholderTag {
+    min-width: 0;
+    padding: 0.05rem 1rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
 .editUnavailable {
     font-size: 0.75rem;
     font-style: italic;

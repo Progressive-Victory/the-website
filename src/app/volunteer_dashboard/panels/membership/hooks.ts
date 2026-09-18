@@ -19,7 +19,12 @@ import {
     MembershipTableMode,
     PendingUpdate,
 } from './membership.types'
-import { useCurrentUser, useFetch, useInfiniteScroll } from '@/util/hooks'
+import {
+    useCurrentUser,
+    useFetch,
+    useInfiniteScroll,
+    usePaginatedSearch,
+} from '@/util/hooks'
 import {
     skipToken,
     useInfiniteQuery,
@@ -29,12 +34,14 @@ import {
 } from '@tanstack/react-query'
 import { User, UserProfile, zUser, zUserProfile } from 'pv-contracts/data'
 import { ActBlueDonorLinkRequest } from 'pv-contracts/requests'
+import type { MembershipSearchRequest } from 'pv-contracts/requests'
 import {
     zMembershipsResponsePacket,
     zPaginatedResponse,
 } from 'pv-contracts/responses'
 import {
     useCallback,
+    useEffect,
     useMemo,
     useRef,
     useState,
@@ -45,8 +52,54 @@ const HISTORY_STALE_TIME = 5 * 60 * 1000
 const HISTORY_LIMIT = 5
 const USER_MATCH_LIMIT = 10
 const PAGE_SIZE = 250
+// # TODO Make these part of API settings
+const COLUMN_ORDER_STORAGE_KEY = 'membership.columnOrder'
+const TABLE_OPTIONS_STORAGE_KEY = 'membership.tableOptions'
 const EMPTY_DRAFT: MemberEdits = {}
 const noopUnsubscribe = () => undefined
+
+export function useColumnOrder() {
+    const [columnOrder, setColumnOrder] = useState<string[]>([])
+
+    useEffect(() => {
+        try {
+            const raw = window.localStorage.getItem(COLUMN_ORDER_STORAGE_KEY)
+            if (raw == null) return
+
+            const parsed: unknown = JSON.parse(raw)
+            if (
+                Array.isArray(parsed) &&
+                parsed.every((id) => typeof id === 'string')
+            )
+                setColumnOrder(parsed)
+        } catch {
+            console.error('Failed to parse column order from localStorage')
+        }
+    }, [])
+
+    const onColumnOrderChange = useCallback((order: string[]) => {
+        setColumnOrder(order)
+        try {
+            window.localStorage.setItem(
+                COLUMN_ORDER_STORAGE_KEY,
+                JSON.stringify(order)
+            )
+        } catch {
+            console.error('Failed to save column order to localStorage')
+        }
+    }, [])
+
+    const resetColumnOrder = useCallback(() => {
+        setColumnOrder([])
+        try {
+            window.localStorage.removeItem(COLUMN_ORDER_STORAGE_KEY)
+        } catch {
+            console.error('Failed to reset column order in localStorage')
+        }
+    }, [])
+
+    return { columnOrder, onColumnOrderChange, resetColumnOrder }
+}
 
 export function useFieldHistory<T extends HistoryEntry>({
     userId,
@@ -386,8 +439,83 @@ const defaultTableOptions: MembershipTableOptions = {
     collapseFulfillment: false,
 }
 
+function useTableOptions() {
+    const [options, setOptions] =
+        useState<MembershipTableOptions>(defaultTableOptions)
+    const hydrated = useRef(false)
+
+    useEffect(() => {
+        try {
+            const raw = window.localStorage.getItem(TABLE_OPTIONS_STORAGE_KEY)
+            if (raw == null) return
+
+            const parsed: unknown = JSON.parse(raw)
+            if (parsed == null || typeof parsed !== 'object') return
+
+            const stored = parsed as Record<string, unknown>
+            setOptions((current) => {
+                const next = { ...current }
+                for (const key of Object.keys(
+                    current
+                ) as (keyof MembershipTableOptions)[])
+                    if (typeof stored[key] === 'boolean')
+                        next[key] = stored[key]
+                return next
+            })
+        } catch {
+            console.error('Failed to parse table options from localStorage')
+        }
+    }, [])
+
+    useEffect(() => {
+        if (!hydrated.current) {
+            hydrated.current = true
+            return
+        }
+        try {
+            window.localStorage.setItem(
+                TABLE_OPTIONS_STORAGE_KEY,
+                JSON.stringify(options)
+            )
+        } catch {
+            console.error('Failed to save table options to localStorage')
+        }
+    }, [options])
+
+    const setOption = useCallback(
+        <K extends keyof MembershipTableOptions>(
+            key: K,
+            value: MembershipTableOptions[K]
+        ) => setOptions((current) => ({ ...current, [key]: value })),
+        []
+    )
+
+    const resetOptions = useCallback(() => {
+        setOptions(defaultTableOptions)
+        try {
+            window.localStorage.removeItem(TABLE_OPTIONS_STORAGE_KEY)
+        } catch {
+            console.error('Failed to remove table options from localStorage')
+        }
+    }, [])
+
+    return { options, setOption, resetOptions }
+}
+
+const eligibleCountSearch: MembershipSearchRequest = {
+    limit: 1,
+    isMember: true,
+    isBenefitEligible: true,
+}
+
 function useMembershipsQuery() {
     const { ready, onGet } = useFetch()
+
+    const eligibleCountQuery = usePaginatedSearch(
+        '/actblue/memberships',
+        zMembershipsResponsePacket,
+        { search: eligibleCountSearch }
+    ).query
 
     const query = useInfiniteQuery({
         queryKey: ['/actblue/memberships', { limit: PAGE_SIZE }],
@@ -429,7 +557,9 @@ function useMembershipsQuery() {
             ? members.length
             : query.data?.pages[0]?.count
 
-    return { query, members, totalEntries }
+    const eligibleMemberCount = eligibleCountQuery.data?.count
+
+    return { query, members, totalEntries, eligibleMemberCount }
 }
 
 export function usePendingUpdates(edit: EditController, members: Member[]) {
@@ -468,11 +598,11 @@ export function usePendingUpdates(edit: EditController, members: Member[]) {
 }
 
 export function useMembershipPanel() {
-    const [options, setOptions] =
-        useState<MembershipTableOptions>(defaultTableOptions)
+    const { options, setOption, resetOptions } = useTableOptions()
     const [tableMode, setTableMode] = useState<MembershipTableMode>('view')
     const { editController, clearEdits } = useMemberEdits()
-    const { query, members, totalEntries } = useMembershipsQuery()
+    const { query, members, totalEntries, eligibleMemberCount } =
+        useMembershipsQuery()
 
     const { fetchNextPage, hasNextPage, isFetchingNextPage } = query
     const isPending: boolean = query.isPending
@@ -485,14 +615,6 @@ export function useMembershipPanel() {
         fetchNextPage,
     })
 
-    const setOption = useCallback(
-        <K extends keyof MembershipTableOptions>(
-            key: K,
-            value: MembershipTableOptions[K]
-        ) => setOptions((current) => ({ ...current, [key]: value })),
-        []
-    )
-
     const stopEditing = useCallback(() => {
         clearEdits()
         setTableMode('view')
@@ -503,8 +625,10 @@ export function useMembershipPanel() {
     return {
         members,
         totalEntries,
+        eligibleMemberCount,
         options,
         setOption,
+        resetOptions,
         tableMode,
         setTableMode,
         editController,

@@ -69,6 +69,7 @@ export default function Page() {
         statsQuery,
         allTimeStatsQuery,
         membershipCountQuery,
+        contributionCountQuery,
         setStartDate,
         setEndDate,
         setCommittedPreset,
@@ -711,8 +712,7 @@ export default function Page() {
                             href="/volunteer_dashboard/panels/contributions"
                             icon={FaMoneyBills}
                             tag={{
-                                count: allTimeStatsQuery.data
-                                    ?.totalContributionCount,
+                                count: contributionCountQuery.data?.count,
                             }}
                             buttonType="card"
                             trackPanelHistory

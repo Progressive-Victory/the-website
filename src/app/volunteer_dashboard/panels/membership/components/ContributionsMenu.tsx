@@ -232,9 +232,11 @@ export const ContributionsMenu = ({
                                         )}
                                     >
                                         {record.isRecurring &&
-                                            record.recurringAmount != null &&
-                                            `${formatAmount(record.recurringAmount)} · `}
-                                        {formatAmount(record.amount)}
+                                        record.recurringAmount != null
+                                            ? formatAmount(
+                                                  record.recurringAmount
+                                              )
+                                            : formatAmount(record.amount)}
                                     </span>
                                 </div>
                             ))}

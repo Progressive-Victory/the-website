@@ -5,9 +5,16 @@ import {
     useMembershipPanel,
     usePendingUpdates,
     useSaveMemberships,
+    useColumnOrder,
     MembershipTableOptions,
 } from './hooks'
-import { EditController, Member } from './membership.types'
+import { matchesSearchQuery } from './membership.helpers'
+import {
+    EditController,
+    Member,
+    MembershipSearchField,
+    membershipSearchFields,
+} from './membership.types'
 import { buildColumns, FULFILLMENT_CATEGORY } from './membershipColumns'
 import styles from './page.module.css'
 import { ListBody, ListElement } from '@/app/admin/layout/List'
@@ -24,6 +31,8 @@ import { usePaginatedSearch } from '@/util/hooks'
 import { UserProfile, zUserProfile } from 'pv-contracts/data'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
+import { FiSearch } from 'react-icons/fi'
+import { IoMdOptions } from 'react-icons/io'
 
 const showHideChoices = [
     { value: true, label: 'Show' },
@@ -128,12 +137,21 @@ function EditToolbar({
 
 export default function Page() {
     const [memberToMatch, setMemberToMatch] = useState<Member | null>(null)
+    // not wired to the query yet
+    const [searchDraft, setSearchDraft] = useState('')
+    const [searchField, setSearchField] =
+        useState<MembershipSearchField>('name')
+    const [scrollToMatchToken, setScrollToMatchToken] = useState(0)
+    const { columnOrder, onColumnOrderChange, resetColumnOrder } =
+        useColumnOrder()
     const linkMutation = useLinkDonorToUser()
     const {
         members,
         totalEntries,
+        eligibleMemberCount,
         options,
         setOption,
+        resetOptions,
         tableMode,
         setTableMode,
         editController,
@@ -181,8 +199,10 @@ export default function Page() {
                 tableMode,
                 edit: editController,
                 onMatchUser: setMemberToMatch,
+                searchQuery: searchDraft,
+                searchField,
             }),
-        [options, tableMode, editController]
+        [options, tableMode, editController, searchDraft, searchField]
     )
 
     const collapsedCategories = useMemo(
@@ -190,15 +210,99 @@ export default function Page() {
         [options.collapseFulfillment]
     )
 
+    const isSearchMatch = useCallback(
+        (member: Member) =>
+            matchesSearchQuery(
+                member,
+                searchDraft.trim().toLowerCase(),
+                searchField
+            ),
+        [searchDraft, searchField]
+    )
+
+    const matchCount = useMemo(
+        () => members.filter(isSearchMatch).length,
+        [members, isSearchMatch]
+    )
+
     return (
         <Panel
             includeHeader
             label="Membership"
             headerRight={
-                <div className={styles.panelTimestamp}>
-                    Showing {members.length.toLocaleString()}
-                    {totalEntries != null &&
-                        ` of ${totalEntries.toLocaleString()}`}
+                <div className={styles.panelHeaderRight}>
+                    <div className={styles.panelTimestamp}>
+                        {eligibleMemberCount != null &&
+                            `${eligibleMemberCount.toLocaleString()} Eligible · `}
+                        Showing {members.length.toLocaleString()}
+                        {totalEntries != null &&
+                            ` of ${totalEntries.toLocaleString()}`}
+                    </div>
+                    <div className={styles.panelSearch}>
+                        <FiSearch
+                            className={styles.panelSearchIcon}
+                            aria-hidden="true"
+                        />
+                        <input
+                            type="search"
+                            className={styles.panelSearchInput}
+                            placeholder="Search..."
+                            aria-label="Search memberships"
+                            value={searchDraft}
+                            onChange={(event) =>
+                                setSearchDraft(event.target.value)
+                            }
+                            onKeyDown={(event) => {
+                                if (event.key !== 'Enter' || matchCount === 0)
+                                    return
+                                event.preventDefault()
+                                setScrollToMatchToken((token) => token + 1)
+                            }}
+                        />
+                        {searchDraft.trim() !== '' && (
+                            <span className={styles.panelSearchCount}>
+                                {matchCount.toLocaleString()}
+                            </span>
+                        )}
+                        {searchDraft !== '' ? (
+                            <button
+                                type="button"
+                                className={styles.panelSearchClear}
+                                aria-label="Clear search"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => setSearchDraft('')}
+                            >
+                                <svg viewBox="0 0 16 16" aria-hidden="true">
+                                    <circle cx="8" cy="8" r="8" />
+                                    <path d="M5.5 5.5l5 5m0-5l-5 5" />
+                                </svg>
+                            </button>
+                        ) : (
+                            <span className={styles.panelSearchFilter}>
+                                <IoMdOptions aria-hidden="true" />
+                                <select
+                                    className={styles.panelSearchFilterSelect}
+                                    aria-label="Search column"
+                                    value={searchField}
+                                    onChange={(event) =>
+                                        setSearchField(
+                                            event.target
+                                                .value as MembershipSearchField
+                                        )
+                                    }
+                                >
+                                    {membershipSearchFields.map((field) => (
+                                        <option
+                                            key={field.value}
+                                            value={field.value}
+                                        >
+                                            {field.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </span>
+                        )}
+                    </div>
                 </div>
             }
         >
@@ -273,6 +377,15 @@ export default function Page() {
                                                 </div>
                                             )
                                         )}
+                                        footerButtonLabel="Restore Defaults"
+                                        footerButtonClassName={
+                                            styles.restoreDefaultsButton
+                                        }
+                                        footerButtonOnClick={() => {
+                                            resetOptions()
+                                            resetColumnOrder()
+                                            closeDropdown()
+                                        }}
                                     />
                                 )}
                             />
@@ -308,6 +421,12 @@ export default function Page() {
                                 collapsedCategories={collapsedCategories}
                                 mode={tableMode}
                                 zebra={options.showZebra}
+                                isScrollTarget={isSearchMatch}
+                                scrollToColumnKey={searchField}
+                                scrollToRowToken={scrollToMatchToken}
+                                reorderable={tableMode === 'edit'}
+                                entryOrder={columnOrder}
+                                onEntryOrderChange={onColumnOrderChange}
                                 footer={
                                     hasNextPage && (
                                         <div
