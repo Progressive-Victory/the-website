@@ -92,8 +92,8 @@ export interface FormProps<T> {
  *
  * See `FormGroup` and `FormField` for details.
  *
- * See `src/app/admin/members/page.tsx` for an example on using this
- * component.
+ * See `src/app/volunteer_dashboard/panels/members/page.tsx` for an example on
+ * using this component.
  *
  * IMPORTANT: This component will prefill `id` and override `dynamic`
  * properties of all direct children. If you're passing any component which

@@ -16,7 +16,7 @@ export function AccountPage() {
     const { isSessionLoading, session, onLogout } = useAuth()
     const loggedInUser = useCurrentUser()
 
-    const canAccessAdminPanel = useMemo(() => {
+    const canAccessDashboard = useMemo(() => {
         return loggedInUser.data
             ? hasPermission(loggedInUser.data, 'Admin Panel Access')
             : false
@@ -86,7 +86,7 @@ export function AccountPage() {
                     <>
                         <AccountDetailsSection
                             userData={loggedInUser.data}
-                            canAccessAdminPanel={canAccessAdminPanel}
+                            canAccessDashboard={canAccessDashboard}
                             handleSignOut={handleSignOut}
                             onSave={onSave}
                             donorLinkError={linkUser.error}

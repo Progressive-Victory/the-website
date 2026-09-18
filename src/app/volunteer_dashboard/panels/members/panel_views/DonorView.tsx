@@ -1,8 +1,7 @@
 'use client'
 
 import styles from './DonorView.module.css'
-import { ListBody } from '@/app/admin/layout/List'
-import { SearchModal } from '@/app/admin/layout/SearchModal'
+import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
 import {
     DateField,
     Form,
@@ -143,6 +142,28 @@ export function DonorView({
 
     const handleOverlaySearch = (e: ChangeEvent<HTMLInputElement>) => {
         onDonorSearch({ ...donorSearch, query: e.target.value })
+    }
+
+    const renderPickerResults = () => {
+        if (donorSearchQuery.isPending)
+            return <div className={styles.pickerStatus}>Loading...</div>
+
+        if (donorSearchQuery.error)
+            return (
+                <div className={styles.pickerStatusError}>
+                    Error: {donorSearchQuery.error.message}
+                </div>
+            )
+
+        const results = donorSearchQuery.data?.data ?? []
+        if (results.length === 0)
+            return <div className={styles.pickerStatus}>No results found</div>
+
+        return (
+            <div className={styles.pickerList}>
+                {results.map((donor) => renderDonorItem(donor, selectedId))}
+            </div>
+        )
     }
 
     const renderEmptyState = () => (
@@ -480,15 +501,7 @@ export function DonorView({
                 searchValue={queryValue}
                 onSearchChange={handleOverlaySearch}
             >
-                <ListBody
-                    count={donorSearchQuery.data?.count}
-                    isPending={donorSearchQuery.isPending}
-                    error={donorSearchQuery.error}
-                >
-                    {donorSearchQuery.data?.data.map((donor) =>
-                        renderDonorItem(donor, selectedId)
-                    )}
-                </ListBody>
+                {renderPickerResults()}
             </SearchModal>
         </div>
     )

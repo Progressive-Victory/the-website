@@ -9,6 +9,31 @@
     height: 100%;
 }
 
+.pickerList {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.pickerStatus {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.pickerStatusError {
+    composes: pickerStatus;
+    color: #ef4444;
+}
+
 .emptyStage {
     height: 100%;
     min-height: 24rem;
