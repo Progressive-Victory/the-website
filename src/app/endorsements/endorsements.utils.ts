@@ -9,7 +9,6 @@ import {
     type SectionGroupingMode,
     type SectionSortOrder,
 } from './endorsements.types'
-import { ElectionStatus, type Endorsement } from '@/contracts/data'
 import {
     ELECTION_STATUS_LABELS,
     ELECTION_STATUS_SORT_ORDER,
@@ -19,6 +18,7 @@ import {
     getStartOfToday,
     getStateLabel,
 } from '@/models'
+import { ElectionStatus, type Endorsement } from 'pv-contracts/data'
 
 /** Statuses that share the "Upcoming" section instead of showing their own label. Might Refactor Later */
 const UPCOMING_STATUSES = new Set<ElectionStatus>([

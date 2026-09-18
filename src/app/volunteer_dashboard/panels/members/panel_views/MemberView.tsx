@@ -12,9 +12,9 @@ import {
     TextField,
 } from '@/components/common/forms'
 import { MultiTextField } from '@/components/common/forms/MultiTextField'
-import { Role, ShirtSize, UpdateHistory, User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
+import { Role, ShirtSize, UpdateHistory, User } from 'pv-contracts/data'
 
 const membershipCardShipmentOptions = [
     { value: 0, label: 'Not Started' },
@@ -143,10 +143,15 @@ export function MemberView({
                     readonly
                 />
                 <TextField
-                    label="Email"
+                    label="Account Email"
                     field="email"
                     autocomplete="email"
                     required
+                />
+                <TextField<User>
+                    label="Discord Email"
+                    getter={(form) => form.discordUsers?.[0]?.email}
+                    readonly
                 />
                 <PhoneField label="Phone Number" field="phone" required />
                 {editing ? (

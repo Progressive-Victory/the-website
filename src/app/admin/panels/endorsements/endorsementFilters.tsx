@@ -3,13 +3,13 @@
 import styles from './endorsementFilters.module.css'
 import { FilterTag } from '@/app/admin/layout/FilterTags'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
+import { stateOptions } from '@/models'
 import {
     ElectionStatus,
     Endorsement,
     EndorsementType,
     InitiativeType,
-} from '@/contracts/data'
-import { stateOptions } from '@/models'
+} from 'pv-contracts/data'
 import { useMemo, useState } from 'react'
 import {
     FaCalendarAlt,
