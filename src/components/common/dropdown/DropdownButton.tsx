@@ -53,11 +53,7 @@ import { IoClose } from 'react-icons/io5'
  */
 
 export type DropdownButtonVariant =
-    | 'long'
-    | 'short'
-    | 'minimal'
-    | 'icon'
-    | 'plain'
+    'long' | 'short' | 'minimal' | 'icon' | 'plain'
 
 interface DropdownVariantConfig {
     ariaHasPopup: 'menu' | 'dialog'
