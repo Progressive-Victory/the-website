@@ -181,7 +181,7 @@ function optionDropdown<T>(
                 label="Filter by"
                 onClose={closeDropdown}
                 narrowLayoutMode="trigger"
-                style={{ left: 0, right: 'auto' }}
+                align="start"
                 body={
                     <div className={styles.filterMenu}>
                         <DropdownOverlayButton
