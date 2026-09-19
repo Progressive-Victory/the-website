@@ -31,10 +31,11 @@ import {
     MemberMenuProps,
     MemberValueProps,
     PackageShipped,
-    ShirtSize,
+    packageShippedOptions,
 } from './membership.types'
 import styles from './membershipCells.module.css'
 import { cn } from '@/util'
+import { ShirtSize } from 'pv-contracts/data'
 import { Fragment } from 'react'
 
 const NoLinkedUser = () => (
@@ -533,21 +534,24 @@ export const EmailMenu = ({ member, closeDropdown }: MemberMenuProps) => (
     />
 )
 
-const shirtSizes: ShirtSize[] = ['XXL', 'XL', 'L', 'M', 'S', 'XS']
+const shirtSizes = Object.values(ShirtSize).reverse()
 
 const shirtSizeClass: Record<ShirtSize, string> = {
-    XS: tags.tagRed,
-    S: tags.tagOrange,
-    M: tags.tagYellow,
-    L: tags.tagGreen,
-    XL: tags.tagBlue,
-    XXL: tags.tagPurple,
+    [ShirtSize.ExtraSmall]: tags.tagRed,
+    [ShirtSize.Small]: tags.tagOrange,
+    [ShirtSize.Medium]: tags.tagYellow,
+    [ShirtSize.Large]: tags.tagGreen,
+    [ShirtSize.ExtraLarge]: tags.tagBlue,
+    [ShirtSize.DoubleExtraLarge]: tags.tagPurple,
 }
+
+const shirtSizeLabel = (size: ShirtSize) =>
+    size === ShirtSize.DoubleExtraLarge ? 'XXL' : size
 
 export const ShirtSizeValue = ({ member }: MemberValueProps) =>
     member.shirtSize ? (
         <span className={cn(tags.tag, shirtSizeClass[member.shirtSize])}>
-            {member.shirtSize}
+            {shirtSizeLabel(member.shirtSize)}
         </span>
     ) : (
         <span className={cn(tags.tag, tags.tagGray)}>N/A</span>
@@ -566,20 +570,13 @@ export const ShirtSizeEdit = ({ member, edit }: MemberEditProps) => {
             value={value}
             options={shirtSizes}
             optionClass={shirtSizeClass}
+            optionLabel={shirtSizeLabel}
             dirty={dirty}
             allowClear
             onSelect={(shirtSize) => edit.update(member, { shirtSize })}
         />
     )
 }
-
-const packageShippedOptions: PackageShipped[] = [
-    'Yes',
-    'No',
-    'Returned',
-    'Not Received',
-    'Canceled',
-]
 
 const packageShippedClass: Record<PackageShipped, string> = {
     Yes: tags.tagGreen,

@@ -47,7 +47,7 @@ const SourceValueTag = ({
 
 const IdenticalTag = ({ source }: { source?: string }) => (
     <span className={cn(tags.tag, tags.tagWide, tags.tagGray)}>
-        {source ? `Identical To ${source}` : 'Identical'}
+        {source ? `Identical to ${source}` : 'Identical'}
     </span>
 )
 

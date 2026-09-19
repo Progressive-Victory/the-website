@@ -18,12 +18,11 @@ import {
     EditController,
     Member,
     MemberEdits,
+    MemberEditProps,
     MemberFlag,
-    MembershipTableMode,
     MembershipTier,
     MembershipSearchField,
     PackageShipped,
-    ShirtSize,
 } from './membership.types'
 import {
     AddressEdit,
@@ -51,6 +50,7 @@ import styles from './page.module.css'
 import { Column, ColumnEntry } from '@/components/common/table'
 import { cn } from '@/util'
 import Link from 'next/link'
+import { ShirtSize } from 'pv-contracts/data'
 
 const monthAbbreviations = [
     'Jan',
@@ -102,12 +102,12 @@ const membershipTierRank: Record<MembershipTier, number> = {
 }
 
 const shirtSizeRank: Record<ShirtSize, number> = {
-    XXL: 0,
-    XL: 1,
-    L: 2,
-    M: 3,
-    S: 4,
-    XS: 5,
+    [ShirtSize.DoubleExtraLarge]: 0,
+    [ShirtSize.ExtraLarge]: 1,
+    [ShirtSize.Large]: 2,
+    [ShirtSize.Medium]: 3,
+    [ShirtSize.Small]: 4,
+    [ShirtSize.ExtraSmall]: 5,
 }
 
 const NO_SHIRT_SIZE_RANK = Object.keys(shirtSizeRank).length
@@ -140,15 +140,15 @@ interface FlagColumnConfig {
     ) => React.ReactNode
 }
 
+interface FlagEditProps extends MemberEditProps {
+    config: FlagColumnConfig
+}
+
 const FlagEdit = ({
     member,
     edit,
     config: { key, header, resolveDraft },
-}: {
-    member: Member
-    edit: EditController
-    config: FlagColumnConfig
-}) => {
+}: FlagEditProps) => {
     const draft = useMemberDraft(edit, member)
     const value = resolveDraft
         ? resolveDraft(member, draft)
@@ -249,23 +249,25 @@ const isFullyFulfilled = (m: Member, requireConfirmations: boolean) =>
 
 export const FULFILLMENT_CATEGORY = 'Fulfillment'
 
-export const buildColumns = ({
-    options,
-    tableMode,
-    edit,
-    onMatchUser,
-    searchQuery = '',
-    searchField = 'name',
-}: {
+export interface BuildColumnsArgs {
     options: MembershipTableOptions
-    tableMode: MembershipTableMode
+    isEditing: boolean
     edit: EditController
     onMatchUser: (member: Member) => void
     searchQuery?: string
     searchField?: MembershipSearchField
-}): ColumnEntry<Member>[] => {
+}
+
+export const buildColumns = ({
+    options,
+    isEditing,
+    edit,
+    onMatchUser,
+    searchQuery = '',
+    searchField = 'name',
+}: BuildColumnsArgs): ColumnEntry<Member>[] => {
     const { showConfirmed, showStatus, showRowNumber } = options
-    const showFulfilledTag = options.showFulfilled && tableMode === 'view'
+    const showFulfilledTag = options.showFulfilled && !isEditing
     const normalizedQuery = searchQuery.trim().toLowerCase()
     const nameQuery = searchField === 'name' ? normalizedQuery : ''
     const discordQuery = searchField === 'discord' ? normalizedQuery : ''
@@ -312,7 +314,7 @@ export const buildColumns = ({
             },
         },
         {
-            label: FULFILLMENT_CATEGORY,
+            key: FULFILLMENT_CATEGORY,
             collapsedWidth: '6rem',
             dotColor: statusDotColor,
             rowRender: showFulfilledTag

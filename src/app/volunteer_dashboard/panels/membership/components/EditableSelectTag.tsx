@@ -31,6 +31,8 @@ export interface EditableSelectTagProps<T extends string> {
     onSelect: (value: T | null) => void
     allowClear?: boolean
     menuLabel?: string
+    fallback?: string
+    optionLabel?: (value: T) => string
 }
 
 export const EditableSelectTag = <T extends string>({
@@ -43,6 +45,8 @@ export const EditableSelectTag = <T extends string>({
     onSelect,
     allowClear = false,
     menuLabel,
+    fallback = 'N/A',
+    optionLabel = (option: T) => option,
 }: EditableSelectTagProps<T>) => {
     const variantClasses = selectVariants[variant]
     const choices: (T | null)[] = allowClear ? [...options, null] : [...options]
@@ -85,14 +89,18 @@ export const EditableSelectTag = <T extends string>({
                                         : optionClass[choice]
                                 )}
                             >
-                                {choice ?? 'N/A'}
+                                {choice == null
+                                    ? fallback
+                                    : optionLabel(choice)}
                             </span>
                         </button>
                     ))}
                 />
             )}
         >
-            <span className={variantClasses.label}>{value ?? 'N/A'}</span>
+            <span className={variantClasses.label}>
+                {value == null ? fallback : optionLabel(value)}
+            </span>
             <FiChevronDown
                 className={variantClasses.chevron}
                 strokeWidth={3}

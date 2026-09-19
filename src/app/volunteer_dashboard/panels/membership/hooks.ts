@@ -16,7 +16,6 @@ import {
     HistoryEntry,
     Member,
     MemberEdits,
-    MembershipTableMode,
     PendingUpdate,
 } from './membership.types'
 import {
@@ -599,7 +598,7 @@ export function usePendingUpdates(edit: EditController, members: Member[]) {
 
 export function useMembershipPanel() {
     const { options, setOption, resetOptions } = useTableOptions()
-    const [tableMode, setTableMode] = useState<MembershipTableMode>('view')
+    const [isEditing, setIsEditing] = useState(false)
     const { editController, clearEdits } = useMemberEdits()
     const { query, members, totalEntries, eligibleMemberCount } =
         useMembershipsQuery()
@@ -617,7 +616,7 @@ export function useMembershipPanel() {
 
     const stopEditing = useCallback(() => {
         clearEdits()
-        setTableMode('view')
+        setIsEditing(false)
     }, [clearEdits])
 
     const saveMutation = useSaveMemberships(stopEditing)
@@ -629,8 +628,8 @@ export function useMembershipPanel() {
         options,
         setOption,
         resetOptions,
-        tableMode,
-        setTableMode,
+        isEditing,
+        setIsEditing,
         editController,
         saveMutation,
         discardEdits: stopEditing,

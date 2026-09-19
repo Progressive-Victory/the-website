@@ -152,7 +152,6 @@
 }
 
 .cell,
-.cellOverflowVisible,
 .dotCell {
     position: relative;
     align-self: stretch;
@@ -202,4 +201,24 @@
     width: 0.55rem;
     height: 0.55rem;
     border-radius: 50%;
+}
+
+.dragGhost {
+    position: fixed;
+    top: -10000px;
+    left: -10000px;
+    overflow: hidden;
+    background: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
+}
+
+.dragGhostCell {
+    position: absolute;
+    margin: 0;
+    opacity: 1;
+}
+
+.spacer {
+    flex-shrink: 0;
 }

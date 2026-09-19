@@ -12,12 +12,11 @@ import {
     PackageShipped,
     PendingUpdate,
     RecurringSummary,
-    ShirtSize,
     TierSegment,
 } from './membership.types'
 import {
     MembershipDeliverableStatus,
-    ShirtSize as ApiShirtSize,
+    ShirtSize,
     UserAddress,
 } from 'pv-contracts/data'
 import {
@@ -449,10 +448,7 @@ export const mapPacketToMember = (
         userAddress: formatUserAddress(user?.address),
         userAddressParts: user?.address,
         donorAddress: formatDonorAddress(donor),
-        shirtSize:
-            membership?.shirtSize === '2XL'
-                ? 'XXL'
-                : (membership?.shirtSize ?? undefined),
+        shirtSize: membership?.shirtSize ?? undefined,
         isMember: membership?.duesPayingMember,
         eligibleForBenefits: membership?.membershipBenefitEligible,
         membershipTier: membershipTiers.find(
@@ -467,22 +463,19 @@ export const mapPacketToMember = (
         discordConfirmed:
             membership?.discordConfirmed ?? Boolean(user?.discordUsers?.length),
         nameConfirmed:
-            membership?.nameConfirmed ?? user?.nameConfirmed ?? undefined,
+            membership?.nameConfirmed ?? user?.nameConfirmed ?? false,
         addressConfirmed:
-            membership?.addressConfirmed ?? user?.addressConfirmed ?? undefined,
-        cardPrinted: membership?.cardPrinted ?? undefined,
-        labelPrinted: membership?.labelPrinted ?? undefined,
-        cardPacked: membership?.itemsPackaged ?? undefined,
-        benefitShipped: membership?.benefitsShipped ?? undefined,
+            membership?.addressConfirmed ?? user?.addressConfirmed ?? false,
+        cardPrinted: membership?.cardPrinted ?? false,
+        labelPrinted: membership?.labelPrinted ?? false,
+        cardPacked: membership?.itemsPackaged ?? false,
+        benefitShipped: membership?.benefitsShipped ?? false,
         membershipCardStatus: cardStatus,
         membershipMerchStatus: merchStatus,
         packageShipped: packageShippedFromStatus(cardStatus),
         userMatched: Boolean(user),
     }
 }
-
-const toApiShirtSize = (size: ShirtSize): ApiShirtSize =>
-    size === 'XXL' ? ApiShirtSize.DoubleExtraLarge : (size as ApiShirtSize)
 
 const packageShippedStatus: Record<
     PackageShipped,
@@ -540,10 +533,10 @@ const resolveConfirmation = (
 const resolveShirtSize = (
     member: Member,
     draft: MemberEdits
-): FieldChange<ApiShirtSize> => {
+): FieldChange<ShirtSize> => {
     if (draft.shirtSize === undefined) return undefined
     if ((draft.shirtSize ?? undefined) === member.shirtSize) return undefined
-    return draft.shirtSize == null ? null : toApiShirtSize(draft.shirtSize)
+    return draft.shirtSize ?? null
 }
 
 const resolveCardStatus = (member: Member, draft: MemberEdits) => {

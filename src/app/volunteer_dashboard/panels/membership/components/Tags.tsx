@@ -29,7 +29,7 @@ export const EditableBoolTag = ({
             styles.editableBoolTag
         )}
         aria-pressed={value === true}
-        aria-label={value ? `${label} confirmed` : `${label} not confirmed`}
+        aria-label={`${label}${value ? '' : ' not'} confirmed`}
         role="button"
         tabIndex={0}
         onClick={onToggle}
@@ -53,7 +53,7 @@ export const ConfirmedBadge = ({
 }) => (
     <span
         className={styles.confirmBadge}
-        data-tooltip={`${label} ${confirmed ? 'Confirmed' : 'Not Confirmed'}`}
+        data-tooltip={`${label} ${confirmed ? '' : 'Not '}Confirmed`}
         tabIndex={0}
     >
         {confirmed ? (

@@ -23,6 +23,7 @@ import {
     DropdownOverlay,
     ToggleGroup,
 } from '@/components/common'
+import { CloseCircleIcon } from '@/components/common/icons/CloseCircleIcon'
 import Panel from '@/components/common/panel/Panel'
 import { Table } from '@/components/common/table'
 import { cn } from '@/util'
@@ -144,6 +145,77 @@ function EditToolbar({
     )
 }
 
+type TableOptionRowConfig = (typeof tableOptionRows)[number]
+
+interface TableOptionRowProps {
+    config: TableOptionRowConfig
+    value: boolean
+    onChange: (value: boolean) => void
+}
+
+function TableOptionRow({
+    config: { label, ariaLabel, choices },
+    value,
+    onChange,
+}: TableOptionRowProps) {
+    return (
+        <div className={styles.tableOptionRow}>
+            <span className={styles.tableOptionLabel}>{label}</span>
+            <ToggleGroup<boolean>
+                ariaLabel={ariaLabel}
+                orientation="horizontal"
+                value={value}
+                options={choices}
+                onChange={onChange}
+            />
+        </div>
+    )
+}
+
+interface TableOptionsMenuProps {
+    options: MembershipTableOptions
+    setOption: <K extends keyof MembershipTableOptions>(
+        key: K,
+        value: MembershipTableOptions[K]
+    ) => void
+    onRestoreDefaults: () => void
+}
+
+function TableOptionsMenu({
+    options,
+    setOption,
+    onRestoreDefaults,
+}: TableOptionsMenuProps) {
+    return (
+        <DropdownButton
+            buttonVariant="minimal"
+            label="Table Options"
+            menu={({ closeDropdown }) => (
+                <DropdownOverlay
+                    className={styles.tableOptionsBox}
+                    label="Table Options"
+                    onClose={closeDropdown}
+                    bodyClassName={styles.tableOptionsBody}
+                    body={tableOptionRows.map((config) => (
+                        <TableOptionRow
+                            key={config.key}
+                            config={config}
+                            value={options[config.key]}
+                            onChange={(value) => setOption(config.key, value)}
+                        />
+                    ))}
+                    footerButtonLabel="Restore Defaults"
+                    footerButtonClassName={styles.restoreDefaultsButton}
+                    footerButtonOnClick={() => {
+                        onRestoreDefaults()
+                        closeDropdown()
+                    }}
+                />
+            )}
+        />
+    )
+}
+
 export default function Page() {
     const [memberToMatch, setMemberToMatch] = useState<Member | null>(null)
     // not wired to the query yet
@@ -161,8 +233,8 @@ export default function Page() {
         options,
         setOption,
         resetOptions,
-        tableMode,
-        setTableMode,
+        isEditing,
+        setIsEditing,
         editController,
         saveMutation,
         discardEdits,
@@ -205,13 +277,13 @@ export default function Page() {
         () =>
             buildColumns({
                 options,
-                tableMode,
+                isEditing,
                 edit: editController,
                 onMatchUser: setMemberToMatch,
                 searchQuery: searchDraft,
                 searchField,
             }),
-        [options, tableMode, editController, searchDraft, searchField]
+        [options, isEditing, editController, searchDraft, searchField]
     )
 
     const collapsedCategories = useMemo(
@@ -316,10 +388,7 @@ export default function Page() {
                                 onMouseDown={(event) => event.preventDefault()}
                                 onClick={() => setSearchDraft('')}
                             >
-                                <svg viewBox="0 0 16 16" aria-hidden="true">
-                                    <circle cx="8" cy="8" r="8" />
-                                    <path d="M5.5 5.5l5 5m0-5l-5 5" />
-                                </svg>
+                                <CloseCircleIcon />
                             </button>
                         ) : (
                             <span className={styles.panelSearchFilter}>
@@ -361,7 +430,7 @@ export default function Page() {
                         </div>
 
                         <div className={styles.tableToolbar}>
-                            {tableMode === 'edit' ? (
+                            {isEditing ? (
                                 <EditToolbar
                                     members={members}
                                     editController={editController}
@@ -372,66 +441,18 @@ export default function Page() {
                                 <button
                                     type="button"
                                     className={styles.toolbarButton}
-                                    onClick={() => setTableMode('edit')}
+                                    onClick={() => setIsEditing(true)}
                                 >
                                     <FaEdit /> Edit
                                 </button>
                             )}
-                            <DropdownButton
-                                buttonVariant="minimal"
-                                label="Table Options"
-                                menu={({ closeDropdown }) => (
-                                    <DropdownOverlay
-                                        className={styles.tableOptionsBox}
-                                        label="Table Options"
-                                        onClose={closeDropdown}
-                                        bodyClassName={styles.tableOptionsBody}
-                                        body={tableOptionRows.map(
-                                            ({
-                                                key,
-                                                label,
-                                                ariaLabel,
-                                                choices,
-                                            }) => (
-                                                <div
-                                                    key={key}
-                                                    className={
-                                                        styles.tableOptionRow
-                                                    }
-                                                >
-                                                    <span
-                                                        className={
-                                                            styles.tableOptionLabel
-                                                        }
-                                                    >
-                                                        {label}
-                                                    </span>
-                                                    <ToggleGroup<boolean>
-                                                        ariaLabel={ariaLabel}
-                                                        orientation="horizontal"
-                                                        value={options[key]}
-                                                        options={choices}
-                                                        onChange={(value) =>
-                                                            setOption(
-                                                                key,
-                                                                value
-                                                            )
-                                                        }
-                                                    />
-                                                </div>
-                                            )
-                                        )}
-                                        footerButtonLabel="Restore Defaults"
-                                        footerButtonClassName={
-                                            styles.restoreDefaultsButton
-                                        }
-                                        footerButtonOnClick={() => {
-                                            resetOptions()
-                                            resetColumnOrder()
-                                            closeDropdown()
-                                        }}
-                                    />
-                                )}
+                            <TableOptionsMenu
+                                options={options}
+                                setOption={setOption}
+                                onRestoreDefaults={() => {
+                                    resetOptions()
+                                    resetColumnOrder()
+                                }}
                             />
                         </div>
                     </div>
@@ -463,14 +484,16 @@ export default function Page() {
                                 data={members}
                                 rowKey={(m) => m.id}
                                 collapsedCategories={collapsedCategories}
-                                mode={tableMode}
-                                zebra={options.showZebra}
+                                options={{
+                                    editing: isEditing,
+                                    zebra: options.showZebra,
+                                    reorderable: isEditing,
+                                    entryOrder: columnOrder,
+                                    onEntryOrderChange: onColumnOrderChange,
+                                }}
                                 isScrollTarget={isSearchMatch}
                                 scrollToColumnKey={searchField}
                                 scrollToRowToken={scrollToMatchToken}
-                                reorderable={tableMode === 'edit'}
-                                entryOrder={columnOrder}
-                                onEntryOrderChange={onColumnOrderChange}
                                 footer={
                                     hasNextPage && (
                                         <div

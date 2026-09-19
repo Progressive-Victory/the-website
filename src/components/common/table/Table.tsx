@@ -2,6 +2,7 @@
 
 import styles from './Table.module.css'
 import { cn } from '@/util'
+import { SortDirection } from 'pv-contracts/requests'
 import React, {
     useCallback,
     useEffect,
@@ -30,10 +31,17 @@ import { MdDragIndicator } from 'react-icons/md'
  * - columns: Column definitions, optionally grouped into categories.
  * - data: The rows to render.
  * - rowKey: Returns a stable unique key for each row.
- * - collapsedCategories: Labels of categories to render collapsed as dots.
- * - mode: 'view' (default) or 'edit' to swap in the editable cell renderers.
- * - zebra: Alternating row background colors.
+ * - collapsedCategories: Keys of categories to render collapsed as dots.
+ * - options: Feature toggles and their companion props. See TableOptions.
  * - footer: Rendered below the last row, inside the scroll container.
+ *
+ *
+ * TableOptions:
+ * - editing: Swap in the editable cell renderers.
+ * - zebra: Alternating row background colors.
+ * - reorderable: Let header cells be dragged to reorder top-level entries.
+ * - entryOrder: Entry ids (column key, or category label) in the desired order.
+ * - onEntryOrderChange: Receives the new entry order after a drag.
  *
  *
  * Column<T>:
@@ -50,11 +58,12 @@ import { MdDragIndicator } from 'react-icons/md'
  *
  *
  * ColumnCategory<T>:
- * - label: Category name, used to target it via collapsedCategories.
+ * - key: Category identifier, unique across all columns and categories.
  * - columns: The columns belonging to this category.
  * - collapsedWidth: Width used while collapsed. Defaults to 5rem.
  * - dotColor: Dot color per column while collapsed. Return null for a bullet.
  * - rowRender: Replaces the category's cells for a row with a single spanning cell.
+ *   Return anything falsy to leave the row's cells alone.
  *
  *
  *
@@ -73,7 +82,7 @@ import { MdDragIndicator } from 'react-icons/md'
  *         sortValue: (example) => example.name,
  *     },
  *     {
- *         label: 'Contact',
+ *         key: 'contact',
  *         columns: [
  *             { key: 'email', header: 'Email', render: (e) => e.email },
  *             { key: 'phone', header: 'Phone', render: (e) => e.phone },
@@ -86,8 +95,7 @@ import { MdDragIndicator } from 'react-icons/md'
  *     columns={columns}
  *     data={examples}
  *     rowKey={(example) => example.id}
- *     mode="view"
- *     zebra
+ *     options={{ zebra: true }}
  * />
  *
  */
@@ -95,6 +103,7 @@ import { MdDragIndicator } from 'react-icons/md'
 const DEFAULT_COLUMN_WIDTH = '10rem'
 const VIRTUALIZE_THRESHOLD = 60
 const OVERSCAN = 10
+const NO_COLLAPSED_CATEGORIES: string[] = []
 
 export interface Column<T> {
     key: string
@@ -111,45 +120,46 @@ export interface Column<T> {
 }
 
 export interface ColumnCategory<T> {
-    label: string
+    key: string
     columns: Column<T>[]
     collapsedWidth?: string
     dotColor?: (row: T, col: Column<T>) => string | null
-    rowRender?: (row: T) => React.ReactNode | null
+    rowRender?: (row: T) => React.ReactNode
 }
 
 export type ColumnEntry<T> = Column<T> | ColumnCategory<T>
 
 function isCategory<T>(entry: ColumnEntry<T>): entry is ColumnCategory<T> {
-    return 'columns' in entry && 'label' in entry
+    return 'columns' in entry
 }
 
-const entryId = <T,>(entry: ColumnEntry<T>) =>
-    isCategory(entry) ? entry.label : entry.key
+const entryCells = (root: HTMLElement | null | undefined, entryKey: string) =>
+    Array.from(
+        root?.querySelectorAll<HTMLElement>(
+            `[data-entry-id="${CSS.escape(entryKey)}"]`
+        ) ?? []
+    )
 
-export type TableMode = 'view' | 'edit'
+export interface TableOptions {
+    editing?: boolean
+    zebra?: boolean
+    /** Distinct from Column.reorderable, which pins an individual column. */
+    reorderable?: boolean
+    entryOrder?: string[]
+    onEntryOrderChange?: (order: string[]) => void
+}
 
 export interface TableProps<T> {
     columns: ColumnEntry<T>[]
     data: T[]
     rowKey: (row: T, index: number) => string | number
     collapsedCategories?: string[]
-    mode?: TableMode
-    zebra?: boolean
+    options?: TableOptions
     footer?: React.ReactNode
     isScrollTarget?: (row: T) => boolean
-    /** Column brought into horizontal view alongside the scroll target. */
     scrollToColumnKey?: string
-    /** Increment to scroll the first isScrollTarget row into view. */
     scrollToRowToken?: number
-    /** Allow header cells to be dragged to reorder top-level entries. */
-    reorderable?: boolean
-    /** Entry ids (column key, or category label) in the desired order. */
-    entryOrder?: string[]
-    onEntryOrderChange?: (order: string[]) => void
 }
-
-type SortDir = 'asc' | 'desc'
 
 type OpenCellSetter = React.Dispatch<React.SetStateAction<string | null>>
 
@@ -160,28 +170,29 @@ interface VisibleEntry<T> {
     width: string
 }
 
-function TableCellInner<T>({
-    col,
-    row,
-    index,
-    mode,
-    isOpen,
-    cellId,
-    setOpenCell,
-    dragging = false,
-    entryId: cellEntryId,
-}: {
+interface TableCellProps<T> {
     col: Column<T>
     row: T
     index: number
-    mode: TableMode
+    editing: boolean
     isOpen: boolean
     cellId: string
     setOpenCell: OpenCellSetter
     dragging?: boolean
     entryId?: string
-}) {
-    const editing = mode === 'edit'
+}
+
+function TableCellInner<T>({
+    col,
+    row,
+    index,
+    editing,
+    isOpen,
+    cellId,
+    setOpenCell,
+    dragging = false,
+    entryId: cellEntryId,
+}: TableCellProps<T>) {
     const editable = editing && col.renderEdit != null
     const interactive = !editing && Boolean(col.menu ?? col.onCellClick)
 
@@ -200,7 +211,7 @@ function TableCellInner<T>({
     return (
         <span
             className={cn(
-                col.allowOverflow ? styles.cellOverflowVisible : styles.cell,
+                styles.cell,
                 interactive && styles.clickable,
                 editing && !editable && styles.lockedCell,
                 dragging && styles.draggingCell,
@@ -244,6 +255,20 @@ function TableCellInner<T>({
 
 const TableCell = React.memo(TableCellInner) as typeof TableCellInner
 
+interface TableRowProps<T> {
+    row: T
+    index: number
+    rowId: string | number
+    columns: ColumnEntry<T>[]
+    visibleEntries: VisibleEntry<T>[]
+    gridTemplateColumns: string
+    editing: boolean
+    zebra: boolean
+    openColKey: string | null
+    setOpenCell: OpenCellSetter
+    draggingEntryId: string | null
+}
+
 function TableRowInner<T>({
     row,
     index,
@@ -251,32 +276,17 @@ function TableRowInner<T>({
     columns,
     visibleEntries,
     gridTemplateColumns,
-    mode,
+    editing,
     zebra,
     openColKey,
     setOpenCell,
     draggingEntryId,
-}: {
-    row: T
-    index: number
-    rowId: string | number
-    columns: ColumnEntry<T>[]
-    visibleEntries: VisibleEntry<T>[]
-    gridTemplateColumns: string
-    mode: TableMode
-    zebra: boolean
-    openColKey: string | null
-    setOpenCell: OpenCellSetter
-    draggingEntryId: string | null
-}) {
+}: TableRowProps<T>) {
     const rowOverrides = new Map<string, React.ReactNode>()
     for (const entry of columns) {
-        if (isCategory(entry) && entry.rowRender) {
-            const result = entry.rowRender(row)
-            if (result != null) {
-                rowOverrides.set(entry.label, result)
-            }
-        }
+        if (!isCategory(entry)) continue
+        const override = entry.rowRender?.(row)
+        if (override) rowOverrides.set(entry.key, override)
     }
 
     const rendered = new Set<string>()
@@ -295,11 +305,11 @@ function TableRowInner<T>({
                     const category = entry.category!
                     return (
                         <span
-                            key={`group-${category.label}`}
-                            data-entry-id={category.label}
+                            key={`group-${category.key}`}
+                            data-entry-id={category.key}
                             className={cn(
                                 styles.dotCell,
-                                draggingEntryId === category.label &&
+                                draggingEntryId === category.key &&
                                     styles.draggingCell
                             )}
                         >
@@ -320,29 +330,27 @@ function TableRowInner<T>({
                                         key={col.key}
                                         className={styles.bullet}
                                     >
-                                        ·
+                                        &middot;
                                     </span>
                                 )
                             })}
                         </span>
                     )
                 }
-                if (entry.category && rowOverrides.has(entry.category.label)) {
-                    if (rendered.has(entry.category.label)) {
-                        return null
-                    }
-                    rendered.add(entry.category.label)
-                    const span = entry.category.columns.length
+                if (entry.category && rowOverrides.has(entry.category.key)) {
+                    if (rendered.has(entry.category.key)) return null
+                    rendered.add(entry.category.key)
+                    const columnSpan = entry.category.columns.length
                     return (
                         <span
-                            key={`override-${entry.category.label}`}
-                            data-entry-id={entry.category.label}
+                            key={`override-${entry.category.key}`}
+                            data-entry-id={entry.category.key}
                             className={cn(
                                 styles.cell,
-                                draggingEntryId === entry.category.label &&
+                                draggingEntryId === entry.category.key &&
                                     styles.draggingCell
                             )}
-                            style={{ gridColumn: `span ${span}` }}
+                            style={{ gridColumn: `span ${columnSpan}` }}
                         >
                             <span
                                 className={cn(
@@ -350,7 +358,7 @@ function TableRowInner<T>({
                                     styles.overrideContent
                                 )}
                             >
-                                {rowOverrides.get(entry.category.label)}
+                                {rowOverrides.get(entry.category.key)}
                             </span>
                         </span>
                     )
@@ -362,14 +370,13 @@ function TableRowInner<T>({
                         col={col}
                         row={row}
                         index={index}
-                        mode={mode}
+                        editing={editing}
                         isOpen={openColKey === col.key}
                         cellId={`${rowId}::${col.key}`}
                         setOpenCell={setOpenCell}
-                        entryId={entry.category?.label ?? col.key}
+                        entryId={entry.category?.key ?? col.key}
                         dragging={
-                            draggingEntryId ===
-                            (entry.category?.label ?? col.key)
+                            draggingEntryId === (entry.category?.key ?? col.key)
                         }
                     />
                 )
@@ -440,19 +447,23 @@ export function Table<T>({
     columns,
     data,
     rowKey,
-    collapsedCategories = [],
-    mode = 'view',
-    zebra = false,
+    collapsedCategories = NO_COLLAPSED_CATEGORIES,
+    options,
     footer,
     isScrollTarget,
     scrollToColumnKey,
     scrollToRowToken,
-    reorderable = false,
-    entryOrder,
-    onEntryOrderChange,
 }: TableProps<T>) {
+    const {
+        editing = false,
+        zebra = false,
+        reorderable = false,
+        entryOrder,
+        onEntryOrderChange,
+    } = options ?? {}
+
     const [sortKey, setSortKey] = useState<string | null>(null)
-    const [sortDir, setSortDir] = useState<SortDir>('asc')
+    const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC)
     const [openCell, setOpenCell] = useState<string | null>(null)
     const [draggingId, setDraggingId] = useState<string | null>(null)
     const [dropTarget, setDropTarget] = useState<{
@@ -472,8 +483,8 @@ export function Table<T>({
     const handledScrollToken = useRef<number | undefined>(undefined)
 
     useEffect(() => {
-        if (mode === 'edit') setOpenCell(null)
-    }, [mode])
+        if (editing) setOpenCell(null)
+    }, [editing])
 
     useEffect(() => {
         if (!openCell) return
@@ -504,10 +515,12 @@ export function Table<T>({
 
     const handleSort = (key: string) => {
         if (sortKey === key) {
-            setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+            setSortDir((d) =>
+                d === SortDirection.ASC ? SortDirection.DESC : SortDirection.ASC
+            )
         } else {
             setSortKey(key)
-            setSortDir('asc')
+            setSortDir(SortDirection.ASC)
         }
     }
 
@@ -516,8 +529,8 @@ export function Table<T>({
         const rank = new Map(entryOrder.map((id, index) => [id, index]))
         return [...columns].sort(
             (a, b) =>
-                (rank.get(entryId(a)) ?? Number.MAX_SAFE_INTEGER) -
-                (rank.get(entryId(b)) ?? Number.MAX_SAFE_INTEGER)
+                (rank.get(a.key) ?? Number.MAX_SAFE_INTEGER) -
+                (rank.get(b.key) ?? Number.MAX_SAFE_INTEGER)
         )
     }, [columns, entryOrder])
 
@@ -528,11 +541,7 @@ export function Table<T>({
         const container = containerRef.current
         if (!container) return
 
-        const cells = Array.from(
-            container.querySelectorAll<HTMLElement>(
-                `[data-entry-id="${entryKey}"]`
-            )
-        )
+        const cells = entryCells(container, entryKey)
         if (cells.length === 0) return
 
         const view = container.getBoundingClientRect()
@@ -556,11 +565,14 @@ export function Table<T>({
         )
 
         const ghost = document.createElement('div')
-        ghost.style.cssText = `position:fixed;top:-10000px;left:-10000px;width:${right - left}px;height:${bottom - top}px;overflow:hidden;background:#ffffff;border-radius:0.5rem;box-shadow:0 8px 20px rgba(15,23,42,0.18);`
+        ghost.className = styles.dragGhost
+        ghost.style.width = `${right - left}px`
+        ghost.style.height = `${bottom - top}px`
 
         for (const { cell, rect } of visible) {
             const clone = cell.cloneNode(true) as HTMLElement
             const computed = window.getComputedStyle(cell)
+            clone.classList.add(styles.dragGhostCell)
             clone.style.fontFamily = computed.fontFamily
             clone.style.fontSize = computed.fontSize
             clone.style.fontWeight = computed.fontWeight
@@ -568,13 +580,10 @@ export function Table<T>({
             clone.style.lineHeight = computed.lineHeight
             clone.style.letterSpacing = computed.letterSpacing
             clone.style.color = computed.color
-            clone.style.position = 'absolute'
-            clone.style.margin = '0'
             clone.style.left = `${rect.left - left}px`
             clone.style.top = `${rect.top - top}px`
             clone.style.width = `${rect.width}px`
             clone.style.height = `${rect.height}px`
-            clone.style.opacity = '1'
             ghost.appendChild(clone)
         }
 
@@ -589,7 +598,7 @@ export function Table<T>({
 
     const moveEntry = (fromId: string, toId: string, after: boolean) => {
         if (fromId === toId) return
-        const ids = orderedColumns.map(entryId)
+        const ids = orderedColumns.map((entry) => entry.key)
         if (!ids.includes(fromId) || !ids.includes(toId)) return
 
         const next = ids.filter((id) => id !== fromId)
@@ -625,14 +634,14 @@ export function Table<T>({
             return 0
         })
 
-        return sortDir === 'desc' ? sorted.reverse() : sorted
+        return sortDir === SortDirection.DESC ? sorted.reverse() : sorted
     }, [data, flatColumns, sortKey, sortDir])
 
     const visibleEntries = useMemo(() => {
         const entries: VisibleEntry<T>[] = []
         for (const entry of orderedColumns) {
             if (isCategory(entry)) {
-                if (collapsedSet.has(entry.label)) {
+                if (collapsedSet.has(entry.key)) {
                     entries.push({
                         type: 'group-collapsed',
                         category: entry,
@@ -679,7 +688,7 @@ export function Table<T>({
                 ? current
                 : { rowHeight, headerHeight }
         )
-    }, [mode, visibleEntries, hasRows])
+    }, [editing, visibleEntries, hasRows])
 
     useEffect(() => {
         if (
@@ -699,7 +708,7 @@ export function Table<T>({
         const top = index * metrics.rowHeight
 
         const headerCell = headerRef.current?.querySelector<HTMLElement>(
-            `[data-column-key="${scrollToColumnKey ?? ''}"]`
+            `[data-column-key="${CSS.escape(scrollToColumnKey ?? '')}"]`
         )
         let left = container.scrollLeft
 
@@ -737,18 +746,20 @@ export function Table<T>({
 
         const offsets: Record<string, number> = {}
         for (const entry of visibleEntries) {
-            const label = entry.category?.label
-            if (entry.type !== 'column' || !label || offsets[label] != null)
+            const categoryKey = entry.category?.key
+            if (
+                entry.type !== 'column' ||
+                !categoryKey ||
+                offsets[categoryKey] != null
+            )
                 continue
 
-            const cells = header.querySelectorAll<HTMLElement>(
-                `[data-entry-id="${label}"]`
-            )
+            const cells = entryCells(header, categoryKey)
             if (cells.length < 2) continue
 
             const first = cells[0].getBoundingClientRect()
             const last = cells[cells.length - 1].getBoundingClientRect()
-            offsets[label] = (last.right - first.left) / 2
+            offsets[categoryKey] = (last.right - first.left) / 2
         }
 
         setHandleOffsets((current) => {
@@ -762,7 +773,7 @@ export function Table<T>({
     return (
         <div
             className={styles.container}
-            data-table-mode={mode}
+            data-table-editing={editing || undefined}
             ref={containerRef}
         >
             <div
@@ -771,7 +782,7 @@ export function Table<T>({
                 ref={headerRef}
             >
                 {visibleEntries.map((entry) => {
-                    const dragId = entry.category?.label ?? entry.col?.key ?? ''
+                    const dragId = entry.category?.key ?? entry.col?.key ?? ''
                     const groupColumns =
                         entry.type === 'column' && entry.category
                             ? entry.category.columns
@@ -790,13 +801,10 @@ export function Table<T>({
                         dropTarget?.id === dragId &&
                         draggingId !== dragId
                     const dropsOnRightHalf = (event: React.DragEvent) => {
-                        const cells =
-                            headerRef.current?.querySelectorAll<HTMLElement>(
-                                `[data-entry-id="${dragId}"]`
-                            )
-                        const first = cells?.[0]?.getBoundingClientRect()
+                        const cells = entryCells(headerRef.current, dragId)
+                        const first = cells[0]?.getBoundingClientRect()
                         const last =
-                            cells?.[cells.length - 1]?.getBoundingClientRect()
+                            cells[cells.length - 1]?.getBoundingClientRect()
                         const rect = event.currentTarget.getBoundingClientRect()
                         const left = first?.left ?? rect.left
                         const right = last?.right ?? rect.right
@@ -859,7 +867,7 @@ export function Table<T>({
                     if (entry.type === 'group-collapsed') {
                         return (
                             <span
-                                key={`group-${entry.category!.label}`}
+                                key={`group-${entry.category!.key}`}
                                 data-entry-id={dragId}
                                 className={cn(
                                     styles.collapsedHeader,
@@ -909,7 +917,7 @@ export function Table<T>({
                                 {col.sortValue && (
                                     <span className={styles.sortIcon}>
                                         {sortKey === col.key ? (
-                                            sortDir === 'asc' ? (
+                                            sortDir === SortDirection.ASC ? (
                                                 <FiChevronUp strokeWidth={3} />
                                             ) : (
                                                 <FiChevronDown
@@ -929,10 +937,8 @@ export function Table<T>({
 
             {start > 0 && (
                 <div
-                    style={{
-                        height: start * metrics.rowHeight,
-                        flexShrink: 0,
-                    }}
+                    className={styles.spacer}
+                    style={{ height: start * metrics.rowHeight }}
                 />
             )}
 
@@ -950,7 +956,7 @@ export function Table<T>({
                         columns={orderedColumns}
                         visibleEntries={visibleEntries}
                         gridTemplateColumns={gridTemplateColumns}
-                        mode={mode}
+                        editing={editing}
                         zebra={zebra}
                         openColKey={
                             openCell?.startsWith(openPrefix)
@@ -965,10 +971,8 @@ export function Table<T>({
 
             {end < rowCount && (
                 <div
-                    style={{
-                        height: (rowCount - end) * metrics.rowHeight,
-                        flexShrink: 0,
-                    }}
+                    className={styles.spacer}
+                    style={{ height: (rowCount - end) * metrics.rowHeight }}
                 />
             )}
             {footer}

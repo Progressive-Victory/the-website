@@ -6,7 +6,7 @@ import {
     getEarliestLineitemDate,
     getMembershipTierForAmount,
 } from '../membership.helpers'
-import { MemberMenuProps } from '../membership.types'
+import { ContributionRecord, MemberMenuProps } from '../membership.types'
 import styles from './ContributionsMenu.module.css'
 import tags from './Tags.module.css'
 import { DropdownOverlay } from '@/components/common'
@@ -72,6 +72,114 @@ const buildMonthRange = (start: Date, end: Date) => {
 
     return months
 }
+
+type MonthLineitem = NonNullable<
+    ContributionRecord['lineitemsByMonth']
+>[string][number]
+
+interface MonthItemProps {
+    item: MonthLineitem
+    onlyRecurring?: boolean
+}
+
+const MonthItem = ({ item, onlyRecurring }: MonthItemProps) => (
+    <span className={styles.monthItem}>
+        <span className={styles.monthItemDate}>
+            {item.orderNumber} &middot; {formatContributionDate(item.paidAt)}
+        </span>
+        <span
+            className={cn(
+                styles.monthItemAmount,
+                onlyRecurring && recurringAmountTagClass(item.amount)
+            )}
+        >
+            {formatAmount(item.amount)}
+        </span>
+    </span>
+)
+
+interface MonthRowProps {
+    label: string
+    items: MonthLineitem[]
+    onlyRecurring?: boolean
+}
+
+const MonthRow = ({ label, items, onlyRecurring }: MonthRowProps) => (
+    <div className={cn(styles.contributionRow, styles.contributionRowTop)}>
+        <span className={styles.contributionDate}>{label}</span>
+        {items.length === 0 ? (
+            <span className={cn(styles.contributionAmount, tags.tagGhost)}>
+                0 lineitems
+            </span>
+        ) : (
+            <span className={styles.monthItems}>
+                {items.map((item) => (
+                    <MonthItem
+                        key={item.orderNumber + item.paidAt}
+                        item={item}
+                        onlyRecurring={onlyRecurring}
+                    />
+                ))}
+            </span>
+        )}
+    </div>
+)
+
+interface ContributionRowProps {
+    record: ContributionRecord
+    onlyRecurring?: boolean
+    onSelect?: () => void
+}
+
+const ContributionRow = ({
+    record,
+    onlyRecurring,
+    onSelect,
+}: ContributionRowProps) => (
+    <div
+        className={cn(
+            styles.contributionRow,
+            onSelect && styles.contributionRowClickable
+        )}
+        onClick={onSelect}
+    >
+        <span className={styles.contributionMain}>
+            <span className={styles.contributionDate}>
+                {formatContributionDate(record.createdAt)}
+            </span>
+            <span className={styles.contributionForm}>
+                {record.contributionForm}
+            </span>
+            <span className={styles.contributionLineitems}>
+                {record.lineitemCount} lineitem
+                {record.lineitemCount !== 1 && 's'}
+            </span>
+            {record.mostRecentLineitemDate && (
+                <span className={styles.contributionLineitems}>
+                    last paid{' '}
+                    {formatContributionDate(record.mostRecentLineitemDate)}
+                </span>
+            )}
+            {record.monthsSpanned != null && (
+                <span className={styles.contributionLineitems}>
+                    {record.monthsWithLineitems} of {record.monthsSpanned} month
+                    {record.monthsSpanned !== 1 && 's'}
+                </span>
+            )}
+        </span>
+        <span
+            className={cn(
+                styles.contributionAmount,
+                !onlyRecurring && record.isRecurring && tags.tagLightBlue,
+                onlyRecurring && recurringAmountTagClass(record.recurringAmount)
+            )}
+        >
+            {record.isRecurring && record.recurringAmount != null
+                ? formatAmount(record.recurringAmount)
+                : formatAmount(record.amount)}
+        </span>
+    </div>
+)
 
 export const ContributionsMenu = ({
     member,
@@ -153,15 +261,11 @@ export const ContributionsMenu = ({
                     ) : (
                         <div className={styles.listBox}>
                             {records.map((record) => (
-                                <div
+                                <ContributionRow
                                     key={record.orderNumber}
-                                    className={cn(
-                                        styles.contributionRow,
-                                        onlyRecurring &&
-                                            record.firstLineitemId != null &&
-                                            styles.contributionRowClickable
-                                    )}
-                                    onClick={
+                                    record={record}
+                                    onlyRecurring={onlyRecurring}
+                                    onSelect={
                                         onlyRecurring &&
                                         record.firstLineitemId != null
                                             ? () => {
@@ -172,73 +276,7 @@ export const ContributionsMenu = ({
                                               }
                                             : undefined
                                     }
-                                >
-                                    <span className={styles.contributionMain}>
-                                        <span
-                                            className={styles.contributionDate}
-                                        >
-                                            {formatContributionDate(
-                                                record.createdAt
-                                            )}
-                                        </span>
-                                        <span
-                                            className={styles.contributionForm}
-                                        >
-                                            {record.contributionForm}
-                                        </span>
-                                        <span
-                                            className={
-                                                styles.contributionLineitems
-                                            }
-                                        >
-                                            {record.lineitemCount} lineitem
-                                            {record.lineitemCount !== 1 && 's'}
-                                        </span>
-                                        {record.mostRecentLineitemDate && (
-                                            <span
-                                                className={
-                                                    styles.contributionLineitems
-                                                }
-                                            >
-                                                last paid{' '}
-                                                {formatContributionDate(
-                                                    record.mostRecentLineitemDate
-                                                )}
-                                            </span>
-                                        )}
-                                        {record.monthsSpanned != null && (
-                                            <span
-                                                className={
-                                                    styles.contributionLineitems
-                                                }
-                                            >
-                                                {record.monthsWithLineitems} of{' '}
-                                                {record.monthsSpanned} month
-                                                {record.monthsSpanned !== 1 &&
-                                                    's'}
-                                            </span>
-                                        )}
-                                    </span>
-                                    <span
-                                        className={cn(
-                                            styles.contributionAmount,
-                                            !onlyRecurring &&
-                                                record.isRecurring &&
-                                                tags.tagLightBlue,
-                                            onlyRecurring &&
-                                                recurringAmountTagClass(
-                                                    record.recurringAmount
-                                                )
-                                        )}
-                                    >
-                                        {record.isRecurring &&
-                                        record.recurringAmount != null
-                                            ? formatAmount(
-                                                  record.recurringAmount
-                                              )
-                                            : formatAmount(record.amount)}
-                                    </span>
-                                </div>
+                                />
                             ))}
                         </div>
                     )}
@@ -248,83 +286,16 @@ export const ContributionsMenu = ({
                                 Months
                             </span>
                             <div className={styles.listBox}>
-                                {monthRows.map((monthRow) => {
-                                    const items =
-                                        lineitemsByMonth[monthRow.key] ?? []
-
-                                    return (
-                                        <div
-                                            key={monthRow.key}
-                                            className={cn(
-                                                styles.contributionRow,
-                                                styles.contributionRowTop
-                                            )}
-                                        >
-                                            <span
-                                                className={
-                                                    styles.contributionDate
-                                                }
-                                            >
-                                                {monthRow.label}
-                                            </span>
-                                            {items.length === 0 ? (
-                                                <span
-                                                    className={cn(
-                                                        styles.contributionAmount,
-                                                        tags.tagGhost
-                                                    )}
-                                                >
-                                                    0 lineitems
-                                                </span>
-                                            ) : (
-                                                <span
-                                                    className={
-                                                        styles.monthItems
-                                                    }
-                                                >
-                                                    {items.map((item) => (
-                                                        <span
-                                                            key={
-                                                                item.orderNumber +
-                                                                item.paidAt
-                                                            }
-                                                            className={
-                                                                styles.monthItem
-                                                            }
-                                                        >
-                                                            <span
-                                                                className={
-                                                                    styles.monthItemDate
-                                                                }
-                                                            >
-                                                                {
-                                                                    item.orderNumber
-                                                                }{' '}
-                                                                ·{' '}
-                                                                {formatContributionDate(
-                                                                    item.paidAt
-                                                                )}
-                                                            </span>
-                                                            <span
-                                                                className={cn(
-                                                                    styles.monthItemAmount,
-                                                                    onlyRecurring &&
-                                                                        recurringAmountTagClass(
-                                                                            item.amount
-                                                                        )
-                                                                )}
-                                                            >
-                                                                {formatAmount(
-                                                                    item.amount
-                                                                )}
-                                                            </span>
-                                                        </span>
-                                                    ))}
-                                                </span>
-                                            )}
-                                        </div>
-                                    )
-                                })}
+                                {monthRows.map((monthRow) => (
+                                    <MonthRow
+                                        key={monthRow.key}
+                                        label={monthRow.label}
+                                        items={
+                                            lineitemsByMonth[monthRow.key] ?? []
+                                        }
+                                        onlyRecurring={onlyRecurring}
+                                    />
+                                ))}
                             </div>
                         </>
                     )}

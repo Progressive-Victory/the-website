@@ -1,5 +1,6 @@
 import {
     MembershipDeliverableStatus,
+    ShirtSize,
     User,
     UserAddress,
 } from 'pv-contracts/data'
@@ -17,8 +18,6 @@ export const membershipTiers = [
 ] as const
 
 export type MembershipTier = (typeof membershipTiers)[number]
-
-export type ShirtSize = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
 
 export interface ContributionRecord {
     orderNumber: string
@@ -59,8 +58,15 @@ export interface TierSegment {
     maxAmount: number
 }
 
-export type PackageShipped =
-    'Yes' | 'No' | 'Returned' | 'Not Received' | 'Canceled'
+export const packageShippedOptions = [
+    'Yes',
+    'No',
+    'Returned',
+    'Not Received',
+    'Canceled',
+] as const
+
+export type PackageShipped = (typeof packageShippedOptions)[number]
 
 export interface Member {
     packet: MembershipsResponsePacket
@@ -115,8 +121,6 @@ export interface Member {
 
     userMatched?: boolean
 }
-
-export type MembershipTableMode = 'view' | 'edit'
 
 export const membershipSearchFields = [
     { value: 'name', label: 'Name' },
