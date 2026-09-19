@@ -9,29 +9,25 @@
     height: 100%;
 }
 
-.pickerList {
+.pickerStatus {
     display: flex;
     flex: 1 1 auto;
     min-height: 0;
     flex-direction: column;
-    overflow-y: auto;
-    scrollbar-width: none;
+    padding: 0.9rem 1rem 1rem;
 
-    &::-webkit-scrollbar {
-        display: none;
+    &:not(:has(button)) {
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        text-align: center;
+        color: #64748b;
+        font-weight: 500;
     }
-}
 
-.pickerStatus {
-    padding: 2rem 1rem;
-    text-align: center;
-    color: #64748b;
-    font-weight: 500;
-}
-
-.pickerStatusError {
-    composes: pickerStatus;
-    color: #ef4444;
+    &.error {
+        color: #ef4444;
+    }
 }
 
 .emptyStage {

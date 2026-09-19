@@ -9,6 +9,7 @@ import {
     TextField,
 } from '@/components/common/forms'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import { cn } from '@/util'
 import type { UseQueryResult } from '@tanstack/react-query'
 import Link from 'next/link'
 import {
@@ -145,23 +146,19 @@ export function DonorView({
     }
 
     const renderPickerResults = () => {
-        if (donorSearchQuery.isPending)
-            return <div className={styles.pickerStatus}>Loading...</div>
+        const { isPending, error, data } = donorSearchQuery
+        const results = data?.data ?? []
 
-        if (donorSearchQuery.error)
-            return (
-                <div className={styles.pickerStatusError}>
-                    Error: {donorSearchQuery.error.message}
-                </div>
-            )
-
-        const results = donorSearchQuery.data?.data ?? []
-        if (results.length === 0)
-            return <div className={styles.pickerStatus}>No results found</div>
+        const renderContent = () => {
+            if (isPending) return 'Loading...'
+            if (error) return `Error: ${error.message}`
+            if (results.length === 0) return 'No results found'
+            return results.map((donor) => renderDonorItem(donor, selectedId))
+        }
 
         return (
-            <div className={styles.pickerList}>
-                {results.map((donor) => renderDonorItem(donor, selectedId))}
+            <div className={cn(styles.pickerStatus, error && styles.error)}>
+                {renderContent()}
             </div>
         )
     }
