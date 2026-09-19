@@ -119,8 +119,9 @@ export function useFetch() {
             await onLogout()
         }
 
+        const text = await res.text()
+
         if (!res.ok) {
-            const text = await res.text()
             let error: ApiError = {
                 message: res.statusText || 'An error occurred',
                 error: '',
@@ -135,7 +136,6 @@ export function useFetch() {
             throw new FetchError(error.message, res.status, error.error)
         }
 
-        const text = await res.text()
         const content =
             res.status === 204 || text.trim().length === 0
                 ? undefined
