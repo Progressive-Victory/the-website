@@ -5,7 +5,6 @@ import styles from './page.module.css'
 import { DonorView } from './panel_views/DonorView'
 import { HistoryView } from './panel_views/HistoryView'
 import { MemberView } from './panel_views/MemberView'
-import { ListElement } from '@/app/admin/layout/List'
 import {
     FilterTags,
     FilterTag,
@@ -607,12 +606,14 @@ export default function Page() {
     const renderDonorItem = useCallback(
         (item: ActBlueDonor, userId: number) => {
             return (
-                <ListElement
+                <button
                     key={item.email}
+                    type="button"
+                    className={styles.donorPickerItem}
                     onClick={() => void handleSelectDonorItem(item, userId)}
                 >
                     <span>{`${item.firstname} ${item.lastname}`}</span>
-                </ListElement>
+                </button>
             )
         },
         [handleSelectDonorItem]

@@ -1,10 +1,10 @@
 'use client'
 
 import styles from './DonorView.module.css'
-import { ListBody } from '@/app/admin/layout/List'
-import { SearchModal } from '@/app/admin/layout/SearchModal'
+import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
 import { Form, FormGroup, TextField } from '@/components/common/forms'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import { cn } from '@/util'
 import type { UseQueryResult } from '@tanstack/react-query'
 import {
     ActBlueContribution,
@@ -131,6 +131,24 @@ export function DonorView({
 
     const handleOverlaySearch = (e: ChangeEvent<HTMLInputElement>) => {
         onDonorSearch({ ...donorSearch, query: e.target.value })
+    }
+
+    const renderPickerResults = () => {
+        const { isPending, error, data } = donorSearchQuery
+        const results = data?.data ?? []
+
+        const renderContent = () => {
+            if (isPending) return 'Loading...'
+            if (error) return `Error: ${error.message}`
+            if (results.length === 0) return 'No results found'
+            return results.map((donor) => renderDonorItem(donor, selectedId))
+        }
+
+        return (
+            <div className={cn(styles.pickerStatus, error && styles.error)}>
+                {renderContent()}
+            </div>
+        )
     }
 
     const renderEmptyState = () => (
@@ -407,15 +425,7 @@ export function DonorView({
                 searchValue={queryValue}
                 onSearchChange={handleOverlaySearch}
             >
-                <ListBody
-                    count={donorSearchQuery.data?.count}
-                    isPending={donorSearchQuery.isPending}
-                    error={donorSearchQuery.error}
-                >
-                    {donorSearchQuery.data?.data.map((donor) =>
-                        renderDonorItem(donor, selectedId)
-                    )}
-                </ListBody>
+                {renderPickerResults()}
             </SearchModal>
         </div>
     )

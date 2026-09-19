@@ -4,6 +4,25 @@
     --navigation-stack-sidebar-gap: 0rem;
 }
 
+.donorPickerItem {
+    display: flex;
+    width: calc(100% - 0.5rem);
+    align-items: center;
+    gap: 1.25rem;
+    margin: 0.25rem;
+    padding: 1rem;
+    border: none;
+    border-radius: 1rem;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #e5e7eb;
+    }
+}
+
 .backButton {
     /* --back-button-color: #ff0202; */
     --back-button-hover-color: rgba(255, 255, 255, 0.7);

@@ -18,7 +18,7 @@ import { IoClose } from 'react-icons/io5'
 
 interface AccountDetailsSectionProps {
     userData: User
-    canAccessAdminPanel: boolean
+    canAccessDashboard: boolean
     handleSignOut: () => void
     onSave: (user: User) => void
     donorLinkError: Error | null
@@ -30,7 +30,7 @@ interface AccountDetailsSectionProps {
 
 export function AccountDetailsSection({
     userData,
-    canAccessAdminPanel,
+    canAccessDashboard,
     handleSignOut,
     onSave,
     donorLinkError,
@@ -334,14 +334,8 @@ export function AccountDetailsSection({
                     </div>
 
                     <div className={styles.headerActions}>
-                        {canAccessAdminPanel ? (
-                            //Temporary Toggle for Admin Panel and Volunteer Dashboard for PR review only
+                        {canAccessDashboard ? (
                             <div>
-                                <BaseButton
-                                    label="Admin Panel"
-                                    href="/admin"
-                                    className={styles.secondaryButton}
-                                />
                                 <BaseButton
                                     label="Volunteer Dashboard"
                                     href="/volunteer_dashboard?from=welcome"
