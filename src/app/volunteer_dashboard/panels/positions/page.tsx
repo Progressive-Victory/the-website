@@ -1,9 +1,8 @@
 'use client'
 
 import styles from './page.module.css'
-import { ListElement } from '@/app/admin/layout/List'
-import { SearchModal } from '@/app/admin/layout/SearchModal'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
+import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
 import {
     Form,
     FormGroup,
@@ -426,13 +425,14 @@ function SubordinatesField(props: SubordinatesFieldProps) {
                 }
             >
                 {filteredPositions.map((p) => (
-                    <ListElement
+                    <button
                         key={p.id}
+                        type="button"
                         className={styles.pickerItem}
                         onClick={() => handleAdd(p.id)}
                     >
                         {p.name}
-                    </ListElement>
+                    </button>
                 ))}
                 {filteredPositions.length === 0 && (
                     <div className={styles.pickerEmpty}>
@@ -558,8 +558,9 @@ function OccupantsField(props: OccupantsFieldProps) {
                     const hasName = !!(u.firstName && u.lastName)
                     const discord = u.discordUsers?.[0]?.username
                     return (
-                        <ListElement
+                        <button
                             key={u.id}
+                            type="button"
                             className={styles.pickerItem}
                             onClick={() => handleAdd(u.id)}
                         >
@@ -573,7 +574,7 @@ function OccupantsField(props: OccupantsFieldProps) {
                                     ? `@${discord}`
                                     : (u.email ?? `User #${u.id}`)}
                             </span>
-                        </ListElement>
+                        </button>
                     )
                 })}
                 {searchResults.length === 0 &&
