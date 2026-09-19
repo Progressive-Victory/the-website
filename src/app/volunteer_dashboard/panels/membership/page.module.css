@@ -269,6 +269,59 @@
     gap: 0.5rem;
 }
 
+.pickerStatus {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    flex-direction: column;
+    padding: 0.9rem 1rem 1rem;
+
+    &:not(:has(button)) {
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        text-align: center;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    &.error {
+        color: #ef4444;
+    }
+}
+
+.userPickerItem {
+    display: flex;
+    width: calc(100% - 0.5rem);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    margin: 0.25rem;
+    padding: 1rem;
+    border: none;
+    border-radius: 1rem;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #e5e7eb;
+    }
+}
+
+.userPickerName {
+    font-size: 0.92rem;
+    font-weight: 550;
+    color: rgba(15, 23, 42, 0.85);
+}
+
+.userPickerSub {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
 .toolbarButton {
     display: flex;
     cursor: pointer;

@@ -17,7 +17,6 @@ import {
 } from './membership.types'
 import { buildColumns, FULFILLMENT_CATEGORY } from './membershipColumns'
 import styles from './page.module.css'
-import { ListBody, ListElement } from '@/app/admin/layout/List'
 import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
 import {
     DropdownButton,
@@ -38,6 +37,16 @@ const showHideChoices = [
     { value: true, label: 'Show' },
     { value: false, label: 'Hide' },
 ]
+
+function getUserDisplayName(user: UserProfile): string {
+    if (user.preferredName) return user.preferredName
+
+    const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ')
+    if (fullName) return fullName
+
+    if (user.email) return user.email
+    return `User ${user.id}`
+}
 
 const tableOptionRows: {
     key: keyof MembershipTableOptions
@@ -224,6 +233,41 @@ export default function Page() {
         () => members.filter(isSearchMatch).length,
         [members, isSearchMatch]
     )
+
+    const renderUserPickerResults = () => {
+        const { isPending, error, data } = userSearchQuery
+        const results = data?.data ?? []
+
+        const renderContent = () => {
+            if (isPending) return 'Loading...'
+            if (error) return `Error: ${error.message}`
+            if (results.length === 0) return 'No results found'
+
+            return results.map((user) => (
+                <button
+                    key={user.id}
+                    type="button"
+                    className={styles.userPickerItem}
+                    onClick={() => void handleMatchUser(user)}
+                >
+                    <span className={styles.userPickerName}>
+                        {getUserDisplayName(user)}
+                    </span>
+                    {user.email && (
+                        <span className={styles.userPickerSub}>
+                            {user.email}
+                        </span>
+                    )}
+                </button>
+            ))
+        }
+
+        return (
+            <div className={cn(styles.pickerStatus, error && styles.error)}>
+                {renderContent()}
+            </div>
+        )
+    }
 
     return (
         <Panel
@@ -450,28 +494,7 @@ export default function Page() {
                     searchValue={userSearch.query ?? ''}
                     onSearchChange={handleUserSearch}
                 >
-                    <ListBody
-                        count={userSearchQuery.data?.count}
-                        isPending={userSearchQuery.isPending}
-                        error={userSearchQuery.error}
-                    >
-                        {userSearchQuery.data?.data.map((user) => (
-                            <ListElement
-                                key={user.id}
-                                onClick={() => void handleMatchUser(user)}
-                            >
-                                <span>
-                                    {user.preferredName ??
-                                        [user.firstName, user.lastName]
-                                            .filter(Boolean)
-                                            .join(' ') ??
-                                        user.email ??
-                                        `User ${user.id}`}
-                                </span>
-                                {user.email && <span>{user.email}</span>}
-                            </ListElement>
-                        ))}
-                    </ListBody>
+                    {renderUserPickerResults()}
                 </SearchModal>
             </div>
         </Panel>
