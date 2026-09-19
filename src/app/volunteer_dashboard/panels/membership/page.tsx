@@ -26,7 +26,7 @@ import {
 import { CloseCircleIcon } from '@/components/common/icons/CloseCircleIcon'
 import Panel from '@/components/common/panel/Panel'
 import { Table } from '@/components/common/table'
-import { cn } from '@/util'
+import { cn, DOT_SEPARATOR } from '@/util'
 import { usePaginatedSearch } from '@/util/hooks'
 import { UserProfile, zUserProfile } from 'pv-contracts/data'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
@@ -349,7 +349,7 @@ export default function Page() {
                 <div className={styles.panelHeaderRight}>
                     <div className={styles.panelTimestamp}>
                         {eligibleMemberCount != null &&
-                            `${eligibleMemberCount.toLocaleString()} Eligible · `}
+                            `${eligibleMemberCount.toLocaleString()} Eligible ${DOT_SEPARATOR} `}
                         Showing {members.length.toLocaleString()}
                         {totalEntries != null &&
                             ` of ${totalEntries.toLocaleString()}`}

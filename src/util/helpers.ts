@@ -71,3 +71,5 @@ export function cn(...classes: unknown[]) {
         .map((className) => String(className))
         .join(' ')
 }
+
+export const DOT_SEPARATOR = '\u00b7'

@@ -4,7 +4,7 @@ import styles from './DonorView.module.css'
 import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
 import { Form, FormGroup, TextField } from '@/components/common/forms'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
-import { cn } from '@/util'
+import { cn, DOT_SEPARATOR } from '@/util'
 import type { UseQueryResult } from '@tanstack/react-query'
 import {
     ActBlueContribution,
@@ -276,7 +276,7 @@ export function DonorView({
                 .map((lineitem) => (
                     <FormGroup
                         title={`Donated $${lineitem.amount}`}
-                        subtitle={`${formatContributionDateTime(lineitem.paidAt)} · ${contributionFormByLineitemId.get(lineitem.lineitemId) ?? 'Unknown form'}`}
+                        subtitle={`${formatContributionDateTime(lineitem.paidAt)} ${DOT_SEPARATOR} ${contributionFormByLineitemId.get(lineitem.lineitemId) ?? 'Unknown form'}`}
                         key={lineitem.lineitemId}
                         defaultCollapsed
                         subGroup

@@ -8,7 +8,7 @@ import {
 import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import { HStack, Spacer, VStack, ZStack } from '@/components/layout'
 import { stateOptions } from '@/models'
-import { cn, parseErrorMessage } from '@/util'
+import { cn, DOT_SEPARATOR, parseErrorMessage } from '@/util'
 import { Endorsement, EndorsementType, InitiativeType } from 'pv-contracts/data'
 import { ChangeEvent, useState } from 'react'
 import { FaCamera } from 'react-icons/fa'
@@ -135,7 +135,8 @@ export function EndorsementBanner({
                                 endorsement.jurisdiction,
                             ]
                                 .filter(Boolean)
-                                .join(' · ') || 'No state selected'}
+                                .join(` ${DOT_SEPARATOR} `) ||
+                                'No state selected'}
                         </h2>
                         {uploadError && (
                             <span className={styles.uploadError}>

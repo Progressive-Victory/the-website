@@ -3,7 +3,7 @@
 import styles from './HistoryView.module.css'
 import { MemberView } from './MemberView'
 import { CollapsibleSection } from '@/components/common'
-import { cn } from '@/util'
+import { cn, DOT_SEPARATOR } from '@/util'
 import { useFetch } from '@/util/hooks'
 import { useQueries } from '@tanstack/react-query'
 import {
@@ -63,7 +63,7 @@ function formatHistoryTimestamp(value: Date, now = new Date()) {
     )
 
     if (diffDays === 0) {
-        return `${time} · Today`
+        return `${time} ${DOT_SEPARATOR} Today`
     }
 
     if (diffDays < 0) {
@@ -72,7 +72,7 @@ function formatHistoryTimestamp(value: Date, now = new Date()) {
 
     if (diffDays <= 6) {
         const weekday = value.toLocaleString([], { weekday: 'long' })
-        return `${time} · ${weekday}`
+        return `${time} ${DOT_SEPARATOR} ${weekday}`
     }
 
     const month = value
@@ -81,7 +81,7 @@ function formatHistoryTimestamp(value: Date, now = new Date()) {
     const day = value.getDate()
     const year = value.getFullYear()
 
-    return `${time} · ${month}. ${day}, ${year}`
+    return `${time} ${DOT_SEPARATOR} ${month}. ${day}, ${year}`
 }
 
 function formatFullHistoryTimestamp(value: Date) {
