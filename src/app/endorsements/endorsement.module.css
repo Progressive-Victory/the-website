@@ -546,20 +546,6 @@
     gap: 1.05rem 1.1rem;
 }
 
-.tileImageFramePledge {
-    background-image: url('/images/endorsement_images/background_blue.png');
-    background-position: -8px -20px;
-    background-repeat: no-repeat;
-    background-size: 110%;
-}
-
-.tileImageFrameNoPledge {
-    background-image: url('/images/endorsement_images/background_yellow.png');
-    background-position: -8px -20px;
-    background-repeat: no-repeat;
-    background-size: 110%;
-}
-
 .primary {
     background-color: #ebafa9;
     color: #ce3728;

@@ -3,12 +3,15 @@
 import styles from './DropdownOverlay.module.css'
 import { areOverlayStylesEqual } from '@/util'
 import {
+    createContext,
     forwardRef,
     useLayoutEffect,
     useRef,
     useState,
     type CSSProperties,
+    type Dispatch,
     type RefObject,
+    type SetStateAction,
 } from 'react'
 import { FiX } from 'react-icons/fi'
 
@@ -24,6 +27,14 @@ const DROPDOWN_OVERLAY_LAYOUT_CONFIG = {
 const INITIAL_OVERLAY_RESPONSIVE_STYLE: CSSProperties = {
     maxWidth: `calc(100dvw - ${DROPDOWN_OVERLAY_LAYOUT_CONFIG.viewportPadding * 2}px)`,
 }
+
+interface DropdownOverlayMenuContextValue {
+    openMenuId: string | null
+    setOpenMenuId: Dispatch<SetStateAction<string | null>>
+}
+
+export const DropdownOverlayMenuContext =
+    createContext<DropdownOverlayMenuContextValue | null>(null)
 
 interface RectLike {
     left: number
@@ -122,7 +133,6 @@ interface UseDropdownOverlayResponsiveStyleInput {
     narrowLayoutMode: DropdownOverlayNarrowLayoutMode
 }
 
-// This function figures out the container dimensions and sets the dropdown width and horizontal position to make sure it fits within the container and aligns it with dropdownbutton. It also updates width dynamically on window resize.
 function useDropdownOverlayResponsiveStyle({
     overlayRef,
     narrowLayoutMode,
@@ -278,6 +288,7 @@ export const DropdownOverlay = forwardRef<HTMLDivElement, DropdownOverlayProps>(
         ref
     ) {
         const localRef = useRef<HTMLDivElement | null>(null)
+        const [openMenuId, setOpenMenuId] = useState<string | null>(null)
         const responsiveStyle = useDropdownOverlayResponsiveStyle({
             overlayRef: localRef,
             narrowLayoutMode,
@@ -316,38 +327,42 @@ export const DropdownOverlay = forwardRef<HTMLDivElement, DropdownOverlayProps>(
                 style={{ ...responsiveStyle, ...style }}
                 {...props}
             >
-                {header ? (
-                    <div className={headerClasses}>{header}</div>
-                ) : label ? (
-                    <div className={headerClasses}>
-                        <span className={styles.title}>{label}</span>
-                        <button
-                            type="button"
-                            className={closeClasses}
-                            onClick={onClose}
-                            aria-label="Close overlay"
-                        >
-                            <FiX size={16} aria-hidden="true" />
-                        </button>
-                    </div>
-                ) : null}
-                {body ? <div className={bodyClasses}>{body}</div> : null}
-                {footer || footerButtonLabel ? (
-                    <div className={footerClasses}>
-                        {footer}
-                        {footerButtonLabel ? (
+                <DropdownOverlayMenuContext.Provider
+                    value={{ openMenuId, setOpenMenuId }}
+                >
+                    {header ? (
+                        <div className={headerClasses}>{header}</div>
+                    ) : label ? (
+                        <div className={headerClasses}>
+                            <span className={styles.title}>{label}</span>
                             <button
                                 type="button"
-                                className={footerButtonClasses}
-                                onClick={footerButtonOnClick}
-                                disabled={footerButtonDisabled}
+                                className={closeClasses}
+                                onClick={onClose}
+                                aria-label="Close overlay"
                             >
-                                {footerButtonLabel}
+                                <FiX size={16} aria-hidden="true" />
                             </button>
-                        ) : null}
-                    </div>
-                ) : null}
-                {children}
+                        </div>
+                    ) : null}
+                    {body ? <div className={bodyClasses}>{body}</div> : null}
+                    {footer || footerButtonLabel ? (
+                        <div className={footerClasses}>
+                            {footer}
+                            {footerButtonLabel ? (
+                                <button
+                                    type="button"
+                                    className={footerButtonClasses}
+                                    onClick={footerButtonOnClick}
+                                    disabled={footerButtonDisabled}
+                                >
+                                    {footerButtonLabel}
+                                </button>
+                            ) : null}
+                        </div>
+                    ) : null}
+                    {children}
+                </DropdownOverlayMenuContext.Provider>
             </div>
         )
     }

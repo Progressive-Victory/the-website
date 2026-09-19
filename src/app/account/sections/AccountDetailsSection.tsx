@@ -8,17 +8,17 @@ import { DiscordAvatar } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
 import formStyles from '@/components/common/forms/Form.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import { MembershipDeliverableStatus, User } from '@/contracts/data'
-import { zDiscordUserIsInServerResponse } from '@/contracts/responses'
 import { cn } from '@/util'
 import { useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
+import { MembershipDeliverableStatus, User } from 'pv-contracts/data'
+import { zDiscordUserIsInServerResponse } from 'pv-contracts/responses'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { IoClose } from 'react-icons/io5'
 
 interface AccountDetailsSectionProps {
     userData: User
-    canAccessAdminPanel: boolean
+    canAccessDashboard: boolean
     handleSignOut: () => void
     onSave: (user: User) => void
     donorLinkError: Error | null
@@ -30,7 +30,7 @@ interface AccountDetailsSectionProps {
 
 export function AccountDetailsSection({
     userData,
-    canAccessAdminPanel,
+    canAccessDashboard,
     handleSignOut,
     onSave,
     donorLinkError,
@@ -61,11 +61,11 @@ export function AccountDetailsSection({
         MembershipDeliverableStatus,
         string
     > = {
+        [MembershipDeliverableStatus.NotEligible]: 'Not Eligible',
         [MembershipDeliverableStatus.NotStarted]: 'Not Started',
-        [MembershipDeliverableStatus.Cancelled]: 'Cancelled',
         [MembershipDeliverableStatus.Printed]: 'Printed',
-        [MembershipDeliverableStatus.Shipped]: 'Shipped',
-        [MembershipDeliverableStatus.Received]: 'Received',
+        [MembershipDeliverableStatus.InTransit]: 'In Transit',
+        [MembershipDeliverableStatus.Recieved]: 'Received',
         [MembershipDeliverableStatus.Returned]: 'Returned (Update Address)',
     }
 
@@ -333,12 +333,14 @@ export function AccountDetailsSection({
                     </div>
 
                     <div className={styles.headerActions}>
-                        {canAccessAdminPanel ? (
-                            <BaseButton
-                                label="Volunteer Dashboard"
-                                href="/admin"
-                                className={styles.secondaryButton}
-                            />
+                        {canAccessDashboard ? (
+                            <div>
+                                <BaseButton
+                                    label="Volunteer Dashboard"
+                                    href="/volunteer_dashboard?from=welcome"
+                                    className={styles.secondaryButton}
+                                />
+                            </div>
                         ) : isInServerResult.data?.isInServer === false ? (
                             <BaseButton
                                 label="Join Community"
