@@ -182,7 +182,9 @@ export function EndorsementBanner({
                             endorsement.endorsementLevel ===
                                 EndorsementType.Endorsement && styles.tagGreen,
                             endorsement.endorsementLevel ===
-                                EndorsementType.Recommendation && styles.tagRed
+                                EndorsementType.Recommendation && styles.tagRed,
+                            endorsement.endorsementLevel ===
+                                EndorsementType.Unendorsed && styles.tagDarkRed
                         )}
                     >
                         {endorsementLevelLabels[endorsement.endorsementLevel]}

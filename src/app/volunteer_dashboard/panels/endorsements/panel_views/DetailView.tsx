@@ -2,6 +2,11 @@
 
 import styles from './DetailView.module.css'
 import {
+    DropdownButton,
+    DropdownOverlay,
+    DropdownOverlayButton,
+} from '@/components/common'
+import {
     CheckboxField,
     DateField,
     DropDownField,
@@ -22,7 +27,14 @@ import {
 } from '@/models'
 import { cn, parseErrorMessage } from '@/util'
 import { BackgroundColor, Endorsement } from 'pv-contracts/data'
-import { ChangeEvent, useCallback, useState } from 'react'
+import {
+    ChangeEvent,
+    KeyboardEvent,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from 'react'
 
 const stateOptionsWithEmpty = [
     { value: '', label: 'No state selected' },
@@ -33,6 +45,49 @@ const avatarBgColorOptions = [
     { value: BackgroundColor.Blue, label: 'Blue' },
     { value: BackgroundColor.Yellow, label: 'Yellow' },
 ]
+
+const generalJurisdictionTypes = ['Nationwide', 'Statewide'] as const
+const otherJurisdictionType = 'Other' as const
+
+const districtJurisdictionTypes = [
+    'Congressional District',
+    'Legislative District',
+    'Senate District',
+] as const
+
+type GeneralJurisdictionType = (typeof generalJurisdictionTypes)[number]
+type DistrictJurisdictionType = (typeof districtJurisdictionTypes)[number]
+type JurisdictionType =
+    | GeneralJurisdictionType
+    | DistrictJurisdictionType
+    | typeof otherJurisdictionType
+
+const isDistrictJurisdiction = (
+    type: JurisdictionType | null
+): type is DistrictJurisdictionType =>
+    districtJurisdictionTypes.some((option) => option === type)
+
+const getJurisdictionSelection = (jurisdiction: string) => {
+    const generalType = generalJurisdictionTypes.find(
+        (option) => jurisdiction === option
+    )
+    const districtType = districtJurisdictionTypes.find((option) =>
+        jurisdiction.startsWith(`${option} `)
+    )
+    const type =
+        generalType ??
+        districtType ??
+        (jurisdiction ? otherJurisdictionType : null)
+
+    return {
+        type,
+        districtValue: districtType
+            ? jurisdiction.slice(districtType.length + 1)
+            : type === otherJurisdictionType
+              ? jurisdiction
+              : '',
+    }
+}
 
 interface DetailViewProps {
     endorsement: Endorsement | null
@@ -109,7 +164,7 @@ export function DetailView({
                     })}
                     options={electionStatusOptions}
                 />
-                <TextField label="Jurisdiction" field="jurisdiction" />
+                <JurisdictionField label="Jurisdiction" field="jurisdiction" />
                 <DateField
                     label="General Election"
                     field="generalElectionDate"
@@ -154,6 +209,230 @@ export function DetailView({
                 />
             </FormGroup>
         </Form>
+    )
+}
+
+function JurisdictionField(
+    props: FormFieldProps<Endorsement, string | null | undefined>
+) {
+    const { getter, onChange, readonly, disabled } = useConfigure(
+        props,
+        useCallback(() => true, [])
+    )
+    const jurisdiction = props.dynamic ? (getter(props.dynamic.form) ?? '') : ''
+    const initialSelection = getJurisdictionSelection(jurisdiction)
+    const [selectedType, setSelectedType] = useState<JurisdictionType | null>(
+        initialSelection.type
+    )
+    const [districtValue, setDistrictValue] = useState(
+        initialSelection.districtValue
+    )
+    const otherInputRef = useRef<HTMLInputElement>(null)
+
+    const normalizedDistrictValue = districtValue.trim()
+    const draftJurisdiction = !selectedType
+        ? null
+        : isDistrictJurisdiction(selectedType)
+          ? normalizedDistrictValue
+              ? `${selectedType} ${normalizedDistrictValue}`
+              : null
+          : selectedType === otherJurisdictionType
+            ? normalizedDistrictValue || null
+            : selectedType
+    const hasJurisdictionChange =
+        draftJurisdiction !== null && draftJurisdiction !== jurisdiction
+
+    useEffect(() => {
+        const selection = getJurisdictionSelection(jurisdiction)
+        setSelectedType(selection.type)
+        setDistrictValue(selection.districtValue)
+    }, [jurisdiction])
+
+    const confirmJurisdiction = (closeDropdown: () => void) => {
+        if (!draftJurisdiction || !hasJurisdictionChange) return
+
+        onChange(draftJurisdiction)
+        closeDropdown()
+    }
+
+    const handleDistrictKeyDown = (
+        event: KeyboardEvent<HTMLInputElement>,
+        closeDropdown: () => void
+    ) => {
+        if (event.key !== 'Enter') return
+
+        event.preventDefault()
+        confirmJurisdiction(closeDropdown)
+    }
+
+    return (
+        <FormField {...props}>
+            {readonly ? (
+                <div className={formFieldStyles.readonly}>{jurisdiction}</div>
+            ) : (
+                <DropdownButton
+                    label={jurisdiction || 'Select jurisdiction'}
+                    disabled={disabled}
+                    className={styles.jurisdictionTrigger}
+                    onClick={() => {
+                        const selection = getJurisdictionSelection(jurisdiction)
+                        setSelectedType(selection.type)
+                        setDistrictValue(selection.districtValue)
+                    }}
+                    menu={({ closeDropdown }) => (
+                        <DropdownOverlay
+                            label="Select jurisdiction"
+                            onClose={closeDropdown}
+                            onClick={(event) => {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }}
+                            narrowLayoutMode="trigger"
+                            className={styles.jurisdictionOverlay}
+                            footerButtonLabel="Confirm"
+                            footerButtonClassName={
+                                styles.jurisdictionConfirmButton
+                            }
+                            footerButtonDisabled={!hasJurisdictionChange}
+                            footerButtonOnClick={() =>
+                                confirmJurisdiction(closeDropdown)
+                            }
+                            body={
+                                <div className={styles.jurisdictionOptions}>
+                                    {generalJurisdictionTypes.map((type) => (
+                                        <DropdownOverlayButton
+                                            key={type}
+                                            checked={selectedType === type}
+                                            onCheckedChange={(checked) => {
+                                                setSelectedType(
+                                                    checked ? type : null
+                                                )
+                                                setDistrictValue('')
+                                            }}
+                                        >
+                                            {type}
+                                        </DropdownOverlayButton>
+                                    ))}
+                                    {districtJurisdictionTypes.map((type) => {
+                                        const isSelected = selectedType === type
+
+                                        return (
+                                            <div
+                                                key={type}
+                                                className={
+                                                    styles.jurisdictionOption
+                                                }
+                                            >
+                                                <DropdownOverlayButton
+                                                    className={
+                                                        styles.jurisdictionOptionButton
+                                                    }
+                                                    selected={isSelected}
+                                                    onClick={() => {
+                                                        if (isSelected) return
+
+                                                        setSelectedType(type)
+                                                        setDistrictValue(
+                                                            jurisdiction.startsWith(
+                                                                `${type} `
+                                                            )
+                                                                ? jurisdiction.slice(
+                                                                      type.length +
+                                                                          1
+                                                                  )
+                                                                : ''
+                                                        )
+                                                    }}
+                                                >
+                                                    {type}
+                                                </DropdownOverlayButton>
+                                                {isSelected && (
+                                                    <input
+                                                        autoFocus
+                                                        type="text"
+                                                        aria-label={`${type} value`}
+                                                        value={districtValue}
+                                                        onChange={(event) =>
+                                                            setDistrictValue(
+                                                                event.target.value
+                                                                    .replace(
+                                                                        /[^a-zA-Z0-9 ]/g,
+                                                                        ''
+                                                                    )
+                                                                    .slice(
+                                                                        0,
+                                                                        20
+                                                                    )
+                                                            )
+                                                        }
+                                                        onKeyDown={(event) =>
+                                                            handleDistrictKeyDown(
+                                                                event,
+                                                                closeDropdown
+                                                            )
+                                                        }
+                                                        className={
+                                                            styles.jurisdictionNumber
+                                                        }
+                                                    />
+                                                )}
+                                            </div>
+                                        )
+                                    })}
+                                    {selectedType === otherJurisdictionType ? (
+                                        <input
+                                            ref={otherInputRef}
+                                            type="text"
+                                            aria-label="Other jurisdiction"
+                                            placeholder="Custom Jurisdiction"
+                                            value={districtValue}
+                                            onChange={(event) =>
+                                                setDistrictValue(
+                                                    event.target.value.slice(
+                                                        0,
+                                                        100
+                                                    )
+                                                )
+                                            }
+                                            onKeyDown={(event) =>
+                                                handleDistrictKeyDown(
+                                                    event,
+                                                    closeDropdown
+                                                )
+                                            }
+                                            className={
+                                                styles.jurisdictionOtherInput
+                                            }
+                                        />
+                                    ) : (
+                                        <DropdownOverlayButton
+                                            onClick={() => {
+                                                setSelectedType(
+                                                    otherJurisdictionType
+                                                )
+                                                setDistrictValue(
+                                                    getJurisdictionSelection(
+                                                        jurisdiction
+                                                    ).type ===
+                                                        otherJurisdictionType
+                                                        ? jurisdiction
+                                                        : ''
+                                                )
+                                                requestAnimationFrame(() =>
+                                                    otherInputRef.current?.focus()
+                                                )
+                                            }}
+                                        >
+                                            Other
+                                        </DropdownOverlayButton>
+                                    )}
+                                </div>
+                            }
+                        />
+                    )}
+                />
+            )}
+        </FormField>
     )
 }
 

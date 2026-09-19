@@ -238,7 +238,63 @@ export function useLargeTitleScroll(
         }
     }, [enabled, scrollRef, titleRef])
 
-    return enabled && collapsed
+    return collapsed
+}
+
+export function usePinnedSectionStuck(
+    scrollRef: React.RefObject<HTMLDivElement | null>,
+    enabled: boolean
+): boolean {
+    const [stuck, setStuck] = useState(false)
+
+    useEffect(() => {
+        if (!enabled) {
+            setStuck(false)
+            return
+        }
+
+        const scrollElement = scrollRef.current
+        if (!scrollElement) return
+
+        let frameId: number | null = null
+
+        function evaluate() {
+            frameId = null
+
+            const container = scrollRef.current
+            const pinned = container?.querySelector<HTMLElement>(
+                '[data-pinned-section]'
+            )
+
+            if (!container || !pinned) {
+                setStuck(false)
+                return
+            }
+
+            const containerTop = container.getBoundingClientRect().top
+            const pinnedTop = pinned.getBoundingClientRect().top
+            setStuck(pinnedTop <= containerTop + 1)
+        }
+
+        function handleScroll() {
+            if (frameId !== null) return
+
+            frameId = requestAnimationFrame(evaluate)
+        }
+
+        scrollElement.addEventListener('scroll', handleScroll, {
+            passive: true,
+        })
+        evaluate()
+
+        return () => {
+            scrollElement.removeEventListener('scroll', handleScroll)
+
+            if (frameId !== null) cancelAnimationFrame(frameId)
+        }
+    }, [enabled, scrollRef])
+
+    return stuck
 }
 
 function getSidebarInlineStyle(
