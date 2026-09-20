@@ -20,7 +20,7 @@ interface AccountDetailsSectionProps {
     userData: User
     canAccessDashboard: boolean
     handleSignOut: () => void
-    onSave: (user: User) => void
+    onSave: (user: User) => void | Promise<void>
     donorLinkError: Error | null
     isLinking?: boolean
     onDonorLinkSubmit: (donorLinkForm: {
@@ -283,27 +283,30 @@ export function AccountDetailsSection({
             ? normalizedZipDigits.padStart(5, '0')
             : null
 
-        onSave({
-            ...userData,
-            firstName: nameDraft.firstName,
-            lastName: nameDraft.lastName,
-            phone: nameDraft.phone || null,
-            shirtSize: nameDraft.shirtSize,
-            nameConfirmed: true,
-            email: shouldUseMatchedEmail
-                ? (matchedDonorEmail ?? userData.email)
-                : userData.email,
-            address: {
-                ...userData.address,
-                addressLine1: normalizeText(addressDraft.addressLine1),
-                addressLine2: normalizeText(addressDraft.addressLine2),
-                city: normalizeText(addressDraft.city),
-                state: normalizeText(addressDraft.state)?.toUpperCase() ?? null,
-                zip: normalizedZip,
-            },
-            addressConfirmed: true,
-        })
-        onDonorLinkSubmit(donorLinkForm)
+        void (async () => {
+            await onSave({
+                ...userData,
+                firstName: nameDraft.firstName,
+                lastName: nameDraft.lastName,
+                phone: nameDraft.phone || null,
+                shirtSize: nameDraft.shirtSize,
+                email: shouldUseMatchedEmail
+                    ? (matchedDonorEmail ?? userData.email)
+                    : userData.email,
+                address: {
+                    ...userData.address,
+                    addressLine1: normalizeText(addressDraft.addressLine1),
+                    addressLine2: normalizeText(addressDraft.addressLine2),
+                    city: normalizeText(addressDraft.city),
+                    state:
+                        normalizeText(addressDraft.state)?.toUpperCase() ??
+                        null,
+                    zip: normalizedZip,
+                },
+            })
+            onDonorLinkSubmit(donorLinkForm)
+        })()
+
         setShowAddressConfirmModal(false)
         setMatchedDonorEmail(null)
     }
