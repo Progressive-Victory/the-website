@@ -9,16 +9,12 @@ import {
     MembershipTier,
     membershipTiers,
     MembershipSearchField,
-    PackageShipped,
     PendingUpdate,
     RecurringSummary,
     TierSegment,
 } from './membership.types'
-import {
-    MembershipDeliverableStatus,
-    ShirtSize,
-    UserAddress,
-} from 'pv-contracts/data'
+import { toDeliverableStatus, toPackageShipped } from '@/util'
+import { ShirtSize, UserAddress } from 'pv-contracts/data'
 import {
     UpdateMembershipRequest,
     UpdateUserAddressRequest,
@@ -131,14 +127,6 @@ const formatDonorAddress = (
             .filter(Boolean)
             .join(', ') || undefined
     )
-}
-
-const packageShippedFromStatus = (
-    merchStatus?: MembershipDeliverableStatus
-): PackageShipped | undefined => {
-    if (merchStatus == null) return undefined
-    if (merchStatus === MembershipDeliverableStatus.Returned) return 'Returned'
-    return merchStatus >= MembershipDeliverableStatus.Recieved ? 'Yes' : 'No'
 }
 
 const monthSpan = (start: Date, end: Date) =>
@@ -472,20 +460,9 @@ export const mapPacketToMember = (
         benefitShipped: membership?.benefitsShipped ?? false,
         membershipCardStatus: cardStatus,
         membershipMerchStatus: merchStatus,
-        packageShipped: packageShippedFromStatus(cardStatus),
+        packageShipped: toPackageShipped(cardStatus),
         userMatched: Boolean(user),
     }
-}
-
-const packageShippedStatus: Record<
-    PackageShipped,
-    MembershipDeliverableStatus
-> = {
-    Yes: MembershipDeliverableStatus.Recieved,
-    No: MembershipDeliverableStatus.NotStarted,
-    Returned: MembershipDeliverableStatus.Returned,
-    'Not Received': MembershipDeliverableStatus.InTransit,
-    Canceled: MembershipDeliverableStatus.NotEligible,
 }
 
 type FieldChange<T> = T | null | undefined
@@ -545,7 +522,7 @@ const resolveCardStatus = (member: Member, draft: MemberEdits) => {
             return undefined
         return draft.packageShipped == null
             ? undefined
-            : packageShippedStatus[draft.packageShipped]
+            : toDeliverableStatus(draft.packageShipped)
     }
 
     return undefined

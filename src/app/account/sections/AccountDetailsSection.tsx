@@ -8,10 +8,10 @@ import { DiscordAvatar } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
 import formStyles from '@/components/common/forms/Form.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import { cn } from '@/util'
+import { cn, memberFacingDeliverableLabel } from '@/util'
 import { useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
-import { MembershipDeliverableStatus, User } from 'pv-contracts/data'
+import { User } from 'pv-contracts/data'
 import { zDiscordUserIsInServerResponse } from 'pv-contracts/responses'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { IoClose } from 'react-icons/io5'
@@ -56,19 +56,6 @@ export function AccountDetailsSection({
     useEffect(() => {
         setUpdatedUser(userData)
     }, [userData])
-
-    const membershipDeliverableLabels: Record<
-        MembershipDeliverableStatus,
-        string
-    > = {
-        [MembershipDeliverableStatus.NotEligible]: 'Requested To Cancel',
-        [MembershipDeliverableStatus.NotStarted]: 'Not Shipped Yet',
-        [MembershipDeliverableStatus.Printed]: 'Not Shipped Yet',
-        [MembershipDeliverableStatus.InTransit]:
-            'Delivery Failed - Fix Address',
-        [MembershipDeliverableStatus.Recieved]: 'Card Shipped',
-        [MembershipDeliverableStatus.Returned]: 'Delivery Failed - Fix Address',
-    }
 
     const normalizeEmail = (value?: string | null) =>
         (value ?? '').trim().toLowerCase()
@@ -491,6 +478,7 @@ export function AccountDetailsSection({
                                                             }
                                                         >
                                                             Membership Card
+                                                            Status
                                                         </span>
                                                         <div
                                                             className={
@@ -502,12 +490,15 @@ export function AccountDetailsSection({
                                                                     formFieldStyles.readonly
                                                                 }
                                                             >
-                                                                {
-                                                                    membershipDeliverableLabels[
-                                                                        userData
-                                                                            .membershipCardStatus
-                                                                    ]
-                                                                }
+                                                                <span
+                                                                    className={
+                                                                        styles.statusTag
+                                                                    }
+                                                                >
+                                                                    {memberFacingDeliverableLabel(
+                                                                        userData.membershipCardStatus
+                                                                    )}
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>

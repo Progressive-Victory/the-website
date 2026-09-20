@@ -1,3 +1,4 @@
+import { PackageShipped } from '@/util'
 import {
     MembershipDeliverableStatus,
     ShirtSize,
@@ -58,15 +59,8 @@ export interface TierSegment {
     maxAmount: number
 }
 
-export const packageShippedOptions = [
-    'Yes',
-    'No',
-    'Returned',
-    'Not Received',
-    'Canceled',
-] as const
-
-export type PackageShipped = (typeof packageShippedOptions)[number]
+export { packageShippedOptions } from '@/util'
+export type { PackageShipped }
 
 export interface Member {
     packet: MembershipsResponsePacket
