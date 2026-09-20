@@ -4,7 +4,13 @@ import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import { cn } from '@/util'
 import type { ReactElement } from 'react'
-import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
+import {
+    FaCalendarAlt,
+    FaDonate,
+    FaUserShield,
+    FaUserTag,
+    FaUsers,
+} from 'react-icons/fa'
 import {
     FaCheckToSlot,
     FaClipboardUser,
@@ -38,6 +44,7 @@ export interface VolunteerDashboardUnselectedDetailProps {
     permissionCount?: number
     positionCount?: number
     endorsementCount?: number
+    eventCount?: number
 }
 
 export function renderVolunteerDashboardUnselectedDetail({
@@ -53,6 +60,7 @@ export function renderVolunteerDashboardUnselectedDetail({
     permissionCount,
     positionCount,
     endorsementCount,
+    eventCount,
 }: VolunteerDashboardUnselectedDetailProps): ReactElement {
     const displayName = currentUserName?.trim()
         ? currentUserName
@@ -179,6 +187,18 @@ export function renderVolunteerDashboardUnselectedDetail({
                             href="/volunteer_dashboard/panels/positions"
                             icon={FaClipboardUser}
                             tag={{ count: positionCount }}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                    </div>
+                    <div className={styles.unselectedGrid}>
+                        {renderUnselectedGridHeader('Community')}
+                        <NavigationButton
+                            label="Events"
+                            description="Discord community events" // TODO: this sucks lol
+                            href="/volunteer_dashboard/panels/events"
+                            icon={FaCalendarAlt}
+                            tag={{ count: eventCount }}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />

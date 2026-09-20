@@ -1,10 +1,9 @@
 'use client'
 
-import styles from './page.module.css'
-import { ListElement } from '@/app/admin/layout/List'
+import styles from '../page.module.css'
 import { DiscordAvatar } from '@/components/common'
-import { DiscordEventAttendee } from '@/contracts/data'
 import { redirect, RedirectType } from 'next/navigation'
+import { DiscordEventAttendee } from 'pv-contracts/data'
 import { FaArrowUpRightFromSquare } from 'react-icons/fa6'
 
 interface EventAttendeesProps {

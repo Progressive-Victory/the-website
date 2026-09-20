@@ -1,0 +1,151 @@
+// import styles from './DetailView.module.css'
+import styles from '../../endorsements/panel_views/DetailView.module.css'
+import { formatDiscordEventDate } from '../page'
+import EventAttendees from './EventAttendees'
+import { DiscordAvatar } from '@/components/common'
+import {
+    DateField,
+    Form,
+    FormField,
+    FormGroup,
+    TextField,
+} from '@/components/common/forms'
+import formStyles from '@/components/common/forms/FormField.module.css'
+import { cn } from '@/util'
+import { DiscordEventStatus } from 'pv-contracts/data'
+import {
+    DiscordEventDetailsResponse,
+    DiscordEventOccurrence,
+    DiscordEventWithOccurrences,
+} from 'pv-contracts/responses'
+
+const statusName = (status: DiscordEventStatus | null | undefined) =>
+    [
+        'Unknown', // for some reason the status is nullable...
+        'Scheduled',
+        'Active',
+        'Completed',
+        'Cancelled',
+    ][status ?? 0]
+
+interface DetailViewProps {
+    event: DiscordEventWithOccurrences | null
+    // "most recent event" in most cases; used for status and occurence-specific data.
+    // can be used in the future to display details for any occurrence.
+    keyOccurrence: DiscordEventOccurrence | null
+    createdBy: DiscordEventDetailsResponse['createdBy'] | null
+    title: string
+    // saving: boolean
+    // onUpdate: (next: FormState<DiscordEvent> | null) => void
+    // onSave: (event: DiscordEvent) => void | boolean
+    // onCreate: () => DiscordEvent
+    // onDelete: () => void
+    // onCancel: () => void
+    beforeHeader?: React.ReactElement
+    className?: string
+}
+
+export function DetailView({
+    event,
+    keyOccurrence,
+    createdBy,
+    title,
+    // saving,
+    // TODO: implement
+    // onUpdate,
+    // onSave,
+    // onCreate,
+    // onDelete,
+    // onCancel,
+    beforeHeader,
+    className,
+}: DetailViewProps) {
+    return (
+        <Form<DiscordEventWithOccurrences>
+            className={className}
+            form={event}
+            title={title}
+            beforeHeader={beforeHeader}
+            readonly={true}
+        >
+            <FormGroup title="Event Info">
+                <TextField label="Name" field="name" required />
+                <TextField label="Description" field="description" />
+                <FormField label="Status">
+                    <div
+                        className={cn(
+                            styles.detailsStatusField,
+                            keyOccurrence &&
+                                styles[
+                                    statusName(
+                                        keyOccurrence.status
+                                    ).toLocaleLowerCase()
+                                ]
+                        )}
+                    >
+                        <span className={formStyles.readonly}>
+                            {statusName(keyOccurrence?.status ?? null)}
+                        </span>
+                    </div>
+                </FormField>
+                <FormField label="Recurring">
+                    <span className={formStyles.readonly}>
+                        {event!.recurrent ? 'Yes' : 'No'}
+                    </span>
+                </FormField>
+                <FormField label="Created By">
+                    <div className={styles.detailsCreatedByContainer}>
+                        <DiscordAvatar
+                            discordUserId={createdBy?.id}
+                            imageId={createdBy?.image}
+                            size={24}
+                        />
+                        <span className={formStyles.readonly}>
+                            {`@${
+                                createdBy?.username ??
+                                event!.creatorDiscordId ??
+                                'Unknown'
+                            }`}
+                        </span>
+                    </div>
+                </FormField>
+                <DateField label="Created At" field="createdAtUtc" />
+                <DateField label="Scheduled Start" field="scheduledStartUtc" />
+                <DateField label="Scheduled End" field="scheduledEndUtc" />
+                <FormField label="Started At">
+                    <span className={formStyles.readonly}>
+                        {keyOccurrence?.startedAtUtc
+                            ? formatDiscordEventDate(keyOccurrence.startedAtUtc)
+                            : 'Not started'}
+                    </span>
+                </FormField>
+                <FormField label="Ended At">
+                    <span className={formStyles.readonly}>
+                        {keyOccurrence?.startedAtUtc ||
+                        keyOccurrence?.status === 2
+                            ? keyOccurrence.endedAtUtc
+                                ? formatDiscordEventDate(
+                                      keyOccurrence.endedAtUtc
+                                  )
+                                : 'Active'
+                            : 'Not started'}
+                    </span>
+                </FormField>
+            </FormGroup>
+            <FormGroup
+                title={
+                    <h2>
+                        Attendees
+                        {keyOccurrence?.attendees?.length !== 0 && (
+                            <span className={styles.attendeeCount}>
+                                {` (${keyOccurrence?.attendees?.length ?? 0})`}
+                            </span>
+                        )}
+                    </h2>
+                }
+            >
+                {<EventAttendees attendees={keyOccurrence?.attendees ?? []} />}
+            </FormGroup>
+        </Form>
+    )
+}
