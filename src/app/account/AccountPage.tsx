@@ -30,8 +30,8 @@ export function AccountPage() {
         loggedInUser: loggedInUser.data,
     })
 
-    const onSave = (user: User) => {
-        updateUser.mutate({
+    const onSave = async (user: User) => {
+        await updateUser.mutateAsync({
             id: user.id,
             user,
             request: {
