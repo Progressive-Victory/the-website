@@ -102,7 +102,7 @@ export function useFetch() {
                 const reason =
                     error instanceof Error ? `: ${error.message}` : ''
                 throw new Error(
-                    `Request failed (${method} ${url.pathname})${reason}`,
+                    `Request failed (${method} ${url.pathname})${reason})`,
                     { cause: error }
                 )
             }
@@ -110,7 +110,7 @@ export function useFetch() {
 
         let res = await request()
 
-        if (session && res.status === 401) {
+        if (session && (session.userId === -1 || res.status === 401)) {
             await onRefresh()
             res = await request()
         }
