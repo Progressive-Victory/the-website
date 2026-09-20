@@ -22,6 +22,7 @@ interface AccountDetailsSectionProps {
     handleSignOut: () => void
     onSave: (user: User) => void
     donorLinkError: Error | null
+    isLinking?: boolean
     onDonorLinkSubmit: (donorLinkForm: {
         donorEmail: string
         orderId: string
@@ -34,6 +35,7 @@ export function AccountDetailsSection({
     handleSignOut,
     onSave,
     donorLinkError,
+    isLinking = false,
     onDonorLinkSubmit,
 }: AccountDetailsSectionProps) {
     const { ready, onGet } = useFetch()
@@ -581,7 +583,12 @@ export function AccountDetailsSection({
                                                 </p>
                                             </div>
                                             <BaseButton
-                                                label="Link ActBlue"
+                                                label={
+                                                    isLinking
+                                                        ? 'Linking...'
+                                                        : 'Link ActBlue'
+                                                }
+                                                disabled={isLinking}
                                                 onClick={() =>
                                                     setShowDonorLinkForm(true)
                                                 }

@@ -91,6 +91,7 @@ export function AccountPage() {
                             handleSignOut={handleSignOut}
                             onSave={onSave}
                             donorLinkError={linkUser.error}
+                            isLinking={linkUser.isPending}
                             onDonorLinkSubmit={onLinkFormSubmit}
                         />
                         {!!loggedInUser.data.donors?.length && (
