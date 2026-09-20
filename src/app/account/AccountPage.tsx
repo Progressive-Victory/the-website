@@ -69,14 +69,15 @@ export function AccountPage() {
         })
     }
 
-    if (isSessionLoading || !session) return null
+    if (isSessionLoading) return null
+
+    if (!session) redirect('/login')
 
     if (
         loggedInUser.data &&
         loggedInUser.data.onboardingStage != OnboardingStage.JOINED
     ) {
         redirect('/volunteer', RedirectType.replace)
-        return null
     }
 
     return (
