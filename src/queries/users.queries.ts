@@ -105,6 +105,8 @@ export function useUpdatedUser({
                     '/actblue/donors/:donorEmail/membership',
                     {
                         discordConfirmed: true,
+                        nameConfirmed: true,
+                        addressConfirmed: true,
                         metaData: {
                             userWhoUpdatedId: id,
                             dataSource: 'Account Page',
