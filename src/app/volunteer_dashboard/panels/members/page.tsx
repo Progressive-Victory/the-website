@@ -18,7 +18,7 @@ import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import { FetchError, stateOptions } from '@/models'
 import { usePositionQueries } from '@/queries'
-import { cn, parseErrorMessage } from '@/util'
+import { cn, parseErrorMessage, DOT_SEPARATOR } from '@/util'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -218,7 +218,7 @@ export default function Page() {
             selectedRole?.name,
         ]
             .filter(Boolean)
-            .join(' · ') || 'All Users'
+            .join(` ${DOT_SEPARATOR} `) || 'All Users'
     const selectedFilterIcon = selectedState ? (
         <FaMapMarkerAlt />
     ) : selectedBirthYear ? (
