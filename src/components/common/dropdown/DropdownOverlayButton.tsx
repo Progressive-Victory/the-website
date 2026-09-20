@@ -17,8 +17,7 @@ import { createPortal } from 'react-dom'
 import { FiCheck, FiChevronRight } from 'react-icons/fi'
 
 type DropdownOverlayButtonMenu =
-    | ReactNode
-    | ((controls: { closeMenu: () => void }) => ReactNode)
+    ReactNode | ((controls: { closeMenu: () => void }) => ReactNode)
 
 export interface DropdownOverlayButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     icon?: ReactNode

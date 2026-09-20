@@ -1,7 +1,7 @@
 import styles from './ElectionStatusBadge.module.css'
-import { ElectionStatus } from '@/contracts/data'
 import { ELECTION_STATUS_LABELS } from '@/models'
 import { cn } from '@/util'
+import { ElectionStatus } from 'pv-contracts/data'
 
 interface ElectionStatusBadgeProps {
     electionStatus: ElectionStatus

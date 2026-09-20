@@ -121,7 +121,7 @@
     align-items: center;
     justify-content: center;
     font-size: clamp(1.65rem, 2.6vw, 2.3rem);
-    font-weight: 750;
+    font-weight: 700;
     letter-spacing: -0.03em;
     line-height: 1.08;
     color: rgba(9, 34, 58, 0.96);
@@ -144,7 +144,7 @@
 .unselectedProfileName {
     margin: 0;
     font-size: clamp(1.65rem, 2.6vw, 2.3rem);
-    font-weight: 750;
+    font-weight: 700;
     letter-spacing: -0.03em;
     line-height: 1.08;
     color: rgba(9, 34, 58, 0.96);
@@ -176,7 +176,7 @@
 .unselectedProfileHandle {
     margin: 0;
     font-size: 0.98rem;
-    font-weight: 540;
+    font-weight: 500;
     letter-spacing: -0.01em;
     color: rgba(15, 23, 42, 0.55);
     animation: nameIn 0.79s cubic-bezier(0.25, 0.46, 0.45, 0.94) 3.275s both;

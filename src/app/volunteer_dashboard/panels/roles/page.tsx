@@ -12,9 +12,6 @@ import {
 } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
-import { Role, zPermission, zRole } from '@/contracts/data'
-import { SortDirection, UpdateRoleRequest } from '@/contracts/requests'
-import { PaginatedResponse } from '@/contracts/responses'
 import { FetchError } from '@/models'
 import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
@@ -25,6 +22,9 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { Role, zPermission, zRole } from 'pv-contracts/data'
+import { SortDirection, UpdateRoleRequest } from 'pv-contracts/requests'
+import { PaginatedResponse } from 'pv-contracts/responses'
 import { useMemo, useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 

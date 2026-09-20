@@ -1,9 +1,9 @@
 import styles from './CandidateDetails.module.css'
 import { ElectionStatusBadge, EndorsementAvatar } from '@/components/common'
 import { HStack, VStack, ZStack } from '@/components/layout'
-import { InitiativeType, type Endorsement } from '@/contracts/data'
 import { ENDORSEMENT_TYPE_LABELS, getStateLabel } from '@/models'
 import { cn } from '@/util'
+import { InitiativeType, type Endorsement } from 'pv-contracts/data'
 import { useEffect, useRef, useState } from 'react'
 import {
     FaDonate,

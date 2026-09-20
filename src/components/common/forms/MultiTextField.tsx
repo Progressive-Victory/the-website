@@ -1,6 +1,6 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
-import tagStyles from '@/app/admin/panels/endorsements/page.module.css'
+import tagStyles from '@/app/volunteer_dashboard/panels/endorsements/page.module.css'
 import { cn } from '@/util'
 import { ChangeEvent, KeyboardEventHandler, useCallback, useState } from 'react'
 

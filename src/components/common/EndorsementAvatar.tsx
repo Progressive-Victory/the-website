@@ -1,8 +1,8 @@
 import { ElectionStatusBadge } from './ElectionStatusBadge'
 import styles from './EndorsementAvatar.module.css'
 import { ImageWithFallback } from './ImageWithFallback'
-import { BackgroundColor, type Endorsement } from '@/contracts/data'
 import { cn } from '@/util'
+import { BackgroundColor, type Endorsement } from 'pv-contracts/data'
 import { FaUser } from 'react-icons/fa'
 
 export type EndorsementAvatarVariant = 'ring' | 'tile'

@@ -9,17 +9,19 @@ import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { Header } from '@/components/layout/Header'
+import { useEndorsementQueries, usePositionQueries } from '@/queries'
+import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
+import { useQuery } from '@tanstack/react-query'
+import { usePathname, useSearchParams } from 'next/navigation'
 import {
     zActBlueDonationPacket,
     zActBlueDonor,
     zPermission,
     zRole,
     zUser,
-} from '@/contracts/data'
-import { useEndorsementQueries, usePositionQueries } from '@/queries'
-import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
-import { useQuery } from '@tanstack/react-query'
-import { usePathname, useSearchParams } from 'next/navigation'
+} from 'pv-contracts/data'
+import { MembershipSearchRequest } from 'pv-contracts/requests'
+import { zMembershipsResponsePacket } from 'pv-contracts/responses'
 import { Suspense, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
@@ -49,6 +51,11 @@ interface DashboardPanelConfigItem {
     count?: number
     buttonType?: 'default' | 'group'
     groupChildren?: DashboardGroupChildConfigItem[]
+}
+
+const membershipCountSearch: MembershipSearchRequest = {
+    limit: 1,
+    isMember: true,
 }
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -82,6 +89,11 @@ function LayoutContent({ children }: { children: ReactNode }) {
         '/actblue/contributions',
         zActBlueDonationPacket,
         { search: { limit: 0 } }
+    )
+    const memberships = usePaginatedSearch(
+        '/actblue/memberships',
+        zMembershipsResponsePacket,
+        { search: membershipCountSearch }
     )
     const positionHierarchy = useQuery({
         queryKey: ['positionHierarchy'],
@@ -137,7 +149,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                     label: 'Membership',
                     href: '/volunteer_dashboard/panels/membership',
                     icon: FaMoneyCheckDollar,
-                    // count: insert,
+                    count: memberships.query.data?.count,
                 },
             ],
         },
@@ -321,6 +333,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                         userCount: users.query.data?.count,
                         donorCount: donors.query.data?.count,
                         contributionCount: contributions.query.data?.count,
+                        membershipCount: memberships.query.data?.count,
                         roleCount: roles.query.data?.count,
                         permissionCount: permissions.query.data?.count,
                         positionCount,

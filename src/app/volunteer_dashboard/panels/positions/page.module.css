@@ -62,7 +62,7 @@
     padding: 0.75rem 0.9rem;
     border-bottom: 1px solid rgba(17, 24, 39, 0.08);
     font-size: 0.92rem;
-    font-weight: 550;
+    font-weight: 500;
     color: rgba(15, 23, 42, 0.85);
     overflow: hidden;
 
@@ -155,7 +155,7 @@
     border: none;
     background: transparent;
     font-size: 0.92rem;
-    font-weight: 550;
+    font-weight: 500;
     letter-spacing: -0.01em;
     color: rgba(15, 23, 42, 0.72);
     cursor: pointer;
@@ -182,16 +182,28 @@
 }
 
 .pickerItem {
-    & > div {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.15rem;
+    display: flex;
+    width: calc(100% - 0.5rem);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    margin: 0.25rem;
+    padding: 1rem;
+    border: none;
+    border-radius: 1rem;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #e5e7eb;
     }
 }
 
 .pickerItemName {
     font-size: 0.92rem;
-    font-weight: 550;
+    font-weight: 500;
     color: rgba(15, 23, 42, 0.85);
 }
 

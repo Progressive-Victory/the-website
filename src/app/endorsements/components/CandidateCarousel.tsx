@@ -1,8 +1,8 @@
 import { waveListVariants } from '../endorsements.motion'
 import styles from './CandidateCarousel.module.css'
 import { EndorsementAvatar, PersonCard } from '@/components/common'
-import { type Endorsement } from '@/contracts/data'
 import { motion } from 'motion/react'
+import { type Endorsement } from 'pv-contracts/data'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 const carouselItemVariants = {

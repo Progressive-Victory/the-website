@@ -3,13 +3,14 @@
 import styles from './endorsementFilters.module.css'
 import { FilterTag } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
+import { stateOptions } from '@/models'
+import { DOT_SEPARATOR } from '@/util'
 import {
     ElectionStatus,
     Endorsement,
     EndorsementType,
     InitiativeType,
-} from '@/contracts/data'
-import { stateOptions } from '@/models'
+} from 'pv-contracts/data'
 import { useMemo, useState } from 'react'
 import {
     FaCalendarAlt,
@@ -181,7 +182,7 @@ function optionDropdown<T>(
                 label="Filter by"
                 onClose={closeDropdown}
                 narrowLayoutMode="trigger"
-                style={{ left: 0, right: 'auto' }}
+                align="start"
                 body={
                     <div className={styles.filterMenu}>
                         <DropdownOverlayButton
@@ -260,7 +261,7 @@ export function useEndorsementFilters(endorsements: Endorsement[]) {
             selectedIncumbentLabel,
         ]
             .filter(Boolean)
-            .join(' · ') || 'More'
+            .join(` ${DOT_SEPARATOR} `) || 'More'
 
     let selectedFilterIcon = <FaCog />
     if (selectedState) selectedFilterIcon = <FaMapMarkerAlt />

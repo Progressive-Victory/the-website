@@ -13,12 +13,21 @@ import {
     getValidChartGranularityModes,
     type ChartGranularityMode,
 } from '@/components/common/charts/timeBuckets'
-import { SortDirection } from '@/contracts/requests'
 import { useActblueQueries } from '@/queries'
+import { usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
+import { zActBlueDonationPacket } from 'pv-contracts/data'
+import { SortDirection } from 'pv-contracts/requests'
+import type { MembershipSearchRequest } from 'pv-contracts/requests'
+import { zMembershipsResponsePacket } from 'pv-contracts/responses'
 import { useEffect, useMemo, useState } from 'react'
 
 type ChartBarDisplayMode = 'grouped' | 'stacked'
+
+const membershipCountSearch: MembershipSearchRequest = {
+    limit: 1,
+    isMember: true,
+}
 
 function getPreviousEquivalentRange(start: Date, end: Date) {
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
@@ -173,6 +182,18 @@ export function useFundraisingDashboardController() {
         queryFn: ({ signal }) => actblueQueries.getFundraisingStats({ signal }),
         enabled: actblueQueries.ready,
     })
+
+    const membershipCountQuery = usePaginatedSearch(
+        '/actblue/memberships',
+        zMembershipsResponsePacket,
+        { search: membershipCountSearch }
+    ).query
+
+    const contributionCountQuery = usePaginatedSearch(
+        '/actblue/contributions',
+        zActBlueDonationPacket,
+        { search: { limit: 0 } }
+    ).query
 
     const earliestContributionQuery = useQuery({
         queryKey: ['/actblue/contributions', 'earliest'],
@@ -443,6 +464,8 @@ export function useFundraisingDashboardController() {
         canApplyCustomRange,
         statsQuery,
         allTimeStatsQuery,
+        membershipCountQuery,
+        contributionCountQuery,
         setStartDate,
         setEndDate,
         setCommittedPreset,
