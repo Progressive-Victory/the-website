@@ -16,7 +16,8 @@ import {
 import { FiX } from 'react-icons/fi'
 
 type DropdownOverlayNarrowLayoutMode = 'container' | 'trigger' | 'flow'
-type DropdownOverlayAlign = 'start' | 'end'
+
+type DropdownOverlayAlign = 'auto' | 'start' | 'end'
 
 const DROPDOWN_OVERLAY_LAYOUT_CONFIG = {
     viewportPadding: 12,
@@ -112,16 +113,14 @@ function computeResponsiveOverlayStyle({
     }
 
     const fitWidth = Math.min(overlayScrollWidth, viewportMaxWidth)
-    const canAlignStart =
-        anchorRect.left + fitWidth <=
-        viewportWidth - DROPDOWN_OVERLAY_LAYOUT_CONFIG.viewportPadding
-    const canAlignEnd =
-        anchorRect.right - fitWidth >=
-        DROPDOWN_OVERLAY_LAYOUT_CONFIG.viewportPadding
+    const rightAlignedStart = anchorRect.right - fitWidth
+    const leftAlignedEnd = anchorRect.left + fitWidth
+    const fitsWhenAlignedLeft =
+        rightAlignedStart < DROPDOWN_OVERLAY_LAYOUT_CONFIG.viewportPadding &&
+        leftAlignedEnd <=
+            viewportWidth - DROPDOWN_OVERLAY_LAYOUT_CONFIG.viewportPadding
     const shouldAlignLeft =
-        align === 'start'
-            ? canAlignStart || !canAlignEnd
-            : !canAlignEnd && canAlignStart
+        align === 'start' || (align === 'auto' && fitsWhenAlignedLeft)
 
     return {
         position: undefined,
@@ -291,7 +290,7 @@ export const DropdownOverlay = forwardRef<HTMLDivElement, DropdownOverlayProps>(
             footerClassName,
             footerButtonClassName,
             narrowLayoutMode = 'container',
-            align = 'end',
+            align = 'auto',
             className,
             style,
             children,

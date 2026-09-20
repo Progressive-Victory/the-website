@@ -4,6 +4,7 @@ import styles from './endorsementFilters.module.css'
 import { FilterTag } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
 import { stateOptions } from '@/models'
+import { DOT_SEPARATOR } from '@/util'
 import {
     ElectionStatus,
     Endorsement,
@@ -261,7 +262,7 @@ export function useEndorsementFilters(endorsements: Endorsement[]) {
             selectedIncumbentLabel,
         ]
             .filter(Boolean)
-            .join(' · ') || 'All'
+            .join(` ${DOT_SEPARATOR} `) || 'More'
 
     let selectedFilterIcon = <FaCog />
     if (selectedState) selectedFilterIcon = <FaMapMarkerAlt />
