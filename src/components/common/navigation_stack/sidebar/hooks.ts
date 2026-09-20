@@ -251,7 +251,7 @@ function getSidebarInlineStyle(
         style['--navigation-stack-sidebar-open-width'] = sidebarWidth
     if (collapsedWidth)
         style['--navigation-stack-sidebar-collapsed-width'] = collapsedWidth
-    return style as CSSProperties
+    return style
 }
 
 export function useSidebarState(

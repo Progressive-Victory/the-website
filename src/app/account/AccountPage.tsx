@@ -6,16 +6,17 @@ import {
     ManualDonorLinkRequest,
 } from './sections/index'
 import styles from '@/app/account/account.module.css'
-import { OnboardingStage, User } from '@/contracts/data'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
+import { RedirectType, redirect } from 'next/navigation'
+import { OnboardingStage, User } from 'pv-contracts/data'
 import { useMemo } from 'react'
 
 export function AccountPage() {
     const { isSessionLoading, session, onLogout } = useAuth()
     const loggedInUser = useCurrentUser()
 
-    const canAccessAdminPanel = useMemo(() => {
+    const canAccessDashboard = useMemo(() => {
         return loggedInUser.data
             ? hasPermission(loggedInUser.data, 'Admin Panel Access')
             : false
@@ -29,8 +30,8 @@ export function AccountPage() {
         loggedInUser: loggedInUser.data,
     })
 
-    const onSave = (user: User) => {
-        updateUser.mutate({
+    const onSave = async (user: User) => {
+        await updateUser.mutateAsync({
             id: user.id,
             user,
             request: {
@@ -68,14 +69,15 @@ export function AccountPage() {
         })
     }
 
-    if (isSessionLoading || !session) return null
+    if (isSessionLoading) return null
+
+    if (!session) redirect('/login')
 
     if (
         loggedInUser.data &&
         loggedInUser.data.onboardingStage != OnboardingStage.JOINED
     ) {
-        window.location.href = '/volunteer'
-        return null
+        redirect('/volunteer', RedirectType.replace)
     }
 
     return (
@@ -85,10 +87,11 @@ export function AccountPage() {
                     <>
                         <AccountDetailsSection
                             userData={loggedInUser.data}
-                            canAccessAdminPanel={canAccessAdminPanel}
+                            canAccessDashboard={canAccessDashboard}
                             handleSignOut={handleSignOut}
                             onSave={onSave}
                             donorLinkError={linkUser.error}
+                            isLinking={linkUser.isPending}
                             onDonorLinkSubmit={onLinkFormSubmit}
                         />
                         {!!loggedInUser.data.donors?.length && (

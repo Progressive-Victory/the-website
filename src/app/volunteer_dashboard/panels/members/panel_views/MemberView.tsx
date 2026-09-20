@@ -12,27 +12,9 @@ import {
     TextField,
 } from '@/components/common/forms'
 import { MultiTextField } from '@/components/common/forms/MultiTextField'
-import { Role, ShirtSize, UpdateHistory, User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
-
-const membershipCardShipmentOptions = [
-    { value: 0, label: 'Not Started' },
-    { value: 1, label: 'Cancelled' },
-    { value: 2, label: 'Printed' },
-    { value: 3, label: 'Shipped' },
-    { value: 4, label: 'Received' },
-    { value: 5, label: 'Returned (Update Address)' },
-]
-
-const membershipMerchShipmentOptions = [
-    { value: 0, label: 'Not Started' },
-    { value: 1, label: 'Cancelled' },
-    { value: 2, label: 'Printed' },
-    { value: 3, label: 'Shipped' },
-    { value: 4, label: 'Received' },
-    { value: 5, label: 'Returned (Update Address)' },
-]
+import { Role, ShirtSize, UpdateHistory, User } from 'pv-contracts/data'
 
 const shirtSizeOptions = [
     { value: '', label: 'None' },
@@ -42,12 +24,6 @@ const shirtSizeOptions = [
     { value: 'L', label: 'Large' },
     { value: 'XL', label: 'Extra Large' },
     { value: '2XL', label: 'Double XL' },
-]
-
-const membershipFulfillmentStatusOptions = [
-    { value: 0, label: 'Not Eligible' },
-    { value: 1, label: 'Not Fulfilled' },
-    { value: 2, label: 'Fulfilled' },
 ]
 
 const calcFutureDate = (
@@ -270,16 +246,6 @@ export function MemberView({
 
             <FormGroup title="Membership Fulfillment">
                 <DropDownField<User>
-                    label="Membership Card Shipped"
-                    field="membershipCardStatus"
-                    options={membershipCardShipmentOptions}
-                />
-                <DropDownField<User>
-                    label="Membership Merch Shipped"
-                    field="membershipMerchStatus"
-                    options={membershipMerchShipmentOptions}
-                />
-                <DropDownField<User>
                     label="Shirt Size"
                     getter={(form) => form.shirtSize ?? ''}
                     setter={(form, field) => ({
@@ -297,16 +263,6 @@ export function MemberView({
                     label="Qualifies for Membership Benefits"
                     field="membershipBenefitEligible"
                     readonly
-                />
-                <DropDownField<User>
-                    label="Membership Fulfillment Status"
-                    field="membershipFulfillmentStatus"
-                    options={membershipFulfillmentStatusOptions}
-                />
-                <CheckboxField label="Name Confirmed" field="nameConfirmed" />
-                <CheckboxField
-                    label="Address Confirmed"
-                    field="addressConfirmed"
                 />
                 <TextField<User>
                     label="Has Active Recurring"

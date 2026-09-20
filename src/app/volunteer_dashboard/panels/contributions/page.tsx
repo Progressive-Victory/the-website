@@ -11,13 +11,16 @@ import {
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
-import { ActBlueDonationPacket, zActBlueDonationPacket } from '@/contracts/data'
-import { SortDirection } from '@/contracts/requests'
 import { dateService } from '@/services'
 import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
+import {
+    ActBlueDonationPacket,
+    zActBlueDonationPacket,
+} from 'pv-contracts/data'
+import { SortDirection } from 'pv-contracts/requests'
 import { useEffect, useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 

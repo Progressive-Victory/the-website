@@ -2,8 +2,9 @@
 
 import styles from '@/app/account/account.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import { ShirtSize } from '@/contracts/data'
+import { stateOptions } from '@/models'
 import { cn } from '@/util'
+import { ShirtSize } from 'pv-contracts/data'
 import { FormEvent, useState } from 'react'
 import { IoClose } from 'react-icons/io5'
 
@@ -245,13 +246,20 @@ function AddressConfirmationPage({
                         <span className={formFieldStyles.fieldLabel}>
                             State
                         </span>
-                        <input
+                        <select
                             className={formFieldStyles.textField}
                             value={addressDraft.state ?? ''}
                             onChange={(e) =>
                                 onChangeAddressDraft('state', e.target.value)
                             }
-                        />
+                        >
+                            <option value="">No state selected</option>
+                            {stateOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </select>
                     </label>
                     <label>
                         <span className={formFieldStyles.fieldLabel}>Zip</span>

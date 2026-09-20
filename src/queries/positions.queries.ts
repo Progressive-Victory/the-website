@@ -1,10 +1,10 @@
-import { zPosition } from '@/contracts/data'
+import { useFetch } from '@/util/hooks'
+import { zPosition } from 'pv-contracts/data'
 import {
     CreatePositionRequest,
     UpdatePositionRequest,
-} from '@/contracts/requests'
-import { zPositionHierarchyResponse } from '@/contracts/responses'
-import { useFetch } from '@/util/hooks'
+} from 'pv-contracts/requests'
+import { zPositionHierarchyResponse } from 'pv-contracts/responses'
 
 export function usePositionQueries() {
     const { ready, onGet, onPost, onPatch, onDelete } = useFetch()

@@ -7,14 +7,14 @@ import {
     TextField,
     DropDownField,
 } from '@/components/common/forms'
-import { ShirtSize, User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
+import { ShirtSize, User } from 'pv-contracts/data'
 import { useState } from 'react'
 
 interface AccountInfoFormProps {
     user: User
-    onSave: (user: User) => void
+    onSave: (user: User) => void | Promise<void>
     onUpdateUser: (user: User) => void
     subtitle?: string
     avatar?: React.ReactNode
@@ -65,7 +65,7 @@ export const AccountInfoForm = ({
 
     const handleFormSave = (user: User) => {
         onUpdateUser(user)
-        onSave(user)
+        void onSave(user)
     }
 
     const showAddressLine2 =

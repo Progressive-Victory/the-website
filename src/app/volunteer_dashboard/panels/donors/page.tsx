@@ -12,18 +12,18 @@ import {
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
+import { cn, parseErrorMessage } from '@/util'
+import { useFetch, usePaginatedSearch } from '@/util/hooks'
+import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
+import { useSearchParams } from 'next/navigation'
 import {
     ActBlueDonor,
     zActBlueDonor,
     ActBlueContribution,
     ActBlueLineitem,
     ActBlueContributionCustomField,
-} from '@/contracts/data'
-import { SortDirection } from '@/contracts/requests'
-import { cn, parseErrorMessage } from '@/util'
-import { useFetch, usePaginatedSearch } from '@/util/hooks'
-import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
-import { useSearchParams } from 'next/navigation'
+} from 'pv-contracts/data'
+import { SortDirection } from 'pv-contracts/requests'
 import { useEffect, useMemo, useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
@@ -113,8 +113,7 @@ export default function Page() {
                         calcFutureDate(
                             contribution.createdAt,
                             contribution.recurringPeriod as
-                                | 'weekly'
-                                | 'monthly',
+                                'weekly' | 'monthly',
                             contribution.recurringDuration ?? 1
                         ) > new Date())
                 )

@@ -229,6 +229,7 @@
     display: flex;
     flex-flow: column nowrap;
     align-items: stretch;
+    overflow-x: auto;
 
     padding: 0 1rem 1rem 1rem;
 }
@@ -744,4 +745,17 @@
 
 .redirectBannerContent a:hover {
     text-decoration: none;
+}
+
+.statusTag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
 }

@@ -1,6 +1,7 @@
 import styles from './stages.module.css'
 import { cn } from '@/util'
 import { CakeIcon, TrophyIcon } from '@heroicons/react/24/solid'
+import { redirect } from 'next/navigation'
 
 export interface CompleteStageProps {
     isInServer: boolean
@@ -20,13 +21,20 @@ export function CompleteStage({
     const text = isInServer
         ? 'Check your Discord client to start participating in the community.'
         : 'Click the button below to rejoin.'
+    const subtext =
+        'Or, visit your account page to tell us more about yourself.'
+
+    const redirectToAccount = () => redirect('/account')
 
     return (
         <div className={styles.container}>
             <Icon className={cn(styles.icon, styles.success)} />
             <p className={styles.subtitle}>{subtitle}</p>
             <p className={styles.text}>{text}</p>
-            {!isInServer && (
+
+            {isInServer ? (
+                <p className={styles.text}>{subtext}</p>
+            ) : (
                 <button
                     disabled={isPending}
                     onClick={onRejoin}
@@ -35,6 +43,13 @@ export function CompleteStage({
                     Rejoin
                 </button>
             )}
+            <button
+                disabled={isPending}
+                onClick={redirectToAccount}
+                className={styles.button}
+            >
+                Account Page
+            </button>
         </div>
     )
 }

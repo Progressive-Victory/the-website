@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './DashboardWidget.module.css'
-import { cn } from '@/util'
+import { cn, DOT_SEPARATOR } from '@/util'
 import { forwardRef } from 'react'
 
 export interface DashboardWidgetProps extends React.HTMLAttributes<HTMLElement> {
@@ -40,7 +40,9 @@ export const DashboardWidget = forwardRef<HTMLElement, DashboardWidgetProps>(
                     <div className={styles.stats}>
                         {hasStat1 && <span>{stat1}</span>}
                         {hasStat1 && hasStat2 && (
-                            <span className={styles.separator}>·</span>
+                            <span className={styles.separator}>
+                                {DOT_SEPARATOR}
+                            </span>
                         )}
                         {hasStat2 && <span>{stat2}</span>}
                     </div>
