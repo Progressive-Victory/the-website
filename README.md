@@ -2,23 +2,23 @@
 
 ## Getting Started with Development
 
-Welcome to the PV Frontpage Redux repo! This is the source code of our website. Before contributing to the codebase you **MUST** read the following information. If you're a fullstack Next.js pro you can quickly skim this. **NOTE**: since migrating to sql and a centralized database, you now also require the api setup on your local machine, and running in concurrence with the website.
+Welcome to the PV Website repo! This is the source code of our website. Before contributing to the codebase you **MUST** read the following information. If you're a fullstack Next.js pro you can quickly skim this.
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-If you're new to Next.js development please start by [reading the docs](https://nextjs.org/docs/app/getting-started/project-structure) to get a understanding of how a Next.js site works. The underlying reactive web development framework is [React](https://react.dev/learn), the linked page has a great tutorial for getting you aquainted quickly.
+If you're new to Next.js development please start by [reading the docs](https://nextjs.org/docs/app/getting-started/project-structure) to get a understanding of how a Next.js site works. The underlying reactive web development framework is [React](https://react.dev/learn), the linked page has a great tutorial for getting you acquainted quickly.
 
-The language used in this project is [Typescript](https://www.typescriptlang.org/docs/) which is a typed version of Javascript. Please take a moment to review Typescript basics and best practices before getting started.
+The language used in this project is [Typescript](https://www.typescriptlang.org/docs/) which is a typed version of JavaScript. Please take a moment to review Typescript basics and best practices before getting started.
 
 By continuing with development you are agreeing that you understand these frameworks and will attempt to work within the best practices and conventions.
 
 ### 1. Create a New Branch
 
-Check out a new branch from `main` before you begin working on any new feature. If you do not understand the previous sentence see [git - the simple guide](https://rogerdudler.github.io/git-guide/) for a primer.
+Check out a new branch from `dev` before you begin working on any new feature. If you do not understand the previous sentence see [git - the simple guide](https://rogerdudler.github.io/git-guide/) for a primer.
 
 ### 2. Installing
 
-**BEFORE** running the server you must have [Node.js](https://nodejs.org/en/download) installed on your machine. We officialy use the 20.19.1 LTS version of Node but backward compatability means you should be able to use any LTS >= 20.19.1 to run the server.
+**BEFORE** running the server you must have [Node.js](https://nodejs.org/en/download) installed on your machine. We officially use the 24.19.0 LTS version of Node but backward compatibility means you should be able to use any LTS >= 20.19.1 to run the server.
 
 **AFTER** installing Node.js you **MUST** install [pnpm](https://pnpm.io/installation) to manage the dependencies for this project. We do **NOT** use npm, if you use npm your builds will fail!
 
@@ -36,17 +36,19 @@ pnpm install
 
 ### 3. Configure
 
-Next, check the .env.example file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to Joops or sH3llH0und on discord.
+Next, in the `.env.example` file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to a member of engineering team leadership on Discord.
 
 ```sh
 # $PROJECT_DIR/.env
 
 # Does not need to change
-SITE_URL="https://example.com"
+SITE_URL="http://localhost:3000"
 
 # api vars
-PV_WEBSITE_API_URL="http://localhost:8080"
+PV_WEBSITE_API_URL="https://devapi.progressivevictory.win"
 ```
+
+**NOTE:** If you have access to `the-local-setup`, the `.env` files are not needed.
 
 ### 4. Run
 
@@ -60,7 +62,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Deploy on Vercel
 
-Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from @somejoops, a deputy, or assistant, or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.
+Only certain users have the ability to deploy branches on Vercel. Create a PR and request help from a member of engineering team leadership, or attend coding team meeting Mondays at 5PM PST / 8PM EST to have your PR approved.
 
 ## Learn More
 
@@ -86,3 +88,8 @@ npx playwright install --with-deps
 ```sh
 pnpm run test
 ```
+
+## Merge Rules
+
+Merge ticket branch -> dev as a squash, covering up our sins in the review process
+Merge dev -> main as a merge, allowing dev and main to share a history and compare histories properly
