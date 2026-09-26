@@ -9,7 +9,11 @@ import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { Header } from '@/components/layout/Header'
-import { useEndorsementQueries, usePositionQueries } from '@/queries'
+import {
+    useEndorsementQueries,
+    usePositionQueries,
+    useEventQueries,
+} from '@/queries'
 import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
 import { usePathname, useSearchParams } from 'next/navigation'
@@ -24,7 +28,13 @@ import { MembershipSearchRequest } from 'pv-contracts/requests'
 import { zMembershipsResponsePacket } from 'pv-contracts/responses'
 import { Suspense, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
+import {
+    FaCalendarAlt,
+    FaDonate,
+    FaUserShield,
+    FaUserTag,
+    FaUsers,
+} from 'react-icons/fa'
 import {
     FaClipboardUser,
     FaDollarSign,
@@ -73,6 +83,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
     const previousPathnameRef = useRef(pathname)
     const positionQueries = usePositionQueries()
     const endorsementQueries = useEndorsementQueries()
+    const eventQueries = useEventQueries()
     const [showWelcome, setShowWelcome] = useState(
         pathname === '/volunteer_dashboard' && welcomeParam
     )
@@ -104,6 +115,11 @@ function LayoutContent({ children }: { children: ReactNode }) {
         queryKey: ['endorsements'],
         queryFn: ({ signal }) => endorsementQueries.getEndorsements({ signal }),
         enabled: endorsementQueries.ready,
+    })
+    const events = useQuery({
+        queryKey: ['events'],
+        queryFn: eventQueries.getEventsSummary,
+        enabled: eventQueries.ready,
     })
 
     const positionCount = positionHierarchy.data?.positions?.length
@@ -180,6 +196,13 @@ function LayoutContent({ children }: { children: ReactNode }) {
             href: '/volunteer_dashboard/panels/endorsements',
             icon: FaCheckToSlot,
             count: endorsements.data?.length,
+        },
+        {
+            key: 'events',
+            label: 'Events',
+            href: '/volunteer_dashboard/panels/events',
+            icon: FaCalendarAlt,
+            count: events.data?.query?.data?.count,
         },
     ]
 

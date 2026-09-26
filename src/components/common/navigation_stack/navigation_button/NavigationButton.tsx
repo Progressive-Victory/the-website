@@ -22,6 +22,7 @@ export interface NavigationButtonProps {
     label: string
     subtitle?: string
     tag?: TagProps
+    renderTag?: React.ReactNode
     subTags?: SubTagProps[]
     href: string
     icon?: IconType | ReactNode
@@ -47,6 +48,7 @@ export function NavigationButton({
     label,
     subtitle,
     tag,
+    renderTag,
     subTags,
     href,
     icon,
@@ -154,6 +156,7 @@ export function NavigationButton({
                     <TagSection
                         buttonType={buttonType}
                         tag={tag}
+                        renderTag={renderTag}
                         isAccountButton={isAccountButton}
                         isCardButton={isCardButton}
                         hasActiveGroupChild={hasActiveGroupChild}

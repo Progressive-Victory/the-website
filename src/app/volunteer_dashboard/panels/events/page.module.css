@@ -1,0 +1,168 @@
+.eventMeta {
+    display: flex;
+    flex-direction: column;
+}
+
+.eventName {
+    font-weight: 500;
+    color: #000;
+}
+
+.eventNextStart {
+    color: #6b7280;
+    font-size: small;
+}
+
+.eventAttendeeCount {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-basis: 3rem;
+    aspect-ratio: 1 / 1;
+
+    border-radius: 100%;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding-inline: 0.75rem;
+    padding-block: 0.15rem;
+}
+
+.eventAttendeeCountTag {
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.detailsPane {
+    height: calc(100dvh - 100px);
+    flex: 1;
+    overflow-y: auto;
+}
+
+.emptyState {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+}
+
+/* pane */
+.detailsHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding-block: 1rem;
+
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.95) 72%,
+        rgba(255, 255, 255, 0)
+    );
+
+    border-radius: 1rem;
+}
+
+.detailsEventThumbnail {
+    width: calc(100% - 2rem);
+    height: 8rem;
+    margin: 0 1rem;
+    object-fit: cover;
+    border-radius: 1rem;
+
+    &.placeholder {
+        --banner-cover-gradient:
+            radial-gradient(
+                circle at 18% 30%,
+                rgba(2, 132, 199, 0.24),
+                transparent 35%
+            ),
+            radial-gradient(
+                circle at 82% 20%,
+                rgba(41, 134, 204, 0.28),
+                transparent 40%
+            ),
+            linear-gradient(
+                120deg,
+                rgba(9, 34, 58, 0.96),
+                rgba(27, 69, 104, 0.9)
+            );
+
+        content: '';
+        background: var(--banner-cover-gradient);
+        background-repeat: no-repeat;
+        pointer-events: none;
+        z-index: -1;
+    }
+}
+
+.detailsEventDecorationContainer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.headerTop {
+    border-radius: 0.75rem;
+    margin-top: -2rem;
+    margin-right: 0.9rem;
+    margin-bottom: 0.9rem;
+    margin-left: 0.9rem;
+    padding-top: 0.8rem;
+    padding-bottom: 0.9rem;
+    padding-inline: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.66);
+
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.11);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: space-between;
+}
+
+.cardStyle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.userInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    & > h1 {
+        font-weight: 500;
+        font-size: 1.125rem;
+    }
+
+    & > h2 {
+        font-weight: 400;
+        font-size: 1rem;
+        color: #3d3d3d;
+    }
+}
+
+.detailsCreatedByContainer,
+.attendeeMeta {
+    display: flex;
+    align-items: center;
+    column-gap: 0.5rem;
+}
+
+.detailsContent {
+    padding: 1rem;
+}
