@@ -147,6 +147,7 @@ export default function Page() {
             collapsedSidebarWidth="5rem"
             sidebarClassName={styles.sidebarBg}
             sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            showScrollbar={false}
             label="Events"
             sidebarList={{
                 search: { search, onSearch },
@@ -186,9 +187,6 @@ export default function Page() {
                                 keyOccurrenceOf(event)?.name ??
                                 `Event ${event.id}`,
                             subtitle: `Scheduled: ${formatDiscordEventDate(event.createdAtUtc)}`,
-                            // tagLabel: makeDateTag(item),
-                            // tagClassName: styles.dateTag,
-                            // subTags: makeLevelTags(item),
                             renderTag: (
                                 <div
                                     className={cn(

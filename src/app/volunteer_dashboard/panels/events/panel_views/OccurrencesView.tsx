@@ -1,7 +1,9 @@
-import EventSubItems from './EventSubItems'
+import { formatDiscordEventDate } from '../page'
+import { OccurrenceCard } from './OccurrenceCard'
 import styles from './panels.module.css'
 import { Form, FormGroup } from '@/components/common/forms'
-import { dateService } from '@/services'
+import { cn } from '@/util'
+import { DiscordEventStatus } from 'pv-contracts/data'
 import {
     DiscordEventOccurrence,
     DiscordEventWithOccurrences,
@@ -10,14 +12,7 @@ import {
 interface OccurrencesViewProps {
     event: DiscordEventWithOccurrences | null
     keyOccurrence: DiscordEventOccurrence | null
-    // createdBy: DiscordEventDetailsResponse['createdBy'] | null
     title: string
-    // saving: boolean
-    // onUpdate: (next: FormState<DiscordEvent> | null) => void
-    // onSave: (event: DiscordEvent) => void | boolean
-    // onCreate: () => DiscordEvent
-    // onDelete: () => void
-    // onCancel: () => void
     beforeHeader?: React.ReactElement
     className?: string
 }
@@ -29,17 +24,6 @@ export function OccurencesView({
     beforeHeader,
     className,
 }: OccurrencesViewProps) {
-    const formatDate = (value: Date, format?: Intl.DateTimeFormatOptions) => {
-        if (!dateService.isValid(value)) return undefined
-        return Intl.DateTimeFormat(
-            'en-US',
-            format ?? {
-                dateStyle: 'long',
-                timeStyle: 'medium',
-            }
-        ).format(value)
-    }
-
     const sortOccurrences = (event: DiscordEventWithOccurrences) =>
         event?.occurrences.toSorted((a, b) => {
             if (b.endedAtUtc && a.endedAtUtc)
@@ -55,13 +39,7 @@ export function OccurencesView({
         })
 
     return (
-        <Form<DiscordEventWithOccurrences>
-            className={className}
-            form={event}
-            title={title}
-            beforeHeader={beforeHeader}
-            readonly={true}
-        >
+        <div className={cn(styles.occurrencesSection, className)}>
             <FormGroup
                 title={
                     <h2 className={styles.header}>
@@ -74,28 +52,40 @@ export function OccurencesView({
                     </h2>
                 }
             >
+                <section className={styles.occurrenceList}>
+                    {event?.occurrences ? (
+                        sortOccurrences(event).map((occurrence) => (
+                            <OccurrenceCard
+                                key={occurrence.id}
+                                occurrence={occurrence}
+                            />
+                        ))
+                    ) : (
+                        <p>No occurrences found.</p>
+                    )}
+                </section>
                 {
-                    <EventSubItems
-                        items={
-                            event?.occurrences
-                                ? sortOccurrences(event)
-                                : ([] as DiscordEventOccurrence[])
-                        }
-                        generators={{
-                            key: (occ) => String(occ.id),
-                            href: () =>
-                                `/admin/panels/events${keyOccurrence?.id ? `?id=${keyOccurrence.id}` : ''}`,
-                            label: (occ) => occ.name,
-                            subtitle: (occ) =>
-                                formatDate(
-                                    occ.endedAtUtc ??
-                                        occ.startedAtUtc ??
-                                        occ.scheduledStartUtc
-                                ) ?? '',
-                        }}
-                    />
+                    // <EventSubItems
+                    //     items={
+                    //         event?.occurrences
+                    //             ? sortOccurrences(event)
+                    //             : ([] as DiscordEventOccurrence[])
+                    //     }
+                    //     generators={{
+                    //         key: (occ) => String(occ.id),
+                    //         href: () =>
+                    //             `/admin/panels/events${keyOccurrence?.id ? `?id=${keyOccurrence.id}` : ''}`,
+                    //         label: (occ) => occ.name,
+                    //         subtitle: (occ) =>
+                    //             formatDate(
+                    //                 occ.endedAtUtc ??
+                    //                     occ.startedAtUtc ??
+                    //                     occ.scheduledStartUtc
+                    //             ) ?? '',
+                    //     }}
+                    // />
                 }
             </FormGroup>
-        </Form>
+        </div>
     )
 }

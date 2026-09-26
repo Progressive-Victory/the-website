@@ -30,3 +30,16 @@
     font-size: 1rem;
     font-weight: 400;
 }
+
+.occurrencesSection {
+    margin-inline: 1rem;
+}
+
+.occurrenceList {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-evenly;
+    gap: 1rem;
+
+    padding: 0.5rem;
+}
