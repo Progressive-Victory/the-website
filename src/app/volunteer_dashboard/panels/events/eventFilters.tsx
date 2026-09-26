@@ -2,6 +2,7 @@ import { YesNoMenu } from '../endorsements/endorsementFilters'
 import styles from '../endorsements/endorsementFilters.module.css'
 import { FilterTag } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
+import { dateService } from '@/services'
 import { DOT_SEPARATOR } from '@/util'
 import { DiscordEventStatus } from 'pv-contracts/data'
 import { DiscordEventWithOccurrences } from 'pv-contracts/responses'
@@ -91,6 +92,20 @@ const newestOccurence = (event: DiscordEventWithOccurrences) =>
     event.occurrences.toSorted(
         (a, b) => a.scheduledStartUtc.getTime() - b.scheduledStartUtc.getTime()
     )[0]
+
+export const formatDiscordEventDate = (
+    value: Date,
+    format?: Intl.DateTimeFormatOptions
+) => {
+    if (!dateService.isValid(value)) return undefined
+    return Intl.DateTimeFormat(
+        'en-US',
+        format ?? {
+            dateStyle: 'long',
+            timeStyle: 'medium',
+        }
+    ).format(value)
+}
 
 export function useEventFilters(events: DiscordEventWithOccurrences[]) {
     const [activeTag, setActiveTag] = useState('all')

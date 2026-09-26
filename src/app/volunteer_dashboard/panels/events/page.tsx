@@ -4,7 +4,7 @@ import { FilterTags } from '../../layout/FilterTags'
 import { MobileSidebarBackButton } from '../../layout/MobileSidebarBackButton'
 import memberStyles from '../members/page.module.css'
 import tagStyles from '../membership/components/Tags.module.css'
-import { useEventFilters } from './eventFilters'
+import { formatDiscordEventDate, useEventFilters } from './eventFilters'
 import styles from './page.module.css'
 import { DetailView } from './panel_views/DetailView'
 import { OccurencesView } from './panel_views/OccurrencesView'
@@ -35,20 +35,6 @@ const eventSortFields: { value: keyof DiscordEvent; label: string }[] = [
     { value: 'creatorDiscordId', label: 'Created by' },
     { value: 'name', label: 'Name' },
 ]
-
-export const formatDiscordEventDate = (
-    value: Date,
-    format?: Intl.DateTimeFormatOptions
-) => {
-    if (!dateService.isValid(value)) return undefined
-    return Intl.DateTimeFormat(
-        'en-US',
-        format ?? {
-            dateStyle: 'long',
-            timeStyle: 'medium',
-        }
-    ).format(value)
-}
 
 export default function Page() {
     const navParams = useSearchParams()
