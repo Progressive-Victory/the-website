@@ -34,12 +34,6 @@ interface DetailViewProps {
     keyOccurrence: DiscordEventOccurrence | null
     createdBy: DiscordEventDetailsResponse['createdBy'] | null
     title: string
-    // saving: boolean
-    // onUpdate: (next: FormState<DiscordEvent> | null) => void
-    // onSave: (event: DiscordEvent) => void | boolean
-    // onCreate: () => DiscordEvent
-    // onDelete: () => void
-    // onCancel: () => void
     beforeHeader?: React.ReactElement
     className?: string
 }
@@ -49,13 +43,6 @@ export function DetailView({
     keyOccurrence,
     createdBy,
     title,
-    // saving,
-    // TODO: implement
-    // onUpdate,
-    // onSave,
-    // onCreate,
-    // onDelete,
-    // onCancel,
     beforeHeader,
     className,
 }: DetailViewProps) {

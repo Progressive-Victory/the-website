@@ -64,27 +64,6 @@ export function OccurencesView({
                         <p>No occurrences found.</p>
                     )}
                 </section>
-                {
-                    // <EventSubItems
-                    //     items={
-                    //         event?.occurrences
-                    //             ? sortOccurrences(event)
-                    //             : ([] as DiscordEventOccurrence[])
-                    //     }
-                    //     generators={{
-                    //         key: (occ) => String(occ.id),
-                    //         href: () =>
-                    //             `/admin/panels/events${keyOccurrence?.id ? `?id=${keyOccurrence.id}` : ''}`,
-                    //         label: (occ) => occ.name,
-                    //         subtitle: (occ) =>
-                    //             formatDate(
-                    //                 occ.endedAtUtc ??
-                    //                     occ.startedAtUtc ??
-                    //                     occ.scheduledStartUtc
-                    //             ) ?? '',
-                    //     }}
-                    // />
-                }
             </FormGroup>
         </div>
     )
