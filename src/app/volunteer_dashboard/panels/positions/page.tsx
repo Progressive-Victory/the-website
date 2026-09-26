@@ -24,7 +24,12 @@ import {
     useUnpaginatedSearch,
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Position, UserProfile, zUserProfile } from 'pv-contracts/data'
+import {
+    Position,
+    PositionTypes,
+    UserProfile,
+    zUserProfile,
+} from 'pv-contracts/data'
 import { SearchRequest, SortDirection } from 'pv-contracts/requests'
 import {
     PaginatedResponse,
@@ -49,6 +54,8 @@ const blankPosition: Position = {
     name: '',
     childIds: [],
     userIds: [],
+    type: PositionTypes.POSITION,
+    seats: 1,
 }
 
 export default function Page() {
@@ -142,6 +149,8 @@ export default function Page() {
             positionQueries.createPosition({
                 name: newValue.name,
                 parentIds: [],
+                positionType: newValue.type,
+                seats: newValue.seats,
             }),
         onChange: (value) => {
             setSelectedPosition(value)
@@ -155,6 +164,8 @@ export default function Page() {
                 name: newValue.name,
                 childIds: newValue.childIds,
                 userIds: newValue.userIds,
+                positionType: newValue.type,
+                seats: newValue.seats,
             }),
         onChange: (value) => {
             setSelectedPosition(value)
