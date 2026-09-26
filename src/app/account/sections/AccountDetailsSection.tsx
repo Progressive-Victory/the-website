@@ -62,25 +62,7 @@ export function AccountDetailsSection({
     const normalizeEmail = (value?: string | null) =>
         (value ?? '').trim().toLowerCase()
 
-    const targetContributionPath = '/donate/pvmember'
-    const recurringShirtSizeThreshold = 100
     const now = new Date()
-
-    const normalizeContributionFormPath = (value?: string | null) => {
-        const form = (value ?? '').trim().toLowerCase()
-        if (!form) return ''
-
-        if (form.startsWith('http://') || form.startsWith('https://')) {
-            try {
-                const url = new URL(form)
-                return url.pathname.replace(/\/+$/, '')
-            } catch {
-                return form
-            }
-        }
-
-        return form.replace(/\/+$/, '')
-    }
 
     const isActiveRecurringContribution = (
         createdAt: Date,
@@ -112,28 +94,6 @@ export function AccountDetailsSection({
                         contribution.recurringDuration
                     )
                 )
-            })
-        ) ?? false
-
-    const hasRecurringPvMemberContributionAtOrAboveThreshold =
-        userData.donors?.some((donor) =>
-            (donor.contributions ?? []).some((contribution) => {
-                const contributionForm = normalizeContributionFormPath(
-                    contribution.contributionForm
-                )
-                const isPvMemberForm = contributionForm.endsWith(
-                    targetContributionPath
-                )
-
-                const hasRecurringAmountAtThreshold =
-                    contribution.isRecurring &&
-                    (contribution.lineitems ?? []).some(
-                        (lineitem) =>
-                            (lineitem.recurringAmount ?? lineitem.amount) >=
-                            recurringShirtSizeThreshold
-                    )
-
-                return isPvMemberForm && hasRecurringAmountAtThreshold
             })
         ) ?? false
 
@@ -613,9 +573,6 @@ export function AccountDetailsSection({
                             onSave={onSave}
                             onUpdateUser={setUpdatedUser}
                             hasMatchedDonor={userHasDonor}
-                            showShirtSize={
-                                hasRecurringPvMemberContributionAtOrAboveThreshold
-                            }
                             subtitle={
                                 updatedUser.discordUsers?.[0]?.username
                                     ? `@${updatedUser.discordUsers[0].username}`
