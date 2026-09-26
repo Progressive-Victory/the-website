@@ -88,8 +88,3 @@ npx playwright install --with-deps
 ```sh
 pnpm run test
 ```
-
-## Merge Rules
-
-Merge ticket branch -> dev as a squash, covering up our sins in the review process
-Merge dev -> main as a merge, allowing dev and main to share a history and compare histories properly
