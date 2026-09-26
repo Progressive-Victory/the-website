@@ -1,9 +1,7 @@
-import { formatDiscordEventDate } from '../page'
 import { OccurrenceCard } from './OccurrenceCard'
 import styles from './panels.module.css'
-import { Form, FormGroup } from '@/components/common/forms'
+import { FormGroup } from '@/components/common/forms'
 import { cn } from '@/util'
-import { DiscordEventStatus } from 'pv-contracts/data'
 import {
     DiscordEventOccurrence,
     DiscordEventWithOccurrences,
@@ -17,13 +15,7 @@ interface OccurrencesViewProps {
     className?: string
 }
 
-export function OccurencesView({
-    event,
-    keyOccurrence,
-    title,
-    beforeHeader,
-    className,
-}: OccurrencesViewProps) {
+export function OccurencesView({ event, className }: OccurrencesViewProps) {
     const sortOccurrences = (event: DiscordEventWithOccurrences) =>
         event?.occurrences.toSorted((a, b) => {
             if (b.endedAtUtc && a.endedAtUtc)

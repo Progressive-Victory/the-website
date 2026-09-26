@@ -336,9 +336,10 @@ export default function Page() {
                                 )}
                                 createdBy={eventQuery.data?.createdBy ?? null}
                                 title={
-                                    eventQuery.data?.event?.occurrences[0]
-                                        .name ?? 'Event'
+                                    keyOccurrenceOf(eventQuery.data.event)
+                                        ?.name ?? 'Event'
                                 }
+
                                 className={styles.detailsContent}
                             />
                         )}
@@ -349,8 +350,8 @@ export default function Page() {
                                     eventQuery.data.event
                                 )}
                                 title={
-                                    eventQuery.data?.event?.occurrences[0]
-                                        .name ?? 'Event'
+                                    keyOccurrenceOf(eventQuery.data.event)
+                                        ?.name ?? 'Event'
                                 }
                             />
                         )}
