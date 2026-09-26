@@ -22,7 +22,15 @@ export function DropDownField<T>(
     const value = getter(props.dynamic!.form) ?? ''
 
     const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        onChange(event.target.value)
+        const rawValue = event.target.value
+        let finalValue: string | number
+        if (!isNaN(Number(rawValue)) && rawValue.trim() !== '') {
+            finalValue = Number(rawValue)
+        } else {
+            finalValue = rawValue
+        }
+
+        onChange(finalValue)
     }
 
     const selectedLabel = useMemo(
