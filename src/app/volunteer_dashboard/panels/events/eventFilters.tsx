@@ -7,8 +7,12 @@ import { DOT_SEPARATOR } from '@/util'
 import { DiscordEventStatus } from 'pv-contracts/data'
 import { DiscordEventWithOccurrences } from 'pv-contracts/responses'
 import { useState } from 'react'
-import { FaCalendarAlt, FaGrinSquintTears } from 'react-icons/fa'
-import { Fa0, Fa1, Fa2, Fa3, Fa4 } from 'react-icons/fa6'
+import { FaCalendarAlt, FaClock, FaUsers } from 'react-icons/fa'
+import {
+    FaUser,
+    FaLocationDot,
+    FaSpaghettiMonsterFlying,
+} from 'react-icons/fa6'
 
 interface EventFilters {
     status: DiscordEventStatus | null
@@ -129,15 +133,15 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
             .filter(Boolean)
             .join(` ${DOT_SEPARATOR} `) || 'More'
     const selectedFilterIcon = selectedEventStatus ? (
-        <Fa1 />
+        <FaSpaghettiMonsterFlying />
     ) : selectedEventChannel ? (
-        <Fa2 />
+        <FaLocationDot />
     ) : isSelectedEventRecurrent ? (
-        <Fa3 />
+        <FaClock />
     ) : selectedCreatorDiscordId ? (
-        <Fa4 />
+        <FaUser />
     ) : (
-        <Fa0 />
+        <FaUsers />
     )
 
     const filterOptions = {
@@ -195,7 +199,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                         All Items
                     </DropdownOverlayButton>
                     <DropdownOverlayButton
-                        icon={<Fa1 />}
+                        icon={<FaSpaghettiMonsterFlying />}
                         selected={selectedEventStatus !== null}
                         menu={({ closeMenu }) => (
                             <div className={styles.nestedFilterMenu}>
@@ -222,7 +226,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                         Status
                     </DropdownOverlayButton>
                     <DropdownOverlayButton
-                        icon={<Fa2 />}
+                        icon={<FaLocationDot />}
                         selected={selectedEventChannel !== null}
                         menu={({ closeMenu }) => (
                             <div className={styles.nestedFilterMenu}>
@@ -252,7 +256,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                         Channel
                     </DropdownOverlayButton>
                     <DropdownOverlayButton
-                        icon={<Fa3 />}
+                        icon={<FaClock />}
                         selected={isSelectedEventRecurrent !== null}
                         menu={({ closeMenu }) => (
                             <YesNoMenu
@@ -268,7 +272,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                         Recurrent
                     </DropdownOverlayButton>
                     <DropdownOverlayButton
-                        icon={<Fa4 />}
+                        icon={<FaUser />}
                         selected={selectedCreatorDiscordId !== null}
                         menu={({ closeMenu }) => (
                             <div className={styles.nestedFilterMenu}>
@@ -311,7 +315,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                 filterOptions.status.find(
                     (o) => o.value === selectedEventStatus
                 )?.label ?? 'All Events',
-            icon: <FaGrinSquintTears />,
+            icon: <FaSpaghettiMonsterFlying />,
             color: '#5997E0',
             width: '10rem',
             activeRedirect: 'all',
@@ -329,7 +333,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                 filterOptions.channel.find(
                     (o) => o.value === selectedEventChannel
                 )?.label ?? 'Channel',
-            icon: <FaGrinSquintTears />,
+            icon: <FaLocationDot />,
             color: '#62A46C',
             width: '10rem',
             activeRedirect: 'all',
@@ -347,7 +351,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                 filterOptions.recurrent.find(
                     (o) => o.value === isSelectedEventRecurrent
                 )?.label ?? 'Recurrent',
-            icon: <FaGrinSquintTears />,
+            icon: <FaClock />,
             color: '#C65882',
             width: '10rem',
             activeRedirect: 'all',
@@ -366,7 +370,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                 filterOptions.creatorDiscordId.find(
                     (o) => o.value === selectedCreatorDiscordId
                 )?.label ?? 'Creator',
-            icon: <FaGrinSquintTears />,
+            icon: <FaUser />,
             color: '#7674B3',
             width: '10rem',
             activeRedirect: 'all',

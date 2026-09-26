@@ -32,14 +32,35 @@
 }
 
 .occurrencesSection {
+    container-type: inline-size;
     margin-inline: 1rem;
 }
 
 .occurrenceList {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-evenly;
+    --num-columns: 1;
+
+    display: grid;
+    grid-template-columns: repeat(var(--num-columns), 1fr);
+    justify-content: center;
     gap: 1rem;
 
     padding: 0.5rem;
+
+    & > * {
+        container-type: inline-size;
+        min-width: 0;
+        margin-inline: auto;
+    }
+}
+
+@container (width >= 48rem) {
+    .occurrenceList.occurrenceList {
+        --num-columns: 2;
+    }
+}
+
+@container (width >= 80rem) {
+    .occurrenceList.occurrenceList.occurrenceList {
+        --num-columns: 3;
+    }
 }

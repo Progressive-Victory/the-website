@@ -42,8 +42,37 @@ export function OccurrenceCard({ occurrence }: OccurrenceCardProps) {
         [DiscordEventStatus.Cancelled]: tagStyles.tagRed,
     }
 
+    // TODO: Implement this in the API (cache ID + stats to table)
     const getChannelName = (channelId: string) => {
-        return `${channelId} (not implemented)`
+        const channelMap: Record<string, string> = {
+            '1153398945695924254': '⛱️ Leadership Lounge',
+            '1161032457932521702': '🔹 Junior Leadership',
+            '1410396846475706408': '🔸 Leadership HQ 1',
+            '1410396711595020308': '🔸 Leadership HQ 2',
+            '1312602031139061870': '💼 Office Hours',
+            '1001555729292992562': '🏟️ Main Stage',
+            '1004495054523617360': '🏢 Organizing HQ 1',
+            '1382739680428167250': '🏢 Organizing HQ 2',
+            '1019969298577506415': '☎️ Phonebank VC 1',
+            '1312592785739747439': '☎️ Phonebank VC 2',
+            '928709708188102686': 'Community VC 1',
+            '928709708188102687': 'Community VC 2',
+            '1532102206038216926': 'Community VC 3',
+            '1532102158340849684': 'Community VC 4',
+            '1532102082008580368': 'Community VC 5',
+            '1312592743729594490': 'Organizing VC 1',
+            '1532102268013510676': 'Organizing VC 2',
+            '1532102283737829386': 'Organizing VC 3',
+            '928709707936456771': '🌴 Community Lounge',
+            '1532102443435950252': '🌐 News & Politics',
+            '1007800638933053450': '🍺 After Hours (18+)',
+            '1063235506999140432': '🎮 Gaming VC 1',
+            '1532102386745606195': '🎮 Gaming VC 2',
+            '1044057191994368020': '📚 Study Buddies',
+        } as const
+        return Object.keys(channelMap).includes(channelId)
+            ? channelMap[channelId]
+            : channelId
     }
 
     return (
@@ -52,6 +81,8 @@ export function OccurrenceCard({ occurrence }: OccurrenceCardProps) {
                 <Image
                     src={occurrence.thumbnailUrl}
                     alt={occurrence.name}
+                    width={807}
+                    height={323}
                     className={styles.thumbnail}
                 />
             ) : (
@@ -103,9 +134,14 @@ export function OccurrenceCard({ occurrence }: OccurrenceCardProps) {
                             label="Started At"
                             getter={() => occurrence.startedAtUtc}
                         />
-                        <DateField
+                        <FormField
                             label="Ended At"
-                            getter={() => occurrence.endedAtUtc}
+                            getter={() =>
+                                occurrence.endedAtUtc?.toLocaleTimeString() ??
+                                (occurrence.startedAtUtc
+                                    ? 'In progress'
+                                    : 'Not started')
+                            }
                         />
                         <FormField label="Attendees">
                             <div className={styles.attendeeList}>

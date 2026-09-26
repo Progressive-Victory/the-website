@@ -361,6 +361,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                         permissionCount: permissions.query.data?.count,
                         positionCount,
                         endorsementCount: endorsements.data?.length,
+                        eventCount: events.data?.query?.data?.count,
                     })}
                 />
             </div>
