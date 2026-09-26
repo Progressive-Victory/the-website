@@ -1,6 +1,6 @@
 // import endorsementStyles from './DetailView.module.css'
 import endorsementStyles from '../../endorsements/panel_views/DetailView.module.css'
-import { formatDiscordEventDate } from '../page'
+import { formatDiscordEventDate } from '../eventFilters'
 import { DiscordAvatar } from '@/components/common'
 import {
     DateField,

@@ -1,5 +1,5 @@
 import tagStyles from '../../membership/components/Tags.module.css'
-import { formatDiscordEventDate } from '../page'
+import { formatDiscordEventDate } from '../eventFilters'
 import styles from './OccurrenceCard.module.css'
 import { DiscordAvatar } from '@/components/common'
 import {
