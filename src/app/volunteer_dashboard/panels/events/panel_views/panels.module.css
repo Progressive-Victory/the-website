@@ -1,0 +1,32 @@
+.attendeeMeta {
+    display: flex;
+    align-items: center;
+    column-gap: 0.5rem;
+}
+
+.itemList {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: stretch;
+    gap: 0.35rem;
+    width: 100%;
+}
+
+.listItem {
+    /* padding-inline: 1rem; */
+    border-radius: 1rem;
+    overflow: hidden;
+
+    & > .selectedAttendee > div,
+    & > div {
+        border-radius: 0;
+        margin: 0;
+    }
+}
+
+.attendeeCount,
+.occurrenceCount {
+    display: inline;
+    font-size: 1rem;
+    font-weight: 400;
+}

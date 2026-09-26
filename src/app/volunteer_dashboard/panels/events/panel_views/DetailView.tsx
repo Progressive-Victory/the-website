@@ -1,7 +1,6 @@
-// import styles from './DetailView.module.css'
-import styles from '../../endorsements/panel_views/DetailView.module.css'
+// import endorsementStyles from './DetailView.module.css'
+import endorsementStyles from '../../endorsements/panel_views/DetailView.module.css'
 import { formatDiscordEventDate } from '../page'
-import EventAttendees from './EventAttendees'
 import { DiscordAvatar } from '@/components/common'
 import {
     DateField,
@@ -61,91 +60,98 @@ export function DetailView({
     className,
 }: DetailViewProps) {
     return (
-        <Form<DiscordEventWithOccurrences>
-            className={className}
-            form={event}
-            title={title}
-            beforeHeader={beforeHeader}
-            readonly={true}
-        >
-            <FormGroup title="Event Info">
-                <TextField label="Name" field="name" required />
-                <TextField label="Description" field="description" />
-                <FormField label="Status">
-                    <div
-                        className={cn(
-                            styles.detailsStatusField,
-                            keyOccurrence &&
-                                styles[
-                                    statusName(
-                                        keyOccurrence.status
-                                    ).toLocaleLowerCase()
-                                ]
-                        )}
-                    >
-                        <span className={formStyles.readonly}>
-                            {statusName(keyOccurrence?.status ?? null)}
-                        </span>
-                    </div>
-                </FormField>
-                <FormField label="Recurring">
-                    <span className={formStyles.readonly}>
-                        {event!.recurrent ? 'Yes' : 'No'}
-                    </span>
-                </FormField>
-                <FormField label="Created By">
-                    <div className={styles.detailsCreatedByContainer}>
-                        <DiscordAvatar
-                            discordUserId={createdBy?.id}
-                            imageId={createdBy?.image}
-                            size={24}
-                        />
-                        <span className={formStyles.readonly}>
-                            {`@${
-                                createdBy?.username ??
-                                event!.creatorDiscordId ??
-                                'Unknown'
-                            }`}
-                        </span>
-                    </div>
-                </FormField>
-                <DateField label="Created At" field="createdAtUtc" />
-                <DateField label="Scheduled Start" field="scheduledStartUtc" />
-                <DateField label="Scheduled End" field="scheduledEndUtc" />
-                <FormField label="Started At">
-                    <span className={formStyles.readonly}>
-                        {keyOccurrence?.startedAtUtc
-                            ? formatDiscordEventDate(keyOccurrence.startedAtUtc)
-                            : 'Not started'}
-                    </span>
-                </FormField>
-                <FormField label="Ended At">
-                    <span className={formStyles.readonly}>
-                        {keyOccurrence?.startedAtUtc ||
-                        keyOccurrence?.status === 2
-                            ? keyOccurrence.endedAtUtc
-                                ? formatDiscordEventDate(
-                                      keyOccurrence.endedAtUtc
-                                  )
-                                : 'Active'
-                            : 'Not started'}
-                    </span>
-                </FormField>
-            </FormGroup>
-            <FormGroup
-                title={
-                    <h2>
-                        Attendees
-                        {keyOccurrence?.attendees?.length !== 0 && (
-                            <span className={styles.attendeeCount}>
-                                {` (${keyOccurrence?.attendees?.length ?? 0})`}
-                            </span>
-                        )}
-                    </h2>
-                }
+        <>
+            <Form<DiscordEventWithOccurrences>
+                className={className}
+                form={event}
+                title={title}
+                beforeHeader={beforeHeader}
+                readonly={true}
             >
-                {<EventAttendees attendees={keyOccurrence?.attendees ?? []} />}
-            </FormGroup>
-        </Form>
+                <FormGroup title="Event Info">
+                    <TextField
+                        label="Name"
+                        getter={() => keyOccurrence?.name}
+                        required
+                    />
+                    <TextField
+                        label="Description"
+                        getter={() => keyOccurrence?.description}
+                    />
+                    <FormField label="Status">
+                        <div
+                            className={cn(
+                                endorsementStyles.detailsStatusField,
+                                keyOccurrence &&
+                                    endorsementStyles[
+                                        statusName(
+                                            keyOccurrence.status
+                                        ).toLocaleLowerCase()
+                                    ]
+                            )}
+                        >
+                            <span className={formStyles.readonly}>
+                                {statusName(keyOccurrence?.status ?? null)}
+                            </span>
+                        </div>
+                    </FormField>
+                    <FormField label="Recurring">
+                        <span className={formStyles.readonly}>
+                            {event!.recurrent ? 'Yes' : 'No'}
+                        </span>
+                    </FormField>
+                    <FormField label="Created By">
+                        <div
+                            className={
+                                endorsementStyles.detailsCreatedByContainer
+                            }
+                        >
+                            <DiscordAvatar
+                                discordUserId={createdBy?.id}
+                                imageId={createdBy?.image}
+                                size={24}
+                            />
+                            <span className={formStyles.readonly}>
+                                {`@${
+                                    createdBy?.username ??
+                                    event!.creatorDiscordId ??
+                                    'Unknown'
+                                }`}
+                            </span>
+                        </div>
+                    </FormField>
+                    <DateField label="Created At" field="createdAtUtc" />
+                    <DateField
+                        label="Scheduled Start"
+                        getter={() => keyOccurrence?.scheduledStartUtc}
+                    />
+                    <DateField
+                        label="Scheduled End"
+                        getter={() => keyOccurrence?.scheduledEndUtc}
+                    />
+                    <FormField label="Started At">
+                        <span className={formStyles.readonly}>
+                            {keyOccurrence?.startedAtUtc
+                                ? formatDiscordEventDate(
+                                      keyOccurrence.startedAtUtc
+                                  )
+                                : 'Not started'}
+                        </span>
+                    </FormField>
+                    <FormField label="Ended At">
+                        <span className={formStyles.readonly}>
+                            {keyOccurrence?.startedAtUtc ||
+                            keyOccurrence?.status === 2
+                                ? keyOccurrence.endedAtUtc
+                                    ? formatDiscordEventDate(
+                                          keyOccurrence.endedAtUtc
+                                      )
+                                    : 'Active'
+                                : 'Not started'}
+                        </span>
+                    </FormField>
+                </FormGroup>
+            </Form>
+        </>
     )
 }

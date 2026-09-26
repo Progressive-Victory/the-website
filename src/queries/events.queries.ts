@@ -1,6 +1,8 @@
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { DiscordEvent, zDiscordEventAttendee } from 'pv-contracts/data'
 import {
+    DiscordEventOccurrence,
+    DiscordEventWithOccurrences,
     zDiscordEventDetailsResponse,
     zDiscordEventWithOccurrences,
 } from 'pv-contracts/responses'
@@ -13,6 +15,25 @@ export function useEventQueries() {
         '/discordEvents',
         zDiscordEventWithOccurrences
     )
+
+    const eventWithAttendees = async (
+        discordEvent: DiscordEventOccurrence,
+        signal: AbortSignal
+    ) => {
+        const attendees = await onGet(
+            '/discordEvents/:eventId/attendance',
+            z.array(zDiscordEventAttendee),
+            {
+                params: { eventId: discordEvent.id },
+                query: { includeDiscordUsers: true },
+                signal,
+            }
+        )
+        return {
+            ...discordEvent,
+            attendees,
+        }
+    }
 
     return {
         ready,
@@ -34,14 +55,12 @@ export function useEventQueries() {
                     }
                 )
 
-                const attendees = await onGet(
-                    '/discordEvents/:eventId/attendance',
-                    z.array(zDiscordEventAttendee),
-                    {
-                        params: { eventId },
-                        query: { includeDiscordUsers: true },
-                        signal,
-                    }
+                const occurrences = await Promise.all(
+                    (
+                        discordEvent.event as DiscordEventWithOccurrences
+                    )?.occurrences.map((occurrence) =>
+                        eventWithAttendees(occurrence, signal)
+                    )
                 )
 
                 if (eventLoading.get) eventLoading.set(false)
@@ -50,7 +69,7 @@ export function useEventQueries() {
                     ...discordEvent,
                     event: {
                         ...discordEvent.event,
-                        attendees,
+                        occurrences,
                     },
                 }
             },

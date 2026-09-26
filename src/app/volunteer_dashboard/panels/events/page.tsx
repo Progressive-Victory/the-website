@@ -2,25 +2,31 @@
 
 import { FilterTags } from '../../layout/FilterTags'
 import { MobileSidebarBackButton } from '../../layout/MobileSidebarBackButton'
-// import memberStyles from '../members/page.module.css'
+import memberStyles from '../members/page.module.css'
+import tagStyles from '../membership/components/Tags.module.css'
 import { useEventFilters } from './eventFilters'
 import styles from './page.module.css'
 import { DetailView } from './panel_views/DetailView'
+import { OccurencesView } from './panel_views/OccurrencesView'
 import Panel, { SidebarBody } from '@/components/common/panel'
+import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import { useEventQueries } from '@/queries'
 import { dateService } from '@/services'
+import { cn } from '@/util'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
+import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
-import { DiscordEvent } from 'pv-contracts/data'
-import {
-    DiscordEventDetailsResponse,
-    DiscordEventWithOccurrences,
-} from 'pv-contracts/responses'
+import { DiscordEvent, DiscordEventStatus } from 'pv-contracts/data'
+import { DiscordEventWithOccurrences } from 'pv-contracts/responses'
 import { useState } from 'react'
 import { FaUsers } from 'react-icons/fa6'
 import { useMediaQuery } from 'usehooks-ts'
 
-type DiscordEventTabKey = 'detail' | 'occurrences'
+type DiscordEventTabKey = 'overview' | 'occurrences'
+const tabs: TabSpec[] = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'occurrences', label: 'Occurrences' },
+]
 
 const eventSortFields: { value: keyof DiscordEvent; label: string }[] = [
     { value: 'scheduledStartUtc', label: 'Start Date' },
@@ -54,7 +60,8 @@ export default function Page() {
     )
     const [loadingEvent, setLoadingEvent] = useState(true)
 
-    const [selectedTab, setSelectedTab] = useState<DiscordEventTabKey>('detail')
+    const [selectedTab, setSelectedTab] =
+        useState<DiscordEventTabKey>('overview')
     const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
     const isDesktop = useMediaQuery('(min-width: 64rem)')
 
@@ -89,25 +96,58 @@ export default function Page() {
         setSelectedEventId(eventId)
     }
 
-    const keyOccurrenceOf = (event: DiscordEventDetailsResponse | null) => {
-        console.log({ event })
-        if (event?.event == null) return null
-        if (!event.event.recurrent)
-            return (event.event as DiscordEventWithOccurrences).occurrences[0]
+    const keyOccurrenceOf = (event: DiscordEventWithOccurrences | null) => {
+        if (event == null) return null
+        if (!event.recurrent) return event.occurrences[0]
 
-        const occurrences = (
-            event.event as DiscordEventWithOccurrences
-        ).occurrences.toSorted(
+        const occurrences = event.occurrences.toSorted(
             (a, b) =>
-                a.scheduledStartUtc.getTime() - b.scheduledStartUtc.getTime()
+                b.scheduledStartUtc.getTime() - a.scheduledStartUtc.getTime()
         )
         return occurrences[0]
+    }
+
+    const formatDate = (value: Date, format?: Intl.DateTimeFormatOptions) => {
+        if (!dateService.isValid(value)) return undefined
+        return Intl.DateTimeFormat(
+            'en-US',
+            format ?? {
+                dateStyle: 'long',
+                timeStyle: 'medium',
+            }
+        ).format(value)
+    }
+
+    const getStatusName = (status: DiscordEventStatus | null) =>
+        [
+            'Unknown', // for some reason the status is nullable...
+            'Scheduled',
+            'Active',
+            'Completed',
+            'Cancelled',
+        ][status ?? 0]
+
+    const statusTag = {
+        0: '',
+        [DiscordEventStatus.Scheduled]: tagStyles.tagYellow,
+        [DiscordEventStatus.Active]: tagStyles.tagGreen,
+        [DiscordEventStatus.Completed]: tagStyles.tagBlue,
+        [DiscordEventStatus.Cancelled]: tagStyles.tagRed,
     }
 
     return (
         <Panel
             includeSidebar
             collapsedSidebarMode="compact"
+            sidebarTogglePlacement="header"
+            showSidebarFooterWhenCollapsed={false}
+            showSidebarBorderWhenCollapsed
+            largeTitle
+            sidebarWidth="25.5rem"
+            collapsedSidebarWidth="5rem"
+            sidebarClassName={styles.sidebarBg}
+            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            label="Events"
             sidebarList={{
                 search: { search, onSearch },
                 footer: {
@@ -142,15 +182,25 @@ export default function Page() {
                         selectedKey={selectedEventId}
                         renderItem={(event: DiscordEventWithOccurrences) => ({
                             key: event.id,
-                            label: String(event.id),
+                            label:
+                                keyOccurrenceOf(event)?.name ??
+                                `Event ${event.id}`,
                             subtitle: `Scheduled: ${formatDiscordEventDate(event.createdAtUtc)}`,
                             // tagLabel: makeDateTag(item),
                             // tagClassName: styles.dateTag,
                             // subTags: makeLevelTags(item),
-                            icon: (
-                                <div className={styles.eventAttendeeCount}>
+                            renderTag: (
+                                <div
+                                    className={cn(
+                                        styles.eventAttendeeCountTag,
+                                        tagStyles.tag,
+                                        statusTag[
+                                            keyOccurrenceOf(event)?.status ?? 0
+                                        ]
+                                    )}
+                                >
+                                    <FaUsers size={18} />
                                     {event.userCount ?? 0}
-                                    <FaUsers size={20} />
                                 </div>
                             ),
                             href: `/volunteer_dashboard/panels/events?eventId=${event.id}`,
@@ -171,31 +221,141 @@ export default function Page() {
                     className={styles.backButton}
                 />
 
+                {!eventQuery.data?.event && (
+                    <div className={styles.emptyState}>No event selected</div>
+                )}
+
+                {eventQuery.isLoading && (
+                    <div className={styles.emptyState}>Loading...</div>
+                )}
+
                 {eventQuery.data?.event && (
                     <>
-                        {selectedTab === 'detail' && (
+                        <div className={styles.detailsHeader}>
+                            {keyOccurrenceOf(eventQuery.data.event)
+                                ?.thumbnailUrl ? (
+                                <Image
+                                    src={
+                                        keyOccurrenceOf(eventQuery.data.event)!
+                                            .thumbnailUrl!
+                                    }
+                                    alt={
+                                        keyOccurrenceOf(eventQuery.data.event)!
+                                            .name
+                                    }
+                                    width={807}
+                                    height={323}
+                                    className={styles.detailsEventThumbnail}
+                                />
+                            ) : (
+                                <div
+                                    className={cn(
+                                        styles.detailsEventThumbnail,
+                                        styles.placeholder
+                                    )}
+                                />
+                            )}
+                            <div className={styles.headerTop}>
+                                <div className={styles.cardStyle}>
+                                    <div className={styles.userInfo}>
+                                        <h1
+                                            className={
+                                                memberStyles.headerUserName
+                                            }
+                                        >
+                                            {
+                                                keyOccurrenceOf(
+                                                    eventQuery.data.event
+                                                )?.name
+                                            }
+                                        </h1>
+                                        <h2
+                                            className={
+                                                memberStyles.headerUserUsername
+                                            }
+                                        >
+                                            {keyOccurrenceOf(
+                                                eventQuery.data.event
+                                            )?.scheduledStartUtc &&
+                                                formatDate(
+                                                    keyOccurrenceOf(
+                                                        eventQuery.data.event
+                                                    )!.scheduledStartUtc
+                                                )}
+                                        </h2>
+                                    </div>
+                                </div>
+                                <div
+                                    className={
+                                        styles.detailsEventDecorationContainer
+                                    }
+                                >
+                                    <span
+                                        className={cn(
+                                            tagStyles.tag,
+                                            statusTag[
+                                                keyOccurrenceOf(
+                                                    eventQuery.data.event
+                                                )?.status ?? 'Unknown'
+                                            ]
+                                        )}
+                                    >
+                                        {getStatusName(
+                                            keyOccurrenceOf(
+                                                eventQuery.data.event
+                                            )?.status ?? null
+                                        )}
+                                    </span>
+                                    {eventQuery.data.event.recurrent && (
+                                        <span
+                                            className={cn(
+                                                tagStyles.tag,
+                                                styles.recurrent
+                                            )}
+                                        >
+                                            Recurring
+                                        </span>
+                                    )}
+                                </div>
+                                <TabBar
+                                    tabs={tabs}
+                                    value={selectedTab}
+                                    onChange={(key) => {
+                                        console.log({ key, selectedTab })
+                                        setSelectedTab(
+                                            key as DiscordEventTabKey
+                                        )
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        {selectedTab === 'overview' && (
                             <DetailView
                                 key={selectedEventId}
-                                event={
-                                    (eventQuery.data
-                                        ?.event as DiscordEventWithOccurrences) ??
-                                    null
-                                }
-                                keyOccurrence={keyOccurrenceOf(eventQuery.data)}
+                                event={eventQuery.data?.event ?? null}
+                                keyOccurrence={keyOccurrenceOf(
+                                    eventQuery.data.event
+                                )}
                                 createdBy={eventQuery.data?.createdBy ?? null}
                                 title={
-                                    (
-                                        eventQuery.data
-                                            ?.event as DiscordEventWithOccurrences
-                                    )?.occurrences[0].name ?? 'Event'
+                                    eventQuery.data?.event?.occurrences[0]
+                                        .name ?? 'Event'
                                 }
                                 className={styles.detailsContent}
                             />
                         )}
-                        {/* {selectedTab === 'occurrences' && (
-                        implement this!!
-                        <OccurencesView />
-                    )} */}
+                        {selectedTab === 'occurrences' && (
+                            <OccurencesView
+                                event={eventQuery.data?.event ?? null}
+                                keyOccurrence={keyOccurrenceOf(
+                                    eventQuery.data.event
+                                )}
+                                title={
+                                    eventQuery.data?.event?.occurrences[0]
+                                        .name ?? 'Event'
+                                }
+                            />
+                        )}
                     </>
                 )}
             </div>

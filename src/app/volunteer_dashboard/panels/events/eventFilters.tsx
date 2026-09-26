@@ -2,6 +2,7 @@ import { YesNoMenu } from '../endorsements/endorsementFilters'
 import styles from '../endorsements/endorsementFilters.module.css'
 import { FilterTag } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
+import { DOT_SEPARATOR } from '@/util'
 import { DiscordEventStatus } from 'pv-contracts/data'
 import { DiscordEventWithOccurrences } from 'pv-contracts/responses'
 import { useState } from 'react'
@@ -111,7 +112,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
             selectedCreatorDiscordId,
         ]
             .filter(Boolean)
-            .join(' - ') || 'More'
+            .join(` ${DOT_SEPARATOR} `) || 'More'
     const selectedFilterIcon = selectedEventStatus ? (
         <Fa1 />
     ) : selectedEventChannel ? (
@@ -297,6 +298,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                 )?.label ?? 'All Events',
             icon: <FaGrinSquintTears />,
             color: '#5997E0',
+            width: '10rem',
             activeRedirect: 'all',
             scrollLeft: 'members',
             scrollRight: 'all',
@@ -314,6 +316,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                 )?.label ?? 'Channel',
             icon: <FaGrinSquintTears />,
             color: '#62A46C',
+            width: '10rem',
             activeRedirect: 'all',
             scrollLeft: 'status',
             scrollRight: 'all',
@@ -331,6 +334,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                 )?.label ?? 'Recurrent',
             icon: <FaGrinSquintTears />,
             color: '#C65882',
+            width: '10rem',
             activeRedirect: 'all',
             scrollLeft: 'channel',
             scrollRight: 'all',
@@ -349,6 +353,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                 )?.label ?? 'Creator',
             icon: <FaGrinSquintTears />,
             color: '#7674B3',
+            width: '10rem',
             activeRedirect: 'all',
             scrollLeft: 'channel',
             scrollRight: 'all',
@@ -363,6 +368,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
             label: selectedFilterLabel,
             icon: selectedFilterIcon,
             color: '#3A3A3C',
+            width: '8rem',
             activeRedirect: 'status',
             scrollLeft: 'status',
             scrollRight: 'all',
