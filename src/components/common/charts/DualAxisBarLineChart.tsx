@@ -19,12 +19,7 @@ import {
 } from 'react'
 
 export type ChartGranularity =
-    | 'hour'
-    | 'day'
-    | 'week'
-    | 'month'
-    | 'quarter'
-    | 'year'
+    'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'
 
 export interface ChartPoint {
     key: string

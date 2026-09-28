@@ -6,6 +6,8 @@ export { Button, Logo, Message }
 
 export * from './CollapsibleSection'
 export * from './DiscordAvatar'
+export * from './ElectionStatusBadge'
+export * from './EndorsementAvatar'
 export * from './ImageWithFallback'
 export * from './Logo'
 export * from './mini_calendar'
@@ -17,3 +19,4 @@ export * from './PersonCard'
 export * from './toggle/Toggle'
 export * from './ToolTip'
 export * from './charts'
+export * from './table'

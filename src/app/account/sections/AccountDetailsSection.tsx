@@ -8,20 +8,21 @@ import { DiscordAvatar } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
 import formStyles from '@/components/common/forms/Form.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import { MembershipDeliverableStatus, User } from '@/contracts/data'
-import { zDiscordUserIsInServerResponse } from '@/contracts/responses'
-import { cn } from '@/util'
+import { cn, memberFacingDeliverableLabel } from '@/util'
 import { useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
+import { User } from 'pv-contracts/data'
+import { zDiscordUserIsInServerResponse } from 'pv-contracts/responses'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { IoClose } from 'react-icons/io5'
 
 interface AccountDetailsSectionProps {
     userData: User
-    canAccessAdminPanel: boolean
+    canAccessDashboard: boolean
     handleSignOut: () => void
-    onSave: (user: User) => void
+    onSave: (user: User) => void | Promise<void>
     donorLinkError: Error | null
+    isLinking?: boolean
     onDonorLinkSubmit: (donorLinkForm: {
         donorEmail: string
         orderId: string
@@ -30,10 +31,11 @@ interface AccountDetailsSectionProps {
 
 export function AccountDetailsSection({
     userData,
-    canAccessAdminPanel,
+    canAccessDashboard,
     handleSignOut,
     onSave,
     donorLinkError,
+    isLinking = false,
     onDonorLinkSubmit,
 }: AccountDetailsSectionProps) {
     const { ready, onGet } = useFetch()
@@ -57,40 +59,10 @@ export function AccountDetailsSection({
         setUpdatedUser(userData)
     }, [userData])
 
-    const membershipDeliverableLabels: Record<
-        MembershipDeliverableStatus,
-        string
-    > = {
-        [MembershipDeliverableStatus.NotEligible]: 'Not Eligible',
-        [MembershipDeliverableStatus.NotStarted]: 'Not Started',
-        [MembershipDeliverableStatus.Printed]: 'Printed',
-        [MembershipDeliverableStatus.InTransit]: 'In Transit',
-        [MembershipDeliverableStatus.Recieved]: 'Received',
-        [MembershipDeliverableStatus.Returned]: 'Returned (Update Address)',
-    }
-
     const normalizeEmail = (value?: string | null) =>
         (value ?? '').trim().toLowerCase()
 
-    const targetContributionPath = '/donate/pvmember'
-    const recurringShirtSizeThreshold = 100
     const now = new Date()
-
-    const normalizeContributionFormPath = (value?: string | null) => {
-        const form = (value ?? '').trim().toLowerCase()
-        if (!form) return ''
-
-        if (form.startsWith('http://') || form.startsWith('https://')) {
-            try {
-                const url = new URL(form)
-                return url.pathname.replace(/\/+$/, '')
-            } catch {
-                return form
-            }
-        }
-
-        return form.replace(/\/+$/, '')
-    }
 
     const isActiveRecurringContribution = (
         createdAt: Date,
@@ -122,28 +94,6 @@ export function AccountDetailsSection({
                         contribution.recurringDuration
                     )
                 )
-            })
-        ) ?? false
-
-    const hasRecurringPvMemberContributionAtOrAboveThreshold =
-        userData.donors?.some((donor) =>
-            (donor.contributions ?? []).some((contribution) => {
-                const contributionForm = normalizeContributionFormPath(
-                    contribution.contributionForm
-                )
-                const isPvMemberForm = contributionForm.endsWith(
-                    targetContributionPath
-                )
-
-                const hasRecurringAmountAtThreshold =
-                    contribution.isRecurring &&
-                    (contribution.lineitems ?? []).some(
-                        (lineitem) =>
-                            (lineitem.recurringAmount ?? lineitem.amount) >=
-                            recurringShirtSizeThreshold
-                    )
-
-                return isPvMemberForm && hasRecurringAmountAtThreshold
             })
         ) ?? false
 
@@ -293,27 +243,30 @@ export function AccountDetailsSection({
             ? normalizedZipDigits.padStart(5, '0')
             : null
 
-        onSave({
-            ...userData,
-            firstName: nameDraft.firstName,
-            lastName: nameDraft.lastName,
-            phone: nameDraft.phone || null,
-            shirtSize: nameDraft.shirtSize,
-            nameConfirmed: true,
-            email: shouldUseMatchedEmail
-                ? (matchedDonorEmail ?? userData.email)
-                : userData.email,
-            address: {
-                ...userData.address,
-                addressLine1: normalizeText(addressDraft.addressLine1),
-                addressLine2: normalizeText(addressDraft.addressLine2),
-                city: normalizeText(addressDraft.city),
-                state: normalizeText(addressDraft.state)?.toUpperCase() ?? null,
-                zip: normalizedZip,
-            },
-            addressConfirmed: true,
-        })
-        onDonorLinkSubmit(donorLinkForm)
+        void (async () => {
+            await onSave({
+                ...userData,
+                firstName: nameDraft.firstName,
+                lastName: nameDraft.lastName,
+                phone: nameDraft.phone || null,
+                shirtSize: nameDraft.shirtSize,
+                email: shouldUseMatchedEmail
+                    ? (matchedDonorEmail ?? userData.email)
+                    : userData.email,
+                address: {
+                    ...userData.address,
+                    addressLine1: normalizeText(addressDraft.addressLine1),
+                    addressLine2: normalizeText(addressDraft.addressLine2),
+                    city: normalizeText(addressDraft.city),
+                    state:
+                        normalizeText(addressDraft.state)?.toUpperCase() ??
+                        null,
+                    zip: normalizedZip,
+                },
+            })
+            onDonorLinkSubmit(donorLinkForm)
+        })()
+
         setShowAddressConfirmModal(false)
         setMatchedDonorEmail(null)
     }
@@ -333,12 +286,14 @@ export function AccountDetailsSection({
                     </div>
 
                     <div className={styles.headerActions}>
-                        {canAccessAdminPanel ? (
-                            <BaseButton
-                                label="Volunteer Dashboard"
-                                href="/admin"
-                                className={styles.secondaryButton}
-                            />
+                        {canAccessDashboard ? (
+                            <div>
+                                <BaseButton
+                                    label="Volunteer Dashboard"
+                                    href="/volunteer_dashboard?from=welcome"
+                                    className={styles.secondaryButton}
+                                />
+                            </div>
                         ) : isInServerResult.data?.isInServer === false ? (
                             <BaseButton
                                 label="Join Community"
@@ -488,6 +443,7 @@ export function AccountDetailsSection({
                                                             }
                                                         >
                                                             Membership Card
+                                                            Status
                                                         </span>
                                                         <div
                                                             className={
@@ -499,12 +455,15 @@ export function AccountDetailsSection({
                                                                     formFieldStyles.readonly
                                                                 }
                                                             >
-                                                                {
-                                                                    membershipDeliverableLabels[
-                                                                        userData
-                                                                            .membershipCardStatus
-                                                                    ]
-                                                                }
+                                                                <span
+                                                                    className={
+                                                                        styles.statusTag
+                                                                    }
+                                                                >
+                                                                    {memberFacingDeliverableLabel(
+                                                                        userData.membershipCardStatus
+                                                                    )}
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -587,7 +546,12 @@ export function AccountDetailsSection({
                                                 </p>
                                             </div>
                                             <BaseButton
-                                                label="Link ActBlue"
+                                                label={
+                                                    isLinking
+                                                        ? 'Linking...'
+                                                        : 'Link ActBlue'
+                                                }
+                                                disabled={isLinking}
                                                 onClick={() =>
                                                     setShowDonorLinkForm(true)
                                                 }
@@ -609,9 +573,6 @@ export function AccountDetailsSection({
                             onSave={onSave}
                             onUpdateUser={setUpdatedUser}
                             hasMatchedDonor={userHasDonor}
-                            showShirtSize={
-                                hasRecurringPvMemberContributionAtOrAboveThreshold
-                            }
                             subtitle={
                                 updatedUser.discordUsers?.[0]?.username
                                     ? `@${updatedUser.discordUsers[0].username}`

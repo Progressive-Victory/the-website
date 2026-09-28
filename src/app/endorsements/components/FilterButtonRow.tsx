@@ -11,7 +11,7 @@ import {
     type SectionGroupingMode,
     type SectionSortOrder,
 } from '../endorsements.types'
-import { cn } from '@/util'
+import { cn, DOT_SEPARATOR } from '@/util'
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
 import {
     type FocusEvent,
@@ -839,7 +839,7 @@ function TagsDropdownGroup<T extends string>({
         ? getOptionLabel(requiredSection.options, requiredSection.value)
         : null
     const selectedLabel = selectedRequiredLabel
-        ? `${selectedTagLabel} · ${selectedRequiredLabel}`
+        ? `${selectedTagLabel} ${DOT_SEPARATOR} ${selectedRequiredLabel}`
         : selectedTagLabel
 
     const handleRequiredSectionPress = (optionValue: string) => {

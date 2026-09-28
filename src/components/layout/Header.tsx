@@ -9,13 +9,13 @@ import { LoginButton } from '@/components/common/buttons/button_types/LoginButto
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
-import { TokenClaims, zDiscordUser } from '@/contracts/data'
 import { cn } from '@/util'
 import { useAuth, useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import NextLink from 'next/link'
+import { TokenClaims, zDiscordUser } from 'pv-contracts/data'
 import type React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import z from 'zod'
@@ -632,15 +632,26 @@ export function Header() {
 
     const resolvedNavitems = useMemo(() => {
         const discordId = discordUsers?.[0]?.id
+        const volunteerHref = session ? '/account?redirect=true' : '/volunteer'
+
         return navitems.map((item) => {
             if (!item.subnav?.columns) return item
+
             return {
                 ...item,
+                href: item.name === 'Volunteer' ? volunteerHref : item.href,
                 subnav: {
                     ...item.subnav,
                     columns: item.subnav.columns.map((col) => ({
                         ...col,
                         items: col.items.map((child) => {
+                            if (item.name === 'Volunteer') {
+                                return {
+                                    ...child,
+                                    href: volunteerHref,
+                                }
+                            }
+
                             if (
                                 child.href.startsWith(
                                     'https://secure.actblue.com/donate/pvmember'
@@ -659,7 +670,7 @@ export function Header() {
                 },
             }
         })
-    }, [discordUsers])
+    }, [discordUsers, session])
 
     useEffect(() => {
         if (!isOpen) return

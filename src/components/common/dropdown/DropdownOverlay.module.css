@@ -16,6 +16,12 @@
     overflow-y: auto;
 }
 
+/* pre-measurement default; the layout effect takes over once the anchor is measured */
+.alignStart {
+    left: 0;
+    right: auto;
+}
+
 .header {
     display: flex;
     align-items: center;

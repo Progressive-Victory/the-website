@@ -1,6 +1,7 @@
 # *
 User-agent: *
 Allow: /
+Disallow: /volunteer_dashboard
 
 # Host
 Host: https://www.progressivevictory.win

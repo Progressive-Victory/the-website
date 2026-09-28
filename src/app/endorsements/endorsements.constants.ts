@@ -1,4 +1,3 @@
-import { type ElectionStatus } from './endorsements.data'
 import {
     type FilterType,
     type GalleryDisplayMode,
@@ -39,23 +38,9 @@ export const UPCOMING_STATUS_LABEL = 'Upcoming'
 export const UNSPECIFIED_STATE_LABEL = 'Unspecified'
 export const NATIONWIDE_STATE_LABEL = 'Nationwide'
 
-export const LOST_OR_DROPPED_STATUSES = new Set<ElectionStatus>([
-    'Lost Primary',
-    'Lost General',
-    'Dropped Out',
-])
-
-export const ELECTION_STATUS_SORT_ORDER: Record<ElectionStatus, number> = {
-    Elected: 0,
-    'Won Primary': 1,
-    '': 2,
-    'Lost General': 3,
-    'Lost Primary': 4,
-    'Dropped Out': 5,
-}
-
 export const electionDateFormatter = new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'UTC',
 })

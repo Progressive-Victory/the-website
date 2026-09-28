@@ -1,4 +1,4 @@
-import { SearchRequest, SortDirection } from '@/contracts/requests'
+import { SearchRequest, SortDirection } from 'pv-contracts/requests'
 import { useMemo, useState } from 'react'
 
 interface UseUnpaginatedSearchProps<T> {
@@ -20,9 +20,9 @@ export function useUnpaginatedSearch<T>({
         if (!onSort) return items
 
         if (search.sort == SortDirection.ASC)
-            return items.sort((a, b) => onSort(a, b, search.sort))
+            return items.sort((a, b) => onSort(a, b, search.sortField))
         if (search.sort == SortDirection.DESC)
-            return items.sort((a, b) => onSort(b, a, search.sort))
+            return items.sort((a, b) => onSort(b, a, search.sortField))
 
         return items
     }, [items, search, onSort])
