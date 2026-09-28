@@ -14,12 +14,14 @@ import Image from 'next/image'
 import type React from 'react'
 import { useState, useMemo } from 'react'
 import {
-    FaHeart as SolidHeart,
-    FaRegHeart as Heart,
-    FaRegComment as FaComment,
-    FaRegShareFromSquare as FaShare,
-    FaEllipsis,
-} from 'react-icons/fa6'
+    HiOutlineHeart,
+    HiOutlineChatBubbleLeftRight,
+    HiOutlineArrowUpOnSquare,
+    HiOutlineEllipsisHorizontal,
+    HiHeart,
+    HiChatBubbleLeftRight,
+    HiArrowUpOnSquare,
+} from 'react-icons/hi2'
 
 interface MotionProps {
     initial?: TargetAndTransition
@@ -346,7 +348,7 @@ export function Message({
                                                     e.stopPropagation()
                                                 }
                                             >
-                                                <FaEllipsis
+                                                <HiOutlineEllipsisHorizontal
                                                     className={
                                                         styles.ellipsisIcon
                                                     }
@@ -395,7 +397,7 @@ export function Message({
                                         aria-label="Comment"
                                     >
                                         {clickedBubble ? (
-                                            <FaComment
+                                            <HiChatBubbleLeftRight
                                                 className={cn(
                                                     styles.iconSolid,
                                                     styles.bubbleActive,
@@ -403,7 +405,7 @@ export function Message({
                                                 )}
                                             />
                                         ) : (
-                                            <FaComment
+                                            <HiOutlineChatBubbleLeftRight
                                                 className={styles.icon}
                                             />
                                         )}
@@ -419,7 +421,7 @@ export function Message({
                                         aria-label="Share"
                                     >
                                         {clickedShare ? (
-                                            <FaShare
+                                            <HiArrowUpOnSquare
                                                 className={cn(
                                                     styles.iconSolid,
                                                     styles.shareActive,
@@ -427,7 +429,9 @@ export function Message({
                                                 )}
                                             />
                                         ) : (
-                                            <FaShare className={styles.icon} />
+                                            <HiOutlineArrowUpOnSquare
+                                                className={styles.icon}
+                                            />
                                         )}
                                     </button>
 
@@ -441,7 +445,7 @@ export function Message({
                                         aria-label="Like"
                                     >
                                         {clickedHeart ? (
-                                            <SolidHeart
+                                            <HiHeart
                                                 className={cn(
                                                     styles.iconSolid,
                                                     styles.heartActive,
@@ -449,7 +453,9 @@ export function Message({
                                                 )}
                                             />
                                         ) : (
-                                            <Heart className={styles.icon} />
+                                            <HiOutlineHeart
+                                                className={styles.icon}
+                                            />
                                         )}
                                     </button>
                                 </div>

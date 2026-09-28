@@ -6,8 +6,7 @@ import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { FaCircleInfo } from 'react-icons/fa6'
-
+import { HiInformationCircle } from 'react-icons/hi2'
 export default function Login() {
     return (
         <MainLayout>
@@ -19,7 +18,7 @@ export default function Login() {
                     <LoginCard />
                 </Suspense>
                 <div className={styles.footer}>
-                    <FaCircleInfo className={styles.infoIcon} />
+                    <HiInformationCircle className={styles.infoIcon} />
                     By signing in you agree to our
                     <Link
                         href="/privacy"
