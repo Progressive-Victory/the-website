@@ -23,14 +23,10 @@ export function DropDownField<T>(
 
     const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
         const rawValue = event.target.value
-        let finalValue: string | number
-        if (!isNaN(Number(rawValue)) && rawValue.trim() !== '') {
-            finalValue = Number(rawValue)
-        } else {
-            finalValue = rawValue
-        }
-
-        onChange(finalValue)
+        const selectedOption = props.options.find(
+            (x) => String(x.value) === rawValue
+        )?.value
+        onChange(selectedOption ?? rawValue)
     }
 
     const selectedLabel = useMemo(
