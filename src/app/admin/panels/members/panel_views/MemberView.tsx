@@ -15,6 +15,7 @@ import { MultiTextField } from '@/components/common/forms/MultiTextField'
 import { Role, ShirtSize, UpdateHistory, User } from '@/contracts/data'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
+import { Country, isValidCountryPostalCode } from 'postal-code-validator'
 
 const membershipCardShipmentOptions = [
     { value: 0, label: 'Not Started' },
@@ -258,7 +259,7 @@ export function MemberView({
                                     ?.slice(-5) ?? null,
                         },
                     })}
-                    validator={(field) => !field?.length || field?.length == 5}
+                    validator={(field) => (!field?.length || field?.length == 5) && isValidCountryPostalCode(field ?? "", Country.UnitedStatesOfAmerica)}
                 />
             </FormGroup>
 
