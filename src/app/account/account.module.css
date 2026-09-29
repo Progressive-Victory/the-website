@@ -173,6 +173,9 @@
     padding-top: 1rem;
     margin: 0;
 }
+.shirtSizeSpacer {
+    height: 1.5rem;
+}
 
 .contributionsContentPanel {
     border-radius: 10px;

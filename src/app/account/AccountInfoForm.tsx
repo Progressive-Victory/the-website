@@ -20,7 +20,6 @@ interface AccountInfoFormProps {
     avatar?: React.ReactNode
     title?: string
     hasMatchedDonor?: boolean
-    showShirtSize?: boolean
 }
 
 //Need to move these to API
@@ -59,7 +58,6 @@ export const AccountInfoForm = ({
     avatar,
     title = 'Account Information',
     hasMatchedDonor = false,
-    showShirtSize = false,
 }: AccountInfoFormProps) => {
     const [isEditing, setIsEditing] = useState(false)
 
@@ -120,7 +118,7 @@ export const AccountInfoForm = ({
                         readonly
                     />
                     <PhoneField label="Phone Number" field="phone" required />
-                    <TextField label="Email" field="email" readonly />
+                    <TextField label="Email" field="email" />
                     <DateField<User>
                         label="Date of Birth"
                         getter={(user) =>
@@ -132,20 +130,38 @@ export const AccountInfoForm = ({
                             dateStyle: 'medium',
                         }}
                     />
-                    {!isEditing && !hasAddressForShipping(user) ? (
+                    {!isEditing ? (
                         <TextField<User>
-                            label={
-                                showAddressLine2 ? 'Address Line 1' : 'Address'
+                            label="Address"
+                            getter={(user) =>
+                                hasAddressForShipping(user)
+                                    ? [
+                                          user.address.addressLine1,
+                                          user.address.addressLine2,
+                                          [
+                                              user.address.city,
+                                              user.address.state,
+                                              user.address.zip
+                                                  ?.padStart(5, '0')
+                                                  .slice(-5),
+                                          ]
+                                              .filter(Boolean)
+                                              .join(', '),
+                                      ]
+                                          .filter(Boolean)
+                                          .join(', ')
+                                    : missingAddressInfoText
                             }
-                            getter={() => missingAddressInfoText}
                             readonly
-                            readonlyClassName={styles.shippingInfoWarningText}
+                            readonlyClassName={
+                                hasAddressForShipping(user)
+                                    ? undefined
+                                    : styles.shippingInfoWarningText
+                            }
                         />
                     ) : (
                         <TextField<User>
-                            label={
-                                showAddressLine2 ? 'Address Line 1' : 'Address'
-                            }
+                            label="Address Line 1"
                             getter={(user) => user.address.addressLine1}
                             setter={(user, field) => ({
                                 ...user,
@@ -158,7 +174,7 @@ export const AccountInfoForm = ({
                             })}
                         />
                     )}
-                    {showAddressLine2 && (
+                    {isEditing && showAddressLine2 && (
                         <TextField<User>
                             label="Address Line 2"
                             getter={(user) => user.address.addressLine2}
@@ -173,55 +189,69 @@ export const AccountInfoForm = ({
                             })}
                         />
                     )}
-                    <TextField<User>
-                        label="Zip Code"
-                        getter={(user) =>
-                            user.address.zip
-                                ? user.address.zip.padStart(5, '0').slice(-5)
-                                : null
-                        }
-                        setter={(user, field) => ({
-                            ...user,
-                            address: {
-                                ...user.address,
-                                zip: field?.trim().length
-                                    ? field
-                                          .replace(/[^\d]/g, '')
+                    {isEditing && (
+                        <TextField<User>
+                            label="City"
+                            getter={(user) => user.address.city}
+                            setter={(user, field) => ({
+                                ...user,
+                                address: {
+                                    ...user.address,
+                                    city:
+                                        normalizeText(field)?.slice(0, 50) ??
+                                        null,
+                                },
+                            })}
+                        />
+                    )}
+                    {isEditing && (
+                        <DropDownField<User>
+                            label="State"
+                            getter={(user) => user.address.state}
+                            setter={(user, field) => ({
+                                ...user,
+                                address: {
+                                    ...user.address,
+                                    state: (field as string) || null,
+                                },
+                            })}
+                            options={stateOptionsWithEmpty}
+                        />
+                    )}
+                    {isEditing && (
+                        <TextField<User>
+                            label="Zip Code"
+                            getter={(user) =>
+                                user.address.zip
+                                    ? user.address.zip
                                           .padStart(5, '0')
                                           .slice(-5)
-                                    : null,
-                            },
-                        })}
-                        validator={(field) =>
-                            !field?.length || field?.length == 5
-                        }
-                    />
-                    <TextField<User>
-                        label="City"
-                        getter={(user) => user.address.city}
-                        setter={(user, field) => ({
-                            ...user,
-                            address: {
-                                ...user.address,
-                                city:
-                                    normalizeText(field)?.slice(0, 50) ?? null,
-                            },
-                        })}
-                    />
-                    <DropDownField<User>
-                        label="State"
-                        getter={(user) => user.address.state}
-                        setter={(user, field) => ({
-                            ...user,
-                            address: {
-                                ...user.address,
-                                state: (field as string) || null,
-                            },
-                        })}
-                        options={stateOptionsWithEmpty}
-                    />
+                                    : null
+                            }
+                            setter={(user, field) => ({
+                                ...user,
+                                address: {
+                                    ...user.address,
+                                    zip: field?.trim().length
+                                        ? field
+                                              .replace(/[^\d]/g, '')
+                                              .padStart(5, '0')
+                                              .slice(-5)
+                                        : null,
+                                },
+                            })}
+                            validator={(field) =>
+                                !field?.length || field?.length == 5
+                            }
+                        />
+                    )}
+                    {!isEditing && hasMatchedDonor && (
+                        <div
+                            aria-hidden="true"
+                            className={styles.shirtSizeSpacer}
+                        />
+                    )}
                     {hasMatchedDonor &&
-                        showShirtSize &&
                         (isEditing ? (
                             <DropDownField<User>
                                 label="Shirt Size"
