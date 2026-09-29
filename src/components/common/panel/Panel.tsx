@@ -7,6 +7,8 @@ import {
     type SidebarListFooterProps,
     type SidebarListSearchProps,
 } from './sidebar_list/SidebarList'
+import { DropdownButton } from '@/components/common/dropdown/DropdownButton'
+import { DropdownOverlay } from '@/components/common/dropdown/DropdownOverlay'
 import { NavigationStack } from '@/components/common/navigation_stack'
 import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { PanelBackButton } from '@/components/common/navigation_stack/detail/PanelBackButton'
@@ -15,6 +17,7 @@ import { SidebarToggleButton } from '@/components/common/navigation_stack/sideba
 import { cn } from '@/util'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
+import { IoMdOptions } from 'react-icons/io'
 import { useMediaQuery } from 'usehooks-ts'
 
 export interface SidebarListConfig {
@@ -48,6 +51,7 @@ export interface PanelProps {
     prominentHeader?: ReactNode
     prominentHeaderLeft?: ReactNode
     prominentHeaderRight?: ReactNode
+    prominentHeaderRightExtra?: ReactNode
     headerLead?: ReactNode
     headerLeft?: ReactNode
     headerRight?: ReactNode
@@ -79,6 +83,7 @@ export function Panel({
     prominentHeader,
     prominentHeaderLeft,
     prominentHeaderRight,
+    prominentHeaderRightExtra,
     headerLead,
     headerLeft,
     headerRight,
@@ -109,13 +114,40 @@ export function Panel({
     const resolvedSidebarFooter =
         sidebarFooter ??
         (sidebarList?.footer && <SidebarListFooter {...sidebarList.footer} />)
-    const resolvedSidebarSearch =
-        sidebarSearch ??
-        (sidebarList?.search && <SidebarListSearch {...sidebarList.search} />)
     const resolvedSidebarFilterContent =
         sidebarFilterContent ??
         (sidebarList?.filters && (
             <SidebarListFilters {...sidebarList.filters} />
+        ))
+    const defaultSearchSettingsButton = resolvedSidebarFilterContent && (
+        <DropdownButton
+            type="button"
+            buttonVariant="plain"
+            aria-label="Show Filters"
+            title="Show Filters"
+            menu={({ closeDropdown }) => (
+                <DropdownOverlay
+                    body={resolvedSidebarFilterContent}
+                    onClose={closeDropdown}
+                />
+            )}
+        >
+            <IoMdOptions aria-hidden="true" />
+        </DropdownButton>
+    )
+    const searchSettingsButton =
+        sidebarList?.search?.settingsDropdownButton ??
+        defaultSearchSettingsButton
+    const resolvedSidebarSearch =
+        sidebarSearch ??
+        (sidebarList?.search && (
+            <SidebarListSearch
+                {...sidebarList.search}
+                resultCount={
+                    sidebarList.search.resultCount ?? sidebarList.footer?.count
+                }
+                settingsDropdownButton={searchSettingsButton}
+            />
         ))
 
     return (
@@ -172,6 +204,7 @@ export function Panel({
                                 content: prominentHeader,
                                 left: resolvedProminentHeaderLeft,
                                 right: prominentHeaderRight,
+                                rightExtra: prominentHeaderRightExtra,
                             }}
                             footer={resolvedSidebarFooter}
                         >

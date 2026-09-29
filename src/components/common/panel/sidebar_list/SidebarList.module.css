@@ -44,19 +44,18 @@
     align-items: center;
     padding-inline: 0.75rem;
     gap: 0.5rem;
+
+    & > div {
+        width: 100%;
+    }
 }
 
-.searchInput > input {
+.sidebarSearchInput {
     width: 100%;
-    border-radius: 0.6rem;
-    border-width: 1px;
-    border-color: #d1d5db;
-    padding: 0.25rem 0.75rem;
-    outline: none;
-
-    &:focus {
-        border-color: #0ea5e9;
-    }
+    max-width: none;
+    padding-block: 0.25rem;
+    font-size: inherit;
+    font-weight: inherit;
 }
 
 .sidebarNavigationButton {

@@ -93,6 +93,199 @@
     border-bottom: 1px solid rgba(17, 24, 39, 0.08);
 }
 
+.settingsOverlay {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.tablePane {
+    width: 100%;
+    min-width: 0;
+    height: calc(100dvh - 100px);
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(248, 250, 252, 0.98) 0%,
+        rgba(241, 245, 249, 0.98) 38%,
+        rgba(14, 165, 233, 0.04) 100%
+    );
+}
+
+.tablePane .tableHeader {
+    align-items: flex-end;
+    gap: 1rem;
+    justify-content: space-between;
+    margin: 0;
+    max-width: none;
+    flex-shrink: 0;
+}
+
+.tablePane .tableHeading {
+    min-width: 0;
+}
+
+.tableToolbar {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.toolbarButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #0284c7;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    background-color: #0ea5e9;
+    color: white;
+    cursor: pointer;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+
+    &:disabled {
+        border-color: #94a3b8;
+        background-color: #cbd5e1;
+        cursor: not-allowed;
+    }
+}
+
+.cancelToolbarButton {
+    border-color: #dc2626;
+    background-color: #ef4444;
+}
+
+.tableEditInput {
+    width: 100%;
+    min-width: 7rem;
+    border: 1px solid rgba(17, 24, 39, 0.14);
+    border-radius: 0.35rem;
+    padding: 0.25rem 0.35rem;
+    background: white;
+    color: rgba(15, 23, 42, 0.85);
+    font: inherit;
+}
+
+.tableEditCheckbox {
+    width: 1rem;
+    height: 1rem;
+}
+
+.tableWrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    padding: 0.75rem 1.05rem 1rem;
+
+    &:has([aria-expanded='true']) {
+        --confirm-tooltip-opacity: 0;
+    }
+}
+
+.panelHeaderRight {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.panelTimestamp {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.tableOptionsBox {
+    min-width: 18rem;
+}
+
+.tableOptionsBody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.tableOptionRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.tableOptionLabel {
+    color: rgba(15, 23, 42, 0.72);
+    font-weight: 600;
+}
+
+.tableNameCell {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-weight: 600;
+}
+
+.tableAvatarCell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    overflow: visible;
+}
+
+.tableAvatar {
+    box-shadow: none !important;
+    transform: scale(1.25);
+}
+
+.tableLoadMore {
+    min-height: 1px;
+    padding: 0.75rem 0;
+    color: rgba(15, 23, 42, 0.55);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.tableHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 1.15rem 1.05rem 0.35rem;
+    margin: 0 auto 1.5rem;
+    max-width: 76rem;
+}
+
+.tableTitle {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: rgba(9, 34, 58, 0.9);
+}
+
+.tableSubTitle {
+    margin: 0.35rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.tableState {
+    padding: 4rem 1rem;
+    text-align: center;
+    color: rgba(15, 23, 42, 0.55);
+}
+
 /* Override for selector specificity */
 .dateTag.dateTag {
     text-transform: none;

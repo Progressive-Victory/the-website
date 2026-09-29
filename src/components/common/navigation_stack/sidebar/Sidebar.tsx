@@ -34,6 +34,7 @@ export interface SidebarHeaderConfig {
     content?: ReactNode
     left?: ReactNode
     right?: ReactNode
+    rightExtra?: ReactNode
     search?: ReactNode
     filters?: SidebarFiltersConfig
 }
@@ -73,6 +74,7 @@ interface ResolvedHeaderProps {
     prominentHeader?: ReactNode
     prominentHeaderLeft?: ReactNode
     prominentHeaderRight?: ReactNode
+    prominentHeaderRightExtra?: ReactNode
 }
 
 type ResolvedSidebarProps = Omit<
@@ -126,6 +128,7 @@ function resolveSidebarProps(props: SidebarProps): ResolvedSidebarProps {
             prominentHeader: h?.content,
             prominentHeaderLeft: h?.left,
             prominentHeaderRight: h?.right,
+            prominentHeaderRightExtra: h?.rightExtra,
         },
         body,
     }
@@ -316,6 +319,7 @@ function ProminentSidebar({
                 prominentHeader={header.prominentHeader}
                 prominentHeaderLeft={header.prominentHeaderLeft}
                 prominentHeaderRight={header.prominentHeaderRight}
+                prominentHeaderRightExtra={header.prominentHeaderRightExtra}
                 filterOpen={header.filterOpen}
                 onFilterOpenChange={header.onFilterOpenChange}
                 filterContent={header.filterContent}
@@ -463,6 +467,7 @@ interface ProminentSidebarHeaderProps {
     prominentHeader?: ReactNode
     prominentHeaderLeft?: ReactNode
     prominentHeaderRight?: ReactNode
+    prominentHeaderRightExtra?: ReactNode
     filterOpen?: boolean
     onFilterOpenChange?: (open: boolean) => void
     filterContent?: ReactNode
@@ -475,6 +480,7 @@ function ProminentSidebarHeader({
     prominentHeader,
     prominentHeaderLeft,
     prominentHeaderRight,
+    prominentHeaderRightExtra,
     filterOpen,
     onFilterOpenChange,
     filterContent,
@@ -514,10 +520,13 @@ function ProminentSidebarHeader({
             <div
                 className={cn(
                     styles.panelHeaderRight,
-                    isGenerated && styles.panelHeaderRightFilterToggle
+                    isGenerated &&
+                        !prominentHeaderRightExtra &&
+                        styles.panelHeaderRightFilterToggle
                 )}
             >
                 {resolvedHeaderRight}
+                {prominentHeaderRightExtra}
             </div>
         </div>
     )

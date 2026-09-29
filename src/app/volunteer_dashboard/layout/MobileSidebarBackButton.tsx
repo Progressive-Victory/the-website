@@ -9,6 +9,7 @@ interface MobileSidebarBackButtonProps {
     sidebarMobileVisible: boolean
     onBack: () => void
     className?: string
+    showOnDesktop?: boolean
 }
 
 export function MobileSidebarBackButton({
@@ -16,12 +17,17 @@ export function MobileSidebarBackButton({
     sidebarMobileVisible,
     onBack,
     className,
+    showOnDesktop = false,
 }: MobileSidebarBackButtonProps) {
     if (sidebarMobileVisible) return null
 
     return (
         <div className={cn(styles.wrapper, className)}>
-            <PanelBackButton label={label} onClick={onBack} />
+            <PanelBackButton
+                label={label}
+                onClick={onBack}
+                showOnDesktop={showOnDesktop}
+            />
         </div>
     )
 }

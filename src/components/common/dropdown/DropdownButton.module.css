@@ -96,6 +96,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
+    width: 2.25rem;
+    height: 2.25rem;
     border: none;
     background: transparent;
     border-radius: 0.85rem;
