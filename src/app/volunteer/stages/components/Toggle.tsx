@@ -1,7 +1,7 @@
 import styles from './components.module.css'
 import { cn } from '@/util'
-import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import { ReactElement } from 'react'
+import { FaCircleInfo } from 'react-icons/fa6'
 
 export function Toggle({
     name,
@@ -22,7 +22,7 @@ export function Toggle({
         <div className={styles.toggleContainer}>
             <div className={styles.toggleLabelContainer}>
                 <div tabIndex={0} className={styles.tooltipContainer}>
-                    <InformationCircleIcon className={styles.tooltipIcon} />
+                    <FaCircleInfo className={styles.tooltipIcon} />
                     <div className={styles.tooltipElement}>
                         <span className={styles.tooltipContent}>{tooltip}</span>
                     </div>
