@@ -19,6 +19,7 @@ import {
     getStateLabel,
 } from '@/models'
 import { useEndorsementQueries } from '@/queries'
+import { cn } from '@/util'
 import {
     useOptimisticDelete,
     useOptimisticUpdate,
@@ -89,7 +90,7 @@ const endorsementLevelTagClass: Record<EndorsementType, string | undefined> = {
     [EndorsementType.PVPledge]: styles.tagPurple,
     [EndorsementType.Endorsement]: styles.tagGreen,
     [EndorsementType.Recommendation]: styles.tagRed,
-    [EndorsementType.Unendorsed]: undefined,
+    [EndorsementType.Unendorsed]: styles.tagDarkRed,
     [EndorsementType.None]: styles.tagDefault,
 }
 
@@ -101,12 +102,24 @@ const initiativeLevelTagClass: Record<InitiativeType, string | undefined> = {
 
 const makeLevelTags = (endorsement: Endorsement) => [
     {
-        label: ENDORSEMENT_TYPE_LABELS[endorsement.endorsementLevel],
-        className: endorsementLevelTagClass[endorsement.endorsementLevel],
+        label:
+            endorsement.endorsementLevel === EndorsementType.None
+                ? 'No Endorsement'
+                : ENDORSEMENT_TYPE_LABELS[endorsement.endorsementLevel],
+        className: cn(
+            styles.sidebarLevelTag,
+            endorsementLevelTagClass[endorsement.endorsementLevel]
+        ),
     },
     {
-        label: INITIATIVE_TYPE_LABELS[endorsement.initiativeLevel],
-        className: initiativeLevelTagClass[endorsement.initiativeLevel],
+        label:
+            endorsement.initiativeLevel === InitiativeType.None
+                ? 'No Initiative'
+                : INITIATIVE_TYPE_LABELS[endorsement.initiativeLevel],
+        className: cn(
+            styles.sidebarLevelTag,
+            initiativeLevelTagClass[endorsement.initiativeLevel]
+        ),
     },
 ]
 

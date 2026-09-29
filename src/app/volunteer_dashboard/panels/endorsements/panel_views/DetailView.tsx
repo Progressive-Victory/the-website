@@ -1,5 +1,6 @@
 'use client'
 
+import { JurisdictionField } from '../components/JurisdictionField'
 import styles from './DetailView.module.css'
 import {
     CheckboxField,
@@ -109,7 +110,7 @@ export function DetailView({
                     })}
                     options={electionStatusOptions}
                 />
-                <TextField label="Jurisdiction" field="jurisdiction" />
+                <JurisdictionField label="Jurisdiction" field="jurisdiction" />
                 <DateField
                     label="General Election"
                     field="generalElectionDate"

@@ -32,7 +32,10 @@ import {
     useQueryClient,
 } from '@tanstack/react-query'
 import { User, UserProfile, zUser, zUserProfile } from 'pv-contracts/data'
-import { ActBlueDonorLinkRequest } from 'pv-contracts/requests'
+import {
+    ActBlueDonorLinkRequest,
+    UpdateMembershipRequest,
+} from 'pv-contracts/requests'
 import type { MembershipSearchRequest } from 'pv-contracts/requests'
 import {
     zMembershipsResponsePacket,
@@ -340,7 +343,7 @@ export function useUserByName(name?: string) {
 }
 
 export function useLinkDonorToUser() {
-    const { onPost } = useFetch()
+    const { onPost, onPatch } = useFetch()
     const loggedInUser = useCurrentUser()
     const queryClient = useQueryClient()
 
@@ -351,19 +354,29 @@ export function useLinkDonorToUser() {
         }: {
             donorEmail: string
             userId: number
-        }) =>
+        }) => {
+            const metaData = {
+                dataSource: 'Membership Panel',
+                userWhoUpdatedId: loggedInUser.data?.id,
+            }
+
             await onPost(
                 '/actblue/donors/:donorEmail/link',
-                {
-                    userId,
-                    metaData: {
-                        dataSource: 'Membership Panel',
-                        userWhoUpdatedId: loggedInUser.data?.id,
-                    },
-                } satisfies ActBlueDonorLinkRequest,
+                { userId, metaData } satisfies ActBlueDonorLinkRequest,
                 null,
                 { params: { donorEmail } }
-            ),
+            )
+
+            await onPatch(
+                '/actblue/donors/:donorEmail/membership',
+                {
+                    discordConfirmed: true,
+                    metaData,
+                } satisfies UpdateMembershipRequest,
+                null,
+                { params: { donorEmail } }
+            )
+        },
         onSuccess: async () => {
             await queryClient.invalidateQueries({
                 queryKey: ['/actblue/memberships'],

@@ -4,7 +4,11 @@ import { SelectionIndicator } from './SelectionIndicator'
 import styles from './Sidebar.module.css'
 import { SidebarToggleButton } from './SidebarToggleButton'
 import type { IndicatorStyle } from './hooks'
-import { useLargeTitleScroll, useSidebarState } from './hooks'
+import {
+    useLargeTitleScroll,
+    usePinnedSectionStuck,
+    useSidebarState,
+} from './hooks'
 import { DropdownButton } from '@/components/common/dropdown/DropdownButton'
 import { DropdownOverlay } from '@/components/common/dropdown/DropdownOverlay'
 import { cn } from '@/util'
@@ -278,6 +282,7 @@ function ProminentSidebar({
         largeTitleRef,
         largeTitleEnabled
     )
+    const pinnedSectionStuck = usePinnedSectionStuck(scrollRef, true)
     const reserveProminentHeaderToggleSpace =
         isDesktop && reserveHeaderToggleSpace
     const resolvedMobileVisible = mobileVisible ?? true
@@ -293,6 +298,7 @@ function ProminentSidebar({
             data-sidebar-large-title-collapsed={
                 largeTitleActive && titleCollapsed
             }
+            data-sidebar-pinned-stuck={pinnedSectionStuck}
             data-sidebar-variant="prominent"
             data-sidebar-visual-mode={visualMode}
             style={sidebarInlineStyle}

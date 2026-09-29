@@ -81,7 +81,7 @@ export function SidebarBody<T>({
     return (
         <>
             {pinnedItems && pinnedItems.length > 0 && (
-                <div className={styles.pinnedSection}>
+                <div className={styles.pinnedSection} data-pinned-section>
                     {pinnedItems.map((item) => renderItemButton(item))}
                 </div>
             )}

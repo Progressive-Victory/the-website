@@ -306,7 +306,11 @@ export const DropdownOverlay = forwardRef<HTMLDivElement, DropdownOverlayProps>(
             align,
         })
 
-        const shellClassName = [styles.shell, className]
+        const shellClassName = [
+            styles.shell,
+            align === 'start' && styles.alignStart,
+            className,
+        ]
             .filter(Boolean)
             .join(' ')
         const headerClasses = [styles.header, headerClassName]
