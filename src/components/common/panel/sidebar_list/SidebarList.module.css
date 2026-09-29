@@ -78,6 +78,10 @@
     overflow: hidden;
 }
 
+.sidebarNavigationButtonChild {
+    overflow: visible;
+}
+
 .pageSelectContainer {
     position: relative;
     display: flex;
@@ -194,7 +198,7 @@
 
     & a {
         white-space: nowrap;
-        min-width: max-content;
+        min-width: 0;
         transition:
             padding 200ms cubic-bezier(0.22, 1, 0.36, 1),
             background-color 200ms cubic-bezier(0.22, 0.61, 0.36, 1),
@@ -237,6 +241,7 @@
 
 :global([data-sidebar-collapsed='true']) .sidebarNavigationButton a {
     gap: var(--navigation-button-link-gap, 1.25rem);
+    min-width: max-content;
 }
 
 :global([data-sidebar-collapsed='true']) .sidebarNavigationButton a > span {
