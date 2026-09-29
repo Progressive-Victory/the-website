@@ -234,13 +234,16 @@ export function MemberView({
                         ...form,
                         address: {
                             ...form.address,
-                            zip:
-                                field
-                                    ?.replace(/[^\d]/, '')
-                                    ?.slice(-5) ?? null,
+                            zip: field?.replace(/[^\d]/, '')?.slice(-5) ?? null,
                         },
                     })}
-                    validator={(field) => (!field?.length || field?.length == 5) && isValidCountryPostalCode(field ?? "", Country.UnitedStatesOfAmerica)}
+                    validator={(field) =>
+                        (!field?.length || field?.length == 5) &&
+                        isValidCountryPostalCode(
+                            field ?? '',
+                            Country.UnitedStatesOfAmerica
+                        )
+                    }
                 />
             </FormGroup>
 
