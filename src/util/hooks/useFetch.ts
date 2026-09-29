@@ -110,7 +110,7 @@ export function useFetch() {
 
         let res = await request()
 
-        if (session && (session.userId === -1 || res.status === 401)) {
+        if (session && res.status === 401) {
             await onRefresh()
             res = await request()
         }
