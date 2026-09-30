@@ -7,6 +7,7 @@ import {
     DateField,
     DropDownField,
     Form,
+    FormControls,
     FormField,
     FormFieldProps,
     FormGroup,
@@ -44,6 +45,8 @@ interface DetailViewProps {
     onCreate: () => Endorsement
     onDelete: () => void
     onCancel: () => void
+    showCreateButton?: boolean
+    controlsRef?: React.Ref<FormControls>
     uploadImage: (image: File) => Promise<{ url: string }>
     beforeHeader?: React.ReactElement
     className?: string
@@ -58,6 +61,8 @@ export function DetailView({
     onCreate,
     onDelete,
     onCancel,
+    showCreateButton,
+    controlsRef,
     uploadImage,
     beforeHeader,
     className,
@@ -72,6 +77,8 @@ export function DetailView({
             onUpdate={onUpdate}
             onSave={onSave}
             onCreate={onCreate}
+            showCreateButton={showCreateButton}
+            controlsRef={controlsRef}
             onDelete={onDelete}
             onCancel={onCancel}
         >
