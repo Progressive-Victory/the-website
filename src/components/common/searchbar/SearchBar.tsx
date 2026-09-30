@@ -3,7 +3,7 @@
 import { DropdownButton } from '../dropdown/DropdownButton'
 import { DropdownOverlay } from '../dropdown/DropdownOverlay'
 import { CloseCircleIcon } from '../icons/CloseCircleIcon'
-import styles from './Searchbar.module.css'
+import styles from './SearchBar.module.css'
 import { cn } from '@/util'
 import type { InputHTMLAttributes, ReactNode } from 'react'
 import { FiSearch } from 'react-icons/fi'
