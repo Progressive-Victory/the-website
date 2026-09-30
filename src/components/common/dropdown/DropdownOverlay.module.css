@@ -14,10 +14,6 @@
     z-index: 120;
     box-shadow: 0 12px 34px rgba(15, 23, 42, 0.16);
     overflow-y: auto;
-    /* Keeps an animating ancestor from relayouting the whole menu each frame. */
-    contain: layout;
-    /* Own layer, so the border and shadow aren't re-rasterized on subpixel moves. */
-    will-change: transform;
 }
 
 /* pre-measurement default; the layout effect takes over once the anchor is measured */

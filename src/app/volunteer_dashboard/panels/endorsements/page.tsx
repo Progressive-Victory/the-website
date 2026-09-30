@@ -8,10 +8,9 @@ import { HistoryView } from './panel_views/HistoryView'
 import { FilterTags } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { EndorsementAvatar } from '@/components/common'
-import { FormControls, FormState } from '@/components/common/forms'
+import { FormState } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
-import { type SidebarListFiltersProps } from '@/components/common/panel/sidebar_list/SidebarList'
 import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ENDORSEMENT_TYPE_LABELS,
@@ -35,8 +34,7 @@ import {
     InitiativeType,
 } from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
-import { useRef, useState } from 'react'
-import { FaRegPenToSquare } from 'react-icons/fa6'
+import { useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
 const blankEndorsement: Endorsement = {
@@ -244,7 +242,6 @@ export default function Page() {
     })
 
     const handleCreate = () => blankEndorsement
-    const formControls = useRef<FormControls>(null)
 
     const handleSave = (newEndorsement: Endorsement) => {
         const originalPublished =
@@ -330,14 +327,6 @@ export default function Page() {
             />
         ) : undefined
 
-    const sidebarFilters: SidebarListFiltersProps = {
-        search,
-        onSearch,
-        sortFieldOptions: endorsementSortFields,
-        showSort: true,
-        showLimit: true,
-    }
-
     return (
         <Panel
             includeSidebar
@@ -362,12 +351,13 @@ export default function Page() {
                     onPageChange: (nextPage: number) =>
                         onSearch({ ...search, page: nextPage }),
                 },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <FaRegPenToSquare size={20} />,
-                label: 'Create Endorsement',
-                onClick: () => formControls.current?.create(),
+                filters: {
+                    search,
+                    onSearch,
+                    sortFieldOptions: endorsementSortFields,
+                    showSort: true,
+                    showLimit: true,
+                },
             }}
             sidebarBody={
                 <>
@@ -441,8 +431,6 @@ export default function Page() {
                         onUpdate={setFormState}
                         onSave={handleSave}
                         onCreate={handleCreate}
-                        showCreateButton={false}
-                        controlsRef={formControls}
                         onDelete={handleDelete}
                         onCancel={handleCancel}
                         uploadImage={endorsementQueries.uploadImage}

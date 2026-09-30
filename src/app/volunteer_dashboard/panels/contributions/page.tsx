@@ -11,10 +11,6 @@ import {
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
-import {
-    SidebarListFilters,
-    type SidebarListFiltersProps,
-} from '@/components/common/panel/sidebar_list/SidebarList'
 import { dateService } from '@/services'
 import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
@@ -26,7 +22,6 @@ import {
 } from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
 import { useEffect, useState } from 'react'
-import { IoEllipsisVertical } from 'react-icons/io5'
 import { useMediaQuery } from 'usehooks-ts'
 
 const CONTRIBUTION_FIELD_OPTIONS = [
@@ -109,14 +104,6 @@ export default function Page() {
 
     const contributions = searchQuery.data?.data ?? []
     const resultCount = searchQuery.data?.count
-    const sidebarFilters: SidebarListFiltersProps = {
-        search,
-        onSearch,
-        searchFieldOptions: CONTRIBUTION_FIELD_OPTIONS,
-        sortFieldOptions: CONTRIBUTION_SORT_FIELD_OPTIONS,
-        showSort: true,
-        showLimit: true,
-    }
 
     return (
         <Panel
@@ -137,11 +124,14 @@ export default function Page() {
                     onPageChange: (nextPage: number) =>
                         onSearch({ ...search, page: nextPage }),
                 },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <IoEllipsisVertical size={20} />,
-                menu: () => <SidebarListFilters {...sidebarFilters} />,
+                filters: {
+                    search,
+                    onSearch,
+                    searchFieldOptions: CONTRIBUTION_FIELD_OPTIONS,
+                    sortFieldOptions: CONTRIBUTION_SORT_FIELD_OPTIONS,
+                    showSort: true,
+                    showLimit: true,
+                },
             }}
             sidebarBody={
                 <SidebarBody<ActBlueDonationPacket>

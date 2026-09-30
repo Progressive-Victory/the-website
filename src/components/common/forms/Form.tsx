@@ -3,12 +3,7 @@ import { DynamicFormFieldProps, FieldConfiguration } from './FormField'
 import { HStack, Spacer, VStack } from '@/components/layout'
 import { cn } from '@/util'
 import deepEqual from 'deep-equal'
-import React, {
-    useCallback,
-    useEffect,
-    useImperativeHandle,
-    useState,
-} from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { FaPlus, FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 
 /**
@@ -16,13 +11,6 @@ import { FaPlus, FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
  * you've started creating or editing something.
  */
 export type FormMode = 'read' | 'create' | 'edit'
-
-/** Imperative handle for driving the form from outside, via `controlsRef`. */
-export interface FormControls {
-    create: () => void
-    edit: () => void
-    cancel: () => void
-}
 
 /**
  * Current internal state of the Form component. This is returned to the parent
@@ -89,12 +77,6 @@ export interface FormProps<T> {
     /** Callback to create a new form value. */
     onCreate?: () => T
 
-    /** Hides the built-in 'Create' buttons while keeping `onCreate` available. */
-    showCreateButton?: boolean
-
-    /** Exposes imperative controls so a parent can trigger create/edit/cancel. */
-    controlsRef?: React.Ref<FormControls>
-
     /** Callback to delete a form value. */
     onDelete?: (form: T) => void
 
@@ -135,8 +117,6 @@ export function Form<T>({
     onUpdate,
     onSave,
     onCreate,
-    showCreateButton = true,
-    controlsRef,
     onDelete,
     onCancel,
 }: FormProps<T>) {
@@ -214,12 +194,6 @@ export function Form<T>({
         reset()
     }
 
-    useImperativeHandle(controlsRef, () => ({
-        create: handleCreate,
-        edit: handleEdit,
-        cancel: handleCancel,
-    }))
-
     // Called whenever the data in any field changes.
     const handleChange = useCallback(
         (id: string, field: unknown) => {
@@ -280,7 +254,7 @@ export function Form<T>({
                     <VStack grow gap>
                         <Spacer />
                         <span>{`No ${title} selected`}</span>
-                        {onCreate && showCreateButton && (
+                        {onCreate && (
                             <button
                                 onClick={handleCreate}
                                 className={cn(styles.button)}
@@ -380,7 +354,7 @@ export function Form<T>({
                                 </>
                             ) : (
                                 <>
-                                    {onCreate && showCreateButton && (
+                                    {onCreate && (
                                         <button
                                             onClick={handleCreate}
                                             className={styles.button}

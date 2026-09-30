@@ -12,7 +12,6 @@ import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/Mobile
 import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
 import {
     Form,
-    FormControls,
     FormGroup,
     FormState,
     DropDownField,
@@ -25,7 +24,6 @@ import {
 } from '@/components/common/forms/FormField'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
-import { type SidebarListFiltersProps } from '@/components/common/panel/sidebar_list/SidebarList'
 import { usePositionQueries } from '@/queries'
 import { cn } from '@/util'
 import {
@@ -48,7 +46,7 @@ import {
     PaginatedResponse,
     PositionHierarchyResponse,
 } from 'pv-contracts/responses'
-import { ChangeEvent, useCallback, useRef, useState } from 'react'
+import { ChangeEvent, useCallback, useState } from 'react'
 import { FaRegPenToSquare } from 'react-icons/fa6'
 import { useMediaQuery } from 'usehooks-ts'
 
@@ -239,15 +237,6 @@ export default function Page() {
         })
     }
 
-    const sidebarFilters: SidebarListFiltersProps = {
-        search,
-        onSearch,
-        showSort: true,
-        showLimit: false,
-    }
-
-    const formControls = useRef<FormControls>(null)
-
     return (
         <Panel
             includeSidebar
@@ -259,12 +248,12 @@ export default function Page() {
             showScrollbar={false}
             sidebarList={{
                 search: { search, onSearch },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <FaRegPenToSquare size={20} />,
-                label: 'Create Position',
-                onClick: () => formControls.current?.create(),
+                filters: {
+                    search,
+                    onSearch,
+                    showSort: true,
+                    showLimit: false,
+                },
             }}
             sidebarBody={
                 <SidebarBody<Position>
@@ -322,8 +311,6 @@ export default function Page() {
                     onUpdate={setFormState}
                     onSave={handleSave}
                     onCreate={handleCreate}
-                    showCreateButton={false}
-                    controlsRef={formControls}
                     onDelete={handleDelete}
                 >
                     <FormGroup title="Details">
