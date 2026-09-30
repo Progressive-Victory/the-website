@@ -497,8 +497,6 @@
     overflow: visible;
 }
 
-/* The collapse transition's opacity keeps a stacking context alive, trapping the
-   menu's z-index, so lift the whole block over the pinned section and tags. */
 .largeTitleBlock:has([aria-expanded='true']) {
     position: relative;
     z-index: 30;
