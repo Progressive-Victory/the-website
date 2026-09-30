@@ -114,8 +114,7 @@ export function CollectInfoStage({
             <header>
                 <p className={styles.title}>Volunteer with PV</p>
                 <p className={styles.subtitle}>
-                    Join us on Discord and make a difference{' '}
-                    <span aria-hidden="true">✨</span>
+                    Join us on Discord and make a difference ✨
                 </p>
             </header>
             <section className={styles.infoFormSection}>
@@ -260,10 +259,8 @@ export function CollectInfoStage({
                 />
             </section>
             <div className={styles.requiredNote}>
-                A red asterisk
-                {' ( '}
-                <span className={styles.requiredIndicator}>*</span>
-                {' )'} = required field
+                <span className={styles.requiredIndicator}>*</span> = required
+                field
             </div>
             <button
                 type="submit"
