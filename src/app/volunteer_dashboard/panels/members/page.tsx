@@ -15,6 +15,10 @@ import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
 import { FormState } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
+import {
+    SidebarListFilters,
+    type SidebarListFiltersProps,
+} from '@/components/common/panel/sidebar_list/SidebarList'
 import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import { FetchError, stateOptions } from '@/models'
 import { usePositionQueries } from '@/queries'
@@ -66,6 +70,7 @@ import {
     FaUserShield,
 } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign, FaAddressCard } from 'react-icons/fa6'
+import { IoEllipsisVertical } from 'react-icons/io5'
 import { MdVerified } from 'react-icons/md'
 import { useMediaQuery } from 'usehooks-ts'
 import z from 'zod'
@@ -871,6 +876,15 @@ export default function Page() {
         }
     }
 
+    const sidebarFilters: SidebarListFiltersProps = {
+        search,
+        onSearch,
+        searchFieldOptions: MEMBER_FIELD_OPTIONS,
+        sortFieldOptions: MEMBER_SORT_FIELD_OPTIONS,
+        showSort: true,
+        showLimit: true,
+    }
+
     return (
         <Panel
             includeSidebar
@@ -895,14 +909,11 @@ export default function Page() {
                     onPageChange: (nextPage: number) =>
                         onSearch({ ...search, page: nextPage }),
                 },
-                filters: {
-                    search,
-                    onSearch,
-                    searchFieldOptions: MEMBER_FIELD_OPTIONS,
-                    sortFieldOptions: MEMBER_SORT_FIELD_OPTIONS,
-                    showSort: true,
-                    showLimit: true,
-                },
+                filters: sidebarFilters,
+            }}
+            prominentHeaderButton={{
+                icon: <IoEllipsisVertical size={20} />,
+                menu: () => <SidebarListFilters {...sidebarFilters} />,
             }}
             sidebarBody={
                 <>
