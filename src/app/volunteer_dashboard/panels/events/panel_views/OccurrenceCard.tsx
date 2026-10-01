@@ -75,6 +75,24 @@ export function OccurrenceCard({ occurrence }: OccurrenceCardProps) {
             : channelId
     }
 
+    const renderAttendeeList = () =>
+        occurrence.attendees && occurrence.attendees.length > 0
+            ? occurrence.attendees.map((attendee) => (
+                  <NavigationButton
+                      key={[occurrence.id, attendee.id].join('__')}
+                      icon={
+                          <DiscordAvatar
+                              discordUserId={attendee.discordUser!.id}
+                              imageId={attendee.discordUser!.image}
+                              size={32}
+                          />
+                      }
+                      label={`@${attendee.discordUser!.username}`}
+                      href={`/volunteer_dashboard/panels/members?userId=${attendee.id}`}
+                  />
+              ))
+            : 'None'
+
     return (
         <div className={styles.card}>
             {occurrence.thumbnailUrl ? (
@@ -145,32 +163,7 @@ export function OccurrenceCard({ occurrence }: OccurrenceCardProps) {
                         />
                         <FormField label="Attendees">
                             <div className={styles.attendeeList}>
-                                {occurrence.attendees &&
-                                occurrence.attendees.length > 0
-                                    ? occurrence.attendees.map((attendee) => (
-                                          <NavigationButton
-                                              key={[
-                                                  occurrence.id,
-                                                  attendee.id,
-                                              ].join('__')}
-                                              icon={
-                                                  <DiscordAvatar
-                                                      discordUserId={
-                                                          attendee.discordUser!
-                                                              .id
-                                                      }
-                                                      imageId={
-                                                          attendee.discordUser!
-                                                              .image
-                                                      }
-                                                      size={32}
-                                                  />
-                                              }
-                                              label={`@${attendee.discordUser!.username}`}
-                                              href={`/volunteer_dashboard/panels/members?userId=${attendee.id}`}
-                                          />
-                                      ))
-                                    : 'None'}
+                                {renderAttendeeList()}
                             </div>
                         </FormField>
                     </FormGroup>

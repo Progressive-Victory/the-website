@@ -121,6 +121,79 @@ export default function Page() {
         [DiscordEventStatus.Cancelled]: tagStyles.tagRed,
     }
 
+    const renderDetailsHeader = () =>
+        eventQuery.data && (
+            <div className={styles.detailsHeader}>
+                {keyOccurrenceOf(eventQuery.data.event)?.thumbnailUrl ? (
+                    <Image
+                        src={
+                            keyOccurrenceOf(eventQuery.data.event)!
+                                .thumbnailUrl!
+                        }
+                        alt={keyOccurrenceOf(eventQuery.data.event)!.name}
+                        width={807}
+                        height={323}
+                        className={styles.detailsEventThumbnail}
+                    />
+                ) : (
+                    <div
+                        className={cn(
+                            styles.detailsEventThumbnail,
+                            styles.placeholder
+                        )}
+                    />
+                )}
+                <div className={styles.headerTop}>
+                    <div className={styles.cardStyle}>
+                        <div className={styles.userInfo}>
+                            <h1 className={memberStyles.headerUserName}>
+                                {keyOccurrenceOf(eventQuery.data.event)?.name}
+                            </h1>
+                            <h2 className={memberStyles.headerUserUsername}>
+                                {keyOccurrenceOf(eventQuery.data.event)
+                                    ?.scheduledStartUtc &&
+                                    formatDate(
+                                        keyOccurrenceOf(eventQuery.data.event)!
+                                            .scheduledStartUtc
+                                    )}
+                            </h2>
+                        </div>
+                    </div>
+                    <div className={styles.detailsEventDecorationContainer}>
+                        <span
+                            className={cn(
+                                tagStyles.tag,
+                                statusTag[
+                                    keyOccurrenceOf(eventQuery.data.event)
+                                        ?.status ?? 'Unknown'
+                                ]
+                            )}
+                        >
+                            {getStatusName(
+                                keyOccurrenceOf(eventQuery.data.event)
+                                    ?.status ?? null
+                            )}
+                        </span>
+                        {eventQuery.data.event.recurrent && (
+                            <span
+                                className={cn(tagStyles.tag, styles.recurrent)}
+                            >
+                                Recurring
+                            </span>
+                        )}
+                    </div>
+                    <TabBar
+                        tabs={tabs}
+                        value={selectedTab}
+                        onChange={(key) => {
+                            console.log({ key, selectedTab })
+                            setSelectedTab(key as DiscordEventTabKey)
+                        }}
+                    />
+                </div>
+            </div>
+        )
+
     return (
         <Panel
             includeSidebar
@@ -215,104 +288,7 @@ export default function Page() {
 
                 {eventQuery.data?.event && (
                     <>
-                        <div className={styles.detailsHeader}>
-                            {keyOccurrenceOf(eventQuery.data.event)
-                                ?.thumbnailUrl ? (
-                                <Image
-                                    src={
-                                        keyOccurrenceOf(eventQuery.data.event)!
-                                            .thumbnailUrl!
-                                    }
-                                    alt={
-                                        keyOccurrenceOf(eventQuery.data.event)!
-                                            .name
-                                    }
-                                    width={807}
-                                    height={323}
-                                    className={styles.detailsEventThumbnail}
-                                />
-                            ) : (
-                                <div
-                                    className={cn(
-                                        styles.detailsEventThumbnail,
-                                        styles.placeholder
-                                    )}
-                                />
-                            )}
-                            <div className={styles.headerTop}>
-                                <div className={styles.cardStyle}>
-                                    <div className={styles.userInfo}>
-                                        <h1
-                                            className={
-                                                memberStyles.headerUserName
-                                            }
-                                        >
-                                            {
-                                                keyOccurrenceOf(
-                                                    eventQuery.data.event
-                                                )?.name
-                                            }
-                                        </h1>
-                                        <h2
-                                            className={
-                                                memberStyles.headerUserUsername
-                                            }
-                                        >
-                                            {keyOccurrenceOf(
-                                                eventQuery.data.event
-                                            )?.scheduledStartUtc &&
-                                                formatDate(
-                                                    keyOccurrenceOf(
-                                                        eventQuery.data.event
-                                                    )!.scheduledStartUtc
-                                                )}
-                                        </h2>
-                                    </div>
-                                </div>
-                                <div
-                                    className={
-                                        styles.detailsEventDecorationContainer
-                                    }
-                                >
-                                    <span
-                                        className={cn(
-                                            tagStyles.tag,
-                                            statusTag[
-                                                keyOccurrenceOf(
-                                                    eventQuery.data.event
-                                                )?.status ?? 'Unknown'
-                                            ]
-                                        )}
-                                    >
-                                        {getStatusName(
-                                            keyOccurrenceOf(
-                                                eventQuery.data.event
-                                            )?.status ?? null
-                                        )}
-                                    </span>
-                                    {eventQuery.data.event.recurrent && (
-                                        <span
-                                            className={cn(
-                                                tagStyles.tag,
-                                                styles.recurrent
-                                            )}
-                                        >
-                                            Recurring
-                                        </span>
-                                    )}
-                                </div>
-                                <TabBar
-                                    tabs={tabs}
-                                    value={selectedTab}
-                                    onChange={(key) => {
-                                        console.log({ key, selectedTab })
-                                        setSelectedTab(
-                                            key as DiscordEventTabKey
-                                        )
-                                    }}
-                                />
-                            </div>
-                        </div>
+                        {renderDetailsHeader()}
                         {selectedTab === 'overview' && (
                             <DetailView
                                 key={selectedEventId}

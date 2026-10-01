@@ -197,7 +197,7 @@ export function renderVolunteerDashboardUnselectedDetail({
                         {renderUnselectedGridHeader('Community')}
                         <NavigationButton
                             label="Events"
-                            description="Discord community events" // TODO: this sucks lol
+                            description="Discord community events"
                             href="/volunteer_dashboard/panels/events"
                             icon={FaCalendarAlt}
                             tag={{ count: eventCount }}
