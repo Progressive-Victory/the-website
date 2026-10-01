@@ -16,7 +16,7 @@ import { SocialIcon } from 'react-social-icons'
 
 const socials = [
     'https://www.twitch.tv/progressivevictory',
-    'https://www.youtube.com/channel/UCRn-TsfTCP68oee03_F2eIg',
+    'https://www.youtube.com/@progressive-victory',
     'https://www.instagram.com/progressivevictory/',
     'https://bsky.app/profile/progressivevictory.win',
     'https://x.com/ProgressiveVic?mx=2',

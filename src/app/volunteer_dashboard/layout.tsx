@@ -31,6 +31,7 @@ import {
     FaCheckToSlot,
     FaMoneyBills,
     FaMoneyCheckDollar,
+    // FaSitemap,
 } from 'react-icons/fa6'
 import type { IconType } from 'react-icons/lib'
 import { useMediaQuery } from 'usehooks-ts'

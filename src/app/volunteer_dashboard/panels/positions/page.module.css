@@ -89,6 +89,18 @@
     background: rgba(15, 23, 42, 0.06);
 }
 
+.relationshipSelect {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding-inline: 0.5rem;
+    padding-block: 0.1rem;
+    border-radius: 9999px;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    outline: none;
+}
+
 .subPositionEntryText {
     transform: translateX(0);
     transition: transform 280ms cubic-bezier(0.25, 1, 0.5, 1);

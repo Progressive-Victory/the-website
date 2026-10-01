@@ -492,6 +492,16 @@
         transform 320ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+.largeTitleBlock:has([aria-expanded='true']),
+.largeTitleSearch:has([aria-expanded='true']) {
+    overflow: visible;
+}
+
+.largeTitleBlock:has([aria-expanded='true']) {
+    position: relative;
+    z-index: 30;
+}
+
 .sidebar[data-sidebar-large-title-collapsed='true'] .largeTitleSearch {
     max-height: 0;
     opacity: 0;
