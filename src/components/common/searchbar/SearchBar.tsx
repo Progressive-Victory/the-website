@@ -51,9 +51,7 @@ export function SearchBar({
                 type="search"
                 className={cn(
                     styles.searchInput,
-
                     styles[searchbarStyle],
-
                     className
                 )}
                 value={value}

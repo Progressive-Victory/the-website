@@ -89,10 +89,7 @@ export default function Page() {
 
     const allPositions = positionHierarchy.data?.positions ?? []
 
-    const positionById = new Map<number, Position>()
-    for (const p of allPositions) {
-        positionById.set(p.id, p)
-    }
+    const positionById = new Map(allPositions.map((p) => [p.id, p]))
 
     const groupedChildIds = new Set(
         allPositions
@@ -114,18 +111,12 @@ export default function Page() {
         onSort: (a, b) => a.name.localeCompare(b.name),
     })
 
-    const positionMap = new Map<number, string>()
-    for (const p of allPositions) {
-        positionMap.set(p.id, p.name)
-    }
-
-    const pageUserMap = new Map<number, UserProfile>()
-    for (const u of positionHierarchy.data?.users ?? []) {
-        pageUserMap.set(u.id, u)
-    }
-    for (const u of userSearchQuery.data?.data ?? []) {
-        pageUserMap.set(u.id, u)
-    }
+    const pageUserMap = new Map(
+        [
+            ...(positionHierarchy.data?.users ?? []),
+            ...(userSearchQuery.data?.data ?? []),
+        ].map((u) => [u.id, u])
+    )
 
     const handleSelectItem = (value: Position): boolean => {
         if (value.id === selectedPosition?.id) return false
@@ -361,7 +352,7 @@ export default function Page() {
                             <SubordinatesField
                                 label="Subordinates"
                                 field="childRelationships"
-                                positionMap={positionMap}
+                                positionById={positionById}
                                 allPositions={
                                     positionHierarchy.data?.positions ?? []
                                 }
@@ -381,7 +372,7 @@ interface SubordinatesFieldProps extends FormFieldProps<
     Position,
     Relationship[]
 > {
-    positionMap: Map<number, string>
+    positionById: Map<number, Position>
     allPositions: Position[]
     currentPositionId: number
     editing: boolean
@@ -460,19 +451,20 @@ function SubordinatesField(props: SubordinatesFieldProps) {
                                 type="button"
                                 className={styles.deleteButton}
                                 onClick={() => handleRemove(id)}
-                                aria-label={`Remove ${props.positionMap.get(id) ?? 'position'}`}
+                                aria-label={`Remove ${props.positionById.get(id)?.name ?? 'position'}`}
                             >
                                 −
                             </button>
                             <span className={styles.subPositionEntryText}>
-                                {props.positionMap.get(id) ?? `Unknown (${id})`}
+                                {props.positionById.get(id)?.name ??
+                                    `Unknown (${id})`}
                             </span>
                             <span className={styles.subPositionTags}>
                                 {props.editing ? (
                                     <select
                                         className={styles.relationshipSelect}
                                         value={type}
-                                        aria-label={`Relationship type for ${props.positionMap.get(id) ?? 'position'}`}
+                                        aria-label={`Relationship type for ${props.positionById.get(id)?.name ?? 'position'}`}
                                         onChange={(event) =>
                                             handleChangeType(
                                                 id,

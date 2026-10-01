@@ -20,12 +20,6 @@ import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
-export type {
-    SidebarHeaderButtonConfig,
-    SidebarHeaderButtonMenu,
-} from '@/components/common/navigation_stack/sidebar/Sidebar'
-export { SidebarHeaderButton } from '@/components/common/navigation_stack/sidebar/Sidebar'
-
 export interface SidebarListConfig {
     search?: SidebarListSearchProps
     filters?: SidebarListFiltersConfig

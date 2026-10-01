@@ -30,7 +30,7 @@ export function NumberField<T>(props: NumberFieldProps<T>) {
 
     const value = getter(props.dynamic!.form)
 
-    const [draft, setDraft] = useState<string | null>(null)
+    const [draft, setDraft] = useState<string>()
 
     const handleInput = (event: React.InputEvent<HTMLInputElement>) => {
         const text = event.currentTarget.value
@@ -54,7 +54,7 @@ export function NumberField<T>(props: NumberFieldProps<T>) {
                     step={props.step ?? 1}
                     value={draft ?? value ?? ''}
                     onInput={handleInput}
-                    onBlur={() => setDraft(null)}
+                    onBlur={() => setDraft(undefined)}
                     className={cn(
                         styles.textField,
                         !validator(value) && styles.invalid

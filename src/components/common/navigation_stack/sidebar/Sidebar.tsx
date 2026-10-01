@@ -429,14 +429,18 @@ export function SidebarHeaderButton({
     buttonVariant = 'icon',
     className,
 }: SidebarHeaderButtonConfig): ReactElement {
+    const shared = {
+        type: 'button',
+        buttonVariant,
+        className,
+        'aria-label': label,
+        title: label,
+    } as const
+
     if (!menu)
         return (
             <DropdownButton
-                type="button"
-                buttonVariant={buttonVariant}
-                className={className}
-                aria-label={label}
-                title={label}
+                {...shared}
                 aria-haspopup={undefined}
                 aria-expanded={undefined}
                 onClick={(event) => {
@@ -450,11 +454,7 @@ export function SidebarHeaderButton({
 
     return (
         <DropdownButton
-            type="button"
-            buttonVariant={buttonVariant}
-            className={className}
-            aria-label={label}
-            title={label}
+            {...shared}
             icon={icon}
             onClick={onClick}
             menu={({ closeDropdown }) => (

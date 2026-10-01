@@ -32,7 +32,5 @@ export function getUserDisplayName(user: UserProfile | undefined): string {
         return `${user.firstName} ${user.lastName}`
     const discord = user.discordUsers?.[0]?.username
     if (discord) return `@${discord}`
-    if (user.preferredName) return user.preferredName
-    if (user.email) return user.email
-    return 'Unknown'
+    return user.preferredName ?? user.email ?? 'Unknown'
 }
