@@ -31,7 +31,7 @@ import {
     FaCheckToSlot,
     FaMoneyBills,
     FaMoneyCheckDollar,
-    // FaSitemap,
+    FaSitemap,
 } from 'react-icons/fa6'
 import type { IconType } from 'react-icons/lib'
 import { useMediaQuery } from 'usehooks-ts'
@@ -181,6 +181,12 @@ function LayoutContent({ children }: { children: ReactNode }) {
             href: '/volunteer_dashboard/panels/endorsements',
             icon: FaCheckToSlot,
             count: endorsements.data?.length,
+        },
+        {
+            key: 'chart',
+            label: 'Chart',
+            href: '/volunteer_dashboard/panels/chart',
+            icon: FaSitemap,
         },
     ]
 
