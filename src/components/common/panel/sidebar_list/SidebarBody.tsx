@@ -2,21 +2,27 @@
 
 import styles from './SidebarList.module.css'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
-import type { SubTagProps } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
-import { parseErrorMessage } from '@/util'
+import type {
+    NavigationButtonType,
+    SubTagProps,
+} from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import { cn, parseErrorMessage } from '@/util'
 import React from 'react'
 import type { ReactNode } from 'react'
 
-export interface SidebarBodyItemConfig {
+export interface SidebarBodyItemConfig<T> {
     key: string | number
     label: string
     subtitle?: string
     tagLabel?: string
+    tagCount?: number
     tagClassName?: string
     renderTag?: React.ReactNode
     subTags?: SubTagProps[]
     icon?: ReactNode
     href: string
+    buttonType?: NavigationButtonType
+    children?: T[]
     onClick: (event: React.MouseEvent) => void
 }
 
@@ -26,7 +32,7 @@ export interface SidebarBodyProps<T> {
     isLoading?: boolean
     error?: unknown
     selectedKey?: string | number | null
-    renderItem: (item: T) => SidebarBodyItemConfig
+    renderItem: (item: T) => SidebarBodyItemConfig<T>
 }
 
 export function SidebarBody<T>({
@@ -53,8 +59,16 @@ export function SidebarBody<T>({
         return <div className={styles.sidebarState}>No items found</div>
     }
 
-    const renderItemButton = (item: T) => {
+    const renderItemButton = (
+        item: T,
+        ancestorKeys: ReadonlySet<string | number> = new Set()
+    ) => {
         const config = renderItem(item)
+        const isGroup =
+            config.buttonType === 'group' && !ancestorKeys.has(config.key)
+        const groupChildren = isGroup ? (config.children ?? []) : []
+        const childAncestorKeys = new Set(ancestorKeys).add(config.key)
+
         return (
             <NavigationButton
                 key={config.key}
@@ -63,9 +77,10 @@ export function SidebarBody<T>({
                 label={config.label}
                 subtitle={config.subtitle}
                 tag={
-                    config.tagLabel
+                    config.tagLabel != null || config.tagCount != null
                         ? {
                               label: config.tagLabel,
+                              count: config.tagCount,
                               labelClassName: config.tagClassName,
                           }
                         : undefined
@@ -73,9 +88,19 @@ export function SidebarBody<T>({
                 renderTag={config.renderTag}
                 subTags={config.subTags}
                 icon={config.icon}
+                buttonType={config.buttonType}
+                groupContent={groupChildren.map((child) =>
+                    renderItemButton(child, childAncestorKeys)
+                )}
+                hasActiveGroupChild={groupChildren.some(
+                    (child) => renderItem(child).key === selectedKey
+                )}
                 onClick={config.onClick}
                 showIndicator={false}
-                className={styles.sidebarNavigationButton}
+                className={cn(
+                    styles.sidebarNavigationButton,
+                    ancestorKeys.size > 0 && styles.sidebarNavigationButtonChild
+                )}
             />
         )
     }

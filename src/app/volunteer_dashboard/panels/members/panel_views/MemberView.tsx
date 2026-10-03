@@ -14,6 +14,7 @@ import {
 import { MultiTextField } from '@/components/common/forms/MultiTextField'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
+import { Country, isValidCountryPostalCode } from 'postal-code-validator'
 import { Role, ShirtSize, UpdateHistory, User } from 'pv-contracts/data'
 
 const shirtSizeOptions = [
@@ -233,14 +234,16 @@ export function MemberView({
                         ...form,
                         address: {
                             ...form.address,
-                            zip:
-                                field
-                                    ?.replace(/[^\d]/, '')
-                                    ?.padStart(5, '0')
-                                    ?.slice(-5) ?? null,
+                            zip: field?.replace(/[^\d]/, '')?.slice(-5) ?? null,
                         },
                     })}
-                    validator={(field) => !field?.length || field?.length == 5}
+                    validator={(field) =>
+                        (!field?.length || field?.length == 5) &&
+                        isValidCountryPostalCode(
+                            field ?? '',
+                            Country.UnitedStatesOfAmerica
+                        )
+                    }
                 />
             </FormGroup>
 

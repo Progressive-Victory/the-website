@@ -10,6 +10,10 @@ import {
 } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
+import {
+    SidebarListFilters,
+    type SidebarListFiltersProps,
+} from '@/components/common/panel/sidebar_list/SidebarList'
 import { FetchError } from '@/models'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -17,6 +21,7 @@ import { Permission, zPermission } from 'pv-contracts/data'
 import { SortDirection, UpdatePermissionRequest } from 'pv-contracts/requests'
 import { PaginatedResponse } from 'pv-contracts/responses'
 import { useState } from 'react'
+import { IoEllipsisVertical } from 'react-icons/io5'
 import { useMediaQuery } from 'usehooks-ts'
 
 export default function Page() {
@@ -121,6 +126,12 @@ export default function Page() {
 
     const permissions = searchQuery.data?.data ?? []
     const resultCount = searchQuery.data?.count
+    const sidebarFilters: SidebarListFiltersProps = {
+        search,
+        onSearch,
+        showSort: true,
+        showLimit: true,
+    }
 
     return (
         <Panel
@@ -141,12 +152,11 @@ export default function Page() {
                     onPageChange: (nextPage: number) =>
                         onSearch({ ...search, page: nextPage }),
                 },
-                filters: {
-                    search,
-                    onSearch,
-                    showSort: true,
-                    showLimit: true,
-                },
+                filters: sidebarFilters,
+            }}
+            prominentHeaderButton={{
+                icon: <IoEllipsisVertical size={20} />,
+                menu: () => <SidebarListFilters {...sidebarFilters} />,
             }}
             sidebarBody={
                 <SidebarBody<Permission>

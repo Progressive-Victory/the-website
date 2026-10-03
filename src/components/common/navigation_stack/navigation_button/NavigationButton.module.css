@@ -254,8 +254,17 @@
     line-height: 1.15;
 }
 
+.labelText {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .subtitleSection {
     display: block;
+    max-width: 100%;
     font-size: 0.75rem;
     font-weight: 500;
     color: rgba(15, 23, 42, 0.48);
@@ -348,6 +357,7 @@
 
     & > .item {
         position: relative;
+        margin-right: 0;
         opacity: 0;
         transform: translate3d(0, -3px, 0);
         backface-visibility: hidden;
@@ -356,7 +366,7 @@
             opacity 160ms ease,
             transform 220ms ease;
 
-        &::before {
+        & > .itemHeader::before {
             content: '';
             position: absolute;
             left: -1.05rem;
@@ -370,13 +380,14 @@
             box-sizing: border-box;
         }
 
-        &:first-child::before {
+        &:first-child > .itemHeader::before {
             top: 0;
             height: 50%;
         }
 
         & .link {
             margin-left: 0.2rem;
+            width: calc(100% - 0.2rem);
             padding: 0.6rem 0.65rem;
             border-radius: 0.85rem;
         }
