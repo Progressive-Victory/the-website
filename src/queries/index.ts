@@ -1,4 +1,5 @@
 export * from './actblue.queries'
 export * from './endorsements.queries'
+export * from './events.queries'
 export * from './positions.queries'
 export * from './users.queries'
