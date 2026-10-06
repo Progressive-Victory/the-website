@@ -10,7 +10,10 @@ import {
 import { NavigationStack } from '@/components/common/navigation_stack'
 import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { PanelBackButton } from '@/components/common/navigation_stack/detail/PanelBackButton'
-import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
+import {
+    Sidebar,
+    type SidebarHeaderButtonConfig,
+} from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { SidebarToggleButton } from '@/components/common/navigation_stack/sidebar/SidebarToggleButton'
 import { cn } from '@/util'
 import type { ReactNode } from 'react'
@@ -48,6 +51,7 @@ export interface PanelProps {
     prominentHeader?: ReactNode
     prominentHeaderLeft?: ReactNode
     prominentHeaderRight?: ReactNode
+    prominentHeaderButton?: SidebarHeaderButtonConfig
     headerLead?: ReactNode
     headerLeft?: ReactNode
     headerRight?: ReactNode
@@ -79,6 +83,7 @@ export function Panel({
     prominentHeader,
     prominentHeaderLeft,
     prominentHeaderRight,
+    prominentHeaderButton,
     headerLead,
     headerLeft,
     headerRight,
@@ -109,13 +114,24 @@ export function Panel({
     const resolvedSidebarFooter =
         sidebarFooter ??
         (sidebarList?.footer && <SidebarListFooter {...sidebarList.footer} />)
-    const resolvedSidebarSearch =
-        sidebarSearch ??
-        (sidebarList?.search && <SidebarListSearch {...sidebarList.search} />)
     const resolvedSidebarFilterContent =
         sidebarFilterContent ??
         (sidebarList?.filters && (
             <SidebarListFilters {...sidebarList.filters} />
+        ))
+    const searchFilterContent =
+        sidebarList?.search?.filterContent ??
+        (resolvedSidebarFilterContent && (() => resolvedSidebarFilterContent))
+    const resolvedSidebarSearch =
+        sidebarSearch ??
+        (sidebarList?.search && (
+            <SidebarListSearch
+                {...sidebarList.search}
+                resultCount={
+                    sidebarList.search.resultCount ?? sidebarList.footer?.count
+                }
+                filterContent={searchFilterContent}
+            />
         ))
 
     return (
@@ -161,17 +177,14 @@ export function Panel({
                                 label: panelLabel,
                                 largeTitle,
                                 search: resolvedSidebarSearch,
-                                filters: resolvedSidebarFilterContent
-                                    ? {
-                                          open: sidebarFilterOpen,
-                                          onOpenChange:
-                                              onSidebarFilterOpenChange,
-                                          content: resolvedSidebarFilterContent,
-                                      }
-                                    : undefined,
+                                filters: {
+                                    open: sidebarFilterOpen,
+                                    onOpenChange: onSidebarFilterOpenChange,
+                                },
                                 content: prominentHeader,
                                 left: resolvedProminentHeaderLeft,
                                 right: prominentHeaderRight,
+                                button: prominentHeaderButton,
                             }}
                             footer={resolvedSidebarFooter}
                         >

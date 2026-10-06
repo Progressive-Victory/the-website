@@ -1,5 +1,10 @@
 import styles from './SidebarList.module.css'
-import { MultiSelect, type MultiSelectOption } from '@/components/common'
+import {
+    MultiSelect,
+    SearchBar,
+    type MultiSelectOption,
+    type SearchBarFilterContent,
+} from '@/components/common'
 import { cn } from '@/util'
 import { type SearchRequest, SortDirection } from 'pv-contracts/requests'
 import { useEffect, useState } from 'react'
@@ -202,6 +207,8 @@ export interface SidebarListSearchProps {
     onSearch: (search: SearchRequest) => void
     placeholder?: string
     inputId?: string
+    resultCount?: number
+    filterContent?: SearchBarFilterContent
 }
 
 export function SidebarListSearch({
@@ -209,22 +216,29 @@ export function SidebarListSearch({
     onSearch,
     placeholder = 'Search...',
     inputId = 'search',
+    resultCount,
+    filterContent,
 }: SidebarListSearchProps) {
+    const updateQuery = (query: string) =>
+        onSearch({
+            ...search,
+            query,
+            page: 0,
+        })
     return (
         <div className={styles.searchInput}>
-            <input
-                type="text"
+            <SearchBar
                 name={inputId}
                 id={inputId}
                 placeholder={placeholder}
+                aria-label={placeholder}
+                searchbarStyle="rounded"
                 value={search.query ?? ''}
-                onChange={(event) =>
-                    onSearch({
-                        ...search,
-                        query: event.currentTarget.value,
-                        page: 0,
-                    })
-                }
+                resultCount={resultCount}
+                filterContent={filterContent}
+                className={styles.sidebarSearchInput}
+                onChange={(event) => updateQuery(event.currentTarget.value)}
+                onClear={() => updateQuery('')}
             />
         </div>
     )
