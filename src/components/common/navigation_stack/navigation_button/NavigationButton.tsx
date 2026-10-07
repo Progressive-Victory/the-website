@@ -138,7 +138,7 @@ export function NavigationButton({
                             classNames?.label
                         )}
                     >
-                        {label}
+                        <span className={styles.labelText}>{label}</span>
                         {subtitle && (
                             <span
                                 className={cn(
