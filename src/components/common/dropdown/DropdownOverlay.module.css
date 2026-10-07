@@ -5,7 +5,7 @@
     padding: 0.62rem;
     border-radius: 0.75rem;
     border: 1px solid rgba(15, 23, 42, 0.14);
-    background: rgba(255, 255, 255, 0.94);
+    background: rgba(255, 255, 255, 0.95);
     display: grid;
     gap: 0.5rem;
     position: absolute;
@@ -14,9 +14,10 @@
     z-index: 120;
     box-shadow: 0 12px 34px rgba(15, 23, 42, 0.16);
     overflow-y: auto;
+    contain: layout;
+    will-change: transform;
 }
 
-/* pre-measurement default; the layout effect takes over once the anchor is measured */
 .alignStart {
     left: 0;
     right: auto;

@@ -21,9 +21,10 @@ import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
 import {
     DropdownButton,
     DropdownOverlay,
+    DropdownOverlayButton,
+    SearchBar,
     ToggleGroup,
 } from '@/components/common'
-import { CloseCircleIcon } from '@/components/common/icons/CloseCircleIcon'
 import Panel from '@/components/common/panel/Panel'
 import { Table } from '@/components/common/table'
 import { cn, DOT_SEPARATOR } from '@/util'
@@ -31,8 +32,6 @@ import { usePaginatedSearch } from '@/util/hooks'
 import { UserProfile, zUserProfile } from 'pv-contracts/data'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
-import { FiSearch } from 'react-icons/fi'
-import { IoMdOptions } from 'react-icons/io'
 
 const showHideChoices = [
     { value: true, label: 'Show' },
@@ -354,68 +353,36 @@ export default function Page() {
                         {totalEntries != null &&
                             ` of ${totalEntries.toLocaleString()}`}
                     </div>
-                    <div className={styles.panelSearch}>
-                        <FiSearch
-                            className={styles.panelSearchIcon}
-                            aria-hidden="true"
-                        />
-                        <input
-                            type="search"
-                            className={styles.panelSearchInput}
-                            placeholder="Search..."
-                            aria-label="Search memberships"
-                            value={searchDraft}
-                            onChange={(event) =>
-                                setSearchDraft(event.target.value)
-                            }
-                            onKeyDown={(event) => {
-                                if (event.key !== 'Enter' || matchCount === 0)
-                                    return
-                                event.preventDefault()
-                                setScrollToMatchToken((token) => token + 1)
-                            }}
-                        />
-                        {searchDraft.trim() !== '' && (
-                            <span className={styles.panelSearchCount}>
-                                {matchCount.toLocaleString()}
-                            </span>
-                        )}
-                        {searchDraft !== '' ? (
-                            <button
-                                type="button"
-                                className={styles.panelSearchClear}
-                                aria-label="Clear search"
-                                onMouseDown={(event) => event.preventDefault()}
-                                onClick={() => setSearchDraft('')}
-                            >
-                                <CloseCircleIcon />
-                            </button>
-                        ) : (
-                            <span className={styles.panelSearchFilter}>
-                                <IoMdOptions aria-hidden="true" />
-                                <select
-                                    className={styles.panelSearchFilterSelect}
-                                    aria-label="Search column"
-                                    value={searchField}
-                                    onChange={(event) =>
-                                        setSearchField(
-                                            event.target
-                                                .value as MembershipSearchField
-                                        )
-                                    }
+                    <SearchBar
+                        placeholder="Search..."
+                        searchbarStyle="pill"
+                        aria-label="Search memberships"
+                        value={searchDraft}
+                        resultCount={matchCount}
+                        onChange={(event) => setSearchDraft(event.target.value)}
+                        onClear={() => setSearchDraft('')}
+                        onKeyDown={(event) => {
+                            if (event.key !== 'Enter' || matchCount === 0)
+                                return
+                            event.preventDefault()
+                            setScrollToMatchToken((token) => token + 1)
+                        }}
+                        filterLabel="Search column"
+                        filterContent={({ close }) =>
+                            membershipSearchFields.map((field) => (
+                                <DropdownOverlayButton
+                                    key={field.value}
+                                    selected={searchField === field.value}
+                                    onClick={() => {
+                                        setSearchField(field.value)
+                                        close()
+                                    }}
                                 >
-                                    {membershipSearchFields.map((field) => (
-                                        <option
-                                            key={field.value}
-                                            value={field.value}
-                                        >
-                                            {field.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </span>
-                        )}
-                    </div>
+                                    {field.label}
+                                </DropdownOverlayButton>
+                            ))
+                        }
+                    />
                 </div>
             }
         >

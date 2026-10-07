@@ -9,7 +9,10 @@ import {
     usePinnedSectionStuck,
     useSidebarState,
 } from './hooks'
-import { DropdownButton } from '@/components/common/dropdown/DropdownButton'
+import {
+    DropdownButton,
+    type DropdownButtonVariant,
+} from '@/components/common/dropdown/DropdownButton'
 import { DropdownOverlay } from '@/components/common/dropdown/DropdownOverlay'
 import { cn } from '@/util'
 import { useRef } from 'react'
@@ -24,7 +27,18 @@ type SidebarHeaderMode = 'shown' | 'hidden'
 export interface SidebarFiltersConfig {
     open?: boolean
     onOpenChange?: (open: boolean) => void
-    content?: ReactNode
+}
+
+export type SidebarHeaderButtonMenu =
+    ReactNode | ((controls: { close: () => void }) => ReactNode)
+
+export interface SidebarHeaderButtonConfig {
+    menu?: SidebarHeaderButtonMenu
+    onClick?: () => void
+    icon?: ReactNode
+    label?: string
+    buttonVariant?: DropdownButtonVariant
+    className?: string
 }
 
 export interface SidebarHeaderConfig {
@@ -34,6 +48,7 @@ export interface SidebarHeaderConfig {
     content?: ReactNode
     left?: ReactNode
     right?: ReactNode
+    button?: SidebarHeaderButtonConfig
     search?: ReactNode
     filters?: SidebarFiltersConfig
 }
@@ -69,10 +84,10 @@ interface ResolvedHeaderProps {
     search?: ReactNode
     filterOpen?: boolean
     onFilterOpenChange?: (open: boolean) => void
-    filterContent?: ReactNode
     prominentHeader?: ReactNode
     prominentHeaderLeft?: ReactNode
     prominentHeaderRight?: ReactNode
+    prominentHeaderButton?: SidebarHeaderButtonConfig
 }
 
 type ResolvedSidebarProps = Omit<
@@ -122,10 +137,10 @@ function resolveSidebarProps(props: SidebarProps): ResolvedSidebarProps {
             search: h?.search,
             filterOpen: h?.filters?.open,
             onFilterOpenChange: h?.filters?.onOpenChange,
-            filterContent: h?.filters?.content,
             prominentHeader: h?.content,
             prominentHeaderLeft: h?.left,
             prominentHeaderRight: h?.right,
+            prominentHeaderButton: h?.button,
         },
         body,
     }
@@ -316,9 +331,9 @@ function ProminentSidebar({
                 prominentHeader={header.prominentHeader}
                 prominentHeaderLeft={header.prominentHeaderLeft}
                 prominentHeaderRight={header.prominentHeaderRight}
+                prominentHeaderButton={header.prominentHeaderButton}
                 filterOpen={header.filterOpen}
                 onFilterOpenChange={header.onFilterOpenChange}
-                filterContent={header.filterContent}
                 reserveToggleSpace={reserveProminentHeaderToggleSpace}
                 largeTitle={largeTitleActive}
             />
@@ -406,33 +421,71 @@ function MinimalSidebarHeader({
     )
 }
 
+export function SidebarHeaderButton({
+    menu,
+    onClick,
+    icon = <IoMdOptions size={20} />,
+    label = 'Show Filters',
+    buttonVariant = 'icon',
+    className,
+}: SidebarHeaderButtonConfig): ReactElement {
+    const shared = {
+        type: 'button',
+        buttonVariant,
+        className,
+        'aria-label': label,
+        title: label,
+    } as const
+
+    if (!menu)
+        return (
+            <DropdownButton
+                {...shared}
+                aria-haspopup={undefined}
+                aria-expanded={undefined}
+                onClick={(event) => {
+                    event.preventDefault()
+                    onClick?.()
+                }}
+            >
+                {icon}
+            </DropdownButton>
+        )
+
+    return (
+        <DropdownButton
+            {...shared}
+            icon={icon}
+            onClick={onClick}
+            menu={({ closeDropdown }) => (
+                <DropdownOverlay
+                    body={
+                        typeof menu === 'function'
+                            ? menu({ close: closeDropdown })
+                            : menu
+                    }
+                    onClose={closeDropdown}
+                />
+            )}
+        />
+    )
+}
+
 function resolveHeaderRight(
     custom: ReactNode,
-    filterContent: ReactNode,
+    button: SidebarHeaderButtonConfig | undefined,
     filterOpen: boolean | undefined,
     onFilterOpenChange: ((open: boolean) => void) | undefined
 ): { element: ReactNode; isGenerated: boolean } {
     if (custom != null) return { element: custom, isGenerated: false }
 
-    if (filterContent != null)
+    if (button) {
+        const variant = button.buttonVariant ?? 'icon'
         return {
-            element: (
-                <DropdownButton
-                    type="button"
-                    buttonVariant="icon"
-                    aria-label="Show Filters"
-                    title="Show Filters"
-                    icon={<IoMdOptions size={20} />}
-                    menu={({ closeDropdown }) => (
-                        <DropdownOverlay
-                            body={filterContent}
-                            onClose={closeDropdown}
-                        />
-                    )}
-                />
-            ),
-            isGenerated: true,
+            element: <SidebarHeaderButton {...button} />,
+            isGenerated: variant === 'icon' || variant === 'short',
         }
+    }
 
     if (typeof filterOpen === 'boolean' && onFilterOpenChange)
         return {
@@ -463,9 +516,9 @@ interface ProminentSidebarHeaderProps {
     prominentHeader?: ReactNode
     prominentHeaderLeft?: ReactNode
     prominentHeaderRight?: ReactNode
+    prominentHeaderButton?: SidebarHeaderButtonConfig
     filterOpen?: boolean
     onFilterOpenChange?: (open: boolean) => void
-    filterContent?: ReactNode
     reserveToggleSpace: boolean
     largeTitle?: boolean
 }
@@ -475,9 +528,9 @@ function ProminentSidebarHeader({
     prominentHeader,
     prominentHeaderLeft,
     prominentHeaderRight,
+    prominentHeaderButton,
     filterOpen,
     onFilterOpenChange,
-    filterContent,
     reserveToggleSpace,
     largeTitle,
 }: ProminentSidebarHeaderProps): ReactElement {
@@ -487,7 +540,7 @@ function ProminentSidebarHeader({
 
     const { element: resolvedHeaderRight, isGenerated } = resolveHeaderRight(
         prominentHeaderRight,
-        filterContent,
+        prominentHeaderButton,
         filterOpen,
         onFilterOpenChange
     )
