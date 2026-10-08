@@ -4,17 +4,6 @@ import styles from './Card.module.css'
 import { BaseButton } from '@/components/common/buttons/Button'
 import { cn } from '@/util'
 import {
-    HeartIcon,
-    ChatBubbleLeftRightIcon,
-    ArrowUpOnSquareIcon,
-    EllipsisHorizontalIcon,
-} from '@heroicons/react/24/outline'
-import {
-    HeartIcon as SolidHeartIcon,
-    ChatBubbleLeftRightIcon as SolidChatBubbleLeftRightIcon,
-    ArrowUpOnSquareIcon as SolidArrowUpOnSquareIcon,
-} from '@heroicons/react/24/solid'
-import {
     motion,
     useSpring,
     useTransform,
@@ -24,6 +13,15 @@ import {
 import Image from 'next/image'
 import type React from 'react'
 import { useState, useMemo } from 'react'
+import {
+    HiOutlineHeart,
+    HiOutlineChatBubbleLeftRight,
+    HiOutlineArrowUpOnSquare,
+    HiOutlineEllipsisHorizontal,
+    HiHeart,
+    HiChatBubbleLeftRight,
+    HiArrowUpOnSquare,
+} from 'react-icons/hi2'
 
 interface MotionProps {
     initial?: TargetAndTransition
@@ -350,7 +348,7 @@ export function Message({
                                                     e.stopPropagation()
                                                 }
                                             >
-                                                <EllipsisHorizontalIcon
+                                                <HiOutlineEllipsisHorizontal
                                                     className={
                                                         styles.ellipsisIcon
                                                     }
@@ -399,7 +397,7 @@ export function Message({
                                         aria-label="Comment"
                                     >
                                         {clickedBubble ? (
-                                            <SolidChatBubbleLeftRightIcon
+                                            <HiChatBubbleLeftRight
                                                 className={cn(
                                                     styles.iconSolid,
                                                     styles.bubbleActive,
@@ -407,7 +405,7 @@ export function Message({
                                                 )}
                                             />
                                         ) : (
-                                            <ChatBubbleLeftRightIcon
+                                            <HiOutlineChatBubbleLeftRight
                                                 className={styles.icon}
                                             />
                                         )}
@@ -423,7 +421,7 @@ export function Message({
                                         aria-label="Share"
                                     >
                                         {clickedShare ? (
-                                            <SolidArrowUpOnSquareIcon
+                                            <HiArrowUpOnSquare
                                                 className={cn(
                                                     styles.iconSolid,
                                                     styles.shareActive,
@@ -431,7 +429,7 @@ export function Message({
                                                 )}
                                             />
                                         ) : (
-                                            <ArrowUpOnSquareIcon
+                                            <HiOutlineArrowUpOnSquare
                                                 className={styles.icon}
                                             />
                                         )}
@@ -447,7 +445,7 @@ export function Message({
                                         aria-label="Like"
                                     >
                                         {clickedHeart ? (
-                                            <SolidHeartIcon
+                                            <HiHeart
                                                 className={cn(
                                                     styles.iconSolid,
                                                     styles.heartActive,
@@ -455,7 +453,7 @@ export function Message({
                                                 )}
                                             />
                                         ) : (
-                                            <HeartIcon
+                                            <HiOutlineHeart
                                                 className={styles.icon}
                                             />
                                         )}
