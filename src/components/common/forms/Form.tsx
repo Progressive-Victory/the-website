@@ -3,7 +3,12 @@ import { DynamicFormFieldProps, FieldConfiguration } from './FormField'
 import { HStack, Spacer, VStack } from '@/components/layout'
 import { cn } from '@/util'
 import deepEqual from 'deep-equal'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, {
+    useCallback,
+    useEffect,
+    useImperativeHandle,
+    useState,
+} from 'react'
 import { FaPlus, FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 
 /**
@@ -11,6 +16,13 @@ import { FaPlus, FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
  * you've started creating or editing something.
  */
 export type FormMode = 'read' | 'create' | 'edit'
+
+/** Imperative handle for driving the form from outside, via `controlsRef`. */
+export interface FormControls {
+    create: () => void
+    edit: () => void
+    cancel: () => void
+}
 
 /**
  * Current internal state of the Form component. This is returned to the parent
@@ -44,6 +56,12 @@ export interface FormProps<T> {
     /** An optional avatar element displayed in the header. */
     avatar?: React.ReactNode
 
+    /** Optional content displayed above the form header. */
+    beforeHeader?: React.ReactElement
+
+    /** Optional class name for the form element. */
+    className?: string
+
     /** If this is true, no 'Edit' button will be displayed. */
     readonly?: boolean
 
@@ -66,13 +84,22 @@ export interface FormProps<T> {
     onUpdate?: (state: FormState<T>) => void
 
     /** Callback to save form data. Should correspond to `saving`. */
-    onSave?: (form: T) => void
+    onSave?: (form: T) => void | boolean
 
     /** Callback to create a new form value. */
     onCreate?: () => T
 
+    /** Hides the built-in 'Create' buttons while keeping `onCreate` available. */
+    showCreateButton?: boolean
+
+    /** Exposes imperative controls so a parent can trigger create/edit/cancel. */
+    controlsRef?: React.Ref<FormControls>
+
     /** Callback to delete a form value. */
     onDelete?: (form: T) => void
+
+    /** Callback when editing is discarded. */
+    onCancel?: () => void
 }
 
 /**
@@ -83,8 +110,8 @@ export interface FormProps<T> {
  *
  * See `FormGroup` and `FormField` for details.
  *
- * See `src/app/admin/members/page.tsx` for an example on using this
- * component.
+ * See `src/app/volunteer_dashboard/panels/members/page.tsx` for an example on
+ * using this component.
  *
  * IMPORTANT: This component will prefill `id` and override `dynamic`
  * properties of all direct children. If you're passing any component which
@@ -99,6 +126,8 @@ export function Form<T>({
     title,
     subtitle,
     avatar,
+    beforeHeader,
+    className,
     readonly = false,
     isInvalid = false,
     saving = false,
@@ -106,7 +135,10 @@ export function Form<T>({
     onUpdate,
     onSave,
     onCreate,
+    showCreateButton = true,
+    controlsRef,
     onDelete,
+    onCancel,
 }: FormProps<T>) {
     // Stores the initial state of the form while editing.
     const [baseForm, setBaseForm] = useState<T | null>(null)
@@ -172,14 +204,21 @@ export function Form<T>({
     // Called when 'Save' is pressed. Asks the parent component to save, and
     // then clears edit state.
     const handleSave = () => {
-        if (editForm) onSave?.(editForm)
-        reset()
+        const result = editForm ? onSave?.(editForm) : undefined
+        if (result !== false) reset()
     }
 
     // Called when 'Cancel' is pressed. Clears edit state.
     const handleCancel = () => {
+        onCancel?.()
         reset()
     }
+
+    useImperativeHandle(controlsRef, () => ({
+        create: handleCreate,
+        edit: handleEdit,
+        cancel: handleCancel,
+    }))
 
     // Called whenever the data in any field changes.
     const handleChange = useCallback(
@@ -241,7 +280,7 @@ export function Form<T>({
                     <VStack grow gap>
                         <Spacer />
                         <span>{`No ${title} selected`}</span>
-                        {onCreate && (
+                        {onCreate && showCreateButton && (
                             <button
                                 onClick={handleCreate}
                                 className={cn(styles.button)}
@@ -286,74 +325,94 @@ export function Form<T>({
         }
     })
 
-    return (
-        <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
-            <header className={styles.header}>
-                <div className={styles.titleSection}>
-                    {avatar && <div className={styles.avatar}>{avatar}</div>}
-                    <div className={styles.titleContent}>
-                        <h1 className={styles.title}>{title}</h1>
-                        {subtitle && (
-                            <p className={styles.subtitle}>{subtitle}</p>
-                        )}
-                    </div>
-                </div>
+    const hydratedBeforeHeader =
+        beforeHeader && React.isValidElement(beforeHeader)
+            ? {
+                  ...beforeHeader,
+                  props: {
+                      id: 'before-header',
+                      ...(beforeHeader.props as object),
+                      dynamic,
+                  },
+              }
+            : beforeHeader
 
-                {!readonly && (
-                    <div className={styles.buttonRow}>
-                        {editing ? (
-                            <>
-                                <button
-                                    onClick={handleSave}
-                                    disabled={!dirty || invalid}
-                                    className={styles.button}
-                                >
-                                    <FaSave /> Save Changes
-                                </button>
-                                <button
-                                    onClick={handleCancel}
-                                    className={cn(
-                                        styles.button,
-                                        styles.discardButton
-                                    )}
-                                >
-                                    <FaTrashAlt /> Discard Changes
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                {onCreate && (
+    return (
+        <>
+            {hydratedBeforeHeader}
+            <form
+                className={cn(styles.form, className)}
+                onSubmit={(e) => e.preventDefault()}
+            >
+                <header className={styles.header}>
+                    <div className={styles.titleSection}>
+                        {avatar && (
+                            <div className={styles.avatar}>{avatar}</div>
+                        )}
+                        <div className={styles.titleContent}>
+                            <h1 className={styles.title}>{title}</h1>
+                            {subtitle && (
+                                <p className={styles.subtitle}>{subtitle}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {!readonly && (
+                        <div className={styles.buttonRow}>
+                            {editing ? (
+                                <>
                                     <button
-                                        onClick={handleCreate}
+                                        onClick={handleSave}
+                                        disabled={!dirty || invalid}
                                         className={styles.button}
                                     >
-                                        <FaPlus /> Create
+                                        <FaSave /> Save Changes
                                     </button>
-                                )}
-                                <button
-                                    onClick={handleEdit}
-                                    className={styles.button}
-                                >
-                                    <FaEdit /> Edit
-                                </button>
-                                {onDelete && (
                                     <button
-                                        onClick={handleDelete}
+                                        onClick={handleCancel}
                                         className={cn(
                                             styles.button,
                                             styles.discardButton
                                         )}
                                     >
-                                        <FaTrashAlt /> Delete
+                                        <FaTrashAlt /> Discard Changes
                                     </button>
-                                )}
-                            </>
-                        )}
-                    </div>
-                )}
-            </header>
+                                </>
+                            ) : (
+                                <>
+                                    {onCreate && showCreateButton && (
+                                        <button
+                                            onClick={handleCreate}
+                                            className={styles.button}
+                                        >
+                                            <FaPlus /> Create
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={handleEdit}
+                                        className={styles.button}
+                                    >
+                                        <FaEdit /> Edit
+                                    </button>
+                                    {onDelete && (
+                                        <button
+                                            onClick={handleDelete}
+                                            className={cn(
+                                                styles.button,
+                                                styles.discardButton
+                                            )}
+                                        >
+                                            <FaTrashAlt /> Delete
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
+                </header>
 
-            {hydratedChildren}
-        </form>
+                {hydratedChildren}
+            </form>
+        </>
     )
 }

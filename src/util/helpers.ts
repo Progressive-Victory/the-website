@@ -1,5 +1,23 @@
 import type { CSSProperties } from 'react'
 
+export function parseErrorMessage(
+    error: unknown,
+    fallback = 'Unknown error'
+): string {
+    if (error instanceof Error) return error.message
+
+    if (
+        typeof error === 'object' &&
+        error !== null &&
+        'message' in error &&
+        typeof error.message === 'string'
+    ) {
+        return error.message
+    }
+
+    return fallback
+}
+
 export function pascalToNormal(str: string): string {
     const pattern = /[a-z](?=[A-Z])/
     const pascalBounds: number[] = []
@@ -53,3 +71,5 @@ export function cn(...classes: unknown[]) {
         .map((className) => String(className))
         .join(' ')
 }
+
+export const DOT_SEPARATOR = '\u00b7'

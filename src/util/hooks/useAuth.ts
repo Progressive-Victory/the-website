@@ -1,5 +1,3 @@
-import { TokenClaims } from '@/contracts/data'
-import { DiscordLoginResponse } from '@/contracts/responses'
 import { ApiError, FetchError } from '@/models'
 import {
     keepPreviousData,
@@ -8,6 +6,8 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { TokenClaims } from 'pv-contracts/data'
+import { DiscordLoginResponse } from 'pv-contracts/responses'
 import { useRef } from 'react'
 
 export function useAuth() {
@@ -86,7 +86,7 @@ export function useAuth() {
 
                   if (res.ok) return (await res.json()) as TokenClaims
 
-                  if (res.status == 404) return null
+                  if (res.status == 404 || res.status == 401) return null
 
                   await onLogout()
 

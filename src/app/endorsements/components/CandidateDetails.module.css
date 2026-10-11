@@ -38,22 +38,6 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.avatarWrap {
-    flex-shrink: 0;
-    border: 3px solid #ffffff;
-    border-radius: 9999px;
-}
-
-.avatarBg {
-    border-radius: 9999px;
-    object-fit: cover;
-}
-
-.avatar {
-    border-radius: 9999px;
-    object-fit: cover;
-}
-
 .quoteBox {
     padding: 1.25rem;
     background: rgba(255, 255, 255, 0.04);

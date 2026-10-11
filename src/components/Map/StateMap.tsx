@@ -162,8 +162,7 @@ function USMapLayer({
                 onEachFeature={onEachFeature}
                 style={(feature) => {
                     const properties = feature?.properties as
-                        | { name: string }
-                        | undefined
+                        { name: string } | undefined
 
                     const baseColor = properties?.name
                         ? baseStateColors?.[properties.name]

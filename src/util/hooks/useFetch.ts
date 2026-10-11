@@ -33,7 +33,7 @@ export function useFetch() {
                 `Invalid fetch! Substitution key :${key} does not exist in params (value ${value})`
             )
 
-        return encodeURIComponent(value)
+        return encodeURIComponent(value).replace(/%40/g, '@')
     }
 
     const addQueryParam = (url: URL, key: string, param: QueryParam) => {
@@ -89,24 +89,57 @@ export function useFetch() {
             req.headers['Content-Type'] = 'application/json'
         }
 
-        let res = await fetch(url, req)
+        const request = async () => {
+            try {
+                return await fetch(url, req)
+            } catch (error) {
+                if (
+                    error instanceof DOMException &&
+                    error.name === 'AbortError'
+                )
+                    throw error
+
+                const reason =
+                    error instanceof Error ? `: ${error.message}` : ''
+                throw new Error(
+                    `Request failed (${method} ${url.pathname})${reason}`,
+                    { cause: error }
+                )
+            }
+        }
+
+        let res = await request()
 
         if (session && res.status === 401) {
             await onRefresh()
-            res = await fetch(url, req)
+            res = await request()
         }
 
         if (session && res.status === 401) {
             await onLogout()
         }
 
+        const text = await res.text()
+
         if (!res.ok) {
-            const error = (await res.json()) as ApiError
+            let error: ApiError = {
+                message: res.statusText || 'An error occurred',
+                error: '',
+            }
+            if (text.trim().length > 0) {
+                try {
+                    error = JSON.parse(text) as ApiError
+                } catch {
+                    error = { message: text, error: '' }
+                }
+            }
             throw new FetchError(error.message, res.status, error.error)
         }
 
         const content =
-            res.status === 204 ? undefined : ((await res.json()) as unknown)
+            res.status === 204 || text.trim().length === 0
+                ? undefined
+                : (JSON.parse(text) as unknown)
 
         const parsed = z.parse(schema ?? z.undefined(), content)
         return parsed as S extends null ? void : z.infer<S>

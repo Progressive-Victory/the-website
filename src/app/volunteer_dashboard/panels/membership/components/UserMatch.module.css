@@ -1,0 +1,85 @@
+.matchSection {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid rgba(17, 24, 39, 0.1);
+}
+
+.matchSectionLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: rgba(15, 23, 42, 0.56);
+    text-transform: uppercase;
+}
+
+.matchEmpty {
+    font-size: 0.8rem;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+.matchContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.matchEntry {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.65rem;
+    color: rgba(15, 23, 42, 0.85);
+    font-size: 0.8rem;
+}
+
+.matchEntryMain {
+    min-width: 0;
+    display: grid;
+    gap: 0.1rem;
+}
+
+.matchEntryName {
+    color: rgba(15, 23, 42, 0.9);
+    font-weight: 600;
+}
+
+.matchEntryDetail {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgba(15, 23, 42, 0.62);
+    font-weight: 500;
+}
+
+.matchButton {
+    margin-left: auto;
+    white-space: nowrap;
+    padding-inline: 0.75rem;
+    padding-block: 0.25rem;
+    border: 0;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(2, 132, 199, 1);
+    background: rgba(14, 165, 233, 0.14);
+    cursor: pointer;
+    transition:
+        background 120ms ease,
+        color 120ms ease;
+
+    &:hover:not(:disabled) {
+        background: #e6e6e6;
+        color: #3d3d3d;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: default;
+    }
+}

@@ -1,11 +1,12 @@
 import { Field, Toggle } from './components'
 import styles from './stages.module.css'
-import { zLocation } from '@/contracts/data'
 import { dateService } from '@/services'
+import { cn } from '@/util'
 import { useFetch, useInit } from '@/util/hooks'
 import Link from 'next/link'
 import phone from 'phone'
 import { Country, isValidCountryPostalCode } from 'postal-code-validator'
+import { zLocation } from 'pv-contracts/data'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export interface IOnboardingForm {
@@ -113,7 +114,8 @@ export function CollectInfoStage({
             <header>
                 <p className={styles.title}>Volunteer with PV</p>
                 <p className={styles.subtitle}>
-                    Join us on Discord and make a difference ✨
+                    Join us on Discord and make a difference{' '}
+                    <span aria-hidden="true">✨</span>
                 </p>
             </header>
             <section className={styles.infoFormSection}>
@@ -148,7 +150,10 @@ export function CollectInfoStage({
                         errorText="Enter a valid date of birth"
                         maxLength={10}
                         onInput={(e) =>
-                            setForm({ ...form, dateOfBirth: e.target.value })
+                            setForm({
+                                ...form,
+                                dateOfBirth: e.currentTarget.value,
+                            })
                         }
                     />
                     <Field
@@ -255,8 +260,10 @@ export function CollectInfoStage({
                 />
             </section>
             <div className={styles.requiredNote}>
-                <span className={styles.requiredIndicator}>*</span> = required
-                field
+                A red asterisk
+                {' ( '}
+                <span className={styles.requiredIndicator}>*</span>
+                {' )'} = required field
             </div>
             <button
                 type="submit"
@@ -264,7 +271,7 @@ export function CollectInfoStage({
                     void handleSubmit()
                 }}
                 disabled={!isValid || isPending}
-                className={styles.iconFormButton}
+                className={cn(styles.button, styles.submit)}
             >
                 Join Now
             </button>

@@ -34,13 +34,10 @@ export function DateField<T>(props: DateFieldProps<T>) {
 
     const format = () => {
         if (!dateService.isValid(value)) return undefined
-        return Intl.DateTimeFormat(
-            'en-US',
-            props.format ?? {
-                dateStyle: 'long',
-                timeStyle: 'medium',
-            }
-        ).format(value!)
+        return Intl.DateTimeFormat('en-US', {
+            timeZone: 'UTC',
+            ...(props.format ?? { dateStyle: 'long', timeStyle: 'medium' }),
+        }).format(value!)
     }
 
     return (

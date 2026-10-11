@@ -21,7 +21,7 @@ export function Field({
     type?: string
     value: string
     onChange?: (e: ChangeEvent<HTMLInputElement>) => void
-    onInput?: (e: ChangeEvent<HTMLInputElement>) => void
+    onInput?: (e: React.InputEvent<HTMLInputElement>) => void
     onBlur?: (e: ChangeEvent<HTMLInputElement>) => void
     label?: string
     placeholder?: string
