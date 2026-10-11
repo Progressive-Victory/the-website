@@ -8,7 +8,11 @@ import { DiscordAvatar } from '@/components/common'
 import { BaseButton } from '@/components/common/buttons/Button'
 import formStyles from '@/components/common/forms/Form.module.css'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import { MembershipDeliverableStatus, User, zActBlueDonor } from '@/contracts/data'
+import {
+    MembershipDeliverableStatus,
+    User,
+    zActBlueDonor,
+} from '@/contracts/data'
 import { zDiscordUserIsInServerResponse } from '@/contracts/responses'
 import { cn } from '@/util'
 import { useFetch } from '@/util/hooks'
@@ -201,6 +205,7 @@ export function AccountDetailsSection({
     }, [donorLinkError])
 
     const handleChangeDonorEmail = (e: ChangeEvent<HTMLInputElement>) => {
+        setLinkFormError(null)
         setDonorLinkForm({
             ...donorLinkForm,
             donorEmail: e.target.value,
@@ -208,6 +213,7 @@ export function AccountDetailsSection({
     }
 
     const handleChangeOrderId = (e: ChangeEvent<HTMLInputElement>) => {
+        setLinkFormError(null)
         setDonorLinkForm({
             ...donorLinkForm,
             orderId: e.target.value,
@@ -270,7 +276,9 @@ export function AccountDetailsSection({
                     styles.linkActBlueFormContainer,
                     styles.detailsLinkForm
                 )}
-                onSubmit={submitLinkForm}
+                onSubmit={(e) => {
+                    void submitLinkForm(e)
+                }}
             >
                 <div
                     className={cn(
@@ -299,9 +307,9 @@ export function AccountDetailsSection({
                         />
                     </label>
                 </div>
-                {(linkFormError || donorLinkError) && (
+                {(linkFormError ?? donorLinkError) && (
                     <span className={styles.linkActBlueFormErrorText}>
-                        {linkFormError || donorLinkError?.message}
+                        {linkFormError ?? donorLinkError?.message}
                     </span>
                 )}
                 <div className={styles.detailsLinkSubmitRow}>

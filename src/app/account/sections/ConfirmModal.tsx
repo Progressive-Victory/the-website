@@ -174,8 +174,9 @@ function AddressConfirmationPage({
                         Confirm your address
                     </p>
                     <p className={styles.detailsLinkFormSubtitle}>
-                        We found a donor match. Please confirm this mailing
-                        address.
+                        We found a donor match. This address came from your
+                        ActBlue contribution and may be out of date. Membership
+                        benefits will be shipped here, so update it if needed.
                     </p>
                 </div>
                 <button
