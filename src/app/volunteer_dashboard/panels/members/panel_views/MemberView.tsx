@@ -24,7 +24,9 @@ const shirtSizeOptions = [
     { value: 'M', label: 'Medium' },
     { value: 'L', label: 'Large' },
     { value: 'XL', label: 'Extra Large' },
-    { value: '2XL', label: 'Double XL' },
+    { value: '2XL', label: '2X Large' },
+    { value: '3XL', label: '3X Large' },
+    { value: '4XL', label: '4X Large' },
 ]
 
 const calcFutureDate = (

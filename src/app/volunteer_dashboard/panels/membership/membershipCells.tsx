@@ -541,12 +541,24 @@ const shirtSizeClass: Record<ShirtSize, string> = {
     [ShirtSize.Small]: tags.tagOrange,
     [ShirtSize.Medium]: tags.tagYellow,
     [ShirtSize.Large]: tags.tagGreen,
-    [ShirtSize.ExtraLarge]: tags.tagBlue,
-    [ShirtSize.DoubleExtraLarge]: tags.tagPurple,
+    [ShirtSize.ExtraLarge]: tags.tagLightBlue,
+    [ShirtSize.DoubleXL]: tags.tagBlue,
+    [ShirtSize.TripleXL]: tags.tagPurple,
+    [ShirtSize.QuadXL]: tags.tagGray,
 }
 
-const shirtSizeLabel = (size: ShirtSize) =>
-    size === ShirtSize.DoubleExtraLarge ? 'XXL' : size
+const shirtSizeLabel = (size: ShirtSize) => {
+    switch (size) {
+        case ShirtSize.DoubleXL:
+            return 'XXL'
+        case ShirtSize.TripleXL:
+            return '3XL'
+        case ShirtSize.QuadXL:
+            return '4XL'
+        default:
+            return size
+    }
+}
 
 export const ShirtSizeValue = ({ member }: MemberValueProps) =>
     member.shirtSize ? (

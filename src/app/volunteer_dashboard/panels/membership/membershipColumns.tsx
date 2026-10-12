@@ -102,12 +102,14 @@ const membershipTierRank: Record<MembershipTier, number> = {
 }
 
 const shirtSizeRank: Record<ShirtSize, number> = {
-    [ShirtSize.DoubleExtraLarge]: 0,
-    [ShirtSize.ExtraLarge]: 1,
-    [ShirtSize.Large]: 2,
-    [ShirtSize.Medium]: 3,
-    [ShirtSize.Small]: 4,
-    [ShirtSize.ExtraSmall]: 5,
+    [ShirtSize.QuadXL]: 0,
+    [ShirtSize.TripleXL]: 1,
+    [ShirtSize.DoubleXL]: 2,
+    [ShirtSize.ExtraLarge]: 3,
+    [ShirtSize.Large]: 4,
+    [ShirtSize.Medium]: 5,
+    [ShirtSize.Small]: 6,
+    [ShirtSize.ExtraSmall]: 7,
 }
 
 const NO_SHIRT_SIZE_RANK = Object.keys(shirtSizeRank).length

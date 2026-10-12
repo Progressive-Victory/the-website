@@ -30,7 +30,9 @@ const shirtSizeOptions = [
     { value: ShirtSize.Medium, label: 'Medium' },
     { value: ShirtSize.Large, label: 'Large' },
     { value: ShirtSize.ExtraLarge, label: 'Extra Large' },
-    { value: ShirtSize.DoubleExtraLarge, label: 'Double XL' },
+    { value: ShirtSize.DoubleXL, label: '2X Large' },
+    { value: ShirtSize.TripleXL, label: '3X Large' },
+    { value: ShirtSize.QuadXL, label: '4X Large' },
 ]
 
 const shirtSizeLabels: Record<ShirtSize, string> = {
@@ -39,7 +41,9 @@ const shirtSizeLabels: Record<ShirtSize, string> = {
     [ShirtSize.Medium]: 'Medium',
     [ShirtSize.Large]: 'Large',
     [ShirtSize.ExtraLarge]: 'Extra Large',
-    [ShirtSize.DoubleExtraLarge]: 'Double XL',
+    [ShirtSize.DoubleXL]: '2X Large',
+    [ShirtSize.TripleXL]: '3X Large',
+    [ShirtSize.QuadXL]: '4X Large',
 }
 
 const missingAddressInfoText = '*Info needed to ship card'
