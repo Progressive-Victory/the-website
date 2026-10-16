@@ -1,10 +1,9 @@
 'use client'
 
 import styles from '@/components/content_sections/ContentSections.module.css'
-import { PlusIcon, MinusIcon } from '@heroicons/react/24/solid'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
-
+import {LuPlus, LuMinus} from 'react-icons/lu'
 export interface DropdownQuestionProps {
     question: string
     answer: string
@@ -45,6 +44,7 @@ export function DropdownQuestion({
         width: '100%',
         height: '100%',
         color: '#09223a',
+        strokeWidth:  1.5,
     }
 
     return (
@@ -58,9 +58,9 @@ export function DropdownQuestion({
 
                 <span style={iconWrapperStyle}>
                     {isOpen ? (
-                        <MinusIcon style={iconStyle} />
+                        <LuMinus style={iconStyle} />
                     ) : (
-                        <PlusIcon style={iconStyle} />
+                        <LuPlus style={iconStyle} />
                     )}
                 </span>
             </div>

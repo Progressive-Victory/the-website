@@ -1,6 +1,7 @@
 import styles from './stages.module.css'
 import { cn } from '@/util'
-import { CakeIcon, TrophyIcon } from '@heroicons/react/24/solid'
+import { HiCake, HiTrophy } from 'react-icons/hi2';
+
 import { redirect } from 'next/navigation'
 
 export interface CompleteStageProps {
@@ -14,7 +15,7 @@ export function CompleteStage({
     isPending,
     onRejoin,
 }: CompleteStageProps) {
-    const Icon = isInServer ? CakeIcon : TrophyIcon
+    const Icon = isInServer ? HiCake : HiTrophy
     const subtitle = isInServer
         ? 'Congrats, you are in the server!'
         : "Looks like you're no longer in the server!"
