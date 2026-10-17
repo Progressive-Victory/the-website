@@ -5,6 +5,7 @@ import {
     AccountDetailsSection,
     ManualDonorLinkRequest,
 } from './sections/index'
+import { AccountLoading } from '@/app/account/AccountLoading'
 import styles from '@/app/account/account.module.css'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
@@ -69,7 +70,7 @@ export function AccountPage() {
         })
     }
 
-    if (isSessionLoading) return null
+    if (isSessionLoading) return <AccountLoading />
 
     if (!session) redirect('/login')
 
