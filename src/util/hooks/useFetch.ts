@@ -18,7 +18,7 @@ interface QueryOptions {
 }
 
 export function useFetch() {
-    const { apiBaseUrl, session, onRefresh, onLogout } = useAuth()
+    const { apiBaseUrl, session, onLogout } = useAuth()
 
     const serializeParam = (param: ParamPrim) => {
         if (param === undefined) return null
@@ -110,13 +110,8 @@ export function useFetch() {
 
         let res = await request()
 
-        if (session && res.status === 401) {
-            await onRefresh()
+        if (res.status === 401 && session) {
             res = await request()
-        }
-
-        if (session && res.status === 401) {
-            await onLogout()
         }
 
         const text = await res.text()
