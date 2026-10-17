@@ -41,6 +41,7 @@ export default defineConfig([
             'react-hooks/preserve-manual-memoization': 'off', //temp
             'react-hooks/refs': 'off', //temp
             'react-hooks/immutability': 'off', //temp
+            complexity: 'error',
         },
     },
     {
