@@ -86,7 +86,7 @@ export function useAuth() {
 
                   if (res.ok) return (await res.json()) as TokenClaims
 
-                  if (res.status == 404) return null
+                  if (res.status == 404 || res.status == 401) return null
 
                   await onLogout()
 
