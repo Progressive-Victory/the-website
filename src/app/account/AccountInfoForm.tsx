@@ -67,12 +67,10 @@ export const AccountInfoForm = ({
             address: {
                 ...user.address,
                 addressLine1:
-                    normalizeText(user.address.addressLine1)?.slice(0, 100) ??
-                    null,
+                    normalizeText(user.address.addressLine1)?.slice(0, 100)
                 addressLine2:
-                    normalizeText(user.address.addressLine2)?.slice(0, 50) ??
-                    null,
-                city: normalizeText(user.address.city)?.slice(0, 50) ?? null,
+                    normalizeText(user.address.addressLine2)?.slice(0, 100)
+                city: normalizeText(user.address.city)?.slice(0, 50),
             },
         }
 
@@ -194,7 +192,7 @@ export const AccountInfoForm = ({
                                 ...user,
                                 address: {
                                     ...user.address,
-                                    addressLine2: field?.slice(0, 50) ?? null,
+                                    addressLine2: field?.slice(0, 100) ?? null,
                                 },
                             })}
                         />
