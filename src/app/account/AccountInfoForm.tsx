@@ -70,7 +70,7 @@ export const AccountInfoForm = ({
                     normalizeText(user.address.addressLine1)?.slice(0, 100) ??
                     null,
                 addressLine2:
-                    normalizeText(user.address.addressLine2)?.slice(0, 50) ??
+                    normalizeText(user.address.addressLine2)?.slice(0, 100) ??
                     null,
                 city: normalizeText(user.address.city)?.slice(0, 50) ?? null,
             },
@@ -194,7 +194,7 @@ export const AccountInfoForm = ({
                                 ...user,
                                 address: {
                                     ...user.address,
-                                    addressLine2: field?.slice(0, 50) ?? null,
+                                    addressLine2: field?.slice(0, 100) ?? null,
                                 },
                             })}
                         />
