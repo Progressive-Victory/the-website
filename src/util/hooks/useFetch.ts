@@ -18,7 +18,7 @@ interface QueryOptions {
 }
 
 export function useFetch() {
-    const { apiBaseUrl, session, onLogout } = useAuth()
+    const { apiBaseUrl, session } = useAuth()
 
     const serializeParam = (param: ParamPrim) => {
         if (param === undefined) return null
