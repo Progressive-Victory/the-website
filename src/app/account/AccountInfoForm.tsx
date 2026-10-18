@@ -67,9 +67,9 @@ export const AccountInfoForm = ({
             address: {
                 ...user.address,
                 addressLine1:
-                    normalizeText(user.address.addressLine1)?.slice(0, 100)
+                    normalizeText(user.address.addressLine1)?.slice(0, 100),
                 addressLine2:
-                    normalizeText(user.address.addressLine2)?.slice(0, 100)
+                    normalizeText(user.address.addressLine2)?.slice(0, 100),
                 city: normalizeText(user.address.city)?.slice(0, 50),
             },
         }
