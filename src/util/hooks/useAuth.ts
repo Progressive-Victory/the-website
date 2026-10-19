@@ -86,12 +86,13 @@ export function useAuth() {
                       })
                   let res = await request()
 
-                  if (res.status == 404) return null
                   if (res.status == 401) {
                       shouldRefresh.current = true
                       await onRefresh()
                       res = await request()
                   }
+                  // this will catch a 404 from the original request or the post-refresh request
+                  if (res.status == 404) return null
 
                   if (res.ok) return (await res.json()) as TokenClaims
 

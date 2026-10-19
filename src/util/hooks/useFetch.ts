@@ -110,6 +110,7 @@ export function useFetch() {
 
         let res = await request()
 
+        // referencing session will trigger an auth refresh
         if (res.status === 401 && session) {
             res = await request()
         }
