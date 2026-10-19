@@ -4,6 +4,7 @@ import { NavItem } from '../types'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import styles from '@/components/layout/header.module.css'
+import { cn } from '@/util'
 
 interface DesktopNavItemProps {
     item: NavItem
@@ -19,13 +20,11 @@ function DesktopNavItem({
     onOpenSubnav,
 }: DesktopNavItemProps) {
     const hasChildren = !!item.subnav?.columns?.length
-    const wrapperClassName = [
+    const wrapperClassName = cn([
         styles.desktopNavItemWrapper,
         isActive ? styles.navItemActive : '',
         shouldDim ? styles.navItemDimmed : '',
-    ]
-        .filter(Boolean)
-        .join(' ')
+    ])
 
     return (
         <div
