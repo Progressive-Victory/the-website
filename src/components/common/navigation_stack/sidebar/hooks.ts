@@ -31,13 +31,7 @@ export function useSelectionIndicator(
     const indicatorLayoutSyncTimeoutRef = useRef<TimeoutHandle | null>(null)
 
     useEffect(() => {
-        if (!enabled) {
-            setIndicatorLayoutSyncing(false)
-            setIndicatorStyle((previous) =>
-                previous.visible ? { ...previous, visible: false } : previous
-            )
-            return
-        }
+        if (!enabled) return
 
         let frameId: number | null = null
 
@@ -158,8 +152,10 @@ export function useSelectionIndicator(
 
     return {
         bodyRef,
-        indicatorLayoutSyncing,
-        indicatorStyle,
+        indicatorLayoutSyncing : enabled && indicatorLayoutSyncing,
+        indicatorStyle: enabled
+            ? indicatorStyle
+            : {...indicatorStyle, visible: false },
     }
 }
 
@@ -194,10 +190,7 @@ export function useLargeTitleScroll(
     const [collapsed, setCollapsed] = useState(false)
 
     useEffect(() => {
-        if (!enabled) {
-            setCollapsed(false)
-            return
-        }
+        if (!enabled) return
 
         const scrollElement = scrollRef.current
         if (!scrollElement) return
@@ -238,7 +231,7 @@ export function useLargeTitleScroll(
         }
     }, [enabled, scrollRef, titleRef])
 
-    return collapsed
+    return enabled && collapsed
 }
 
 export function usePinnedSectionStuck(
@@ -248,10 +241,7 @@ export function usePinnedSectionStuck(
     const [stuck, setStuck] = useState(false)
 
     useEffect(() => {
-        if (!enabled) {
-            setStuck(false)
-            return
-        }
+        if (!enabled) return
 
         const scrollElement = scrollRef.current
         if (!scrollElement) return
@@ -294,7 +284,7 @@ export function usePinnedSectionStuck(
         }
     }, [enabled, scrollRef])
 
-    return stuck
+    return enabled && stuck
 }
 
 function getSidebarInlineStyle(

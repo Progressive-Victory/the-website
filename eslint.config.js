@@ -37,10 +37,10 @@ export default defineConfig([
             '@typescript-eslint/no-unsafe-enum-comparison': 'off',
             '@typescript-eslint/no-unsafe-call': 'warn',
             '@typescript-eslint/no-unsafe-return': 'warn',
-            'react-hooks/set-state-in-effect': 'off', //temp
-            'react-hooks/preserve-manual-memoization': 'off', //temp
-            'react-hooks/refs': 'off', //temp
-            'react-hooks/immutability': 'off', //temp
+            // 'react-hooks/set-state-in-effect': 'off', //temp
+            // 'react-hooks/preserve-manual-memoization': 'off', //temp
+            // 'react-hooks/refs': 'off', //temp
+            // 'react-hooks/immutability': 'off', //temp
         },
     },
     {

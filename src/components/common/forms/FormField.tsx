@@ -145,6 +145,38 @@ export interface DynamicFormFieldProps<FormType, FieldType = unknown> {
     ) => void
 }
 
+function createGetter<FormType, FieldType>(
+    getter: ((form: FormType) => FieldType) | undefined,
+    field: string | undefined
+) {
+    if (getter) return getter
+
+    if (field) {
+        return (form: FormType) =>
+            (form as Record<string, FieldType>)[field]
+    }
+
+    return () => undefined
+}
+
+function createSetter<FormType, FieldType>(
+    setter:
+        | ((form: FormType, field: FieldType) => FormType)
+        | undefined,
+    field: string | undefined
+) {
+    if (setter) return setter
+
+    if (field) {
+        return (form: FormType, value: FieldType) => ({
+            ...form,
+            [field]: value,
+        })
+    }
+
+    return (form: FormType) => form
+}
+
 /**
  * Hook for initializing a form field. Pass in your props and a default
  * validator, and it'll compute the actual getter, setter, validator,
@@ -165,34 +197,15 @@ export function useConfigure<FormType, FieldType>(
     const id = props.id
     const onConfigure = props.dynamic?.onConfigure
 
-    // Use the provided getter if available, or default to `form[props.field]`.
-    // If no field is provided either, be sad and return undefined.
-    const getter = useMemo(() => {
-        const getter = props.getter
-        if (getter) return getter
+    const getter = useMemo(
+        () => createGetter(props.getter, props.field),
+        [props.getter, props.field]
+    )
 
-        const key = props.field
-        if (key)
-            return (form: FormType) => (form as Record<string, FieldType>)[key]
-
-        return () => undefined
-    }, [props.getter, props.field])
-
-    // Use the provided setter if available, or default to `form[props.field]`.
-    // If no field is provided either, be sad and return undefined.
-    const setter = useMemo(() => {
-        const setter = props.setter
-        if (setter) return setter
-
-        const key = props.field
-        if (key)
-            return (form: FormType, field: FieldType) => ({
-                ...form,
-                [key]: field,
-            })
-
-        return (form: FormType) => form
-    }, [props.setter, props.field])
+    const setter = useMemo(
+        () => createSetter(props.setter, props.field),
+        [props.setter, props.field]
+    )
 
     // Use the provided validator if available, or default to the, well,
     // default one. We can't be sad here because it can't be undefined.

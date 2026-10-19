@@ -26,7 +26,6 @@ export function useCollapse(options: UseCollapseOptions = {}) {
 
     useLayoutEffect(() => {
         if (!shouldRender) {
-            setContentHeight(0)
             return
         }
 

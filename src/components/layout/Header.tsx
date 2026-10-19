@@ -676,7 +676,10 @@ export function Header() {
         if (!isOpen) return
 
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setIsOpen(false)
+            if (e.key === 'Escape') {
+                setMobileSubnavItem(null)
+                setIsOpen(false)
+            }
         }
 
         document.addEventListener('keydown', onKeyDown)
@@ -696,10 +699,6 @@ export function Header() {
         document.addEventListener('keydown', onKeyDown)
         return () => document.removeEventListener('keydown', onKeyDown)
     }, [])
-
-    useEffect(() => {
-        if (!isOpen) setMobileSubnavItem(null)
-    }, [isOpen])
 
     useEffect(() => {
         if (typeof window === 'undefined') return
@@ -901,6 +900,7 @@ export function Header() {
                         className={styles.headerMenuButton}
                         onClick={() => {
                             closeSubnav()
+                            if (isOpen) setMobileSubnavItem(null)
                             setIsOpen((prev) => !prev)
                         }}
                         initial={false}
@@ -983,7 +983,10 @@ export function Header() {
                             WebkitBackdropFilter: 'blur(10px)',
                             backgroundColor: 'rgba(0, 0, 0, 0.18)',
                         }}
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => {
+                            setMobileSubnavItem(null)
+                            setIsOpen(false)
+                        }}
                     />
                 )}
             </AnimatePresence>

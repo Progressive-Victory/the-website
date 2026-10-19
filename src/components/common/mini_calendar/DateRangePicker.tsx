@@ -10,7 +10,7 @@ import {
     startOfDayISO,
 } from './dateRange.helpers'
 import { useDateRangeSelectionController } from './useDateRangeSelectionController'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 interface DateRangePickerProps {
     startDate: Date | null
@@ -40,12 +40,20 @@ export function DateRangePicker({
         return new Date(anchor.getFullYear(), anchor.getMonth(), 1)
     })
 
-    useEffect(() => {
-        if (!startDate) return
-        const anchor = new Date(startDate)
-        if (Number.isNaN(anchor.getTime())) return
-        setCalendarMonth(new Date(anchor.getFullYear(), anchor.getMonth(), 1))
-    }, [startDate])
+    const [previousStartDate, setPreviousStartDate] = useState(startDate)
+
+    if (startDate !== previousStartDate) {
+        setPreviousStartDate(startDate)
+
+        if (startDate) {
+            const anchor = new Date(startDate)
+            if (!Number.isNaN(anchor.getTime())) {
+                setCalendarMonth(
+                    new Date(anchor.getFullYear(), anchor.getMonth(), 1)
+                )
+            }
+        }
+    }
 
     const todayInputValue = useMemo(
         () => isoToDateInput(new Date().toISOString()),

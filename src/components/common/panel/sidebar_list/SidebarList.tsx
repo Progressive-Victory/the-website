@@ -259,7 +259,8 @@ export function SidebarListFooter({
     isPending = false,
     onPageChange,
 }: SidebarListFooterProps) {
-    const [value, setValue] = useState('')
+    const [value, setValue] = useState(() => (page + 1).toString())
+    const [previousPage, setPreviousPage] = useState(page)
 
     const totalCount = count ?? 0
     const pageCount = Math.ceil(totalCount / pageSize)
@@ -281,9 +282,10 @@ export function SidebarListFooter({
         }
     }
 
-    useEffect(() => {
+    if (page !== previousPage) {
+        setPreviousPage(page)
         setValue((page + 1).toString())
-    }, [page])
+    }
 
     useEffect(() => {
         if (page < 0) onPageChange(0)

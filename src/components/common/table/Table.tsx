@@ -483,10 +483,6 @@ export function Table<T>({
     const handledScrollToken = useRef<number | undefined>(undefined)
 
     useEffect(() => {
-        if (editing) setOpenCell(null)
-    }, [editing])
-
-    useEffect(() => {
         if (!openCell) return
 
         const onDocumentMouseDown = (event: MouseEvent) => {
@@ -959,7 +955,7 @@ export function Table<T>({
                         editing={editing}
                         zebra={zebra}
                         openColKey={
-                            openCell?.startsWith(openPrefix)
+                            !editing && openCell?.startsWith(openPrefix)
                                 ? openCell.slice(openPrefix.length)
                                 : null
                         }
