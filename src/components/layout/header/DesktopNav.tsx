@@ -43,11 +43,11 @@ function DesktopNavItem({
                 className={isActive ? buttonStyles.activeNavItem : undefined}
             />
 
-            {hasChildren ? (
+            {hasChildren && (
                 <span className={styles.srOnly}>
                     {isActive ? 'Submenu expanded' : 'Has submenu'}
                 </span>
-            ) : null}
+            )}
         </div>
     )
 }
@@ -64,16 +64,15 @@ export function DesktopNav({
     onOpenSubnav,
 }: DesktopNavProps) {
     return (
-        <nav
-            className={styles.headerCenterNav}
-            aria-label="Primary navigation"
-        >
+        <nav className={styles.headerCenterNav} aria-label="Primary navigation">
             {navitems.map((item) => (
                 <DesktopNavItem
                     key={item.name}
                     item={item}
                     isActive={activeSubnav?.name === item.name}
-                    shouldDim={!!activeSubnav && activeSubnav.name !== item.name}
+                    shouldDim={
+                        !!activeSubnav && activeSubnav.name !== item.name
+                    }
                     onOpenSubnav={onOpenSubnav}
                 />
             ))}

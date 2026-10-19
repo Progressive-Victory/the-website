@@ -17,13 +17,7 @@ export function MobileMenuControls({
     onToggle,
 }: MobileMenuControlsProps) {
     return (
-        <div
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-            }}
-        >
+        <div className={styles.mobileMenuControls}>
             <DonateButton
                 label="Donate"
                 className={cn(

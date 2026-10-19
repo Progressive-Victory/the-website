@@ -39,7 +39,7 @@ export function DesktopSubnav({
     return (
         <>
             <AnimatePresence>
-                {isOpen ? (
+                {isOpen && (
                     <motion.div
                         key="desktop-subnav-backdrop"
                         className={styles.desktopSubnavBackdrop}
@@ -54,7 +54,7 @@ export function DesktopSubnav({
                             onClose()
                         }}
                     />
-                ) : null}
+                )}
             </AnimatePresence>
 
             <AnimatePresence>

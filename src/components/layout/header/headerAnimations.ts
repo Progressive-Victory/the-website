@@ -1,5 +1,3 @@
-import type React from 'react'
-
 export const PANEL_TRANSITION = {
     type: 'tween',
     duration: 0.18,
@@ -12,15 +10,6 @@ export const menuButtonVariants = {
     hover: { scale: 1.07, color: '#CE3728' },
     tap: { scale: 0.94 },
 } as const
-
-export const hamburgerLineBaseStyle: React.CSSProperties = {
-    position: 'absolute',
-    width: '1.75rem',
-    height: '0.18rem',
-    borderRadius: '999px',
-    background: 'currentColor',
-    transformOrigin: 'center',
-}
 
 export const hamburgerLineVariantsTop = {
     closed: { y: -7, rotate: 0, opacity: 1 },

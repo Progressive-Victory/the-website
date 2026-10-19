@@ -1,15 +1,15 @@
 'use client'
 
-import styles from '@/components/layout/header.module.css'
-import { AnimatePresence, motion } from 'motion/react'
-import Image from 'next/image'
-import NextLink from 'next/link'
 import { AuthActions } from './header/AuthActions'
 import { DesktopNav } from './header/DesktopNav'
 import { DesktopSubnav } from './header/DesktopSubnav'
 import { MobileMenuControls } from './header/MobileMenuControls'
 import { NavDrawer } from './header/NavDrawer'
 import { useHeaderNav } from './header/useHeaderNav'
+import styles from '@/components/layout/header.module.css'
+import { AnimatePresence, motion } from 'motion/react'
+import Image from 'next/image'
+import NextLink from 'next/link'
 
 /**
  * A navigation header for the Progressive Victory website.
@@ -115,7 +115,7 @@ export function Header() {
             </header>
 
             <AnimatePresence>
-                {isOpen ? (
+                {isOpen && (
                     <motion.div
                         key="nav-backdrop"
                         aria-hidden="true"
@@ -133,7 +133,7 @@ export function Header() {
                         }}
                         onClick={closeMenu}
                     />
-                ) : null}
+                )}
             </AnimatePresence>
 
             <NavDrawer

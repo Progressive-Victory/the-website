@@ -1,12 +1,12 @@
 'use client'
 
 import { NavItem } from '../types'
+import { navitems } from './navItems'
 import { useAuth, useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
 import { TokenClaims, zDiscordUser } from 'pv-contracts/data'
 import { useEffect, useMemo, useState } from 'react'
 import z from 'zod'
-import { navitems } from './navItems'
 
 type DiscordUser = z.infer<typeof zDiscordUser>
 
@@ -25,6 +25,30 @@ export interface HeaderNavState {
     toggleMenu: () => void
     closeMenu: () => void
     isSubnavOpen: boolean
+}
+
+function memberNavMapper(
+    item: NavItem,
+    child: NavItem,
+    volunteerHref: string,
+    discordId: string | undefined
+): NavItem {
+    if (item.name === 'Volunteer') {
+        return {
+            ...child,
+            href: volunteerHref,
+        }
+    }
+
+    if (child.href.startsWith('https://secure.actblue.com/donate/pvmember')) {
+        return {
+            ...child,
+            href: discordId
+                ? `${child.href}&refcode2=${discordId}`
+                : child.href,
+        }
+    }
+    return child
 }
 
 export function useHeaderNav(): HeaderNavState {
@@ -64,28 +88,14 @@ export function useHeaderNav(): HeaderNavState {
                     ...item.subnav,
                     columns: item.subnav.columns.map((col) => ({
                         ...col,
-                        items: col.items.map((child) => {
-                            if (item.name === 'Volunteer') {
-                                return {
-                                    ...child,
-                                    href: volunteerHref,
-                                }
-                            }
-
-                            if (
-                                child.href.startsWith(
-                                    'https://secure.actblue.com/donate/pvmember'
-                                )
-                            ) {
-                                return {
-                                    ...child,
-                                    href: discordId
-                                        ? `${child.href}&refcode2=${discordId}`
-                                        : child.href,
-                                }
-                            }
-                            return child
-                        }),
+                        items: col.items.map((child) =>
+                            memberNavMapper(
+                                item,
+                                child,
+                                volunteerHref,
+                                discordId
+                            )
+                        ),
                     })),
                 },
             }

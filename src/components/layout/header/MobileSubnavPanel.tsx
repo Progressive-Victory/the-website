@@ -32,31 +32,10 @@ function MobileBackButton({ onClick }: { onClick: () => void }) {
 
 function MobileSubnavColumn({ column }: { column: SubnavColumn }) {
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                rowGap: '0.5rem',
-            }}
-        >
-            <div
-                style={{
-                    padding: '0 10px',
-                    fontWeight: 600,
-                    letterSpacing: '0.02em',
-                    color: 'rgba(255,255,255,0.82)',
-                }}
-            >
-                {column.title}
-            </div>
+        <div className={styles.mobileSubnavColumn}>
+            <div className={styles.mobileSubnavColumnTitle}>{column.title}</div>
 
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    rowGap: '0.75rem',
-                }}
-            >
+            <div className={styles.mobileSubnavColumnItems}>
                 {column.items.map((child) => (
                     <motion.div
                         key={child.name}
@@ -92,13 +71,7 @@ export function MobileSubnavPanel({ item, onBack }: MobileSubnavPanelProps) {
             exit={{ x: '8%', opacity: 0 }}
             transition={PANEL_TRANSITION}
         >
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    rowGap: '1rem',
-                }}
-            >
+            <div className={styles.mobileSubPanel}>
                 <div className={styles.mobileSubnavTopBar}>
                     <MobileBackButton onClick={onBack} />
                     <div className={styles.mobileSubnavTitle}>{item.name}</div>

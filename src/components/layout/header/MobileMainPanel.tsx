@@ -1,13 +1,13 @@
 'use client'
 
 import { NavItem } from '../types'
+import { AuthActions } from './AuthActions'
+import { MobileNavItem } from './MobileNavItem'
+import { PANEL_TRANSITION, itemVariants } from './headerAnimations'
 import { DonateButton } from '@/components/common/buttons/button_types/DonateButton'
 import styles from '@/components/layout/header.module.css'
 import { motion } from 'motion/react'
 import { TokenClaims } from 'pv-contracts/data'
-import { AuthActions } from './AuthActions'
-import { PANEL_TRANSITION, itemVariants } from './headerAnimations'
-import { MobileNavItem } from './MobileNavItem'
 
 interface MobileMainPanelProps {
     navitems: NavItem[]
@@ -37,13 +37,7 @@ export function MobileMainPanel({
             exit={{ x: '-8%', opacity: 0 }}
             transition={PANEL_TRANSITION}
         >
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    rowGap: '1rem',
-                }}
-            >
+            <div className={styles.mobileSubPanel}>
                 {navitems.map((item) => (
                     <MobileNavItem
                         key={item.name}

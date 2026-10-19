@@ -43,16 +43,8 @@ export function NavDrawer({
                     exit={{ y: '-100%' }}
                     transition={drawerTransition}
                     className={styles.navDrawer}
-                    style={{
-                        position: 'fixed',
-                        zIndex: 50,
-                        paddingTop: '32px',
-                        backgroundColor: 'rgba(9, 34, 58, 0.88)',
-                        borderBottom: '1px solid rgba(255,255,255,0.10)',
-                        overflow: 'hidden',
-                    }}
                 >
-                    <div style={{ position: 'relative' }}>
+                    <div className={styles.navDrawerInner}>
                         <AnimatePresence mode="wait" initial={false}>
                             {mobileSubnavItem ? (
                                 <MobileSubnavPanel
