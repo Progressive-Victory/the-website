@@ -238,7 +238,7 @@ export default function Page() {
     }
 
     const formControls = useRef<FormControls>(null)
-  
+
     return (
         <Panel
             includeSidebar

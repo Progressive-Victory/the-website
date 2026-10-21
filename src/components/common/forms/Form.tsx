@@ -340,7 +340,7 @@ export function Form<T>({
     // defined components will be hydrated, but note that this includes
     // non-form-specific components.
     const hydratedChildren = React.Children.map(children, hydrateChild)!.flat()
-    
+
     const hydratedBeforeHeader =
         beforeHeader && React.isValidElement(beforeHeader)
             ? {
