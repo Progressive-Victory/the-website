@@ -88,7 +88,7 @@ export function useAuth() {
 
                   if (res.status == 401) {
                       shouldRefresh.current = true
-                      await refreshQuery.refetch()
+                      await refreshQuery.refetch({ cancelRefetch: false })
                       res = await request()
                   }
                   // this will catch a 404 from the original request or the post-refresh request
@@ -108,7 +108,7 @@ export function useAuth() {
 
     const session = sessionQuery.data ?? null
 
-    const refetchSession = sessionQuery.refetch
+    const refetchSession = () => sessionQuery.refetch({ cancelRefetch: false })
 
     const refreshQuery = useQuery({
         queryKey: ['/auth/refresh'],
@@ -127,13 +127,7 @@ export function useAuth() {
                       }
                   )
 
-                  if (res.ok) {
-                      await queryClient.invalidateQueries({
-                          queryKey: ['/auth'],
-                      })
-                      return true
-                  }
-                  return false
+                  return res.ok
               }
             : skipToken,
         refetchInterval: 5 * 60 * 1000,
