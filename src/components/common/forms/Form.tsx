@@ -306,40 +306,47 @@ export function Form<T>({
         onConfigure: handleConfigure,
     }
 
-    // Hydrates an individual child element by populating its
-    // default id and dynamic data from the parent form element.
-    // Returns an array of React.ReactNode[].
-    const hydrateChild = (
-        child: React.ReactNode,
-        i: number
-    ): React.ReactNode[] => {
-        // If the node is a non-element or a builtin, change nothing.
-        if (!React.isValidElement(child) || typeof child.type == 'string')
-            return [child]
-        // If the node is a React fragment (<></>), recurse on its children.
-        else if (child.type === React.Fragment) {
-            const fragmentChildren = ((child.props as React.FragmentProps)
-                .children ?? []) as React.ReactNode[]
-            return fragmentChildren.flatMap(hydrateChild)
-        }
+    // Generates a function to hydrate a child element with props.
+    // Accepts an id prefix to ensure that nested elements still have
+    // unique id fields.
+    const hydrateChild =
+        (prefix = '') =>
+        // Hydrates an individual child element by populating its
+        // default id and dynamic data from the parent form element.
+        // Returns an array of React.ReactNode[].
+        (child: React.ReactNode, i: number): React.ReactNode[] => {
+            // If the node is a non-element or a builtin, change nothing.
+            if (!React.isValidElement(child) || typeof child.type == 'string')
+                return [child]
+            // If the node is a React fragment (<></>), recurse on its children.
+            else if (child.type === React.Fragment) {
+                const fragmentChildren = ((child.props as React.FragmentProps)
+                    .children ?? []) as React.ReactNode[]
+                return fragmentChildren.flatMap(
+                    hydrateChild(`${i.toString()}-`)
+                )
+            }
 
-        // Otherwise, default `id` if it's undefined, and override `dynamic`.
-        return [
-            {
-                ...child,
-                props: {
-                    id: i.toString(),
-                    ...(child.props as object),
-                    dynamic,
+            // Otherwise, default `id` if it's undefined, and override `dynamic`.
+            return [
+                {
+                    ...child,
+                    props: {
+                        id: `${prefix}${i.toString()}`,
+                        ...(child.props as object),
+                        dynamic,
+                    },
                 },
-            },
-        ]
-    }
+            ]
+        }
 
     // Populate default id and dynamic data into the children. Only user-
     // defined components will be hydrated, but note that this includes
     // non-form-specific components.
-    const hydratedChildren = React.Children.map(children, hydrateChild)!.flat()
+    const hydratedChildren = React.Children.map(
+        children,
+        hydrateChild()
+    )!.flat()
 
     const hydratedBeforeHeader =
         beforeHeader && React.isValidElement(beforeHeader)
