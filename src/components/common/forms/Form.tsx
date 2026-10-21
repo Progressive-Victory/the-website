@@ -267,6 +267,13 @@ export function Form<T>({
         []
     )
 
+    const renderCreateButton = (className?: string) =>
+        onCreate && showCreateButton ? (
+            <button onClick={handleCreate} className={className}>
+                <FaPlus /> Create
+            </button>
+        ) : null
+
     // If anything changes, inform the parent component of the new state
     useEffect(() => {
         if (onUpdate && form != null) onUpdate({ form, mode, dirty, invalid })
@@ -279,15 +286,7 @@ export function Form<T>({
                 <HStack grow>
                     <VStack grow gap>
                         <Spacer />
-                        <span>{`No ${title} selected`}</span>
-                        {onCreate && showCreateButton && (
-                            <button
-                                onClick={handleCreate}
-                                className={cn(styles.button)}
-                            >
-                                <FaPlus /> Create
-                            </button>
-                        )}
+                        {renderCreateButton(styles.button)}
                         <Spacer />
                     </VStack>
                 </HStack>
