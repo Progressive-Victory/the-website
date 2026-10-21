@@ -305,27 +305,35 @@ export function Form<T>({
         onChange: handleChange,
         onConfigure: handleConfigure,
     }
-    
+
     // Hydrates an individual child element by populating its
     // default id and dynamic data from the parent form element.
-    // Returns a child element or an array of child elements.
-    const hydrateChild = (child, i) => {
+    // Returns an array of React.ReactNode[].
+    const hydrateChild = (
+        child: React.ReactNode,
+        i: number
+    ): React.ReactNode[] => {
         // If the node is a non-element or a builtin, change nothing.
         if (!React.isValidElement(child) || typeof child.type == 'string')
-            return child
+            return [child]
         // If the node is a React fragment (<></>), recurse on its children.
-        else if (child.type === React.Fragment && child.props.children)
-            return child.props.children.flatMap(hydrateChild)
-        
-        // Otherwise, default `id` if it's undefined, and override `dynamic`.
-        return {
-            ...child,
-            props: {
-                id: i.toString(),
-                ...(child.props as object),
-                dynamic,
-            },
+        else if (child.type === React.Fragment) {
+            const fragmentChildren = ((child.props as React.FragmentProps)
+                .children ?? []) as React.ReactNode[]
+            return fragmentChildren.flatMap(hydrateChild)
         }
+
+        // Otherwise, default `id` if it's undefined, and override `dynamic`.
+        return [
+            {
+                ...child,
+                props: {
+                    id: i.toString(),
+                    ...(child.props as object),
+                    dynamic,
+                },
+            },
+        ]
     }
 
     // Populate default id and dynamic data into the children. Only user-
