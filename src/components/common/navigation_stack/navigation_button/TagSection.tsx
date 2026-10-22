@@ -13,6 +13,7 @@ export interface TagProps {
 export interface TagSectionProps {
     buttonType: NavigationButtonType
     tag?: TagProps
+    renderTag?: React.ReactNode
     isAccountButton: boolean
     isCardButton: boolean
     hasActiveGroupChild: boolean
@@ -23,6 +24,7 @@ export interface TagSectionProps {
 export function TagSection({
     buttonType,
     tag,
+    renderTag,
     isAccountButton,
     isCardButton,
     hasActiveGroupChild,
@@ -36,12 +38,14 @@ export function TagSection({
         <span
             className={cn(
                 styles.tagSection,
+                renderTag && styles.rendered,
                 label && styles.tagSectionWithLabel,
                 isAccountButton && styles.accountTagSection,
                 isCardButton && styles.cardTagSection,
                 className
             )}
         >
+            {renderTag}
             {buttonType === 'group' ? (
                 <span
                     aria-hidden="true"

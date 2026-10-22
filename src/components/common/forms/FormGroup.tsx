@@ -1,7 +1,7 @@
 import { DynamicFormFieldProps } from './FormField'
 import styles from './FormGroup.module.css'
 import { CollapsibleSection } from '@/components/common'
-import React from 'react'
+import React, { ReactNode } from 'react'
 
 /** Properties for the FormGroup component. */
 export interface FormGroupProps<T> {
@@ -13,8 +13,8 @@ export interface FormGroupProps<T> {
      */
     id?: string
 
-    /** The group's title, displayed as a heading above the fields. */
-    title: string
+    /** The group's title, displayed as a heading (or custom component) above the fields. */
+    title: string | ReactNode
 
     /** Optional subtitle displayed under the group's title. */
     subtitle?: string
@@ -25,7 +25,7 @@ export interface FormGroupProps<T> {
     /**Whether the group is meant to wrap other form groups or not */
     wrapper?: boolean
 
-    /**Wheter the group is a sub group of a bigger */
+    /**Whether the group is a sub group of a bigger group */
     subGroup?: boolean
 
     /**
