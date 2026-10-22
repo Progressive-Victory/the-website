@@ -40,7 +40,7 @@ export default defineConfig([
             'react-hooks/set-state-in-effect': 'off', //temp
             'react-hooks/preserve-manual-memoization': 'off', //temp
             'react-hooks/refs': 'off', //temp
-            'react-hooks/immutability': 'off', //temp
+            // 'react-hooks/immutability': 'off', //temp
         },
     },
     {
