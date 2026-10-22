@@ -270,7 +270,7 @@ export default function Page() {
                         tagCount:
                             position.type === PositionTypes.GROUP
                                 ? undefined
-                                : position.seats,
+                                : (position.seats ?? undefined),
                         buttonType:
                             position.type === PositionTypes.GROUP
                                 ? 'group'
