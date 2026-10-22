@@ -209,7 +209,7 @@ export function DropdownOverlayButton({
         }
     }
 
-    return (
+    const renderComponent = () => (
         <div
             ref={containerRef}
             className={styles.container}
@@ -279,4 +279,6 @@ export function DropdownOverlayButton({
                 )}
         </div>
     )
+
+    return renderComponent()
 }
