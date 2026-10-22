@@ -332,25 +332,21 @@ export default function Page() {
                     </FormGroup>
                     {formState?.mode !== 'create' && selectedPosition && (
                         <>
-                            {
-                                // Only display "People" if there are that may be filled.
-                                seats > 0 && (
-                                    <FormGroup title="People">
-                                        <OccupantsField
-                                            label="People"
-                                            field="userIds"
-                                            allUsers={
-                                                positionHierarchy.data?.users ??
-                                                []
-                                            }
-                                            userSearchQuery={userSearchQuery}
-                                            userSearch={userSearch}
-                                            onUserSearch={onUserSearch}
-                                            editing={formState?.mode === 'edit'}
-                                        />
-                                    </FormGroup>
-                                )
-                            }
+                            {seats > 0 && (
+                                <FormGroup title="People">
+                                    <OccupantsField
+                                        label="People"
+                                        field="userIds"
+                                        allUsers={
+                                            positionHierarchy.data?.users ?? []
+                                        }
+                                        userSearchQuery={userSearchQuery}
+                                        userSearch={userSearch}
+                                        onUserSearch={onUserSearch}
+                                        editing={formState?.mode === 'edit'}
+                                    />
+                                </FormGroup>
+                            )}
                             <FormGroup title="Subordinates">
                                 <SubordinatesField
                                     label="Subordinates"
