@@ -2,8 +2,8 @@
 
 import styles from './page.module.css'
 import { useCurrentUser } from '@/util/hooks'
-import { ArrowPathIcon } from '@heroicons/react/24/outline'
 import { useParams, useSearchParams } from 'next/navigation'
+import { FaArrowsRotate } from 'react-icons/fa6'
 
 export default function Page() {
     const routeParams = useParams()
@@ -35,7 +35,7 @@ export default function Page() {
     return (
         <div className={styles.page}>
             <div className={styles.content}>
-                <ArrowPathIcon className={styles.spinner} />
+                <FaArrowsRotate className={styles.spinner} />
                 <p className={styles.text}>Redirecting...</p>
             </div>
         </div>
