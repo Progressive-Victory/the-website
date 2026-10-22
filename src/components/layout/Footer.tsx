@@ -93,6 +93,8 @@ function MobileFooter() {
                         <SocialIcon
                             key={social}
                             url={social}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             fgColor="white"
                             className={styles.mobileSocialIconFixed}
                         />
@@ -109,6 +111,8 @@ function MobileFooter() {
                         <SocialIcon
                             key={social}
                             url={social}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             fgColor="white"
                             className={styles.mobileSocialIconAuto}
                         />
@@ -225,6 +229,8 @@ function DesktopFooter() {
                                 <SocialIcon
                                     key={social}
                                     url={social}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     fgColor="white"
                                     className={styles.socialIcons}
                                 />
