@@ -20,6 +20,7 @@ export interface SubTagProps {
 
 export interface NavigationButtonProps {
     label: string
+    labelPill?: string
     subtitle?: string
     tag?: TagProps
     subTags?: SubTagProps[]
@@ -45,6 +46,7 @@ export interface NavigationButtonProps {
 
 export function NavigationButton({
     label,
+    labelPill,
     subtitle,
     tag,
     subTags,
@@ -147,6 +149,11 @@ export function NavigationButton({
                                 )}
                             >
                                 {subtitle}
+                            </span>
+                        )}
+                        {labelPill && (
+                            <span className={styles.labelPill}>
+                                {labelPill}
                             </span>
                         )}
                     </span>

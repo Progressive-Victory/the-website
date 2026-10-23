@@ -263,6 +263,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                                             ? `@${discordUser.username}`
                                             : undefined
                                     }
+                                    labelPill="She/Her"
                                 />
                             }
                         >
