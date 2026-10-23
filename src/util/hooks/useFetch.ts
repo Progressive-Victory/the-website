@@ -18,7 +18,7 @@ interface QueryOptions {
 }
 
 export function useFetch() {
-    const { apiBaseUrl, refetchSession } = useAuth()
+    const { apiBaseUrl, onRefreshSession } = useAuth()
 
     const serializeParam = (param: ParamPrim) => {
         if (param === undefined) return null
@@ -110,7 +110,7 @@ export function useFetch() {
 
         let res = await request()
 
-        if (res.status === 401 && (await refetchSession())) {
+        if (res.status === 401 && (await onRefreshSession())) {
             res = await request()
         }
 

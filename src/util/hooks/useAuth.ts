@@ -108,7 +108,8 @@ export function useAuth() {
 
     const session = sessionQuery.data ?? null
 
-    const refetchSession = () => sessionQuery.refetch({ cancelRefetch: false })
+    const onRefreshSession = () =>
+        sessionQuery.refetch({ cancelRefetch: false })
 
     const refreshQuery = useQuery({
         queryKey: ['/auth/refresh'],
@@ -140,7 +141,7 @@ export function useAuth() {
         apiBaseUrl,
         isSessionLoading,
         session,
-        refetchSession,
+        onRefreshSession,
         onLogin,
         onLogout,
     }
