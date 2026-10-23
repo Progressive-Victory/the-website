@@ -330,37 +330,37 @@ export default function Page() {
                         />
                         <NumberField label="Seats" field="seats" required />
                     </FormGroup>
-                    {formState?.mode !== 'create' &&
-                        selectedPosition &&
-                        seats > 0 && (
-                            <FormGroup title="People">
-                                <OccupantsField
-                                    label="People"
-                                    field="userIds"
-                                    allUsers={
-                                        positionHierarchy.data?.users ?? []
+                    {formState?.mode !== 'create' && selectedPosition && (
+                        <>
+                            {seats > 0 && (
+                                <FormGroup title="People">
+                                    <OccupantsField
+                                        label="People"
+                                        field="userIds"
+                                        allUsers={
+                                            positionHierarchy.data?.users ?? []
+                                        }
+                                        userSearchQuery={userSearchQuery}
+                                        userSearch={userSearch}
+                                        onUserSearch={onUserSearch}
+                                        editing={formState?.mode === 'edit'}
+                                    />
+                                </FormGroup>
+                            )}
+                            <FormGroup title="Subordinates">
+                                <SubordinatesField
+                                    label="Subordinates"
+                                    field="childRelationships"
+                                    positionById={positionById}
+                                    allPositions={
+                                        positionHierarchy.data?.positions ?? []
                                     }
-                                    userSearchQuery={userSearchQuery}
-                                    userSearch={userSearch}
-                                    onUserSearch={onUserSearch}
+                                    currentPositionId={selectedPosition.id}
                                     editing={formState?.mode === 'edit'}
+                                    userMap={pageUserMap}
                                 />
                             </FormGroup>
-                        )}
-                    {formState?.mode !== 'create' && selectedPosition && (
-                        <FormGroup title="Subordinates">
-                            <SubordinatesField
-                                label="Subordinates"
-                                field="childRelationships"
-                                positionById={positionById}
-                                allPositions={
-                                    positionHierarchy.data?.positions ?? []
-                                }
-                                currentPositionId={selectedPosition.id}
-                                editing={formState?.mode === 'edit'}
-                                userMap={pageUserMap}
-                            />
-                        </FormGroup>
+                        </>
                     )}
                 </Form>
             </div>

@@ -80,13 +80,21 @@ export function useAuth() {
         queryKey: ['/auth'],
         queryFn: apiBaseUrl
             ? async () => {
-                  const res = await fetch(new URL('/auth', apiBaseUrl), {
-                      credentials: 'include',
-                  })
+                  const request = () =>
+                      fetch(new URL('/auth', apiBaseUrl), {
+                          credentials: 'include',
+                      })
+                  let res = await request()
+
+                  if (res.status == 401) {
+                      shouldRefresh.current = true
+                      await refreshQuery.refetch({ cancelRefetch: false })
+                      res = await request()
+                  }
+                  // this will catch a 404 from the original request or the post-refresh request
+                  if (res.status == 404) return null
 
                   if (res.ok) return (await res.json()) as TokenClaims
-
-                  if (res.status == 404 || res.status == 401) return null
 
                   await onLogout()
 
@@ -97,51 +105,44 @@ export function useAuth() {
     })
 
     const isSessionLoading = sessionQuery.isLoading || sessionQuery.isPending
+
     const session = sessionQuery.data ?? null
+
+    const onRefreshSession = () =>
+        sessionQuery.refetch({ cancelRefetch: false })
 
     const refreshQuery = useQuery({
         queryKey: ['/auth/refresh'],
-        queryFn:
-            apiBaseUrl && session
-                ? async () => {
-                      if (!shouldRefresh.current) {
-                          shouldRefresh.current = true
-                          return true
-                      }
-
-                      const res = await fetch(
-                          new URL('/auth/refresh', apiBaseUrl),
-                          {
-                              method: 'POST',
-                              credentials: 'include',
-                          }
-                      )
-
-                      if (res.ok) {
-                          await queryClient.invalidateQueries({
-                              queryKey: ['/auth'],
-                          })
-                          return true
-                      }
-
-                      await onLogout()
-                      return false
+        queryFn: apiBaseUrl
+            ? async () => {
+                  if (!shouldRefresh.current) {
+                      shouldRefresh.current = true
+                      return true
                   }
-                : skipToken,
+
+                  const res = await fetch(
+                      new URL('/auth/refresh', apiBaseUrl),
+                      {
+                          method: 'POST',
+                          credentials: 'include',
+                      }
+                  )
+
+                  return res.ok
+              }
+            : skipToken,
         refetchInterval: 5 * 60 * 1000,
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
     })
 
-    const onRefresh = refreshQuery.refetch
-
     return {
         apiBaseUrl,
         isSessionLoading,
         session,
+        onRefreshSession,
         onLogin,
-        onRefresh,
         onLogout,
     }
 }
