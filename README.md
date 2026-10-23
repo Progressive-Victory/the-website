@@ -38,6 +38,8 @@ pnpm install
 
 Next, in the `.env.example` file you'll see the list of required variables for proper function of the development server. Below is how you should configure each variable as of writing. All requests for credentials should be directed to a member of engineering team leadership on Discord.
 
+**Please create this file as `.env` at the project root**. Editing your `.env.example` will not do anything.
+
 ```sh
 # $PROJECT_DIR/.env
 
