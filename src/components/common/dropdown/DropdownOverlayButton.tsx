@@ -50,7 +50,9 @@ export function DropdownOverlayButton({
     const containerRef = useRef<HTMLDivElement>(null)
     const buttonRef = useRef<HTMLButtonElement>(null)
     const menuRef = useRef<HTMLDivElement>(null)
-    const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const [closeTimer, setTimer] = useState<ReturnType<
+        typeof setTimeout
+    > | null>(null)
     const [isLocallyOpen, setIsLocallyOpen] = useState(false)
     const [menuStyle, setMenuStyle] = useState<CSSProperties | null>(null)
     const isOpen = menuGroup ? menuGroup.openMenuId === menuId : isLocallyOpen
@@ -67,8 +69,8 @@ export function DropdownOverlayButton({
     }
 
     const cancelClose = () => {
-        if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
-        closeTimerRef.current = null
+        if (closeTimer) clearTimeout(closeTimer)
+        setTimer(null)
     }
 
     const openMenu = () => {
@@ -83,7 +85,7 @@ export function DropdownOverlayButton({
 
     const scheduleClose = () => {
         cancelClose()
-        closeTimerRef.current = setTimeout(closeMenu, 180)
+        setTimer(setTimeout(closeMenu, 180))
     }
 
     useLayoutEffect(() => {
@@ -133,8 +135,8 @@ export function DropdownOverlayButton({
         if (!isOpen) return
 
         const close = () => {
-            if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
-            closeTimerRef.current = null
+            if (closeTimer) clearTimeout(closeTimer)
+            setTimer(null)
             if (menuGroup) {
                 menuGroup.setOpenMenuId((currentMenuId) =>
                     currentMenuId === menuId ? null : currentMenuId
@@ -167,14 +169,7 @@ export function DropdownOverlayButton({
             document.removeEventListener('pointerdown', handlePointerDown)
             document.removeEventListener('keydown', handleDocumentKeyDown)
         }
-    }, [isOpen, menuGroup, menuId])
-
-    useEffect(
-        () => () => {
-            if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
-        },
-        []
-    )
+    }, [closeTimer, isOpen, menuGroup, menuId])
 
     const renderedMenu = typeof menu === 'function' ? menu({ closeMenu }) : menu
 

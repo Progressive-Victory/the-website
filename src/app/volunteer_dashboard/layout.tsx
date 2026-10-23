@@ -22,7 +22,7 @@ import {
 } from 'pv-contracts/data'
 import { MembershipSearchRequest } from 'pv-contracts/requests'
 import { zMembershipsResponsePacket } from 'pv-contracts/responses'
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
 import {
@@ -71,13 +71,12 @@ function LayoutContent({ children }: { children: ReactNode }) {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const welcomeParam = searchParams.get('from') === 'welcome'
-    const previousPathnameRef = useRef(pathname)
+    const [previousPathname, setPrevious] = useState(pathname)
     const positionQueries = usePositionQueries()
     const endorsementQueries = useEndorsementQueries()
     const [showWelcome, setShowWelcome] = useState(
         pathname === '/volunteer_dashboard' && welcomeParam
     )
-    const previousPathname = previousPathnameRef.current
     const users = usePaginatedSearch('/users', zUser, { search: { limit: 0 } })
     const roles = usePaginatedSearch('/roles', zRole, { search: { limit: 0 } })
     const permissions = usePaginatedSearch('/permissions', zPermission, {
@@ -185,7 +184,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
     ]
 
     useEffect(() => {
-        previousPathnameRef.current = pathname
+        setPrevious(pathname)
     }, [pathname])
 
     useEffect(() => {
