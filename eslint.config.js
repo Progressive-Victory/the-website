@@ -39,7 +39,6 @@ export default defineConfig([
             '@typescript-eslint/no-unsafe-return': 'warn',
             'react-hooks/set-state-in-effect': 'off', //temp
             'react-hooks/preserve-manual-memoization': 'off', //temp
-            'react-hooks/refs': 'off', //temp
             'react-hooks/immutability': 'off', //temp
         },
     },
