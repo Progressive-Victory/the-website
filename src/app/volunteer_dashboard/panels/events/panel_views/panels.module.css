@@ -1,0 +1,65 @@
+.attendeeMeta {
+    display: flex;
+    align-items: center;
+    column-gap: 0.5rem;
+}
+
+.itemList {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: stretch;
+    gap: 0.35rem;
+    width: 100%;
+}
+
+.listItem {
+    border-radius: 1rem;
+    overflow: hidden;
+
+    & > .selectedAttendee > div,
+    & > div {
+        border-radius: 0;
+        margin: 0;
+    }
+}
+
+.attendeeCount,
+.occurrenceCount {
+    display: inline;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.occurrencesSection {
+    container-type: inline-size;
+    margin-inline: 1rem;
+}
+
+.occurrenceList {
+    --num-columns: 1;
+
+    display: grid;
+    grid-template-columns: repeat(var(--num-columns), 1fr);
+    justify-content: center;
+    gap: 1rem;
+
+    padding: 0.5rem;
+
+    & > * {
+        container-type: inline-size;
+        min-width: 0;
+        margin-inline: auto;
+    }
+}
+
+@container (width >= 48rem) {
+    .occurrenceList.occurrenceList {
+        --num-columns: 2;
+    }
+}
+
+@container (width >= 80rem) {
+    .occurrenceList.occurrenceList.occurrenceList {
+        --num-columns: 3;
+    }
+}

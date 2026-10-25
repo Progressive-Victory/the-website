@@ -17,6 +17,7 @@ export interface SidebarBodyItemConfig<T> {
     tagLabel?: string
     tagCount?: number
     tagClassName?: string
+    renderTag?: React.ReactNode
     subTags?: SubTagProps[]
     icon?: ReactNode
     href: string
@@ -84,6 +85,7 @@ export function SidebarBody<T>({
                           }
                         : undefined
                 }
+                renderTag={config.renderTag}
                 subTags={config.subTags}
                 icon={config.icon}
                 buttonType={config.buttonType}
