@@ -739,6 +739,7 @@ export default function Page() {
                 membershipFulfillmentStatus: user.membershipFulfillmentStatus
                     ? +user.membershipFulfillmentStatus
                     : null,
+                signedNda: user.signedNda,
                 nameConfirmed: user.nameConfirmed,
                 addressConfirmed: user.addressConfirmed,
                 roles: user.roles?.map((role) => role.id),

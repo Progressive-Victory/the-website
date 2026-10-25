@@ -280,6 +280,10 @@ export function MemberView({
                     field="acceptedAlerts"
                     readonly
                 />
+                <CheckboxField
+                    label="Signed NDA"
+                    field="signedNda"
+                />
                 <CheckboxField label="Verified" field="verified" readonly />
                 <TextField
                     label="Onboarding Stage"
