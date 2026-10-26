@@ -7,6 +7,7 @@ import { MainLayout } from '@/components/layout'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { HiInformationCircle } from 'react-icons/hi2'
+
 export default function Login() {
     return (
         <MainLayout>

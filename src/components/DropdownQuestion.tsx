@@ -3,7 +3,8 @@
 import styles from '@/components/content_sections/ContentSections.module.css'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
-import {LuPlus, LuMinus} from 'react-icons/lu'
+import { LuPlus, LuMinus } from 'react-icons/lu'
+
 export interface DropdownQuestionProps {
     question: string
     answer: string
@@ -44,7 +45,7 @@ export function DropdownQuestion({
         width: '100%',
         height: '100%',
         color: '#09223a',
-        strokeWidth:  1.5,
+        strokeWidth: 1.5,
     }
 
     return (

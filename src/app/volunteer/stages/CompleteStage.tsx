@@ -1,8 +1,7 @@
 import styles from './stages.module.css'
 import { cn } from '@/util'
-import { HiCake, HiTrophy } from 'react-icons/hi2';
-
 import { redirect } from 'next/navigation'
+import { HiCake, HiTrophy } from 'react-icons/hi2'
 
 export interface CompleteStageProps {
     isInServer: boolean
