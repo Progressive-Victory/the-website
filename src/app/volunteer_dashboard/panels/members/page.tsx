@@ -732,6 +732,7 @@ export default function Page() {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 birthdate: user.birthdate,
+                aliases: Array.from(user.aliases ?? []),
                 membershipCardStatus: +user.membershipCardStatus,
                 membershipMerchStatus: +user.membershipMerchStatus,
                 shirtSize: user.shirtSize,
