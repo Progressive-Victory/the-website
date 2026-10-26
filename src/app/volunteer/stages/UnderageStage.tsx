@@ -2,6 +2,7 @@ import styles from './stages.module.css'
 import { cn } from '@/util'
 import { useInit } from '@/util/hooks'
 import { FaCalendarAlt } from 'react-icons/fa'
+
 export interface UnderageStageProps {
     isPending: boolean
     onAgeUp: () => void
