@@ -97,8 +97,8 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(react@19.3.0)
       zod:
-        specifier: ^4.6.5
-        version: 4.6.5
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.5
@@ -5139,8 +5139,8 @@ packages:
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
 
-  zod@4.6.5:
-    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
+  zod@4.6.6:
+    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
 
   zustand@3.7.2:
     resolution: {integrity: sha512-PIJDIZKtokhof+9+60cpockVOq05sJzHCriyvaLBmEJixseQ1a5Kdov6fWZfWOu5SK9c+FhH1jU0tntLxRJYMA==}
@@ -6240,7 +6240,7 @@ snapshots:
   '@progressive-victory/the-contracts@https://codeload.github.com/Progressive-Victory/the-contracts/tar.gz/c4aca26addad0ef22c970da995efdd4838b3c2bd#path:/dist':
     dependencies:
       '@fastify/multipart': 10.1.4
-      zod: 4.6.5
+      zod: 4.6.6
 
   '@radix-ui/primitive@1.1.3': {}
 
@@ -8143,8 +8143,8 @@ snapshots:
       '@babel/parser': 7.29.7
       eslint: 9.39.5(jiti@1.21.7)
       hermes-parser: 0.25.1
-      zod: 4.6.5
-      zod-validation-error: 4.0.2(zod@4.6.5)
+      zod: 4.6.6
+      zod-validation-error: 4.0.2(zod@4.6.6)
     transitivePeerDependencies:
       - supports-color
 
@@ -10715,11 +10715,11 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-validation-error@4.0.2(zod@4.6.5):
+  zod-validation-error@4.0.2(zod@4.6.6):
     dependencies:
-      zod: 4.6.5
+      zod: 4.6.6
 
-  zod@4.6.5: {}
+  zod@4.6.6: {}
 
   zustand@3.7.2(react@19.3.0):
     optionalDependencies:
