@@ -30,7 +30,7 @@ export function MultiTextField<T>(props: MultiTextProps<T>) {
         switch (event.key) {
             case 'Enter':
             case 'Tab':
-                onChange(value.add(inputValue))
+                onChange(new Set([...value, inputValue]))
                 setInputValue('')
                 event.preventDefault()
         }
