@@ -6,15 +6,13 @@ import {
     hamburgerLineVariantsTop,
 } from './headerAnimations'
 import styles from '@/components/layout/header.module.css'
+import { cn } from '@/util'
 import { motion } from 'motion/react'
 
 export function HamburgerIcon({ isOpen }: { isOpen: boolean }) {
     return (
         <motion.span
-            className={[
-                styles.headerMenuIconWrapper,
-                styles.hamburgerIcon,
-            ].join(' ')}
+            className={cn(styles.headerMenuIconWrapper, styles.hamburgerIcon)}
             aria-hidden="true"
             initial={false}
             animate={isOpen ? 'open' : 'closed'}

@@ -25,7 +25,19 @@ function AccountOrLogin({
     onLogin,
     buttonVariant,
 }: Omit<AuthActionsProps, 'showDonate' | 'donateClassName'>) {
-    if (!session) {
+    if (isSessionLoading)
+        return (
+            <AccountButton
+                label="Account"
+                href="/account"
+                discordUserId={discordUserId}
+                imageId={avatarImageId}
+                buttonVariant={buttonVariant}
+                disabled
+            />
+        )
+
+    if (!session)
         return (
             <LoginButton
                 label="Log In"
@@ -33,7 +45,6 @@ function AccountOrLogin({
                 onClick={() => void onLogin()}
             />
         )
-    }
 
     return (
         <AccountButton
@@ -42,7 +53,6 @@ function AccountOrLogin({
             discordUserId={discordUserId}
             imageId={avatarImageId}
             buttonVariant={buttonVariant}
-            disabled={isSessionLoading}
         />
     )
 }

@@ -20,11 +20,11 @@ function DesktopNavItem({
     onOpenSubnav,
 }: DesktopNavItemProps) {
     const hasChildren = !!item.subnav?.columns?.length
-    const wrapperClassName = cn([
+    const wrapperClassName = cn(
         styles.desktopNavItemWrapper,
         isActive ? styles.navItemActive : '',
-        shouldDim ? styles.navItemDimmed : '',
-    ])
+        shouldDim ? styles.navItemDimmed : ''
+    )
 
     return (
         <div
