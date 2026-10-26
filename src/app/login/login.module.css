@@ -53,11 +53,12 @@
 
 .infoIcon {
     width: 1rem;
+    height: 1rem;
     aspect-ratio: 1 / 1;
 
     margin-right: 0.25rem;
     border-radius: 9999px;
-
+    
     background-color: white;
 
     color: #4483c7;
