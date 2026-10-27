@@ -4,6 +4,13 @@
     --navigation-stack-sidebar-gap: 0rem;
 }
 
+.featuredIcon {
+    display: block;
+    width: 40px;
+    height: 40px;
+    color: rgba(15, 23, 42, 0.78);
+}
+
 .sidebarSearchInput {
     width: 100%;
     border-radius: 0.6rem;
