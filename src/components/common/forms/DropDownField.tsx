@@ -22,7 +22,11 @@ export function DropDownField<T>(
     const value = getter(props.dynamic!.form) ?? ''
 
     const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        onChange(event.target.value)
+        const rawValue = event.target.value
+        const selectedOption = props.options.find(
+            (x) => String(x.value) === rawValue
+        )?.value
+        onChange(selectedOption ?? rawValue)
     }
 
     const selectedLabel = useMemo(
