@@ -50,9 +50,8 @@ export function DropdownOverlayButton({
     const containerRef = useRef<HTMLDivElement>(null)
     const buttonRef = useRef<HTMLButtonElement>(null)
     const menuRef = useRef<HTMLDivElement>(null)
-    const [closeTimer, setTimer] = useState<ReturnType<
-        typeof setTimeout
-    > | null>(null)
+    const [closeTimer, setCloseTimer] =
+        useState<ReturnType<typeof setTimeout>>()
     const [isLocallyOpen, setIsLocallyOpen] = useState(false)
     const [menuStyle, setMenuStyle] = useState<CSSProperties | null>(null)
     const isOpen = menuGroup ? menuGroup.openMenuId === menuId : isLocallyOpen
@@ -70,7 +69,7 @@ export function DropdownOverlayButton({
 
     const cancelClose = () => {
         if (closeTimer) clearTimeout(closeTimer)
-        setTimer(null)
+        setCloseTimer(undefined)
     }
 
     const openMenu = () => {
@@ -85,7 +84,7 @@ export function DropdownOverlayButton({
 
     const scheduleClose = () => {
         cancelClose()
-        setTimer(setTimeout(closeMenu, 180))
+        setCloseTimer(setTimeout(closeMenu, 180))
     }
 
     useLayoutEffect(() => {
@@ -136,7 +135,7 @@ export function DropdownOverlayButton({
 
         const close = () => {
             if (closeTimer) clearTimeout(closeTimer)
-            setTimer(null)
+            setCloseTimer(undefined)
             if (menuGroup) {
                 menuGroup.setOpenMenuId((currentMenuId) =>
                     currentMenuId === menuId ? null : currentMenuId

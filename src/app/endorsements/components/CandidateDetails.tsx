@@ -75,11 +75,11 @@ export function CandidateDetails({
 }: CandidateDetailsProps) {
     const [visible, setVisible] = useState(false)
     const [mounted, setMounted] = useState(false)
-    const [lastCandidate, setLast] = useState<Endorsement | null>(null)
+    const [lastCandidate, setLastCandidate] = useState<Endorsement | null>(null)
 
     useEffect(() => {
         if (candidateProp) {
-            setLast(candidateProp)
+            setLastCandidate(candidateProp)
             setMounted(true)
             requestAnimationFrame(() => setVisible(true))
             document.body.style.overflow = 'hidden'

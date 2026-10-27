@@ -71,7 +71,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const welcomeParam = searchParams.get('from') === 'welcome'
-    const [previousPathname, setPrevious] = useState(pathname)
+    const [previousPathName, setPreviousPathName] = useState(pathname)
     const positionQueries = usePositionQueries()
     const endorsementQueries = useEndorsementQueries()
     const [showWelcome, setShowWelcome] = useState(
@@ -184,7 +184,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
     ]
 
     useEffect(() => {
-        setPrevious(pathname)
+        setPreviousPathName(pathname)
     }, [pathname])
 
     useEffect(() => {
@@ -210,7 +210,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
         (panel) => panel.href === pathname
     )
     const previousTopLevelIndex = dashboardPanelConfig.findIndex(
-        (panel) => panel.href === previousPathname
+        (panel) => panel.href === previousPathName
     )
 
     const activePanelLabel = dashboardPanelConfig
@@ -278,7 +278,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                                         pathname === panel.href &&
                                         currentTopLevelIndex !== -1 &&
                                         previousTopLevelIndex !== -1 &&
-                                        previousPathname !== pathname
+                                        previousPathName !== pathname
                                             ? currentTopLevelIndex >
                                               previousTopLevelIndex
                                                 ? 'down'

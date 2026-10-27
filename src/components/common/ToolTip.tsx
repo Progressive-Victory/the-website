@@ -29,7 +29,7 @@ export function ToolTip({
 
     // Logic used to close the tooltip by clicking outside of it.
     useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
+        const handleClickOutside = (event: MouseEvent) => {
             if (
                 wrapperRef.current &&
                 !wrapperRef.current.contains(event.target as HTMLElement)
