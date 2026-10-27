@@ -1,6 +1,6 @@
 'use client'
 
-import { AllPermissions, AllPermissionsSidebarItem } from './AllPermissions'
+import { MyPermissions, MyPermissionsSidebarItem } from './MyPermissions'
 import styles from './page.module.css'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import {
@@ -165,7 +165,7 @@ export default function Page() {
             }}
             sidebarBody={
                 <>
-                    <AllPermissionsSidebarItem
+                    <MyPermissionsSidebarItem
                         selected={featuredSelected}
                         onSelect={() => {
                             const selected = handleSelectItem(null)
@@ -201,7 +201,7 @@ export default function Page() {
                     sidebarMobileVisible={isDesktop || sidebarMobileVisible}
                     onBack={() => setSidebarMobileVisible(true)}
                 />
-                {featuredSelected && <AllPermissions />}
+                {featuredSelected && <MyPermissions />}
                 {selectedPermission && (
                     <Form<Permission>
                         key={selectedPermission.id}

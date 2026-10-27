@@ -3,21 +3,23 @@
 import styles from './page.module.css'
 import { Form, FormGroup, TextField } from '@/components/common/forms'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
+import { usePositionQueries } from '@/queries'
 import { cn, parseErrorMessage } from '@/util'
 import { useCurrentUser, usePaginatedSearch } from '@/util/hooks'
+import { useQuery } from '@tanstack/react-query'
 import { zPermission } from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
 import { FaUserShield } from 'react-icons/fa'
 
-interface AllPermissionsSidebarItemProps {
+interface MyPermissionsSidebarItemProps {
     selected: boolean
     onSelect: () => void
 }
 
-export function AllPermissionsSidebarItem({
+export function MyPermissionsSidebarItem({
     selected,
     onSelect,
-}: AllPermissionsSidebarItemProps) {
+}: MyPermissionsSidebarItemProps) {
     return (
         <SidebarBody<string>
             items={[]}
@@ -39,17 +41,23 @@ export function AllPermissionsSidebarItem({
     )
 }
 
-export function AllPermissions() {
+export function MyPermissions() {
     const currentUser = useCurrentUser()
+    const positionQueries = usePositionQueries()
+    const positionHierarchy = useQuery({
+        queryKey: ['positionHierarchy'],
+        queryFn: positionQueries.getPositionHierarchy,
+        enabled: positionQueries.ready,
+    })
     const { query } = usePaginatedSearch('/permissions', zPermission, {
         all: true,
         search: { sort: SortDirection.ASC, limit: 100 },
     })
 
-    if (query.isPending || currentUser.isLoading)
+    if (query.isPending || currentUser.isLoading || positionHierarchy.isPending)
         return <div className={styles.emptyState}>Loading permissions...</div>
 
-    const error = query.error ?? currentUser.error
+    const error = query.error ?? currentUser.error ?? positionHierarchy.error
     if (error)
         return (
             <div className={styles.emptyState}>
@@ -60,10 +68,13 @@ export function AllPermissions() {
     if (!currentUser.data)
         return <div className={styles.emptyState}>Loading permissions...</div>
 
+    const userId = currentUser.data.id
     const grantedPermissionIds = new Set(
-        currentUser.data.positions?.flatMap((position) =>
-            position.permissions.map((permission) => permission.id)
-        ) ?? []
+        positionHierarchy.data?.positions
+            .filter((position) => position.userIds.includes(userId))
+            .flatMap((position) =>
+                position.permissions.map((permission) => permission.id)
+            ) ?? []
     )
 
     return (
