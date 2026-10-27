@@ -1,10 +1,13 @@
 'use client'
 
+import { useIsContainerDesktop } from '../NavigationStack.helpers'
 import styles from './PanelBackButton.module.css'
 import { BackButton } from '@/components/common/buttons'
 import { cn } from '@/util'
 import { usePanelBackNavigation } from '@/util/hooks'
-import { useMediaQuery } from 'usehooks-ts'
+import { createContext, useContext } from 'react'
+
+export const PanelRouteBackHiddenContext = createContext(false)
 
 interface PanelBackButtonProps {
     className?: string
@@ -22,7 +25,8 @@ export function PanelBackButton({
     label = 'Back',
 }: PanelBackButtonProps) {
     const { handleNavigateBack, isPanelRoute } = usePanelBackNavigation()
-    const isDesktop = useMediaQuery('(min-width: 64rem)')
+    const isDesktop = useIsContainerDesktop()
+    const routeBackHidden = useContext(PanelRouteBackHiddenContext)
 
     const shouldShowForViewport =
         (isDesktop && showOnDesktop) || (!isDesktop && showOnMobile)
@@ -30,6 +34,8 @@ export function PanelBackButton({
     if (!isPanelRoute || !shouldShowForViewport) {
         return null
     }
+
+    if (!onClick && routeBackHidden) return null
 
     return (
         <BackButton

@@ -1,38 +1,589 @@
-.flowContainer {
-    width: 100%;
-    height: calc(100dvh - 100px);
-    min-height: 0;
+.sidebarBg {
+    --navigation-stack-sidebar-bg: #f9fafb;
+    --navigation-stack-sidebar-padding: 0rem;
+    --navigation-stack-sidebar-gap: 0rem;
 }
 
-.headerActions {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
+.filterTagsWrapper {
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
 
-.button {
-    display: flex;
-    cursor: pointer;
-    align-items: center;
-    gap: 0.5rem;
-    border-radius: 0.5rem;
-    border-width: 1px;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    font-weight: 500;
-    color: white;
-    border-color: #0284c7;
-    background-color: #0ea5e9;
-
-    &:disabled {
-        cursor: not-allowed;
-        border-color: #207aa7;
-        background-color: #1c6287;
+    :global([data-sidebar-collapsed='true']) & {
+        display: none;
     }
 }
 
-.discardButton {
-    border-color: #dc2626;
-    background-color: #ef4444;
+.filterMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 12rem;
+}
+
+.linePointSelection {
+    width: 100%;
+    height: 100%;
+    border: 2px solid #0284c7;
+    border-radius: 50%;
+    background: rgba(14, 165, 233, 0.14);
+    visibility: hidden;
+
+    &[data-selected='true'] {
+        visibility: visible;
+    }
+}
+
+.helperLines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 40000;
+    stroke: #0284c7;
+    stroke-width: 1px;
+}
+
+.emptyFilterMenu {
+    margin: 0;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.8rem;
+    color: rgba(17, 24, 39, 0.5);
+}
+
+.chart {
+    position: relative;
+    flex: 1 0 20rem;
+    min-height: 0;
+    width: 100%;
+}
+
+.headerToggles {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.directionSelect {
+    margin-left: 0.35rem;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.hitboxToggle {
+    padding: 0.45rem 0.75rem;
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    border-radius: 0.62rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: #fff;
+    color: #475569;
+
+    &[aria-pressed='true'] {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+}
+
+.chart[data-editing='false'] :global(.react-flow__handle) {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.positionHandle::after,
+.handleSnapHitbox {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--handle-hitbox-diameter);
+    height: var(--handle-hitbox-diameter);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+
+.chart[data-editing='true'] .positionHandle::after {
+    content: '';
+    pointer-events: auto;
+    cursor: crosshair;
+}
+
+.handleSnapHitbox {
+    box-sizing: border-box;
+    border: 1px solid rgba(61, 61, 61, 0.35);
+    background: rgba(230, 230, 230, 0.5);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.positionHandle:hover .handleSnapHitbox,
+.positionHandle:global(.connectingto) .handleSnapHitbox {
+    background: rgba(14, 165, 233, 0.14);
+    border-color: rgba(2, 132, 199, 0.5);
+}
+
+.sidebarDetail,
+.lineDetails {
+    padding: 1rem 1.5rem 1.5rem;
+}
+
+.sidebarDetail .positionForm {
+    padding: 0;
+}
+
+.dataModel {
+    margin: 0;
+
+    > div {
+        display: grid;
+        grid-template-columns: 6rem minmax(0, 1fr);
+        gap: 0.75rem;
+        padding-block: 0.4rem;
+    }
+
+    dt {
+        font-weight: 600;
+    }
+
+    dd {
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+}
+
+.dataModelNote {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.linePointText {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.linePointLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.linePointTypeIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+    color: #6b7280;
+}
+
+.linePointEntry .deleteButton {
+    left: 0.9rem;
+}
+
+.linePointCoordinates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.75rem;
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-variant-numeric: tabular-nums;
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.linePointValues {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.linePointRow {
+    position: relative;
+}
+
+.linePointOpen {
+    display: inline-flex;
+    align-items: center;
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+.linePointOpen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    border-radius: inherit;
+}
+
+.linePointOpen:focus-visible::after {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.linePointRow .deleteButton {
+    z-index: 1;
+}
+
+.pointType {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+}
+
+.pointTypeTrigger {
+    width: 100%;
+    max-width: 24rem;
+}
+
+.pointTypeOverlay.pointTypeOverlay {
+    min-width: 100%;
+}
+
+.lineDelete {
+    color: #b91c1c;
+    margin-top: 1rem;
+}
+
+.modalHost {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    transform: translateZ(0);
+    pointer-events: none;
+
+    &:empty {
+        display: none;
+    }
+
+    > * {
+        pointer-events: auto;
+    }
+}
+
+.group {
+    width: 100%;
+    height: 100%;
+    border: 2px solid #94a3b8;
+    border-radius: 0.75rem;
+    background: rgba(226, 232, 240, 0.35);
+
+    &[data-selected='true'] {
+        border-color: #2563eb;
+    }
+}
+
+.groupTitle {
+    box-sizing: border-box;
+    min-height: 60px;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.positionNode {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #94a3b8;
+    border-radius: 0.5rem;
+    background: white;
+    color: #0f172a;
+    overflow-wrap: anywhere;
+
+    &[data-selected='true'] {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 1px #2563eb;
+    }
+}
+
+.positionTitle {
+    box-sizing: border-box;
+    min-height: 50px;
+    padding: 0.75rem;
+    font-weight: 600;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.seatRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-sizing: border-box;
+    height: 36px;
+    padding: 0.25rem 0.75rem;
+    border-top: 1px solid #e2e8f0;
+    font-size: 0.8rem;
+
+    img {
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    span {
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+.positionForm > header {
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+}
+
+.positionForm > header > :first-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.positionForm > header > :last-child {
+    flex-wrap: wrap;
+}
+
+.subPositions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+.subPositionsLabel {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+    color: inherit;
+}
+
+.subPositionsContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 18px 45px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+}
+
+.subPositionEntryEmpty {
+    padding: 0.75rem 0.9rem;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.relationshipSectionTitle {
+    margin: 0;
+    padding: 0.75rem 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.subPositionEntry {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.85);
+    overflow: hidden;
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.subPositionTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-left: auto;
+}
+
+.subPositionTag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding-inline: 0.6rem;
+    padding-block: 0.12rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.subPositionEntryText {
+    transform: translateX(0);
+    transition: transform 280ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.subPositionEntryTextSub {
+    transform: translateX(0);
+    transition: transform 280ms cubic-bezier(0.25, 1, 0.5, 1);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.subPositionEntryEditing {
+    & .subPositionEntryText,
+    & .subPositionEntryTextSub {
+        transform: translateX(2rem);
+    }
+
+    & .deleteButton {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: auto;
+    }
+}
+
+.subPositionEntryEditing .linePointText {
+    transform: none;
+}
+
+.deleteButton {
+    position: absolute;
+    left: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: none;
+    border-radius: 50%;
+    background: #ef4444;
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.5);
+    transition:
+        opacity 200ms cubic-bezier(0.25, 1, 0.5, 1),
+        transform 200ms cubic-bezier(0.25, 1, 0.5, 1);
+    pointer-events: none;
+
+    &:hover {
+        background: #dc2626;
+    }
+
+    &:active {
+        transform: scale(0.9);
+    }
+}
+
+.addRow {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    padding-left: 0.75rem;
+    border: none;
+    background: transparent;
+    font-size: 0.92rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.72);
+    cursor: pointer;
+    transition: background 140ms ease;
+
+    &:hover {
+        color: rgba(2, 132, 199, 1);
+        background: rgba(14, 165, 233, 0.14);
+    }
+}
+
+.addIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-left: 0;
+    margin-right: 0.5rem;
+}
+
+.pickerList {
+    flex: 0 0 auto;
+    display: flow-root;
+}
+
+.pickerItem {
+    display: flex;
+    width: calc(100% - 0.5rem);
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.25rem;
+    padding: 1rem;
+    border: none;
+    border-radius: 1rem;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #e5e7eb;
+    }
+}
+
+.pickerAvatar {
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.pickerItemDetails {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.15rem;
+    overflow-wrap: anywhere;
+}
+
+.pickerItemName {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.85);
+}
+
+.pickerItemSub {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.pickerEmpty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #64748b;
+    font-weight: 500;
 }

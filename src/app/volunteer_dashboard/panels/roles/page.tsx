@@ -31,7 +31,6 @@ import { SortDirection, UpdateRoleRequest } from 'pv-contracts/requests'
 import { PaginatedResponse } from 'pv-contracts/responses'
 import { useMemo, useState } from 'react'
 import { IoEllipsisVertical } from 'react-icons/io5'
-import { useMediaQuery } from 'usehooks-ts'
 
 export default function Page() {
     const queryClient = useQueryClient()
@@ -40,7 +39,6 @@ export default function Page() {
     const [selectedId, setSelectedId] = useState<number | null>(null)
     const [formState, setFormState] = useState<FormState<Role> | null>(null)
     const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
-    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const {
         query: searchQuery,
@@ -195,7 +193,7 @@ export default function Page() {
             largeTitle
             sidebarWidth="24rem"
             sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            sidebarMobileVisible={sidebarMobileVisible}
             label="Roles"
             showScrollbar={false}
             sidebarList={{
@@ -227,9 +225,7 @@ export default function Page() {
                         onClick: (event) => {
                             event.preventDefault()
                             handleSelectItem(role)
-                            if (!isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
+                            setSidebarMobileVisible(false)
                         },
                     })}
                 />
@@ -238,7 +234,7 @@ export default function Page() {
             <div className={styles.detailPane}>
                 <MobileSidebarBackButton
                     label="Roles"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    sidebarMobileVisible={sidebarMobileVisible}
                     onBack={() => setSidebarMobileVisible(true)}
                 />
                 {selectedId == null && (

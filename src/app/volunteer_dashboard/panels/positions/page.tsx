@@ -50,7 +50,6 @@ import {
 } from 'pv-contracts/responses'
 import { ChangeEvent, useCallback, useRef, useState } from 'react'
 import { FaRegPenToSquare } from 'react-icons/fa6'
-import { useMediaQuery } from 'usehooks-ts'
 
 const blankPosition: Position = {
     id: -1,
@@ -71,7 +70,6 @@ export default function Page() {
     )
     const [formState, setFormState] = useState<FormState<Position> | null>(null)
     const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
-    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const positionHierarchy = useQuery({
         queryKey: ['positionHierarchy'],
@@ -119,7 +117,7 @@ export default function Page() {
     )
 
     const handleSelectItem = (value: Position): boolean => {
-        if (value.id === selectedPosition?.id) return false
+        if (value.id === selectedPosition?.id) return true
 
         if (formState?.dirty) {
             const proceed = confirm(
@@ -245,7 +243,7 @@ export default function Page() {
             largeTitle
             sidebarWidth="24rem"
             sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            sidebarMobileVisible={sidebarMobileVisible}
             label="Positions"
             showScrollbar={false}
             sidebarList={{
@@ -255,7 +253,10 @@ export default function Page() {
             prominentHeaderButton={{
                 icon: <FaRegPenToSquare size={20} />,
                 label: 'Create Position',
-                onClick: () => formControls.current?.create(),
+                onClick: () => {
+                    formControls.current?.create()
+                    setSidebarMobileVisible(false)
+                },
             }}
             sidebarBody={
                 <SidebarBody<Position>
@@ -270,7 +271,7 @@ export default function Page() {
                         tagCount:
                             position.type === PositionTypes.GROUP
                                 ? undefined
-                                : position.seats,
+                                : (position.seats ?? undefined),
                         buttonType:
                             position.type === PositionTypes.GROUP
                                 ? 'group'
@@ -283,7 +284,7 @@ export default function Page() {
                         onClick: (event) => {
                             event.preventDefault()
                             const selected = handleSelectItem(position)
-                            if (selected && !isDesktop) {
+                            if (selected) {
                                 setSidebarMobileVisible(false)
                             }
                         },
@@ -294,11 +295,12 @@ export default function Page() {
             <div className={styles.detailPane}>
                 <MobileSidebarBackButton
                     label="Positions"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    sidebarMobileVisible={sidebarMobileVisible}
                     onBack={() => setSidebarMobileVisible(true)}
                 />
                 <Form<Position>
                     key={selectedPosition?.id}
+                    className={styles.positionForm}
                     form={selectedPosition}
                     title={
                         formState?.mode == 'create'
@@ -316,6 +318,7 @@ export default function Page() {
                     showCreateButton={false}
                     controlsRef={formControls}
                     onDelete={handleDelete}
+                    deleteInEditMode
                 >
                     <FormGroup title="Details">
                         <TextField label="Name" field="name" required />

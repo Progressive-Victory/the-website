@@ -11,6 +11,7 @@ import {
     FaDollarSign,
     FaMoneyBills,
     FaMoneyCheckDollar,
+    FaSitemap,
 } from 'react-icons/fa6'
 
 function renderUnselectedGridHeader(label: string): ReactElement {
@@ -181,6 +182,14 @@ export function renderVolunteerDashboardUnselectedDetail({
                             href="/volunteer_dashboard/panels/positions"
                             icon={FaClipboardUser}
                             tag={{ count: positionCount }}
+                            buttonType="card"
+                            resetPanelHistoryOnClick
+                        />
+                        <NavigationButton
+                            label="Chart"
+                            description="Explore the organizational chart."
+                            href="/volunteer_dashboard/panels/chart"
+                            icon={FaSitemap}
                             buttonType="card"
                             resetPanelHistoryOnClick
                         />

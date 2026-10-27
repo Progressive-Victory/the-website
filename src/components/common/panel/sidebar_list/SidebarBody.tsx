@@ -13,6 +13,7 @@ import type { ReactNode } from 'react'
 export interface SidebarBodyItemConfig<T> {
     key: string | number
     label: string
+    labelClassName?: string
     subtitle?: string
     tagLabel?: string
     tagCount?: number
@@ -23,6 +24,8 @@ export interface SidebarBodyItemConfig<T> {
     buttonType?: NavigationButtonType
     children?: T[]
     onClick: (event: React.MouseEvent) => void
+    draggable?: boolean
+    onDragStart?: React.DragEventHandler<HTMLAnchorElement>
 }
 
 export interface SidebarBodyProps<T> {
@@ -74,6 +77,7 @@ export function SidebarBody<T>({
                 active={selectedKey === config.key}
                 href={config.href}
                 label={config.label}
+                classNames={{ label: config.labelClassName }}
                 subtitle={config.subtitle}
                 tag={
                     config.tagLabel != null || config.tagCount != null
@@ -94,6 +98,8 @@ export function SidebarBody<T>({
                     (child) => renderItem(child).key === selectedKey
                 )}
                 onClick={config.onClick}
+                draggable={config.draggable}
+                onDragStart={config.onDragStart}
                 showIndicator={false}
                 className={cn(
                     styles.sidebarNavigationButton,

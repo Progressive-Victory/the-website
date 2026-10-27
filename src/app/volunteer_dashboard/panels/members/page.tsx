@@ -72,7 +72,6 @@ import {
 import { FaClipboardUser, FaDollarSign, FaAddressCard } from 'react-icons/fa6'
 import { IoEllipsisVertical } from 'react-icons/io5'
 import { MdVerified } from 'react-icons/md'
-import { useMediaQuery } from 'usehooks-ts'
 import z from 'zod'
 
 type MemberTabKey = 'overview' | 'donorMatching' | 'history'
@@ -477,7 +476,6 @@ export default function Page() {
     }
 
     const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
-    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const loggedInUser = useCurrentUser()
     const positionQueries = usePositionQueries()
@@ -896,7 +894,7 @@ export default function Page() {
             sidebarWidth="25.5rem"
             collapsedSidebarWidth="5rem"
             sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            sidebarMobileVisible={sidebarMobileVisible}
             label="Members"
             showScrollbar={false}
             sidebarList={{
@@ -951,9 +949,7 @@ export default function Page() {
                             onClick: (event) => {
                                 event.preventDefault()
                                 handleSelectItem(user)
-                                if (!isDesktop) {
-                                    setSidebarMobileVisible(false)
-                                }
+                                setSidebarMobileVisible(false)
                             },
                         })}
                     />
@@ -963,7 +959,7 @@ export default function Page() {
             <div className={styles.detailsPane}>
                 <MobileSidebarBackButton
                     label="Members"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    sidebarMobileVisible={sidebarMobileVisible}
                     onBack={() => setSidebarMobileVisible(true)}
                     className={styles.backButton}
                 />

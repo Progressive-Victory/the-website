@@ -8,6 +8,11 @@ import {
     type SidebarListSearchProps,
 } from './sidebar_list/SidebarList'
 import { NavigationStack } from '@/components/common/navigation_stack'
+import {
+    NavigationStackWidthContext,
+    useElementWidth,
+    useIsContainerDesktop,
+} from '@/components/common/navigation_stack/NavigationStack.helpers'
 import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { PanelBackButton } from '@/components/common/navigation_stack/detail/PanelBackButton'
 import {
@@ -17,8 +22,7 @@ import {
 import { SidebarToggleButton } from '@/components/common/navigation_stack/sidebar/SidebarToggleButton'
 import { cn } from '@/util'
 import type { ReactNode } from 'react'
-import { useState } from 'react'
-import { useMediaQuery } from 'usehooks-ts'
+import { useRef, useState } from 'react'
 
 export interface SidebarListConfig {
     search?: SidebarListSearchProps
@@ -29,6 +33,7 @@ export interface SidebarListConfig {
 export interface PanelProps {
     children: ReactNode
     label?: string
+    sidebarLabel?: string
     includeHeader?: boolean
     includeSidebar?: boolean
     largeTitle?: boolean
@@ -61,6 +66,7 @@ export interface PanelProps {
 export function Panel({
     children,
     label,
+    sidebarLabel,
     includeHeader = false,
     includeSidebar = false,
     largeTitle = false,
@@ -91,7 +97,9 @@ export function Panel({
 }: PanelProps) {
     const panelLabel = label ?? 'Panel'
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-    const isDesktop = useMediaQuery('(min-width: 64rem)')
+    const contentRef = useRef<HTMLDivElement>(null)
+    const contentWidth = useElementWidth(contentRef)
+    const isDesktop = useIsContainerDesktop(contentWidth)
     const showHeader = includeHeader
     const resolvedSidebarTogglePlacement =
         sidebarTogglePlacement ??
@@ -135,105 +143,113 @@ export function Panel({
         ))
 
     return (
-        <div className={styles.content} aria-label={panelLabel}>
-            {includeSidebar && (
-                <NavigationStack
-                    overlay={
-                        showOverlaySidebarToggle && (
-                            <SidebarToggleButton
-                                isOpen={isSidebarOpen}
-                                onToggle={() =>
-                                    setIsSidebarOpen((previous) => !previous)
+        <NavigationStackWidthContext.Provider value={contentWidth}>
+            <div
+                ref={contentRef}
+                className={styles.content}
+                aria-label={panelLabel}
+            >
+                {includeSidebar && (
+                    <NavigationStack
+                        overlay={
+                            showOverlaySidebarToggle && (
+                                <SidebarToggleButton
+                                    isOpen={isSidebarOpen}
+                                    onToggle={() =>
+                                        setIsSidebarOpen(
+                                            (previous) => !previous
+                                        )
+                                    }
+                                />
+                            )
+                        }
+                        sidebar={
+                            <Sidebar
+                                className={sidebarClassName}
+                                variant="prominent"
+                                width={sidebarWidth}
+                                collapsedWidth={collapsedSidebarWidth}
+                                collapsedMode={collapsedSidebarMode}
+                                mobileVisible={sidebarMobileVisible}
+                                showScrollbar={showScrollbar}
+                                open={isSidebarOpen}
+                                onOpenChange={setIsSidebarOpen}
+                                showFooterToggle={
+                                    resolvedSidebarTogglePlacement === 'footer'
+                                }
+                                showFooterWhenCollapsed={
+                                    showSidebarFooterWhenCollapsed
+                                }
+                                showBorderWhenCollapsed={
+                                    showSidebarBorderWhenCollapsed
+                                }
+                                reserveHeaderToggleSpace={
+                                    resolvedSidebarTogglePlacement === 'header'
+                                }
+                                label={panelLabel}
+                                header={{
+                                    mode: includeHeader ? 'shown' : 'hidden',
+                                    label: sidebarLabel ?? panelLabel,
+                                    largeTitle,
+                                    search: resolvedSidebarSearch,
+                                    filters: {
+                                        open: sidebarFilterOpen,
+                                        onOpenChange: onSidebarFilterOpenChange,
+                                    },
+                                    content: prominentHeader,
+                                    left: resolvedProminentHeaderLeft,
+                                    right: prominentHeaderRight,
+                                    button: prominentHeaderButton,
+                                }}
+                                footer={resolvedSidebarFooter}
+                            >
+                                {sidebarBody}
+                            </Sidebar>
+                        }
+                        detail={
+                            <Detail
+                                bodyType="panel"
+                                label={panelLabel}
+                                body={
+                                    <>
+                                        {showHeader && (
+                                            <PanelHeader
+                                                panelLabel={panelLabel}
+                                                shiftForOverlayToggle={
+                                                    shiftHeaderLeftForToggle
+                                                }
+                                                headerLead={resolvedHeaderLead}
+                                                headerLeft={headerLeft}
+                                                headerRight={headerRight}
+                                            />
+                                        )}
+                                        {children}
+                                        {footer && (
+                                            <PanelFooter>{footer}</PanelFooter>
+                                        )}
+                                    </>
                                 }
                             />
-                        )
-                    }
-                    sidebar={
-                        <Sidebar
-                            className={sidebarClassName}
-                            variant="prominent"
-                            width={sidebarWidth}
-                            collapsedWidth={collapsedSidebarWidth}
-                            collapsedMode={collapsedSidebarMode}
-                            mobileVisible={sidebarMobileVisible}
-                            showScrollbar={showScrollbar}
-                            open={isSidebarOpen}
-                            onOpenChange={setIsSidebarOpen}
-                            showFooterToggle={
-                                resolvedSidebarTogglePlacement === 'footer'
-                            }
-                            showFooterWhenCollapsed={
-                                showSidebarFooterWhenCollapsed
-                            }
-                            showBorderWhenCollapsed={
-                                showSidebarBorderWhenCollapsed
-                            }
-                            reserveHeaderToggleSpace={
-                                resolvedSidebarTogglePlacement === 'header'
-                            }
-                            label={panelLabel}
-                            header={{
-                                mode: includeHeader ? 'shown' : 'hidden',
-                                label: panelLabel,
-                                largeTitle,
-                                search: resolvedSidebarSearch,
-                                filters: {
-                                    open: sidebarFilterOpen,
-                                    onOpenChange: onSidebarFilterOpenChange,
-                                },
-                                content: prominentHeader,
-                                left: resolvedProminentHeaderLeft,
-                                right: prominentHeaderRight,
-                                button: prominentHeaderButton,
-                            }}
-                            footer={resolvedSidebarFooter}
-                        >
-                            {sidebarBody}
-                        </Sidebar>
-                    }
-                    detail={
-                        <Detail
-                            bodyType="panel"
-                            label={panelLabel}
-                            body={
-                                <>
-                                    {showHeader && (
-                                        <PanelHeader
-                                            panelLabel={panelLabel}
-                                            shiftForOverlayToggle={
-                                                shiftHeaderLeftForToggle
-                                            }
-                                            headerLead={resolvedHeaderLead}
-                                            headerLeft={headerLeft}
-                                            headerRight={headerRight}
-                                        />
-                                    )}
-                                    {children}
-                                    {footer && (
-                                        <PanelFooter>{footer}</PanelFooter>
-                                    )}
-                                </>
-                            }
-                        />
-                    }
-                />
-            )}
-            {!includeSidebar && (
-                <>
-                    {showHeader && (
-                        <PanelHeader
-                            panelLabel={panelLabel}
-                            shiftForOverlayToggle={false}
-                            headerLead={resolvedHeaderLead}
-                            headerLeft={headerLeft}
-                            headerRight={headerRight}
-                        />
-                    )}
-                    {children}
-                    {footer && <PanelFooter>{footer}</PanelFooter>}
-                </>
-            )}
-        </div>
+                        }
+                    />
+                )}
+                {!includeSidebar && (
+                    <>
+                        {showHeader && (
+                            <PanelHeader
+                                panelLabel={panelLabel}
+                                shiftForOverlayToggle={false}
+                                headerLead={resolvedHeaderLead}
+                                headerLeft={headerLeft}
+                                headerRight={headerRight}
+                            />
+                        )}
+                        {children}
+                        {footer && <PanelFooter>{footer}</PanelFooter>}
+                    </>
+                )}
+            </div>
+        </NavigationStackWidthContext.Provider>
     )
 }
 

@@ -14,7 +14,7 @@ export interface FormGroupProps<T> {
     id?: string
 
     /** The group's title, displayed as a heading above the fields. */
-    title: string
+    title: React.ReactNode
 
     /** Optional subtitle displayed under the group's title. */
     subtitle?: string

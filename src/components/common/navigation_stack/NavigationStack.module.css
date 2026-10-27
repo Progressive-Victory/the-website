@@ -1,17 +1,20 @@
 .root {
+    --sidebar-collapse-duration: 280ms;
+    --sidebar-collapse-ease: cubic-bezier(0.22, 1, 0.36, 1);
     position: relative;
     display: flex;
     width: 100%;
     height: var(--navigation-stack-height, 100dvh);
     background: var(--navigation-stack-bg, transparent);
     overflow: hidden;
+    container: navigation-stack / inline-size;
 }
 
 .overlay {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 4;
+    z-index: 31;
     display: flex;
     align-items: center;
     height: var(--navigation-stack-sidebar-header-min-height, 4.05rem);

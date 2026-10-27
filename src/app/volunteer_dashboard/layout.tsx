@@ -155,13 +155,6 @@ function LayoutContent({ children }: { children: ReactNode }) {
             ],
         },
         {
-            key: 'positions',
-            label: 'Positions',
-            href: '/volunteer_dashboard/panels/positions',
-            icon: FaClipboardUser,
-            count: positionCount,
-        },
-        {
             key: 'roles',
             label: 'Roles',
             href: '/volunteer_dashboard/panels/roles',
@@ -176,17 +169,24 @@ function LayoutContent({ children }: { children: ReactNode }) {
             count: permissions.query.data?.count,
         },
         {
-            key: 'endorsements',
-            label: 'Endorsements',
-            href: '/volunteer_dashboard/panels/endorsements',
-            icon: FaCheckToSlot,
-            count: endorsements.data?.length,
+            key: 'positions',
+            label: 'Positions',
+            href: '/volunteer_dashboard/panels/positions',
+            icon: FaClipboardUser,
+            count: positionCount,
         },
         {
             key: 'chart',
             label: 'Chart',
             href: '/volunteer_dashboard/panels/chart',
             icon: FaSitemap,
+        },
+        {
+            key: 'endorsements',
+            label: 'Endorsements',
+            href: '/volunteer_dashboard/panels/endorsements',
+            icon: FaCheckToSlot,
+            count: endorsements.data?.length,
         },
     ]
 

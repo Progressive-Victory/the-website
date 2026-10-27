@@ -39,6 +39,7 @@ export interface SidebarHeaderButtonConfig {
     label?: string
     buttonVariant?: DropdownButtonVariant
     className?: string
+    disabled?: boolean
 }
 
 export interface SidebarHeaderConfig {
@@ -319,6 +320,7 @@ function ProminentSidebar({
             style={sidebarInlineStyle}
             className={cn(
                 styles.sidebar,
+                visualMode === 'prominent' && styles.sidebarProminent,
                 visualMode === 'prominent-bare' && styles.sidebarMinimal,
                 styles.sidebarWithProminentHeader,
                 isExpanded ? styles.sidebarOpen : styles.sidebarClosed,
@@ -346,7 +348,7 @@ function ProminentSidebar({
             >
                 <div
                     className={cn(
-                        visualMode === 'prominent' && styles.sidebarProminent
+                        visualMode === 'prominent' && styles.prominentContent
                     )}
                 >
                     {largeTitleActive && (
@@ -428,11 +430,13 @@ export function SidebarHeaderButton({
     label = 'Show Filters',
     buttonVariant = 'icon',
     className,
+    disabled,
 }: SidebarHeaderButtonConfig): ReactElement {
     const shared = {
         type: 'button',
         buttonVariant,
         className,
+        disabled,
         'aria-label': label,
         title: label,
     } as const

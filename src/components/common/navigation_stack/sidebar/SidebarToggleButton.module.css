@@ -51,7 +51,7 @@
     transform: rotate(180deg);
 }
 
-@media (min-width: 64rem) {
+@container navigation-stack (min-width: 64rem) {
     .toggleButton {
         display: inline-flex;
     }
