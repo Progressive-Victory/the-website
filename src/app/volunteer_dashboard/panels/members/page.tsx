@@ -936,6 +936,7 @@ export default function Page() {
                             subtitle: user.discordUsers?.[0]?.username
                                 ? `@${user.discordUsers[0].username}`
                                 : 'NOT FOUND',
+                            labelPill: `${user.preferredPronouns ?? ''}`.trim(), // # TODO: Replace with actual pronouns when API supports it.
                             tagLabel:
                                 user.id === loggedInUser.data?.id
                                     ? 'You'

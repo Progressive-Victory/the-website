@@ -44,6 +44,7 @@ export function AccountPage() {
                 phone: user.phone,
                 firstName: user.firstName,
                 lastName: user.lastName,
+                preferredPronouns: user.preferredPronouns,
                 birthdate: user.birthdate,
                 address: {
                     addressLine1: user.address.addressLine1,
