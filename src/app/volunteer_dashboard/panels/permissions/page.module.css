@@ -11,6 +11,71 @@
     color: rgba(15, 23, 42, 0.78);
 }
 
+.permissionList.permissionList {
+    gap: 0;
+    margin-top: 0.5rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 18px 45px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+
+    & > * {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0.9rem;
+        border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+        font-size: 0.92rem;
+        font-weight: 500;
+        color: rgba(15, 23, 42, 0.85);
+
+        &:last-child {
+            border-bottom: 0;
+        }
+
+        & > span {
+            flex: 1 1 0;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        & > div {
+            flex: 0 1 auto;
+            min-width: 0;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+
+.permissionStatus.permissionStatus {
+    display: inline-flex;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 3.25rem;
+    padding-inline: 0.75rem;
+    padding-block: 0.12rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+
+    &.permissionStatusEnabled {
+        color: var(--navigation-button-link-active-color, rgba(2, 132, 199, 1));
+        background: var(
+            --navigation-button-link-active-bg,
+            rgba(14, 165, 233, 0.14)
+        );
+    }
+}
+
 .sidebarSearchInput {
     width: 100%;
     border-radius: 0.6rem;
