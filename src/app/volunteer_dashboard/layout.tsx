@@ -227,7 +227,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
     const isPanelSelected = pathname.startsWith('/volunteer_dashboard/panels/')
 
     return (
-        <ProtectedPage requiredRoles={['Superadmin']}>
+        <ProtectedPage requiredPermissions={['Admin Panel Access']}>
             <div className={styles.root}>
                 <Header />
 

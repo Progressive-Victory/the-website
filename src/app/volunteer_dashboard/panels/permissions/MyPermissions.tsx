@@ -3,10 +3,8 @@
 import styles from './page.module.css'
 import { Form, FormGroup, TextField } from '@/components/common/forms'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
-import { usePositionQueries } from '@/queries'
 import { cn, parseErrorMessage } from '@/util'
 import { useCurrentUser, usePaginatedSearch } from '@/util/hooks'
-import { useQuery } from '@tanstack/react-query'
 import { zPermission } from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
 import { FaUserShield } from 'react-icons/fa'
@@ -43,21 +41,15 @@ export function MyPermissionsSidebarItem({
 
 export function MyPermissions() {
     const currentUser = useCurrentUser()
-    const positionQueries = usePositionQueries()
-    const positionHierarchy = useQuery({
-        queryKey: ['positionHierarchy'],
-        queryFn: positionQueries.getPositionHierarchy,
-        enabled: positionQueries.ready,
-    })
     const { query } = usePaginatedSearch('/permissions', zPermission, {
         all: true,
         search: { sort: SortDirection.ASC, limit: 100 },
     })
 
-    if (query.isPending || currentUser.isLoading || positionHierarchy.isPending)
+    if (query.isPending || currentUser.isLoading)
         return <div className={styles.emptyState}>Loading permissions...</div>
 
-    const error = query.error ?? currentUser.error ?? positionHierarchy.error
+    const error = query.error ?? currentUser.error
     if (error)
         return (
             <div className={styles.emptyState}>
@@ -68,13 +60,10 @@ export function MyPermissions() {
     if (!currentUser.data)
         return <div className={styles.emptyState}>Loading permissions...</div>
 
-    const userId = currentUser.data.id
     const grantedPermissionIds = new Set(
-        positionHierarchy.data?.positions
-            .filter((position) => position.userIds.includes(userId))
-            .flatMap((position) =>
-                position.permissions.map((permission) => permission.id)
-            ) ?? []
+        currentUser.data.positions?.flatMap((position) =>
+            position.permissions.map((permission) => permission.id)
+        ) ?? []
     )
 
     return (
