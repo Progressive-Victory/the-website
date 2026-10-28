@@ -16,3 +16,4 @@ export const metadata: Metadata = {
 export default function MembershipSupport() {
     redirect('https://forms.gle/jbNftCSaqv416q3V6')
 }
+//test
