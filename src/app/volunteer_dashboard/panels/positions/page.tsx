@@ -16,18 +16,19 @@ import {
     FormGroup,
     FormState,
     DropDownField,
-    NumberField,
     TextField,
 } from '@/components/common/forms'
 import {
     FormFieldProps,
     useConfigure,
 } from '@/components/common/forms/FormField'
+import { StepperField } from '@/components/common/forms/StepperField'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { type SidebarListFiltersProps } from '@/components/common/panel/sidebar_list/SidebarList'
+import { Switch } from '@/components/common/switch/Switch'
 import { usePositionQueries } from '@/queries'
-import { cn } from '@/util'
+import { cn, parseErrorMessage } from '@/util'
 import {
     useOptimisticDelete,
     useOptimisticUpdate,
@@ -41,6 +42,7 @@ import {
     Relationship,
     RelationshipTypes,
     UserProfile,
+    zPermission,
     zUserProfile,
 } from 'pv-contracts/data'
 import { SearchRequest, SortDirection } from 'pv-contracts/requests'
@@ -49,6 +51,7 @@ import {
     PositionHierarchyResponse,
 } from 'pv-contracts/responses'
 import { ChangeEvent, useCallback, useRef, useState } from 'react'
+import { FaInfinity } from 'react-icons/fa'
 import { FaRegPenToSquare } from 'react-icons/fa6'
 import { useMediaQuery } from 'usehooks-ts'
 
@@ -198,7 +201,7 @@ export default function Page() {
 
     const handleCreate = () => blankPosition
 
-    const seats = formState?.form.seats ?? selectedPosition?.seats ?? 0
+    const seats = (formState?.form ?? selectedPosition)?.seats
 
     const handleSave = (newPosition: Position) => {
         if (formState?.mode === 'create') {
@@ -270,7 +273,7 @@ export default function Page() {
                         tagCount:
                             position.type === PositionTypes.GROUP
                                 ? undefined
-                                : (position.seats ?? undefined),
+                                : (position.seats ?? position.userIds.length),
                         buttonType:
                             position.type === PositionTypes.GROUP
                                 ? 'group'
@@ -317,7 +320,13 @@ export default function Page() {
                     controlsRef={formControls}
                     onDelete={handleDelete}
                 >
-                    <FormGroup title="Details">
+                    <FormGroup
+                        title="Details"
+                        className={cn(
+                            styles.subPositionsContainer,
+                            styles.detailsFields
+                        )}
+                    >
                         <TextField label="Name" field="name" required />
                         <DropDownField<Position>
                             label="Type"
@@ -328,11 +337,21 @@ export default function Page() {
                             })}
                             options={positionTypeOptions}
                         />
-                        <NumberField label="Seats" field="seats" required />
+                        <StepperField<Position>
+                            label="Seats"
+                            field="seats"
+                            min={0}
+                            nullLabel="Uncapped"
+                            nullIcon={<FaInfinity aria-hidden="true" />}
+                            setter={(form, value) => ({
+                                ...form,
+                                seats: value === 0 ? null : (value ?? null),
+                            })}
+                        />
                     </FormGroup>
                     {formState?.mode !== 'create' && selectedPosition && (
                         <>
-                            {seats > 0 && (
+                            {(seats == null || seats > 0) && (
                                 <FormGroup title="People">
                                     <OccupantsField
                                         label="People"
@@ -360,11 +379,112 @@ export default function Page() {
                                     userMap={pageUserMap}
                                 />
                             </FormGroup>
+                            <FormGroup title="Permissions">
+                                <PermissionsField
+                                    label="Permissions"
+                                    field="permissions"
+                                />
+                            </FormGroup>
                         </>
                     )}
                 </Form>
             </div>
         </Panel>
+    )
+}
+
+function PermissionsField(
+    props: FormFieldProps<Position, Position['permissions']>
+) {
+    const { getter, onChange, readonly, disabled } = useConfigure(
+        props,
+        useCallback(() => true, [])
+    )
+    const { query } = usePaginatedSearch('/permissions', zPermission, {
+        all: true,
+        search: { sort: SortDirection.ASC, limit: 100 },
+    })
+
+    const permissions = query.data?.data ?? []
+    const assignedPermissions = getter(props.dynamic!.form) ?? []
+    const assignedPermissionIds = new Set(
+        assignedPermissions.map((permission) => permission.id)
+    )
+
+    return (
+        <div className={styles.subPositions}>
+            <div className={styles.subPositionsContainer}>
+                {query.isPending ? (
+                    <div className={styles.subPositionEntryEmpty}>
+                        Loading permissions...
+                    </div>
+                ) : query.error ? (
+                    <div className={styles.subPositionEntryEmpty}>
+                        Error: {parseErrorMessage(query.error)}
+                    </div>
+                ) : (
+                    <>
+                        {permissions.length === 0 && (
+                            <div className={styles.subPositionEntryEmpty}>
+                                No permissions
+                            </div>
+                        )}
+                        {permissions.map((permission) => (
+                            <div
+                                key={permission.id}
+                                className={cn(
+                                    styles.subPositionEntry,
+                                    styles.permissionEntry
+                                )}
+                            >
+                                <span className={styles.subPositionEntryText}>
+                                    {permission.name}
+                                </span>
+                                {!readonly ? (
+                                    <Switch
+                                        type="long"
+                                        ariaLabel={permission.name}
+                                        checked={assignedPermissionIds.has(
+                                            permission.id
+                                        )}
+                                        disabled={disabled}
+                                        onCheckedChange={(checked) => {
+                                            onChange(
+                                                checked
+                                                    ? [
+                                                          ...assignedPermissions,
+                                                          permission,
+                                                      ]
+                                                    : assignedPermissions.filter(
+                                                          (assigned) =>
+                                                              assigned.id !==
+                                                              permission.id
+                                                      )
+                                            )
+                                        }}
+                                    />
+                                ) : (
+                                    <span className={styles.subPositionTags}>
+                                        <span
+                                            className={styles.subPositionTag}
+                                            data-enabled={assignedPermissionIds.has(
+                                                permission.id
+                                            )}
+                                        >
+                                            {assignedPermissionIds.has(
+                                                permission.id
+                                            )
+                                                ? 'Yes'
+                                                : 'No'}
+                                        </span>
+                                    </span>
+                                )}
+                            </div>
+                        ))}
+                    </>
+                )}
+            </div>
+        </div>
     )
 }
 
@@ -569,8 +689,10 @@ function OccupantsField(props: OccupantsFieldProps) {
     )
 
     const userIds = getter(props.dynamic!.form) ?? []
-    const seats = props.dynamic!.form.seats ?? 0
-    const openSeats = Math.max(seats - userIds.length, 0)
+    const seats = props.dynamic!.form.seats
+    const openSeats = seats === null ? 0 : Math.max(seats - userIds.length, 0)
+    const atCapacity = seats !== null && openSeats === 0
+    const assignmentRows = seats === null ? Number(props.editing) : openSeats
     const [pickerOpen, setPickerOpen] = useState(false)
 
     const userMap = new Map<number, UserProfile>()
@@ -586,7 +708,7 @@ function OccupantsField(props: OccupantsFieldProps) {
     }
 
     const handleAdd = (id: number) => {
-        if (!userIds.includes(id) && openSeats > 0) {
+        if (!userIds.includes(id) && !atCapacity) {
             onChange([...userIds, id])
         }
         setPickerOpen(false)
@@ -607,6 +729,11 @@ function OccupantsField(props: OccupantsFieldProps) {
     return (
         <div className={styles.subPositions}>
             <div className={styles.subPositionsContainer}>
+                {seats === null && userIds.length === 0 && !props.editing && (
+                    <div className={styles.subPositionEntryEmpty}>
+                        No people assigned
+                    </div>
+                )}
                 {userIds.map((id) => (
                     <div
                         key={id}
@@ -635,7 +762,7 @@ function OccupantsField(props: OccupantsFieldProps) {
                         </span>
                     </div>
                 ))}
-                {Array.from({ length: openSeats }, (_, index) =>
+                {Array.from({ length: assignmentRows }, (_, index) =>
                     props.editing ? (
                         <button
                             key={`open-seat-${index}`}
