@@ -39,6 +39,7 @@ export interface SidebarHeaderButtonConfig {
     label?: string
     buttonVariant?: DropdownButtonVariant
     className?: string
+    disabled?: boolean
 }
 
 export interface SidebarHeaderConfig {
@@ -428,11 +429,13 @@ export function SidebarHeaderButton({
     label = 'Show Filters',
     buttonVariant = 'icon',
     className,
+    disabled,
 }: SidebarHeaderButtonConfig): ReactElement {
     const shared = {
         type: 'button',
         buttonVariant,
         className,
+        disabled,
         'aria-label': label,
         title: label,
     } as const
