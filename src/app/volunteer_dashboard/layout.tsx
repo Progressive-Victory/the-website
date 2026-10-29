@@ -22,7 +22,7 @@ import {
 } from 'pv-contracts/data'
 import { MembershipSearchRequest } from 'pv-contracts/requests'
 import { zMembershipsResponsePacket } from 'pv-contracts/responses'
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
 import {
@@ -71,13 +71,12 @@ function LayoutContent({ children }: { children: ReactNode }) {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const welcomeParam = searchParams.get('from') === 'welcome'
-    const previousPathnameRef = useRef(pathname)
+    const [previousPathName, setPreviousPathName] = useState(pathname)
     const positionQueries = usePositionQueries()
     const endorsementQueries = useEndorsementQueries()
     const [showWelcome, setShowWelcome] = useState(
         pathname === '/volunteer_dashboard' && welcomeParam
     )
-    const previousPathname = previousPathnameRef.current
     const users = usePaginatedSearch('/users', zUser, { search: { limit: 0 } })
     const roles = usePaginatedSearch('/roles', zRole, { search: { limit: 0 } })
     const permissions = usePaginatedSearch('/permissions', zPermission, {
@@ -185,7 +184,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
     ]
 
     useEffect(() => {
-        previousPathnameRef.current = pathname
+        setPreviousPathName(pathname)
     }, [pathname])
 
     useEffect(() => {
@@ -211,7 +210,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
         (panel) => panel.href === pathname
     )
     const previousTopLevelIndex = dashboardPanelConfig.findIndex(
-        (panel) => panel.href === previousPathname
+        (panel) => panel.href === previousPathName
     )
 
     const activePanelLabel = dashboardPanelConfig
@@ -279,7 +278,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                                         pathname === panel.href &&
                                         currentTopLevelIndex !== -1 &&
                                         previousTopLevelIndex !== -1 &&
-                                        previousPathname !== pathname
+                                        previousPathName !== pathname
                                             ? currentTopLevelIndex >
                                               previousTopLevelIndex
                                                 ? 'down'
