@@ -1,5 +1,6 @@
 'use client'
 
+import { MyPermissions, MyPermissionsSidebarItem } from './MyPermissions'
 import styles from './page.module.css'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import {
@@ -30,6 +31,7 @@ export default function Page() {
 
     const [selectedPermission, setSelectedPermission] =
         useState<Permission | null>(null)
+    const [featuredSelected, setFeaturedSelected] = useState(true)
     const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
     const isDesktop = useMediaQuery('(min-width: 64rem)')
 
@@ -102,8 +104,9 @@ export default function Page() {
             queryClient.invalidateQueries({ queryKey: ['/roles', search] }),
     })
 
-    const handleSelectItem = (value: Permission): boolean => {
-        if (value.id === selectedPermission?.id) return false
+    const handleSelectItem = (value: Permission | null): boolean => {
+        if (value && value.id === selectedPermission?.id) return false
+        if (!value && featuredSelected) return false
 
         if (formState?.dirty) {
             const proceed = confirm(
@@ -113,6 +116,8 @@ export default function Page() {
         }
 
         setSelectedPermission(value)
+        setFeaturedSelected(value === null)
+        setFormState(null)
         return true
     }
 
@@ -159,24 +164,35 @@ export default function Page() {
                 menu: () => <SidebarListFilters {...sidebarFilters} />,
             }}
             sidebarBody={
-                <SidebarBody<Permission>
-                    items={permissions}
-                    isLoading={searchQuery.isPending}
-                    error={searchQuery.error}
-                    selectedKey={selectedPermission?.id}
-                    renderItem={(permission) => ({
-                        key: permission.id,
-                        label: permission.name,
-                        href: `/volunteer_dashboard/panels/permissions?permissionId=${permission.id}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            const selected = handleSelectItem(permission)
+                <>
+                    <MyPermissionsSidebarItem
+                        selected={featuredSelected}
+                        onSelect={() => {
+                            const selected = handleSelectItem(null)
                             if (selected && !isDesktop) {
                                 setSidebarMobileVisible(false)
                             }
-                        },
-                    })}
-                />
+                        }}
+                    />
+                    <SidebarBody<Permission>
+                        items={permissions}
+                        isLoading={searchQuery.isPending}
+                        error={searchQuery.error}
+                        selectedKey={selectedPermission?.id}
+                        renderItem={(permission) => ({
+                            key: permission.id,
+                            label: permission.name,
+                            href: `/volunteer_dashboard/panels/permissions?permissionId=${permission.id}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                const selected = handleSelectItem(permission)
+                                if (selected && !isDesktop) {
+                                    setSidebarMobileVisible(false)
+                                }
+                            },
+                        })}
+                    />
+                </>
             }
         >
             <div className={styles.detailPane}>
@@ -185,7 +201,8 @@ export default function Page() {
                     sidebarMobileVisible={isDesktop || sidebarMobileVisible}
                     onBack={() => setSidebarMobileVisible(true)}
                 />
-                {selectedPermission ? (
+                {featuredSelected && <MyPermissions />}
+                {selectedPermission && (
                     <Form<Permission>
                         key={selectedPermission.id}
                         form={selectedPermission}
@@ -198,10 +215,6 @@ export default function Page() {
                             <TextField label="Name" field="name" required />
                         </FormGroup>
                     </Form>
-                ) : (
-                    <div className={styles.emptyState}>
-                        No permission selected
-                    </div>
                 )}
             </div>
         </Panel>
