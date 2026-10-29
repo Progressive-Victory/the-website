@@ -44,8 +44,6 @@ interface DetailViewProps {
     onSave: (endorsement: Endorsement) => void | boolean
     onCreate: () => Endorsement
     onDelete: () => void
-    editDisabledReason?: string
-    deleteDisabledReason?: string
     onCancel: () => void
     showCreateButton?: boolean
     controlsRef?: React.Ref<FormControls>
@@ -62,8 +60,6 @@ export function DetailView({
     onSave,
     onCreate,
     onDelete,
-    editDisabledReason,
-    deleteDisabledReason,
     onCancel,
     showCreateButton,
     controlsRef,
@@ -84,8 +80,6 @@ export function DetailView({
             showCreateButton={showCreateButton}
             controlsRef={controlsRef}
             onDelete={onDelete}
-            editDisabledReason={editDisabledReason}
-            deleteDisabledReason={deleteDisabledReason}
             onCancel={onCancel}
         >
             <FormGroup title="Details">

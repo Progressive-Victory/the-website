@@ -9,7 +9,6 @@ import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { Header } from '@/components/layout/Header'
-import { PermissionIds } from '@/models'
 import { useEndorsementQueries, usePositionQueries } from '@/queries'
 import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
@@ -228,9 +227,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
     const isPanelSelected = pathname.startsWith('/volunteer_dashboard/panels/')
 
     return (
-        <ProtectedPage
-            requiredPermissions={[PermissionIds.VOLUNTEER_DASHBOARD_ACCESS]}
-        >
+        <ProtectedPage requiredPermissions={['Admin Panel Access']}>
             <div className={styles.root}>
                 <Header />
 

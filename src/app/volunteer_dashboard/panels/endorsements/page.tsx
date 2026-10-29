@@ -16,15 +16,12 @@ import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ENDORSEMENT_TYPE_LABELS,
     INITIATIVE_TYPE_LABELS,
-    PermissionIds,
     getRelevantElectionDate,
     getStateLabel,
 } from '@/models'
 import { useEndorsementQueries } from '@/queries'
 import { cn } from '@/util'
 import {
-    hasPermission,
-    useCurrentUser,
     useOptimisticDelete,
     useOptimisticUpdate,
     useUnpaginatedSearch,
@@ -131,10 +128,6 @@ const makeLevelTags = (endorsement: Endorsement) => [
 export default function Page() {
     const queryClient = useQueryClient()
     const endorsementQueries = useEndorsementQueries()
-    const currentUser = useCurrentUser()
-    const canEditEndorsements =
-        !!currentUser.data &&
-        hasPermission(currentUser.data, PermissionIds.EDIT_ENDORSEMENTS)
 
     const [selectedEndorsement, setSelectedEndorsement] =
         useState<Endorsement | null>(null)
@@ -373,10 +366,7 @@ export default function Page() {
             }}
             prominentHeaderButton={{
                 icon: <FaRegPenToSquare size={20} />,
-                label: canEditEndorsements
-                    ? 'Create Endorsement'
-                    : 'Not Allowed To Create Endorsements',
-                disabled: !canEditEndorsements,
+                label: 'Create Endorsement',
                 onClick: () => formControls.current?.create(),
             }}
             sidebarBody={
@@ -454,16 +444,6 @@ export default function Page() {
                         showCreateButton={false}
                         controlsRef={formControls}
                         onDelete={handleDelete}
-                        editDisabledReason={
-                            canEditEndorsements
-                                ? undefined
-                                : 'Not Allowed To Edit Endorsements'
-                        }
-                        deleteDisabledReason={
-                            canEditEndorsements
-                                ? undefined
-                                : 'Not Allowed To Delete Endorsements'
-                        }
                         onCancel={handleCancel}
                         uploadImage={endorsementQueries.uploadImage}
                         className={styles.detailsContent}

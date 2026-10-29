@@ -38,16 +38,6 @@
             border-bottom: 0;
         }
 
-        &:has(input) {
-            box-sizing: border-box;
-            min-height: calc(1lh + 1.5rem + 1px);
-            padding-block: 0;
-
-            &:last-child {
-                min-height: calc(1lh + 1.5rem);
-            }
-        }
-
         & > span {
             flex: 1 1 0;
             min-width: 0;
@@ -60,93 +50,6 @@
             text-align: right;
             overflow-wrap: anywhere;
         }
-    }
-}
-
-.permissionList.permissionCards {
-    background: none;
-    border: 0;
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    overflow: visible;
-
-    & > * {
-        background: rgba(255, 255, 255, 0.72);
-        backdrop-filter: blur(18px) saturate(160%);
-        -webkit-backdrop-filter: blur(18px) saturate(160%);
-        border-inline: 1px solid rgba(17, 24, 39, 0.1);
-    }
-
-    & > :last-child,
-    & > :has(+ .cardBreak) {
-        border-bottom: 1px solid rgba(17, 24, 39, 0.1);
-        border-end-start-radius: 1rem;
-        border-end-end-radius: 1rem;
-    }
-
-    & > :first-child,
-    & > .cardBreak + * {
-        border-top: 1px solid rgba(17, 24, 39, 0.1);
-        border-start-start-radius: 1rem;
-        border-start-end-radius: 1rem;
-    }
-
-    & > :last-child:has(input),
-    & > :has(input):has(+ .cardBreak) {
-        min-height: calc(1lh + 1.5rem + 1px);
-    }
-
-    & > :first-child:has(input),
-    & > .cardBreak + :has(input) {
-        min-height: calc(1lh + 1.5rem + 2px);
-    }
-
-    & > .cardBreak {
-        height: 1rem;
-        padding: 0;
-        border: 0;
-        background: none;
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-    }
-}
-
-.secondaryValue.secondaryValue {
-    color: rgba(15, 23, 42, 0.45);
-}
-
-.permissionList.permissionList > .linkRow {
-    padding: 0;
-}
-
-.rowLink {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-    padding: 0.75rem 0.9rem;
-    color: inherit;
-    text-decoration: none;
-    transition: background-color 140ms ease;
-
-    &:hover {
-        background: rgba(15, 23, 42, 0.05);
-    }
-
-    &:focus-visible {
-        outline: 2px solid #2986cc;
-        outline-offset: -2px;
-    }
-
-    & > span {
-        flex: 1 1 0;
-        min-width: 0;
-        overflow-wrap: anywhere;
-    }
-
-    & > svg {
-        flex-shrink: 0;
     }
 }
 

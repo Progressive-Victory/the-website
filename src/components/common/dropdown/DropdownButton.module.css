@@ -104,13 +104,6 @@
     color: rgba(15, 23, 42, 0.62);
     gap: 0.5rem;
     transition: background-color 140ms ease;
-
-    &:disabled,
-    &:disabled:hover {
-        cursor: default;
-        opacity: 0.4;
-        background: transparent;
-    }
 }
 
 .buttonIcon:hover {

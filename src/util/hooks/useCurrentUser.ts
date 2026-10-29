@@ -38,10 +38,10 @@ export function useCurrentUser() {
     }
 }
 
-export function hasPermission(user: User, permissionId: number): boolean {
+export function hasPermission(user: User, permission: string): boolean {
     return (
         user.positions?.some((position) =>
-            position.permissions.some((p) => p.id === permissionId)
+            position.permissions.some((p) => p.name === permission)
         ) ?? false
     )
 }

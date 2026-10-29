@@ -77,18 +77,6 @@
     background-color: #ef4444;
 }
 
-.unavailable:disabled {
-    cursor: default;
-    opacity: 0.4;
-    border-color: #0284c7;
-    background-color: #0ea5e9;
-
-    &.discardButton {
-        border-color: #dc2626;
-        background-color: #ef4444;
-    }
-}
-
 .emptyContainer {
     display: flex;
     width: 100%;

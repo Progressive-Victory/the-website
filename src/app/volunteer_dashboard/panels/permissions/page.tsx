@@ -16,23 +16,18 @@ import {
     type SidebarListFiltersProps,
 } from '@/components/common/panel/sidebar_list/SidebarList'
 import { FetchError } from '@/models'
-import { usePositionQueries } from '@/queries'
-import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import Link from 'next/link'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Permission, zPermission } from 'pv-contracts/data'
 import { SortDirection, UpdatePermissionRequest } from 'pv-contracts/requests'
 import { PaginatedResponse } from 'pv-contracts/responses'
 import { useState } from 'react'
-import { FiChevronRight } from 'react-icons/fi'
 import { IoEllipsisVertical } from 'react-icons/io5'
 import { useMediaQuery } from 'usehooks-ts'
 
 export default function Page() {
     const queryClient = useQueryClient()
     const { onPatch } = useFetch()
-    const positionQueries = usePositionQueries()
 
     const [selectedPermission, setSelectedPermission] =
         useState<Permission | null>(null)
@@ -106,15 +101,7 @@ export default function Page() {
             )
         },
         onSettled: () =>
-            Promise.all([
-                queryClient.invalidateQueries({ queryKey: ['/permissions'] }),
-                queryClient.invalidateQueries({
-                    queryKey: ['positionHierarchy'],
-                }),
-                queryClient.invalidateQueries({
-                    queryKey: ['/users/current'],
-                }),
-            ]),
+            queryClient.invalidateQueries({ queryKey: ['/roles', search] }),
     })
 
     const handleSelectItem = (value: Permission | null): boolean => {
@@ -142,23 +129,8 @@ export default function Page() {
         })
     }
 
-    const permissions = [...(searchQuery.data?.data ?? [])].sort((a, b) =>
-        search.sort === SortDirection.DESC ? b.id - a.id : a.id - b.id
-    )
+    const permissions = searchQuery.data?.data ?? []
     const resultCount = searchQuery.data?.count
-
-    const positionHierarchy = useQuery({
-        queryKey: ['positionHierarchy'],
-        queryFn: positionQueries.getPositionHierarchy,
-        enabled: positionQueries.ready,
-    })
-    const assignedPositions = (positionHierarchy.data?.positions ?? [])
-        .filter((position) =>
-            position.permissions.some(
-                (permission) => permission.id === selectedPermission?.id
-            )
-        )
-        .sort((a, b) => a.name.localeCompare(b.name))
     const sidebarFilters: SidebarListFiltersProps = {
         search,
         onSearch,
@@ -239,75 +211,8 @@ export default function Page() {
                         onUpdate={setFormState}
                         onSave={handleSave}
                     >
-                        <FormGroup
-                            title="Details"
-                            className={cn(
-                                styles.permissionList,
-                                styles.permissionCards
-                            )}
-                        >
-                            <TextField label="Name" field="name" />
-                            {/* # TODO: use the real field once the API adds permission descriptions. */}
-                            <TextField<Permission>
-                                label="Description"
-                                getter={() => 'No description yet'}
-                                readonlyClassName={styles.secondaryValue}
-                                readonly
-                            />
-                            <div className={styles.cardBreak} />
-                            <TextField<Permission>
-                                label="ID"
-                                getter={(permission) => String(permission.id)}
-                                readonlyClassName={styles.secondaryValue}
-                                readonly
-                            />
-                        </FormGroup>
-                        <FormGroup
-                            title="Positions"
-                            className={styles.permissionList}
-                        >
-                            {positionHierarchy.isPending ? (
-                                <div>
-                                    <span className={styles.secondaryValue}>
-                                        Loading positions...
-                                    </span>
-                                </div>
-                            ) : positionHierarchy.error ? (
-                                <div role="alert">
-                                    <span className={styles.secondaryValue}>
-                                        Error:{' '}
-                                        {parseErrorMessage(
-                                            positionHierarchy.error
-                                        )}
-                                    </span>
-                                </div>
-                            ) : assignedPositions.length === 0 ? (
-                                <div>
-                                    <span className={styles.secondaryValue}>
-                                        No positions grant this permission
-                                    </span>
-                                </div>
-                            ) : (
-                                assignedPositions.map((position) => (
-                                    <div
-                                        key={position.id}
-                                        className={styles.linkRow}
-                                    >
-                                        <Link
-                                            href={`/volunteer_dashboard/panels/positions?positionId=${position.id}`}
-                                            className={styles.rowLink}
-                                        >
-                                            <span>{position.name}</span>
-                                            <FiChevronRight
-                                                aria-hidden="true"
-                                                className={
-                                                    styles.secondaryValue
-                                                }
-                                            />
-                                        </Link>
-                                    </div>
-                                ))
-                            )}
+                        <FormGroup title="Details">
+                            <TextField label="Name" field="name" required />
                         </FormGroup>
                     </Form>
                 )}

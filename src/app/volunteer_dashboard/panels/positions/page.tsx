@@ -36,7 +36,6 @@ import {
     useUnpaginatedSearch,
 } from '@/util/hooks'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useSearchParams } from 'next/navigation'
 import {
     Position,
     PositionTypes,
@@ -51,7 +50,7 @@ import {
     PaginatedResponse,
     PositionHierarchyResponse,
 } from 'pv-contracts/responses'
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, useCallback, useRef, useState } from 'react'
 import { FaInfinity } from 'react-icons/fa'
 import { FaRegPenToSquare } from 'react-icons/fa6'
 import { useMediaQuery } from 'usehooks-ts'
@@ -82,21 +81,6 @@ export default function Page() {
         queryFn: positionQueries.getPositionHierarchy,
         enabled: positionQueries.ready,
     })
-
-    const navPositionId = Number(useSearchParams().get('positionId')) || null
-    const appliedNavPositionId = useRef<number | null>(null)
-
-    useEffect(() => {
-        if (!navPositionId || appliedNavPositionId.current === navPositionId)
-            return
-        const position = positionHierarchy.data?.positions.find(
-            (p) => p.id === navPositionId
-        )
-        if (!position) return
-        appliedNavPositionId.current = navPositionId
-        setSelectedPosition(position)
-        setSidebarMobileVisible(false)
-    }, [navPositionId, positionHierarchy.data])
 
     const {
         query: userSearchQuery,
@@ -421,9 +405,7 @@ function PermissionsField(
         search: { sort: SortDirection.ASC, limit: 100 },
     })
 
-    const permissions = [...(query.data?.data ?? [])].sort(
-        (a, b) => a.id - b.id
-    )
+    const permissions = query.data?.data ?? []
     const assignedPermissions = getter(props.dynamic!.form) ?? []
     const assignedPermissionIds = new Set(
         assignedPermissions.map((permission) => permission.id)
