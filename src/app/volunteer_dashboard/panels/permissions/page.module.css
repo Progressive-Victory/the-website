@@ -4,6 +4,175 @@
     --navigation-stack-sidebar-gap: 0rem;
 }
 
+.featuredIcon {
+    display: block;
+    width: 40px;
+    height: 40px;
+    color: rgba(15, 23, 42, 0.78);
+}
+
+.permissionList.permissionList {
+    gap: 0;
+    margin-top: 0.5rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 18px 45px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+
+    & > * {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0.9rem;
+        border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+        font-size: 0.92rem;
+        font-weight: 500;
+        color: rgba(15, 23, 42, 0.85);
+
+        &:last-child {
+            border-bottom: 0;
+        }
+
+        &:has(input) {
+            box-sizing: border-box;
+            min-height: calc(1lh + 1.5rem + 1px);
+            padding-block: 0;
+
+            &:last-child {
+                min-height: calc(1lh + 1.5rem);
+            }
+        }
+
+        & > span {
+            flex: 1 1 0;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        & > div {
+            flex: 0 1 auto;
+            min-width: 0;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+
+.permissionList.permissionCards {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    overflow: visible;
+
+    & > * {
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        border-inline: 1px solid rgba(17, 24, 39, 0.1);
+    }
+
+    & > :last-child,
+    & > :has(+ .cardBreak) {
+        border-bottom: 1px solid rgba(17, 24, 39, 0.1);
+        border-end-start-radius: 1rem;
+        border-end-end-radius: 1rem;
+    }
+
+    & > :first-child,
+    & > .cardBreak + * {
+        border-top: 1px solid rgba(17, 24, 39, 0.1);
+        border-start-start-radius: 1rem;
+        border-start-end-radius: 1rem;
+    }
+
+    & > :last-child:has(input),
+    & > :has(input):has(+ .cardBreak) {
+        min-height: calc(1lh + 1.5rem + 1px);
+    }
+
+    & > :first-child:has(input),
+    & > .cardBreak + :has(input) {
+        min-height: calc(1lh + 1.5rem + 2px);
+    }
+
+    & > .cardBreak {
+        height: 1rem;
+        padding: 0;
+        border: 0;
+        background: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+}
+
+.secondaryValue.secondaryValue {
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.permissionList.permissionList > .linkRow {
+    padding: 0;
+}
+
+.rowLink {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 140ms ease;
+
+    &:hover {
+        background: rgba(15, 23, 42, 0.05);
+    }
+
+    &:focus-visible {
+        outline: 2px solid #2986cc;
+        outline-offset: -2px;
+    }
+
+    & > span {
+        flex: 1 1 0;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    & > svg {
+        flex-shrink: 0;
+    }
+}
+
+.permissionStatus.permissionStatus {
+    display: inline-flex;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 3.25rem;
+    padding-inline: 0.75rem;
+    padding-block: 0.12rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+
+    &.permissionStatusEnabled {
+        color: var(--navigation-button-link-active-color, rgba(2, 132, 199, 1));
+        background: var(
+            --navigation-button-link-active-bg,
+            rgba(14, 165, 233, 0.14)
+        );
+    }
+}
+
 .sidebarSearchInput {
     width: 100%;
     border-radius: 0.6rem;

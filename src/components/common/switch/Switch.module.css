@@ -1,0 +1,56 @@
+.switch {
+    appearance: none;
+    position: relative;
+    flex: 0 0 var(--switch-width, 2.25rem);
+    width: var(--switch-width, 2.25rem);
+    height: 1.25rem;
+    margin: 0 0 0 auto;
+    border: 0;
+    border-radius: 9999px;
+    background: #d1d5db;
+    cursor: pointer;
+    transition: background-color 180ms ease;
+
+    &[data-type='long'] {
+        --switch-width: 3rem;
+        --switch-thumb-width: 1.5rem;
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0.125rem;
+        left: 0.125rem;
+        width: var(--switch-thumb-width, 1rem);
+        height: 1rem;
+        border-radius: 9999px;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        transition: transform 180ms ease;
+    }
+
+    &:checked {
+        background: #2986cc;
+
+        &::before {
+            transform: translateX(
+                calc(
+                    var(--switch-width, 2.25rem) -
+                        var(--switch-thumb-width, 1rem) - 0.25rem
+                )
+            );
+        }
+    }
+
+    &:focus-visible {
+        outline: 2px solid #2986cc;
+        outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &,
+        &::before {
+            transition: none;
+        }
+    }
+}

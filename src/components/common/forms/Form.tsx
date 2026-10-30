@@ -115,6 +115,12 @@ export interface FormProps<T> {
     /** Shows 'Delete' alongside Save/Discard while editing instead of beside 'Edit'. */
     deleteInEditMode?: boolean
 
+    /** Disables 'Edit' and shows this text as its tooltip. */
+    editDisabledReason?: string
+
+    /** Disables 'Delete' and shows this text as its tooltip. */
+    deleteDisabledReason?: string
+
     /** Callback when editing is discarded. */
     onCancel?: () => void
 }
@@ -159,6 +165,8 @@ export function Form<T>({
     hideEditButton = false,
     hideEditActions = false,
     hideSaveDiscard = false,
+    editDisabledReason,
+    deleteDisabledReason,
     onCancel,
     initialSession,
 }: FormProps<T>) {
@@ -211,7 +219,7 @@ export function Form<T>({
 
     // Called when 'Edit' is pressed. Simply edits current form state.
     const handleEdit = () => {
-        if (!initialForm) return
+        if (!initialForm || editDisabledReason) return
         beginEdit(initialForm, 'edit')
     }
 
@@ -224,7 +232,7 @@ export function Form<T>({
 
     // Called when 'Delete' is pressed. Asks the parent to delete the form.
     const handleDelete = () => {
-        if (!initialForm) return
+        if (!initialForm || deleteDisabledReason) return
         onDelete?.(initialForm)
     }
 
@@ -456,10 +464,16 @@ export function Form<T>({
                                             mode === 'edit' && (
                                                 <button
                                                     onClick={handleDelete}
-                                                    disabled={saving}
+                                                    disabled={
+                                                        saving ||
+                                                        !!deleteDisabledReason
+                                                    }
+                                                    title={deleteDisabledReason}
                                                     className={cn(
                                                         styles.button,
-                                                        styles.discardButton
+                                                        styles.discardButton,
+                                                        deleteDisabledReason &&
+                                                            styles.unavailable
                                                     )}
                                                 >
                                                     <FaTrashAlt /> Delete
@@ -479,7 +493,13 @@ export function Form<T>({
                                         {!hideEditButton && (
                                             <button
                                                 onClick={handleEdit}
-                                                className={styles.button}
+                                                disabled={!!editDisabledReason}
+                                                title={editDisabledReason}
+                                                className={cn(
+                                                    styles.button,
+                                                    editDisabledReason &&
+                                                        styles.unavailable
+                                                )}
                                             >
                                                 <FaEdit /> Edit
                                             </button>
@@ -487,9 +507,13 @@ export function Form<T>({
                                         {onDelete && !deleteInEditMode && (
                                             <button
                                                 onClick={handleDelete}
+                                                disabled={!!deleteDisabledReason}
+                                                title={deleteDisabledReason}
                                                 className={cn(
                                                     styles.button,
-                                                    styles.discardButton
+                                                    styles.discardButton,
+                                                    deleteDisabledReason &&
+                                                        styles.unavailable
                                                 )}
                                             >
                                                 <FaTrashAlt /> Delete

@@ -21,7 +21,11 @@ import {
 } from '@/components/common/panel/sidebar_list/SidebarList'
 import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import { FetchError, stateOptions } from '@/models'
-import { usePositionQueries } from '@/queries'
+import {
+    useLinkDonorToUser,
+    usePositionQueries,
+    useUnlinkDonorFromUser,
+} from '@/queries'
 import { cn, parseErrorMessage, DOT_SEPARATOR } from '@/util'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
@@ -46,7 +50,6 @@ import {
     zUserProfile,
 } from 'pv-contracts/data'
 import {
-    ActBlueDonorLinkRequest,
     SortDirection,
     UpdateUserRequest,
     zUpdateUserRequest,
@@ -186,7 +189,7 @@ function FilterSubmenu<T>({
 
 export default function Page() {
     const queryClient = useQueryClient()
-    const { ready, onGet, onPatch, onPost } = useFetch()
+    const { ready, onGet, onPatch } = useFetch()
     const navParams = useSearchParams()
     const navUserId = navParams.get('userId')
 
@@ -611,50 +614,21 @@ export default function Page() {
             ]),
     })
 
+    const linkDonor = useLinkDonorToUser('Member Panel')
+    const unlinkDonor = useUnlinkDonorFromUser('Member Panel')
+
     const handleSelectDonorItem = useCallback(
-        async (value: ActBlueDonor, userId: number) => {
+        async (donor: ActBlueDonor, userId: number) => {
             setPickingDonor(false)
-
-            await onPost(
-                '/actblue/donors/:donorEmail/link',
-                {
-                    userId,
-                    metaData: {
-                        dataSource: 'Member Panel',
-                        userWhoUpdatedId: loggedInUser.data?.id,
-                    },
-                } satisfies ActBlueDonorLinkRequest,
-                null,
-                { params: { donorEmail: value.email } }
-            )
-
-            await queryClient.invalidateQueries({
-                queryKey: [`/users/${userId}`],
-            })
+            await linkDonor.mutateAsync({ donor, userId })
         },
-        [onPost, queryClient, loggedInUser.data]
+        [linkDonor]
     )
 
     const handleDeleteDonorItem = useCallback(
-        async (value: ActBlueDonor, userId: number) => {
-            await onPost(
-                '/actblue/donors/:donorEmail/link',
-                {
-                    userId: null,
-                    metaData: {
-                        dataSource: 'Member Panel',
-                        userWhoUpdatedId: loggedInUser.data?.id,
-                    },
-                },
-                null,
-                { params: { donorEmail: value.email } }
-            )
-
-            await queryClient.invalidateQueries({
-                queryKey: [`/users/${userId}`],
-            })
-        },
-        [onPost, queryClient, loggedInUser.data?.id]
+        (donor: ActBlueDonor, userId: number) =>
+            unlinkDonor.mutateAsync({ donorEmail: donor.email, userId }),
+        [unlinkDonor]
     )
 
     const handleSelectItem = (value: UserProfile | User) => {
@@ -730,6 +704,7 @@ export default function Page() {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 birthdate: user.birthdate,
+                aliases: Array.from(user.aliases ?? []),
                 membershipCardStatus: +user.membershipCardStatus,
                 membershipMerchStatus: +user.membershipMerchStatus,
                 shirtSize: user.shirtSize,

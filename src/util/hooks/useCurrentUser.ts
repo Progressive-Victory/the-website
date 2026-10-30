@@ -15,6 +15,7 @@ export function useCurrentUser() {
         queryFn: getCurrentUser({
             includeDiscordUsers: true,
             includeDonors: true,
+            includePositions: true,
         }),
         placeholderData: keepPreviousData,
     })
@@ -37,10 +38,10 @@ export function useCurrentUser() {
     }
 }
 
-export function hasPermission(user: User, permission: string): boolean {
+export function hasPermission(user: User, permissionId: number): boolean {
     return (
-        user.roles?.some((r) =>
-            r.permissions?.some((p) => p.name == permission)
+        user.positions?.some((position) =>
+            position.permissions.some((p) => p.id === permissionId)
         ) ?? false
     )
 }
