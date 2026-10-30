@@ -32,10 +32,6 @@ import {
     useQueryClient,
 } from '@tanstack/react-query'
 import { User, UserProfile, zUser, zUserProfile } from 'pv-contracts/data'
-import {
-    ActBlueDonorLinkRequest,
-    UpdateMembershipRequest,
-} from 'pv-contracts/requests'
 import type { MembershipSearchRequest } from 'pv-contracts/requests'
 import {
     zMembershipsResponsePacket,
@@ -342,50 +338,6 @@ export function useUserByName(name?: string) {
     }
 }
 
-export function useLinkDonorToUser() {
-    const { onPost, onPatch } = useFetch()
-    const loggedInUser = useCurrentUser()
-    const queryClient = useQueryClient()
-
-    return useMutation({
-        mutationFn: async ({
-            donorEmail,
-            userId,
-        }: {
-            donorEmail: string
-            userId: number
-        }) => {
-            const metaData = {
-                dataSource: 'Membership Panel',
-                userWhoUpdatedId: loggedInUser.data?.id,
-            }
-
-            await onPost(
-                '/actblue/donors/:donorEmail/link',
-                { userId, metaData } satisfies ActBlueDonorLinkRequest,
-                null,
-                { params: { donorEmail } }
-            )
-
-            await onPatch(
-                '/actblue/donors/:donorEmail/membership',
-                {
-                    discordConfirmed: true,
-                    metaData,
-                } satisfies UpdateMembershipRequest,
-                null,
-                { params: { donorEmail } }
-            )
-        },
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({
-                queryKey: ['/actblue/memberships'],
-            })
-        },
-        onError: (error) => console.error(error),
-    })
-}
-
 export function useSaveMemberships(onSaved: () => void) {
     const { onPatch } = useFetch()
     const loggedInUser = useCurrentUser()
@@ -419,7 +371,6 @@ export function useSaveMemberships(onSaved: () => void) {
             }
         },
         onSuccess: async () => {
-            onSaved()
             await Promise.all([
                 queryClient.invalidateQueries({
                     queryKey: ['/actblue/memberships'],
@@ -428,6 +379,7 @@ export function useSaveMemberships(onSaved: () => void) {
                     queryKey: ['/users/:userId'],
                 }),
             ])
+            onSaved()
         },
         onError: (error) => console.error(error),
     })
@@ -633,6 +585,7 @@ export function useMembershipPanel() {
     }, [clearEdits])
 
     const saveMutation = useSaveMemberships(stopEditing)
+    const isSaving = saveMutation.isPending
 
     return {
         members,
@@ -642,6 +595,7 @@ export function useMembershipPanel() {
         setOption,
         resetOptions,
         isEditing,
+        isSaving,
         setIsEditing,
         editController,
         saveMutation,

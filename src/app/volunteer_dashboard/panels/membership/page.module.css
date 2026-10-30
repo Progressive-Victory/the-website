@@ -109,6 +109,15 @@
     &:has([aria-expanded='true']) {
         --confirm-tooltip-opacity: 0;
     }
+
+    &.saving {
+        opacity: 0.7;
+        cursor: progress;
+    }
+}
+
+.tableFieldset {
+    display: contents;
 }
 
 .loadMore {
