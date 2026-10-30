@@ -1,7 +1,6 @@
 'use client'
 
 import {
-    useLinkDonorToUser,
     useUserByDiscord,
     useUserByEmail,
     useUserByName,
@@ -10,6 +9,7 @@ import {
 import { formatPhone } from '../membership.helpers'
 import { Member } from '../membership.types'
 import styles from './UserMatch.module.css'
+import { useLinkDonorToUser } from '@/queries'
 import { UserProfile } from 'pv-contracts/data'
 
 export interface UserMatchProps {
@@ -38,7 +38,7 @@ const UserMatchSuggestion = ({
     missingMessage,
     emptyMessage,
 }: UserMatchSuggestionProps) => {
-    const linkMutation = useLinkDonorToUser()
+    const linkMutation = useLinkDonorToUser('Membership Panel')
     const donorEmail = member.donorEmail
 
     const statusMessage = !hasValue
@@ -82,7 +82,10 @@ const UserMatchSuggestion = ({
                             onClick={() => {
                                 if (donorEmail == null || match == null) return
                                 linkMutation.mutate(
-                                    { donorEmail, userId: match.id },
+                                    {
+                                        donor: member.packet.donor,
+                                        userId: match.id,
+                                    },
                                     { onSuccess: onLinked }
                                 )
                             }}
