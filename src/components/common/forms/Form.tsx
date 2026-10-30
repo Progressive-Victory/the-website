@@ -507,7 +507,9 @@ export function Form<T>({
                                         {onDelete && !deleteInEditMode && (
                                             <button
                                                 onClick={handleDelete}
-                                                disabled={!!deleteDisabledReason}
+                                                disabled={
+                                                    !!deleteDisabledReason
+                                                }
                                                 title={deleteDisabledReason}
                                                 className={cn(
                                                     styles.button,
