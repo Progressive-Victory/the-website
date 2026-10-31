@@ -135,6 +135,7 @@
 
 .sidebarDetail .positionForm {
     padding: 0;
+    margin-top: 1rem;
 }
 
 .dataModel {
@@ -157,12 +158,19 @@
 
 .linePointText {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
+    flex-direction: column;
+    gap: 0.25rem;
     flex: 1;
     min-width: 0;
     overflow-wrap: anywhere;
+}
+
+.linePointMain {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-width: 0;
 }
 
 .linePointLabel {

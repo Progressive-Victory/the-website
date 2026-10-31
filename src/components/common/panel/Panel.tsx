@@ -33,7 +33,6 @@ export interface SidebarListConfig {
 export interface PanelProps {
     children: ReactNode
     label?: string
-    sidebarLabel?: string
     includeHeader?: boolean
     includeSidebar?: boolean
     largeTitle?: boolean
@@ -66,7 +65,6 @@ export interface PanelProps {
 export function Panel({
     children,
     label,
-    sidebarLabel,
     includeHeader = false,
     includeSidebar = false,
     largeTitle = false,
@@ -189,7 +187,7 @@ export function Panel({
                                 label={panelLabel}
                                 header={{
                                     mode: includeHeader ? 'shown' : 'hidden',
-                                    label: sidebarLabel ?? panelLabel,
+                                    label: panelLabel,
                                     largeTitle,
                                     search: resolvedSidebarSearch,
                                     filters: {

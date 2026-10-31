@@ -38,6 +38,7 @@ import {
 import { LineDetails } from './fields/LineDetails'
 import { OccupantsField } from './fields/OccupantsField'
 import { PermissionsField } from './fields/PermissionsField'
+import { PositionLinesField } from './fields/PositionLinesField'
 import { SubordinatesField } from './fields/SubordinatesField'
 import styles from './page.module.css'
 import {
@@ -315,6 +316,11 @@ export default function Page() {
         setShowPositionDetails(false)
     }
 
+    const closeDetails = () => {
+        setShowPositionDetails(false)
+        setSelectedLineId(null)
+    }
+
     const sidebarFilters: SidebarListFiltersProps = {
         search,
         onSearch,
@@ -361,20 +367,6 @@ export default function Page() {
                             </select>
                         </label>
                     </div>
-                }
-                sidebarLabel={
-                    showPositionDetails || selectedLine ? '' : 'Positions'
-                }
-                prominentHeaderLeft={
-                    showPositionDetails || selectedLine ? (
-                        <BackButton
-                            label="Positions"
-                            onClick={() => {
-                                setShowPositionDetails(false)
-                                setSelectedLineId(null)
-                            }}
-                        />
-                    ) : undefined
                 }
                 showScrollbar={false}
                 sidebarList={
@@ -444,6 +436,7 @@ export default function Page() {
                                     )
                                 }
                                 lines={chartLines}
+                                positions={chartPositions}
                                 branchPoints={chartBranchPoints}
                                 usedBranchPoints={
                                     new Set(
@@ -509,12 +502,17 @@ export default function Page() {
                                     )
                                     setSelectedLineId(null)
                                 }}
+                                onBack={closeDetails}
                             />
                         )}
                         <div
                             className={styles.sidebarDetail}
                             hidden={!showPositionDetails}
                         >
+                            <BackButton
+                                label="Back To Positions"
+                                onClick={closeDetails}
+                            />
                             <Form<Position>
                                 controlsRef={formControls}
                                 key={`${selectedPosition?.id}:${isEditing}:${editRevision}`}
@@ -748,6 +746,21 @@ export default function Page() {
                                         </FormGroup>
                                     )}
                             </Form>
+                            {detailPosition && !isGroup && (
+                                <PositionLinesField
+                                    position={detailPosition}
+                                    positions={chartPositions}
+                                    lines={chartLines}
+                                    onSelectLine={(id) => {
+                                        if (saveDrafts.isPending) return
+                                        setSelectedLinePoint(null)
+                                        setSelectedLineId(id)
+                                        setSelectedPosition(null)
+                                        setFormState(null)
+                                        setShowPositionDetails(false)
+                                    }}
+                                />
+                            )}
                             {detailPosition && (
                                 <section aria-label="Data model">
                                     <FormGroup title="Data model">

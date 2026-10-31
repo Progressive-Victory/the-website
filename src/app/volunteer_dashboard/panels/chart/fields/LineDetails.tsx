@@ -3,11 +3,13 @@ import {
     type Line,
     type LinePointData,
     type BranchPoint,
+    type Position,
 } from '../domain/chart.types'
 import {
     lineError,
     isMovablePoint,
-    parentLine,
+    parentLines,
+    resolveLineSources,
     childLines,
     incomingLineCount,
 } from '../domain/lineGraph'
@@ -20,15 +22,28 @@ import { Fragment, useState, type ReactNode } from 'react'
 import { FaCodeCommit, FaCodeCompare, FaCodeMerge } from 'react-icons/fa6'
 import { FiChevronRight } from 'react-icons/fi'
 
+interface PointEntry {
+    point: LinePointData
+    owner: Line
+}
+
+interface FeedGroup {
+    id: string
+    title: string
+    points: PointEntry[]
+}
+
 export function LineDetails({
     line,
     lines = [],
+    positions = [],
     branchPoints = [],
     pointCoordinates,
     editing,
     disabled,
     onChange,
     onDelete,
+    onBack,
     onAddPoint,
     onDeleteBranchPoint,
     usedBranchPoints,
@@ -37,12 +52,14 @@ export function LineDetails({
 }: {
     line: Line
     lines?: Line[]
+    positions?: Position[]
     branchPoints?: BranchPoint[]
     pointCoordinates: LinePointCoordinates
     editing: boolean
     disabled: boolean
     onChange: (line: Line, branchPoints?: BranchPoint[]) => void
     onDelete: () => void
+    onBack: () => void
     onAddPoint: () => void
     onDeleteBranchPoint?: (id: string) => void
     usedBranchPoints?: ReadonlySet<string>
@@ -98,20 +115,57 @@ export function LineDetails({
         )
     }
     const error = lineError(line)
-    const chain: Line[] = []
     const visited = new Set<string>()
-    let current: Line | undefined = line
-    while (current && !visited.has(current.id)) {
-        chain.unshift(current)
-        visited.add(current.id)
-        current = parentLine(current, lines)
+    const chainTo = (end: Line) => {
+        const chain: Line[] = []
+        let current: Line | undefined = end
+        while (current && !visited.has(current.id)) {
+            chain.unshift(current)
+            visited.add(current.id)
+            const parents = parentLines(current, lines)
+            current = parents.length === 1 ? parents[0] : undefined
+        }
+        return chain
     }
-    const points = chain.flatMap((owner, index) =>
-        owner.points
-            .slice(index === 0 ? 0 : 1)
-            .map((point) => ({ point, owner }))
-    )
-    const renderPoints = (entries: typeof points, offset: number) =>
+    const chainPoints = (chain: Line[]): PointEntry[] =>
+        chain.flatMap((owner, index) =>
+            owner.points
+                .slice(index === 0 ? 0 : 1)
+                .map((point) => ({ point, owner }))
+        )
+    const chain = chainTo(line)
+    const collectFeeds = (head: Line): FeedGroup[] => {
+        const parents = parentLines(head, lines)
+        if (parents.length < 2) return []
+        return parents.flatMap((parent) => {
+            if (visited.has(parent.id)) return []
+            const feed = chainTo(parent)
+            const sourceIds = new Set(
+                resolveLineSources(parent, lines).map(
+                    ({ positionId }) => positionId
+                )
+            )
+            const names = positions
+                .filter(({ id }) => sourceIds.has(id))
+                .map(({ name }) => name)
+            return [
+                ...collectFeeds(feed[0]),
+                {
+                    id: parent.id,
+                    title: `From ${names.join(', ') || 'unknown'}`,
+                    points: chainPoints(feed),
+                },
+            ]
+        })
+    }
+    const feeds = chain[0] ? collectFeeds(chain[0]) : []
+    const points = chainPoints(chain)
+    const detailFeedId = points.some(({ point }) => point.id === detailPointId)
+        ? undefined
+        : feeds.find(({ points }) =>
+              points.some(({ point }) => point.id === detailPointId)
+          )?.id
+    const renderPoints = (entries: PointEntry[], offset: number) =>
         entries.map(({ point, owner }, localIndex) => {
             if (detailPointId && point.id !== detailPointId) return null
             const index = offset + localIndex
@@ -121,6 +175,7 @@ export function LineDetails({
                 point.kind === 'branchpoint'
             const removable =
                 free &&
+                point.id !== owner.points[0]?.id &&
                 (!junction ||
                     (!!onDeleteBranchPoint &&
                         incomingLineCount(point.id, lines) < 2))
@@ -197,47 +252,51 @@ export function LineDetails({
                             styles.linePointText
                         )}
                     >
-                        <span className={styles.linePointLabel}>
-                            <span className={styles.linePointTypeIcon}>
-                                {!(editing && removable) && (
-                                    <span
-                                        role="img"
-                                        aria-label={pointType}
-                                        title={pointType}
+                        <div className={styles.linePointMain}>
+                            <span className={styles.linePointLabel}>
+                                <span className={styles.linePointTypeIcon}>
+                                    {!(editing && removable) && (
+                                        <span
+                                            role="img"
+                                            aria-label={pointType}
+                                            title={pointType}
+                                        >
+                                            <PointIcon aria-hidden="true" />
+                                        </span>
+                                    )}
+                                </span>
+                                <span>Point {index + 1}</span>
+                            </span>
+                            <div className={styles.linePointValues}>
+                                <span className={styles.linePointCoordinates}>
+                                    {(['x', 'y'] as const).map((axis) => (
+                                        <span
+                                            key={axis}
+                                            aria-label={axis.toUpperCase()}
+                                        >
+                                            {axis.toUpperCase()}:{' '}
+                                            {coordinates &&
+                                            Number.isFinite(coordinates[axis])
+                                                ? Math.round(coordinates[axis])
+                                                : free
+                                                  ? 'Invalid'
+                                                  : 'Measuring...'}
+                                        </span>
+                                    ))}
+                                </span>
+                                {!detailPointId && (
+                                    <button
+                                        type="button"
+                                        className={styles.linePointOpen}
+                                        aria-label={`View ${title}`}
+                                        onClick={() =>
+                                            setSelectedPointId(point.id)
+                                        }
                                     >
-                                        <PointIcon aria-hidden="true" />
-                                    </span>
+                                        <FiChevronRight aria-hidden="true" />
+                                    </button>
                                 )}
-                            </span>
-                            <span>Point {index + 1}</span>
-                        </span>
-                        <div className={styles.linePointValues}>
-                            <span className={styles.linePointCoordinates}>
-                                {(['x', 'y'] as const).map((axis) => (
-                                    <span
-                                        key={axis}
-                                        aria-label={axis.toUpperCase()}
-                                    >
-                                        {axis.toUpperCase()}:{' '}
-                                        {coordinates &&
-                                        Number.isFinite(coordinates[axis])
-                                            ? Math.round(coordinates[axis])
-                                            : free
-                                              ? 'Invalid'
-                                              : 'Measuring...'}
-                                    </span>
-                                ))}
-                            </span>
-                            {!detailPointId && (
-                                <button
-                                    type="button"
-                                    className={styles.linePointOpen}
-                                    aria-label={`View ${title}`}
-                                    onClick={() => setSelectedPointId(point.id)}
-                                >
-                                    <FiChevronRight aria-hidden="true" />
-                                </button>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -264,11 +323,13 @@ export function LineDetails({
             aria-label={detailPointId ? 'Point details' : 'Line details'}
             className={styles.lineDetails}
         >
-            {detailPointId && (
+            {detailPointId ? (
                 <BackButton
                     label="Back to line"
                     onClick={() => setSelectedPointId(null)}
                 />
+            ) : (
+                <BackButton label="Back To Positions" onClick={onBack} />
             )}
             <FormGroup title="Details">
                 {selectedPoint && (
@@ -308,27 +369,41 @@ export function LineDetails({
                         </div>
                     </div>
                 )}
-                <div className={styles.subPositions}>
-                    <h3 className={styles.relationshipSectionTitle}>
-                        {detailPointId ? 'Point' : 'Line points'}
-                    </h3>
-                    <div className={styles.subPositionsContainer}>
-                        {renderPoints(points, 0)}
-                        {renderBranches(line, points.length)}
-                        {editing && !detailPointId && (
-                            <button
-                                type="button"
-                                className={styles.addRow}
-                                aria-label="Add point"
-                                disabled={disabled}
-                                onClick={onAddPoint}
-                            >
-                                <span className={styles.addIcon}>+</span>
-                                Add point
-                            </button>
-                        )}
+                {feeds
+                    .filter(({ id }) => !detailPointId || id === detailFeedId)
+                    .map((feed) => (
+                        <div key={feed.id} className={styles.subPositions}>
+                            <h3 className={styles.relationshipSectionTitle}>
+                                {detailPointId ? 'Point' : feed.title}
+                            </h3>
+                            <div className={styles.subPositionsContainer}>
+                                {renderPoints(feed.points, 0)}
+                            </div>
+                        </div>
+                    ))}
+                {!detailFeedId && (
+                    <div className={styles.subPositions}>
+                        <h3 className={styles.relationshipSectionTitle}>
+                            {detailPointId ? 'Point' : 'Line points'}
+                        </h3>
+                        <div className={styles.subPositionsContainer}>
+                            {renderPoints(points, 0)}
+                            {renderBranches(line, points.length)}
+                            {editing && !detailPointId && (
+                                <button
+                                    type="button"
+                                    className={styles.addRow}
+                                    aria-label="Add point"
+                                    disabled={disabled}
+                                    onClick={onAddPoint}
+                                >
+                                    <span className={styles.addIcon}>+</span>
+                                    Add point
+                                </button>
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
             </FormGroup>
             {error && <p role="alert">{error}</p>}
             {editing && !detailPointId && (
