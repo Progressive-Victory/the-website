@@ -117,7 +117,7 @@ const ContributionsTable = ({ lineitems }: ContributionsTableProps) => {
 interface AccountContributionsSectionProps {
     user: User
     error: Error | null
-    onSubmit: (donorLinkForm: ManualDonorLinkRequest) => void
+    onSubmit: (donorLinkForm: ManualDonorLinkRequest) => Promise<void>
 }
 
 export function AccountContributionsSection({
@@ -129,6 +129,7 @@ export function AccountContributionsSection({
         donorEmail: '',
         orderId: '',
     })
+    const [linkFormError, setLinkFormError] = React.useState<string>()
 
     const userHasDonor = user.donors && user.donors.length > 0
 
@@ -162,7 +163,17 @@ export function AccountContributionsSection({
 
     const submitLinkForm = (e: React.FormEvent) => {
         e.preventDefault()
-        onSubmit(donorLinkForm)
+        const donorEmail = donorLinkForm.donorEmail.trim()
+        const orderId = donorLinkForm.orderId.trim()
+
+        if (!donorEmail) return setLinkFormError('Donor email is required')
+        if (!orderId) return setLinkFormError('Order ID is required')
+
+        setLinkFormError(undefined)
+        onSubmit({
+            donorEmail,
+            orderId,
+        })
     }
 
     return (
@@ -218,11 +229,11 @@ export function AccountContributionsSection({
                             <button type="submit" className={formStyles.button}>
                                 Link
                             </button>
-                            {error && (
+                            {(error ?? linkFormError) && (
                                 <span
                                     className={styles.linkActBlueFormErrorText}
                                 >
-                                    {error.message}
+                                    {error?.message ?? linkFormError}
                                 </span>
                             )}
                         </form>
