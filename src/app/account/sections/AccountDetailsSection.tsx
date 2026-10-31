@@ -26,7 +26,7 @@ interface AccountDetailsSectionProps {
     onDonorLinkSubmit: (donorLinkForm: {
         donorEmail: string
         orderId: string
-    }) => void
+    }) => Promise<void>
 }
 
 export function AccountDetailsSection({
@@ -101,6 +101,7 @@ export function AccountDetailsSection({
         donorEmail: '',
         orderId: '',
     })
+    const [linkFormError, setLinkFormError] = useState<string>()
     const [showDonorLinkForm, setShowDonorLinkForm] = useState(false)
     const [pendingLinkEmail, setPendingLinkEmail] = useState<string | null>(
         null
@@ -156,8 +157,26 @@ export function AccountDetailsSection({
 
     const submitLinkForm = (e: FormEvent) => {
         e.preventDefault()
-        setShowDonorLinkForm(false)
-        setShowAddressConfirmModal(true)
+
+        const donorEmail = donorLinkForm.donorEmail.trim()
+        const orderId = donorLinkForm.orderId.trim()
+
+        if (!donorEmail) return setLinkFormError('Donor email is required.')
+        if (!orderId) return setLinkFormError('Order ID is required.')
+
+        setLinkFormError(undefined)
+        onDonorLinkSubmit({
+            donorEmail,
+            orderId,
+        })
+            .then(() => {
+                setShowDonorLinkForm(false)
+                setShowAddressConfirmModal(true)
+            })
+            .catch(() => {
+                // mutation error takes precedence
+                setLinkFormError('')
+            })
     }
 
     const renderDonorLinkForm = () => {
@@ -196,9 +215,9 @@ export function AccountDetailsSection({
                         />
                     </label>
                 </div>
-                {donorLinkError && (
+                {(donorLinkError ?? linkFormError) && (
                     <span className={styles.linkActBlueFormErrorText}>
-                        {donorLinkError.message}
+                        {donorLinkError?.message ?? linkFormError}
                     </span>
                 )}
                 <div className={styles.detailsLinkSubmitRow}>

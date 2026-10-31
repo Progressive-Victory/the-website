@@ -64,10 +64,10 @@ export function AccountPage() {
         })
     }
 
-    const onLinkFormSubmit = (donorLinkForm: ManualDonorLinkRequest) => {
+    const onLinkFormSubmit = async (donorLinkForm: ManualDonorLinkRequest) => {
         if (!loggedInUser.data) return
 
-        linkUser.mutate({
+        await linkUser.mutateAsync({
             id: loggedInUser.data.id,
             user: loggedInUser.data,
             donorLinkRequest: donorLinkForm,
