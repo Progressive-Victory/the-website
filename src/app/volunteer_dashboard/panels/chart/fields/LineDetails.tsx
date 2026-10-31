@@ -12,12 +12,8 @@ import {
     incomingLineCount,
 } from '../domain/lineGraph'
 import styles from '../page.module.css'
-import {
-    DropdownButton,
-    DropdownOverlay,
-    DropdownOverlayButton,
-} from '@/components/common'
 import { BackButton } from '@/components/common/buttons'
+import formFieldStyles from '@/components/common/forms/FormField.module.css'
 import { FormGroup } from '@/components/common/forms/FormGroup'
 import { cn } from '@/util'
 import { Fragment, useState, type ReactNode } from 'react'
@@ -276,47 +272,40 @@ export function LineDetails({
             )}
             <FormGroup title="Details">
                 {selectedPoint && (
-                    <div className={styles.pointType}>
-                        <span>Type</span>
-                        {editing &&
-                        selectedPoint.kind !== 'anchorpoint' &&
-                        !usedBranchPoints?.has(selectedPoint.id) ? (
-                            <DropdownButton
-                                label={typeLabel}
-                                aria-label="Point type"
-                                disabled={typeLocked}
-                                className={styles.pointTypeTrigger}
-                                menu={({ closeDropdown }) => (
-                                    <DropdownOverlay
-                                        narrowLayoutMode="trigger"
-                                        align="end"
-                                        className={styles.pointTypeOverlay}
-                                        body={(
-                                            ['waypoint', 'branchpoint'] as const
-                                        ).map((kind) => (
-                                            <DropdownOverlayButton
-                                                key={kind}
-                                                checked={
-                                                    selectedPoint.kind === kind
-                                                }
-                                                disabled={typeLocked}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked)
-                                                        changePointType(kind)
-                                                    closeDropdown()
-                                                }}
-                                            >
-                                                {kind === 'waypoint'
-                                                    ? 'Waypoint'
-                                                    : 'Branchpoint'}
-                                            </DropdownOverlayButton>
-                                        ))}
-                                    />
-                                )}
-                            />
-                        ) : (
-                            <span>{typeLabel}</span>
+                    <div
+                        className={cn(
+                            styles.subPositionsContainer,
+                            styles.detailsFields
                         )}
+                    >
+                        <div>
+                            <span>Type</span>
+                            {editing &&
+                            selectedPoint.kind !== 'anchorpoint' &&
+                            !usedBranchPoints?.has(selectedPoint.id) ? (
+                                <select
+                                    aria-label="Point type"
+                                    value={selectedPoint.kind}
+                                    disabled={typeLocked}
+                                    className={formFieldStyles.textField}
+                                    onChange={(event) =>
+                                        changePointType(
+                                            event.target.value as
+                                                'waypoint' | 'branchpoint'
+                                        )
+                                    }
+                                >
+                                    <option value="waypoint">Waypoint</option>
+                                    <option value="branchpoint">
+                                        Branchpoint
+                                    </option>
+                                </select>
+                            ) : (
+                                <div className={formFieldStyles.readonly}>
+                                    {typeLabel}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
                 <div className={styles.subPositions}>

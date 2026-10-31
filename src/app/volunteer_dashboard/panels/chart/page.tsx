@@ -37,6 +37,7 @@ import {
 } from './fields/GroupMembershipField'
 import { LineDetails } from './fields/LineDetails'
 import { OccupantsField } from './fields/OccupantsField'
+import { PermissionsField } from './fields/PermissionsField'
 import { SubordinatesField } from './fields/SubordinatesField'
 import styles from './page.module.css'
 import {
@@ -51,14 +52,14 @@ import {
     FormGroup,
     FormState,
     DropDownField,
-    NumberField,
     TextField,
 } from '@/components/common/forms'
 import type { FormControls } from '@/components/common/forms/Form'
+import { StepperField } from '@/components/common/forms/StepperField'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { type SidebarListFiltersProps } from '@/components/common/panel/sidebar_list/SidebarList'
-import { parseErrorMessage } from '@/util'
+import { cn, parseErrorMessage } from '@/util'
 import {
     useAssignedUsers,
     usePaginatedSearch,
@@ -68,6 +69,7 @@ import deepEqual from 'deep-equal'
 import { zUserProfile } from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
 import { useCallback, useMemo, useRef, useState } from 'react'
+import { FaInfinity } from 'react-icons/fa'
 import { FaRegPenToSquare } from 'react-icons/fa6'
 
 const blankPosition: Position = {
@@ -77,6 +79,7 @@ const blankPosition: Position = {
     userIds: [],
     type: PositionTypes.POSITION,
     seats: 1,
+    permissions: [],
 }
 
 export default function Page() {
@@ -108,9 +111,9 @@ export default function Page() {
     const [modalHost, setModalHost] = useState<HTMLDivElement | null>(null)
     const [assignedUsers, setAssignedUsers] = useState<UserProfile[]>([])
 
-    const [showHitboxes, setShowHitboxes] = useState(true)
+    const [showHitboxes, setShowHitboxes] = useState(false)
     const [directionChevrons, setDirectionChevrons] =
-        useState<DirectionChevronMode>('all')
+        useState<DirectionChevronMode>('merges')
 
     const {
         chartBranchPoints,
@@ -299,7 +302,7 @@ export default function Page() {
         setShowPositionDetails(true)
     }
 
-    const seats = formState?.form.seats ?? selectedPosition?.seats ?? 0
+    const seats = (formState?.form ?? selectedPosition)?.seats
     const isGroup =
         (formState?.form.type ?? selectedPosition?.type) === PositionTypes.GROUP
 
@@ -551,7 +554,13 @@ export default function Page() {
                                 hideEditButton
                                 hideSaveDiscard
                             >
-                                <FormGroup title="Details">
+                                <FormGroup
+                                    title="Details"
+                                    className={cn(
+                                        styles.subPositionsContainer,
+                                        styles.detailsFields
+                                    )}
+                                >
                                     <TextField
                                         label="Name"
                                         field="name"
@@ -578,10 +587,21 @@ export default function Page() {
                                         options={positionTypeOptions}
                                     />
                                     {!isGroup && (
-                                        <NumberField
+                                        <StepperField<Position>
                                             label="Seats"
                                             field="seats"
-                                            required
+                                            min={0}
+                                            nullLabel="Uncapped"
+                                            nullIcon={
+                                                <FaInfinity aria-hidden="true" />
+                                            }
+                                            setter={(form, value) => ({
+                                                ...form,
+                                                seats:
+                                                    value === 0
+                                                        ? null
+                                                        : (value ?? null),
+                                            })}
                                         />
                                     )}
                                     {detailPosition && (
@@ -594,7 +614,7 @@ export default function Page() {
                                 {(formState?.mode === 'create' ||
                                     selectedPosition) &&
                                     !isGroup &&
-                                    seats > 0 && (
+                                    (seats == null || seats > 0) && (
                                         <FormGroup title="People">
                                             <OccupantsField
                                                 label="People"
@@ -616,91 +636,128 @@ export default function Page() {
                                             />
                                         </FormGroup>
                                     )}
+                                {detailPosition && (
+                                    <div>
+                                        <SubordinatesField
+                                            key={detailPosition.id}
+                                            position={detailPosition}
+                                            positions={chartPositions}
+                                            lines={chartLines}
+                                            editing={isEditing}
+                                            disabled={saveDrafts.isPending}
+                                            onAdd={(id) => {
+                                                if (
+                                                    !isEditing ||
+                                                    saveDrafts.isPending
+                                                )
+                                                    return
+                                                if (
+                                                    detailPosition.type ===
+                                                    PositionTypes.GROUP
+                                                ) {
+                                                    const member =
+                                                        positionById.get(id)
+                                                    if (!member) return
+                                                    const form =
+                                                        reparentPosition(
+                                                            chartPositions,
+                                                            member,
+                                                            detailPosition.id
+                                                        )
+                                                    replacePosition(form)
+                                                } else {
+                                                    addLine(
+                                                        createLine(
+                                                            {
+                                                                positionId:
+                                                                    detailPosition.id,
+                                                                handle: 'bottom',
+                                                            },
+                                                            {
+                                                                positionId: id,
+                                                                handle: 'top',
+                                                            }
+                                                        )
+                                                    )
+                                                }
+                                            }}
+                                            onRemove={(id) => {
+                                                if (
+                                                    !isEditing ||
+                                                    saveDrafts.isPending
+                                                )
+                                                    return
+                                                if (
+                                                    detailPosition.type ===
+                                                    PositionTypes.GROUP
+                                                ) {
+                                                    const member =
+                                                        positionById.get(id)
+                                                    if (!member) return
+                                                    const form =
+                                                        reparentPosition(
+                                                            chartPositions,
+                                                            member,
+                                                            undefined
+                                                        )
+                                                    replacePosition(form)
+                                                } else {
+                                                    const removed = new Set(
+                                                        chartLines.flatMap(
+                                                            (line) => {
+                                                                const {
+                                                                    target,
+                                                                } =
+                                                                    lineEndpoints(
+                                                                        line
+                                                                    )
+                                                                return target.kind ===
+                                                                    'anchorpoint' &&
+                                                                    target.positionId ===
+                                                                        id
+                                                                    ? exclusiveSourceLines(
+                                                                          line,
+                                                                          chartLines,
+                                                                          detailPosition.id
+                                                                      )
+                                                                    : []
+                                                            }
+                                                        )
+                                                    )
+                                                    replaceLines(
+                                                        chartLines.filter(
+                                                            (line) =>
+                                                                !removed.has(
+                                                                    line.id
+                                                                )
+                                                        )
+                                                    )
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                                {(formState?.mode === 'create' ||
+                                    selectedPosition) &&
+                                    !isGroup && (
+                                        <FormGroup title="Permissions">
+                                            <PermissionsField
+                                                label="Permissions"
+                                                field="permissions"
+                                            />
+                                        </FormGroup>
+                                    )}
                             </Form>
-                            {detailPosition && (
-                                <SubordinatesField
-                                    key={detailPosition.id}
-                                    position={detailPosition}
-                                    positions={chartPositions}
-                                    lines={chartLines}
-                                    editing={isEditing}
-                                    disabled={saveDrafts.isPending}
-                                    onAdd={(id) => {
-                                        if (!isEditing || saveDrafts.isPending)
-                                            return
-                                        if (
-                                            detailPosition.type ===
-                                            PositionTypes.GROUP
-                                        ) {
-                                            const member = positionById.get(id)
-                                            if (!member) return
-                                            const form = reparentPosition(
-                                                chartPositions,
-                                                member,
-                                                detailPosition.id
-                                            )
-                                            replacePosition(form)
-                                        } else {
-                                            addLine(
-                                                createLine(
-                                                    {
-                                                        positionId:
-                                                            detailPosition.id,
-                                                        handle: 'bottom',
-                                                    },
-                                                    {
-                                                        positionId: id,
-                                                        handle: 'top',
-                                                    }
-                                                )
-                                            )
-                                        }
-                                    }}
-                                    onRemove={(id) => {
-                                        if (!isEditing || saveDrafts.isPending)
-                                            return
-                                        if (
-                                            detailPosition.type ===
-                                            PositionTypes.GROUP
-                                        ) {
-                                            const member = positionById.get(id)
-                                            if (!member) return
-                                            const form = reparentPosition(
-                                                chartPositions,
-                                                member,
-                                                undefined
-                                            )
-                                            replacePosition(form)
-                                        } else {
-                                            const removed = new Set(
-                                                chartLines.flatMap((line) => {
-                                                    const { target } =
-                                                        lineEndpoints(line)
-                                                    return target.kind ===
-                                                        'anchorpoint' &&
-                                                        target.positionId === id
-                                                        ? exclusiveSourceLines(
-                                                              line,
-                                                              chartLines,
-                                                              detailPosition.id
-                                                          )
-                                                        : []
-                                                })
-                                            )
-                                            replaceLines(
-                                                chartLines.filter(
-                                                    (line) =>
-                                                        !removed.has(line.id)
-                                                )
-                                            )
-                                        }
-                                    }}
-                                />
-                            )}
                             {detailPosition && (
                                 <section aria-label="Data model">
                                     <FormGroup title="Data model">
-                                        <dl className={styles.dataModel}>
+                                        <dl
+                                            className={cn(
+                                                styles.dataModel,
+                                                styles.subPositionsContainer,
+                                                styles.detailsFields
+                                            )}
+                                        >
                                             {Object.entries({
                                                 ID: detailPosition.id,
                                                 Name: detailPosition.name,
@@ -724,6 +781,13 @@ export default function Page() {
                                                     detailPosition.userIds.join(
                                                         ', '
                                                     ) || 'None',
+                                                Permissions:
+                                                    detailPosition.permissions
+                                                        .map(
+                                                            ({ id, name }) =>
+                                                                `${name} (${id})`
+                                                        )
+                                                        .join(', ') || 'None',
                                                 'Parent group':
                                                     detailPosition.parentGroupId ??
                                                     'None',

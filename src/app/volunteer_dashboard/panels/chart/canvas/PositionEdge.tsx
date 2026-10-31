@@ -202,14 +202,21 @@ export function PositionEdge({
                                 180) /
                             Math.PI
                         return (
-                            <polyline
+                            <g
                                 key={`${index}-${start.x}-${start.y}-${end.x}-${end.y}`}
-                                data-testid="line-direction-chevron"
-                                points="-3,-5 3,0 -3,5"
                                 transform={`translate(${(start.x + end.x) / 2} ${(start.y + end.y) / 2}) rotate(${angle})`}
-                                className={styles.directionChevron}
-                                style={{ stroke: pointColor }}
-                            />
+                            >
+                                <polyline
+                                    points="-3,-5 3,0 -3,5"
+                                    className={styles.directionChevronHalo}
+                                />
+                                <polyline
+                                    data-testid="line-direction-chevron"
+                                    points="-3,-5 3,0 -3,5"
+                                    className={styles.directionChevron}
+                                    style={{ stroke: pointColor }}
+                                />
+                            </g>
                         )
                     })}
                 </g>

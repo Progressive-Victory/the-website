@@ -256,6 +256,7 @@ export function legacyToChart(value: unknown): ChartDocument {
             type: position.type,
             seats: position.seats,
             userIds: position.userIds,
+            permissions: [],
             parentGroupId: undefined,
         }
     })

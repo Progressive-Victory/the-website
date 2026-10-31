@@ -88,6 +88,10 @@
     }
 }
 
+.chart[data-moving] :global(.react-flow__viewport) {
+    will-change: transform;
+}
+
 .chart[data-editing='false'] :global(.react-flow__handle) {
     visibility: hidden;
     pointer-events: none;
@@ -135,13 +139,6 @@
 
 .dataModel {
     margin: 0;
-
-    > div {
-        display: grid;
-        grid-template-columns: 6rem minmax(0, 1fr);
-        gap: 0.75rem;
-        padding-block: 0.4rem;
-    }
 
     dt {
         font-weight: 600;
@@ -232,27 +229,6 @@
 
 .linePointRow .deleteButton {
     z-index: 1;
-}
-
-.pointType {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    font-size: 0.85rem;
-    color: #6b7280;
-    margin-bottom: 0.75rem;
-}
-
-.pointTypeTrigger {
-    width: 100%;
-    max-width: 24rem;
-}
-
-.pointTypeOverlay.pointTypeOverlay {
-    min-width: 100%;
 }
 
 .lineDelete {
@@ -387,6 +363,52 @@
     overflow: hidden;
 }
 
+.detailsFields.detailsFields {
+    gap: 0;
+    margin-top: 0.5rem;
+
+    & > * {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0.9rem;
+        border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+        font-size: 0.92rem;
+        font-weight: 500;
+        color: rgba(15, 23, 42, 0.85);
+
+        &:last-child {
+            border-bottom: 0;
+        }
+
+        &:has(input, select) {
+            box-sizing: border-box;
+            min-height: calc(1lh + 1.5rem + 1px);
+            padding-block: 0;
+
+            &:last-child {
+                min-height: calc(1lh + 1.5rem);
+            }
+        }
+
+        & > * {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        & > :last-child {
+            text-align: right;
+        }
+    }
+
+    & input,
+    & select {
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+}
+
 .subPositionEntryEmpty {
     padding: 0.75rem 0.9rem;
     font-size: 0.92rem;
@@ -433,6 +455,31 @@
     white-space: nowrap;
     color: rgba(15, 23, 42, 0.72);
     background: rgba(15, 23, 42, 0.06);
+
+    &[data-enabled] {
+        display: inline-flex;
+        justify-content: center;
+        box-sizing: border-box;
+        width: 3.25rem;
+        padding-inline: 0.75rem;
+    }
+
+    &[data-enabled='true'] {
+        color: var(--navigation-button-link-active-color, rgba(2, 132, 199, 1));
+        background: var(
+            --navigation-button-link-active-bg,
+            rgba(14, 165, 233, 0.14)
+        );
+    }
+}
+
+.permissionEntry {
+    gap: 1rem;
+
+    & > span {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
 }
 
 .subPositionEntryText {

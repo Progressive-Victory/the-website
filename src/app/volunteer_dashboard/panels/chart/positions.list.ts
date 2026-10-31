@@ -32,7 +32,7 @@ export function positionListItem(
         tagCount:
             position.type === PositionTypes.GROUP
                 ? undefined
-                : (position.seats ?? undefined),
+                : (position.seats ?? position.userIds.length),
         buttonType: position.type === PositionTypes.GROUP ? 'group' : 'default',
         children: getPositionListChildren(position, positionById),
         href: `/volunteer_dashboard/panels/chart?positionId=${position.id}`,

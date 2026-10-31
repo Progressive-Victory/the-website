@@ -82,10 +82,15 @@
     }
 }
 
-.directionChevron {
+.directionChevron,
+.directionChevronHalo {
     fill: none;
     stroke-width: 1.75px;
     stroke-linecap: round;
     stroke-linejoin: round;
-    filter: drop-shadow(0 0 1px white) drop-shadow(0 0 1px white);
+}
+
+.directionChevronHalo {
+    stroke: white;
+    stroke-width: 3.75px;
 }

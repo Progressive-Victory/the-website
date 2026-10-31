@@ -631,12 +631,23 @@ export function ChartCanvas({
                             deleteKeyCode={null}
                             proOptions={{ hideAttribution: true }}
                             panOnScroll
+                            onMoveStart={() => {
+                                if (containerRef.current)
+                                    containerRef.current.dataset.moving = 'true'
+                            }}
+                            onMoveEnd={() => {
+                                if (containerRef.current)
+                                    delete containerRef.current.dataset.moving
+                            }}
                             minZoom={0.05}
                             fitView
                             fitViewOptions={{ padding: 0.15, minZoom: 0.05 }}
                         >
                             <Background />
-                            <HelperLinesOverlay {...alignmentGuides} />
+                            {(alignmentGuides.horizontal ??
+                                alignmentGuides.vertical) && (
+                                <HelperLinesOverlay {...alignmentGuides} />
+                            )}
                             <ChartControls
                                 editControls={editControls}
                                 clipboard={

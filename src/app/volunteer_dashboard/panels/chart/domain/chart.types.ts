@@ -1,3 +1,5 @@
+import type { Permission } from 'pv-contracts/data'
+
 export enum PositionTypes {
     POSITION = 0,
     GROUP = 1,
@@ -10,6 +12,7 @@ export interface Position {
     type: PositionTypes
     seats: number | null
     userIds: number[]
+    permissions: Permission[]
     parentGroupId?: number
     groupBounds?: GroupBounds
 }

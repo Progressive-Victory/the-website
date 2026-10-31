@@ -35,8 +35,10 @@ export function OccupantsField(props: OccupantsFieldProps) {
         useCallback(() => true, [])
     )
     const userIds = getter(props.dynamic!.form) ?? []
-    const seats = props.dynamic!.form.seats ?? 0
-    const openSeats = Math.max(seats - userIds.length, 0)
+    const seats = props.dynamic!.form.seats
+    const openSeats = seats === null ? 0 : Math.max(seats - userIds.length, 0)
+    const atCapacity = seats !== null && openSeats === 0
+    const assignmentRows = seats === null ? Number(props.editing) : openSeats
     const [pickerOpen, setPickerOpen] = useState(false)
     const userMap = new Map<number, UserProfile>()
     for (const u of props.allUsers) {
@@ -49,7 +51,7 @@ export function OccupantsField(props: OccupantsFieldProps) {
         onChange(userIds.filter((id) => id !== idToRemove))
     }
     const handleAdd = (user: UserProfile) => {
-        if (!userIds.includes(user.id) && openSeats > 0) {
+        if (!userIds.includes(user.id) && !atCapacity) {
             props.onAssignUser(user)
             onChange([...userIds, user.id])
         }
@@ -68,6 +70,11 @@ export function OccupantsField(props: OccupantsFieldProps) {
     return (
         <div className={styles.subPositions}>
             <div className={styles.subPositionsContainer}>
+                {seats === null && userIds.length === 0 && !props.editing && (
+                    <div className={styles.subPositionEntryEmpty}>
+                        No people assigned
+                    </div>
+                )}
                 {userIds.map((id) => (
                     <div
                         key={id}
@@ -96,7 +103,7 @@ export function OccupantsField(props: OccupantsFieldProps) {
                         </span>
                     </div>
                 ))}
-                {Array.from({ length: openSeats }, (_, index) =>
+                {Array.from({ length: assignmentRows }, (_, index) =>
                     props.editing ? (
                         <button
                             key={`open-seat-${index}`}

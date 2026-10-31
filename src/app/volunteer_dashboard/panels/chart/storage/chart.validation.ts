@@ -5,6 +5,7 @@ import {
     incomingLineCount,
     resolveLineSource,
 } from '../domain/lineGraph'
+import { zPermission } from 'pv-contracts/data'
 import { z } from 'zod'
 
 export const zHandleSide = z.enum(['top', 'right', 'bottom', 'left'])
@@ -18,6 +19,7 @@ export const zPosition = z.strictObject({
     type: z.nativeEnum(PositionTypes),
     seats: z.number().int().nonnegative().nullable(),
     userIds: z.array(z.number().int()),
+    permissions: z.array(zPermission).default([]),
     parentGroupId: z.number().int().positive().optional(),
     groupBounds: z
         .strictObject({
