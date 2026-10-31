@@ -1,4 +1,6 @@
 .content {
+    --navigation-stack-height: 100%;
+
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -26,12 +28,16 @@
     justify-content: space-between;
     align-items: center;
     column-gap: 0.75rem;
-    padding: 1.35rem 1.25rem;
+    min-height: var(--navigation-stack-sidebar-header-min-height, 4.05rem);
+    padding: 0.8rem 1.25rem;
     background-color: #f9fafb;
     backdrop-filter: blur(14px) saturate(150%);
     -webkit-backdrop-filter: blur(14px) saturate(150%);
     border-bottom: 2px solid #e5e7eb;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
+    box-shadow: var(
+        --panel-header-highlight,
+        0 1px 0 rgba(255, 255, 255, 0.75) inset
+    );
 }
 
 .panelTimestamp {
@@ -55,11 +61,12 @@
     justify-self: start;
     min-width: 0;
     overflow: hidden;
+    transition: padding-left var(--sidebar-collapse-duration, 280ms)
+        var(--sidebar-collapse-ease, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .panelHeaderLeftShifted {
     padding-left: 2.5rem;
-    transition: padding-left 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .panelHeaderRight {

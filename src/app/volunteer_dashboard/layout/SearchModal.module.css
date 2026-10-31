@@ -46,6 +46,7 @@
 }
 
 .modalHeader {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -53,6 +54,30 @@
     padding: 1rem;
     border-bottom: 1px solid rgba(17, 24, 39, 0.1);
     background: rgba(255, 255, 255, 0.6);
+}
+
+.searchProgress {
+    position: absolute;
+    inset: auto 0 -1px;
+    height: 2px;
+    overflow: hidden;
+    pointer-events: none;
+    background: rgba(37, 99, 235, 0.15);
+}
+
+.searchProgress::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #2563eb;
+    transform: translateX(-100%) scaleX(0.35);
+    animation: searchProgress 1.2s ease-in-out infinite;
+}
+
+@keyframes searchProgress {
+    to {
+        transform: translateX(100%) scaleX(0.35);
+    }
 }
 
 .modalHeaderLeft {
@@ -154,6 +179,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .searchProgress::after {
+        animation: none;
+        transform: none;
+        opacity: 0.65;
+    }
+
     .modalBackdrop {
         will-change: auto;
     }

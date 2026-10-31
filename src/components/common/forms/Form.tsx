@@ -18,10 +18,13 @@ import { FaPlus, FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 export type FormMode = 'read' | 'create' | 'edit'
 
 /** Imperative handle for driving the form from outside, via `controlsRef`. */
-export interface FormControls {
+export interface FormControls<T = unknown> {
     create: () => void
     edit: () => void
+    save: () => void
     cancel: () => void
+    /** Updates an active edit session without remounting its fields. */
+    update(form: T): void
 }
 
 /**
@@ -44,6 +47,8 @@ export interface FormState<T> {
 
 /** Properties for the Form component. */
 export interface FormProps<T> {
+    /** Restores an editing session when mounting a form managed by external controls. */
+    initialSession?: { form: T; mode: 'edit' | 'create' }
     /** The data your form will operate on. */
     form: T | null
 
@@ -64,6 +69,15 @@ export interface FormProps<T> {
 
     /** If this is true, no 'Edit' button will be displayed. */
     readonly?: boolean
+
+    /** Hides only the read-mode Edit button; editing must be started via controlsRef. */
+    hideEditButton?: boolean
+
+    /** Hides Save/Discard while editing an existing item (create mode keeps them). */
+    hideEditActions?: boolean
+
+    /** Hides Save/Discard in both edit and create modes without hiding Delete. */
+    hideSaveDiscard?: boolean
 
     /** An override to force invalidity even if all fields report valid. */
     isInvalid?: boolean
@@ -93,10 +107,13 @@ export interface FormProps<T> {
     showCreateButton?: boolean
 
     /** Exposes imperative controls so a parent can trigger create/edit/cancel. */
-    controlsRef?: React.Ref<FormControls>
+    controlsRef?: React.Ref<FormControls<T>>
 
     /** Callback to delete a form value. */
     onDelete?: (form: T) => void
+
+    /** Shows 'Delete' alongside Save/Discard while editing instead of beside 'Edit'. */
+    deleteInEditMode?: boolean
 
     /** Disables 'Edit' and shows this text as its tooltip. */
     editDisabledReason?: string
@@ -144,18 +161,27 @@ export function Form<T>({
     showCreateButton = true,
     controlsRef,
     onDelete,
+    deleteInEditMode = false,
+    hideEditButton = false,
+    hideEditActions = false,
+    hideSaveDiscard = false,
     editDisabledReason,
     deleteDisabledReason,
     onCancel,
+    initialSession,
 }: FormProps<T>) {
     // Stores the initial state of the form while editing.
-    const [baseForm, setBaseForm] = useState<T | null>(null)
+    const [baseForm, setBaseForm] = useState<T | null>(
+        initialSession ? (initialForm ?? initialSession.form) : null
+    )
 
     // Stores the current state of the form while editing.
-    const [editForm, setEditForm] = useState<T | null>(null)
+    const [editForm, setEditForm] = useState<T | null>(
+        initialSession?.form ?? null
+    )
 
     // Stores the current editing mode of the form.
-    const [mode, setMode] = useState<FormMode>('read')
+    const [mode, setMode] = useState<FormMode>(initialSession?.mode ?? 'read')
 
     // Stores a set of field ids which have values different than their
     // initial values.
@@ -175,6 +201,7 @@ export function Form<T>({
     const editing = mode !== 'read'
     const dirty = dirtyMap.size > 0
     const invalid = isInvalid || invalidMap.size > 0
+    const restoringSession = initialSession !== undefined
 
     const reset = () => {
         setEditForm(null)
@@ -225,7 +252,11 @@ export function Form<T>({
     useImperativeHandle(controlsRef, () => ({
         create: handleCreate,
         edit: handleEdit,
+        save: handleSave,
         cancel: handleCancel,
+        update: (form: T) => {
+            if (mode !== 'read') setEditForm(form)
+        },
     }))
 
     // Called whenever the data in any field changes.
@@ -274,6 +305,20 @@ export function Form<T>({
         },
         []
     )
+
+    useEffect(() => {
+        if (!restoringSession || !editForm) return
+        setInvalidMap(
+            new Set(
+                Object.entries(configureMap)
+                    .filter(
+                        ([, { getter, validator }]) =>
+                            !validator(getter(editForm))
+                    )
+                    .map(([id]) => id)
+            )
+        )
+    }, [restoringSession, editForm, configureMap])
 
     // If anything changes, inform the parent component of the new state
     useEffect(() => {
@@ -388,68 +433,98 @@ export function Form<T>({
                         </div>
                     </div>
 
-                    {!readonly && (
-                        <div className={styles.buttonRow}>
-                            {editing ? (
-                                <>
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={!dirty || invalid}
-                                        className={styles.button}
-                                    >
-                                        <FaSave /> Save Changes
-                                    </button>
-                                    <button
-                                        onClick={handleCancel}
-                                        className={cn(
-                                            styles.button,
-                                            styles.discardButton
+                    {!readonly &&
+                        !(editing && hideEditActions && mode === 'edit') && (
+                            <div className={styles.buttonRow}>
+                                {editing ? (
+                                    <>
+                                        {!hideSaveDiscard && (
+                                            <>
+                                                <button
+                                                    onClick={handleSave}
+                                                    disabled={!dirty || invalid}
+                                                    className={styles.button}
+                                                >
+                                                    <FaSave /> Save Changes
+                                                </button>
+                                                <button
+                                                    onClick={handleCancel}
+                                                    className={cn(
+                                                        styles.button,
+                                                        styles.discardButton
+                                                    )}
+                                                >
+                                                    <FaTrashAlt /> Discard
+                                                    Changes
+                                                </button>
+                                            </>
                                         )}
-                                    >
-                                        <FaTrashAlt /> Discard Changes
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    {onCreate && showCreateButton && (
-                                        <button
-                                            onClick={handleCreate}
-                                            className={styles.button}
-                                        >
-                                            <FaPlus /> Create
-                                        </button>
-                                    )}
-                                    <button
-                                        onClick={handleEdit}
-                                        disabled={!!editDisabledReason}
-                                        title={editDisabledReason}
-                                        className={cn(
-                                            styles.button,
-                                            editDisabledReason &&
-                                                styles.unavailable
-                                        )}
-                                    >
-                                        <FaEdit /> Edit
-                                    </button>
-                                    {onDelete && (
-                                        <button
-                                            onClick={handleDelete}
-                                            disabled={!!deleteDisabledReason}
-                                            title={deleteDisabledReason}
-                                            className={cn(
-                                                styles.button,
-                                                styles.discardButton,
-                                                deleteDisabledReason &&
-                                                    styles.unavailable
+                                        {onDelete &&
+                                            deleteInEditMode &&
+                                            mode === 'edit' && (
+                                                <button
+                                                    onClick={handleDelete}
+                                                    disabled={
+                                                        saving ||
+                                                        !!deleteDisabledReason
+                                                    }
+                                                    title={deleteDisabledReason}
+                                                    className={cn(
+                                                        styles.button,
+                                                        styles.discardButton,
+                                                        deleteDisabledReason &&
+                                                            styles.unavailable
+                                                    )}
+                                                >
+                                                    <FaTrashAlt /> Delete
+                                                </button>
                                             )}
-                                        >
-                                            <FaTrashAlt /> Delete
-                                        </button>
-                                    )}
-                                </>
-                            )}
-                        </div>
-                    )}
+                                    </>
+                                ) : (
+                                    <>
+                                        {onCreate && showCreateButton && (
+                                            <button
+                                                onClick={handleCreate}
+                                                className={styles.button}
+                                            >
+                                                <FaPlus /> Create
+                                            </button>
+                                        )}
+                                        {!hideEditButton && (
+                                            <button
+                                                onClick={handleEdit}
+                                                disabled={!!editDisabledReason}
+                                                title={editDisabledReason}
+                                                className={cn(
+                                                    styles.button,
+                                                    editDisabledReason &&
+                                                        styles.unavailable
+                                                )}
+                                            >
+                                                <FaEdit /> Edit
+                                            </button>
+                                        )}
+                                        {onDelete && !deleteInEditMode && (
+                                            <button
+                                                onClick={handleDelete}
+                                                disabled={
+                                                    !!deleteDisabledReason
+                                                }
+                                                title={deleteDisabledReason}
+                                                className={cn(
+                                                    styles.button,
+                                                    styles.discardButton,
+                                                    deleteDisabledReason &&
+                                                        styles.unavailable
+                                                )}
+                                            >
+                                                <FaTrashAlt /> Delete
+                                            </button>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        )}
                 </header>
 
                 {hydratedChildren}

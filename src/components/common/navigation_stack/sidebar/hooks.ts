@@ -1,7 +1,7 @@
+import { useIsContainerDesktop } from '../NavigationStack.helpers'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { useMediaQuery } from 'usehooks-ts'
 
 export interface IndicatorStyle {
     top: number
@@ -173,7 +173,7 @@ export function useSidebarOpenState(
     toggle: () => void
 } {
     const [uncontrolledOpen, setUncontrolledOpen] = useState(true)
-    const isDesktop = useMediaQuery('(min-width: 64rem)')
+    const isDesktop = useIsContainerDesktop()
     const desktopExpanded = controlledOpen ?? uncontrolledOpen
     const isExpanded = !isDesktop || desktopExpanded
 

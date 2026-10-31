@@ -1,6 +1,4 @@
 .sidebar {
-    --sidebar-collapse-duration: 280ms;
-    --sidebar-collapse-ease: cubic-bezier(0.22, 1, 0.36, 1);
     --sidebar-content-slide-duration: 240ms;
     --sidebar-content-slide-ease: cubic-bezier(0.32, 0.72, 0, 1);
     overflow: hidden;
@@ -16,17 +14,22 @@
 }
 
 .sidebarProminent,
-.sidebarMinimal {
+.sidebarMinimal,
+.prominentContent {
     position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--navigation-stack-sidebar-gap, 1rem);
     padding: var(--navigation-stack-sidebar-padding, 0.9rem);
-    width: 100%;
-    height: 100dvh;
     background: var(--navigation-stack-sidebar-bg, transparent);
     backdrop-filter: blur(18px) saturate(160%);
     -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+.sidebarProminent,
+.sidebarMinimal {
+    width: 100%;
+    height: 100%;
     border-right: 1px solid rgba(17, 24, 39, 0.08);
 }
 
@@ -63,7 +66,7 @@
     );
 }
 
-@media (min-width: 96rem) {
+@container navigation-stack (min-width: 96rem) {
     .sidebarOpen {
         --navigation-stack-sidebar-width: var(
             --navigation-stack-sidebar-open-width,
@@ -101,7 +104,7 @@
     pointer-events: none;
 }
 
-@media (max-width: 63.999rem) {
+@container navigation-stack (max-width: 63.999rem) {
     .sidebar {
         width: 100%;
         min-width: 0;
@@ -109,8 +112,11 @@
     }
 
     .sidebarMinimal,
-    .sidebarProminent {
+    .sidebarProminent,
+    .sidebar[data-sidebar-visual-mode],
+    .sidebar[data-keep-border-when-collapsed='true'][data-sidebar-visual-mode][data-sidebar-collapsed] {
         border-right-width: 0;
+        box-shadow: none;
     }
 
     .sidebar[data-mobile-visible='false'] {
@@ -192,7 +198,7 @@
     display: contents;
 }
 
-@media (min-width: 64rem) {
+@container navigation-stack (min-width: 64rem) {
     .sidebar {
         flex-grow: 0;
         flex-shrink: 0;
@@ -312,7 +318,10 @@
     backdrop-filter: blur(14px) saturate(150%);
     -webkit-backdrop-filter: blur(14px) saturate(150%);
     border-bottom: 2px solid #e5e7eb;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
+    box-shadow: var(
+        --panel-header-highlight,
+        0 1px 0 rgba(255, 255, 255, 0.75) inset
+    );
     overflow: visible;
 }
 
@@ -379,12 +388,12 @@
     min-width: 0;
     overflow: clip;
     overflow-clip-margin: 0.6rem;
+    transition: padding-left var(--sidebar-collapse-duration)
+        var(--sidebar-collapse-ease);
 }
 
 .panelHeaderLeftShifted {
     padding-left: 3.5rem;
-    transition: padding-left var(--sidebar-collapse-duration)
-        var(--sidebar-collapse-ease);
 }
 
 .breadcrumbs {

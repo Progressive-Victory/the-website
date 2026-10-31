@@ -1,5 +1,5 @@
 import styles from './FormField.module.css'
-import { ReactElement, useEffect, useMemo } from 'react'
+import { ReactElement, ReactNode, useEffect, useMemo } from 'react'
 
 /**
  * Properties for the FormField component. All form fields extend their
@@ -19,6 +19,9 @@ export interface FormFieldProps<FormType, FieldType = unknown> {
 
     /** A label which will be displayed to the left of the field. */
     label: string
+
+    /** Optional content rendered after the label, e.g. a status marker. */
+    labelIcon?: ReactNode
 
     /** Whether this field can be edited. */
     readonly?: boolean
@@ -234,6 +237,7 @@ export function useConfigure<FormType, FieldType>(
 export function FormField<FormType, FieldType>({
     id,
     label,
+    labelIcon,
     readonly,
     required,
     deprecated,
@@ -246,6 +250,7 @@ export function FormField<FormType, FieldType>({
         <>
             <span className={styles.fieldLabel}>
                 {label}
+                {labelIcon}
                 {required && (
                     <span className={styles.required} title="Required Field">
                         *

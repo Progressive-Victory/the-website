@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './MobileSidebarBackButton.module.css'
+import { useIsContainerDesktop } from '@/components/common/navigation_stack/NavigationStack.helpers'
 import { PanelBackButton } from '@/components/common/navigation_stack/detail/PanelBackButton'
 import { cn } from '@/util'
 
@@ -17,7 +18,8 @@ export function MobileSidebarBackButton({
     onBack,
     className,
 }: MobileSidebarBackButtonProps) {
-    if (sidebarMobileVisible) return null
+    const isDesktop = useIsContainerDesktop()
+    if (isDesktop || sidebarMobileVisible) return null
 
     return (
         <div className={cn(styles.wrapper, className)}>

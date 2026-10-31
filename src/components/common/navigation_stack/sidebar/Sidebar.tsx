@@ -320,6 +320,7 @@ function ProminentSidebar({
             style={sidebarInlineStyle}
             className={cn(
                 styles.sidebar,
+                visualMode === 'prominent' && styles.sidebarProminent,
                 visualMode === 'prominent-bare' && styles.sidebarMinimal,
                 styles.sidebarWithProminentHeader,
                 isExpanded ? styles.sidebarOpen : styles.sidebarClosed,
@@ -347,7 +348,7 @@ function ProminentSidebar({
             >
                 <div
                     className={cn(
-                        visualMode === 'prominent' && styles.sidebarProminent
+                        visualMode === 'prominent' && styles.prominentContent
                     )}
                 >
                     {largeTitleActive && (

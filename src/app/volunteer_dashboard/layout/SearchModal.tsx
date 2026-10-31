@@ -10,6 +10,7 @@ export interface SearchModalProps {
     title: string
     subtitle: string
     searchValue: string
+    loading?: boolean
     onSearchChange: (e: ChangeEvent<HTMLInputElement>) => void
     children: React.ReactNode
 }
@@ -54,6 +55,7 @@ export function SearchModal({
     title,
     subtitle,
     searchValue,
+    loading = false,
     onSearchChange,
     children,
 }: SearchModalProps) {
@@ -97,6 +99,13 @@ export function SearchModal({
                 transition={modalTransition}
             >
                 <div className={styles.modalHeader}>
+                    {loading && (
+                        <div
+                            className={styles.searchProgress}
+                            role="progressbar"
+                            aria-label="Loading search results"
+                        />
+                    )}
                     <div className={styles.modalHeaderLeft}>
                         <div className={styles.modalTitle}>{title}</div>
                         <div className={styles.modalSubtitle}>{subtitle}</div>
@@ -116,7 +125,9 @@ export function SearchModal({
                     </div>
                 </div>
 
-                <div className={styles.modalBody}>{children}</div>
+                <div className={styles.modalBody} aria-busy={loading}>
+                    {children}
+                </div>
 
                 <div className={styles.modalFooter}>
                     <button
