@@ -104,6 +104,7 @@ const MEMBER_FIELD_OPTIONS = [
     { value: 'completed_intake_utc', label: 'Date Intake Done' },
     { value: 'aliases', label: 'Aliases' },
     { value: 'discord_usernames', label: 'Discord Usernames' },
+    { value: 'discord_id', label: 'Discord ID' },
 ]
 
 const MEMBER_SORT_FIELD_OPTIONS = [
