@@ -1,27 +1,19 @@
 'use client'
 
 import { ChartModalHostContext } from './ChartModalPortal'
-import { SidebarFilterTags } from './SidebarFilterTags'
-import { ChartCanvas, type ChartCanvasHandle } from './canvas/ChartCanvas'
-import type {
-    DirectionChevronMode,
-    LinePointCoordinates,
-} from './canvas/LineEditingContext'
-import { insertLinePoint } from './canvas/linePoints'
-import { canConnectPositions } from './canvas/positions.connections'
 import {
     Position,
     PositionTypes,
     UserProfile,
     type Line,
     type BranchPoint,
-} from './domain/chart.types'
+} from './api/domain/chart.types'
 import {
     lineError,
     lineEndpoints,
     usedBranchPoints,
     exclusiveSourceLines,
-} from './domain/lineGraph'
+} from './api/domain/lineGraph'
 import {
     createLine,
     splitBranch,
@@ -29,24 +21,32 @@ import {
     deleteBranch,
     deleteBranchPoint,
     simplifyLines,
-} from './domain/lineOperations'
-import { useChartEditor } from './editor/useChartEditor'
+} from './api/domain/lineOperations'
+import { useChartEditor } from './api/editor/useChartEditor'
+import { ChartCanvas, type ChartCanvasHandle } from './canvas/ChartCanvas'
+import type {
+    DirectionChevronMode,
+    LinePointCoordinates,
+} from './canvas/LineEditingContext'
+import { insertLinePoint } from './canvas/linePoints'
+import { canConnectPositions } from './canvas/positions.connections'
+import styles from './page.module.css'
 import {
     GroupMembershipField,
     reparentPosition,
-} from './fields/GroupMembershipField'
-import { LineDetails } from './fields/LineDetails'
-import { OccupantsField } from './fields/OccupantsField'
-import { PermissionsField } from './fields/PermissionsField'
-import { PositionLinesField } from './fields/PositionLinesField'
-import { SubordinatesField } from './fields/SubordinatesField'
-import styles from './page.module.css'
+} from './sidebar/GroupMembershipField'
+import { LineDetails } from './sidebar/LineDetails'
+import { OccupantsField } from './sidebar/OccupantsField'
+import { PermissionsField } from './sidebar/PermissionsField'
+import { PositionLinesField } from './sidebar/PositionLinesField'
+import { SidebarFilterTags } from './sidebar/SidebarFilterTags'
+import { SubordinatesField } from './sidebar/SubordinatesField'
 import {
     positionTypeOptions,
     positionTypeLabels,
     getPositionListChildren,
     positionListItem,
-} from './positions.list'
+} from './sidebar/positions.list'
 import { BackButton } from '@/components/common/buttons'
 import {
     Form,
@@ -57,6 +57,8 @@ import {
 } from '@/components/common/forms'
 import type { FormControls } from '@/components/common/forms/Form'
 import { StepperField } from '@/components/common/forms/StepperField'
+import { ClonePlusIcon } from '@/components/common/icons/ClonePlusIcon'
+import { SidebarHeaderButton } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { type SidebarListFiltersProps } from '@/components/common/panel/sidebar_list/SidebarList'
@@ -377,13 +379,21 @@ export default function Page() {
                               filters: sidebarFilters,
                           }
                 }
-                prominentHeaderButton={{
-                    icon: <FaRegPenToSquare size={20} />,
-                    label: 'Create Position',
-                    onClick: () => {
-                        handleCreate()
-                    },
-                }}
+                prominentHeaderRight={
+                    <>
+                        <SidebarHeaderButton
+                            icon={<FaRegPenToSquare size={20} />}
+                            label="Create Position"
+                            onClick={() => {
+                                handleCreate()
+                            }}
+                        />
+                        <SidebarHeaderButton
+                            icon={<ClonePlusIcon size={20} />}
+                            label="Create Group"
+                        />
+                    </>
+                }
                 sidebarBody={
                     <>
                         {invalidLine && invalidLine.id !== selectedLineId && (
