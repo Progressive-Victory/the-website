@@ -65,11 +65,14 @@ export function MyPermissions() {
             position.permissions.map((permission) => permission.id)
         ) ?? []
     )
+    const permissions = [...(query.data?.data ?? [])].sort(
+        (a, b) => a.id - b.id
+    )
 
     return (
-        <Form form={query.data?.data ?? []} title="My Permissions" readonly>
+        <Form form={permissions} title="My Permissions" readonly>
             <FormGroup title="Permissions" className={styles.permissionList}>
-                {query.data?.data.map((permission) => (
+                {permissions.map((permission) => (
                     <TextField
                         key={permission.id}
                         label={permission.name}

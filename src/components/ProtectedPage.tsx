@@ -8,7 +8,7 @@ import { ReactNode } from 'react'
 
 interface ProtectedPageProps {
     children: ReactNode
-    requiredPermissions: string[]
+    requiredPermissions: number[]
 }
 
 export function ProtectedPage({
@@ -30,8 +30,8 @@ export function ProtectedPage({
             )
 
         if (
-            !requiredPermissions.every((permission) =>
-                hasPermission(user, permission)
+            !requiredPermissions.every((permissionId) =>
+                hasPermission(user, permissionId)
             )
         )
             return (
