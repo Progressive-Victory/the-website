@@ -5,9 +5,12 @@ import {
     type GroupBounds,
     type UserProfile,
     type BranchPoint,
-} from '../domain/chart.types'
-import { resolveLineSource, resolveLineTarget } from '../domain/lineGraph'
-import { getUserDisplayName, positionTypeLabels } from '../positions.list'
+} from '../api/domain/chart.types'
+import { resolveLineSource, resolveLineTarget } from '../api/domain/lineGraph'
+import {
+    getUserDisplayName,
+    positionTypeLabels,
+} from '../sidebar/positions.list'
 import { MarkerType, type Edge, type Node } from '@xyflow/react'
 
 const GROUP_HEADER_GAP = 52

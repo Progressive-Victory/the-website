@@ -1,9 +1,13 @@
 'use client'
 
 import { ChartModalPortal } from '../ChartModalPortal'
-import { Position, UserProfile, type MemberSearch } from '../domain/chart.types'
+import {
+    Position,
+    UserProfile,
+    type MemberSearch,
+} from '../api/domain/chart.types'
 import styles from '../page.module.css'
-import { getUserDisplayName } from '../positions.list'
+import { getUserDisplayName } from './positions.list'
 import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
 import { DiscordAvatar } from '@/components/common/DiscordAvatar'
 import {

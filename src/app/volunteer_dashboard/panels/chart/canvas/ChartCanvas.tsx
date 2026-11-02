@@ -6,12 +6,12 @@ import {
     type HandleSide,
     type UserProfile,
     type BranchPoint,
-} from '../domain/chart.types'
+} from '../api/domain/chart.types'
 import {
     lineEndpoints,
     isMovablePoint,
     resolveLinePoints,
-} from '../domain/lineGraph'
+} from '../api/domain/lineGraph'
 import styles from '../page.module.css'
 import {
     connectionRadius,

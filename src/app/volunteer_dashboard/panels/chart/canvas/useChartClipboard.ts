@@ -1,6 +1,6 @@
 'use client'
 
-import type { Position, Line, BranchPoint } from '../domain/chart.types'
+import type { Position, Line, BranchPoint } from '../api/domain/chart.types'
 import {
     copyChartSelection,
     pastedSelectionIds,

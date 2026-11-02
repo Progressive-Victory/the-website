@@ -1,6 +1,6 @@
 'use client'
 
-import type { Position } from '../domain/chart.types'
+import type { Position } from '../api/domain/chart.types'
 import styles from '../page.module.css'
 import {
     FormFieldProps,

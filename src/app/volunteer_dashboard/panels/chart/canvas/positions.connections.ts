@@ -1,6 +1,6 @@
-import { PositionTypes, type Position } from '../domain/chart.types'
+import { PositionTypes, type Position } from '../api/domain/chart.types'
 
-export { createLine } from '../domain/lineOperations'
+export { createLine } from '../api/domain/lineOperations'
 
 export function canConnectPositions(
     positions: Position[],

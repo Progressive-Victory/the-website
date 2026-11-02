@@ -1,7 +1,7 @@
 'use client'
 
-import type { Line } from '../domain/chart.types'
-import { childLines, parentLines } from '../domain/lineGraph'
+import type { Line } from '../api/domain/chart.types'
+import { childLines, parentLines } from '../api/domain/lineGraph'
 import { highlightedLineZIndex, lineZIndex } from './positionsToGraph'
 import type { Edge } from '@xyflow/react'
 import { useCallback, useMemo, useState } from 'react'

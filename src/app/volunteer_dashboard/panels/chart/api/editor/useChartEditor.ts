@@ -3,7 +3,7 @@
 import {
     pasteChartSelection,
     type ChartClipboard,
-} from '../canvas/chartClipboard'
+} from '../../canvas/chartClipboard'
 import type {
     Position,
     Line,

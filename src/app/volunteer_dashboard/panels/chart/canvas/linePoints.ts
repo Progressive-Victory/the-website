@@ -1,5 +1,5 @@
-import { type Line, type Waypoint } from '../domain/chart.types'
-import { isMovablePoint } from '../domain/lineGraph'
+import { type Line, type Waypoint } from '../api/domain/chart.types'
+import { isMovablePoint } from '../api/domain/lineGraph'
 
 export interface Point {
     x: number

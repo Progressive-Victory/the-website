@@ -1,7 +1,11 @@
 import { ChartModalPortal } from '../ChartModalPortal'
+import {
+    PositionTypes,
+    type Line,
+    type Position,
+} from '../api/domain/chart.types'
+import { lineEndpoints, resolveLineSources } from '../api/domain/lineGraph'
 import { canSetParentGroup } from '../canvas/positions.connections'
-import { PositionTypes, type Line, type Position } from '../domain/chart.types'
-import { lineEndpoints, resolveLineSources } from '../domain/lineGraph'
 import styles from '../page.module.css'
 import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
 import { FormGroup } from '@/components/common/forms/FormGroup'

@@ -1,4 +1,4 @@
-import type { Line, HandleSide, BranchPoint } from '../domain/chart.types'
+import type { Line, HandleSide, BranchPoint } from '../api/domain/chart.types'
 import { createContext } from 'react'
 
 export type LinePointCoordinates = Record<string, { x: number; y: number }>

@@ -1,5 +1,5 @@
-import { type BranchPoint, type Line } from '../domain/chart.types'
-import { resolveLinePoints } from '../domain/lineGraph'
+import { type BranchPoint, type Line } from '../api/domain/chart.types'
+import { resolveLinePoints } from '../api/domain/lineGraph'
 import type { Node } from '@xyflow/react'
 
 export const linePointNodeType = 'linePointSelection'

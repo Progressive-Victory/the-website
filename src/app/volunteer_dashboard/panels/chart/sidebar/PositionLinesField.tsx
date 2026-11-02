@@ -1,5 +1,5 @@
-import type { Line, Position } from '../domain/chart.types'
-import { childLines, parentLines } from '../domain/lineGraph'
+import type { Line, Position } from '../api/domain/chart.types'
+import { childLines, parentLines } from '../api/domain/lineGraph'
 import styles from '../page.module.css'
 import { FormGroup } from '@/components/common/forms/FormGroup'
 import { cn } from '@/util'

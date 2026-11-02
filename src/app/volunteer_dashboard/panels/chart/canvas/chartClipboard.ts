@@ -1,6 +1,6 @@
-import { type ChartDocument, type Position } from '../domain/chart.types'
-import { usedBranchPoints } from '../domain/lineGraph'
-import { simplifyLines } from '../domain/lineOperations'
+import { type ChartDocument, type Position } from '../api/domain/chart.types'
+import { usedBranchPoints } from '../api/domain/lineGraph'
+import { simplifyLines } from '../api/domain/lineOperations'
 
 export type ChartClipboard = Omit<ChartDocument, 'version'>
 

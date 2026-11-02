@@ -1,4 +1,4 @@
-import type { HandleSide } from '../domain/chart.types'
+import type { HandleSide } from '../api/domain/chart.types'
 import { LineEditingContext } from './LineEditingContext'
 import styles from './LinePoint.module.css'
 import { useReactFlow, useStoreApi } from '@xyflow/react'

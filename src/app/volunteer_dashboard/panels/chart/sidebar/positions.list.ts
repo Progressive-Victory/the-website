@@ -1,4 +1,4 @@
-import { PositionTypes, Position, UserProfile } from './domain/chart.types'
+import { PositionTypes, Position, UserProfile } from '../api/domain/chart.types'
 import type { SidebarBodyItemConfig } from '@/components/common/panel/sidebar_list/SidebarBody'
 
 export const positionTypeLabels: Record<PositionTypes, string> = {

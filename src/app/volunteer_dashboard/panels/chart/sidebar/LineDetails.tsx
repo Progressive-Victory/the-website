@@ -1,10 +1,9 @@
-import type { LinePointCoordinates } from '../canvas/LineEditingContext'
 import {
     type Line,
     type LinePointData,
     type BranchPoint,
     type Position,
-} from '../domain/chart.types'
+} from '../api/domain/chart.types'
 import {
     lineError,
     isMovablePoint,
@@ -12,7 +11,8 @@ import {
     resolveLineSources,
     childLines,
     incomingLineCount,
-} from '../domain/lineGraph'
+} from '../api/domain/lineGraph'
+import type { LinePointCoordinates } from '../canvas/LineEditingContext'
 import styles from '../page.module.css'
 import { BackButton } from '@/components/common/buttons'
 import formFieldStyles from '@/components/common/forms/FormField.module.css'

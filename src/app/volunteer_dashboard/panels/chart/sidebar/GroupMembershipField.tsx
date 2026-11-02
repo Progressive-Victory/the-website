@@ -1,5 +1,5 @@
+import { PositionTypes, type Position } from '../api/domain/chart.types'
 import { canSetParentGroup } from '../canvas/positions.connections'
-import { PositionTypes, type Position } from '../domain/chart.types'
 import { DropDownField } from '@/components/common/forms'
 import type { FormFieldProps } from '@/components/common/forms/FormField'
 import { useCallback } from 'react'

@@ -1,11 +1,11 @@
 'use client'
 
-import { type Line } from '../domain/chart.types'
+import { type Line } from '../api/domain/chart.types'
 import {
     incomingLineCount,
     isMovablePoint,
     resolveLinePoints,
-} from '../domain/lineGraph'
+} from '../api/domain/lineGraph'
 import { BranchConnectionHandle } from './BranchConnectionHandle'
 import { LineEditingContext } from './LineEditingContext'
 import styles from './LinePoint.module.css'
