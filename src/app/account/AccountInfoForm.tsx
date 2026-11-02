@@ -62,8 +62,22 @@ export const AccountInfoForm = ({
     const [isEditing, setIsEditing] = useState(false)
 
     const handleFormSave = (user: User) => {
-        onUpdateUser(user)
-        void onSave(user)
+        const normalizedUser = {
+            ...user,
+            address: {
+                ...user.address,
+                addressLine1:
+                    normalizeText(user.address.addressLine1)?.slice(0, 100) ??
+                    null,
+                addressLine2:
+                    normalizeText(user.address.addressLine2)?.slice(0, 100) ??
+                    null,
+                city: normalizeText(user.address.city)?.slice(0, 50) ?? null,
+            },
+        }
+
+        onUpdateUser(normalizedUser)
+        void onSave(normalizedUser)
     }
 
     const showAddressLine2 =
@@ -167,9 +181,7 @@ export const AccountInfoForm = ({
                                 ...user,
                                 address: {
                                     ...user.address,
-                                    addressLine1:
-                                        normalizeText(field)?.slice(0, 100) ??
-                                        null,
+                                    addressLine1: field?.slice(0, 100) ?? null,
                                 },
                             })}
                         />
@@ -182,9 +194,7 @@ export const AccountInfoForm = ({
                                 ...user,
                                 address: {
                                     ...user.address,
-                                    addressLine2:
-                                        normalizeText(field)?.slice(0, 100) ??
-                                        null,
+                                    addressLine2: field?.slice(0, 100) ?? null,
                                 },
                             })}
                         />
@@ -197,9 +207,7 @@ export const AccountInfoForm = ({
                                 ...user,
                                 address: {
                                     ...user.address,
-                                    city:
-                                        normalizeText(field)?.slice(0, 50) ??
-                                        null,
+                                    city: field?.slice(0, 50) ?? null,
                                 },
                             })}
                         />

@@ -98,6 +98,12 @@ export interface FormProps<T> {
     /** Callback to delete a form value. */
     onDelete?: (form: T) => void
 
+    /** Disables 'Edit' and shows this text as its tooltip. */
+    editDisabledReason?: string
+
+    /** Disables 'Delete' and shows this text as its tooltip. */
+    deleteDisabledReason?: string
+
     /** Callback when editing is discarded. */
     onCancel?: () => void
 }
@@ -138,6 +144,8 @@ export function Form<T>({
     showCreateButton = true,
     controlsRef,
     onDelete,
+    editDisabledReason,
+    deleteDisabledReason,
     onCancel,
 }: FormProps<T>) {
     // Stores the initial state of the form while editing.
@@ -184,7 +192,7 @@ export function Form<T>({
 
     // Called when 'Edit' is pressed. Simply edits current form state.
     const handleEdit = () => {
-        if (!initialForm) return
+        if (!initialForm || editDisabledReason) return
         beginEdit(initialForm, 'edit')
     }
 
@@ -197,7 +205,7 @@ export function Form<T>({
 
     // Called when 'Delete' is pressed. Asks the parent to delete the form.
     const handleDelete = () => {
-        if (!initialForm) return
+        if (!initialForm || deleteDisabledReason) return
         onDelete?.(initialForm)
     }
 
@@ -306,24 +314,47 @@ export function Form<T>({
         onConfigure: handleConfigure,
     }
 
+    // Generates a function to hydrate a child element with props.
+    // Accepts an id prefix to ensure that nested elements still have
+    // unique id fields.
+    const hydrateChild =
+        (prefix = '') =>
+        // Hydrates an individual child element by populating its
+        // default id and dynamic data from the parent form element.
+        // Returns an array of React.ReactNode[].
+        (child: React.ReactNode, i: number): React.ReactNode[] => {
+            // If the node is a non-element or a builtin, change nothing.
+            if (!React.isValidElement(child) || typeof child.type == 'string')
+                return [child]
+            // If the node is a React fragment (<></>), recurse on its children.
+            else if (child.type === React.Fragment) {
+                const fragmentChildren = ((child.props as React.FragmentProps)
+                    .children ?? []) as React.ReactNode[]
+                return fragmentChildren.flatMap(
+                    hydrateChild(`${i.toString()}-`)
+                )
+            }
+
+            // Otherwise, default `id` if it's undefined, and override `dynamic`.
+            return [
+                {
+                    ...child,
+                    props: {
+                        id: `${prefix}${i.toString()}`,
+                        ...(child.props as object),
+                        dynamic,
+                    },
+                },
+            ]
+        }
+
     // Populate default id and dynamic data into the children. Only user-
     // defined components will be hydrated, but note that this includes
     // non-form-specific components.
-    const hydratedChildren = React.Children.map(children, (child, i) => {
-        // If the node is a non-element or a builtin, change nothing.
-        if (!React.isValidElement(child) || typeof child.type == 'string')
-            return child
-
-        // Otherwise, default `id` if it's undefined, and override `dynamic`.
-        return {
-            ...child,
-            props: {
-                id: i.toString(),
-                ...(child.props as object),
-                dynamic,
-            },
-        }
-    })
+    const hydratedChildren = React.Children.map(
+        children,
+        hydrateChild()
+    )!.flat()
 
     const hydratedBeforeHeader =
         beforeHeader && React.isValidElement(beforeHeader)
@@ -390,16 +421,26 @@ export function Form<T>({
                                     )}
                                     <button
                                         onClick={handleEdit}
-                                        className={styles.button}
+                                        disabled={!!editDisabledReason}
+                                        title={editDisabledReason}
+                                        className={cn(
+                                            styles.button,
+                                            editDisabledReason &&
+                                                styles.unavailable
+                                        )}
                                     >
                                         <FaEdit /> Edit
                                     </button>
                                     {onDelete && (
                                         <button
                                             onClick={handleDelete}
+                                            disabled={!!deleteDisabledReason}
+                                            title={deleteDisabledReason}
                                             className={cn(
                                                 styles.button,
-                                                styles.discardButton
+                                                styles.discardButton,
+                                                deleteDisabledReason &&
+                                                    styles.unavailable
                                             )}
                                         >
                                             <FaTrashAlt /> Delete

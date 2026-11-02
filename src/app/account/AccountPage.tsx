@@ -5,7 +5,9 @@ import {
     AccountDetailsSection,
     ManualDonorLinkRequest,
 } from './sections/index'
+import { AccountLoading } from '@/app/account/AccountLoading'
 import styles from '@/app/account/account.module.css'
+import { PermissionIds } from '@/models'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
 import { RedirectType, redirect } from 'next/navigation'
@@ -18,7 +20,10 @@ export function AccountPage() {
 
     const canAccessDashboard = useMemo(() => {
         return loggedInUser.data
-            ? hasPermission(loggedInUser.data, 'Admin Panel Access')
+            ? hasPermission(
+                  loggedInUser.data,
+                  PermissionIds.VOLUNTEER_DASHBOARD_ACCESS
+              )
             : false
     }, [loggedInUser.data])
 
@@ -69,7 +74,7 @@ export function AccountPage() {
         })
     }
 
-    if (isSessionLoading) return null
+    if (isSessionLoading) return <AccountLoading />
 
     if (!session) redirect('/login')
 

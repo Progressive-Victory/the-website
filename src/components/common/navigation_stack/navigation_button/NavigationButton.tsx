@@ -20,6 +20,7 @@ export interface SubTagProps {
 
 export interface NavigationButtonProps {
     label: string
+    ariaLabel?: string
     subtitle?: string
     tag?: TagProps
     renderTag?: React.ReactNode
@@ -46,6 +47,7 @@ export interface NavigationButtonProps {
 
 export function NavigationButton({
     label,
+    ariaLabel,
     subtitle,
     tag,
     renderTag,
@@ -97,6 +99,7 @@ export function NavigationButton({
         >
             <div className={styles.itemHeader}>
                 <Link
+                    aria-label={ariaLabel}
                     aria-current={active ? 'page' : undefined}
                     className={cn(
                         isCardButton ? styles.cardLink : styles.link,
