@@ -1,7 +1,10 @@
 'use client'
 
+import {
+    NavigationStackWidthContext,
+    useElementWidth,
+} from './NavigationStack.helpers'
 import styles from './NavigationStack.module.css'
-import { NavigationStackWidthContext, useElementWidth } from './NavigationStack.helpers'
 import { cn } from '@/util'
 import { useRef, type ReactElement, type ReactNode } from 'react'
 
