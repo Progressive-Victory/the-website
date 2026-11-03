@@ -13,6 +13,7 @@ import type { ReactNode } from 'react'
 export interface SidebarBodyItemConfig<T> {
     key: string | number
     label: string
+    ariaLabel?: string
     subtitle?: string
     tagLabel?: string
     tagCount?: number
@@ -74,6 +75,7 @@ export function SidebarBody<T>({
                 active={selectedKey === config.key}
                 href={config.href}
                 label={config.label}
+                ariaLabel={config.ariaLabel}
                 subtitle={config.subtitle}
                 tag={
                     config.tagLabel != null || config.tagCount != null

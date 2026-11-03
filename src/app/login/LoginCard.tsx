@@ -4,11 +4,12 @@ import styles from './login.module.css'
 import { cn } from '@/util'
 import { useAuth } from '@/util/hooks'
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export function LoginCard() {
     const { session, onLogin } = useAuth()
 
+    const router = useRouter()
     const params = useSearchParams()
 
     const redirect = params.get('redirect') ?? '/account'
@@ -22,7 +23,7 @@ export function LoginCard() {
               : null
 
     if (session) {
-        window.location.href = redirect
+        router.replace(redirect)
         return null
     }
 

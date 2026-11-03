@@ -2,18 +2,18 @@ import styles from '../app/login/login.module.css'
 import { HalftoneBackground } from './halftone/HalftoneBackground'
 import { MainLayout } from './layout'
 import { AccessDenied } from '@/components/AccessDenied'
-import { useAuth, useCurrentUser } from '@/util/hooks'
+import { hasPermission, useAuth, useCurrentUser } from '@/util/hooks'
 import { redirect } from 'next/navigation'
 import { ReactNode } from 'react'
 
 interface ProtectedPageProps {
     children: ReactNode
-    requiredRoles: string[]
+    requiredPermissions: number[]
 }
 
 export function ProtectedPage({
     children,
-    requiredRoles = [],
+    requiredPermissions = [],
 }: ProtectedPageProps) {
     const { isSessionLoading, session } = useAuth()
     const currentUser = useCurrentUser()
@@ -23,14 +23,15 @@ export function ProtectedPage({
     if (!session) redirect('/login')
 
     const isAccessDenied = () => {
-        if (!currentUser.data || currentUser.error)
+        const user = currentUser.data
+        if (!user || currentUser.error)
             return (
                 <AccessDenied message="There was an error while checking your authentication." />
             )
 
         if (
-            !requiredRoles.every((role) =>
-                currentUser.data?.roles?.some((found) => found.name == role)
+            !requiredPermissions.every((permissionId) =>
+                hasPermission(user, permissionId)
             )
         )
             return (
