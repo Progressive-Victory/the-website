@@ -1,12 +1,12 @@
 'use client'
 
 import { NavItem } from '../types'
+import { MobileMainPanel } from './MobileMainPanel'
+import { MobileSubnavPanel } from './MobileSubnavPanel'
+import { drawerTransition } from './headerAnimations'
 import styles from '@/components/layout/header.module.css'
 import { AnimatePresence, motion } from 'motion/react'
 import { TokenClaims } from 'pv-contracts/data'
-import { drawerTransition } from './headerAnimations'
-import { MobileMainPanel } from './MobileMainPanel'
-import { MobileSubnavPanel } from './MobileSubnavPanel'
 
 interface NavDrawerProps {
     isOpen: boolean
@@ -33,7 +33,7 @@ export function NavDrawer({
 }: NavDrawerProps) {
     return (
         <AnimatePresence>
-            {isOpen ? (
+            {isOpen && (
                 <motion.nav
                     key="nav-drawer"
                     id="site-nav-drawer"
@@ -65,7 +65,7 @@ export function NavDrawer({
                         </AnimatePresence>
                     </div>
                 </motion.nav>
-            ) : null}
+            )}
         </AnimatePresence>
     )
 }
