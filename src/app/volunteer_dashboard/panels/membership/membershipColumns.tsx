@@ -7,6 +7,7 @@ import {
     TierHistoryMenu,
     AmountHistoryMenu,
 } from './components/TierHistoryMenu'
+import { MatchedUserMenu } from './components/UserMatch'
 import { MembershipTableOptions, useMemberDraft } from './hooks'
 import {
     hasAddressDraftChange,
@@ -49,7 +50,6 @@ import {
 import styles from './page.module.css'
 import { Column, ColumnEntry } from '@/components/common/table'
 import { cn } from '@/util'
-import Link from 'next/link'
 import { ShirtSize } from 'pv-contracts/data'
 
 const monthAbbreviations = [
@@ -490,23 +490,11 @@ export const buildColumns = ({
             header: 'User Matched',
             width: '5rem',
             sortValue: (m) => (m.userMatched ? 1 : 0),
-            render: (m) =>
-                m.userId != null ? (
-                    <Link
-                        href={`/volunteer_dashboard/panels/members?userId=${m.userId}`}
-                        className={styles.userMatchedLink}
-                    >
-                        <BoolTag value={m.userMatched} />
-                    </Link>
-                ) : (
-                    <button
-                        type="button"
-                        className={styles.userMatchedLink}
-                        aria-label="Match user"
-                        onClick={() => onMatchUser(m)}
-                    >
-                        <BoolTag value={m.userMatched} />
-                    </button>
+            render: (m) => <BoolTag value={m.userMatched} />,
+            onCellClick: (m) => m.userId == null && onMatchUser(m),
+            menu: (m, { closeDropdown }) =>
+                m.userId != null && (
+                    <MatchedUserMenu member={m} closeDropdown={closeDropdown} />
                 ),
         },
     ]
