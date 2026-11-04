@@ -283,7 +283,7 @@ export function AccountDetailsSection({
                     zip: normalizedZip,
                 },
             })
-            onDonorLinkSubmit(donorLinkForm)
+            await onDonorLinkSubmit(donorLinkForm)
         })()
 
         setShowAddressConfirmModal(false)

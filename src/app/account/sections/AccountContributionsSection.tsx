@@ -169,11 +169,12 @@ export function AccountContributionsSection({
         if (!donorEmail) return setLinkFormError('Donor email is required')
         if (!orderId) return setLinkFormError('Order ID is required')
 
-        setLinkFormError(undefined)
         onSubmit({
             donorEmail,
             orderId,
         })
+            .then(() => setLinkFormError(undefined))
+            .catch((err) => setLinkFormError(err as string))
     }
 
     return (
