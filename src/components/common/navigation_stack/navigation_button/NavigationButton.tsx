@@ -21,6 +21,7 @@ export interface SubTagProps {
 export interface NavigationButtonProps {
     label: string
     labelPill?: string
+    ariaLabel?: string
     subtitle?: string
     tag?: TagProps
     subTags?: SubTagProps[]
@@ -47,6 +48,7 @@ export interface NavigationButtonProps {
 export function NavigationButton({
     label,
     labelPill,
+    ariaLabel,
     subtitle,
     tag,
     subTags,
@@ -97,6 +99,7 @@ export function NavigationButton({
         >
             <div className={styles.itemHeader}>
                 <Link
+                    aria-label={ariaLabel}
                     aria-current={active ? 'page' : undefined}
                     className={cn(
                         isCardButton ? styles.cardLink : styles.link,

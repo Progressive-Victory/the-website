@@ -1,5 +1,6 @@
 'use client'
 
+import { MyPermissions, MyPermissionsSidebarItem } from './MyPermissions'
 import styles from './page.module.css'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import {
@@ -15,21 +16,27 @@ import {
     type SidebarListFiltersProps,
 } from '@/components/common/panel/sidebar_list/SidebarList'
 import { FetchError } from '@/models'
+import { usePositionQueries } from '@/queries'
+import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import Link from 'next/link'
 import { Permission, zPermission } from 'pv-contracts/data'
 import { SortDirection, UpdatePermissionRequest } from 'pv-contracts/requests'
 import { PaginatedResponse } from 'pv-contracts/responses'
 import { useState } from 'react'
+import { FiChevronRight } from 'react-icons/fi'
 import { IoEllipsisVertical } from 'react-icons/io5'
 import { useMediaQuery } from 'usehooks-ts'
 
 export default function Page() {
     const queryClient = useQueryClient()
     const { onPatch } = useFetch()
+    const positionQueries = usePositionQueries()
 
     const [selectedPermission, setSelectedPermission] =
         useState<Permission | null>(null)
+    const [featuredSelected, setFeaturedSelected] = useState(true)
     const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
     const isDesktop = useMediaQuery('(min-width: 64rem)')
 
@@ -99,11 +106,20 @@ export default function Page() {
             )
         },
         onSettled: () =>
-            queryClient.invalidateQueries({ queryKey: ['/roles', search] }),
+            Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['/permissions'] }),
+                queryClient.invalidateQueries({
+                    queryKey: ['positionHierarchy'],
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: ['/users/current'],
+                }),
+            ]),
     })
 
-    const handleSelectItem = (value: Permission): boolean => {
-        if (value.id === selectedPermission?.id) return false
+    const handleSelectItem = (value: Permission | null): boolean => {
+        if (value && value.id === selectedPermission?.id) return false
+        if (!value && featuredSelected) return false
 
         if (formState?.dirty) {
             const proceed = confirm(
@@ -113,6 +129,8 @@ export default function Page() {
         }
 
         setSelectedPermission(value)
+        setFeaturedSelected(value === null)
+        setFormState(null)
         return true
     }
 
@@ -124,8 +142,23 @@ export default function Page() {
         })
     }
 
-    const permissions = searchQuery.data?.data ?? []
+    const permissions = [...(searchQuery.data?.data ?? [])].sort((a, b) =>
+        search.sort === SortDirection.DESC ? b.id - a.id : a.id - b.id
+    )
     const resultCount = searchQuery.data?.count
+
+    const positionHierarchy = useQuery({
+        queryKey: ['positionHierarchy'],
+        queryFn: positionQueries.getPositionHierarchy,
+        enabled: positionQueries.ready,
+    })
+    const assignedPositions = (positionHierarchy.data?.positions ?? [])
+        .filter((position) =>
+            position.permissions.some(
+                (permission) => permission.id === selectedPermission?.id
+            )
+        )
+        .sort((a, b) => a.name.localeCompare(b.name))
     const sidebarFilters: SidebarListFiltersProps = {
         search,
         onSearch,
@@ -159,24 +192,35 @@ export default function Page() {
                 menu: () => <SidebarListFilters {...sidebarFilters} />,
             }}
             sidebarBody={
-                <SidebarBody<Permission>
-                    items={permissions}
-                    isLoading={searchQuery.isPending}
-                    error={searchQuery.error}
-                    selectedKey={selectedPermission?.id}
-                    renderItem={(permission) => ({
-                        key: permission.id,
-                        label: permission.name,
-                        href: `/volunteer_dashboard/panels/permissions?permissionId=${permission.id}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            const selected = handleSelectItem(permission)
+                <>
+                    <MyPermissionsSidebarItem
+                        selected={featuredSelected}
+                        onSelect={() => {
+                            const selected = handleSelectItem(null)
                             if (selected && !isDesktop) {
                                 setSidebarMobileVisible(false)
                             }
-                        },
-                    })}
-                />
+                        }}
+                    />
+                    <SidebarBody<Permission>
+                        items={permissions}
+                        isLoading={searchQuery.isPending}
+                        error={searchQuery.error}
+                        selectedKey={selectedPermission?.id}
+                        renderItem={(permission) => ({
+                            key: permission.id,
+                            label: permission.name,
+                            href: `/volunteer_dashboard/panels/permissions?permissionId=${permission.id}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                const selected = handleSelectItem(permission)
+                                if (selected && !isDesktop) {
+                                    setSidebarMobileVisible(false)
+                                }
+                            },
+                        })}
+                    />
+                </>
             }
         >
             <div className={styles.detailPane}>
@@ -185,7 +229,8 @@ export default function Page() {
                     sidebarMobileVisible={isDesktop || sidebarMobileVisible}
                     onBack={() => setSidebarMobileVisible(true)}
                 />
-                {selectedPermission ? (
+                {featuredSelected && <MyPermissions />}
+                {selectedPermission && (
                     <Form<Permission>
                         key={selectedPermission.id}
                         form={selectedPermission}
@@ -194,14 +239,77 @@ export default function Page() {
                         onUpdate={setFormState}
                         onSave={handleSave}
                     >
-                        <FormGroup title="Details">
-                            <TextField label="Name" field="name" required />
+                        <FormGroup
+                            title="Details"
+                            className={cn(
+                                styles.permissionList,
+                                styles.permissionCards
+                            )}
+                        >
+                            <TextField label="Name" field="name" />
+                            {/* # TODO: use the real field once the API adds permission descriptions. */}
+                            <TextField<Permission>
+                                label="Description"
+                                getter={() => 'No description yet'}
+                                readonlyClassName={styles.secondaryValue}
+                                readonly
+                            />
+                            <div className={styles.cardBreak} />
+                            <TextField<Permission>
+                                label="ID"
+                                getter={(permission) => String(permission.id)}
+                                readonlyClassName={styles.secondaryValue}
+                                readonly
+                            />
+                        </FormGroup>
+                        <FormGroup
+                            title="Positions"
+                            className={styles.permissionList}
+                        >
+                            {positionHierarchy.isPending ? (
+                                <div>
+                                    <span className={styles.secondaryValue}>
+                                        Loading positions...
+                                    </span>
+                                </div>
+                            ) : positionHierarchy.error ? (
+                                <div role="alert">
+                                    <span className={styles.secondaryValue}>
+                                        Error:{' '}
+                                        {parseErrorMessage(
+                                            positionHierarchy.error
+                                        )}
+                                    </span>
+                                </div>
+                            ) : assignedPositions.length === 0 ? (
+                                <div>
+                                    <span className={styles.secondaryValue}>
+                                        No positions grant this permission
+                                    </span>
+                                </div>
+                            ) : (
+                                assignedPositions.map((position) => (
+                                    <div
+                                        key={position.id}
+                                        className={styles.linkRow}
+                                    >
+                                        <Link
+                                            href={`/volunteer_dashboard/panels/positions?positionId=${position.id}`}
+                                            className={styles.rowLink}
+                                        >
+                                            <span>{position.name}</span>
+                                            <FiChevronRight
+                                                aria-hidden="true"
+                                                className={
+                                                    styles.secondaryValue
+                                                }
+                                            />
+                                        </Link>
+                                    </div>
+                                ))
+                            )}
                         </FormGroup>
                     </Form>
-                ) : (
-                    <div className={styles.emptyState}>
-                        No permission selected
-                    </div>
                 )}
             </div>
         </Panel>

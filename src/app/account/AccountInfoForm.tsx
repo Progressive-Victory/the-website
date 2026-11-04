@@ -238,6 +238,7 @@ export const AccountInfoForm = ({
                                 },
                             })}
                             options={stateOptionsWithEmpty}
+                            required
                         />
                     )}
                     {isEditing && (
@@ -265,6 +266,7 @@ export const AccountInfoForm = ({
                             validator={(field) =>
                                 !field?.length || field?.length == 5
                             }
+                            required
                         />
                     )}
                     {!isEditing && hasMatchedDonor && (

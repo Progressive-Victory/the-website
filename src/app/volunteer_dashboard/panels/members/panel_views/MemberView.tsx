@@ -230,6 +230,7 @@ export function MemberView({
                         },
                     })}
                     options={stateOptions}
+                    required
                 />
                 <TextField<User>
                     label="Zip Code"
@@ -248,6 +249,7 @@ export function MemberView({
                             Country.UnitedStatesOfAmerica
                         )
                     }
+                    required
                 />
             </FormGroup>
 
