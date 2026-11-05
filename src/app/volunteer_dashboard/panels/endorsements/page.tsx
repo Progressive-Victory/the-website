@@ -40,7 +40,6 @@ import {
 import { SortDirection } from 'pv-contracts/requests'
 import { useRef, useState } from 'react'
 import { FaRegPenToSquare } from 'react-icons/fa6'
-import { useMediaQuery } from 'usehooks-ts'
 
 const blankEndorsement: Endorsement = {
     id: -1,
@@ -143,7 +142,6 @@ export default function Page() {
     )
     const [selectedTab, setSelectedTab] = useState<EndorsementTabKey>('detail')
     const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
-    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const endorsementsQuery = useQuery({
         queryKey: ['endorsements'],
@@ -356,7 +354,7 @@ export default function Page() {
             sidebarWidth="25.5rem"
             collapsedSidebarWidth="5rem"
             sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            sidebarMobileVisible={sidebarMobileVisible}
             label="Endorsements"
             showScrollbar={false}
             sidebarList={{
@@ -412,7 +410,7 @@ export default function Page() {
                             onClick: (event) => {
                                 event.preventDefault()
                                 const selected = handleSelectItem(item)
-                                if (selected && !isDesktop) {
+                                if (selected) {
                                     setSidebarMobileVisible(false)
                                 }
                             },
@@ -424,7 +422,7 @@ export default function Page() {
             <div className={styles.detailsPane}>
                 <MobileSidebarBackButton
                     label="Endorsements"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    sidebarMobileVisible={sidebarMobileVisible}
                     onBack={() => setSidebarMobileVisible(true)}
                     className={styles.backButton}
                 />

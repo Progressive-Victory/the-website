@@ -7,7 +7,7 @@ import { FiChevronDown, FiChevronLeft } from 'react-icons/fi'
 
 export interface CollapsibleSectionProps {
     children?: React.ReactNode
-    title?: string
+    title?: React.ReactNode
     subtitle?: string
     initialOpenState?: boolean
     subGroup?: boolean

@@ -1,4 +1,5 @@
 export * from './useAuth'
+export * from './useAssignedUsers'
 export * from './useAfterEffectsSettle'
 export * from './useClickAway'
 export * from './useCurrentUser'

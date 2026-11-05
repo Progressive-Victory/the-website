@@ -27,7 +27,6 @@ import { PaginatedResponse } from 'pv-contracts/responses'
 import { useState } from 'react'
 import { FiChevronRight } from 'react-icons/fi'
 import { IoEllipsisVertical } from 'react-icons/io5'
-import { useMediaQuery } from 'usehooks-ts'
 
 export default function Page() {
     const queryClient = useQueryClient()
@@ -38,7 +37,6 @@ export default function Page() {
         useState<Permission | null>(null)
     const [featuredSelected, setFeaturedSelected] = useState(true)
     const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
-    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const [formState, setFormState] = useState<FormState<Permission> | null>(
         null
@@ -118,8 +116,8 @@ export default function Page() {
     })
 
     const handleSelectItem = (value: Permission | null): boolean => {
-        if (value && value.id === selectedPermission?.id) return false
-        if (!value && featuredSelected) return false
+        if (value && value.id === selectedPermission?.id) return true
+        if (!value && featuredSelected) return true
 
         if (formState?.dirty) {
             const proceed = confirm(
@@ -172,7 +170,7 @@ export default function Page() {
             largeTitle
             sidebarWidth="24rem"
             sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            sidebarMobileVisible={sidebarMobileVisible}
             label="Permissions"
             showScrollbar={false}
             sidebarList={{
@@ -197,7 +195,7 @@ export default function Page() {
                         selected={featuredSelected}
                         onSelect={() => {
                             const selected = handleSelectItem(null)
-                            if (selected && !isDesktop) {
+                            if (selected) {
                                 setSidebarMobileVisible(false)
                             }
                         }}
@@ -214,7 +212,7 @@ export default function Page() {
                             onClick: (event) => {
                                 event.preventDefault()
                                 const selected = handleSelectItem(permission)
-                                if (selected && !isDesktop) {
+                                if (selected) {
                                     setSidebarMobileVisible(false)
                                 }
                             },
@@ -226,7 +224,7 @@ export default function Page() {
             <div className={styles.detailPane}>
                 <MobileSidebarBackButton
                     label="Permissions"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    sidebarMobileVisible={sidebarMobileVisible}
                     onBack={() => setSidebarMobileVisible(true)}
                 />
                 {featuredSelected && <MyPermissions />}

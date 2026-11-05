@@ -1,0 +1,66 @@
+.layer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.group {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 0.65rem;
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(16px) saturate(145%);
+    -webkit-backdrop-filter: blur(16px) saturate(145%);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 2.1rem;
+    height: 2.1rem;
+    border: none;
+    background: transparent;
+    color: rgba(15, 23, 42, 0.72);
+    cursor: pointer;
+    transition:
+        background 150ms ease-in-out,
+        color 150ms ease-in-out;
+
+    & + & {
+        border-top: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    &:hover:not(:disabled) {
+        background: rgba(15, 23, 42, 0.05);
+        color: #ce3728;
+    }
+
+    &:active:not(:disabled) {
+        background: rgba(15, 23, 42, 0.09);
+    }
+
+    &:disabled {
+        color: rgba(15, 23, 42, 0.26);
+        cursor: default;
+    }
+
+    &:focus-visible {
+        outline: 2px solid rgba(2, 132, 199, 0.6);
+        outline-offset: -2px;
+    }
+}
+
+.labeledButton {
+    composes: button;
+    width: auto;
+    gap: 0.4rem;
+    padding-inline: 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+}

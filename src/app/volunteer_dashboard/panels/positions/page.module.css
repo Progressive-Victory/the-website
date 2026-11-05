@@ -12,6 +12,20 @@
     padding-block: 1rem;
 }
 
+.positionForm > header {
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+}
+
+.positionForm > header > :first-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.positionForm > header > :last-child {
+    flex-wrap: wrap;
+}
+
 .emptyState {
     height: 100%;
     display: flex;

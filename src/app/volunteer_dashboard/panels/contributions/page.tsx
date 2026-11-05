@@ -27,7 +27,6 @@ import {
 import { SortDirection } from 'pv-contracts/requests'
 import { useEffect, useState } from 'react'
 import { IoEllipsisVertical } from 'react-icons/io5'
-import { useMediaQuery } from 'usehooks-ts'
 
 const CONTRIBUTION_FIELD_OPTIONS = [
     { value: 'lineitem_id', label: 'Lineitem ID' },
@@ -54,7 +53,6 @@ export default function Page() {
         navVal ? +navVal : null
     )
     const [sidebarMobileVisible, setSidebarMobileVisible] = useState(true)
-    const isDesktop = useMediaQuery('(min-width: 64rem)')
 
     const {
         query: searchQuery,
@@ -124,7 +122,7 @@ export default function Page() {
             largeTitle
             sidebarWidth="24rem"
             sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+            sidebarMobileVisible={sidebarMobileVisible}
             label="Contributions"
             showScrollbar={false}
             sidebarList={{
@@ -160,9 +158,7 @@ export default function Page() {
                         onClick: (event) => {
                             event.preventDefault()
                             setSelectedLineitemId(contribution.lineitemId)
-                            if (!isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
+                            setSidebarMobileVisible(false)
                         },
                     })}
                 />
@@ -171,7 +167,7 @@ export default function Page() {
             <div className={styles.detailsPane}>
                 <MobileSidebarBackButton
                     label="Contributions"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    sidebarMobileVisible={sidebarMobileVisible}
                     onBack={() => setSidebarMobileVisible(true)}
                 />
 

@@ -7,7 +7,7 @@ import { cn } from '@/util'
 import { useCollapse } from '@/util/hooks/useCollapse'
 import Link from 'next/link'
 import { type CSSProperties, type ReactElement, type ReactNode } from 'react'
-import type { MouseEvent } from 'react'
+import type { DragEventHandler, MouseEvent } from 'react'
 import type { IconType } from 'react-icons/lib'
 
 export type NavigationButtonType = 'default' | 'group' | 'card' | 'account'
@@ -34,6 +34,8 @@ export interface NavigationButtonProps {
     trackPanelHistory?: boolean
     resetPanelHistoryOnClick?: boolean
     onClick?: (event: MouseEvent<HTMLAnchorElement>) => void
+    draggable?: boolean
+    onDragStart?: DragEventHandler<HTMLAnchorElement>
     showIndicator?: boolean
     active?: boolean
     style?: CSSProperties
@@ -58,6 +60,8 @@ export function NavigationButton({
     hasActiveGroupChild = false,
     indicatorDirection = 'none',
     onClick,
+    draggable,
+    onDragStart,
     showIndicator = true,
     active = false,
     style,
@@ -113,6 +117,8 @@ export function NavigationButton({
                     data-show-indicator={showIndicator ? undefined : 'false'}
                     href={href}
                     onClick={onClick}
+                    draggable={draggable}
+                    onDragStart={onDragStart}
                     title={label}
                 >
                     {hasIcon && (

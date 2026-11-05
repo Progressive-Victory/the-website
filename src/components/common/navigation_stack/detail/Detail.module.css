@@ -34,7 +34,10 @@
     backdrop-filter: blur(14px) saturate(150%);
     -webkit-backdrop-filter: blur(14px) saturate(150%);
     border-bottom: 2px solid #e5e7eb;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
+    box-shadow: var(
+        --panel-header-highlight,
+        0 1px 0 rgba(255, 255, 255, 0.75) inset
+    );
 }
 
 .panelTimestamp {
@@ -78,13 +81,13 @@
     display: contents;
 }
 
-@media (max-width: 63.999rem) {
+@container navigation-stack (max-width: 63.999rem) {
     .detail[data-mobile-visible='true'] {
         display: flex;
     }
 }
 
-@media (min-width: 64rem) {
+@container navigation-stack (min-width: 64rem) {
     .backButton {
         display: none;
     }
