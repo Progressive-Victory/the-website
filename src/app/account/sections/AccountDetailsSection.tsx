@@ -210,6 +210,196 @@ export function AccountDetailsSection({
         )
     }
 
+    const showLinkForm = !userHasDonor && showDonorLinkForm
+
+    const renderHeaderActions = () => (
+        <div className={styles.headerActions}>
+            {canAccessDashboard ? (
+                <div>
+                    <BaseButton
+                        label="Volunteer Dashboard"
+                        href="/volunteer_dashboard?from=welcome"
+                        className={styles.secondaryButton}
+                    />
+                </div>
+            ) : isInServerResult.data?.isInServer === false ? (
+                <BaseButton
+                    label="Join Community"
+                    href="/volunteer"
+                    className={styles.secondaryButton}
+                />
+            ) : null}
+            <BaseButton
+                label="Sign Out"
+                onClick={handleSignOut}
+                className={styles.primaryButton}
+            />
+        </div>
+    )
+
+    const renderLinkPanel = () => (
+        <>
+            <div className={styles.detailsLinkFormHeader}>
+                <div className={styles.detailsLinkFormCopy}>
+                    <p className={styles.detailsAlreadyMemberText}>
+                        Connect your ActBlue account
+                    </p>
+                    <p className={styles.detailsLinkFormSubtitle}>
+                        <span className={styles.detailsLinkFormAlertText}>
+                            Check the email you used to donate or log into
+                            ACTBLUE
+                        </span>{' '}
+                        to find and paste the order number of any donation to PV
+                        so we can link your account and ship your card.
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    onClick={() => setShowDonorLinkForm(false)}
+                    className={styles.detailsCloseButton}
+                    aria-label="Close connect ActBlue form"
+                >
+                    <IoClose size={20} />
+                </button>
+            </div>
+            {renderDonorLinkForm()}
+        </>
+    )
+
+    const renderMembershipCta = () => (
+        <div className={styles.detailsMembershipCta}>
+            <div className={styles.detailsMembershipCopy}>
+                <h3 className={styles.detailsMembershipHeading}>
+                    Dues Paying Membership
+                </h3>
+                <p className={styles.detailsMembershipSubtitle}>
+                    Get your membership card
+                </p>
+            </div>
+            <BaseButton
+                href={
+                    discordUserId
+                        ? `https://secure.actblue.com/donate/pvmember?refcode=Account%20Page&refcode2=${discordUserId}`
+                        : 'https://secure.actblue.com/donate/pvmember?refcode=Account%20Page'
+                }
+                label="Become a Member"
+                className={styles.primaryButton}
+            />
+        </div>
+    )
+
+    const renderMembershipStatus = () => (
+        <div className={styles.detailsMembershipStatusPanel}>
+            {userData.duesPayingMember && hasActiveRecurringContribution ? (
+                <>
+                    <div className={formFieldStyles.fieldHeader}>
+                        <span className={formFieldStyles.fieldLabel}>
+                            Membership Card Status
+                        </span>
+                        <div className={formFieldStyles.fieldValue}>
+                            <div className={formFieldStyles.readonly}>
+                                <span className={styles.statusTag}>
+                                    {memberFacingDeliverableLabel(
+                                        userData.membershipCardStatus
+                                    )}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className={formFieldStyles.fieldHeader}></div>
+                </>
+            ) : (
+                <>
+                    <div className={styles.membershipStatusIndicatorContainer}>
+                        <span>Dues Paying Member:</span>
+                        <div>
+                            <div className={styles.membershipStatus}>
+                                {userData.duesPayingMember ? 'Yes' : 'No'}
+                            </div>
+                        </div>
+                    </div>
+                    <p className={styles.membershipStatusManualNotice}>
+                        If it remains incorrect, please{' '}
+                        <a
+                            href="https://www.progressivevictory.win/membership_support"
+                            className={styles.membershipStatusManualNoticeLink}
+                        >
+                            click here
+                        </a>{' '}
+                        for support.
+                    </p>
+                </>
+            )}
+        </div>
+    )
+
+    const renderConnectCta = () => (
+        <div
+            className={cn(
+                styles.detailsMembershipCta,
+                styles.detailsConnectCta
+            )}
+        >
+            <div className={styles.detailsMembershipCopy}>
+                <p className={styles.detailsAlreadyMemberText}>
+                    Already a member?
+                </p>
+                <p className={styles.detailsConnectSubtitle}>
+                    Connect your ActBlue to check the status of your membership
+                    benefits
+                </p>
+            </div>
+            <BaseButton
+                label={isLinking ? 'Linking...' : 'Link ActBlue'}
+                disabled={isLinking}
+                onClick={() => setShowDonorLinkForm(true)}
+                className={cn(styles.secondaryButton, styles.buttonHover)}
+            />
+        </div>
+    )
+
+    const renderCardColumn = () => {
+        if (showLinkForm) return renderLinkPanel()
+        return (
+            <>
+                {renderMembershipCta()}
+                <div className={styles.cardColumnInner}>
+                    <InteractiveThreeCard
+                        dynamic
+                        backImage="/images/membercard_back.png"
+                    />
+                </div>
+                {userHasDonor ? renderMembershipStatus() : renderConnectCta()}
+            </>
+        )
+    }
+
+    const renderAccountInfoForm = () => {
+        const discord = updatedUser.discordUsers?.[0]
+        return (
+            <AccountInfoForm
+                user={updatedUser}
+                onSave={onSave}
+                onUpdateUser={setUpdatedUser}
+                hasMatchedDonor={userHasDonor}
+                subtitle={
+                    discord?.username ? `@${discord.username}` : undefined
+                }
+                avatar={
+                    <DiscordAvatar
+                        discordUserId={discord?.id}
+                        imageId={discord?.image}
+                        size={48}
+                    />
+                }
+                title={
+                    `${updatedUser.firstName ?? ''} ${updatedUser.lastName ?? ''}`.trim() ||
+                    'Account'
+                }
+            />
+        )
+    }
+
     const updateAddressDraft = (
         field: 'addressLine1' | 'addressLine2' | 'city' | 'state' | 'zip',
         value: string
@@ -284,30 +474,7 @@ export function AccountDetailsSection({
                             cards.
                         </p>
                     </div>
-
-                    <div className={styles.headerActions}>
-                        {canAccessDashboard ? (
-                            <div>
-                                <BaseButton
-                                    label="Volunteer Dashboard"
-                                    href="/volunteer_dashboard?from=welcome"
-                                    className={styles.secondaryButton}
-                                />
-                            </div>
-                        ) : isInServerResult.data?.isInServer === false ? (
-                            <BaseButton
-                                label="Join Community"
-                                href="/volunteer"
-                                className={styles.secondaryButton}
-                            />
-                        ) : null}
-
-                        <BaseButton
-                            label="Sign Out"
-                            onClick={handleSignOut}
-                            className={styles.primaryButton}
-                        />
-                    </div>
+                    {renderHeaderActions()}
                 </div>
             </header>
 
@@ -331,269 +498,12 @@ export function AccountDetailsSection({
                                 styles.detailsCardMobileLast
                             )}
                         >
-                            {!userHasDonor && showDonorLinkForm ? (
-                                <>
-                                    <div
-                                        className={styles.detailsLinkFormHeader}
-                                    >
-                                        <div
-                                            className={
-                                                styles.detailsLinkFormCopy
-                                            }
-                                        >
-                                            <p
-                                                className={
-                                                    styles.detailsAlreadyMemberText
-                                                }
-                                            >
-                                                Connect your ActBlue account
-                                            </p>
-                                            <p
-                                                className={
-                                                    styles.detailsLinkFormSubtitle
-                                                }
-                                            >
-                                                <span
-                                                    className={
-                                                        styles.detailsLinkFormAlertText
-                                                    }
-                                                >
-                                                    Check the email you used to
-                                                    donate or log into ACTBLUE
-                                                </span>{' '}
-                                                to find and paste the order
-                                                number of any donation to PV so
-                                                we can link your account and
-                                                ship your card.
-                                            </p>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                setShowDonorLinkForm(false)
-                                            }
-                                            className={
-                                                styles.detailsCloseButton
-                                            }
-                                            aria-label="Close connect ActBlue form"
-                                        >
-                                            <IoClose size={20} />
-                                        </button>
-                                    </div>
-                                    {renderDonorLinkForm()}
-                                </>
-                            ) : (
-                                <>
-                                    <div
-                                        className={styles.detailsMembershipCta}
-                                    >
-                                        <div
-                                            className={
-                                                styles.detailsMembershipCopy
-                                            }
-                                        >
-                                            <h3
-                                                className={
-                                                    styles.detailsMembershipHeading
-                                                }
-                                            >
-                                                Dues Paying Membership
-                                            </h3>
-                                            <p
-                                                className={
-                                                    styles.detailsMembershipSubtitle
-                                                }
-                                            >
-                                                Get your membership card
-                                            </p>
-                                        </div>
-                                        <BaseButton
-                                            href={
-                                                discordUserId
-                                                    ? `https://secure.actblue.com/donate/pvmember?refcode=Account%20Page&refcode2=${discordUserId}`
-                                                    : 'https://secure.actblue.com/donate/pvmember?refcode=Account%20Page'
-                                            }
-                                            label="Become a Member"
-                                            className={styles.primaryButton}
-                                        />
-                                    </div>
-                                    <div className={styles.cardColumnInner}>
-                                        <InteractiveThreeCard
-                                            dynamic
-                                            backImage="/images/membercard_back.png"
-                                        />
-                                    </div>
-                                    {userHasDonor && (
-                                        <div
-                                            className={
-                                                styles.detailsMembershipStatusPanel
-                                            }
-                                        >
-                                            {userData.duesPayingMember &&
-                                            hasActiveRecurringContribution ? (
-                                                <>
-                                                    <div
-                                                        className={
-                                                            formFieldStyles.fieldHeader
-                                                        }
-                                                    >
-                                                        <span
-                                                            className={
-                                                                formFieldStyles.fieldLabel
-                                                            }
-                                                        >
-                                                            Membership Card
-                                                            Status
-                                                        </span>
-                                                        <div
-                                                            className={
-                                                                formFieldStyles.fieldValue
-                                                            }
-                                                        >
-                                                            <div
-                                                                className={
-                                                                    formFieldStyles.readonly
-                                                                }
-                                                            >
-                                                                <span
-                                                                    className={
-                                                                        styles.statusTag
-                                                                    }
-                                                                >
-                                                                    {memberFacingDeliverableLabel(
-                                                                        userData.membershipCardStatus
-                                                                    )}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div
-                                                        className={
-                                                            formFieldStyles.fieldHeader
-                                                        }
-                                                    ></div>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <div
-                                                        className={
-                                                            styles.membershipStatusIndicatorContainer
-                                                        }
-                                                    >
-                                                        <span>
-                                                            Dues Paying Member:
-                                                        </span>
-                                                        <div>
-                                                            <div
-                                                                className={
-                                                                    styles.membershipStatus
-                                                                }
-                                                            >
-                                                                {userData.duesPayingMember
-                                                                    ? 'Yes'
-                                                                    : 'No'}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <p
-                                                        className={
-                                                            styles.membershipStatusManualNotice
-                                                        }
-                                                    >
-                                                        If it remains incorrect,
-                                                        please{' '}
-                                                        <a
-                                                            href="https://www.progressivevictory.win/membership_support"
-                                                            className={
-                                                                styles.membershipStatusManualNoticeLink
-                                                            }
-                                                        >
-                                                            click here
-                                                        </a>{' '}
-                                                        for support.
-                                                    </p>
-                                                </>
-                                            )}
-                                        </div>
-                                    )}
-                                    {!userHasDonor && (
-                                        <div
-                                            className={cn(
-                                                styles.detailsMembershipCta,
-                                                styles.detailsConnectCta
-                                            )}
-                                        >
-                                            <div
-                                                className={
-                                                    styles.detailsMembershipCopy
-                                                }
-                                            >
-                                                <p
-                                                    className={
-                                                        styles.detailsAlreadyMemberText
-                                                    }
-                                                >
-                                                    Already a member?
-                                                </p>
-                                                <p
-                                                    className={
-                                                        styles.detailsConnectSubtitle
-                                                    }
-                                                >
-                                                    Connect your ActBlue to
-                                                    check the status of your
-                                                    membership benefits
-                                                </p>
-                                            </div>
-                                            <BaseButton
-                                                label={
-                                                    isLinking
-                                                        ? 'Linking...'
-                                                        : 'Link ActBlue'
-                                                }
-                                                disabled={isLinking}
-                                                onClick={() =>
-                                                    setShowDonorLinkForm(true)
-                                                }
-                                                className={cn(
-                                                    styles.secondaryButton,
-                                                    styles.buttonHover
-                                                )}
-                                            />
-                                        </div>
-                                    )}
-                                </>
-                            )}
+                            {renderCardColumn()}
                         </div>
                     </div>
 
                     <div className={styles.detailsFormPanel}>
-                        <AccountInfoForm
-                            user={updatedUser}
-                            onSave={onSave}
-                            onUpdateUser={setUpdatedUser}
-                            hasMatchedDonor={userHasDonor}
-                            subtitle={
-                                updatedUser.discordUsers?.[0]?.username
-                                    ? `@${updatedUser.discordUsers[0].username}`
-                                    : undefined
-                            }
-                            avatar={
-                                <DiscordAvatar
-                                    discordUserId={
-                                        updatedUser.discordUsers?.[0]?.id
-                                    }
-                                    imageId={
-                                        updatedUser.discordUsers?.[0]?.image
-                                    }
-                                    size={48}
-                                />
-                            }
-                            title={
-                                `${updatedUser.firstName ?? ''} ${updatedUser.lastName ?? ''}`.trim() ||
-                                'Account'
-                            }
-                        />
+                        {renderAccountInfoForm()}
                     </div>
                 </div>
             </div>

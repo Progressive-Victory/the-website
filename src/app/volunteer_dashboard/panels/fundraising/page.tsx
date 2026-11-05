@@ -87,6 +87,8 @@ export default function Page() {
         resetChartViewToSelectedRange,
     } = useFundraisingDashboardController()
 
+    const stats: Partial<typeof statsQuery.data> = statsQuery.data ?? {}
+
     const recurringChangeAmount =
         typeof recurringDollarsChange === 'number' &&
         Number.isFinite(recurringDollarsChange)
@@ -550,9 +552,7 @@ export default function Page() {
                                     {raisedKickerLabel}
                                 </div>
                                 <div className={styles.heroValue}>
-                                    {formatCurrency(
-                                        statsQuery.data?.totalDollarsRaised
-                                    )}
+                                    {formatCurrency(stats.totalDollarsRaised)}
                                 </div>
                             </div>
 
@@ -595,7 +595,7 @@ export default function Page() {
                             <DashboardWidget
                                 title="Recurring"
                                 value={formatCurrency(
-                                    statsQuery.data?.recurringDollarsRaised
+                                    stats.recurringDollarsRaised
                                 )}
                                 valueChange={
                                     recurringChangeLabel != null && (
@@ -613,17 +613,14 @@ export default function Page() {
                                 }
                                 stat1={
                                     recurringPct != null &&
-                                    statsQuery.data
-                                        ?.recurringContributionCount != null
+                                    stats.recurringContributionCount != null
                                         ? `${recurringPct}% of total`
                                         : '—'
                                 }
                                 stat2={
-                                    statsQuery.data
-                                        ?.recurringContributionCount != null
+                                    stats.recurringContributionCount != null
                                         ? formatDonationCountLabel(
-                                              statsQuery.data
-                                                  .recurringContributionCount
+                                              stats.recurringContributionCount
                                           )
                                         : '—'
                                 }
@@ -632,21 +629,18 @@ export default function Page() {
                             <DashboardWidget
                                 title="One-Time"
                                 value={formatCurrency(
-                                    statsQuery.data?.oneTimeDollarsRaised
+                                    stats.oneTimeDollarsRaised
                                 )}
                                 stat1={
                                     oneTimePct != null &&
-                                    statsQuery.data?.oneTimeContributionCount !=
-                                        null
+                                    stats.oneTimeContributionCount != null
                                         ? `${oneTimePct}% of total`
                                         : '—'
                                 }
                                 stat2={
-                                    statsQuery.data?.oneTimeContributionCount !=
-                                    null
+                                    stats.oneTimeContributionCount != null
                                         ? formatDonationCountLabel(
-                                              statsQuery.data
-                                                  .oneTimeContributionCount
+                                              stats.oneTimeContributionCount
                                           )
                                         : '—'
                                 }
@@ -654,27 +648,25 @@ export default function Page() {
 
                             <DashboardWidget
                                 title="Donors"
-                                value={formatCount(
-                                    statsQuery.data?.totalDonorCount
-                                )}
+                                value={formatCount(stats.totalDonorCount)}
                                 stat1={`Recurring ${formatCount(
-                                    statsQuery.data?.recurringDonorCount
+                                    stats.recurringDonorCount
                                 )}`}
                                 stat2={`One-Time ${formatCount(
-                                    statsQuery.data?.oneTimeDonorCount
+                                    stats.oneTimeDonorCount
                                 )}`}
                             />
 
                             <DashboardWidget
                                 title="Contributions"
                                 value={formatCount(
-                                    statsQuery.data?.totalContributionCount
+                                    stats.totalContributionCount
                                 )}
                                 stat1={`Recurring ${formatCount(
-                                    statsQuery.data?.recurringContributionCount
+                                    stats.recurringContributionCount
                                 )}`}
                                 stat2={`One-Time ${formatCount(
-                                    statsQuery.data?.oneTimeContributionCount
+                                    stats.oneTimeContributionCount
                                 )}`}
                             />
                         </div>

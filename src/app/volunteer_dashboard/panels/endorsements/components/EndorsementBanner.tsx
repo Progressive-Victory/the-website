@@ -89,6 +89,45 @@ export function EndorsementBanner({
         }
     }
 
+    const renderPublishedPill = () => {
+        const published = endorsement.endorsementPublished
+        return (
+            <span
+                className={cn(
+                    styles.rolePill,
+                    published ? styles.tagGreen : styles.tagDarkRed
+                )}
+            >
+                {published ? 'Published' : 'Not Published'}
+            </span>
+        )
+    }
+
+    const renderTitleBlock = () => (
+        <VStack align="left" gap={0.2}>
+            <h1 className={styles.headerUserName}>
+                {endorsement.name || 'New Endorsement'}
+                {endorsement.incumbent && '*'}
+            </h1>
+            <h2 className={styles.headerUserUsername}>
+                {[
+                    stateNames.get(endorsement.state) ?? endorsement.state,
+                    endorsement.jurisdiction,
+                ]
+                    .filter(Boolean)
+                    .join(` ${DOT_SEPARATOR} `) || 'No state selected'}
+            </h2>
+            {uploadError && (
+                <span className={styles.uploadError}>{uploadError}</span>
+            )}
+        </VStack>
+    )
+
+    const renderTabs = () => {
+        if (!tabs?.length || !selectedTab || !onTabChange) return null
+        return <TabBar tabs={tabs} value={selectedTab} onChange={onTabChange} />
+    }
+
     const content = (
         <VStack align="left" gap={0.75} className={styles.headerTop}>
             <HStack gap={0.75} className={styles.topRow}>
@@ -123,43 +162,10 @@ export function EndorsementBanner({
                             />
                         </ZStack>
                     )}
-                    <VStack align="left" gap={0.2}>
-                        <h1 className={styles.headerUserName}>
-                            {endorsement.name || 'New Endorsement'}
-                            {endorsement.incumbent && '*'}
-                        </h1>
-                        <h2 className={styles.headerUserUsername}>
-                            {[
-                                stateNames.get(endorsement.state) ??
-                                    endorsement.state,
-                                endorsement.jurisdiction,
-                            ]
-                                .filter(Boolean)
-                                .join(` ${DOT_SEPARATOR} `) ||
-                                'No state selected'}
-                        </h2>
-                        {uploadError && (
-                            <span className={styles.uploadError}>
-                                {uploadError}
-                            </span>
-                        )}
-                    </VStack>
+                    {renderTitleBlock()}
                 </HStack>
                 <Spacer />
-                <HStack gap={0.5}>
-                    <span
-                        className={cn(
-                            styles.rolePill,
-                            endorsement.endorsementPublished
-                                ? styles.tagGreen
-                                : styles.tagDarkRed
-                        )}
-                    >
-                        {endorsement.endorsementPublished
-                            ? 'Published'
-                            : 'Not Published'}
-                    </span>
-                </HStack>
+                <HStack gap={0.5}>{renderPublishedPill()}</HStack>
             </HStack>
             <HStack gap={0.5}>
                 {endorsement.initiativeLevel !== InitiativeType.None && (
@@ -192,13 +198,7 @@ export function EndorsementBanner({
                     </span>
                 )}
             </HStack>
-            {tabs && tabs.length > 0 && selectedTab && onTabChange && (
-                <TabBar
-                    tabs={tabs}
-                    value={selectedTab}
-                    onChange={onTabChange}
-                />
-            )}
+            {renderTabs()}
         </VStack>
     )
 
