@@ -146,6 +146,10 @@ export function MemberView({
                     The obvious solution (fragment) causes the page to break for unknowable reasons.
                     Check website PR #493 to see details of how each solution breaks */}
                 {editing && <TextField label="Last Name" field="lastName" />}
+                <TextField
+                    label="Preferred Pronouns"
+                    field="preferredPronouns"
+                />
                 <DateField<User>
                     label="Date of Birth"
                     getter={(form) =>
@@ -226,6 +230,7 @@ export function MemberView({
                         },
                     })}
                     options={stateOptions}
+                    required
                 />
                 <TextField<User>
                     label="Zip Code"
@@ -244,6 +249,7 @@ export function MemberView({
                             Country.UnitedStatesOfAmerica
                         )
                     }
+                    required
                 />
             </FormGroup>
 

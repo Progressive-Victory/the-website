@@ -131,6 +131,8 @@ function LayoutContent({ children }: { children: ReactNode }) {
     const displayName =
         `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim() ||
         (discordUser?.username ? `@${discordUser.username}` : 'User')
+    const displayPronouns =
+        `${currentUser.data?.preferredPronouns ?? ''}`.trim()
 
     const dashboardPanelConfig: DashboardPanelConfigItem[] = [
         {
@@ -288,6 +290,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                                             ? `@${discordUser.username}`
                                             : undefined
                                     }
+                                    labelPill={displayPronouns}
                                 />
                             }
                         >

@@ -122,6 +122,20 @@ export const AccountInfoForm = ({
                     {isEditing && (
                         <TextField label="Last Name" field="lastName" />
                     )}
+                    {isEditing ? (
+                        <TextField
+                            label="Preferred Pronouns"
+                            field="preferredPronouns"
+                        />
+                    ) : `${user.preferredPronouns ?? ''}`.trim() ? (
+                        <TextField<User>
+                            label="Preferred Pronouns"
+                            getter={(user) =>
+                                `${user.preferredPronouns ?? ''}`.trim() || null
+                            }
+                            readonly
+                        />
+                    ) : null}
                     <TextField<User>
                         label="Discord Username"
                         getter={(user) =>
@@ -224,6 +238,7 @@ export const AccountInfoForm = ({
                                 },
                             })}
                             options={stateOptionsWithEmpty}
+                            required
                         />
                     )}
                     {isEditing && (
@@ -251,6 +266,7 @@ export const AccountInfoForm = ({
                             validator={(field) =>
                                 !field?.length || field?.length == 5
                             }
+                            required
                         />
                     )}
                     {!isEditing && hasMatchedDonor && (
