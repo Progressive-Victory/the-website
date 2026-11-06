@@ -7,12 +7,8 @@ import { DOT_SEPARATOR } from '@/util'
 import { DiscordEventStatus } from 'pv-contracts/data'
 import { DiscordEventWithOccurrences } from 'pv-contracts/responses'
 import { useState } from 'react'
-import { FaCalendarAlt, FaClock, FaUsers } from 'react-icons/fa'
-import {
-    FaUser,
-    FaLocationDot,
-    FaSpaghettiMonsterFlying,
-} from 'react-icons/fa6'
+import { FaCalendarAlt, FaClock, FaUsers, FaVolumeDown } from 'react-icons/fa'
+import { FaUser, FaCalendarCheck } from 'react-icons/fa6'
 
 interface EventFilters {
     status: DiscordEventStatus | null
@@ -133,9 +129,9 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
             .filter(Boolean)
             .join(` ${DOT_SEPARATOR} `) || 'More'
     const selectedFilterIcon = selectedEventStatus ? (
-        <FaSpaghettiMonsterFlying />
+        <FaCalendarCheck />
     ) : selectedEventChannel ? (
-        <FaLocationDot />
+        <FaVolumeDown />
     ) : isSelectedEventRecurrent ? (
         <FaClock />
     ) : selectedCreatorDiscordId ? (
@@ -199,7 +195,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                         All Items
                     </DropdownOverlayButton>
                     <DropdownOverlayButton
-                        icon={<FaSpaghettiMonsterFlying />}
+                        icon={<FaCalendarCheck />}
                         selected={selectedEventStatus !== null}
                         menu={({ closeMenu }) => (
                             <div className={styles.nestedFilterMenu}>
@@ -226,7 +222,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                         Status
                     </DropdownOverlayButton>
                     <DropdownOverlayButton
-                        icon={<FaLocationDot />}
+                        icon={<FaVolumeDown />}
                         selected={selectedEventChannel !== null}
                         menu={({ closeMenu }) => (
                             <div className={styles.nestedFilterMenu}>
@@ -315,7 +311,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                 filterOptions.status.find(
                     (o) => o.value === selectedEventStatus
                 )?.label ?? 'All Events',
-            icon: <FaSpaghettiMonsterFlying />,
+            icon: <FaCalendarCheck />,
             color: '#5997E0',
             width: '10rem',
             activeRedirect: 'all',
@@ -333,7 +329,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                 filterOptions.channel.find(
                     (o) => o.value === selectedEventChannel
                 )?.label ?? 'Channel',
-            icon: <FaLocationDot />,
+            icon: <FaVolumeDown />,
             color: '#62A46C',
             width: '10rem',
             activeRedirect: 'all',

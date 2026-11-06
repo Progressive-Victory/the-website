@@ -9,10 +9,14 @@ import styles from './page.module.css'
 import { DetailView } from './panel_views/DetailView'
 import { OccurencesView } from './panel_views/OccurrencesView'
 import Panel, { SidebarBody } from '@/components/common/panel'
+import {
+    SidebarListFilters,
+    type SidebarListFiltersProps,
+} from '@/components/common/panel/sidebar_list/SidebarList'
 import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import { useEventQueries } from '@/queries'
 import { dateService } from '@/services'
-import { cn } from '@/util'
+import { cn, parseErrorMessage } from '@/util'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
@@ -20,6 +24,7 @@ import { DiscordEvent, DiscordEventStatus } from 'pv-contracts/data'
 import { DiscordEventWithOccurrences } from 'pv-contracts/responses'
 import { useState } from 'react'
 import { FaUsers } from 'react-icons/fa6'
+import { IoEllipsisVertical } from 'react-icons/io5'
 import { useMediaQuery } from 'usehooks-ts'
 
 type DiscordEventTabKey = 'overview' | 'occurrences'
@@ -194,6 +199,14 @@ export default function Page() {
             </div>
         )
 
+    const sidebarFilters: SidebarListFiltersProps = {
+        search,
+        onSearch,
+        sortFieldOptions: eventSortFields,
+        showSort: true,
+        showLimit: true,
+    }
+
     return (
         <Panel
             includeSidebar
@@ -206,25 +219,23 @@ export default function Page() {
             collapsedSidebarWidth="5rem"
             sidebarClassName={styles.sidebarBg}
             sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-            showScrollbar={false}
             label="Events"
+            showScrollbar={false}
             sidebarList={{
                 search: { search, onSearch },
                 footer: {
                     page: search.page ?? 0,
                     pageSize: search.limit ?? 25,
-                    count: eventsQuery.data?.count ?? 0,
+                    count: eventsQuery.data?.count,
                     isPending: eventsQuery.isPending,
                     onPageChange: (nextPage: number) =>
                         onSearch({ ...search, page: nextPage }),
                 },
-                filters: {
-                    search,
-                    onSearch,
-                    sortFieldOptions: eventSortFields,
-                    showSort: true,
-                    showLimit: true,
-                },
+                filters: sidebarFilters,
+            }}
+            prominentHeaderButton={{
+                icon: <IoEllipsisVertical size={20} />,
+                menu: () => <SidebarListFilters {...sidebarFilters} />,
             }}
             sidebarBody={
                 <>
@@ -264,6 +275,7 @@ export default function Page() {
                             onClick: (e) => {
                                 e.preventDefault()
                                 handleSelectEvent(event.id ?? null)
+                                if (!isDesktop) setSidebarMobileVisible(false)
                             },
                         })}
                     />
@@ -278,15 +290,23 @@ export default function Page() {
                     className={styles.backButton}
                 />
 
-                {!eventQuery.data?.event && (
+                {selectedEventId == null && (
                     <div className={styles.emptyState}>No event selected</div>
                 )}
 
-                {eventQuery.isLoading && (
-                    <div className={styles.emptyState}>Loading...</div>
+                {selectedEventId != null && eventQuery.isPending && (
+                    <div className={styles.emptyState}>
+                        Loading event details...
+                    </div>
                 )}
 
-                {eventQuery.data?.event && (
+                {selectedEventId != null && eventQuery.error && (
+                    <div className={cn(styles.emptyState, styles.errorText)}>
+                        Error: {parseErrorMessage(eventQuery.error)}
+                    </div>
+                )}
+
+                {selectedEventId != null && eventQuery.data?.event && (
                     <>
                         {renderDetailsHeader()}
                         {selectedTab === 'overview' && (
