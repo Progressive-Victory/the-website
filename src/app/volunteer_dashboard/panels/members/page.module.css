@@ -4,6 +4,10 @@
     --navigation-stack-sidebar-gap: 0rem;
 }
 
+.sidebarBg :global([data-pinned-section]) {
+    background: #f9fafb;
+}
+
 .donorPickerItem {
     display: flex;
     width: calc(100% - 0.5rem);
