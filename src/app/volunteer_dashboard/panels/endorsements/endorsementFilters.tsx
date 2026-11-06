@@ -81,7 +81,7 @@ const publishedOptions = [
     { value: false, label: 'Not Published' },
 ]
 
-function YesNoMenu({
+export function YesNoMenu({
     selected,
     onSelect,
 }: {
