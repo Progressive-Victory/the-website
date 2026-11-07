@@ -17,6 +17,7 @@ export function usePaginatedSearch<S extends z.ZodObject>(
         endpointParams?: RouteParams
         search?: SearchRequest
         all?: boolean
+        transformSearchRequest?: (search: SearchRequest) => SearchRequest
     }
 ) {
     const { ready, onGet } = useFetch()
@@ -41,10 +42,11 @@ export function usePaginatedSearch<S extends z.ZodObject>(
                   count - truePage * (search.limit ?? 25)
               )
             : search.limit
-
+        const requestSearch =
+            options?.transformSearchRequest?.(search) ?? search
         return await onGet(endpoint, zPaginatedResponse(schema), {
             params: options?.endpointParams,
-            query: { ...search, page: truePage, limit },
+            query: { ...requestSearch, page: truePage, limit },
             signal,
         })
     }

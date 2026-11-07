@@ -491,6 +491,10 @@ export default function Page() {
         onSearch,
     } = usePaginatedSearch('/users', zUserProfile, {
         search: { sort: SortDirection.DESC, sortField: 'created_at_utc' },
+        transformSearchRequest: (search) =>
+            search.searchField === 'phone' && search.query !== undefined
+                ? { ...search, query: search.query.replace(/\D/g, '') }
+                : search,
     })
 
     const { query: rolesQuery } = usePaginatedSearch('/roles', zRole, {
