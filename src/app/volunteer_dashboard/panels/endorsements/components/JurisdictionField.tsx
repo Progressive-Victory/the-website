@@ -1,18 +1,13 @@
 'use client'
 
 import styles from './JurisdictionField.module.css'
+import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
+import { useListEditing } from '@/components/common/list/ListContext'
+import { DropdownRow } from '@/components/common/list/rows/DropdownRow'
 import {
-    DropdownButton,
-    DropdownOverlay,
-    DropdownOverlayButton,
-} from '@/components/common'
-import {
-    FormField,
-    FormFieldProps,
-    useConfigure,
-} from '@/components/common/forms'
-import formFieldStyles from '@/components/common/forms/FormField.module.css'
-import { Endorsement } from 'pv-contracts/data'
+    useListField,
+    type ListRowFieldProps,
+} from '@/components/common/list/useListField'
 import {
     Dispatch,
     KeyboardEvent,
@@ -68,14 +63,41 @@ const getJurisdictionSelection = (jurisdiction: string) => {
     }
 }
 
-export function JurisdictionField(
-    props: FormFieldProps<Endorsement, string | null | undefined>
-) {
-    const { getter, onChange, readonly, disabled } = useConfigure(
-        props,
-        useCallback(() => true, [])
+export interface JurisdictionFieldProps extends ListRowFieldProps<
+    string | null
+> {
+    label: string
+    editing?: boolean
+    readOnly?: boolean
+}
+
+export function JurisdictionField({
+    value: valueProp,
+    onValueChange: onValueChangeProp,
+    field,
+    getter,
+    setter,
+    validator,
+    editing: editingOverride,
+    ...rowProps
+}: JurisdictionFieldProps) {
+    const { value, onValueChange } = useListField<string | null>(
+        {
+            value: valueProp,
+            onValueChange: onValueChangeProp,
+            field,
+            getter,
+            setter,
+            validator: validator ?? (() => true),
+        },
+        {
+            required: false,
+            isEmpty: (value) => !value?.trim(),
+            editing: editingOverride,
+        }
     )
-    const jurisdiction = props.dynamic ? (getter(props.dynamic.form) ?? '') : ''
+    const jurisdiction = value ?? ''
+    const editing = useListEditing(editingOverride)
     const initialSelection = getJurisdictionSelection(jurisdiction)
     const [selectedType, setSelectedType] = useState<JurisdictionType | null>(
         initialSelection.type
@@ -84,6 +106,7 @@ export function JurisdictionField(
         initialSelection.districtValue
     )
     const otherInputRef = useRef<HTMLInputElement>(null)
+    const previousEditing = useRef(editing)
 
     const normalizedDistrictValue = districtValue.trim()
     const draftJurisdiction = !selectedType
@@ -105,57 +128,64 @@ export function JurisdictionField(
     }, [jurisdiction])
 
     useEffect(syncToJurisdiction, [syncToJurisdiction])
+    useEffect(() => {
+        if (previousEditing.current === editing) return
+        previousEditing.current = editing
+        syncToJurisdiction()
+    }, [editing, syncToJurisdiction])
 
     const confirm = (closeDropdown: () => void) => {
         if (!draftJurisdiction || !hasChange) return
 
-        onChange(draftJurisdiction)
+        onValueChange(draftJurisdiction)
         closeDropdown()
     }
 
-    if (readonly)
-        return (
-            <FormField {...props}>
-                <div className={formFieldStyles.readonly}>{jurisdiction}</div>
-            </FormField>
-        )
-
     return (
-        <FormField {...props}>
-            <DropdownButton
-                label={jurisdiction || 'Select jurisdiction'}
-                disabled={disabled}
-                className={styles.trigger}
-                onClick={syncToJurisdiction}
-                menu={({ closeDropdown }) => (
-                    <DropdownOverlay
-                        label="Select jurisdiction"
-                        onClose={closeDropdown}
-                        onClick={(event) => {
-                            event.preventDefault()
-                            event.stopPropagation()
-                        }}
-                        narrowLayoutMode="trigger"
-                        className={styles.overlay}
-                        footerButtonLabel="Confirm"
-                        footerButtonClassName={styles.confirmButton}
-                        footerButtonDisabled={!hasChange}
-                        footerButtonOnClick={() => confirm(closeDropdown)}
-                        body={
-                            <JurisdictionOptions
-                                jurisdiction={jurisdiction}
-                                selectedType={selectedType}
-                                setSelectedType={setSelectedType}
-                                districtValue={districtValue}
-                                setDistrictValue={setDistrictValue}
-                                otherInputRef={otherInputRef}
-                                onConfirm={() => confirm(closeDropdown)}
-                            />
-                        }
-                    />
-                )}
-            />
-        </FormField>
+        <DropdownRow
+            {...rowProps}
+            editing={editingOverride}
+            readOnly={rowProps.readOnly}
+            value={jurisdiction}
+            onValueChange={(next) => onValueChange(String(next))}
+            placeholder="Select jurisdiction"
+            triggerLabel={jurisdiction || 'Select jurisdiction'}
+            onTriggerClick={syncToJurisdiction}
+            validator={(next) =>
+                validator ? validator(String(next ?? '')) : true
+            }
+            menu={({ closeDropdown }) => (
+                <DropdownOverlay
+                    label="Select jurisdiction"
+                    onClose={closeDropdown}
+                    onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }}
+                    narrowLayoutMode="trigger"
+                    className={styles.overlay}
+                    footerButtonLabel="Confirm"
+                    footerButtonClassName={styles.confirmButton}
+                    footerButtonDisabled={!hasChange}
+                    footerButtonOnClick={() => confirm(closeDropdown)}
+                    body={
+                        <JurisdictionOptions
+                            jurisdiction={jurisdiction}
+                            selectedType={selectedType}
+                            setSelectedType={setSelectedType}
+                            districtValue={districtValue}
+                            setDistrictValue={setDistrictValue}
+                            otherInputRef={otherInputRef}
+                            onConfirm={() => confirm(closeDropdown)}
+                            onSelectGeneral={(type) => {
+                                onValueChange(type)
+                                closeDropdown()
+                            }}
+                        />
+                    }
+                />
+            )}
+        />
     )
 }
 
@@ -167,6 +197,7 @@ interface JurisdictionOptionsProps {
     setDistrictValue: Dispatch<SetStateAction<string>>
     otherInputRef: RefObject<HTMLInputElement | null>
     onConfirm: () => void
+    onSelectGeneral: (type: GeneralJurisdictionType) => void
 }
 
 function JurisdictionOptions({
@@ -177,6 +208,7 @@ function JurisdictionOptions({
     setDistrictValue,
     otherInputRef,
     onConfirm,
+    onSelectGeneral,
 }: JurisdictionOptionsProps) {
     const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
         if (event.key !== 'Enter') return
@@ -210,10 +242,12 @@ function JurisdictionOptions({
             {generalJurisdiction.options.map((type) => (
                 <DropdownOverlayButton
                     key={type}
-                    checked={selectedType === type}
-                    onCheckedChange={(checked) => {
-                        setSelectedType(checked ? type : null)
+                    selected={selectedType === type}
+                    onClick={() => {
+                        if (selectedType === type) return
+                        setSelectedType(type)
                         setDistrictValue('')
+                        onSelectGeneral(type)
                     }}
                 >
                     {type}

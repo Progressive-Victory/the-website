@@ -49,8 +49,8 @@ export const endorsementLevelOptions = [
 ].map((value) => ({ value, label: ENDORSEMENT_TYPE_LABELS[value] }))
 
 export const initiativeLevelOptions = [
-    InitiativeType.State,
     InitiativeType.National,
+    InitiativeType.State,
     InitiativeType.None,
 ].map((value) => ({ value, label: INITIATIVE_TYPE_LABELS[value] }))
 

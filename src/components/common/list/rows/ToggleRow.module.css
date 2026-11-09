@@ -1,0 +1,21 @@
+.togglePill {
+    display: inline-flex;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 3.25rem;
+    padding: 0.12rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+
+    &[data-enabled='true'] {
+        color: var(--navigation-button-link-active-color, rgba(2, 132, 199, 1));
+        background: var(
+            --navigation-button-link-active-bg,
+            rgba(14, 165, 233, 0.14)
+        );
+    }
+}

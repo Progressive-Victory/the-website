@@ -1,5 +1,21 @@
 import styles from './FormField.module.css'
-import { ReactElement, useEffect, useMemo } from 'react'
+import { cn } from '@/util'
+import { ReactElement, useEffect, useMemo, type MouseEvent } from 'react'
+
+const INTERACTIVE_SELECTOR =
+    'input, select, textarea, button, a, [tabindex], [contenteditable]'
+
+const preventRowActivation = (event: MouseEvent<HTMLLabelElement>) => {
+    const control = (event.target as Element).closest(INTERACTIVE_SELECTOR)
+    if (!control || !event.currentTarget.contains(control))
+        event.preventDefault()
+}
+
+const labelAlignClasses = {
+    top: styles.labelTop,
+    center: styles.labelCenter,
+    bottom: styles.labelBottom,
+}
 
 /**
  * Properties for the FormField component. All form fields extend their
@@ -19,6 +35,8 @@ export interface FormFieldProps<FormType, FieldType = unknown> {
 
     /** A label which will be displayed to the left of the field. */
     label: string
+
+    labelAlign?: 'top' | 'center' | 'bottom'
 
     /** Whether this field can be edited. */
     readonly?: boolean
@@ -234,6 +252,7 @@ export function useConfigure<FormType, FieldType>(
 export function FormField<FormType, FieldType>({
     id,
     label,
+    labelAlign = 'center',
     readonly,
     required,
     deprecated,
@@ -244,7 +263,9 @@ export function FormField<FormType, FieldType>({
 
     const content = (
         <>
-            <span className={styles.fieldLabel}>
+            <span
+                className={cn(styles.fieldLabel, labelAlignClasses[labelAlign])}
+            >
                 {label}
                 {required && (
                     <span className={styles.required} title="Required Field">
@@ -266,7 +287,11 @@ export function FormField<FormType, FieldType>({
 
     if (isEditing)
         return (
-            <label key={id} className={styles.fieldHeader}>
+            <label
+                key={id}
+                className={styles.fieldHeader}
+                onClick={preventRowActivation}
+            >
                 {content}
             </label>
         )

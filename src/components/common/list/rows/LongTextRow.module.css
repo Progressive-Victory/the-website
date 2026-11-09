@@ -1,0 +1,18 @@
+.editor {
+    width: 100%;
+    padding-block: 0.5rem 0.125rem;
+}
+
+.row:has(.editor) > [data-align='top'] {
+    padding-top: calc(0.5rem + 0.125rem + 1px);
+}
+
+.textarea {
+    box-sizing: border-box;
+    min-height: calc(3 * 1.35em + 0.5rem + 2px);
+    padding-block: 0.25rem;
+    overflow-y: hidden;
+    font: inherit;
+    line-height: 1.35;
+    resize: none;
+}
