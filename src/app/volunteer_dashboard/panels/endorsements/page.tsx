@@ -434,9 +434,7 @@ export default function Page() {
                     <DetailView
                         key={selectedEndorsement?.id ?? 'empty'}
                         beforeHeader={renderBanner(true)}
-                        endorsement={
-                            formState?.form ?? selectedEndorsement ?? null
-                        }
+                        endorsement={selectedEndorsement}
                         title={
                             formState?.mode === 'create'
                                 ? formState.form.name ||

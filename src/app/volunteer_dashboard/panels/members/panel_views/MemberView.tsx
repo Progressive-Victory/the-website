@@ -1,21 +1,28 @@
 'use client'
 
 import {
-    CheckboxField,
-    DateField,
-    DropDownField,
-    Form,
-    FormGroup,
-    FormState,
-    PhoneField,
-    SelectManyField,
-    TextField,
-} from '@/components/common/forms'
-import { MultiTextField } from '@/components/common/forms/MultiTextField'
-import { stateOptions } from '@/models'
+    AddList,
+    AddressRow,
+    DateRow,
+    List,
+    NameRow,
+    PhoneRow,
+    PickerRow,
+    TextRow,
+    ListBreak,
+    MultiSelectRow,
+    ToggleRow,
+} from '@/components/common'
+import { Form, FormState } from '@/components/common/forms'
 import { dateService } from '@/services'
-import { Country, isValidCountryPostalCode } from 'postal-code-validator'
-import { Role, ShirtSize, UpdateHistory, User } from 'pv-contracts/data'
+import {
+    Location,
+    Position,
+    Role,
+    ShirtSize,
+    UpdateHistory,
+    User,
+} from 'pv-contracts/data'
 
 const shirtSizeOptions = [
     { value: '', label: 'None' },
@@ -25,6 +32,15 @@ const shirtSizeOptions = [
     { value: 'L', label: 'Large' },
     { value: 'XL', label: 'Extra Large' },
     { value: '2XL', label: 'Double XL' },
+]
+
+const pronounOptions = [
+    { value: '', label: 'None' },
+    { value: 'he/him', label: 'he/him' },
+    { value: 'she/her', label: 'she/her' },
+    { value: 'they/them', label: 'they/them' },
+    { value: 'any/all', label: 'any/all' },
+    { value: 'other', label: 'other' },
 ]
 
 const calcFutureDate = (
@@ -44,11 +60,8 @@ const calcFutureDate = (
     }
 }
 
-const getHasActiveRecurringValue = (form: User): string => {
-    const donors = form.donors ?? []
-    if (donors.length === 0) return 'No Donor Info'
-
-    const hasActiveRecurring = donors.some((donor) =>
+const hasActiveRecurring = (form: User): boolean =>
+    (form.donors ?? []).some((donor) =>
         (donor.contributions ?? []).some(
             (contribution) =>
                 contribution.isRecurring &&
@@ -61,8 +74,18 @@ const getHasActiveRecurringValue = (form: User): string => {
         )
     )
 
-    return hasActiveRecurring ? 'Yes' : 'No'
+const toListItem = ({ id, name }: { id: number; name: string }) => ({
+    id,
+    label: name,
+})
+
+const accountDateFormat: Intl.DateTimeFormatOptions = {
+    dateStyle: 'long',
+    timeStyle: 'medium',
 }
+
+type MemberWithPronouns = User & { preferredPronouns?: string | null }
+
 export interface MemberViewProps {
     selectedId: number
     user: User
@@ -74,7 +97,10 @@ export interface MemberViewProps {
     editing: boolean
     isInvalid: boolean
     roles: Role[]
-    roleOptions: { value: number; label: string }[]
+    /** Every position, offered by the Positions add list. */
+    positions: Position[]
+    location?: Location | null
+    invalidZip?: string | null
 
     makeFormTitle: (user: User) => string
     handleSave?: (user: User) => void
@@ -87,12 +113,23 @@ export function MemberView({
     setFormState,
     saving,
     isInvalid,
-    editing,
-    roles,
-    roleOptions,
+    positions,
+    location,
+    invalidZip,
     makeFormTitle,
     handleSave,
 }: MemberViewProps) {
+    const existingPronouns = ((selectedHistory ?? user) as MemberWithPronouns)
+        .preferredPronouns
+    const availablePronouns =
+        existingPronouns &&
+        !pronounOptions.some((option) => option.value === existingPronouns)
+            ? [
+                  ...pronounOptions,
+                  { value: existingPronouns, label: existingPronouns },
+              ]
+            : pronounOptions
+
     return (
         <Form<User>
             key={selectedId}
@@ -104,222 +141,233 @@ export function MemberView({
             onUpdate={setFormState}
             onSave={handleSave}
         >
-            <FormGroup title="Account Information">
-                <TextField<User>
-                    label="Discord Username"
-                    getter={(form) =>
+            <List title="Member Details">
+                <NameRow label="Name" />
+                <PickerRow
+                    label="Pronouns"
+                    indicator="unsupported"
+                    getter={(form: MemberWithPronouns) =>
+                        form.preferredPronouns ?? ''
+                    }
+                    setter={(form: User, value) => ({
+                        ...form,
+                        preferredPronouns: value ? String(value) : null,
+                    })}
+                    options={availablePronouns}
+                />
+                <ListBreak />
+                <TextRow
+                    label="Discord"
+                    getter={(form: User) =>
                         (form.discordUsers ?? [])
-                            ?.map(({ username }) => `@${username}`)
+                            .map(({ username }) => `@${username}`)
                             .join(', ')
                     }
-                    readonly
+                    readOnly
                 />
-                <TextField<User>
-                    label="Discord ID"
-                    getter={(form) => form.discordUsers?.[0]?.id}
-                    readonly
+                <PhoneRow label="Phone" field="phone" indicator="required" />
+                <TextRow label="Email" field="email" indicator="required" />
+                <ListBreak />
+                <AddressRow
+                    label="Address"
+                    indicator="required"
+                    showCounty
+                    location={location}
+                    invalidZip={invalidZip}
+                    getter={(form: User) => form.address}
+                    setter={(form: User, address) => ({
+                        ...form,
+                        address: { ...form.address, ...address },
+                    })}
+                    validator={(address) =>
+                        !!address?.state?.trim() || address?.zip?.length === 5
+                    }
                 />
-                <TextField
-                    label="Account Email"
-                    field="email"
-                    autocomplete="email"
-                    required
-                />
-                <TextField<User>
-                    label="Discord Email"
-                    getter={(form) => form.discordUsers?.[0]?.email}
-                    readonly
-                />
-                <PhoneField label="Phone Number" field="phone" required />
-                {editing ? (
-                    <TextField label="First Name" field="firstName" />
-                ) : (
-                    <TextField<User>
-                        label="Full Name"
-                        getter={(user) =>
-                            `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
-                        }
-                        readonly
-                    />
-                )}
-                {/* 6/25/36 - There is no way to merge this conditional in with the above trinary.
-                    The obvious solution (fragment) causes the page to break for unknowable reasons.
-                    Check website PR #493 to see details of how each solution breaks */}
-                {editing && <TextField label="Last Name" field="lastName" />}
-                <TextField
-                    label="Preferred Pronouns"
-                    field="preferredPronouns"
-                />
-                <DateField<User>
+                <ListBreak />
+                <DateRow
                     label="Date of Birth"
-                    getter={(form) =>
+                    getter={(form: User) =>
                         dateService.fromISODateString(form.birthdate)
                     }
-                    field="birthdate"
-                    format={{
-                        timeZone: 'UTC',
-                        dateStyle: 'medium',
-                    }}
+                    setter={(form: User, date) => ({
+                        ...form,
+                        birthdate: date,
+                    })}
                 />
-                <TextField<User>
+                <TextRow
                     label="Age"
-                    readonly
-                    getter={(form) =>
+                    getter={(form: User) =>
                         dateService.isValid(form.birthdate)
                             ? dateService.getAge(form.birthdate!)?.toString()
                             : null
                     }
+                    readOnly
                 />
-                <MultiTextField<User> label="Aliases" field="aliases" />
-                <DateField label="Date Created" field="createdAtUtc" readonly />
-            </FormGroup>
+                <ListBreak />
+                <DateRow
+                    label="Account Created"
+                    field="createdAtUtc"
+                    dateFormat={accountDateFormat}
+                    readOnly
+                />
+                <ListBreak />
+                <MultiSelectRow
+                    label="Aliases"
+                    field="aliases"
+                    indicator="unsupported"
+                />
+            </List>
 
-            <FormGroup title="Address">
-                <TextField<User>
-                    label="Address Line 1"
-                    getter={(form) => form.address.addressLine1}
-                    setter={(form, field) => ({
-                        ...form,
-                        address: {
-                            ...form.address,
-                            addressLine1: field?.slice(0, 100) ?? null,
-                        },
-                    })}
-                />
-                <TextField<User>
-                    label="Address Line 2"
-                    getter={(form) => form.address.addressLine2}
-                    setter={(form, field) => ({
-                        ...form,
-                        address: {
-                            ...form.address,
-                            addressLine2: field?.slice(0, 100) ?? null,
-                        },
-                    })}
-                />
-                <TextField<User>
-                    label="City"
-                    getter={(form) => form.address.city}
-                    setter={(form, field) => ({
-                        ...form,
-                        address: {
-                            ...form.address,
-                            city: field?.slice(0, 50) ?? null,
-                        },
-                    })}
-                />
-                <TextField<User>
-                    label="County"
-                    getter={(form) => form.address.county}
-                    setter={(form, field) => ({
-                        ...form,
-                        address: {
-                            ...form.address,
-                            county: field?.slice(0, 50) ?? null,
-                        },
-                    })}
-                />
-                <DropDownField<User>
-                    label="State"
-                    getter={(user) => user.address.state}
-                    setter={(user, field) => ({
-                        ...user,
-                        address: {
-                            ...user.address,
-                            state: (field as string) ?? null,
-                        },
-                    })}
-                    options={stateOptions}
-                    required
-                />
-                <TextField<User>
-                    label="Zip Code"
-                    getter={(form) => form.address.zip}
-                    setter={(form, field) => ({
-                        ...form,
-                        address: {
-                            ...form.address,
-                            zip: field?.replace(/[^\d]/, '')?.slice(-5) ?? null,
-                        },
-                    })}
-                    validator={(field) =>
-                        (!field?.length || field?.length == 5) &&
-                        isValidCountryPostalCode(
-                            field ?? '',
-                            Country.UnitedStatesOfAmerica
-                        )
+            <List title="Discord Information">
+                <TextRow
+                    label="Discord Username"
+                    getter={(form: User) =>
+                        (form.discordUsers ?? [])
+                            .map(({ username }) => `@${username}`)
+                            .join(', ')
                     }
-                    required
+                    readOnly
                 />
-            </FormGroup>
+                <TextRow
+                    label="Server Nickname"
+                    indicator="unsupported"
+                    readOnly
+                />
+                <ListBreak />
+                <TextRow
+                    label="Discord ID"
+                    getter={(form: User) => form.discordUsers?.[0]?.id}
+                    readOnly
+                />
+                <TextRow
+                    label="Discord Email"
+                    getter={(form: User) => form.discordUsers?.[0]?.email}
+                    readOnly
+                />
+                <ListBreak />
+                <DateRow
+                    label="Joined Server"
+                    field="joinedAtUtc"
+                    dateFormat={accountDateFormat}
+                    readOnly
+                />
+            </List>
 
-            <FormGroup title="Membership Fulfillment">
-                <DropDownField<User>
+            <List title="Membership">
+                <ToggleRow
+                    label="Dues Paying Member"
+                    field="duesPayingMember"
+                    readOnly
+                />
+                <ToggleRow
+                    label="Has Active Recurring"
+                    getter={hasActiveRecurring}
+                    readOnly
+                />
+                <ListBreak />
+                <ToggleRow
+                    label="Qualifies for Membership Benefits"
+                    field="membershipBenefitEligible"
+                    readOnly
+                />
+                <PickerRow
                     label="Shirt Size"
-                    getter={(form) => form.shirtSize ?? ''}
-                    setter={(form, field) => ({
+                    getter={(form: User) => form.shirtSize ?? ''}
+                    setter={(form: User, value) => ({
                         ...form,
-                        shirtSize: field ? (field as ShirtSize) : null,
+                        shirtSize: value ? (value as ShirtSize) : null,
                     })}
                     options={shirtSizeOptions}
                 />
-                <CheckboxField<User>
-                    label="Dues Paying Member"
-                    field="duesPayingMember"
-                    readonly
-                />
-                <CheckboxField<User>
-                    label="Qualifies for Membership Benefits"
-                    field="membershipBenefitEligible"
-                    readonly
-                />
-                <TextField<User>
-                    label="Has Active Recurring"
-                    readonly
-                    getter={getHasActiveRecurringValue}
-                />
-            </FormGroup>
+            </List>
 
-            <FormGroup title="Account Status" defaultCollapsed>
-                <CheckboxField
-                    label="Accepted Alerts"
-                    field="acceptedAlerts"
-                    readonly
-                />
-                <CheckboxField label="Verified" field="verified" readonly />
-                <TextField
+            <List title="Account Status" defaultCollapsed>
+                <ToggleRow label="Verified" field="verified" readOnly />
+                <TextRow
                     label="Onboarding Stage"
                     field="onboardingStage"
-                    readonly
+                    readOnly
+                />{' '}
+                <ListBreak />
+                <DateRow
+                    label="Account Created"
+                    field="createdAtUtc"
+                    dateFormat={accountDateFormat}
+                    readOnly
                 />
-                <DateField
-                    label="Date Intake Done"
+                <DateRow
+                    label="Completed Signup"
                     field="completedIntakeUtc"
-                    readonly
+                    dateFormat={accountDateFormat}
+                    readOnly
                 />
-                <DateField
-                    label="Date Server Joined"
+                <DateRow
+                    label="Joined Discord Server"
                     field="joinedAtUtc"
-                    readonly
+                    dateFormat={accountDateFormat}
+                    readOnly
                 />
-            </FormGroup>
+                <ListBreak />
+                <ToggleRow
+                    label="Accepted Alerts"
+                    field="acceptedAlerts"
+                    readOnly
+                />
+            </List>
 
-            <FormGroup title="Positions & Roles">
-                <SelectManyField<User>
-                    label="Roles"
-                    options={roleOptions}
-                    getter={(form) => (form.roles ?? []).map((role) => role.id)}
-                    setter={(form, field) => ({
-                        ...form,
-                        roles:
-                            field != null
-                                ? roles.filter((role) =>
-                                      field.includes(role.id)
-                                  )
-                                : form.roles,
-                    })}
-                />
-            </FormGroup>
+            <AddList
+                title="Positions"
+                addLabel="Add Position"
+                emptyLabel="No positions"
+                pickerTitle="Add Position"
+                pickerSubtitle="Search for a position to assign this member to."
+                options={positions
+                    .filter(
+                        (position) =>
+                            position.seats == null ||
+                            position.userIds.length < position.seats ||
+                            position.userIds.includes(user.id)
+                    )
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((position) => ({
+                        ...toListItem(position),
+                        description:
+                            position.seats == null
+                                ? `${position.userIds.length} assigned`
+                                : `${position.userIds.length} of ${position.seats} seats filled`,
+                    }))}
+                getter={(form: User) => (form.positions ?? []).map(toListItem)}
+                setter={(form: User, items) => ({
+                    ...form,
+                    positions: items
+                        .map(
+                            (item) =>
+                                positions.find((p) => p.id === item.id) ??
+                                form.positions?.find((p) => p.id === item.id)
+                        )
+                        .filter((position) => position != null),
+                })}
+            />
+            {/* Commented Out Delibrately Because Roles Are Not Fully Depricated */}
+            {/* <AddList
+                title="Roles"
+                addLabel="Add Role"
+                emptyLabel="No roles"
+                pickerTitle="Add Role"
+                pickerSubtitle="Search for a role to give this member."
+                options={roles.map(toListItem)}
+                getter={(form: User) => (form.roles ?? []).map(toListItem)}
+                setter={(form: User, items) => ({
+                    ...form,
+                    roles: items
+                        .map(
+                            (item) =>
+                                roles.find((r) => r.id === item.id) ??
+                                form.roles?.find((r) => r.id === item.id)
+                        )
+                        .filter((role) => role != null),
+                })}
+            /> */}
         </Form>
     )
 }

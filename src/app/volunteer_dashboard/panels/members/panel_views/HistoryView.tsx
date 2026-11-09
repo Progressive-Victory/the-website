@@ -8,6 +8,7 @@ import { useFetch } from '@/util/hooks'
 import { useQueries } from '@tanstack/react-query'
 import {
     ActBlueDonor,
+    Position,
     Role,
     UpdateHistory,
     User,
@@ -29,7 +30,7 @@ export interface HistoryViewProps {
     isRefetching: boolean
 
     roles: Role[]
-    roleOptions: { value: number; label: string }[]
+    positions: Position[]
     makeFormTitle: (user: User) => string
 }
 
@@ -105,7 +106,7 @@ export function HistoryView({
     onSelectDonorHistory,
     isRefetching,
     roles,
-    roleOptions,
+    positions,
     makeFormTitle,
 }: HistoryViewProps) {
     const { ready, onGet } = useFetch()
@@ -266,7 +267,7 @@ export function HistoryView({
                         editing={false}
                         isInvalid={false}
                         roles={roles}
-                        roleOptions={roleOptions}
+                        positions={positions}
                         makeFormTitle={(u) => makeFormTitle(u)}
                     />
                 </div>
