@@ -109,6 +109,15 @@
     &:has([aria-expanded='true']) {
         --confirm-tooltip-opacity: 0;
     }
+
+    &.saving {
+        opacity: 0.7;
+        cursor: progress;
+    }
+}
+
+.tableFieldset {
+    display: contents;
 }
 
 .loadMore {
@@ -237,6 +246,18 @@
     color: rgba(15, 23, 42, 0.6);
 }
 
+.linkingSpinner {
+    font-size: 1rem;
+    color: rgba(15, 23, 42, 0.6);
+    animation: linkingSpin 1s linear infinite;
+}
+
+@keyframes linkingSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .tableOptionsBox {
     min-width: 14rem;
     background: rgba(255, 255, 255, 0.96);
@@ -277,14 +298,6 @@
         background: none;
         color: rgba(15, 23, 42, 0.8);
     }
-}
-
-.userMatchedLink {
-    display: inline-flex;
-    cursor: pointer;
-    border: 0;
-    padding: 0;
-    background: transparent;
 }
 
 @media (max-width: 53rem) {

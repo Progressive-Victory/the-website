@@ -1,7 +1,6 @@
 'use client'
 
 import {
-    useLinkDonorToUser,
     useUserByDiscord,
     useUserByEmail,
     useUserByName,
@@ -10,6 +9,10 @@ import {
 import { formatPhone } from '../membership.helpers'
 import { Member } from '../membership.types'
 import styles from './UserMatch.module.css'
+import { DropdownOverlay } from '@/components/common'
+import { useLinkDonorToUser, useUnlinkDonorFromUser } from '@/queries'
+import { cn } from '@/util'
+import Link from 'next/link'
 import { UserProfile } from 'pv-contracts/data'
 
 export interface UserMatchProps {
@@ -38,7 +41,7 @@ const UserMatchSuggestion = ({
     missingMessage,
     emptyMessage,
 }: UserMatchSuggestionProps) => {
-    const linkMutation = useLinkDonorToUser()
+    const linkMutation = useLinkDonorToUser('Membership Panel')
     const donorEmail = member.donorEmail
 
     const statusMessage = !hasValue
@@ -82,7 +85,10 @@ const UserMatchSuggestion = ({
                             onClick={() => {
                                 if (donorEmail == null || match == null) return
                                 linkMutation.mutate(
-                                    { donorEmail, userId: match.id },
+                                    {
+                                        donor: member.packet.donor,
+                                        userId: match.id,
+                                    },
                                     { onSuccess: onLinked }
                                 )
                             }}
@@ -153,6 +159,79 @@ export const DiscordUserMatch = ({ member, onLinked }: UserMatchProps) => {
             isError={isError}
             missingMessage="No Discord handle to match on"
             emptyMessage="No user found with this Discord handle"
+        />
+    )
+}
+
+export const MatchedUserMenu = ({
+    member,
+    closeDropdown,
+}: {
+    member: Member
+    closeDropdown: () => void
+}) => {
+    const unlinkMutation = useUnlinkDonorFromUser('Membership Panel')
+    const { userId } = member
+
+    if (userId == null) return null
+
+    return (
+        <DropdownOverlay
+            label="Matched User"
+            onClose={closeDropdown}
+            className={styles.matchedOverlay}
+            align="start"
+            body={
+                <>
+                    <div className={styles.matchContainer}>
+                        <div className={styles.matchEntry}>
+                            <Link
+                                href={`/volunteer_dashboard/panels/members?userId=${userId}`}
+                                className={cn(
+                                    styles.matchEntryMain,
+                                    styles.matchEntryLink
+                                )}
+                            >
+                                <span className={styles.matchEntryName}>
+                                    {member.userName ?? `User ${userId}`}
+                                </span>
+                                {member.userEmail && (
+                                    <span className={styles.matchEntryDetail}>
+                                        {member.userEmail}
+                                    </span>
+                                )}
+                            </Link>
+                            <button
+                                type="button"
+                                className={cn(
+                                    styles.matchButton,
+                                    styles.unmatchButton
+                                )}
+                                disabled={unlinkMutation.isPending}
+                                onClick={() =>
+                                    unlinkMutation.mutate(
+                                        {
+                                            donorEmail:
+                                                member.packet.donor.email,
+                                            userId,
+                                        },
+                                        { onSuccess: closeDropdown }
+                                    )
+                                }
+                            >
+                                {unlinkMutation.isPending
+                                    ? 'Unlinking…'
+                                    : 'Unmatch'}
+                            </button>
+                        </div>
+                    </div>
+                    {unlinkMutation.isError && (
+                        <div className={styles.matchEmpty}>
+                            Failed to unlink user
+                        </div>
+                    )}
+                </>
+            }
         />
     )
 }

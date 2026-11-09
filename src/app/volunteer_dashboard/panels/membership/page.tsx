@@ -1,7 +1,6 @@
 'use client'
 
 import {
-    useLinkDonorToUser,
     useMembershipPanel,
     usePendingUpdates,
     useSaveMemberships,
@@ -27,11 +26,13 @@ import {
 } from '@/components/common'
 import Panel from '@/components/common/panel/Panel'
 import { Table } from '@/components/common/table'
+import { DONOR_LINK_MUTATION_KEY, useLinkDonorToUser } from '@/queries'
 import { cn, DOT_SEPARATOR } from '@/util'
 import { usePaginatedSearch } from '@/util/hooks'
+import { useIsMutating } from '@tanstack/react-query'
 import { UserProfile, zUserProfile } from 'pv-contracts/data'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
-import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
+import { FaCog, FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 
 const showHideChoices = [
     { value: true, label: 'Show' },
@@ -224,7 +225,9 @@ export default function Page() {
     const [scrollToMatchToken, setScrollToMatchToken] = useState(0)
     const { columnOrder, onColumnOrderChange, resetColumnOrder } =
         useColumnOrder()
-    const linkMutation = useLinkDonorToUser()
+    const linkMutation = useLinkDonorToUser('Membership Panel')
+    const isLinking =
+        useIsMutating({ mutationKey: DONOR_LINK_MUTATION_KEY }) > 0
     const {
         members,
         totalEntries,
@@ -233,6 +236,7 @@ export default function Page() {
         setOption,
         resetOptions,
         isEditing,
+        isSaving,
         setIsEditing,
         editController,
         saveMutation,
@@ -253,13 +257,13 @@ export default function Page() {
 
     const handleMatchUser = useCallback(
         async (user: UserProfile) => {
-            const donorEmail = memberToMatch?.donorEmail
-            if (donorEmail == null) return
+            const donor = memberToMatch?.packet.donor
+            if (donor == null) return
 
-            await linkMutation.mutateAsync({ donorEmail, userId: user.id })
+            await linkMutation.mutateAsync({ donor, userId: user.id })
             setMemberToMatch(null)
         },
-        [linkMutation, memberToMatch?.donorEmail]
+        [linkMutation, memberToMatch]
     )
 
     const handleUserSearch = useCallback(
@@ -397,14 +401,35 @@ export default function Page() {
                         </div>
 
                         <div className={styles.tableToolbar}>
-                            {isEditing ? (
+                            {isLinking && (
+                                <FaCog
+                                    className={styles.linkingSpinner}
+                                    aria-label="Updating user match"
+                                />
+                            )}
+                            {isSaving && (
+                                <>
+                                    <span className={styles.editStatus}>
+                                        Saving changes…
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className={styles.toolbarButton}
+                                        disabled
+                                    >
+                                        <FaSave /> Saving…
+                                    </button>
+                                </>
+                            )}
+                            {isEditing && !isSaving && (
                                 <EditToolbar
                                     members={members}
                                     editController={editController}
                                     saveMutation={saveMutation}
                                     discardEdits={discardEdits}
                                 />
-                            ) : (
+                            )}
+                            {!isEditing && (
                                 <button
                                     type="button"
                                     className={styles.toolbarButton}
@@ -424,7 +449,12 @@ export default function Page() {
                         </div>
                     </div>
 
-                    <div className={styles.tableWrapper}>
+                    <div
+                        className={cn(
+                            styles.tableWrapper,
+                            isSaving && styles.saving
+                        )}
+                    >
                         {error ? (
                             <div className={styles.tableStatus} role="alert">
                                 <p className={styles.tableStatusTitle}>
@@ -446,33 +476,38 @@ export default function Page() {
                                 Loading membership records...
                             </div>
                         ) : (
-                            <Table
-                                columns={columns}
-                                data={members}
-                                rowKey={(m) => m.id}
-                                collapsedCategories={collapsedCategories}
-                                options={{
-                                    editing: isEditing,
-                                    zebra: options.showZebra,
-                                    reorderable: isEditing,
-                                    entryOrder: columnOrder,
-                                    onEntryOrderChange: onColumnOrderChange,
-                                }}
-                                isScrollTarget={isSearchMatch}
-                                scrollToColumnKey={searchField}
-                                scrollToRowToken={scrollToMatchToken}
-                                footer={
-                                    hasNextPage && (
-                                        <div
-                                            className={styles.loadMore}
-                                            ref={sentinelRef}
-                                        >
-                                            {isFetchingNextPage &&
-                                                'Loading more membership records...'}
-                                        </div>
-                                    )
-                                }
-                            />
+                            <fieldset
+                                className={styles.tableFieldset}
+                                disabled={isSaving}
+                            >
+                                <Table
+                                    columns={columns}
+                                    data={members}
+                                    rowKey={(m) => m.id}
+                                    collapsedCategories={collapsedCategories}
+                                    options={{
+                                        editing: isEditing,
+                                        zebra: options.showZebra,
+                                        reorderable: isEditing && !isSaving,
+                                        entryOrder: columnOrder,
+                                        onEntryOrderChange: onColumnOrderChange,
+                                    }}
+                                    isScrollTarget={isSearchMatch}
+                                    scrollToColumnKey={searchField}
+                                    scrollToRowToken={scrollToMatchToken}
+                                    footer={
+                                        hasNextPage && (
+                                            <div
+                                                className={styles.loadMore}
+                                                ref={sentinelRef}
+                                            >
+                                                {isFetchingNextPage &&
+                                                    'Loading more membership records...'}
+                                            </div>
+                                        )
+                                    }
+                                />
+                            </fieldset>
                         )}
                     </div>
                 </div>

@@ -14,6 +14,7 @@ export function useUserQueries() {
     const getCurrentUser = (options?: {
         includeDiscordUsers?: boolean
         includeDonors?: boolean
+        includePositions?: boolean
     }) =>
         ready
             ? ({ signal }: { signal: AbortSignal }) =>
@@ -21,6 +22,7 @@ export function useUserQueries() {
                       query: {
                           includeDiscordUsers: options?.includeDiscordUsers,
                           includeDonors: options?.includeDonors,
+                          includePositions: options?.includePositions,
                       },
                       signal,
                   })

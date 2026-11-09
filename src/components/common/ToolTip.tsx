@@ -1,6 +1,6 @@
 import styles from './ToolTip.module.css'
 import { cn } from '@/util'
-import { useState, useEffect, useRef, RefObject } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 /*
 preliminary notes: component that generates a button which upon being clicked displays an 
@@ -27,24 +27,24 @@ export function ToolTip({
     const [closerList, setCloserList] = useState<Element[]>([])
     const wrapperRef = useRef<HTMLDivElement>(null)
 
-    function useOutsideDetector(ref: RefObject<HTMLDivElement | null>) {
-        useEffect(() => {
-            function handleClickOutside(event: MouseEvent) {
-                if (
-                    ref.current &&
-                    !ref.current.contains(event.target as HTMLElement)
-                ) {
-                    setOpen(false)
-                }
+    // Logic used to close the tooltip by clicking outside of it.
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                wrapperRef.current &&
+                !wrapperRef.current.contains(event.target as HTMLElement)
+            ) {
+                setOpen(false)
             }
+        }
 
-            document.addEventListener('mousedown', handleClickOutside)
-            return () => {
-                document.removeEventListener('mousedown', handleClickOutside)
-            }
-        }, [ref])
-    }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [wrapperRef])
 
+    // Gets the list of children that can close the tooltip when opened.
     useEffect(() => {
         if (!wrapperRef.current) return
         const closers = Array.from(
@@ -54,8 +54,7 @@ export function ToolTip({
         setCloserList(closers)
     }, [open])
 
-    useOutsideDetector(wrapperRef)
-
+    // Add handlers that close the tooltip to closer components.
     closerList?.map((element: Element) => {
         if (element instanceof HTMLButtonElement) {
             const btn = element

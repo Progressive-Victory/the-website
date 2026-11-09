@@ -153,6 +153,7 @@ export default function VolunteerPage() {
             lastName: form.lastName,
             phone: form.phoneNumber,
             zipCode: +form.zipCode,
+            preferredPronouns: form.preferredPronouns,
             acceptedAlerts: form.getAlerts,
             birthdate: new Date(form.dateOfBirth),
             usCitizen: form.usCitizen,
@@ -216,6 +217,8 @@ export default function VolunteerPage() {
                                             ?.toISOString()
                                             ?.split('T')?.[0] ?? '',
                                     zipCode: user.data?.address?.zip ?? '',
+                                    preferredPronouns:
+                                        user.data?.preferredPronouns ?? '',
                                     phoneNumber: user.data?.phone ?? '',
                                     getAlerts:
                                         user.data?.acceptedAlerts ?? false,
