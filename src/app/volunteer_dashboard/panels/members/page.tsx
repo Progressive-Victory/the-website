@@ -489,6 +489,10 @@ export default function Page() {
         onSearch,
     } = usePaginatedSearch('/users', zUserProfile, {
         search: { sort: SortDirection.DESC, sortField: 'created_at_utc' },
+        transformSearchRequest: (search) =>
+            search.searchField === 'phone' && search.query !== undefined
+                ? { ...search, query: search.query.replace(/\D/g, '') }
+                : search,
     })
 
     const { query: rolesQuery } = usePaginatedSearch('/roles', zRole, {
@@ -909,6 +913,7 @@ export default function Page() {
                             subtitle: user.discordUsers?.[0]?.username
                                 ? `@${user.discordUsers[0].username}`
                                 : 'NOT FOUND',
+                            labelPill: `${user.preferredPronouns ?? ''}`.trim(), // # TODO: Replace with actual pronouns when API supports it.
                             tagLabel:
                                 user.id === loggedInUser.data?.id
                                     ? 'You'

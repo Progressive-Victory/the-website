@@ -14,6 +14,7 @@ export interface SidebarBodyItemConfig<T> {
     key: string | number
     label: string
     labelClassName?: string
+    labelPill?: string
     ariaLabel?: string
     subtitle?: string
     tagLabel?: string
@@ -79,6 +80,7 @@ export function SidebarBody<T>({
                 href={config.href}
                 label={config.label}
                 classNames={{ label: config.labelClassName }}
+                labelPill={config.labelPill}
                 ariaLabel={config.ariaLabel}
                 subtitle={config.subtitle}
                 tag={
