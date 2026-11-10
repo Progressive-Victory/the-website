@@ -73,7 +73,7 @@ const zLine = z.strictObject({
 
 export const zChartDocument = z
     .strictObject({
-        version: z.literal(5),
+        version: z.number().int().positive(),
         positions: z.array(zPosition),
         lines: z.array(zLine),
         branchPoints: z.array(zBranchPoint),

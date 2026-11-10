@@ -121,7 +121,7 @@ export default function Page() {
     const {
         chartBranchPoints,
         isLoading,
-        storageError,
+        loadError,
         isEditing,
         editRevision,
         deletedPositionIds,
@@ -286,7 +286,7 @@ export default function Page() {
     }
 
     const handleCreate = () => {
-        if (saveDrafts.isPending || isLoading || storageError) return
+        if (saveDrafts.isPending || isLoading || loadError) return
         let coordinates: Position['coordinates']
         try {
             if (!chartControls.current)
@@ -408,7 +408,7 @@ export default function Page() {
                             <SidebarBody<Position>
                                 items={positions}
                                 isLoading={isLoading}
-                                error={storageError}
+                                error={loadError}
                                 selectedKey={selectedPosition?.id}
                                 renderItem={(position) =>
                                     positionListItem(
@@ -947,13 +947,9 @@ export default function Page() {
                             changedDrafts.every(({ invalid }) => !invalid) &&
                             linesValid,
                         disabled:
-                            saveDrafts.isPending || isLoading || !!storageError,
+                            saveDrafts.isPending || isLoading || !!loadError,
                         onEdit: () => {
-                            if (
-                                saveDrafts.isPending ||
-                                isLoading ||
-                                storageError
-                            )
+                            if (saveDrafts.isPending || isLoading || loadError)
                                 return
                             startEditing()
                             if (selectedPosition) setShowPositionDetails(true)
@@ -1020,7 +1016,7 @@ export default function Page() {
                     }}
                     isLoading={isLoading}
                     error={
-                        storageError?.message ??
+                        loadError?.message ??
                         (assignedUsersError
                             ? `Assigned members could not be loaded. ${parseErrorMessage(assignedUsersError)}`
                             : null)

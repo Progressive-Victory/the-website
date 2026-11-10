@@ -1,5 +1,4 @@
 import type {
-    ChartDocument,
     Position,
     Line,
     BranchPoint,
@@ -8,20 +7,15 @@ import type {
 import type { FormState } from '@/components/common/forms'
 
 export interface ChartEditorState {
-    saved: ChartDocument
     drafts: Record<number, FormState<Position>>
     lineDrafts: Line[] | null
     branchPointDrafts: BranchPoint[] | null
     deletedPositionIds: Set<number>
-    isLoading: boolean
-    storageError: Error | null
     isEditing: boolean
     editRevision: number
 }
 
 export type ChartEditorAction =
-    | { type: 'loadSucceeded'; document: ChartDocument }
-    | { type: 'loadFailed'; error: Error }
     | { type: 'editingChanged'; editing: boolean }
     | { type: 'positionChanged'; form: FormState<Position> }
     | { type: 'positionCreated'; position: Position }
@@ -43,25 +37,28 @@ export type ChartEditorAction =
           branchPoints: BranchPoint[]
       }
     | { type: 'linesReplaced'; lines: Line[] }
-    | { type: 'lineAdded'; line: Line }
-    | { type: 'branchPointChanged'; point: BranchPoint }
+    | { type: 'lineAdded'; line: Line; savedLines: Line[] }
+    | {
+          type: 'branchPointChanged'
+          point: BranchPoint
+          savedBranchPoints: BranchPoint[]
+      }
     | {
           type: 'linePointsMoved'
           coordinates: Record<string, { x: number; y: number }>
+          savedLines: Line[]
+          savedBranchPoints: BranchPoint[]
       }
     | { type: 'lineGraphChanged'; lines: Line[]; branchPoints: BranchPoint[] }
-    | { type: 'saveSucceeded'; document: ChartDocument }
+    | { type: 'saveSucceeded' }
     | { type: 'discard' }
 
 export function createChartEditorState(): ChartEditorState {
     return {
-        saved: { version: 5, positions: [], lines: [], branchPoints: [] },
         drafts: {},
         lineDrafts: null,
         branchPointDrafts: null,
         deletedPositionIds: new Set(),
-        isLoading: true,
-        storageError: null,
         isEditing: false,
         editRevision: 0,
     }
@@ -84,15 +81,6 @@ export function chartEditorReducer(
     action: ChartEditorAction
 ): ChartEditorState {
     switch (action.type) {
-        case 'loadSucceeded':
-            return {
-                ...state,
-                saved: action.document,
-                isLoading: false,
-                storageError: null,
-            }
-        case 'loadFailed':
-            return { ...state, isLoading: false, storageError: action.error }
         case 'editingChanged':
             return { ...state, isEditing: action.editing }
         case 'positionChanged': {
@@ -225,7 +213,7 @@ export function chartEditorReducer(
             return {
                 ...state,
                 lineDrafts: [
-                    ...(state.lineDrafts ?? state.saved.lines),
+                    ...(state.lineDrafts ?? action.savedLines),
                     action.line,
                 ],
             }
@@ -233,7 +221,7 @@ export function chartEditorReducer(
             return {
                 ...state,
                 branchPointDrafts: (
-                    state.branchPointDrafts ?? state.saved.branchPoints
+                    state.branchPointDrafts ?? action.savedBranchPoints
                 ).map((point) =>
                     point.id === action.point.id ? action.point : point
                 ),
@@ -241,7 +229,7 @@ export function chartEditorReducer(
         case 'linePointsMoved':
             return {
                 ...state,
-                lineDrafts: (state.lineDrafts ?? state.saved.lines).map(
+                lineDrafts: (state.lineDrafts ?? action.savedLines).map(
                     (line) => ({
                         ...line,
                         points: line.points.map((point) =>
@@ -256,7 +244,7 @@ export function chartEditorReducer(
                     })
                 ),
                 branchPointDrafts: (
-                    state.branchPointDrafts ?? state.saved.branchPoints
+                    state.branchPointDrafts ?? action.savedBranchPoints
                 ).map((point) =>
                     action.coordinates[point.id]
                         ? {
@@ -273,7 +261,6 @@ export function chartEditorReducer(
                 branchPointDrafts: action.branchPoints,
             }
         case 'saveSucceeded':
-            return clearDrafts({ ...state, saved: action.document })
         case 'discard':
             return clearDrafts(state)
     }

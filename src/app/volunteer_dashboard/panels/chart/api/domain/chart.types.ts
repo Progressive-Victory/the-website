@@ -1,9 +1,6 @@
-import type { Permission } from 'pv-contracts/data'
+import { PositionTypes, type Permission } from 'pv-contracts/data'
 
-export enum PositionTypes {
-    POSITION = 0,
-    GROUP = 1,
-}
+export { PositionTypes }
 
 export interface Position {
     id: number
@@ -64,10 +61,19 @@ export interface Line {
 }
 
 export interface ChartDocument {
-    version: 5
+    version: number
     positions: Position[]
     lines: Line[]
     branchPoints: BranchPoint[]
+}
+
+export const ORG_CHART_VERSION = 1
+
+export const EMPTY_CHART: ChartDocument = {
+    version: ORG_CHART_VERSION,
+    positions: [],
+    lines: [],
+    branchPoints: [],
 }
 
 export type { UserProfile } from 'pv-contracts/data'

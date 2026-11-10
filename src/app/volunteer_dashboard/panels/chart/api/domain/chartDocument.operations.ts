@@ -1,5 +1,6 @@
 import { validateChartDocument } from '../storage/chart.validation'
 import {
+    ORG_CHART_VERSION,
     PositionTypes,
     type ChartDocument,
     type Line,
@@ -8,6 +9,7 @@ import {
 } from './chart.types'
 import { usedBranchPoints } from './lineGraph'
 import { simplifyLines } from './lineOperations'
+import type { Position as ApiPosition } from 'pv-contracts/data'
 
 function addCoordinates(
     first: Position['coordinates'],
@@ -59,20 +61,54 @@ export function removeDeletedPositionsAndUngroup(
         })
 }
 
-export function saveLocalChart(
+export function mergeChartWithPositions(
+    chart: ChartDocument,
+    positions: ApiPosition[]
+): ChartDocument {
+    const layouts = new Map(
+        chart.positions.map((layout) => [layout.id, layout])
+    )
+    const merged = removeDeletedPositionsAndUngroup(
+        positions.map(({ id, name, type, seats, userIds, permissions }) => {
+            const layout = layouts.get(id)
+            return {
+                id,
+                name,
+                type,
+                seats,
+                userIds,
+                permissions,
+                ...(layout?.coordinates && { coordinates: layout.coordinates }),
+                ...(layout?.parentGroupId !== undefined && {
+                    parentGroupId: layout.parentGroupId,
+                }),
+                ...(layout?.groupBounds && { groupBounds: layout.groupBounds }),
+            }
+        }),
+        new Set()
+    )
+    const lines = simplifyLines(
+        chart.lines,
+        new Set(merged.map(({ id }) => id)),
+        chart.branchPoints
+    )
+    return {
+        version: chart.version,
+        positions: merged,
+        lines,
+        branchPoints: usedBranchPoints(lines, chart.branchPoints),
+    }
+}
+
+export function applyChartDrafts(
     document: ChartDocument,
     drafts: Position[],
     deletedIds: ReadonlySet<number>,
+    createdIds: ReadonlyMap<number, number>,
     lines: Line[],
-    branchPoints: BranchPoint[] = document.branchPoints
-): { document: ChartDocument; createdIds: Map<number, number> } {
+    branchPoints: BranchPoint[]
+): ChartDocument {
     const current = validateChartDocument(document)
-    let nextId = Math.max(0, ...current.positions.map(({ id }) => id)) + 1
-    const createdIds = new Map(
-        drafts
-            .filter(({ id }) => id < 0 && !deletedIds.has(id))
-            .map(({ id }) => [id, nextId++])
-    )
     const allPositions = removeDeletedPositionsAndUngroup(
         [...current.positions, ...drafts],
         deletedIds
@@ -103,11 +139,10 @@ export function saveLocalChart(
         ),
     }))
 
-    const savedDocument = validateChartDocument({
-        version: 5,
+    return validateChartDocument({
+        version: ORG_CHART_VERSION,
         positions: savedPositions,
         lines: savedLines,
         branchPoints: usedBranchPoints(savedLines, branchPoints),
     })
-    return { document: savedDocument, createdIds }
 }
