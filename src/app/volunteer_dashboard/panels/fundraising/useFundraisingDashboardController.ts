@@ -15,18 +15,97 @@ import {
 } from '@/components/common/charts/timeBuckets'
 import { useActblueQueries } from '@/queries'
 import { usePaginatedSearch } from '@/util/hooks'
-import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
-import { zActBlueDonationPacket } from 'pv-contracts/data'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import {
+    zActBlueDonationPacket,
+    type ActBlueDonationPacket,
+} from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
 import type { MembershipSearchRequest } from 'pv-contracts/requests'
-import { zMembershipsResponsePacket } from 'pv-contracts/responses'
+import {
+    zMembershipsResponsePacket,
+    type ActBlueFundraisingStatsResponse,
+} from 'pv-contracts/responses'
 import { useEffect, useMemo, useState } from 'react'
 
 type ChartBarDisplayMode = 'grouped' | 'stacked'
 
+const CONTRIBUTIONS_PAGE_SIZE = 1000
+
 const membershipCountSearch: MembershipSearchRequest = {
     limit: 1,
     isMember: true,
+}
+
+function isWithinRange(paidAt: Date, start: Date | null, end: Date | null) {
+    const time = paidAt.getTime()
+    if (start && time < start.getTime()) return false
+    if (end && time >= end.getTime() + 1000) return false
+    return true
+}
+
+function computeFundraisingStats(
+    contributions: ActBlueDonationPacket[]
+): ActBlueFundraisingStatsResponse {
+    let oneTimeDollarsRaised = 0
+    let recurringDollarsRaised = 0
+    let oneTimeContributionCount = 0
+    let recurringContributionCount = 0
+    const oneTimeDonors = new Set<string>()
+    const recurringDonors = new Set<string>()
+
+    for (const contribution of contributions) {
+        const donor = contribution.email.toLowerCase()
+        if (contribution.isRecurring) {
+            recurringDollarsRaised += contribution.amount
+            recurringContributionCount += 1
+            recurringDonors.add(donor)
+        } else {
+            oneTimeDollarsRaised += contribution.amount
+            oneTimeContributionCount += 1
+            oneTimeDonors.add(donor)
+        }
+    }
+
+    const totalDollarsRaised = oneTimeDollarsRaised + recurringDollarsRaised
+    const totalContributionCount =
+        oneTimeContributionCount + recurringContributionCount
+
+    return {
+        totalDollarsRaised,
+        oneTimeDollarsRaised,
+        recurringDollarsRaised,
+        totalContributionCount,
+        oneTimeContributionCount,
+        recurringContributionCount,
+        totalDonorCount: oneTimeDonors.size + recurringDonors.size,
+        oneTimeDonorCount: oneTimeDonors.size,
+        recurringDonorCount: recurringDonors.size,
+        avgContributionAmount: totalContributionCount
+            ? totalDollarsRaised / totalContributionCount
+            : 0,
+    }
+}
+
+function findBucketIndex(buckets: { start: Date; end: Date }[], paidAt: Date) {
+    const time = paidAt.getTime()
+    let low = 0
+    let high = buckets.length - 1
+    let match = -1
+
+    while (low <= high) {
+        const mid = (low + high) >> 1
+        if (buckets[mid].start.getTime() <= time) {
+            match = mid
+            low = mid + 1
+        } else {
+            high = mid - 1
+        }
+    }
+
+    if (match < 0) return -1
+    const bucket = buckets[match]
+    return isWithinRange(paidAt, bucket.start, bucket.end) ? match : -1
 }
 
 function getPreviousEquivalentRange(start: Date, end: Date) {
@@ -134,48 +213,11 @@ export function useFundraisingDashboardController() {
 
     const isAllTime = !startDate && !endDate
 
-    const statsQuery = useQuery({
-        queryKey: [
-            '/actblue/fundraising/stats',
-            startDate ?? null,
-            endDate ?? null,
-        ],
-        queryFn: ({ signal }) =>
-            actblueQueries.getFundraisingStats({
-                startDate: startDate?.toISOString(),
-                endDate: endDate?.toISOString(),
-                signal,
-            }),
-        placeholderData: keepPreviousData,
-        enabled: actblueQueries.ready,
-    })
-
     const previousPeriodRange = useMemo(() => {
         if (!startDate || !endDate) return null
         if (committedPreset === 'All Time') return null
         return getPreviousEquivalentRange(startDate, endDate)
     }, [startDate, endDate, committedPreset])
-
-    const previousPeriodStatsQuery = useQuery({
-        queryKey: [
-            '/actblue/fundraising/stats',
-            'previous-period',
-            previousPeriodRange?.start ?? null,
-            previousPeriodRange?.end ?? null,
-        ],
-        queryFn: ({ signal }) => {
-            if (!previousPeriodRange) {
-                throw new Error('Missing previous period range')
-            }
-            return actblueQueries.getFundraisingStats({
-                startDate: previousPeriodRange.start.toISOString(),
-                endDate: previousPeriodRange.end.toISOString(),
-                signal,
-            })
-        },
-        placeholderData: keepPreviousData,
-        enabled: actblueQueries.ready && previousPeriodRange != null,
-    })
 
     const allTimeStatsQuery = useQuery({
         queryKey: ['/actblue/fundraising/stats', 'all-time-cards'],
@@ -217,38 +259,6 @@ export function useFundraisingDashboardController() {
         const d = first instanceof Date ? first : new Date(first)
         return Number.isNaN(d.getTime()) ? undefined : d
     }, [earliestContributionQuery.data])
-
-    const recurringPct = useMemo(() => {
-        if (!statsQuery.data) return null
-        return getPercentage(
-            statsQuery.data.recurringDollarsRaised,
-            statsQuery.data.totalDollarsRaised
-        )
-    }, [statsQuery.data])
-
-    const oneTimePct = useMemo(() => {
-        if (!statsQuery.data) return null
-        return getPercentage(
-            statsQuery.data.oneTimeDollarsRaised,
-            statsQuery.data.totalDollarsRaised
-        )
-    }, [statsQuery.data])
-
-    const recurringDollarsChange = useMemo(() => {
-        const current = statsQuery.data?.recurringDollarsRaised
-        const previous = previousPeriodStatsQuery.data?.recurringDollarsRaised
-
-        if (
-            current == null ||
-            previous == null ||
-            !Number.isFinite(current) ||
-            !Number.isFinite(previous)
-        ) {
-            return null
-        }
-
-        return current - previous
-    }, [statsQuery.data, previousPeriodStatsQuery.data])
 
     const selectedChartStartDate = startDate
     const selectedChartBaseEndDate = endDate
@@ -322,29 +332,129 @@ export function useFundraisingDashboardController() {
         }
     }, [zoomEnabled])
 
-    const chartBucketQueries = useQueries({
-        queries: chartBuckets.map((bucket) => ({
-            queryKey: [
-                '/actblue/fundraising/stats',
-                'bucket',
-                bucket.start,
-                bucket.end,
-            ],
-            queryFn: ({ signal }) =>
-                actblueQueries.getFundraisingStats({
-                    startDate: bucket.start.toISOString(),
-                    endDate: bucket.end.toISOString(),
+    const contributionsFetchFrom = useMemo(() => {
+        if (!startDate) return null
+        const starts = [
+            startDate,
+            previousPeriodRange?.start,
+            chartBuckets[0]?.start,
+        ].filter((date): date is Date => date != null)
+        return new Date(Math.min(...starts.map((date) => date.getTime())))
+    }, [startDate, previousPeriodRange, chartBuckets])
+
+    const contributionsQuery = useQuery({
+        queryKey: [
+            '/actblue/contributions',
+            'client-stats',
+            contributionsFetchFrom ?? null,
+        ],
+        queryFn: async ({ signal }) => {
+            const fetched: ActBlueDonationPacket[] = []
+
+            for (let page = 0; ; page += 1) {
+                const response = await actblueQueries.getContributions({
+                    search: {
+                        page,
+                        limit: CONTRIBUTIONS_PAGE_SIZE,
+                        sortField: 'paid_at',
+                        sort: SortDirection.DESC,
+                    },
                     signal,
-                }),
-            enabled: actblueQueries.ready,
-            staleTime: 60_000,
-            placeholderData: keepPreviousData,
-        })),
+                })
+                const pageData = response.data
+                fetched.push(...pageData)
+
+                const newest = pageData[0]?.paidAt
+                const oldest = pageData[pageData.length - 1]?.paidAt
+                const reachedFetchFrom =
+                    contributionsFetchFrom != null &&
+                    newest != null &&
+                    oldest != null &&
+                    newest.getTime() >= oldest.getTime() &&
+                    oldest.getTime() < contributionsFetchFrom.getTime()
+
+                if (
+                    pageData.length === 0 ||
+                    fetched.length >= response.count ||
+                    reachedFetchFrom
+                )
+                    break
+            }
+
+            return fetched
+        },
+        placeholderData: keepPreviousData,
+        enabled: actblueQueries.ready,
+        staleTime: 60_000,
     })
+
+    const contributions = contributionsQuery.data
+
+    const currentStats = useMemo(
+        () =>
+            contributions &&
+            computeFundraisingStats(
+                contributions.filter((contribution) =>
+                    isWithinRange(contribution.paidAt, startDate, endDate)
+                )
+            ),
+        [contributions, startDate, endDate]
+    )
+
+    const previousPeriodStats = useMemo(
+        () =>
+            contributions &&
+            previousPeriodRange &&
+            computeFundraisingStats(
+                contributions.filter((contribution) =>
+                    isWithinRange(
+                        contribution.paidAt,
+                        previousPeriodRange.start,
+                        previousPeriodRange.end
+                    )
+                )
+            ),
+        [contributions, previousPeriodRange]
+    )
+
+    const statsQuery = { data: currentStats }
+
+    const recurringPct = useMemo(() => {
+        if (!currentStats) return null
+        return getPercentage(
+            currentStats.recurringDollarsRaised,
+            currentStats.totalDollarsRaised
+        )
+    }, [currentStats])
+
+    const oneTimePct = useMemo(() => {
+        if (!currentStats) return null
+        return getPercentage(
+            currentStats.oneTimeDollarsRaised,
+            currentStats.totalDollarsRaised
+        )
+    }, [currentStats])
+
+    const recurringDollarsChange = useMemo(() => {
+        if (!currentStats || !previousPeriodStats) return null
+        return (
+            currentStats.recurringDollarsRaised -
+            previousPeriodStats.recurringDollarsRaised
+        )
+    }, [currentStats, previousPeriodStats])
+
+    const chartBucketStats = useMemo(() => {
+        const groups = chartBuckets.map(() => [] as ActBlueDonationPacket[])
+        for (const contribution of contributions ?? []) {
+            const idx = findBucketIndex(chartBuckets, contribution.paidAt)
+            if (idx >= 0) groups[idx].push(contribution)
+        }
+        return groups.map(computeFundraisingStats)
+    }, [chartBuckets, contributions])
 
     const chartPoints = useMemo<ChartPoint[]>(() => {
         return chartBuckets.map((bucket, idx) => {
-            const data = chartBucketQueries[idx]?.data
+            const data = chartBucketStats[idx]
 
             return {
                 key: bucket.key,
@@ -359,7 +469,7 @@ export function useFundraisingDashboardController() {
                 lineValue: data?.totalContributionCount ?? 0,
             }
         })
-    }, [chartBuckets, chartBucketQueries])
+    }, [chartBuckets, chartBucketStats])
 
     useEffect(() => {
         if (!validGranularityModes.includes(granularityMode)) {
