@@ -3,6 +3,7 @@
 import styles from './endorsementFilters.module.css'
 import { FilterTag } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
+import { YesNoMenu } from '@/components/common/forms/YesNoMenu'
 import { stateOptions } from '@/models'
 import { DOT_SEPARATOR } from '@/util'
 import {
@@ -71,39 +72,10 @@ const thumbsDownLevels = new Set([
     EndorsementType.None,
 ])
 
-const yesNoOptions = [
-    { value: true, label: 'Yes' },
-    { value: false, label: 'No' },
-]
-
 const publishedOptions = [
     { value: true, label: 'Published' },
     { value: false, label: 'Not Published' },
 ]
-
-function YesNoMenu({
-    selected,
-    onSelect,
-}: {
-    selected: boolean | null
-    onSelect: (value: boolean | null) => void
-}) {
-    return (
-        <div className={styles.nestedFilterMenu}>
-            {yesNoOptions.map((option) => (
-                <DropdownOverlayButton
-                    key={option.label}
-                    checked={selected === option.value}
-                    onCheckedChange={(checked) =>
-                        onSelect(checked ? option.value : null)
-                    }
-                >
-                    {option.label}
-                </DropdownOverlayButton>
-            ))}
-        </div>
-    )
-}
 
 function getElectionYears(endorsement: Endorsement) {
     return [endorsement.primaryElectionDate, endorsement.generalElectionDate]
