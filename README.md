@@ -4,6 +4,8 @@
 
 Welcome to the PV Website repo! This is the source code of our website. Before contributing to the codebase you **MUST** read the following information. If you're a fullstack Next.js pro you can quickly skim this.
 
+Contributions are currently restricted to members of Progressive Victory. If you are interested in contributing, please [join PV](https://progressivevictory.com/volunteer) and apply to the engineering team.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 If you're new to Next.js development please start by [reading the docs](https://nextjs.org/docs/app/getting-started/project-structure) to get a understanding of how a Next.js site works. The underlying reactive web development framework is [React](https://react.dev/learn), the linked page has a great tutorial for getting you acquainted quickly.
