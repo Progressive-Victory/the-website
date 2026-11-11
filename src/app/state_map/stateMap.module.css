@@ -1,0 +1,157 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+    padding: 2.5rem 1rem;
+}
+
+.modes {
+    display: inline-flex;
+    border: 1px solid #9fc9e8;
+    border-radius: 9999px;
+    padding: 0.25rem;
+    gap: 0.25rem;
+}
+
+.mode {
+    border-radius: 9999px;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #09223a;
+    cursor: pointer;
+    transition:
+        background-color 160ms ease,
+        color 160ms ease;
+
+    &:hover {
+        background-color: #d4e7f5;
+    }
+
+    &.activeMode {
+        background-color: #09223a;
+        color: #ffffff;
+    }
+}
+
+.grid {
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+    border-radius: 0.75rem;
+    background-color: #ffffff;
+    background-image:
+        linear-gradient(to right, rgba(9, 34, 58, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(9, 34, 58, 0.06) 1px, transparent 1px);
+    background-size: 2.5% 4%;
+}
+
+/* Ranks mode swaps the dashed border for the badges' solid dark rim. */
+.metal .shape {
+    fill-opacity: 1;
+    stroke-width: 3;
+    stroke-dasharray: none;
+    /* Recesses the body so the full-strength inset border reads as a bevel. */
+    filter: brightness(0.72);
+}
+
+.insetBorder {
+    fill: none;
+    stroke-width: 9;
+    pointer-events: none;
+}
+
+.facets {
+    pointer-events: none;
+    mix-blend-mode: overlay;
+}
+
+.state {
+    position: absolute;
+    overflow: visible;
+    pointer-events: none;
+    transition:
+        transform 220ms ease,
+        filter 220ms ease;
+
+    &.lifted {
+        z-index: 2;
+        transform: translateY(-1.25rem) scale(1.08);
+        filter: drop-shadow(0 1rem 1rem rgba(9, 34, 58, 0.45));
+    }
+}
+
+.shape {
+    pointer-events: auto;
+    cursor: pointer;
+    fill: var(--state-fill, #2986cc);
+    fill-opacity: 0.9;
+    stroke: var(--state-stroke, #ffffff);
+    stroke-width: 1.5;
+    stroke-dasharray: 3;
+    vector-effect: non-scaling-stroke;
+    transition: fill 160ms ease;
+
+    &:hover {
+        fill: #ebafa9;
+    }
+
+    /* Browsers draw the default outline around the path's bounding box, which reads as a stray rectangle. */
+    &:focus {
+        outline: none;
+    }
+
+    &:focus-visible {
+        fill: #ebafa9;
+        stroke-dasharray: none;
+        stroke-width: 2.5;
+    }
+}
+
+.lifted .shape {
+    fill: #ce3728;
+    stroke-dasharray: none;
+}
+
+.readout {
+    min-height: 1.75rem;
+    font-size: 1.125rem;
+    color: #09223a;
+    text-align: center;
+}
+
+.selected {
+    font-weight: 700;
+    color: #ce3728;
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.25rem;
+    max-width: 1100px;
+    font-size: 0.9375rem;
+    color: #09223a;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.swatch {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.25rem;
+    border: 1px solid rgba(9, 34, 58, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .state {
+        transition: none;
+    }
+}

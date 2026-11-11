@@ -3,6 +3,7 @@ import styles from './StateMap.module.css'
 import { OPEN_ATTR, OPEN_MAP_URI } from './constants'
 import { StateDataFeatureCollection, statesData } from './stateData'
 import { MapView, StateMapInteractionProps } from './types'
+import { getMemberCountColor } from './util'
 import { getBrandColor } from '@/util/theme'
 import { Feature, Geometry } from 'geojson'
 import { useCallback, useMemo } from 'react'
@@ -58,8 +59,6 @@ export default function StateMap(
 }
 
 // Map Layers
-const gradientShades = [100, 200, 300, 400, 500, 600, 700] as const
-
 function USMapLayer({
     data,
     hoveredState,
@@ -70,45 +69,10 @@ function USMapLayer({
 }: StateMapInteractionProps & {
     data: StateDataFeatureCollection
 }) {
-    // USED FOR OLD LOGIC BELOW
-    // const max = useMemo(() => {
-    //     if (!stateMemberCount) return undefined
-    //     return Math.max(...Object.values(stateMemberCount))
-    // }, [stateMemberCount])
-
     const getFillColor = useCallback(
         (stateName: string) => {
             if (!stateMemberCount) return undefined
-
-            const memberCount = stateMemberCount[stateName]
-            if (!memberCount) return getBrandColor('mapBlue', gradientShades[0])
-
-            // OLD LOGIC FOR DETERMINING STATE COLOR DYNAMICALLY
-            // // Determine bin index (0–4) from normalized value
-            // const normalized = memberCount / max
-            // const index = Math.min(
-            //     gradientShades.length - 1,
-            //     Math.floor(normalized * gradientShades.length)
-            // )
-
-            // Custom buckets for member count colors - requested quick fix
-            let index = 0
-            if (memberCount > 500) {
-                index = 6
-            } else if (memberCount > 340) {
-                index = 5
-            } else if (memberCount > 220) {
-                index = 4
-            } else if (memberCount > 110) {
-                index = 3
-            } else if (memberCount > 40) {
-                index = 2
-            } else if (memberCount > 20) {
-                index = 1
-            }
-
-            const shade = gradientShades[index]
-            return getBrandColor('mapBlue', shade)
+            return getMemberCountColor(stateMemberCount[stateName])
         },
         [stateMemberCount]
     )
