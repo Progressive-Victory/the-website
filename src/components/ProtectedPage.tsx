@@ -1,38 +1,53 @@
+import styles from '../app/login/login.module.css'
+import { HalftoneBackground } from './halftone/HalftoneBackground'
+import { MainLayout } from './layout'
 import { AccessDenied } from '@/components/AccessDenied'
-import { useAuth, useCurrentUser } from '@/util/hooks'
+import { hasPermission, useAuth, useCurrentUser } from '@/util/hooks'
+import { redirect } from 'next/navigation'
 import { ReactNode } from 'react'
 
 interface ProtectedPageProps {
     children: ReactNode
-    requiredRoles: string[]
+    requiredPermissions: number[]
 }
 
 export function ProtectedPage({
     children,
-    requiredRoles = [],
+    requiredPermissions = [],
 }: ProtectedPageProps) {
     const { isSessionLoading, session } = useAuth()
     const currentUser = useCurrentUser()
 
     if (currentUser.isLoading || isSessionLoading) return null
 
-    if (!session)
-        return (
-            <AccessDenied message="You need to be logged in to view this page." />
-        )
+    if (!session) redirect('/login')
 
-    if (!currentUser.data || currentUser.error)
-        return (
-            <AccessDenied message="There was an error while checking your authentication." />
-        )
+    const isAccessDenied = () => {
+        const user = currentUser.data
+        if (!user || currentUser.error)
+            return (
+                <AccessDenied message="There was an error while checking your authentication." />
+            )
 
-    if (
-        !requiredRoles.every((role) =>
-            currentUser.data?.roles?.some((found) => found.name == role)
+        if (
+            !requiredPermissions.every((permissionId) =>
+                hasPermission(user, permissionId)
+            )
         )
+            return (
+                <AccessDenied message="You lack sufficient permissions to view this page." />
+            )
+        return false
+    }
+    const accessDenied = isAccessDenied()
+
+    return accessDenied ? (
+        <MainLayout>
+            <div className={styles.backgroundCover} />
+            <HalftoneBackground />
+            <div className={styles.body}>{accessDenied}</div>
+        </MainLayout>
+    ) : (
+        children
     )
-        return (
-            <AccessDenied message="You lack sufficient permissions to view this page." />
-        )
-    return children
 }

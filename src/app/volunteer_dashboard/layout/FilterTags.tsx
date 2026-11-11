@@ -58,9 +58,7 @@ function TagButton({
 
     useLayoutEffect(() => {
         if (labelRef.current) {
-            setLabelWidth(
-                Math.ceil(labelRef.current.getBoundingClientRect().width) + 1
-            )
+            setLabelWidth(labelRef.current.scrollWidth + 1)
         }
     }, [tag.label, isActive, setLabelWidth])
 

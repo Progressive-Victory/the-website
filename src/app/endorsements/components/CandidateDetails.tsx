@@ -4,7 +4,7 @@ import { HStack, VStack, ZStack } from '@/components/layout'
 import { ENDORSEMENT_TYPE_LABELS, getStateLabel } from '@/models'
 import { cn } from '@/util'
 import { InitiativeType, type Endorsement } from 'pv-contracts/data'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
     FaDonate,
     FaGlobe,
@@ -26,6 +26,8 @@ interface CandidateQuoteProps {
     handleHref: string | null
     quote: string | null
 }
+
+const hiddenJurisdictions = new Set(['Nationwide', 'Statewide'])
 
 function getSocialIcon(url: string) {
     if (url.includes('twitter.com') || url.includes('x.com'))
@@ -73,11 +75,11 @@ export function CandidateDetails({
 }: CandidateDetailsProps) {
     const [visible, setVisible] = useState(false)
     const [mounted, setMounted] = useState(false)
-    const lastCandidate = useRef<Endorsement | null>(null)
+    const [lastCandidate, setLastCandidate] = useState<Endorsement | null>(null)
 
     useEffect(() => {
         if (candidateProp) {
-            lastCandidate.current = candidateProp
+            setLastCandidate(candidateProp)
             setMounted(true)
             requestAnimationFrame(() => setVisible(true))
             document.body.style.overflow = 'hidden'
@@ -91,8 +93,11 @@ export function CandidateDetails({
         if (!visible) setMounted(false)
     }
 
-    const candidate = lastCandidate.current
-    if (!mounted || !candidate) return null
+    if (!mounted || !lastCandidate) return null
+
+    const showJurisdiction =
+        !!lastCandidate.jurisdiction &&
+        !hiddenJurisdictions.has(lastCandidate.jurisdiction)
 
     return (
         <ZStack
@@ -108,7 +113,7 @@ export function CandidateDetails({
                 <VStack align="left" gap={1.5} className={styles.container}>
                     <HStack align="top" gap={1.25} className={styles.header}>
                         <EndorsementAvatar
-                            endorsement={candidate}
+                            endorsement={lastCandidate}
                             size={100}
                             showBadge={false}
                         />
@@ -119,10 +124,12 @@ export function CandidateDetails({
                                 className={styles.nameRow}
                             >
                                 <h1 className={styles.name}>
-                                    {candidate.name}
+                                    {lastCandidate.name}
                                 </h1>
                                 <ElectionStatusBadge
-                                    electionStatus={candidate.electionStatus}
+                                    electionStatus={
+                                        lastCandidate.electionStatus
+                                    }
                                 />
                             </HStack>
                             <HStack
@@ -133,23 +140,23 @@ export function CandidateDetails({
                                 <span className={styles.badge}>
                                     {
                                         ENDORSEMENT_TYPE_LABELS[
-                                            candidate.endorsementLevel
+                                            lastCandidate.endorsementLevel
                                         ]
                                     }
                                 </span>
-                                {candidate.initiativeLevel ===
+                                {lastCandidate.initiativeLevel ===
                                     InitiativeType.National && (
                                     <span className={styles.candidateTag}>
                                         National Initiative
                                     </span>
                                 )}
-                                {candidate.initiativeLevel ===
+                                {lastCandidate.initiativeLevel ===
                                     InitiativeType.State && (
                                     <span className={styles.candidateTag}>
                                         State Initiative
                                     </span>
                                 )}
-                                {candidate.isPvMember && (
+                                {lastCandidate.isPvMember && (
                                     <span className={styles.candidateTag}>
                                         PV Member
                                     </span>
@@ -160,9 +167,9 @@ export function CandidateDetails({
                                 gap={0.5}
                                 className={styles.socialRow}
                             >
-                                {candidate.donateHref && (
+                                {lastCandidate.donateHref && (
                                     <a
-                                        href={candidate.donateHref}
+                                        href={lastCandidate.donateHref}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className={styles.socialLink}
@@ -171,9 +178,9 @@ export function CandidateDetails({
                                         <FaDonate />
                                     </a>
                                 )}
-                                {candidate.websiteHref && (
+                                {lastCandidate.websiteHref && (
                                     <a
-                                        href={candidate.websiteHref}
+                                        href={lastCandidate.websiteHref}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className={styles.socialLink}
@@ -182,17 +189,19 @@ export function CandidateDetails({
                                         <FaGlobe />
                                     </a>
                                 )}
-                                {candidate.handleHref && (
+                                {lastCandidate.handleHref && (
                                     <a
-                                        href={candidate.handleHref}
+                                        href={lastCandidate.handleHref}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className={styles.socialLink}
                                         title={getSocialPlatformName(
-                                            candidate.handleHref
+                                            lastCandidate.handleHref
                                         )}
                                     >
-                                        {getSocialIcon(candidate.handleHref)}
+                                        {getSocialIcon(
+                                            lastCandidate.handleHref
+                                        )}
                                     </a>
                                 )}
                             </HStack>
@@ -212,10 +221,10 @@ export function CandidateDetails({
                             >
                                 <span className={styles.infoLabel}>State</span>
                                 <span className={styles.infoValue}>
-                                    {getStateLabel(candidate.state)}
+                                    {getStateLabel(lastCandidate.state)}
                                 </span>
                             </VStack>
-                            {candidate.jurisdiction && (
+                            {showJurisdiction && (
                                 <VStack
                                     align="left"
                                     gap={0}
@@ -225,11 +234,11 @@ export function CandidateDetails({
                                         Jurisdiction
                                     </span>
                                     <span className={styles.infoValue}>
-                                        {candidate.jurisdiction}
+                                        {lastCandidate.jurisdiction}
                                     </span>
                                 </VStack>
                             )}
-                            {candidate.primaryElectionDate && (
+                            {lastCandidate.primaryElectionDate && (
                                 <VStack
                                     align="left"
                                     gap={0}
@@ -239,14 +248,14 @@ export function CandidateDetails({
                                         Primary
                                     </span>
                                     <span className={styles.infoValue}>
-                                        {candidate.primaryElectionDate.toLocaleDateString(
+                                        {lastCandidate.primaryElectionDate.toLocaleDateString(
                                             undefined,
                                             { timeZone: 'UTC' }
                                         )}
                                     </span>
                                 </VStack>
                             )}
-                            {candidate.generalElectionDate && (
+                            {lastCandidate.generalElectionDate && (
                                 <VStack
                                     align="left"
                                     gap={0}
@@ -256,7 +265,7 @@ export function CandidateDetails({
                                         General
                                     </span>
                                     <span className={styles.infoValue}>
-                                        {candidate.generalElectionDate.toLocaleDateString(
+                                        {lastCandidate.generalElectionDate.toLocaleDateString(
                                             undefined,
                                             { timeZone: 'UTC' }
                                         )}
@@ -266,9 +275,9 @@ export function CandidateDetails({
                         </HStack>
                         <hr className={styles.divider} />
                         <CandidateQuote
-                            handle={candidate.handle}
-                            handleHref={candidate.handleHref}
-                            quote={candidate.quote}
+                            handle={lastCandidate.handle}
+                            handleHref={lastCandidate.handleHref}
+                            quote={lastCandidate.quote}
                         />
                     </VStack>
                 </VStack>

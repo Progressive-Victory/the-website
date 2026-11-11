@@ -14,25 +14,8 @@ import {
 import { MultiTextField } from '@/components/common/forms/MultiTextField'
 import { stateOptions } from '@/models'
 import { dateService } from '@/services'
+import { Country, isValidCountryPostalCode } from 'postal-code-validator'
 import { Role, ShirtSize, UpdateHistory, User } from 'pv-contracts/data'
-
-const membershipCardShipmentOptions = [
-    { value: 0, label: 'Not Started' },
-    { value: 1, label: 'Cancelled' },
-    { value: 2, label: 'Printed' },
-    { value: 3, label: 'Shipped' },
-    { value: 4, label: 'Received' },
-    { value: 5, label: 'Returned (Update Address)' },
-]
-
-const membershipMerchShipmentOptions = [
-    { value: 0, label: 'Not Started' },
-    { value: 1, label: 'Cancelled' },
-    { value: 2, label: 'Printed' },
-    { value: 3, label: 'Shipped' },
-    { value: 4, label: 'Received' },
-    { value: 5, label: 'Returned (Update Address)' },
-]
 
 const shirtSizeOptions = [
     { value: '', label: 'None' },
@@ -42,12 +25,6 @@ const shirtSizeOptions = [
     { value: 'L', label: 'Large' },
     { value: 'XL', label: 'Extra Large' },
     { value: '2XL', label: 'Double XL' },
-]
-
-const membershipFulfillmentStatusOptions = [
-    { value: 0, label: 'Not Eligible' },
-    { value: 1, label: 'Not Fulfilled' },
-    { value: 2, label: 'Fulfilled' },
 ]
 
 const calcFutureDate = (
@@ -169,6 +146,10 @@ export function MemberView({
                     The obvious solution (fragment) causes the page to break for unknowable reasons.
                     Check website PR #493 to see details of how each solution breaks */}
                 {editing && <TextField label="Last Name" field="lastName" />}
+                <TextField
+                    label="Preferred Pronouns"
+                    field="preferredPronouns"
+                />
                 <DateField<User>
                     label="Date of Birth"
                     getter={(form) =>
@@ -249,6 +230,7 @@ export function MemberView({
                         },
                     })}
                     options={stateOptions}
+                    required
                 />
                 <TextField<User>
                     label="Zip Code"
@@ -257,28 +239,21 @@ export function MemberView({
                         ...form,
                         address: {
                             ...form.address,
-                            zip:
-                                field
-                                    ?.replace(/[^\d]/, '')
-                                    ?.padStart(5, '0')
-                                    ?.slice(-5) ?? null,
+                            zip: field?.replace(/[^\d]/, '')?.slice(-5) ?? null,
                         },
                     })}
-                    validator={(field) => !field?.length || field?.length == 5}
+                    validator={(field) =>
+                        (!field?.length || field?.length == 5) &&
+                        isValidCountryPostalCode(
+                            field ?? '',
+                            Country.UnitedStatesOfAmerica
+                        )
+                    }
+                    required
                 />
             </FormGroup>
 
             <FormGroup title="Membership Fulfillment">
-                <DropDownField<User>
-                    label="Membership Card Shipped"
-                    field="membershipCardStatus"
-                    options={membershipCardShipmentOptions}
-                />
-                <DropDownField<User>
-                    label="Membership Merch Shipped"
-                    field="membershipMerchStatus"
-                    options={membershipMerchShipmentOptions}
-                />
                 <DropDownField<User>
                     label="Shirt Size"
                     getter={(form) => form.shirtSize ?? ''}
@@ -297,16 +272,6 @@ export function MemberView({
                     label="Qualifies for Membership Benefits"
                     field="membershipBenefitEligible"
                     readonly
-                />
-                <DropDownField<User>
-                    label="Membership Fulfillment Status"
-                    field="membershipFulfillmentStatus"
-                    options={membershipFulfillmentStatusOptions}
-                />
-                <CheckboxField label="Name Confirmed" field="nameConfirmed" />
-                <CheckboxField
-                    label="Address Confirmed"
-                    field="addressConfirmed"
                 />
                 <TextField<User>
                     label="Has Active Recurring"

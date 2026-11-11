@@ -113,6 +113,11 @@
     --navigation-button-sub-tag-bg: rgba(255, 95, 75, 0.3);
 }
 
+.tagDarkRed {
+    --navigation-button-sub-tag-color: rgba(255, 207, 201, 1);
+    --navigation-button-sub-tag-bg: rgba(177, 2, 2, 1);
+}
+
 .tagOrange {
     --navigation-button-sub-tag-color: rgba(117, 56, 0, 1);
     --navigation-button-sub-tag-bg: rgba(255, 72, 0, 0.3);

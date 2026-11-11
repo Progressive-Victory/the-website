@@ -1,0 +1,74 @@
+.tierHistoryOverlay {
+    min-width: 20rem;
+}
+
+.tierHistoryBody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    width: 100%;
+}
+
+.tierHistorySummary {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: rgba(15, 23, 42, 0.56);
+}
+
+.tierHistoryEmpty {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.5);
+}
+
+.listBox {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.tierRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.65rem;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.tierMeta {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.tierRange {
+    color: rgba(15, 23, 42, 0.9);
+    font-weight: 600;
+}
+
+.tierPayments {
+    color: rgba(15, 23, 42, 0.5);
+    font-weight: 500;
+    font-size: 0.72rem;
+}
+
+.tierAmount {
+    color: rgba(15, 23, 42, 0.62);
+    font-weight: 600;
+    white-space: nowrap;
+}

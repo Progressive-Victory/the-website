@@ -5,6 +5,7 @@ import {
     type ButtonHTMLAttributes,
     type CSSProperties,
     type KeyboardEvent,
+    type MouseEvent,
     type ReactNode,
     useContext,
     useEffect,
@@ -23,6 +24,10 @@ export interface DropdownOverlayButtonProps extends ButtonHTMLAttributes<HTMLBut
     icon?: ReactNode
     selected?: boolean
     checked?: boolean
+    onCheckedChange?: (
+        checked: boolean,
+        event: MouseEvent<HTMLButtonElement>
+    ) => void
     menu?: DropdownOverlayButtonMenu
 }
 
@@ -34,6 +39,7 @@ export function DropdownOverlayButton({
     className,
     children,
     onClick,
+    onCheckedChange,
     onKeyDown,
     ...props
 }: DropdownOverlayButtonProps) {
@@ -44,7 +50,8 @@ export function DropdownOverlayButton({
     const containerRef = useRef<HTMLDivElement>(null)
     const buttonRef = useRef<HTMLButtonElement>(null)
     const menuRef = useRef<HTMLDivElement>(null)
-    const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const [closeTimer, setCloseTimer] =
+        useState<ReturnType<typeof setTimeout>>()
     const [isLocallyOpen, setIsLocallyOpen] = useState(false)
     const [menuStyle, setMenuStyle] = useState<CSSProperties | null>(null)
     const isOpen = menuGroup ? menuGroup.openMenuId === menuId : isLocallyOpen
@@ -61,8 +68,8 @@ export function DropdownOverlayButton({
     }
 
     const cancelClose = () => {
-        if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
-        closeTimerRef.current = null
+        if (closeTimer) clearTimeout(closeTimer)
+        setCloseTimer(undefined)
     }
 
     const openMenu = () => {
@@ -77,7 +84,7 @@ export function DropdownOverlayButton({
 
     const scheduleClose = () => {
         cancelClose()
-        closeTimerRef.current = setTimeout(closeMenu, 180)
+        setCloseTimer(setTimeout(closeMenu, 180))
     }
 
     useLayoutEffect(() => {
@@ -127,8 +134,8 @@ export function DropdownOverlayButton({
         if (!isOpen) return
 
         const close = () => {
-            if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
-            closeTimerRef.current = null
+            if (closeTimer) clearTimeout(closeTimer)
+            setCloseTimer(undefined)
             if (menuGroup) {
                 menuGroup.setOpenMenuId((currentMenuId) =>
                     currentMenuId === menuId ? null : currentMenuId
@@ -161,14 +168,7 @@ export function DropdownOverlayButton({
             document.removeEventListener('pointerdown', handlePointerDown)
             document.removeEventListener('keydown', handleDocumentKeyDown)
         }
-    }, [isOpen, menuGroup, menuId])
-
-    useEffect(
-        () => () => {
-            if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
-        },
-        []
-    )
+    }, [closeTimer, isOpen, menuGroup, menuId])
 
     const renderedMenu = typeof menu === 'function' ? menu({ closeMenu }) : menu
 
@@ -176,7 +176,10 @@ export function DropdownOverlayButton({
         event
     ) => {
         onClick?.(event)
-        if (!event.defaultPrevented && hasMenu) setIsOpen(!isOpen)
+        if (event.defaultPrevented) return
+
+        if (hasCheckmark) onCheckedChange?.(!checked, event)
+        if (hasMenu) setIsOpen(!isOpen)
     }
 
     const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {

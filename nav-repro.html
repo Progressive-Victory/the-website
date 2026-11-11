@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="src/app/tw.css" />
+        <link
+            rel="stylesheet"
+            href="src/components/common/navigation_stack/sidebar/Sidebar.module.css"
+        />
+        <link
+            rel="stylesheet"
+            href="src/components/common/navigation_stack/navigation_button/NavigationButton.module.css"
+        />
+        <link
+            rel="stylesheet"
+            href="src/components/common/navigation_stack/navigation_button/TagSection.module.css"
+        />
+        <link
+            rel="stylesheet"
+            href="src/components/common/panel/sidebar_list/SidebarList.module.css"
+        />
+        <style>
+            body {
+                margin: 0;
+                display: flex;
+            }
+            .sidebarBg {
+                --navigation-stack-sidebar-bg: #f9fafb;
+                --navigation-stack-sidebar-padding: 0rem;
+                --navigation-stack-sidebar-gap: 0rem;
+            }
+        </style>
+    </head>
+    <body>
+        <aside
+            class="sidebar sidebarProminent sidebarWithProminentHeader sidebarOpen sidebarBg"
+            style="--navigation-stack-sidebar-open-width: 24rem"
+        >
+            <div class="sidebarBodyWrapper sidebarBodyWrapperHideScrollbar">
+                <div class="sidebarProminent">
+                    <div class="body" id="body">
+                        <div class="item sidebarNavigationButton" id="lvl0">
+                            <div class="itemHeader">
+                                <a class="link" href="#">
+                                    <span
+                                        class="labelSection labelSectionWithSubtitle"
+                                    >
+                                        <span class="labelText">asfe</span>
+                                        <span class="subtitleSection"
+                                            >Group</span
+                                        >
+                                    </span>
+                                    <span class="tagSection"
+                                        ><span class="groupTagButton"
+                                            ><span
+                                                class="groupTagChevron"
+                                            ></span></span
+                                    ></span>
+                                </a>
+                            </div>
+                            <div
+                                class="groupChildrenClip"
+                                data-open="true"
+                                style="--group-children-open-height: 2000px"
+                            >
+                                <div class="groupChildren">
+                                    <div
+                                        class="item sidebarNavigationButton sidebarNavigationButtonChild"
+                                        id="lvl1"
+                                    >
+                                        <div class="itemHeader">
+                                            <a class="link" href="#">
+                                                <span
+                                                    class="labelSection labelSectionWithSubtitle"
+                                                >
+                                                    <span class="labelText"
+                                                        >hjk</span
+                                                    >
+                                                    <span
+                                                        class="subtitleSection"
+                                                        >Group</span
+                                                    >
+                                                </span>
+                                                <span class="tagSection"
+                                                    ><span
+                                                        class="groupTagButton"
+                                                        ><span
+                                                            class="groupTagChevron"
+                                                        ></span></span
+                                                ></span>
+                                            </a>
+                                        </div>
+                                        <div
+                                            class="groupChildrenClip"
+                                            data-open="true"
+                                            style="
+                                                --group-children-open-height: 2000px;
+                                            "
+                                        >
+                                            <div class="groupChildren">
+                                                <div
+                                                    class="item sidebarNavigationButton sidebarNavigationButtonChild"
+                                                    id="lvl2"
+                                                >
+                                                    <div class="itemHeader">
+                                                        <a
+                                                            class="link"
+                                                            href="#"
+                                                        >
+                                                            <span
+                                                                class="labelSection labelSectionWithSubtitle"
+                                                            >
+                                                                <span
+                                                                    class="labelText"
+                                                                    >dfsd</span
+                                                                >
+                                                                <span
+                                                                    class="subtitleSection"
+                                                                    >Group</span
+                                                                >
+                                                            </span>
+                                                            <span
+                                                                class="tagSection"
+                                                                ><span
+                                                                    class="groupTagButton"
+                                                                    ><span
+                                                                        class="groupTagChevron"
+                                                                    ></span></span
+                                                            ></span>
+                                                        </a>
+                                                    </div>
+                                                    <div
+                                                        class="groupChildrenClip"
+                                                        data-open="true"
+                                                        style="
+                                                            --group-children-open-height: 2000px;
+                                                        "
+                                                    >
+                                                        <div
+                                                            class="groupChildren"
+                                                        >
+                                                            <div
+                                                                class="item itemActive sidebarNavigationButton sidebarNavigationButtonChild"
+                                                                id="lvl3"
+                                                            >
+                                                                <div
+                                                                    class="itemHeader"
+                                                                >
+                                                                    <a
+                                                                        class="link"
+                                                                        href="#"
+                                                                        aria-current="page"
+                                                                    >
+                                                                        <span
+                                                                            class="labelSection labelSectionWithSubtitle"
+                                                                        >
+                                                                            <span
+                                                                                class="labelText"
+                                                                                >Assistant
+                                                                                Executive
+                                                                                Director</span
+                                                                            >
+                                                                            <span
+                                                                                class="subtitleSection"
+                                                                                >Position</span
+                                                                            >
+                                                                        </span>
+                                                                        <span
+                                                                            class="tagSection"
+                                                                            ><span
+                                                                                class="count"
+                                                                                >1</span
+                                                                            ></span
+                                                                        >
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="item sidebarNavigationButton" id="flat">
+                            <div class="itemHeader">
+                                <a class="link" href="#">
+                                    <span
+                                        class="labelSection labelSectionWithSubtitle"
+                                    >
+                                        <span class="labelText"
+                                            >Executive Director</span
+                                        >
+                                        <span class="subtitleSection"
+                                            >Position</span
+                                        >
+                                    </span>
+                                    <span class="tagSection"
+                                        ><span class="count">2</span></span
+                                    >
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </body>
+</html>

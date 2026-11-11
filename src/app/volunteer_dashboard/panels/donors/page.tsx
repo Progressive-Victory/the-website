@@ -12,6 +12,10 @@ import {
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
+import {
+    SidebarListFilters,
+    type SidebarListFiltersProps,
+} from '@/components/common/panel/sidebar_list/SidebarList'
 import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
@@ -25,6 +29,7 @@ import {
 } from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
 import { useEffect, useMemo, useState } from 'react'
+import { IoEllipsisVertical } from 'react-icons/io5'
 import { useMediaQuery } from 'usehooks-ts'
 
 interface contributionData {
@@ -160,6 +165,14 @@ export default function Page() {
 
     const donors = searchQuery.data?.data ?? []
     const resultCount = searchQuery.data?.count
+    const sidebarFilters: SidebarListFiltersProps = {
+        search,
+        onSearch,
+        searchFieldOptions: DONOR_FIELD_OPTIONS,
+        sortFieldOptions: DONOR_SORT_FIELD_OPTIONS,
+        showSort: true,
+        showLimit: true,
+    }
 
     return (
         <Panel
@@ -180,14 +193,11 @@ export default function Page() {
                     onPageChange: (nextPage: number) =>
                         onSearch({ ...search, page: nextPage }),
                 },
-                filters: {
-                    search,
-                    onSearch,
-                    searchFieldOptions: DONOR_FIELD_OPTIONS,
-                    sortFieldOptions: DONOR_SORT_FIELD_OPTIONS,
-                    showSort: true,
-                    showLimit: true,
-                },
+                filters: sidebarFilters,
+            }}
+            prominentHeaderButton={{
+                icon: <IoEllipsisVertical size={20} />,
+                menu: () => <SidebarListFilters {...sidebarFilters} />,
             }}
             sidebarBody={
                 <SidebarBody<ActBlueDonor>

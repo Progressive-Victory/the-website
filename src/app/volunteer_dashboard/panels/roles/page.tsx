@@ -12,6 +12,10 @@ import {
 } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
+import {
+    SidebarListFilters,
+    type SidebarListFiltersProps,
+} from '@/components/common/panel/sidebar_list/SidebarList'
 import { FetchError } from '@/models'
 import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
@@ -26,6 +30,7 @@ import { Role, zPermission, zRole } from 'pv-contracts/data'
 import { SortDirection, UpdateRoleRequest } from 'pv-contracts/requests'
 import { PaginatedResponse } from 'pv-contracts/responses'
 import { useMemo, useState } from 'react'
+import { IoEllipsisVertical } from 'react-icons/io5'
 import { useMediaQuery } from 'usehooks-ts'
 
 export default function Page() {
@@ -178,6 +183,12 @@ export default function Page() {
         [permissionOptions]
     )
 
+    const sidebarFilters: SidebarListFiltersProps = {
+        search,
+        onSearch,
+        options: filterOptions,
+    }
+
     return (
         <Panel
             includeSidebar
@@ -197,11 +208,11 @@ export default function Page() {
                     onPageChange: (nextPage: number) =>
                         onSearch({ ...search, page: nextPage }),
                 },
-                filters: {
-                    search,
-                    onSearch,
-                    options: filterOptions,
-                },
+                filters: sidebarFilters,
+            }}
+            prominentHeaderButton={{
+                icon: <IoEllipsisVertical size={20} />,
+                menu: () => <SidebarListFilters {...sidebarFilters} />,
             }}
             sidebarBody={
                 <SidebarBody<Role>

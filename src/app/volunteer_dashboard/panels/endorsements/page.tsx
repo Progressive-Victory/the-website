@@ -8,18 +8,23 @@ import { HistoryView } from './panel_views/HistoryView'
 import { FilterTags } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { EndorsementAvatar } from '@/components/common'
-import { FormState } from '@/components/common/forms'
+import { FormControls, FormState } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
+import { type SidebarListFiltersProps } from '@/components/common/panel/sidebar_list/SidebarList'
 import { TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ENDORSEMENT_TYPE_LABELS,
     INITIATIVE_TYPE_LABELS,
+    PermissionIds,
     getRelevantElectionDate,
     getStateLabel,
 } from '@/models'
 import { useEndorsementQueries } from '@/queries'
+import { cn } from '@/util'
 import {
+    hasPermission,
+    useCurrentUser,
     useOptimisticDelete,
     useOptimisticUpdate,
     useUnpaginatedSearch,
@@ -33,7 +38,8 @@ import {
     InitiativeType,
 } from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { FaRegPenToSquare } from 'react-icons/fa6'
 import { useMediaQuery } from 'usehooks-ts'
 
 const blankEndorsement: Endorsement = {
@@ -89,7 +95,7 @@ const endorsementLevelTagClass: Record<EndorsementType, string | undefined> = {
     [EndorsementType.PVPledge]: styles.tagPurple,
     [EndorsementType.Endorsement]: styles.tagGreen,
     [EndorsementType.Recommendation]: styles.tagRed,
-    [EndorsementType.Unendorsed]: undefined,
+    [EndorsementType.Unendorsed]: styles.tagDarkRed,
     [EndorsementType.None]: styles.tagDefault,
 }
 
@@ -101,18 +107,34 @@ const initiativeLevelTagClass: Record<InitiativeType, string | undefined> = {
 
 const makeLevelTags = (endorsement: Endorsement) => [
     {
-        label: ENDORSEMENT_TYPE_LABELS[endorsement.endorsementLevel],
-        className: endorsementLevelTagClass[endorsement.endorsementLevel],
+        label:
+            endorsement.endorsementLevel === EndorsementType.None
+                ? 'No Endorsement'
+                : ENDORSEMENT_TYPE_LABELS[endorsement.endorsementLevel],
+        className: cn(
+            styles.sidebarLevelTag,
+            endorsementLevelTagClass[endorsement.endorsementLevel]
+        ),
     },
     {
-        label: INITIATIVE_TYPE_LABELS[endorsement.initiativeLevel],
-        className: initiativeLevelTagClass[endorsement.initiativeLevel],
+        label:
+            endorsement.initiativeLevel === InitiativeType.None
+                ? 'No Initiative'
+                : INITIATIVE_TYPE_LABELS[endorsement.initiativeLevel],
+        className: cn(
+            styles.sidebarLevelTag,
+            initiativeLevelTagClass[endorsement.initiativeLevel]
+        ),
     },
 ]
 
 export default function Page() {
     const queryClient = useQueryClient()
     const endorsementQueries = useEndorsementQueries()
+    const currentUser = useCurrentUser()
+    const canEditEndorsements =
+        !!currentUser.data &&
+        hasPermission(currentUser.data, PermissionIds.EDIT_ENDORSEMENTS)
 
     const [selectedEndorsement, setSelectedEndorsement] =
         useState<Endorsement | null>(null)
@@ -229,6 +251,7 @@ export default function Page() {
     })
 
     const handleCreate = () => blankEndorsement
+    const formControls = useRef<FormControls>(null)
 
     const handleSave = (newEndorsement: Endorsement) => {
         const originalPublished =
@@ -314,6 +337,14 @@ export default function Page() {
             />
         ) : undefined
 
+    const sidebarFilters: SidebarListFiltersProps = {
+        search,
+        onSearch,
+        sortFieldOptions: endorsementSortFields,
+        showSort: true,
+        showLimit: true,
+    }
+
     return (
         <Panel
             includeSidebar
@@ -338,13 +369,15 @@ export default function Page() {
                     onPageChange: (nextPage: number) =>
                         onSearch({ ...search, page: nextPage }),
                 },
-                filters: {
-                    search,
-                    onSearch,
-                    sortFieldOptions: endorsementSortFields,
-                    showSort: true,
-                    showLimit: true,
-                },
+                filters: sidebarFilters,
+            }}
+            prominentHeaderButton={{
+                icon: <FaRegPenToSquare size={20} />,
+                label: canEditEndorsements
+                    ? 'Create Endorsement'
+                    : 'Not Allowed To Create Endorsements',
+                disabled: !canEditEndorsements,
+                onClick: () => formControls.current?.create(),
             }}
             sidebarBody={
                 <>
@@ -418,7 +451,19 @@ export default function Page() {
                         onUpdate={setFormState}
                         onSave={handleSave}
                         onCreate={handleCreate}
+                        showCreateButton={false}
+                        controlsRef={formControls}
                         onDelete={handleDelete}
+                        editDisabledReason={
+                            canEditEndorsements
+                                ? undefined
+                                : 'Not Allowed To Edit Endorsements'
+                        }
+                        deleteDisabledReason={
+                            canEditEndorsements
+                                ? undefined
+                                : 'Not Allowed To Delete Endorsements'
+                        }
                         onCancel={handleCancel}
                         uploadImage={endorsementQueries.uploadImage}
                         className={styles.detailsContent}

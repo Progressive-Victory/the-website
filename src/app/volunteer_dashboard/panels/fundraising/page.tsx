@@ -68,6 +68,8 @@ export default function Page() {
         isAwaitingDraftEndDate,
         statsQuery,
         allTimeStatsQuery,
+        membershipCountQuery,
+        contributionCountQuery,
         setStartDate,
         setEndDate,
         setCommittedPreset,
@@ -710,8 +712,7 @@ export default function Page() {
                             href="/volunteer_dashboard/panels/contributions"
                             icon={FaMoneyBills}
                             tag={{
-                                count: allTimeStatsQuery.data
-                                    ?.totalContributionCount,
+                                count: contributionCountQuery.data?.count,
                             }}
                             buttonType="card"
                             trackPanelHistory
@@ -722,9 +723,9 @@ export default function Page() {
                             description="Dues Paying Membership switchboard."
                             href="/volunteer_dashboard/panels/membership"
                             icon={FaMoneyCheckDollar}
-                            // tag={{ count: 92 }} will be added once membership stats are available.
+                            tag={{ count: membershipCountQuery.data?.count }}
                             buttonType="card"
-                            resetPanelHistoryOnClick
+                            trackPanelHistory
                         />
                     </div>
                 </div>

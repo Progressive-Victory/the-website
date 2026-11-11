@@ -5,7 +5,9 @@ import {
     AccountDetailsSection,
     ManualDonorLinkRequest,
 } from './sections/index'
+import { AccountLoading } from '@/app/account/AccountLoading'
 import styles from '@/app/account/account.module.css'
+import { PermissionIds } from '@/models'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
 import { RedirectType, redirect } from 'next/navigation'
@@ -18,7 +20,10 @@ export function AccountPage() {
 
     const canAccessDashboard = useMemo(() => {
         return loggedInUser.data
-            ? hasPermission(loggedInUser.data, 'Admin Panel Access')
+            ? hasPermission(
+                  loggedInUser.data,
+                  PermissionIds.VOLUNTEER_DASHBOARD_ACCESS
+              )
             : false
     }, [loggedInUser.data])
 
@@ -30,8 +35,8 @@ export function AccountPage() {
         loggedInUser: loggedInUser.data,
     })
 
-    const onSave = (user: User) => {
-        updateUser.mutate({
+    const onSave = async (user: User) => {
+        await updateUser.mutateAsync({
             id: user.id,
             user,
             request: {
@@ -43,6 +48,7 @@ export function AccountPage() {
                 phone: user.phone,
                 firstName: user.firstName,
                 lastName: user.lastName,
+                preferredPronouns: user.preferredPronouns,
                 birthdate: user.birthdate,
                 address: {
                     addressLine1: user.address.addressLine1,
@@ -69,14 +75,15 @@ export function AccountPage() {
         })
     }
 
-    if (isSessionLoading || !session) return null
+    if (isSessionLoading) return <AccountLoading />
+
+    if (!session) redirect('/login')
 
     if (
         loggedInUser.data &&
         loggedInUser.data.onboardingStage != OnboardingStage.JOINED
     ) {
         redirect('/volunteer', RedirectType.replace)
-        return null
     }
 
     return (
@@ -90,6 +97,7 @@ export function AccountPage() {
                             handleSignOut={handleSignOut}
                             onSave={onSave}
                             donorLinkError={linkUser.error}
+                            isLinking={linkUser.isPending}
                             onDonorLinkSubmit={onLinkFormSubmit}
                         />
                         {!!loggedInUser.data.donors?.length && (

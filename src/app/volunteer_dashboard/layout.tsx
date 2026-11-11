@@ -9,6 +9,7 @@ import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { Header } from '@/components/layout/Header'
+import { PermissionIds } from '@/models'
 import { useEndorsementQueries, usePositionQueries } from '@/queries'
 import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
@@ -20,7 +21,9 @@ import {
     zRole,
     zUser,
 } from 'pv-contracts/data'
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { MembershipSearchRequest } from 'pv-contracts/requests'
+import { zMembershipsResponsePacket } from 'pv-contracts/responses'
+import { Suspense, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
 import {
@@ -29,6 +32,7 @@ import {
     FaCheckToSlot,
     FaMoneyBills,
     FaMoneyCheckDollar,
+    // FaSitemap,
 } from 'react-icons/fa6'
 import type { IconType } from 'react-icons/lib'
 import { useMediaQuery } from 'usehooks-ts'
@@ -51,6 +55,11 @@ interface DashboardPanelConfigItem {
     groupChildren?: DashboardGroupChildConfigItem[]
 }
 
+const membershipCountSearch: MembershipSearchRequest = {
+    limit: 1,
+    isMember: true,
+}
+
 export default function Layout({ children }: { children: ReactNode }) {
     return (
         <Suspense fallback={null}>
@@ -63,13 +72,12 @@ function LayoutContent({ children }: { children: ReactNode }) {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const welcomeParam = searchParams.get('from') === 'welcome'
-    const previousPathnameRef = useRef(pathname)
+    const [previousPathName, setPreviousPathName] = useState(pathname)
     const positionQueries = usePositionQueries()
     const endorsementQueries = useEndorsementQueries()
     const [showWelcome, setShowWelcome] = useState(
         pathname === '/volunteer_dashboard' && welcomeParam
     )
-    const previousPathname = previousPathnameRef.current
     const users = usePaginatedSearch('/users', zUser, { search: { limit: 0 } })
     const roles = usePaginatedSearch('/roles', zRole, { search: { limit: 0 } })
     const permissions = usePaginatedSearch('/permissions', zPermission, {
@@ -82,6 +90,11 @@ function LayoutContent({ children }: { children: ReactNode }) {
         '/actblue/contributions',
         zActBlueDonationPacket,
         { search: { limit: 0 } }
+    )
+    const memberships = usePaginatedSearch(
+        '/actblue/memberships',
+        zMembershipsResponsePacket,
+        { search: membershipCountSearch }
     )
     const positionHierarchy = useQuery({
         queryKey: ['positionHierarchy'],
@@ -102,6 +115,8 @@ function LayoutContent({ children }: { children: ReactNode }) {
     const displayName =
         `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim() ||
         (discordUser?.username ? `@${discordUser.username}` : 'User')
+    const displayPronouns =
+        `${currentUser.data?.preferredPronouns ?? ''}`.trim()
 
     const dashboardPanelConfig: DashboardPanelConfigItem[] = [
         {
@@ -137,7 +152,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                     label: 'Membership',
                     href: '/volunteer_dashboard/panels/membership',
                     icon: FaMoneyCheckDollar,
-                    // count: insert,
+                    count: memberships.query.data?.count,
                 },
             ],
         },
@@ -172,7 +187,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
     ]
 
     useEffect(() => {
-        previousPathnameRef.current = pathname
+        setPreviousPathName(pathname)
     }, [pathname])
 
     useEffect(() => {
@@ -198,7 +213,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
         (panel) => panel.href === pathname
     )
     const previousTopLevelIndex = dashboardPanelConfig.findIndex(
-        (panel) => panel.href === previousPathname
+        (panel) => panel.href === previousPathName
     )
 
     const activePanelLabel = dashboardPanelConfig
@@ -214,7 +229,9 @@ function LayoutContent({ children }: { children: ReactNode }) {
     const isPanelSelected = pathname.startsWith('/volunteer_dashboard/panels/')
 
     return (
-        <ProtectedPage requiredRoles={['Superadmin']}>
+        <ProtectedPage
+            requiredPermissions={[PermissionIds.VOLUNTEER_DASHBOARD_ACCESS]}
+        >
             <div className={styles.root}>
                 <Header />
 
@@ -250,6 +267,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                                             ? `@${discordUser.username}`
                                             : undefined
                                     }
+                                    labelPill={displayPronouns}
                                 />
                             }
                         >
@@ -266,7 +284,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                                         pathname === panel.href &&
                                         currentTopLevelIndex !== -1 &&
                                         previousTopLevelIndex !== -1 &&
-                                        previousPathname !== pathname
+                                        previousPathName !== pathname
                                             ? currentTopLevelIndex >
                                               previousTopLevelIndex
                                                 ? 'down'
@@ -321,6 +339,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                         userCount: users.query.data?.count,
                         donorCount: donors.query.data?.count,
                         contributionCount: contributions.query.data?.count,
+                        membershipCount: memberships.query.data?.count,
                         roleCount: roles.query.data?.count,
                         permissionCount: permissions.query.data?.count,
                         positionCount,

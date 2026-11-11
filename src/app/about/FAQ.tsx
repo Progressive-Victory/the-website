@@ -9,11 +9,11 @@ const questions = [
     },
     {
         question: "What if I'm under the age of 18?",
-        answer: 'Unfortunately, all members of Progressive Victory must be 18 years or older in order to join. If you are currently between the ages 16 and 17, you may attend in person organizing or community events if accompanied by a parent or guardian.',
+        answer: 'Unfortunately, all members of Progressive Victory must be 18 years or older to join. If you are currently between the ages 16 and 17, you may attend in-person organizing or community events if accompanied by a parent or guardian.',
     },
     {
         question: "Should I join if I don't want to volunteer?",
-        answer: "Of Course! Progressive Victory is more than just a poltical org it's a community first and foremost. We have worked hard to create a healthy & thriving social space for that also happens to swing elections!",
+        answer: "Of course! Progressive Victory is more than just a political org, it's a community. We have worked hard to create a healthy and thriving social space. With invigorated and hopeful spirits, people can swing elections!",
     },
     {
         question: 'Do I need previous organizing experience?',

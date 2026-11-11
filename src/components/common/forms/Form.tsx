@@ -3,7 +3,12 @@ import { DynamicFormFieldProps, FieldConfiguration } from './FormField'
 import { HStack, Spacer, VStack } from '@/components/layout'
 import { cn } from '@/util'
 import deepEqual from 'deep-equal'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, {
+    useCallback,
+    useEffect,
+    useImperativeHandle,
+    useState,
+} from 'react'
 import { FaPlus, FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
 
 /**
@@ -11,6 +16,13 @@ import { FaPlus, FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
  * you've started creating or editing something.
  */
 export type FormMode = 'read' | 'create' | 'edit'
+
+/** Imperative handle for driving the form from outside, via `controlsRef`. */
+export interface FormControls {
+    create: () => void
+    edit: () => void
+    cancel: () => void
+}
 
 /**
  * Current internal state of the Form component. This is returned to the parent
@@ -77,8 +89,20 @@ export interface FormProps<T> {
     /** Callback to create a new form value. */
     onCreate?: () => T
 
+    /** Hides the built-in 'Create' buttons while keeping `onCreate` available. */
+    showCreateButton?: boolean
+
+    /** Exposes imperative controls so a parent can trigger create/edit/cancel. */
+    controlsRef?: React.Ref<FormControls>
+
     /** Callback to delete a form value. */
     onDelete?: (form: T) => void
+
+    /** Disables 'Edit' and shows this text as its tooltip. */
+    editDisabledReason?: string
+
+    /** Disables 'Delete' and shows this text as its tooltip. */
+    deleteDisabledReason?: string
 
     /** Callback when editing is discarded. */
     onCancel?: () => void
@@ -117,7 +141,11 @@ export function Form<T>({
     onUpdate,
     onSave,
     onCreate,
+    showCreateButton = true,
+    controlsRef,
     onDelete,
+    editDisabledReason,
+    deleteDisabledReason,
     onCancel,
 }: FormProps<T>) {
     // Stores the initial state of the form while editing.
@@ -164,7 +192,7 @@ export function Form<T>({
 
     // Called when 'Edit' is pressed. Simply edits current form state.
     const handleEdit = () => {
-        if (!initialForm) return
+        if (!initialForm || editDisabledReason) return
         beginEdit(initialForm, 'edit')
     }
 
@@ -177,7 +205,7 @@ export function Form<T>({
 
     // Called when 'Delete' is pressed. Asks the parent to delete the form.
     const handleDelete = () => {
-        if (!initialForm) return
+        if (!initialForm || deleteDisabledReason) return
         onDelete?.(initialForm)
     }
 
@@ -193,6 +221,12 @@ export function Form<T>({
         onCancel?.()
         reset()
     }
+
+    useImperativeHandle(controlsRef, () => ({
+        create: handleCreate,
+        edit: handleEdit,
+        cancel: handleCancel,
+    }))
 
     // Called whenever the data in any field changes.
     const handleChange = useCallback(
@@ -254,7 +288,7 @@ export function Form<T>({
                     <VStack grow gap>
                         <Spacer />
                         <span>{`No ${title} selected`}</span>
-                        {onCreate && (
+                        {onCreate && showCreateButton && (
                             <button
                                 onClick={handleCreate}
                                 className={cn(styles.button)}
@@ -280,24 +314,47 @@ export function Form<T>({
         onConfigure: handleConfigure,
     }
 
+    // Generates a function to hydrate a child element with props.
+    // Accepts an id prefix to ensure that nested elements still have
+    // unique id fields.
+    const hydrateChild =
+        (prefix = '') =>
+        // Hydrates an individual child element by populating its
+        // default id and dynamic data from the parent form element.
+        // Returns an array of React.ReactNode[].
+        (child: React.ReactNode, i: number): React.ReactNode[] => {
+            // If the node is a non-element or a builtin, change nothing.
+            if (!React.isValidElement(child) || typeof child.type == 'string')
+                return [child]
+            // If the node is a React fragment (<></>), recurse on its children.
+            else if (child.type === React.Fragment) {
+                const fragmentChildren = ((child.props as React.FragmentProps)
+                    .children ?? []) as React.ReactNode[]
+                return fragmentChildren.flatMap(
+                    hydrateChild(`${i.toString()}-`)
+                )
+            }
+
+            // Otherwise, default `id` if it's undefined, and override `dynamic`.
+            return [
+                {
+                    ...child,
+                    props: {
+                        id: `${prefix}${i.toString()}`,
+                        ...(child.props as object),
+                        dynamic,
+                    },
+                },
+            ]
+        }
+
     // Populate default id and dynamic data into the children. Only user-
     // defined components will be hydrated, but note that this includes
     // non-form-specific components.
-    const hydratedChildren = React.Children.map(children, (child, i) => {
-        // If the node is a non-element or a builtin, change nothing.
-        if (!React.isValidElement(child) || typeof child.type == 'string')
-            return child
-
-        // Otherwise, default `id` if it's undefined, and override `dynamic`.
-        return {
-            ...child,
-            props: {
-                id: i.toString(),
-                ...(child.props as object),
-                dynamic,
-            },
-        }
-    })
+    const hydratedChildren = React.Children.map(
+        children,
+        hydrateChild()
+    )!.flat()
 
     const hydratedBeforeHeader =
         beforeHeader && React.isValidElement(beforeHeader)
@@ -354,7 +411,7 @@ export function Form<T>({
                                 </>
                             ) : (
                                 <>
-                                    {onCreate && (
+                                    {onCreate && showCreateButton && (
                                         <button
                                             onClick={handleCreate}
                                             className={styles.button}
@@ -364,16 +421,26 @@ export function Form<T>({
                                     )}
                                     <button
                                         onClick={handleEdit}
-                                        className={styles.button}
+                                        disabled={!!editDisabledReason}
+                                        title={editDisabledReason}
+                                        className={cn(
+                                            styles.button,
+                                            editDisabledReason &&
+                                                styles.unavailable
+                                        )}
                                     >
                                         <FaEdit /> Edit
                                     </button>
                                     {onDelete && (
                                         <button
                                             onClick={handleDelete}
+                                            disabled={!!deleteDisabledReason}
+                                            title={deleteDisabledReason}
                                             className={cn(
                                                 styles.button,
-                                                styles.discardButton
+                                                styles.discardButton,
+                                                deleteDisabledReason &&
+                                                    styles.unavailable
                                             )}
                                         >
                                             <FaTrashAlt /> Delete

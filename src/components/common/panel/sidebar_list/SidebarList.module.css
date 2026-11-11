@@ -44,19 +44,18 @@
     align-items: center;
     padding-inline: 0.75rem;
     gap: 0.5rem;
+
+    & > div {
+        width: 100%;
+    }
 }
 
-.searchInput > input {
+.sidebarSearchInput {
     width: 100%;
-    border-radius: 0.6rem;
-    border-width: 1px;
-    border-color: #d1d5db;
-    padding: 0.25rem 0.75rem;
-    outline: none;
-
-    &:focus {
-        border-color: #0ea5e9;
-    }
+    max-width: none;
+    padding-block: 0.25rem;
+    font-size: inherit;
+    font-weight: inherit;
 }
 
 .sidebarNavigationButton {
@@ -76,6 +75,10 @@
     --navigation-button-link-active-color: #000;
     --navigation-button-link-active-hover-bg: #d1d5db;
     overflow: hidden;
+}
+
+.sidebarNavigationButtonChild {
+    overflow: visible;
 }
 
 .pageSelectContainer {
@@ -185,17 +188,20 @@
     & .sidebarNavigationButton {
         margin-top: 3px;
         margin-bottom: 2px;
-        transition: margin 280ms cubic-bezier(0.22, 1, 0.36, 1);
+        transition: margin 200ms cubic-bezier(0.22, 1, 0.36, 1);
     }
 }
 
 .sidebarNavigationButton {
+    transition: border-radius 200ms cubic-bezier(0.22, 1, 0.36, 1);
+
     & a {
         white-space: nowrap;
-        min-width: max-content;
+        min-width: 0;
         transition:
-            padding 280ms cubic-bezier(0.22, 1, 0.36, 1),
-            background-color 220ms cubic-bezier(0.22, 0.61, 0.36, 1),
+            padding 200ms cubic-bezier(0.22, 1, 0.36, 1),
+            background-color 200ms cubic-bezier(0.22, 0.61, 0.36, 1),
+            border-radius 200ms cubic-bezier(0.22, 1, 0.36, 1),
             transform 140ms ease,
             color 140ms ease,
             box-shadow 140ms ease;
@@ -210,13 +216,31 @@
     }
 }
 
-:global([data-sidebar-large-title-collapsed='true']) .pinnedSection,
+:global([data-sidebar-pinned-stuck='true']) .pinnedSection,
 :global([data-sidebar-collapsed='true']) .pinnedSection {
     border-bottom-color: rgba(17, 24, 39, 0.1);
 }
 
+:global([data-sidebar-pinned-stuck='true'])
+    .pinnedSection
+    .sidebarNavigationButton:has(a[aria-current='page']),
+:global([data-sidebar-collapsed='true'])
+    .pinnedSection
+    .sidebarNavigationButton:has(a[aria-current='page']) {
+    --navigation-button-item-margin: 0;
+    --navigation-button-item-radius: 0;
+    --navigation-button-link-radius: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+
+    & a {
+        padding-block: 1.16rem;
+    }
+}
+
 :global([data-sidebar-collapsed='true']) .sidebarNavigationButton a {
     gap: var(--navigation-button-link-gap, 1.25rem);
+    min-width: max-content;
 }
 
 :global([data-sidebar-collapsed='true']) .sidebarNavigationButton a > span {

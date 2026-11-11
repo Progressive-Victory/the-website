@@ -18,7 +18,7 @@ interface QueryOptions {
 }
 
 export function useFetch() {
-    const { apiBaseUrl, session, onRefresh, onLogout } = useAuth()
+    const { apiBaseUrl, onRefreshSession } = useAuth()
 
     const serializeParam = (param: ParamPrim) => {
         if (param === undefined) return null
@@ -33,7 +33,7 @@ export function useFetch() {
                 `Invalid fetch! Substitution key :${key} does not exist in params (value ${value})`
             )
 
-        return encodeURIComponent(value)
+        return encodeURIComponent(value).replace(/%40/g, '@')
     }
 
     const addQueryParam = (url: URL, key: string, param: QueryParam) => {
@@ -110,22 +110,31 @@ export function useFetch() {
 
         let res = await request()
 
-        if (session && res.status === 401) {
-            await onRefresh()
+        if (res.status === 401 && (await onRefreshSession())) {
             res = await request()
         }
 
-        if (session && res.status === 401) {
-            await onLogout()
-        }
+        const text = await res.text()
 
         if (!res.ok) {
-            const error = (await res.json()) as ApiError
+            let error: ApiError = {
+                message: res.statusText || 'An error occurred',
+                error: '',
+            }
+            if (text.trim().length > 0) {
+                try {
+                    error = JSON.parse(text) as ApiError
+                } catch {
+                    error = { message: text, error: '' }
+                }
+            }
             throw new FetchError(error.message, res.status, error.error)
         }
 
         const content =
-            res.status === 204 ? undefined : ((await res.json()) as unknown)
+            res.status === 204 || text.trim().length === 0
+                ? undefined
+                : (JSON.parse(text) as unknown)
 
         const parsed = z.parse(schema ?? z.undefined(), content)
         return parsed as S extends null ? void : z.infer<S>

@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 export interface IOnboardingForm {
     firstName: string
     lastName: string
+    preferredPronouns: string
     dateOfBirth: string
     zipCode: string
     phoneNumber: string
@@ -114,7 +115,8 @@ export function CollectInfoStage({
             <header>
                 <p className={styles.title}>Volunteer with PV</p>
                 <p className={styles.subtitle}>
-                    Join us on Discord and make a difference ✨
+                    Join us on Discord and make a difference{' '}
+                    <span aria-hidden="true">✨</span>
                 </p>
             </header>
             <section className={styles.infoFormSection}>
@@ -166,17 +168,32 @@ export function CollectInfoStage({
                         }
                     />
                 </div>
-                <Field
-                    value={phoneNumber}
-                    label="Phone Number"
-                    error={!parsedPhone.isValid}
-                    errorText="Enter a valid 10-digit phone number"
-                    maxLength={20}
-                    onChange={(e) => {
-                        setPhoneNumber(e.target.value)
-                    }}
-                    onBlur={(e) => setFormattedPhoneNumber(e.target.value)}
-                />
+                <div className={styles.infoFormRow}>
+                    <Field
+                        value={form.preferredPronouns}
+                        label="Preferred Pronouns (optional)"
+                        placeholder="ex: he/him, she/her, they/them"
+                        maxLength={50}
+                        onChange={(e) =>
+                            setForm({
+                                ...form,
+                                preferredPronouns: e.target.value,
+                            })
+                        }
+                        required={false}
+                    />
+                    <Field
+                        value={phoneNumber}
+                        label="Phone Number"
+                        error={!parsedPhone.isValid}
+                        errorText="Enter a valid 10-digit phone number"
+                        maxLength={20}
+                        onChange={(e) => {
+                            setPhoneNumber(e.target.value)
+                        }}
+                        onBlur={(e) => setFormattedPhoneNumber(e.target.value)}
+                    />
+                </div>
                 <p className={styles.phoneNote}>
                     <em>
                         US numbers only. Message and data rates may apply. Must
@@ -259,8 +276,10 @@ export function CollectInfoStage({
                 />
             </section>
             <div className={styles.requiredNote}>
-                <span className={styles.requiredIndicator}>*</span> = required
-                field
+                A red asterisk
+                {' ( '}
+                <span className={styles.requiredIndicator}>*</span>
+                {' )'} = required field
             </div>
             <button
                 type="submit"
