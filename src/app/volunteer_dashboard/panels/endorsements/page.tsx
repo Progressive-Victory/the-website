@@ -345,7 +345,14 @@ export default function Page() {
         showLimit: true,
     }
 
-    return (
+    const titleFormState =
+        formState?.mode === 'create'
+            ? formState.form.name || 'Create New Endorsement'
+            : (formState?.form?.name ??
+              selectedEndorsement?.name ??
+              'Endorsement')
+
+    const renderWholePage = () => (
         <Panel
             includeSidebar
             collapsedSidebarMode="compact"
@@ -437,14 +444,7 @@ export default function Page() {
                         endorsement={
                             formState?.form ?? selectedEndorsement ?? null
                         }
-                        title={
-                            formState?.mode === 'create'
-                                ? formState.form.name ||
-                                  'Create New Endorsement'
-                                : (formState?.form?.name ??
-                                  selectedEndorsement?.name ??
-                                  'Endorsement')
-                        }
+                        title={titleFormState}
                         saving={
                             createMutation.isPending || updateMutation.isPending
                         }
@@ -475,4 +475,6 @@ export default function Page() {
             </div>
         </Panel>
     )
+
+    return renderWholePage()
 }

@@ -13,6 +13,123 @@ export function formatHour(date: Date, includeMinute = false): string {
     return `${display}${suffix}`
 }
 
+function pickYearLabel(
+    date: Date,
+    level: number,
+    idx: number,
+    stride: number
+): string {
+    if (level <= 1) return date.toLocaleDateString('en-US', { year: 'numeric' })
+    if (level === 2)
+        return date
+            .toLocaleDateString('en-US', { year: '2-digit' })
+            .replace(/^/, "'")
+    return idx % stride === 0
+        ? date
+              .toLocaleDateString('en-US', { year: '2-digit' })
+              .replace(/^/, "'")
+        : ''
+}
+
+function pickMonthLabel(
+    date: Date,
+    level: number,
+    spansYears: boolean,
+    idx: number,
+    totalCount: number
+): string {
+    const isFirst = idx === 0
+    const isLast = idx === totalCount - 1
+    const isQuarterStart = date.getMonth() % 3 === 0
+
+    if (level === 0)
+        return date.toLocaleDateString('en-US', {
+            month: 'long',
+            ...(spansYears ? { year: 'numeric' } : {}),
+        })
+
+    if (level === 1)
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            ...(spansYears ? { year: '2-digit' } : {}),
+        })
+
+    if (level === 2) {
+        return date.toLocaleDateString('en-US', { month: 'short' })
+    }
+
+    if (isFirst || isLast || isQuarterStart) {
+        return date.toLocaleDateString('en-US', { month: 'short' })
+    }
+
+    return ''
+}
+
+function pickWeekLabel(
+    date: Date,
+    level: number,
+    idx: number,
+    stride: number
+): string {
+    if (level === 0)
+        return date.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+        })
+
+    if (level === 1)
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+        })
+
+    if (level === 2)
+        return date.toLocaleDateString('en-US', {
+            month: 'numeric',
+            day: 'numeric',
+        })
+
+    return idx % stride === 0
+        ? date.toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+          })
+        : ''
+}
+
+function pickDayLabel(
+    date: Date,
+    level: number,
+    idx: number,
+    stride: number
+): string {
+    if (level === 0)
+        return date.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+        })
+
+    if (level === 1)
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+        })
+
+    if (level === 2)
+        return date.toLocaleDateString('en-US', {
+            month: 'numeric',
+            day: 'numeric',
+        })
+
+    return idx % stride === 0
+        ? date.toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+          })
+        : ''
+}
+
 export function pickLabel(
     granularity: ChartGranularity,
     date: Date,
@@ -43,45 +160,11 @@ export function pickLabel(
     else level = 3
 
     if (granularity === 'year') {
-        if (level <= 1)
-            return date.toLocaleDateString('en-US', { year: 'numeric' })
-        if (level === 2)
-            return date
-                .toLocaleDateString('en-US', { year: '2-digit' })
-                .replace(/^/, "'")
-        return idx % stride === 0
-            ? date
-                  .toLocaleDateString('en-US', { year: '2-digit' })
-                  .replace(/^/, "'")
-            : ''
+        pickYearLabel(date, level, idx, stride)
     }
 
     if (granularity === 'month') {
-        const isFirst = idx === 0
-        const isLast = idx === totalCount - 1
-        const isQuarterStart = date.getMonth() % 3 === 0
-
-        if (level === 0)
-            return date.toLocaleDateString('en-US', {
-                month: 'long',
-                ...(spansYears ? { year: 'numeric' } : {}),
-            })
-
-        if (level === 1)
-            return date.toLocaleDateString('en-US', {
-                month: 'short',
-                ...(spansYears ? { year: '2-digit' } : {}),
-            })
-
-        if (level === 2) {
-            return date.toLocaleDateString('en-US', { month: 'short' })
-        }
-
-        if (isFirst || isLast || isQuarterStart) {
-            return date.toLocaleDateString('en-US', { month: 'short' })
-        }
-
-        return ''
+        return pickMonthLabel(date, level, spansYears, idx, totalCount)
     }
 
     if (granularity === 'quarter') {
@@ -96,58 +179,11 @@ export function pickLabel(
     }
 
     if (granularity === 'week') {
-        if (level === 0)
-            return date.toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-            })
-
-        if (level === 1)
-            return date.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-            })
-
-        if (level === 2)
-            return date.toLocaleDateString('en-US', {
-                month: 'numeric',
-                day: 'numeric',
-            })
-
-        return idx % stride === 0
-            ? date.toLocaleDateString('en-US', {
-                  month: 'numeric',
-                  day: 'numeric',
-              })
-            : ''
+        return pickWeekLabel(date, level, idx, stride)
     }
 
     if (granularity === 'day') {
-        if (level === 0)
-            return date.toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-            })
-
-        if (level === 1)
-            return date.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-            })
-
-        if (level === 2)
-            return date.toLocaleDateString('en-US', {
-                month: 'numeric',
-                day: 'numeric',
-            })
-
-        return idx % stride === 0
-            ? date.toLocaleDateString('en-US', {
-                  month: 'numeric',
-                  day: 'numeric',
-              })
-            : ''
+        return pickDayLabel(date, level, idx, stride)
     }
 
     if (level === 0) return formatHour(date, true)

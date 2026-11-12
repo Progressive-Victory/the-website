@@ -410,14 +410,7 @@ export function Form<T>({
                                 </>
                             ) : (
                                 <>
-                                    {onCreate && showCreateButton && (
-                                        <button
-                                            onClick={handleCreate}
-                                            className={styles.button}
-                                        >
-                                            <FaPlus /> Create
-                                        </button>
-                                    )}
+                                    {renderCreateButton(styles.button)}
                                     <button
                                         onClick={handleEdit}
                                         disabled={!!editDisabledReason}

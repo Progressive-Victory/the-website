@@ -78,33 +78,37 @@ export function NavigationButton({
         toggle: handleGroupTagClick,
     } = useCollapse({ deps: [groupContent] })
 
-    return (
-        <div
-            className={cn(
-                styles.item,
-                isCardButton && styles.cardItem,
-                isAccountButton && styles.accountItem,
-                active ? styles.itemActive : styles.itemInactive,
-                active &&
-                    indicatorDirection === 'up' &&
-                    styles.itemActiveFromUp,
-                active &&
-                    indicatorDirection === 'down' &&
-                    styles.itemActiveFromDown,
-                className
-            )}
-            style={style}
-        >
+    const getItemClassName = () =>
+        cn(
+            styles.item,
+            isCardButton && styles.cardItem,
+            isAccountButton && styles.accountItem,
+            active ? styles.itemActive : styles.itemInactive,
+            active && indicatorDirection === 'up' && styles.itemActiveFromUp,
+            active &&
+                indicatorDirection === 'down' &&
+                styles.itemActiveFromDown,
+            className
+        )
+
+    const getLinkClassName = () =>
+        cn(
+            isCardButton ? styles.cardLink : styles.link,
+            isAccountButton && styles.accountLink,
+            hasSubTags && styles.linkWithSubTags,
+            classNames?.link
+        )
+
+    const getIconClassName = () =>
+        cn(styles.iconSection, isAccountButton && styles.accountIconSection)
+
+    const renderComponent = () => (
+        <div className={getItemClassName()} style={style}>
             <div className={styles.itemHeader}>
                 <Link
                     aria-label={ariaLabel}
                     aria-current={active ? 'page' : undefined}
-                    className={cn(
-                        isCardButton ? styles.cardLink : styles.link,
-                        isAccountButton && styles.accountLink,
-                        hasSubTags && styles.linkWithSubTags,
-                        classNames?.link
-                    )}
+                    className={getLinkClassName()}
                     data-indicator-target={
                         showIndicator && hasActiveGroupChild && !isGroupOpen
                             ? 'true'
@@ -116,13 +120,7 @@ export function NavigationButton({
                     title={label}
                 >
                     {hasIcon && (
-                        <span
-                            className={cn(
-                                styles.iconSection,
-                                isAccountButton && styles.accountIconSection
-                            )}
-                            aria-hidden="true"
-                        >
+                        <span className={getIconClassName()} aria-hidden="true">
                             {IconComponent ? (
                                 <IconComponent size={isCardButton ? 20 : 19} />
                             ) : (
@@ -208,4 +206,6 @@ export function NavigationButton({
             )}
         </div>
     )
+
+    return renderComponent()
 }

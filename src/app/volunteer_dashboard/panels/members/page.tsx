@@ -215,29 +215,34 @@ export default function Page() {
     const [selectedPosition, setSelectedPosition] = useState<Position>()
     const [selectedRole, setSelectedRole] = useState<Role>()
 
-    const selectedStateLabel = stateOptions.find(
-        (state) => state.value === selectedState
-    )?.label
-    const selectedFilterLabel =
-        [
-            selectedStateLabel,
-            selectedBirthYear,
-            selectedPosition?.name,
-            selectedRole?.name,
-        ]
-            .filter(Boolean)
-            .join(` ${DOT_SEPARATOR} `) || 'All Users'
-    const selectedFilterIcon = selectedState ? (
-        <FaMapMarkerAlt />
-    ) : selectedBirthYear ? (
-        <FaBirthdayCake />
-    ) : selectedPosition ? (
-        <FaSitemap />
-    ) : selectedRole ? (
-        <FaUserShield />
-    ) : (
-        <FaUsers />
-    )
+    const getFilterLabel = () => {
+        const selectedStateLabel = stateOptions.find(
+            (state) => state.value === selectedState
+        )?.label
+        return (
+            [
+                selectedStateLabel,
+                selectedBirthYear,
+                selectedPosition?.name,
+                selectedRole?.name,
+            ]
+                .filter(Boolean)
+                .join(` ${DOT_SEPARATOR} `) || 'All Users'
+        )
+    }
+
+    const renderFilterIcon = () =>
+        selectedState ? (
+            <FaMapMarkerAlt />
+        ) : selectedBirthYear ? (
+            <FaBirthdayCake />
+        ) : selectedPosition ? (
+            <FaSitemap />
+        ) : selectedRole ? (
+            <FaUserShield />
+        ) : (
+            <FaUsers />
+        )
 
     const memberFilterTags: FilterTag[] = [
         {
@@ -352,8 +357,8 @@ export default function Page() {
         },
         {
             key: 'all',
-            label: selectedFilterLabel,
-            icon: selectedFilterIcon,
+            label: getFilterLabel(),
+            icon: renderFilterIcon(),
             color: '#3A3A3C',
             width: '8.4rem',
             activeRedirect: 'members',
@@ -673,7 +678,7 @@ export default function Page() {
             const orNull = (value: string | null | undefined) =>
                 value?.length ? value : null
 
-            const address = {
+            const buildAddress = () => ({
                 addressLine1: orNull(user.address.addressLine1?.trim()),
                 addressLine2: orNull(user.address.addressLine2?.trim()),
                 city:
@@ -688,7 +693,8 @@ export default function Page() {
                 zip:
                     orNull(user.address.zip?.trim()) ??
                     locationQuery.data?.zip?.toString(),
-            }
+            })
+            const address = buildAddress()
 
             const oldAddress = userQuery.data?.address ?? null
             const addressIsDirty =
@@ -851,6 +857,50 @@ export default function Page() {
         }
     }
 
+    const renderDetails = () => (
+        <div className={styles.detailsPane}>
+            <MobileSidebarBackButton
+                label="Members"
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                onBack={() => setSidebarMobileVisible(true)}
+                className={styles.backButton}
+            />
+
+            {selectedId == null && (
+                <div className={styles.emptyState}>No user selected</div>
+            )}
+
+            {selectedId != null && userQuery.isPending && (
+                <div className={styles.emptyState}>Loading user details...</div>
+            )}
+
+            {selectedId != null && userQuery.error && (
+                <div className={cn(styles.emptyState, styles.errorText)}>
+                    Error: {parseErrorMessage(userQuery.error)}
+                </div>
+            )}
+
+            {selectedId && userQuery.data && (
+                <>
+                    <div className={styles.detailsHeader}>
+                        <div className={styles.bannerCover} />
+                        <MemberBanner
+                            user={userQuery.data}
+                            makeTitle={makeTitle}
+                            selectedTab={selectedTab}
+                            tabs={tabs}
+                            onTabChange={(key) =>
+                                setSelectedTab(key as MemberTabKey)
+                            }
+                            positions={positionHierarchy.data?.positions}
+                        />
+                    </div>
+                    <div className={styles.detailsContent}>{renderPage()}</div>
+                </>
+            )}
+        </div>
+    )
+
     const sidebarFilters: SidebarListFiltersProps = {
         search,
         onSearch,
@@ -859,6 +909,15 @@ export default function Page() {
         showSort: true,
         showLimit: true,
     }
+
+    const sidebarFooterProperties = () => ({
+        page: search.page ?? 0,
+        pageSize: search.limit ?? 25,
+        count: searchQuery.data?.count,
+        isPending: searchQuery.isPending,
+        onPageChange: (nextPage: number) =>
+            onSearch({ ...search, page: nextPage }),
+    })
 
     return (
         <Panel
@@ -876,14 +935,7 @@ export default function Page() {
             showScrollbar={false}
             sidebarList={{
                 search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: searchQuery.data?.count,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
+                footer: sidebarFooterProperties(),
                 filters: sidebarFilters,
             }}
             prominentHeaderButton={{
@@ -935,51 +987,7 @@ export default function Page() {
                 </>
             }
         >
-            <div className={styles.detailsPane}>
-                <MobileSidebarBackButton
-                    label="Members"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                    className={styles.backButton}
-                />
-
-                {selectedId == null && (
-                    <div className={styles.emptyState}>No user selected</div>
-                )}
-
-                {selectedId != null && userQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading user details...
-                    </div>
-                )}
-
-                {selectedId != null && userQuery.error && (
-                    <div className={cn(styles.emptyState, styles.errorText)}>
-                        Error: {parseErrorMessage(userQuery.error)}
-                    </div>
-                )}
-
-                {selectedId && userQuery.data && (
-                    <>
-                        <div className={styles.detailsHeader}>
-                            <div className={styles.bannerCover} />
-                            <MemberBanner
-                                user={userQuery.data}
-                                makeTitle={makeTitle}
-                                selectedTab={selectedTab}
-                                tabs={tabs}
-                                onTabChange={(key) =>
-                                    setSelectedTab(key as MemberTabKey)
-                                }
-                                positions={positionHierarchy.data?.positions}
-                            />
-                        </div>
-                        <div className={styles.detailsContent}>
-                            {renderPage()}
-                        </div>
-                    </>
-                )}
-            </div>
+            {renderDetails()}
         </Panel>
     )
 }

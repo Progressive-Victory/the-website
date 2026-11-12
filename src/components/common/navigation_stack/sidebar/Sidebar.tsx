@@ -121,6 +121,19 @@ function resolveSidebarProps(props: SidebarProps): ResolvedSidebarProps {
     const variant = props.variant ?? 'minimal'
     const h = inputHeader
 
+    const headerProperties = () => ({
+        mode: h?.mode ?? (variant === 'prominent' ? 'hidden' : 'shown'),
+        label: h?.label ?? props.label,
+        largeTitle: h?.largeTitle ?? false,
+        search: h?.search,
+        filterOpen: h?.filters?.open,
+        onFilterOpenChange: h?.filters?.onOpenChange,
+        prominentHeader: h?.content,
+        prominentHeaderLeft: h?.left,
+        prominentHeaderRight: h?.right,
+        prominentHeaderButton: h?.button,
+    })
+
     return {
         ...rest,
         variant,
@@ -131,18 +144,7 @@ function resolveSidebarProps(props: SidebarProps): ResolvedSidebarProps {
         showBorderWhenCollapsed: props.showBorderWhenCollapsed ?? false,
         reserveHeaderToggleSpace: props.reserveHeaderToggleSpace ?? false,
         showSelectionIndicator: props.showSelectionIndicator ?? false,
-        header: {
-            mode: h?.mode ?? (variant === 'prominent' ? 'hidden' : 'shown'),
-            label: h?.label ?? props.label,
-            largeTitle: h?.largeTitle ?? false,
-            search: h?.search,
-            filterOpen: h?.filters?.open,
-            onFilterOpenChange: h?.filters?.onOpenChange,
-            prominentHeader: h?.content,
-            prominentHeaderLeft: h?.left,
-            prominentHeaderRight: h?.right,
-            prominentHeaderButton: h?.button,
-        },
+        header: headerProperties(),
         body,
     }
 }
