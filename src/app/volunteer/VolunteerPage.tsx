@@ -165,6 +165,7 @@ export default function VolunteerPage() {
         lastName: user.data?.lastName ?? '',
         dateOfBirth: user.data?.birthdate?.toISOString()?.split('T')?.[0] ?? '',
         zipCode: user.data?.address?.zip ?? '',
+        preferredPronouns: user.data?.preferredPronouns ?? '',
         phoneNumber: user.data?.phone ?? '',
         getAlerts: user.data?.acceptedAlerts ?? false,
         usCitizen: false,
