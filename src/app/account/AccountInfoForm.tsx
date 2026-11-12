@@ -122,6 +122,20 @@ export const AccountInfoForm = ({
                     {isEditing && (
                         <TextField label="Last Name" field="lastName" />
                     )}
+                    {isEditing ? (
+                        <TextField
+                            label="Preferred Pronouns"
+                            field="preferredPronouns"
+                        />
+                    ) : `${user.preferredPronouns ?? ''}`.trim() ? (
+                        <TextField<User>
+                            label="Preferred Pronouns"
+                            getter={(user) =>
+                                `${user.preferredPronouns ?? ''}`.trim() || null
+                            }
+                            readonly
+                        />
+                    ) : null}
                     <TextField<User>
                         label="Discord Username"
                         getter={(user) =>

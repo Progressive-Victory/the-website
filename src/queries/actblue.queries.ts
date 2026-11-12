@@ -133,12 +133,15 @@ const buildAddressFill = (
     return Object.keys(request).length > 0 ? request : undefined
 }
 
+export const DONOR_LINK_MUTATION_KEY = ['/actblue/donors/:donorEmail/link']
+
 export function useLinkDonorToUser(dataSource: string) {
     const { onGet, onPost, onPatch } = useFetch()
     const loggedInUser = useCurrentUser()
     const queryClient = useQueryClient()
 
     return useMutation({
+        mutationKey: DONOR_LINK_MUTATION_KEY,
         mutationFn: async ({
             donor,
             userId,
@@ -214,6 +217,7 @@ export function useUnlinkDonorFromUser(dataSource: string) {
     const queryClient = useQueryClient()
 
     return useMutation({
+        mutationKey: DONOR_LINK_MUTATION_KEY,
         mutationFn: async ({
             donorEmail,
         }: {

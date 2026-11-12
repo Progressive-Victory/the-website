@@ -153,6 +153,7 @@ export default function VolunteerPage() {
             lastName: form.lastName,
             phone: form.phoneNumber,
             zipCode: +form.zipCode,
+            preferredPronouns: form.preferredPronouns,
             acceptedAlerts: form.getAlerts,
             birthdate: new Date(form.dateOfBirth),
             usCitizen: form.usCitizen,
