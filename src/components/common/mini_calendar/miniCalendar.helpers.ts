@@ -64,10 +64,10 @@ export function normalizeMaxDateTs(maxDate?: Date) {
 
 function isStrictlyBetween(
     value: number,
-    lo: number | null,
-    hi: number | null
+    minTs: number | null,
+    maxTs: number | null
 ): boolean {
-    return lo != null && hi != null && value > lo && value < hi
+    return minTs != null && maxTs != null && value > minTs && value < maxTs
 }
 
 function isOutsideBounds(

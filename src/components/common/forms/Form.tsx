@@ -294,6 +294,7 @@ export function Form<T>({
                 <HStack grow>
                     <VStack grow gap>
                         <Spacer />
+                        <span>{`No ${title} selected`}</span>
                         {renderCreateButton(styles.button)}
                         <Spacer />
                     </VStack>
