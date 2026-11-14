@@ -22,7 +22,6 @@
 
     &[data-layout-syncing='true'] {
         transition:
-            top 90ms ease-out,
             height 90ms ease-out,
             opacity 160ms ease;
     }
