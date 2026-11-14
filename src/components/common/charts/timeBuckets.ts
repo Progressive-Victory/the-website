@@ -316,6 +316,19 @@ export function getValidChartGranularityModes(
     return modes
 }
 
+function getChartMode(
+    mode: ChartGranularityMode,
+    start: Date,
+    end: Date
+): ChartBucket[] | null {
+    if (mode === 'day') return buildDayBuckets(start, end)
+    if (mode === 'week') return buildWeekBuckets(start, end)
+    if (mode === 'month') return buildMonthBuckets(start, end)
+    if (mode === 'quarter') return buildQuarterBuckets(start, end)
+    if (mode === 'year') return buildYearBuckets(start, end)
+    return null
+}
+
 export function buildChartBuckets(
     startDate: Date | null,
     endDate: Date | null,
@@ -364,19 +377,8 @@ export function buildChartBuckets(
         return buildHourBuckets(start, end)
     }
 
-    if (mode === 'day') return buildDayBuckets(start, end)
-    if (mode === 'week') return buildWeekBuckets(start, end)
-    if (mode === 'month') return buildMonthBuckets(start, end)
-    if (mode === 'quarter') return buildQuarterBuckets(start, end)
-    if (mode === 'year') return buildYearBuckets(start, end)
-
-    if (isAllTimeSelection) {
-        if (totalDays <= 90)
-            return buildDayBuckets(start, end, Number.MAX_SAFE_INTEGER)
-        if (totalDays <= 366 * 5)
-            return buildMonthBuckets(start, end, Number.MAX_SAFE_INTEGER)
-        return buildYearBuckets(start, end)
-    }
+    const chartMode = getChartMode(mode, start, end)
+    if (chartMode !== null) return chartMode
 
     if (totalDays <= 90)
         return buildDayBuckets(start, end, Number.MAX_SAFE_INTEGER)

@@ -630,6 +630,9 @@ export function Header() {
                 : skipToken,
     })
 
+    const discordUserId = discordUsers?.[0]?.id
+    const avatarImageId = discordUsers?.[0]?.image
+
     const resolvedNavitems = useMemo(() => {
         const discordId = discordUsers?.[0]?.id
         const volunteerHref = session ? '/account?redirect=true' : '/volunteer'
@@ -741,7 +744,7 @@ export function Header() {
 
     const isSubnavOpen = !!activeSubnav?.subnav?.columns?.length
 
-    return (
+    const returnHeader = () => (
         <>
             <AnimatePresence>
                 {isSubnavOpen ? (
@@ -862,8 +865,8 @@ export function Header() {
                         <AccountButton
                             label="Account"
                             href="/account"
-                            discordUserId={discordUsers?.[0]?.id}
-                            imageId={discordUsers?.[0]?.image}
+                            discordUserId={discordUserId}
+                            imageId={avatarImageId}
                             disabled
                         />
                     ) : !session ? (
@@ -875,8 +878,8 @@ export function Header() {
                         <AccountButton
                             label="Account"
                             href="/account"
-                            discordUserId={discordUsers?.[0]?.id}
-                            imageId={discordUsers?.[0]?.image}
+                            discordUserId={discordUserId}
+                            imageId={avatarImageId}
                         />
                     )}
                 </div>
@@ -995,10 +998,12 @@ export function Header() {
                 setMobileSubnavItem={setMobileSubnavItem}
                 isSessionLoading={isSessionLoading}
                 session={session}
-                discordUserId={discordUsers?.[0]?.id}
-                avatarImageId={discordUsers?.[0]?.image}
+                discordUserId={discordUserId}
+                avatarImageId={avatarImageId}
                 onLogin={onLogin}
             />
         </>
     )
+
+    return returnHeader()
 }

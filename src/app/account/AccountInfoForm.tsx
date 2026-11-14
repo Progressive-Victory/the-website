@@ -96,7 +96,7 @@ export const AccountInfoForm = ({
         return trimmed.length ? trimmed : null
     }
 
-    return (
+    const renderWholePage = () => (
         <div className={styles.contentBackground}>
             <Form<User>
                 form={user}
@@ -312,4 +312,6 @@ export const AccountInfoForm = ({
             </Form>
         </div>
     )
+
+    return renderWholePage()
 }
