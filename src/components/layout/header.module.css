@@ -13,6 +13,24 @@
     padding-right: 1.5rem;
 }
 
+.hamburgerIcon {
+    display: inline-flex;
+    width: 1.75rem;
+    height: 1.75rem;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.hamburgerLineBaseStyle {
+    position: absolute;
+    width: 1.75rem;
+    height: 0.18rem;
+    border-radius: 999px;
+    background: currentColor;
+    transform-origin: center;
+}
+
 .headerLogoSmall {
     display: flex;
     align-items: center;
@@ -57,9 +75,10 @@
     justify-content: center;
 }
 
-.headerMenuIcon {
-    width: 2rem;
-    height: 2rem;
+.mobileMenuControls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 @media (min-width: 1024px) {
@@ -229,19 +248,25 @@
     left: 0;
     right: 0;
     top: 6rem;
-    z-index: 10;
+    z-index: 50;
     display: flex;
     flex-direction: column;
     width: 100%;
     row-gap: 1rem;
     padding-left: 2.5rem;
     padding-right: 2.5rem;
-    padding-top: 1rem;
+    padding-top: 2rem;
     padding-bottom: 4rem;
     border-bottom-left-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
-    background-color: #09223a;
+    background-color: rgba(9, 34, 58, 0.88);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+.navDrawerInner {
+    position: relative;
 }
 
 .navDrawerItem {
@@ -262,6 +287,12 @@
 
 .mobilePanel {
     min-width: 0;
+}
+
+.mobileSubPanel {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
 }
 
 .panelHidden {
@@ -335,6 +366,25 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.mobileSubnavColumn {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.5rem;
+}
+
+.mobileSubnavColumnTitle {
+    padding: 0 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.mobileSubnavColumnItems {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.75rem;
 }
 
 .mobileDonateButton {
