@@ -76,6 +76,9 @@ export default function Page() {
                       )
                 : skipToken,
         placeholderData: keepPreviousData,
+        select: (data) => { 
+            return {...data, paidAtFormatted: data.paidAt.toLocaleString()}
+        },
     })
 
     useEffect(() => {
@@ -207,7 +210,7 @@ export default function Page() {
                         <FormGroup title="Lineitem Info">
                             <TextField label="Lineitem Id" field="lineitemId" />
                             <TextField label="Sequence" field="sequence" />
-                            <DateField label="Paid At" field="paidAt" />
+                            <TextField label="Paid At" field="paidAtFormatted" />
                             <TextField label="Amount" field="amount" />
                             <TextField<ActBlueDonationPacket>
                                 label="Recurring Amount"
