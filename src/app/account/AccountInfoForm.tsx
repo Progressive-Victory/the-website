@@ -62,8 +62,13 @@ export const AccountInfoForm = ({
     const [isEditing, setIsEditing] = useState(false)
 
     const handleFormSave = (user: User) => {
+        const hasFullName = Boolean(
+            normalizeText(user.firstName) && normalizeText(user.lastName)
+        )
+
         const normalizedUser = {
             ...user,
+            nameConfirmed: hasFullName ? true : user.nameConfirmed,
             address: {
                 ...user.address,
                 addressLine1:
@@ -76,8 +81,15 @@ export const AccountInfoForm = ({
             },
         }
 
-        onUpdateUser(normalizedUser)
-        void onSave(normalizedUser)
+        const confirmedUser = {
+            ...normalizedUser,
+            addressConfirmed: hasAddressForShipping(normalizedUser)
+                ? true
+                : normalizedUser.addressConfirmed,
+        }
+
+        onUpdateUser(confirmedUser)
+        void onSave(confirmedUser)
     }
 
     const showAddressLine2 =
