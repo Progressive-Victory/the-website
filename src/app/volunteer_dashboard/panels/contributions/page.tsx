@@ -6,7 +6,6 @@ import {
     FormGroup,
     TextField,
     Form,
-    DateField,
 } from '@/components/common/forms'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import Panel from '@/components/common/panel/Panel'
@@ -77,7 +76,7 @@ export default function Page() {
                 : skipToken,
         placeholderData: keepPreviousData,
         select: (data) => { 
-            return {...data, paidAtFormatted: data.paidAt.toLocaleString()}
+            return {...data, paidAtFormatted: data.paidAt.toLocaleString("en-US", { dateStyle: "long", timeStyle: "medium"})}
         },
     })
 
