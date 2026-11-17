@@ -305,8 +305,6 @@ export function Message({
 
                 {renderEllipsis()}
             </div>
-
-            <div className={styles.text}>{children}</div>
         </div>
     )
 
