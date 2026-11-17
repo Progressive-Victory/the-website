@@ -680,93 +680,83 @@ export default function Page() {
         placeholderData: keepPreviousData,
     })
 
-    const handleSave = useCallback(
-        (user: User) => {
-            const orNull = (value: string | null | undefined) =>
-                value?.length ? value : null
+    const handleSave = (user: User) => {
+        const orNull = (value: string | null | undefined) =>
+            value?.length ? value : null
 
-            const buildAddress = () => ({
-                addressLine1: orNull(user.address.addressLine1?.trim()),
-                addressLine2: orNull(user.address.addressLine2?.trim()),
-                city: orNull(user.address.city?.trim()),
-                county: orNull(user.address.county?.trim()),
-                state: orNull(user.address.state?.trim()),
-                zip: orNull(user.address.zip?.trim()),
-            })
-            const address = buildAddress()
+        const buildAddress = () => ({
+            addressLine1: orNull(user.address.addressLine1?.trim()),
+            addressLine2: orNull(user.address.addressLine2?.trim()),
+            city: orNull(user.address.city?.trim()),
+            county: orNull(user.address.county?.trim()),
+            state: orNull(user.address.state?.trim()),
+            zip: orNull(user.address.zip?.trim()),
+        })
+        const address = buildAddress()
 
-            const oldAddress = userQuery.data?.address ?? null
-            const addressIsDirty =
-                address.addressLine1 != oldAddress?.addressLine1 ||
-                address.addressLine2 != oldAddress?.addressLine2 ||
-                address.city != oldAddress?.city ||
-                address.county != oldAddress?.county ||
-                address.state != oldAddress?.state ||
-                address.zip != oldAddress?.zip
+        const oldAddress = userQuery.data?.address ?? null
+        const addressIsDirty =
+            address.addressLine1 != oldAddress?.addressLine1 ||
+            address.addressLine2 != oldAddress?.addressLine2 ||
+            address.city != oldAddress?.city ||
+            address.county != oldAddress?.county ||
+            address.state != oldAddress?.state ||
+            address.zip != oldAddress?.zip
 
-            const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
-                email: user.email,
-                phone: user.phone,
-                preferredName: user.preferredName,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                birthdate: user.birthdate,
-                aliases: Array.from(user.aliases ?? []),
-                membershipCardStatus: +user.membershipCardStatus,
-                membershipMerchStatus: +user.membershipMerchStatus,
-                shirtSize: user.shirtSize,
-                duesPayingMember: user.duesPayingMember,
-                membershipFulfillmentStatus: user.membershipFulfillmentStatus
-                    ? +user.membershipFulfillmentStatus
-                    : null,
-                nameConfirmed: user.nameConfirmed,
-                addressConfirmed: user.addressConfirmed,
-                roles: user.roles?.map((role) => role.id),
-                metaData: {
-                    dataSource: 'Member Panel',
-                    userWhoUpdatedId: loggedInUser.data?.id,
-                },
-            } satisfies UpdateUserRequest)
-            if (addressIsDirty) request.address = address
+        const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
+            email: user.email,
+            phone: user.phone,
+            preferredName: user.preferredName,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            birthdate: user.birthdate,
+            aliases: Array.from(user.aliases ?? []),
+            membershipCardStatus: +user.membershipCardStatus,
+            membershipMerchStatus: +user.membershipMerchStatus,
+            shirtSize: user.shirtSize,
+            duesPayingMember: user.duesPayingMember,
+            membershipFulfillmentStatus: user.membershipFulfillmentStatus
+                ? +user.membershipFulfillmentStatus
+                : null,
+            nameConfirmed: user.nameConfirmed,
+            addressConfirmed: user.addressConfirmed,
+            roles: user.roles?.map((role) => role.id),
+            metaData: {
+                dataSource: 'Member Panel',
+                userWhoUpdatedId: loggedInUser.data?.id,
+            },
+        } satisfies UpdateUserRequest)
+        if (addressIsDirty) request.address = address
 
-            const before = new Set(
-                (userQuery.data?.positions ?? []).map((position) => position.id)
+        const before = new Set(
+            (userQuery.data?.positions ?? []).map((position) => position.id)
+        )
+        const after = new Set(
+            (user.positions ?? []).map((position) => position.id)
+        )
+        const positionUpdates = (positionHierarchy.data?.positions ?? [])
+            .filter(
+                (position) => before.has(position.id) !== after.has(position.id)
             )
-            const after = new Set(
-                (user.positions ?? []).map((position) => position.id)
-            )
-            const positionUpdates = (positionHierarchy.data?.positions ?? [])
-                .filter(
-                    (position) =>
-                        before.has(position.id) !== after.has(position.id)
+            .map((position) => {
+                const others = position.userIds.filter(
+                    (userId) => userId !== user.id
                 )
-                .map((position) => {
-                    const others = position.userIds.filter(
-                        (userId) => userId !== user.id
-                    )
-                    return {
-                        positionId: position.id,
-                        userIds: after.has(position.id)
-                            ? [...others, user.id]
-                            : others,
-                    }
-                })
-
-            updateMutation.mutate({
-                id: user.id,
-                user,
-                request,
-                positionUpdates,
+                return {
+                    positionId: position.id,
+                    userIds: after.has(position.id)
+                        ? [...others, user.id]
+                        : others,
+                }
             })
-        },
-        [
-            updateMutation,
-            userQuery.data?.address,
-            userQuery.data?.positions,
-            positionHierarchy.data?.positions,
-            loggedInUser.data,
-        ]
-    )
+
+        updateMutation.mutate({
+            id: user.id,
+            user,
+            request,
+            positionUpdates,
+        })
+    }
 
     const makeTitle = useCallback((user: User | UserProfile) => {
         if (user.firstName && user.lastName)
