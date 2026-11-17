@@ -156,11 +156,12 @@ export function Chart({
     onRangeSelect,
     cornerTopRight,
 }: ChartProps) {
-    const labels: DualAxisBarLineChartSeriesLabels = {
+    const resolveLabels = () => ({
         primaryBar: seriesLabels?.primaryBar ?? 'Primary Series',
         secondaryBar: seriesLabels?.secondaryBar ?? 'Secondary Series',
         line: seriesLabels?.line ?? 'Line Series',
-    }
+    })
+    const labels: DualAxisBarLineChartSeriesLabels = resolveLabels()
 
     const palette = useMemo<DualAxisBarLineChartColors>(
         () => ({
@@ -170,21 +171,30 @@ export function Chart({
         [colors]
     )
 
-    const tooltipFormatPrimary = valueFormatters?.primaryBar ?? formatCount
-    const tooltipFormatSecondary = valueFormatters?.secondaryBar ?? formatCount
-    const tooltipFormatLine = valueFormatters?.line ?? formatCount
-    const leftAxisFormatter = axisFormatters?.left ?? formatCountAxis
-    const rightAxisFormatter = axisFormatters?.right ?? formatCountAxis
+    const resolveFormatters = () => ({
+        tooltipFormatPrimary: valueFormatters?.primaryBar ?? formatCount,
+        tooltipFormatSecondary: valueFormatters?.secondaryBar ?? formatCount,
+        tooltipFormatLine: valueFormatters?.line ?? formatCount,
+        leftAxisFormatter: axisFormatters?.left ?? formatCountAxis,
+        rightAxisFormatter: axisFormatters?.right ?? formatCountAxis,
+    })
+    const {
+        tooltipFormatPrimary,
+        tooltipFormatSecondary,
+        tooltipFormatLine,
+        leftAxisFormatter,
+        rightAxisFormatter,
+    } = resolveFormatters()
 
-    const table: DualAxisBarLineTableConfig = {
+    const resolveTable = () => ({
         caption: tableConfig?.caption ?? `${title} by period`,
         periodHeader: tableConfig?.periodHeader ?? 'Period',
         primaryBarHeader: tableConfig?.primaryBarHeader ?? labels.primaryBar,
         secondaryBarHeader:
             tableConfig?.secondaryBarHeader ?? labels.secondaryBar,
         lineHeader: tableConfig?.lineHeader ?? labels.line,
-    }
-
+    })
+    const table: DualAxisBarLineTableConfig = resolveTable()
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const wrapRef = useRef<HTMLDivElement | null>(null)
     const tooltipRef = useRef<HTMLDivElement | null>(null)
@@ -366,231 +376,271 @@ export function Chart({
             getComputedStyle(canvas).fontFamily ||
             'system-ui, -apple-system, sans-serif'
 
-        ctx.lineWidth = 1
-        ctx.strokeStyle = COLOR_GRID
-        ctx.fillStyle = COLOR_AXIS_TEXT
-        ctx.font = `700 10px ${fontFamily}`
-        ctx.textBaseline = 'middle'
+        const drawAxes = () => {
+            ctx.lineWidth = 1
+            ctx.strokeStyle = COLOR_GRID
+            ctx.fillStyle = COLOR_AXIS_TEXT
+            ctx.font = `700 10px ${fontFamily}`
+            ctx.textBaseline = 'middle'
 
-        const barTicks = barScale.ticks
-        for (const tick of barTicks) {
-            const y =
-                Math.round(
-                    g.plotBottom - (tick / barScale.max) * g.plotHeight
-                ) + 0.5
-            ctx.beginPath()
-            ctx.moveTo(g.plotLeft, y)
-            ctx.lineTo(g.plotRight, y)
-            ctx.stroke()
-
-            ctx.textAlign = 'right'
-            ctx.fillText(
-                leftAxisFormatter(tick, barScale.step),
-                g.plotLeft - 8,
-                y
-            )
-        }
-
-        if (showLine) {
+            const barTicks = barScale.ticks
             for (const tick of barTicks) {
-                const ratio = tick / barScale.max
-                const y = Math.round(g.plotBottom - ratio * g.plotHeight) + 0.5
-                const lineValue = ratio * lineScale.max
-                ctx.textAlign = 'left'
+                const y =
+                    Math.round(
+                        g.plotBottom - (tick / barScale.max) * g.plotHeight
+                    ) + 0.5
+                ctx.beginPath()
+                ctx.moveTo(g.plotLeft, y)
+                ctx.lineTo(g.plotRight, y)
+                ctx.stroke()
+
+                ctx.textAlign = 'right'
                 ctx.fillText(
-                    rightAxisFormatter(lineValue, lineScale.step),
-                    g.plotRight + 8,
+                    leftAxisFormatter(tick, barScale.step),
+                    g.plotLeft - 8,
                     y
                 )
             }
-        }
 
-        ctx.save()
-        ctx.setLineDash([3, 3])
-        ctx.strokeStyle = COLOR_YEAR_DIVIDER
-        ctx.lineWidth = 1
-        yearDividers.forEach((d) => {
-            const x =
-                Math.round(g.plotLeft + (d.idx / points.length) * g.plotWidth) +
-                0.5
-            ctx.beginPath()
-            ctx.moveTo(x, g.plotTop)
-            ctx.lineTo(x, g.plotBottom)
-            ctx.stroke()
-        })
-        ctx.restore()
-
-        ctx.font = `700 9px ${fontFamily}`
-        yearDividers.forEach((d) => {
-            const x = g.plotLeft + (d.idx / points.length) * g.plotWidth
-            const label = String(d.year)
-            const padX = 4
-            const padY = 2
-            const metrics = ctx.measureText(label)
-            const w = metrics.width + padX * 2
-            const h = 12
-            const bx = Math.round(x + 4)
-            const by = g.plotTop + 4
-            ctx.fillStyle = COLOR_YEAR_LABEL_BG
-            roundRect(ctx, bx, by, w, h, 3)
-            ctx.fill()
-            ctx.fillStyle = COLOR_YEAR_LABEL
-            ctx.textAlign = 'left'
-            ctx.textBaseline = 'middle'
-            ctx.fillText(label, bx + padX, by + h / 2 + padY * 0)
-        })
-
-        if (hoverIdx != null && hoverIdx >= 0 && hoverIdx < points.length) {
-            const cx = getColumnCenter(g, hoverIdx, points.length)
-            const bandW = g.columnWidth
-            ctx.fillStyle = COLOR_HOVER_BAND
-            ctx.fillRect(cx - bandW / 2, g.plotTop, bandW, g.plotHeight)
-        }
-
-        if (
-            dragStartIdx != null &&
-            dragCurrentIdx != null &&
-            dragStartIdx >= 0 &&
-            dragCurrentIdx >= 0 &&
-            dragStartIdx < points.length &&
-            dragCurrentIdx < points.length
-        ) {
-            const rangeStart = Math.min(dragStartIdx, dragCurrentIdx)
-            const rangeEnd = Math.max(dragStartIdx, dragCurrentIdx)
-            const startCenter = getColumnCenter(g, rangeStart, points.length)
-            const endCenter = getColumnCenter(g, rangeEnd, points.length)
-            const left = startCenter - g.columnWidth / 2
-            const right = endCenter + g.columnWidth / 2
-
-            ctx.fillStyle = COLOR_DRAG_BAND
-            ctx.fillRect(left, g.plotTop, right - left, g.plotHeight)
-
-            ctx.strokeStyle = COLOR_DRAG_BAND_EDGE
-            ctx.lineWidth = 1
-            ctx.beginPath()
-            ctx.moveTo(Math.round(left) + 0.5, g.plotTop)
-            ctx.lineTo(Math.round(left) + 0.5, g.plotBottom)
-            ctx.moveTo(Math.round(right) + 0.5, g.plotTop)
-            ctx.lineTo(Math.round(right) + 0.5, g.plotBottom)
-            ctx.stroke()
-        }
-
-        const groupAvailable = Math.max(
-            0,
-            g.columnWidth * (1 - GROUP_GAP_RATIO)
-        )
-        const barWidth = Math.max(
-            BAR_MIN_WIDTH,
-            Math.min(BAR_MAX_WIDTH, (groupAvailable - BAR_GAP) / 2)
-        )
-        const stackedBarWidth = Math.max(
-            BAR_MIN_WIDTH,
-            Math.min(BAR_MAX_WIDTH * 2 + BAR_GAP, groupAvailable)
-        )
-
-        for (let i = 0; i < points.length; i += 1) {
-            const p = points[i]
-            const cx = getColumnCenter(g, i, points.length)
-            const primaryRatio =
-                barScale.max > 0 ? p.primaryBarValue / barScale.max : 0
-            const secondaryRatio =
-                barScale.max > 0 ? p.secondaryBarValue / barScale.max : 0
-            const primaryHeight = Math.max(
-                p.primaryBarValue > 0 ? 2 : 0,
-                primaryRatio * g.plotHeight
-            )
-            const secondaryHeight = Math.max(
-                p.secondaryBarValue > 0 ? 2 : 0,
-                secondaryRatio * g.plotHeight
-            )
-
-            const baseY = g.plotBottom
-
-            if (barDisplayMode === 'stacked') {
-                const stackedX = cx - stackedBarWidth / 2
-                const stackedHeight = secondaryHeight + primaryHeight
-
-                if (stackedHeight > 0) {
-                    const stackedY = baseY - stackedHeight
-                    const stackedRadius = Math.min(4, stackedBarWidth / 2)
-
-                    ctx.save()
-                    roundRect(
-                        ctx,
-                        stackedX,
-                        stackedY,
-                        stackedBarWidth,
-                        stackedHeight,
-                        stackedRadius,
-                        true
+            if (showLine) {
+                for (const tick of barTicks) {
+                    const ratio = tick / barScale.max
+                    const y =
+                        Math.round(g.plotBottom - ratio * g.plotHeight) + 0.5
+                    const lineValue = ratio * lineScale.max
+                    ctx.textAlign = 'left'
+                    ctx.fillText(
+                        rightAxisFormatter(lineValue, lineScale.step),
+                        g.plotRight + 8,
+                        y
                     )
-                    ctx.clip()
-
-                    if (secondaryHeight > 0) {
-                        ctx.fillStyle = palette.secondaryBar
-                        ctx.fillRect(
-                            stackedX,
-                            baseY - secondaryHeight,
-                            stackedBarWidth,
-                            secondaryHeight
-                        )
-                    }
-
-                    if (primaryHeight > 0) {
-                        ctx.fillStyle = palette.primaryBar
-                        ctx.fillRect(
-                            stackedX,
-                            baseY - stackedHeight,
-                            stackedBarWidth,
-                            primaryHeight
-                        )
-                    }
-
-                    ctx.restore()
                 }
-            } else {
-                const primaryX = cx - barWidth - BAR_GAP / 2
-                const secondaryX = cx + BAR_GAP / 2
-
-                ctx.fillStyle = palette.primaryBar
-                roundRect(
-                    ctx,
-                    primaryX,
-                    baseY - primaryHeight,
-                    barWidth,
-                    primaryHeight,
-                    Math.min(3, barWidth / 2),
-                    true
-                )
-                ctx.fill()
-
-                ctx.fillStyle = palette.secondaryBar
-                roundRect(
-                    ctx,
-                    secondaryX,
-                    baseY - secondaryHeight,
-                    barWidth,
-                    secondaryHeight,
-                    Math.min(3, barWidth / 2),
-                    true
-                )
-                ctx.fill()
             }
         }
 
-        if (showLine && points.length > 0 && lineScale.max > 0) {
-            const linePts = points.map((p, i) => {
-                const ratio = p.lineValue / lineScale.max
-                return {
-                    x: getColumnCenter(g, i, points.length),
-                    y: g.plotBottom - ratio * g.plotHeight,
-                }
-            })
-
-            if (showAreaFill) {
+        const drawYearDividers = () => {
+            ctx.save()
+            ctx.setLineDash([3, 3])
+            ctx.strokeStyle = COLOR_YEAR_DIVIDER
+            ctx.lineWidth = 1
+            yearDividers.forEach((d) => {
+                const x =
+                    Math.round(
+                        g.plotLeft + (d.idx / points.length) * g.plotWidth
+                    ) + 0.5
                 ctx.beginPath()
-                ctx.moveTo(linePts[0].x, g.plotBottom)
-                ctx.lineTo(linePts[0].x, linePts[0].y)
+                ctx.moveTo(x, g.plotTop)
+                ctx.lineTo(x, g.plotBottom)
+                ctx.stroke()
+            })
+            ctx.restore()
+
+            ctx.font = `700 9px ${fontFamily}`
+            yearDividers.forEach((d) => {
+                const x = g.plotLeft + (d.idx / points.length) * g.plotWidth
+                const label = String(d.year)
+                const padX = 4
+                const padY = 2
+                const metrics = ctx.measureText(label)
+                const w = metrics.width + padX * 2
+                const h = 12
+                const bx = Math.round(x + 4)
+                const by = g.plotTop + 4
+                ctx.fillStyle = COLOR_YEAR_LABEL_BG
+                roundRect(ctx, bx, by, w, h, 3)
+                ctx.fill()
+                ctx.fillStyle = COLOR_YEAR_LABEL
+                ctx.textAlign = 'left'
+                ctx.textBaseline = 'middle'
+                ctx.fillText(label, bx + padX, by + h / 2 + padY * 0)
+            })
+        }
+
+        const drawBands = () => {
+            if (hoverIdx != null && hoverIdx >= 0 && hoverIdx < points.length) {
+                const cx = getColumnCenter(g, hoverIdx, points.length)
+                const bandW = g.columnWidth
+                ctx.fillStyle = COLOR_HOVER_BAND
+                ctx.fillRect(cx - bandW / 2, g.plotTop, bandW, g.plotHeight)
+            }
+
+            if (
+                dragStartIdx != null &&
+                dragCurrentIdx != null &&
+                dragStartIdx >= 0 &&
+                dragCurrentIdx >= 0 &&
+                dragStartIdx < points.length &&
+                dragCurrentIdx < points.length
+            ) {
+                const rangeStart = Math.min(dragStartIdx, dragCurrentIdx)
+                const rangeEnd = Math.max(dragStartIdx, dragCurrentIdx)
+                const startCenter = getColumnCenter(
+                    g,
+                    rangeStart,
+                    points.length
+                )
+                const endCenter = getColumnCenter(g, rangeEnd, points.length)
+                const left = startCenter - g.columnWidth / 2
+                const right = endCenter + g.columnWidth / 2
+
+                ctx.fillStyle = COLOR_DRAG_BAND
+                ctx.fillRect(left, g.plotTop, right - left, g.plotHeight)
+
+                ctx.strokeStyle = COLOR_DRAG_BAND_EDGE
+                ctx.lineWidth = 1
+                ctx.beginPath()
+                ctx.moveTo(Math.round(left) + 0.5, g.plotTop)
+                ctx.lineTo(Math.round(left) + 0.5, g.plotBottom)
+                ctx.moveTo(Math.round(right) + 0.5, g.plotTop)
+                ctx.lineTo(Math.round(right) + 0.5, g.plotBottom)
+                ctx.stroke()
+            }
+        }
+
+        const drawBars = () => {
+            const groupAvailable = Math.max(
+                0,
+                g.columnWidth * (1 - GROUP_GAP_RATIO)
+            )
+            const barWidth = Math.max(
+                BAR_MIN_WIDTH,
+                Math.min(BAR_MAX_WIDTH, (groupAvailable - BAR_GAP) / 2)
+            )
+            const stackedBarWidth = Math.max(
+                BAR_MIN_WIDTH,
+                Math.min(BAR_MAX_WIDTH * 2 + BAR_GAP, groupAvailable)
+            )
+
+            for (let i = 0; i < points.length; i += 1) {
+                const p = points[i]
+                const cx = getColumnCenter(g, i, points.length)
+                const primaryRatio =
+                    barScale.max > 0 ? p.primaryBarValue / barScale.max : 0
+                const secondaryRatio =
+                    barScale.max > 0 ? p.secondaryBarValue / barScale.max : 0
+                const primaryHeight = Math.max(
+                    p.primaryBarValue > 0 ? 2 : 0,
+                    primaryRatio * g.plotHeight
+                )
+                const secondaryHeight = Math.max(
+                    p.secondaryBarValue > 0 ? 2 : 0,
+                    secondaryRatio * g.plotHeight
+                )
+
+                const baseY = g.plotBottom
+
+                if (barDisplayMode === 'stacked') {
+                    const stackedX = cx - stackedBarWidth / 2
+                    const stackedHeight = secondaryHeight + primaryHeight
+
+                    if (stackedHeight > 0) {
+                        const stackedY = baseY - stackedHeight
+                        const stackedRadius = Math.min(4, stackedBarWidth / 2)
+
+                        ctx.save()
+                        roundRect(
+                            ctx,
+                            stackedX,
+                            stackedY,
+                            stackedBarWidth,
+                            stackedHeight,
+                            stackedRadius,
+                            true
+                        )
+                        ctx.clip()
+
+                        if (secondaryHeight > 0) {
+                            ctx.fillStyle = palette.secondaryBar
+                            ctx.fillRect(
+                                stackedX,
+                                baseY - secondaryHeight,
+                                stackedBarWidth,
+                                secondaryHeight
+                            )
+                        }
+
+                        if (primaryHeight > 0) {
+                            ctx.fillStyle = palette.primaryBar
+                            ctx.fillRect(
+                                stackedX,
+                                baseY - stackedHeight,
+                                stackedBarWidth,
+                                primaryHeight
+                            )
+                        }
+
+                        ctx.restore()
+                    }
+                } else {
+                    const primaryX = cx - barWidth - BAR_GAP / 2
+                    const secondaryX = cx + BAR_GAP / 2
+
+                    ctx.fillStyle = palette.primaryBar
+                    roundRect(
+                        ctx,
+                        primaryX,
+                        baseY - primaryHeight,
+                        barWidth,
+                        primaryHeight,
+                        Math.min(3, barWidth / 2),
+                        true
+                    )
+                    ctx.fill()
+
+                    ctx.fillStyle = palette.secondaryBar
+                    roundRect(
+                        ctx,
+                        secondaryX,
+                        baseY - secondaryHeight,
+                        barWidth,
+                        secondaryHeight,
+                        Math.min(3, barWidth / 2),
+                        true
+                    )
+                    ctx.fill()
+                }
+            }
+        }
+
+        const drawLine = () => {
+            if (showLine && points.length > 0 && lineScale.max > 0) {
+                const linePts = points.map((p, i) => {
+                    const ratio = p.lineValue / lineScale.max
+                    return {
+                        x: getColumnCenter(g, i, points.length),
+                        y: g.plotBottom - ratio * g.plotHeight,
+                    }
+                })
+
+                if (showAreaFill) {
+                    ctx.beginPath()
+                    ctx.moveTo(linePts[0].x, g.plotBottom)
+                    ctx.lineTo(linePts[0].x, linePts[0].y)
+                    for (let i = 1; i < linePts.length; i += 1) {
+                        const prev = linePts[i - 1]
+                        const curr = linePts[i]
+                        if (smoothLine) {
+                            const mx = (prev.x + curr.x) / 2
+                            ctx.bezierCurveTo(
+                                mx,
+                                prev.y,
+                                mx,
+                                curr.y,
+                                curr.x,
+                                curr.y
+                            )
+                        } else {
+                            ctx.lineTo(curr.x, curr.y)
+                        }
+                    }
+                    ctx.lineTo(linePts[linePts.length - 1].x, g.plotBottom)
+                    ctx.closePath()
+                    ctx.fillStyle = palette.lineFill
+                    ctx.fill()
+                }
+
+                ctx.beginPath()
+                ctx.moveTo(linePts[0].x, linePts[0].y)
                 for (let i = 1; i < linePts.length; i += 1) {
                     const prev = linePts[i - 1]
                     const curr = linePts[i]
@@ -608,60 +658,32 @@ export function Chart({
                         ctx.lineTo(curr.x, curr.y)
                     }
                 }
-                ctx.lineTo(linePts[linePts.length - 1].x, g.plotBottom)
-                ctx.closePath()
-                ctx.fillStyle = palette.lineFill
-                ctx.fill()
-            }
-
-            ctx.beginPath()
-            ctx.moveTo(linePts[0].x, linePts[0].y)
-            for (let i = 1; i < linePts.length; i += 1) {
-                const prev = linePts[i - 1]
-                const curr = linePts[i]
-                if (smoothLine) {
-                    const mx = (prev.x + curr.x) / 2
-                    ctx.bezierCurveTo(mx, prev.y, mx, curr.y, curr.x, curr.y)
-                } else {
-                    ctx.lineTo(curr.x, curr.y)
-                }
-            }
-            ctx.strokeStyle = palette.line
-            ctx.lineWidth = 2.4
-            ctx.lineCap = 'round'
-            ctx.lineJoin = 'round'
-            ctx.stroke()
-
-            for (let i = 0; i < linePts.length; i += 1) {
-                const pt = linePts[i]
-                const r = i === hoverIdx ? 4.5 : 3.2
-                ctx.beginPath()
-                ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2)
-                ctx.fillStyle = palette.linePointFill
-                ctx.fill()
-                ctx.lineWidth = 1
-                ctx.strokeStyle = palette.linePointStroke
+                ctx.strokeStyle = palette.line
+                ctx.lineWidth = 2.4
+                ctx.lineCap = 'round'
+                ctx.lineJoin = 'round'
                 ctx.stroke()
+
+                for (let i = 0; i < linePts.length; i += 1) {
+                    const pt = linePts[i]
+                    const r = i === hoverIdx ? 4.5 : 3.2
+                    ctx.beginPath()
+                    ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2)
+                    ctx.fillStyle = palette.linePointFill
+                    ctx.fill()
+                    ctx.lineWidth = 1
+                    ctx.strokeStyle = palette.linePointStroke
+                    ctx.stroke()
+                }
             }
         }
 
-        ctx.font = `760 10px ${fontFamily}`
-        ctx.fillStyle = COLOR_X_LABEL
-        ctx.textBaseline = 'top'
-        const stride = Math.max(1, Math.ceil(32 / Math.max(g.columnWidth, 1)))
-        const labelCandidates: {
-            idx: number
-            text: string
-            x: number
-            align: CanvasTextAlign
-            left: number
-            right: number
-        }[] = []
-
-        for (let i = 0; i < points.length; i += 1) {
-            const p = points[i]
-            const cx = getColumnCenter(g, i, points.length)
-            const isEnd = i === 0 || i === points.length - 1
+        const getPointLabel = (
+            p: ChartPoint,
+            i: number,
+            isEnd: boolean,
+            stride: number
+        ) => {
             let label: string
             if (p.anchor && p.granularity) {
                 const date = p.anchor
@@ -695,73 +717,118 @@ export function Chart({
             } else {
                 label = isEnd || i % stride === 0 ? (p.label ?? '') : ''
             }
-            if (!label) continue
+            return label
+        }
 
-            let align: CanvasTextAlign = 'center'
-            if (i === 0) align = 'left'
-            else if (i === points.length - 1) align = 'right'
+        const buildLabelCandidates = () => {
+            const stride = Math.max(
+                1,
+                Math.ceil(32 / Math.max(g.columnWidth, 1))
+            )
+            const labelCandidates: {
+                idx: number
+                text: string
+                x: number
+                align: CanvasTextAlign
+                left: number
+                right: number
+            }[] = []
 
-            let lx = cx
-            if (i === 0) lx = Math.max(cx - g.columnWidth / 2, g.plotLeft)
-            else if (i === points.length - 1)
-                lx = Math.min(cx + g.columnWidth / 2, g.plotRight)
+            for (let i = 0; i < points.length; i += 1) {
+                const p = points[i]
+                const cx = getColumnCenter(g, i, points.length)
+                const isEnd = i === 0 || i === points.length - 1
+                const label = getPointLabel(p, i, isEnd, stride)
+                if (!label) continue
 
-            const width = ctx.measureText(label).width
-            let left = lx - width / 2
-            let right = lx + width / 2
-            if (align === 'left') {
-                left = lx
-                right = lx + width
-            } else if (align === 'right') {
-                left = lx - width
-                right = lx
+                let align: CanvasTextAlign = 'center'
+                if (i === 0) align = 'left'
+                else if (i === points.length - 1) align = 'right'
+
+                let lx = cx
+                if (i === 0) lx = Math.max(cx - g.columnWidth / 2, g.plotLeft)
+                else if (i === points.length - 1)
+                    lx = Math.min(cx + g.columnWidth / 2, g.plotRight)
+
+                const width = ctx.measureText(label).width
+                let left = lx - width / 2
+                let right = lx + width / 2
+                if (align === 'left') {
+                    left = lx
+                    right = lx + width
+                } else if (align === 'right') {
+                    left = lx - width
+                    right = lx
+                }
+
+                labelCandidates.push({
+                    idx: i,
+                    text: label,
+                    x: lx,
+                    align,
+                    left,
+                    right,
+                })
             }
 
-            labelCandidates.push({
-                idx: i,
-                text: label,
-                x: lx,
-                align,
-                left,
-                right,
-            })
+            return labelCandidates
         }
 
-        const placedRanges: { left: number; right: number }[] = []
-        const placementPadding = 6
+        const drawXLabels = () => {
+            ctx.font = `760 10px ${fontFamily}`
+            ctx.fillStyle = COLOR_X_LABEL
+            ctx.textBaseline = 'top'
+            const labelCandidates = buildLabelCandidates()
 
-        const placeLabel = (
-            candidate: (typeof labelCandidates)[number],
-            force = false
-        ) => {
-            const candidateLeft = candidate.left - placementPadding
-            const candidateRight = candidate.right + placementPadding
-            const overlaps = placedRanges.some(
-                (range) =>
-                    candidateLeft <= range.right && candidateRight >= range.left
+            const placedRanges: { left: number; right: number }[] = []
+            const placementPadding = 6
+
+            const placeLabel = (
+                candidate: (typeof labelCandidates)[number],
+                force = false
+            ) => {
+                const candidateLeft = candidate.left - placementPadding
+                const candidateRight = candidate.right + placementPadding
+                const overlaps = placedRanges.some(
+                    (range) =>
+                        candidateLeft <= range.right &&
+                        candidateRight >= range.left
+                )
+
+                if (overlaps && !force) return
+
+                ctx.textAlign = candidate.align
+                ctx.fillText(candidate.text, candidate.x, g.plotBottom + 6)
+                placedRanges.push({
+                    left: candidateLeft,
+                    right: candidateRight,
+                })
+            }
+
+            const firstIdx = 0
+            const lastIdx = points.length - 1
+            const firstCandidate = labelCandidates.find(
+                (c) => c.idx === firstIdx
             )
+            const lastCandidate = labelCandidates.find((c) => c.idx === lastIdx)
 
-            if (overlaps && !force) return
+            if (firstCandidate) placeLabel(firstCandidate, true)
+            if (lastCandidate && lastCandidate !== firstCandidate)
+                placeLabel(lastCandidate, true)
 
-            ctx.textAlign = candidate.align
-            ctx.fillText(candidate.text, candidate.x, g.plotBottom + 6)
-            placedRanges.push({ left: candidateLeft, right: candidateRight })
+            for (const candidate of labelCandidates) {
+                if (candidate.idx === firstIdx || candidate.idx === lastIdx)
+                    continue
+                placeLabel(candidate)
+            }
         }
 
-        const firstIdx = 0
-        const lastIdx = points.length - 1
-        const firstCandidate = labelCandidates.find((c) => c.idx === firstIdx)
-        const lastCandidate = labelCandidates.find((c) => c.idx === lastIdx)
-
-        if (firstCandidate) placeLabel(firstCandidate, true)
-        if (lastCandidate && lastCandidate !== firstCandidate)
-            placeLabel(lastCandidate, true)
-
-        for (const candidate of labelCandidates) {
-            if (candidate.idx === firstIdx || candidate.idx === lastIdx)
-                continue
-            placeLabel(candidate)
-        }
+        drawAxes()
+        drawYearDividers()
+        drawBands()
+        drawBars()
+        drawLine()
+        drawXLabels()
     }, [
         size,
         geometry,
@@ -902,147 +969,154 @@ export function Chart({
 
     const hoverPoint = hoverIdx != null ? points[hoverIdx] : null
 
+    const renderHeader = () => (
+        <div className={styles.headerRow}>
+            <h2 className={styles.title}>{title}</h2>
+            <div className={styles.headerRight}>
+                {headerRight ??
+                    (hint ? <span className={styles.hint}>{hint}</span> : null)}
+            </div>
+        </div>
+    )
+
+    const renderLegend = () => (
+        <div className={styles.legend}>
+            <span className={styles.legendItem}>
+                <span
+                    className={styles.swatch}
+                    style={{ background: palette.primaryBar }}
+                    aria-hidden="true"
+                />
+                {labels.primaryBar}
+            </span>
+            <span className={styles.legendItem}>
+                <span
+                    className={styles.swatch}
+                    style={{ background: palette.secondaryBar }}
+                    aria-hidden="true"
+                />
+                {labels.secondaryBar}
+            </span>
+            {showLine && (
+                <span className={styles.legendItem}>
+                    <span
+                        className={cn(styles.swatch, styles.lineSwatch)}
+                        style={{ background: palette.line }}
+                        aria-hidden="true"
+                    />
+                    {labels.line}
+                </span>
+            )}
+        </div>
+    )
+
+    const renderTooltip = () =>
+        hoverPoint &&
+        hoverPos && (
+            <div
+                ref={tooltipRef}
+                className={cn(
+                    styles.tooltip,
+                    styles.tooltipVisible,
+                    tooltipSide === 'right' && styles.tooltipRight
+                )}
+                style={{
+                    left: `${tooltipPos?.x ?? hoverPos.x}px`,
+                    top: `${tooltipPos?.y ?? hoverPos.y}px`,
+                }}
+                role="tooltip"
+            >
+                <div className={styles.tooltipLabel}>
+                    {hoverPoint.fullLabel}
+                </div>
+                <div className={styles.tooltipRow}>
+                    <span
+                        className={styles.tooltipDot}
+                        style={{ background: palette.primaryBar }}
+                        aria-hidden="true"
+                    />
+                    {labels.primaryBar}:{' '}
+                    {tooltipFormatPrimary(hoverPoint.primaryBarValue)}
+                </div>
+                <div className={styles.tooltipRow}>
+                    <span
+                        className={styles.tooltipDot}
+                        style={{ background: palette.secondaryBar }}
+                        aria-hidden="true"
+                    />
+                    {labels.secondaryBar}:{' '}
+                    {tooltipFormatSecondary(hoverPoint.secondaryBarValue)}
+                </div>
+                {showLine && (
+                    <div className={styles.tooltipRow}>
+                        <span
+                            className={styles.tooltipDot}
+                            style={{ background: palette.line }}
+                            aria-hidden="true"
+                        />
+                        {labels.line}: {tooltipFormatLine(hoverPoint.lineValue)}
+                    </div>
+                )}
+            </div>
+        )
+
+    const renderCanvasWrap = () => (
+        <div ref={wrapRef} className={styles.canvasWrap}>
+            {cornerTopRight ? (
+                <div className={styles.cornerTopRight}>{cornerTopRight}</div>
+            ) : null}
+
+            <canvas
+                ref={canvasRef}
+                className={styles.canvas}
+                role="img"
+                aria-label={
+                    chartAriaLabel ?? `${title} across ${points.length} periods`
+                }
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onPointerCancel={onPointerCancel}
+                onPointerLeave={onPointerLeave}
+            />
+
+            {renderTooltip()}
+        </div>
+    )
+
+    const renderTable = () => (
+        <table className={styles.srOnly}>
+            <caption>{table.caption}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{table.periodHeader}</th>
+                    <th scope="col">{table.primaryBarHeader}</th>
+                    <th scope="col">{table.secondaryBarHeader}</th>
+                    <th scope="col">{table.lineHeader}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {points.map((p) => (
+                    <tr key={p.key}>
+                        <th scope="row">{p.fullLabel}</th>
+                        <td>{tooltipFormatPrimary(p.primaryBarValue)}</td>
+                        <td>{tooltipFormatSecondary(p.secondaryBarValue)}</td>
+                        <td>{tooltipFormatLine(p.lineValue)}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    )
+
     return (
         <section
             className={styles.chart}
             aria-label={ariaLabel ?? `${title} chart`}
         >
-            <div className={styles.headerRow}>
-                <h2 className={styles.title}>{title}</h2>
-                <div className={styles.headerRight}>
-                    {headerRight ??
-                        (hint ? (
-                            <span className={styles.hint}>{hint}</span>
-                        ) : null)}
-                </div>
-            </div>
-
-            <div className={styles.legend}>
-                <span className={styles.legendItem}>
-                    <span
-                        className={styles.swatch}
-                        style={{ background: palette.primaryBar }}
-                        aria-hidden="true"
-                    />
-                    {labels.primaryBar}
-                </span>
-                <span className={styles.legendItem}>
-                    <span
-                        className={styles.swatch}
-                        style={{ background: palette.secondaryBar }}
-                        aria-hidden="true"
-                    />
-                    {labels.secondaryBar}
-                </span>
-                {showLine && (
-                    <span className={styles.legendItem}>
-                        <span
-                            className={cn(styles.swatch, styles.lineSwatch)}
-                            style={{ background: palette.line }}
-                            aria-hidden="true"
-                        />
-                        {labels.line}
-                    </span>
-                )}
-            </div>
-
-            <div ref={wrapRef} className={styles.canvasWrap}>
-                {cornerTopRight ? (
-                    <div className={styles.cornerTopRight}>
-                        {cornerTopRight}
-                    </div>
-                ) : null}
-
-                <canvas
-                    ref={canvasRef}
-                    className={styles.canvas}
-                    role="img"
-                    aria-label={
-                        chartAriaLabel ??
-                        `${title} across ${points.length} periods`
-                    }
-                    onPointerDown={onPointerDown}
-                    onPointerMove={onPointerMove}
-                    onPointerUp={onPointerUp}
-                    onPointerCancel={onPointerCancel}
-                    onPointerLeave={onPointerLeave}
-                />
-
-                {hoverPoint && hoverPos && (
-                    <div
-                        ref={tooltipRef}
-                        className={cn(
-                            styles.tooltip,
-                            styles.tooltipVisible,
-                            tooltipSide === 'right' && styles.tooltipRight
-                        )}
-                        style={{
-                            left: `${tooltipPos?.x ?? hoverPos.x}px`,
-                            top: `${tooltipPos?.y ?? hoverPos.y}px`,
-                        }}
-                        role="tooltip"
-                    >
-                        <div className={styles.tooltipLabel}>
-                            {hoverPoint.fullLabel}
-                        </div>
-                        <div className={styles.tooltipRow}>
-                            <span
-                                className={styles.tooltipDot}
-                                style={{ background: palette.primaryBar }}
-                                aria-hidden="true"
-                            />
-                            {labels.primaryBar}:{' '}
-                            {tooltipFormatPrimary(hoverPoint.primaryBarValue)}
-                        </div>
-                        <div className={styles.tooltipRow}>
-                            <span
-                                className={styles.tooltipDot}
-                                style={{ background: palette.secondaryBar }}
-                                aria-hidden="true"
-                            />
-                            {labels.secondaryBar}:{' '}
-                            {tooltipFormatSecondary(
-                                hoverPoint.secondaryBarValue
-                            )}
-                        </div>
-                        {showLine && (
-                            <div className={styles.tooltipRow}>
-                                <span
-                                    className={styles.tooltipDot}
-                                    style={{ background: palette.line }}
-                                    aria-hidden="true"
-                                />
-                                {labels.line}:{' '}
-                                {tooltipFormatLine(hoverPoint.lineValue)}
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            <table className={styles.srOnly}>
-                <caption>{table.caption}</caption>
-                <thead>
-                    <tr>
-                        <th scope="col">{table.periodHeader}</th>
-                        <th scope="col">{table.primaryBarHeader}</th>
-                        <th scope="col">{table.secondaryBarHeader}</th>
-                        <th scope="col">{table.lineHeader}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {points.map((p) => (
-                        <tr key={p.key}>
-                            <th scope="row">{p.fullLabel}</th>
-                            <td>{tooltipFormatPrimary(p.primaryBarValue)}</td>
-                            <td>
-                                {tooltipFormatSecondary(p.secondaryBarValue)}
-                            </td>
-                            <td>{tooltipFormatLine(p.lineValue)}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            {renderHeader()}
+            {renderLegend()}
+            {renderCanvasWrap()}
+            {renderTable()}
         </section>
     )
 }
