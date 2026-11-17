@@ -1,7 +1,7 @@
-import { YesNoMenu } from '../endorsements/endorsementFilters'
 import styles from '../endorsements/endorsementFilters.module.css'
 import { FilterTag } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
+import { YesNoMenu } from '@/components/common/forms/YesNoMenu'
 import { dateService } from '@/services'
 import { DOT_SEPARATOR } from '@/util'
 import { DiscordEventStatus } from 'pv-contracts/data'
@@ -9,6 +9,11 @@ import { DiscordEventWithOccurrences } from 'pv-contracts/responses'
 import { useState } from 'react'
 import { FaCalendarAlt, FaClock, FaUsers, FaVolumeDown } from 'react-icons/fa'
 import { FaUser, FaCalendarCheck } from 'react-icons/fa6'
+
+interface Filter<T> {
+    value: T
+    label: string
+}
 
 interface EventFilters {
     status: DiscordEventStatus | null
@@ -23,26 +28,22 @@ const matchesFilterTag = (
     filters: EventFilters
 ) => {
     if (tag === 'all') {
-        Object.keys(filters).forEach((filter) => {
-            if (
-                [null, event[tag] ?? newestOccurence(event)[tag]].includes(
-                    filters[filter]
-                )
+        return Object.keys(filters).every((filter) =>
+            [null, event[filter] ?? newestOccurrence(event)[filter]].includes(
+                filters[filter]
             )
-                return false
-        })
-        return true
+        )
     }
 
-    return [null, event[tag] ?? newestOccurence(event)[tag]].includes(
+    return [null, event[tag] ?? newestOccurrence(event)[tag]].includes(
         filters[tag]
     )
 }
 
 function optionDropdown<T>(
-    options: { value: T; label: string }[],
-    selected: T | null,
-    onSelect: (value: T | null) => void
+    options: Filter<T>[],
+    selected: Filter<T> | undefined,
+    onSelect: (value: Filter<T> | undefined) => void
 ): FilterTag['dropdownOverlay'] {
     const CloseDropdown = ({
         closeDropdown,
@@ -57,9 +58,9 @@ function optionDropdown<T>(
             body={
                 <div className={styles.filterMenu}>
                     <DropdownOverlayButton
-                        checked={selected === null}
+                        checked={selected === undefined}
                         onClick={() => {
-                            onSelect(null)
+                            onSelect(undefined)
                             closeDropdown()
                         }}
                     >
@@ -70,7 +71,7 @@ function optionDropdown<T>(
                             key={String(o.value)}
                             checked={selected === o.value}
                             onClick={() => {
-                                onSelect(o.value)
+                                onSelect(o)
                                 closeDropdown()
                             }}
                         >
@@ -88,7 +89,7 @@ const getDiscordChannelName = (channelId: string) =>
     `${channelId} (Not Implemented)`
 const getDiscordUsername = (discordUserId: string) =>
     `${discordUserId} (Not Implemented)`
-const newestOccurence = (event: DiscordEventWithOccurrences) =>
+const newestOccurrence = (event: DiscordEventWithOccurrences) =>
     event.occurrences.toSorted(
         (a, b) => a.scheduledStartUtc.getTime() - b.scheduledStartUtc.getTime()
     )[0]
@@ -111,13 +112,13 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
     const [activeTag, setActiveTag] = useState('all')
 
     const [selectedEventStatus, setSelectedEventStatus] =
-        useState<EventFilters['status']>(null)
+        useState<Filter<EventFilters['status']>>()
     const [selectedEventChannel, setSelectedEventChannel] =
-        useState<EventFilters['channel']>(null)
+        useState<Filter<EventFilters['channel']>>()
     const [isSelectedEventRecurrent, setIsSelectedEventRecurrent] =
-        useState<EventFilters['recurrent']>(null)
+        useState<Filter<EventFilters['recurrent']>>()
     const [selectedCreatorDiscordId, setSelectedCreatorDiscordId] =
-        useState<EventFilters['creatorDiscordId']>(null)
+        useState<Filter<EventFilters['creatorDiscordId']>>()
 
     const selectedFilterLabel =
         [
@@ -126,7 +127,11 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
             isSelectedEventRecurrent,
             selectedCreatorDiscordId,
         ]
-            .filter(Boolean)
+            .filter(
+                (filter) =>
+                    filter?.value !== null && filter?.value !== undefined
+            )
+            .map((filter) => filter?.label)
             .join(` ${DOT_SEPARATOR} `) || 'More'
     const selectedFilterIcon = selectedEventStatus ? (
         <FaCalendarCheck />
@@ -148,7 +153,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
             { value: DiscordEventStatus.Cancelled, label: 'Cancelled' },
         ],
         channel: [
-            ...new Set(events.map((e) => newestOccurence(e).channelId)),
+            ...new Set(events.map((e) => newestOccurrence(e).channelId)),
         ].map((channelId) => ({
             value: channelId,
             label: getDiscordChannelName(channelId),
@@ -179,16 +184,16 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                     <DropdownOverlayButton
                         icon={<FaCalendarAlt />}
                         checked={
-                            selectedEventStatus === null &&
-                            selectedEventChannel === null &&
-                            isSelectedEventRecurrent === null &&
-                            selectedCreatorDiscordId === null
+                            selectedEventStatus === undefined &&
+                            selectedEventChannel === undefined &&
+                            isSelectedEventRecurrent === undefined &&
+                            selectedCreatorDiscordId === undefined
                         }
                         onClick={() => {
-                            setSelectedEventStatus(null)
-                            setSelectedEventChannel(null)
-                            setIsSelectedEventRecurrent(null)
-                            setSelectedCreatorDiscordId(null)
+                            setSelectedEventStatus(undefined)
+                            setSelectedEventChannel(undefined)
+                            setIsSelectedEventRecurrent(undefined)
+                            setSelectedCreatorDiscordId(undefined)
                             closeDropdown()
                         }}
                     >
@@ -196,19 +201,19 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                     </DropdownOverlayButton>
                     <DropdownOverlayButton
                         icon={<FaCalendarCheck />}
-                        selected={selectedEventStatus !== null}
+                        selected={selectedEventStatus !== undefined}
                         menu={({ closeMenu }) => (
                             <div className={styles.nestedFilterMenu}>
                                 {filterOptions.status.map((status) => (
                                     <DropdownOverlayButton
                                         key={status.value}
-                                        checked={
-                                            selectedEventStatus === status.value
-                                        }
+                                        checked={selectedEventStatus === status}
                                         onClick={() => {
-                                            setSelectedEventStatus(status.value)
-                                            setSelectedEventChannel(null)
-                                            setSelectedCreatorDiscordId(null)
+                                            setSelectedEventStatus(status)
+                                            setSelectedEventChannel(undefined)
+                                            setSelectedCreatorDiscordId(
+                                                undefined
+                                            )
                                             closeMenu()
                                             closeDropdown()
                                         }}
@@ -223,22 +228,21 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                     </DropdownOverlayButton>
                     <DropdownOverlayButton
                         icon={<FaVolumeDown />}
-                        selected={selectedEventChannel !== null}
+                        selected={selectedEventChannel !== undefined}
                         menu={({ closeMenu }) => (
                             <div className={styles.nestedFilterMenu}>
                                 {filterOptions.channel.map((channel) => (
                                     <DropdownOverlayButton
                                         key={channel.value}
                                         checked={
-                                            selectedEventChannel ===
-                                            channel.value
+                                            selectedEventChannel === channel
                                         }
                                         onClick={() => {
-                                            setSelectedEventStatus(null)
-                                            setSelectedEventChannel(
-                                                channel.value
+                                            setSelectedEventStatus(undefined)
+                                            setSelectedEventChannel(channel)
+                                            setSelectedCreatorDiscordId(
+                                                undefined
                                             )
-                                            setSelectedCreatorDiscordId(null)
                                             closeMenu()
                                             closeDropdown()
                                         }}
@@ -253,12 +257,17 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                     </DropdownOverlayButton>
                     <DropdownOverlayButton
                         icon={<FaClock />}
-                        selected={isSelectedEventRecurrent !== null}
+                        selected={isSelectedEventRecurrent !== undefined}
                         menu={({ closeMenu }) => (
                             <YesNoMenu
-                                selected={isSelectedEventRecurrent}
+                                selected={
+                                    isSelectedEventRecurrent?.value ?? null
+                                }
                                 onSelect={(value) => {
-                                    setIsSelectedEventRecurrent(value)
+                                    setIsSelectedEventRecurrent({
+                                        value,
+                                        label: value ? 'Yes' : 'No',
+                                    })
                                     closeMenu()
                                     closeDropdown()
                                 }}
@@ -269,7 +278,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                     </DropdownOverlayButton>
                     <DropdownOverlayButton
                         icon={<FaUser />}
-                        selected={selectedCreatorDiscordId !== null}
+                        selected={selectedCreatorDiscordId !== undefined}
                         menu={({ closeMenu }) => (
                             <div className={styles.nestedFilterMenu}>
                                 {filterOptions.creatorDiscordId.map(
@@ -278,13 +287,17 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
                                             key={creator.value}
                                             checked={
                                                 selectedCreatorDiscordId ===
-                                                creator.value
+                                                creator
                                             }
                                             onClick={() => {
-                                                setSelectedEventStatus(null)
-                                                setSelectedEventChannel(null)
+                                                setSelectedEventStatus(
+                                                    undefined
+                                                )
+                                                setSelectedEventChannel(
+                                                    undefined
+                                                )
                                                 setSelectedCreatorDiscordId(
-                                                    creator.value
+                                                    creator
                                                 )
                                                 closeMenu()
                                                 closeDropdown()
@@ -309,7 +322,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
             key: 'status',
             label:
                 filterOptions.status.find(
-                    (o) => o.value === selectedEventStatus
+                    (o) => o.value === selectedEventStatus?.value
                 )?.label ?? 'All Events',
             icon: <FaCalendarCheck />,
             color: '#5997E0',
@@ -327,7 +340,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
             key: 'channel',
             label:
                 filterOptions.channel.find(
-                    (o) => o.value === selectedEventChannel
+                    (o) => o.value === selectedEventChannel?.value
                 )?.label ?? 'Channel',
             icon: <FaVolumeDown />,
             color: '#62A46C',
@@ -345,7 +358,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
             key: 'recurrent',
             label:
                 filterOptions.recurrent.find(
-                    (o) => o.value === isSelectedEventRecurrent
+                    (o) => o.value === isSelectedEventRecurrent?.value
                 )?.label ?? 'Recurrent',
             icon: <FaClock />,
             color: '#C65882',
@@ -364,7 +377,7 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
             key: 'creatorDiscordId',
             label:
                 filterOptions.creatorDiscordId.find(
-                    (o) => o.value === selectedCreatorDiscordId
+                    (o) => o.value === selectedCreatorDiscordId?.value
                 )?.label ?? 'Creator',
             icon: <FaUser />,
             color: '#7674B3',
@@ -393,10 +406,10 @@ export function useEventFilters(events: DiscordEventWithOccurrences[]) {
 
     const filtered = events.filter((event) =>
         matchesFilterTag(event, activeTag, {
-            status: selectedEventStatus,
-            channel: selectedEventChannel,
-            recurrent: isSelectedEventRecurrent,
-            creatorDiscordId: selectedCreatorDiscordId,
+            status: selectedEventStatus?.value ?? null,
+            channel: selectedEventChannel?.value ?? null,
+            recurrent: isSelectedEventRecurrent?.value ?? null,
+            creatorDiscordId: selectedCreatorDiscordId?.value ?? null,
         })
     )
 
