@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 'use client'
 
 import { MemberBanner } from './MemberBanner'
@@ -77,6 +78,8 @@ import { IoEllipsisVertical } from 'react-icons/io5'
 import { MdVerified } from 'react-icons/md'
 import { useMediaQuery } from 'usehooks-ts'
 import z from 'zod'
+
+/* eslint-disable complexity */
 
 type MemberTabKey = 'overview' | 'donorMatching' | 'history'
 

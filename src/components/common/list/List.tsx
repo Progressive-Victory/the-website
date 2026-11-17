@@ -22,7 +22,11 @@ import { flushSync } from 'react-dom'
 const ANIMATION_MS = 420
 const UNMOUNT_BUFFER_MS = 80
 
-export function ListBreak({ editingOnly = false }: { editingOnly?: boolean }) {
+interface ListBreakProps {
+    editingOnly?: boolean
+}
+
+export function ListBreak({ editingOnly = false }: ListBreakProps) {
     void editingOnly
     return null
 }
@@ -30,7 +34,7 @@ export function ListBreak({ editingOnly = false }: { editingOnly?: boolean }) {
 function splitCards(children: ReactNode, editing: boolean): ReactNode[][] {
     const cards: ReactNode[][] = [[]]
     for (const child of Children.toArray(children)) {
-        if (isValidElement(child) && child.type === ListBreak) {
+        if (isValidElement<ListBreakProps>(child) && child.type === ListBreak) {
             if (!child.props.editingOnly || editing) cards.push([])
         } else cards[cards.length - 1].push(child)
     }
