@@ -483,10 +483,6 @@ export function Table<T>({
     const handledScrollToken = useRef<number | undefined>(undefined)
 
     useEffect(() => {
-        if (editing) setOpenCell(null)
-    }, [editing])
-
-    useEffect(() => {
         if (!openCell) return
 
         const onDocumentMouseDown = (event: MouseEvent) => {

@@ -261,6 +261,7 @@ export function SidebarListFooter({
 }: SidebarListFooterProps) {
     const [value, setValue] = useState('')
 
+    const currentPage = page + 1
     const totalCount = count ?? 0
     const pageCount = Math.ceil(totalCount / pageSize)
     const canNavigate = pageCount > 1
@@ -276,14 +277,10 @@ export function SidebarListFooter({
         const nextPage = +value - 1
         if (0 <= nextPage && nextPage <= maxPage) {
             onPageChange(nextPage)
-        } else {
-            setValue((page + 1).toString())
         }
-    }
 
-    useEffect(() => { // This is problematic.
-        setValue((page + 1).toString())
-    }, [page]) // When page changes, update the display value to be the new value + 1; (value is generally page+1, but can be manually set to change the page.)
+        setValue('')
+    }
 
     useEffect(() => {
         if (page < 0) onPageChange(0)
@@ -326,7 +323,7 @@ export function SidebarListFooter({
                         <input
                             id="page"
                             type="text"
-                            value={value}
+                            value={value || currentPage}
                             disabled={isPending}
                             onBlur={handleSubmit}
                             onChange={(event) =>

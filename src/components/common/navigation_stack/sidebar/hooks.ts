@@ -30,12 +30,15 @@ export function useSelectionIndicator(
     const bodyRef = useRef<HTMLDivElement>(null)
     const indicatorLayoutSyncTimeoutRef = useRef<TimeoutHandle | null>(null)
 
+    if (!enabled) {
+        if (indicatorLayoutSyncing) setIndicatorLayoutSyncing(false)
+        if (indicatorStyle.visible) setIndicatorStyle((previous) =>
+            previous.visible ? { ...previous, visible: false } : previous
+        )
+    }
+
     useEffect(() => {
         if (!enabled) {
-            setIndicatorLayoutSyncing(false)
-            setIndicatorStyle((previous) =>
-                previous.visible ? { ...previous, visible: false } : previous
-            )
             return
         }
 
@@ -192,10 +195,10 @@ export function useLargeTitleScroll(
     enabled: boolean
 ): boolean {
     const [collapsed, setCollapsed] = useState(false)
+    if (!enabled && collapsed) setCollapsed(false)
 
     useEffect(() => {
         if (!enabled) {
-            setCollapsed(false)
             return
         }
 
@@ -246,10 +249,10 @@ export function usePinnedSectionStuck(
     enabled: boolean
 ): boolean {
     const [stuck, setStuck] = useState(false)
+    if (!enabled && setStuck) setStuck(false)
 
     useEffect(() => {
         if (!enabled) {
-            setStuck(false)
             return
         }
 
