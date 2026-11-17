@@ -13,31 +13,76 @@ import {
     User,
     zDiscordUser,
 } from 'pv-contracts/data'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import z from 'zod'
 
 export interface HistoryViewProps {
-    selectedId: number
     user: User
-
-    selectedHistory: UpdateHistory<User> | null
-    onSelectHistory: (update: UpdateHistory<User> | null) => void
-
-    selectedDonorHistory: UpdateHistory<ActBlueDonor> | null
-    onSelectDonorHistory: (update: UpdateHistory<ActBlueDonor> | null) => void
-
     isRefetching: boolean
-
     roles: Role[]
     roleOptions: { value: number; label: string }[]
-    makeFormTitle: (user: User) => string
+    makeTitle: (user: User) => string
 }
 
-type UnifiedHistoryItem =
-    | { kind: 'account'; update: UpdateHistory<User> }
-    | { kind: 'donor'; update: UpdateHistory<ActBlueDonor> }
+interface HistoryEntry {
+    key: string
+    when: Date
+    whoId: number | null
+    account?: UpdateHistory<User>
+    donor?: UpdateHistory<ActBlueDonor>
+}
 
 const DAY_MS = 24 * 60 * 60 * 1000
+
+// One save can write account and donor history separately, a few requests apart
+const SAME_CHANGE_WINDOW_MS = 5000
+
+function buildHistoryEntries(user: User) {
+    const updates = [
+        ...(user.history ?? []).map((account) => ({
+            update: account,
+            account,
+            donor: undefined,
+        })),
+        ...(user.donorHistory ?? []).map((donor) => ({
+            update: donor,
+            account: undefined,
+            donor,
+        })),
+    ].sort(
+        (a, b) =>
+            a.update.historyWhenUpdatedUtc.getTime() -
+            b.update.historyWhenUpdatedUtc.getTime()
+    )
+
+    const entries: HistoryEntry[] = []
+
+    for (const { update, account, donor } of updates) {
+        const last = entries.at(-1)
+        const when = update.historyWhenUpdatedUtc
+
+        if (
+            last?.whoId === update.historyWhoUpdatedId &&
+            when.getTime() - last.when.getTime() <= SAME_CHANGE_WINDOW_MS &&
+            !(account && last.account) &&
+            !(donor && last.donor)
+        ) {
+            last.account ??= account
+            last.donor ??= donor
+            continue
+        }
+
+        entries.push({
+            key: `${account ? 'account' : 'donor'}-${update.historyId}`,
+            when,
+            whoId: update.historyWhoUpdatedId,
+            account,
+            donor,
+        })
+    }
+
+    return entries.reverse()
+}
 
 function normalizeMeridiem(time: string) {
     return time.replace(/\s*([AP])M\b/g, (_, period: string) => {
@@ -96,57 +141,33 @@ function formatFullHistoryTimestamp(value: Date) {
     )
 }
 
+function HistoryMessage({ children }: { children: ReactNode }) {
+    return (
+        <div className={styles.section}>
+            <div className={styles.historyContainer}>
+                <div className={cn(styles.historyEntry, styles.historyEntryUi)}>
+                    {children}
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export function HistoryView({
-    selectedId,
     user,
-    selectedHistory,
-    onSelectHistory,
-    selectedDonorHistory,
-    onSelectDonorHistory,
     isRefetching,
     roles,
     roleOptions,
-    makeFormTitle,
+    makeTitle,
 }: HistoryViewProps) {
     const { ready, onGet } = useFetch()
+    const [selectedKey, setSelectedKey] = useState<string | null>(null)
 
-    const sortedHistory = (user?.history ?? []).slice().sort((a, b) => {
-        return (
-            b.historyWhenUpdatedUtc.getTime() -
-            a.historyWhenUpdatedUtc.getTime()
-        )
-    })
-
-    const sortedDonorHistory = (user?.donorHistory ?? [])
-        .slice()
-        .sort((a, b) => {
-            return (
-                b.historyWhenUpdatedUtc.getTime() -
-                a.historyWhenUpdatedUtc.getTime()
-            )
-        })
-
-    const mergedHistory = [
-        ...sortedHistory.map((update) => ({
-            kind: 'account' as const,
-            update,
-        })),
-        ...sortedDonorHistory.map((update) => ({
-            kind: 'donor' as const,
-            update,
-        })),
-    ].sort(
-        (a, b) =>
-            b.update.historyWhenUpdatedUtc.getTime() -
-            a.update.historyWhenUpdatedUtc.getTime()
-    )
+    const entries = buildHistoryEntries(user)
+    const selected = entries.find((entry) => entry.key === selectedKey)
 
     const updaterIds = Array.from(
-        new Set(
-            mergedHistory
-                .map((item) => item.update.historyWhoUpdatedId)
-                .filter((id): id is number => id != null)
-        )
+        new Set(entries.flatMap((entry) => entry.whoId ?? []))
     )
 
     const updaterDiscordQueries = useQueries({
@@ -178,202 +199,94 @@ export function HistoryView({
         return `User #${historyWhoUpdatedId}`
     }
 
-    const makeHistoryMessage = (
-        who: string,
-        place: 'Account' | 'Donor',
-        source: string
-    ) => {
+    const describeEntry = ({ whoId, account, donor }: HistoryEntry) => {
+        const targets = [account && 'Account', donor && 'Donor']
+            .filter(Boolean)
+            .join(' & ')
+        const source =
+            account?.historyDataSource ?? donor?.historyDataSource ?? null
+
         return (
             <>
-                <span className={styles.historyEntryActor}>{who}</span>
-                <span
-                    className={styles.historyEntryPrefix}
-                >{` updated ${place} via ${source}`}</span>
+                <span className={styles.historyEntryActor}>
+                    {updateLabel(whoId)}
+                </span>
+                <span className={styles.historyEntryPrefix}>
+                    {` updated ${targets}`}
+                    {source && ` via ${source}`}
+                </span>
             </>
         )
     }
 
-    const handleMakeHistoryLabel = (update: UpdateHistory<User>) => {
-        const who = updateLabel(update.historyWhoUpdatedId)
-        const source = update.historyDataSource ?? 'Unknown'
-        return makeHistoryMessage(who, 'Account', source)
-    }
-
-    const handleMakeDonorHistoryLabel = (
-        update: UpdateHistory<ActBlueDonor>
-    ) => {
-        const who = updateLabel(update.historyWhoUpdatedId)
-        const source = update.historyDataSource ?? 'Unknown'
-        return makeHistoryMessage(who, 'Donor', source)
-    }
-
-    if (selectedId == null) return null
-
-    if (isRefetching) {
-        return (
-            <div className={styles.section}>
-                <div className={styles.historyContainer}>
-                    <div
-                        className={cn(
-                            styles.historyEntry,
-                            styles.historyEntryUi
-                        )}
-                    >
-                        Refreshing…
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    if (!mergedHistory.length) {
-        return (
-            <div className={styles.section}>
-                <div className={styles.historyContainer}>
-                    <div
-                        className={cn(
-                            styles.historyEntry,
-                            styles.historyEntryUi
-                        )}
-                    >
-                        No history found
-                    </div>
-                </div>
-            </div>
-        )
-    }
+    if (isRefetching) return <HistoryMessage>Refreshing…</HistoryMessage>
+    if (!entries.length)
+        return <HistoryMessage>No history found</HistoryMessage>
 
     return (
         <div className={styles.section}>
-            <UnifiedHistoryField
-                title="History"
-                history={mergedHistory}
-                selectedAccountHistory={selectedHistory}
-                selectedDonorHistory={selectedDonorHistory}
-                onSelectAccountHistory={onSelectHistory}
-                onSelectDonorHistory={onSelectDonorHistory}
-                makeAccountLabel={handleMakeHistoryLabel}
-                makeDonorLabel={handleMakeDonorHistoryLabel}
-            />
+            <CollapsibleSection title="History" initialOpenState>
+                <div className={styles.historyContainer}>
+                    {entries.map((entry) => (
+                        <button
+                            key={entry.key}
+                            type="button"
+                            onClick={() =>
+                                setSelectedKey(
+                                    entry.key === selectedKey ? null : entry.key
+                                )
+                            }
+                            className={cn(
+                                styles.historyEntry,
+                                entry.key === selectedKey &&
+                                    styles.historyEntrySelected
+                            )}
+                        >
+                            <span className={styles.historyEntryMain}>
+                                {describeEntry(entry)}
+                            </span>
 
-            {selectedHistory ? (
+                            <span
+                                className={styles.historyEntryDateTag}
+                                data-full-date={formatFullHistoryTimestamp(
+                                    entry.when
+                                )}
+                            >
+                                {formatHistoryTimestamp(entry.when)}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </CollapsibleSection>
+
+            {selected?.account && (
                 <div className={styles.snapshotWrap}>
                     <MemberView
-                        selectedId={selectedId}
+                        selectedId={user.id}
                         user={user}
-                        selectedHistory={selectedHistory}
+                        selectedHistory={selected.account}
                         saving={false}
                         editing={false}
                         isInvalid={false}
                         roles={roles}
                         roleOptions={roleOptions}
-                        makeFormTitle={(u) => makeFormTitle(u)}
+                        makeFormTitle={(u) =>
+                            `${makeTitle(u)} @ ${formatFullHistoryTimestamp(selected.when)}`
+                        }
                     />
                 </div>
-            ) : null}
+            )}
 
-            {!selectedHistory && selectedDonorHistory ? (
+            {selected?.donor && (
                 <div className={styles.snapshotWrap}>
                     <span>
                         Donor:{' '}
-                        {`${selectedDonorHistory.firstname} ${selectedDonorHistory.lastname}`}
+                        {`${selected.donor.firstname} ${selected.donor.lastname}`}
                     </span>
                     <br />
-                    <span>
-                        {selectedDonorHistory.userId ? 'Linked' : 'Unlinked'}
-                    </span>
+                    <span>{selected.donor.userId ? 'Linked' : 'Unlinked'}</span>
                 </div>
-            ) : null}
+            )}
         </div>
-    )
-}
-
-interface UnifiedHistoryFieldProps {
-    title: string
-    defaultCollapsed?: boolean
-    history: UnifiedHistoryItem[]
-    selectedAccountHistory: UpdateHistory<User> | null
-    selectedDonorHistory: UpdateHistory<ActBlueDonor> | null
-    onSelectAccountHistory: (update: UpdateHistory<User> | null) => void
-    onSelectDonorHistory: (update: UpdateHistory<ActBlueDonor> | null) => void
-    makeAccountLabel: (update: UpdateHistory<User>) => ReactNode
-    makeDonorLabel: (update: UpdateHistory<ActBlueDonor>) => ReactNode
-}
-
-function UnifiedHistoryField({
-    title,
-    defaultCollapsed,
-    history,
-    selectedAccountHistory,
-    selectedDonorHistory,
-    onSelectAccountHistory,
-    onSelectDonorHistory,
-    makeAccountLabel,
-    makeDonorLabel,
-}: UnifiedHistoryFieldProps) {
-    return (
-        <CollapsibleSection title={title} initialOpenState={!defaultCollapsed}>
-            <div className={styles.historyContainer}>
-                {history.map((item, i) => {
-                    const isSelected =
-                        item.kind == 'account'
-                            ? selectedAccountHistory?.historyId ===
-                              item.update.historyId
-                            : selectedDonorHistory?.historyId ===
-                              item.update.historyId
-
-                    const handleSelect = () => {
-                        if (item.kind == 'account') {
-                            if (isSelected) {
-                                onSelectAccountHistory(null)
-                                return
-                            }
-
-                            onSelectAccountHistory(item.update)
-                            onSelectDonorHistory(null)
-                            return
-                        }
-
-                        if (isSelected) {
-                            onSelectDonorHistory(null)
-                            return
-                        }
-
-                        onSelectDonorHistory(item.update)
-                        onSelectAccountHistory(null)
-                    }
-
-                    return (
-                        <div key={`${item.kind}-${item.update.historyId ?? i}`}>
-                            <button
-                                type="button"
-                                onClick={handleSelect}
-                                className={cn(
-                                    styles.historyEntry,
-                                    isSelected && styles.historyEntrySelected
-                                )}
-                            >
-                                <span className={styles.historyEntryMain}>
-                                    {item.kind == 'account'
-                                        ? makeAccountLabel(item.update)
-                                        : makeDonorLabel(item.update)}
-                                </span>
-
-                                <span
-                                    className={styles.historyEntryDateTag}
-                                    data-full-date={formatFullHistoryTimestamp(
-                                        item.update.historyWhenUpdatedUtc
-                                    )}
-                                >
-                                    {formatHistoryTimestamp(
-                                        item.update.historyWhenUpdatedUtc
-                                    )}
-                                </span>
-                            </button>
-                        </div>
-                    )
-                })}
-            </div>
-        </CollapsibleSection>
     )
 }
