@@ -64,13 +64,11 @@ function snapshotOf(value: object, ignoredKeys: string[] = []) {
 }
 
 function byTime<T extends { historyWhenUpdatedUtc: Date }>(updates: T[]) {
-    return updates
-        .slice()
-        .sort(
-            (a, b) =>
-                a.historyWhenUpdatedUtc.getTime() -
-                b.historyWhenUpdatedUtc.getTime()
-        )
+    return updates.toSorted(
+        (a, b) =>
+            a.historyWhenUpdatedUtc.getTime() -
+            b.historyWhenUpdatedUtc.getTime()
+    )
 }
 
 function accountEvents(history: UpdateHistory<User>[]) {
