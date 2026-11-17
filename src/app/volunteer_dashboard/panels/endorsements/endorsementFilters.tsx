@@ -51,6 +51,19 @@ const endorsementLevelFilterOptions = endorsementLevelOptions.map((option) => ({
     label: endorsementLevelFilterLabels.get(option.value) ?? option.label,
 }))
 
+const getFilterIcon = (
+    selectedState: string | null,
+    selectedYear: number | null,
+    selectedIsPvMember: boolean | null,
+    selectedIsIncumbent: boolean | null
+) => {
+    if (selectedState) return <FaMapMarkerAlt />
+    if (selectedYear) return <FaCalendarAlt />
+    if (selectedIsPvMember !== null) return <FaClipboardUser />
+    if (selectedIsIncumbent !== null) return <FaUserTie />
+    return <FaCog />
+}
+
 export const electionStatusOptions = [
     { value: ElectionStatus.Elected, label: 'Elected' },
     { value: ElectionStatus.WonPrimary, label: 'Won Primary' },
@@ -264,12 +277,12 @@ export function useEndorsementFilters(endorsements: Endorsement[]) {
             .filter(Boolean)
             .join(` ${DOT_SEPARATOR} `) || 'More'
 
-    let selectedFilterIcon = <FaCog />
-    if (selectedState) selectedFilterIcon = <FaMapMarkerAlt />
-    else if (selectedYear) selectedFilterIcon = <FaCalendarAlt />
-    else if (selectedIsPvMember !== null)
-        selectedFilterIcon = <FaClipboardUser />
-    else if (selectedIsIncumbent !== null) selectedFilterIcon = <FaUserTie />
+    const selectedFilterIcon = getFilterIcon(
+        selectedState,
+        selectedYear,
+        selectedIsPvMember,
+        selectedIsIncumbent
+    )
 
     const clearMoreFilters = () => {
         setSelectedState(null)

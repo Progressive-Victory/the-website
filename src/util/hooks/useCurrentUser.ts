@@ -1,3 +1,4 @@
+import { QUERY_STALE_TIME } from '.'
 import { useUserQueries } from '@/queries'
 import {
     keepPreviousData,
@@ -18,6 +19,7 @@ export function useCurrentUser() {
             includePositions: true,
         }),
         placeholderData: keepPreviousData,
+        staleTime: QUERY_STALE_TIME,
     })
 
     const handleRefetch = async () => {
