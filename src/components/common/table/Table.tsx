@@ -796,10 +796,6 @@ export function Table<T>({
                         reorderable &&
                         (entry.category != null ||
                             (entry.col?.reorderable ?? true))
-                    const isDropTarget =
-                        draggingId != null &&
-                        dropTarget?.id === dragId &&
-                        draggingId !== dragId
                     const dropsOnRightHalf = (event: React.DragEvent) => {
                         const cells = entryCells(headerRef.current, dragId)
                         const first = cells[0]?.getBoundingClientRect()
@@ -847,91 +843,113 @@ export function Table<T>({
                           }
                         : {}
 
-                    const dropClass = !isDropTarget
-                        ? undefined
-                        : dropTarget.after
-                          ? isEntryEnd
-                              ? styles.dropAfter
-                              : undefined
-                          : isEntryStart
-                            ? styles.dropBefore
-                            : undefined
+                    const getSharedClasses = () => {
+                        const isDropTarget =
+                            draggingId != null &&
+                            dropTarget?.id === dragId &&
+                            draggingId !== dragId
 
-                    const sharedClasses = cn(
-                        entryReorderable && styles.draggableHeader,
-                        hoveredEntryId === dragId && styles.headerHovered,
-                        draggingId === dragId && styles.draggingHeader,
-                        dropClass
-                    )
+                        const dropClass = !isDropTarget
+                            ? undefined
+                            : dropTarget.after
+                              ? isEntryEnd
+                                  ? styles.dropAfter
+                                  : undefined
+                              : isEntryStart
+                                ? styles.dropBefore
+                                : undefined
 
-                    if (entry.type === 'group-collapsed') {
-                        return (
-                            <span
-                                key={`group-${entry.category!.key}`}
-                                data-entry-id={dragId}
-                                className={cn(
-                                    styles.collapsedHeader,
-                                    sharedClasses
-                                )}
-                                {...dragProps}
-                            >
-                                {entryReorderable && (
-                                    <MdDragIndicator
-                                        className={styles.dragHandle}
-                                        aria-hidden="true"
-                                    />
-                                )}
-                            </span>
+                        return cn(
+                            entryReorderable && styles.draggableHeader,
+                            hoveredEntryId === dragId && styles.headerHovered,
+                            draggingId === dragId && styles.draggingHeader,
+                            dropClass
                         )
                     }
-                    const col = entry.col!
-                    return (
+
+                    const renderCollapsedHeader = () => (
                         <span
-                            key={col.key}
-                            data-column-key={col.key}
+                            key={`group-${entry.category!.key}`}
                             data-entry-id={dragId}
                             className={cn(
-                                col.sortValue && styles.sortableHeader,
-                                sharedClasses
+                                styles.collapsedHeader,
+                                getSharedClasses()
                             )}
-                            onClick={
-                                col.sortValue
-                                    ? () => handleSort(col.key)
-                                    : undefined
-                            }
                             {...dragProps}
                         >
-                            {entryReorderable && isEntryStart && (
+                            {entryReorderable && (
                                 <MdDragIndicator
                                     className={styles.dragHandle}
-                                    style={
-                                        handleOffsets[dragId] != null
-                                            ? { left: handleOffsets[dragId] }
-                                            : undefined
-                                    }
                                     aria-hidden="true"
                                 />
                             )}
-                            <span className={styles.headerLabel}>
-                                {col.header}
-                                {col.sortValue && (
-                                    <span className={styles.sortIcon}>
-                                        {sortKey === col.key ? (
-                                            sortDir === SortDirection.ASC ? (
-                                                <FiChevronUp strokeWidth={3} />
-                                            ) : (
-                                                <FiChevronDown
-                                                    strokeWidth={3}
-                                                />
-                                            )
-                                        ) : (
-                                            <FiChevronDown strokeWidth={2} />
-                                        )}
-                                    </span>
-                                )}
-                            </span>
                         </span>
                     )
+
+                    const renderColumnHeader = () => {
+                        const col = entry.col!
+                        return (
+                            <span
+                                key={col.key}
+                                data-column-key={col.key}
+                                data-entry-id={dragId}
+                                className={cn(
+                                    col.sortValue && styles.sortableHeader,
+                                    getSharedClasses()
+                                )}
+                                onClick={
+                                    col.sortValue
+                                        ? () => handleSort(col.key)
+                                        : undefined
+                                }
+                                {...dragProps}
+                            >
+                                {entryReorderable && isEntryStart && (
+                                    <MdDragIndicator
+                                        className={styles.dragHandle}
+                                        style={
+                                            handleOffsets[dragId] != null
+                                                ? {
+                                                      left: handleOffsets[
+                                                          dragId
+                                                      ],
+                                                  }
+                                                : undefined
+                                        }
+                                        aria-hidden="true"
+                                    />
+                                )}
+                                <span className={styles.headerLabel}>
+                                    {col.header}
+                                    {col.sortValue && (
+                                        <span className={styles.sortIcon}>
+                                            {sortKey === col.key ? (
+                                                sortDir ===
+                                                SortDirection.ASC ? (
+                                                    <FiChevronUp
+                                                        strokeWidth={3}
+                                                    />
+                                                ) : (
+                                                    <FiChevronDown
+                                                        strokeWidth={3}
+                                                    />
+                                                )
+                                            ) : (
+                                                <FiChevronDown
+                                                    strokeWidth={2}
+                                                />
+                                            )}
+                                        </span>
+                                    )}
+                                </span>
+                            </span>
+                        )
+                    }
+
+                    if (entry.type === 'group-collapsed') {
+                        return renderCollapsedHeader()
+                    }
+                    return renderColumnHeader()
                 })}
             </div>
 

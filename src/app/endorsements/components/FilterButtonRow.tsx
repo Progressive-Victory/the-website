@@ -281,6 +281,192 @@ export function FilterButtonRow({
         closeSearch()
     }
 
+    const LAYOUT_SPRING = {
+        type: 'spring',
+        stiffness: 380,
+        damping: 32,
+        mass: 0.7,
+    } as const
+
+    function getSearchWidth(
+        isMobile: boolean,
+        isOpen: boolean,
+        mobileWidth: number | null,
+        expandedWidth: number | null
+    ) {
+        const px = isMobile ? mobileWidth : isOpen ? expandedWidth : null
+        return px ? `${px}px` : 'var(--search-control-size)'
+    }
+
+    const renderSearch = () => (
+        <motion.div
+            initial={false}
+            layout="position"
+            ref={searchControlRef}
+            className={cn(
+                styles.searchControl,
+                searchIsExpanded && !isMobile && styles.searchControlExpanded,
+                (singleColumnLayout || showSearchLabel) &&
+                    styles.searchControlStacked
+            )}
+            transition={{ layout: LAYOUT_SPRING }}
+            onPointerDownCapture={() => setOpenDropdown(null)}
+            onBlur={handleSearchBlur}
+        >
+            {showSearchLabel && (
+                <p
+                    className={cn(
+                        styles.controlLabel,
+                        styles.searchControlLabel
+                    )}
+                >
+                    Search
+                </p>
+            )}
+            <motion.div
+                initial={false}
+                className={styles.searchMorph}
+                animate={{
+                    width: getSearchWidth(
+                        isMobile,
+                        isSearchOpen,
+                        mobileSearchWidth,
+                        searchExpandedWidth
+                    ),
+                }}
+                transition={
+                    skipLayoutAnim
+                        ? { duration: 0 }
+                        : {
+                              type: 'spring',
+                              stiffness: 360,
+                              damping: 34,
+                              mass: 0.68,
+                          }
+                }
+            >
+                <button
+                    ref={searchToggleButtonRef}
+                    type="button"
+                    className={cn(
+                        styles.searchToggleButton,
+                        !isMobile &&
+                            isSearchOpen &&
+                            styles.searchToggleButtonClose
+                    )}
+                    onPointerDown={(event) => {
+                        if (!isMobile && isSearchOpen) {
+                            event.preventDefault()
+                        }
+                    }}
+                    onClick={() => {
+                        setOpenDropdown(null)
+
+                        if (isMobile) {
+                            if (searchQuery) {
+                                setSearchQuery('')
+                            } else {
+                                searchInputRef.current?.focus()
+                            }
+                            return
+                        }
+
+                        if (isSearchOpen) {
+                            closeSearch()
+                        } else {
+                            openSearch()
+                        }
+                    }}
+                    aria-label={
+                        isMobile
+                            ? searchQuery
+                                ? 'Clear search'
+                                : 'Search endorsements'
+                            : isSearchOpen
+                              ? 'Close search'
+                              : 'Open search'
+                    }
+                >
+                    <span className={styles.searchIconWrap} aria-hidden="true">
+                        <svg
+                            className={cn(
+                                styles.searchIcon,
+                                isMobile ||
+                                    (!isSearchOpen && styles.searchIconVisible)
+                            )}
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                        >
+                            <circle
+                                cx="11"
+                                cy="11"
+                                r="7"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                            />
+                            <path
+                                d="M20 20l-4.1-4.1"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                            />
+                        </svg>
+                        <svg
+                            className={cn(
+                                styles.searchIcon,
+                                !isMobile &&
+                                    isSearchOpen &&
+                                    styles.searchIconVisible
+                            )}
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                        >
+                            <path
+                                d="M6 6l12 12M18 6L6 18"
+                                stroke="currentColor"
+                                strokeWidth="2.2"
+                                strokeLinecap="round"
+                            />
+                        </svg>
+                    </span>
+                </button>
+                <AnimatePresence initial={false}>
+                    {searchIsExpanded && (
+                        <motion.input
+                            ref={searchInputRef}
+                            type="text"
+                            className={styles.searchInput}
+                            value={searchQuery}
+                            onChange={(event) =>
+                                setSearchQuery(event.target.value)
+                            }
+                            onKeyDown={(event) => {
+                                if (event.key === 'Escape') {
+                                    closeSearch()
+                                    return
+                                }
+
+                                if (event.key === 'Enter') {
+                                    searchInputRef.current?.blur()
+                                }
+                            }}
+                            placeholder="Search"
+                            aria-label="Search endorsements"
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -8 }}
+                            transition={{ duration: 0.16 }}
+                        />
+                    )}
+                </AnimatePresence>
+            </motion.div>
+        </motion.div>
+    )
+
     const sectionedInitial = isMobile
         ? { opacity: 0, scale: 0.95, filter: 'blur(4px)' }
         : {
@@ -516,189 +702,7 @@ export function FilterButtonRow({
                                 </motion.div>
                             )}
                         </AnimatePresence>
-
-                        <motion.div
-                            initial={false}
-                            layout="position"
-                            ref={searchControlRef}
-                            className={cn(
-                                styles.searchControl,
-                                searchIsExpanded &&
-                                    !isMobile &&
-                                    styles.searchControlExpanded,
-                                (singleColumnLayout || showSearchLabel) &&
-                                    styles.searchControlStacked
-                            )}
-                            transition={{
-                                layout: {
-                                    type: 'spring',
-                                    stiffness: 380,
-                                    damping: 32,
-                                    mass: 0.7,
-                                },
-                            }}
-                            onPointerDownCapture={() => setOpenDropdown(null)}
-                            onBlur={handleSearchBlur}
-                        >
-                            {showSearchLabel && (
-                                <p
-                                    className={cn(
-                                        styles.controlLabel,
-                                        styles.searchControlLabel
-                                    )}
-                                >
-                                    Search
-                                </p>
-                            )}
-                            <motion.div
-                                initial={false}
-                                className={styles.searchMorph}
-                                animate={{
-                                    width: isMobile
-                                        ? mobileSearchWidth
-                                            ? `${mobileSearchWidth}px`
-                                            : 'var(--search-control-size)'
-                                        : isSearchOpen && searchExpandedWidth
-                                          ? `${searchExpandedWidth}px`
-                                          : 'var(--search-control-size)',
-                                }}
-                                transition={
-                                    skipLayoutAnim
-                                        ? { duration: 0 }
-                                        : {
-                                              type: 'spring',
-                                              stiffness: 360,
-                                              damping: 34,
-                                              mass: 0.68,
-                                          }
-                                }
-                            >
-                                <button
-                                    ref={searchToggleButtonRef}
-                                    type="button"
-                                    className={cn(
-                                        styles.searchToggleButton,
-                                        !isMobile &&
-                                            isSearchOpen &&
-                                            styles.searchToggleButtonClose
-                                    )}
-                                    onPointerDown={(event) => {
-                                        if (!isMobile && isSearchOpen) {
-                                            event.preventDefault()
-                                        }
-                                    }}
-                                    onClick={() => {
-                                        setOpenDropdown(null)
-
-                                        if (isMobile) {
-                                            if (searchQuery) {
-                                                setSearchQuery('')
-                                            } else {
-                                                searchInputRef.current?.focus()
-                                            }
-                                            return
-                                        }
-
-                                        if (isSearchOpen) {
-                                            closeSearch()
-                                        } else {
-                                            openSearch()
-                                        }
-                                    }}
-                                    aria-label={
-                                        isMobile
-                                            ? searchQuery
-                                                ? 'Clear search'
-                                                : 'Search endorsements'
-                                            : isSearchOpen
-                                              ? 'Close search'
-                                              : 'Open search'
-                                    }
-                                >
-                                    <span
-                                        className={styles.searchIconWrap}
-                                        aria-hidden="true"
-                                    >
-                                        <svg
-                                            className={cn(
-                                                styles.searchIcon,
-                                                isMobile ||
-                                                    (!isSearchOpen &&
-                                                        styles.searchIconVisible)
-                                            )}
-                                            width="20"
-                                            height="20"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                        >
-                                            <circle
-                                                cx="11"
-                                                cy="11"
-                                                r="7"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                            />
-                                            <path
-                                                d="M20 20l-4.1-4.1"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                                strokeLinecap="round"
-                                            />
-                                        </svg>
-                                        <svg
-                                            className={cn(
-                                                styles.searchIcon,
-                                                !isMobile &&
-                                                    isSearchOpen &&
-                                                    styles.searchIconVisible
-                                            )}
-                                            width="20"
-                                            height="20"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                        >
-                                            <path
-                                                d="M6 6l12 12M18 6L6 18"
-                                                stroke="currentColor"
-                                                strokeWidth="2.2"
-                                                strokeLinecap="round"
-                                            />
-                                        </svg>
-                                    </span>
-                                </button>
-                                <AnimatePresence initial={false}>
-                                    {searchIsExpanded && (
-                                        <motion.input
-                                            ref={searchInputRef}
-                                            type="text"
-                                            className={styles.searchInput}
-                                            value={searchQuery}
-                                            onChange={(event) =>
-                                                setSearchQuery(
-                                                    event.target.value
-                                                )
-                                            }
-                                            onKeyDown={(event) => {
-                                                if (event.key === 'Escape') {
-                                                    closeSearch()
-                                                    return
-                                                }
-
-                                                if (event.key === 'Enter') {
-                                                    searchInputRef.current?.blur()
-                                                }
-                                            }}
-                                            placeholder="Search"
-                                            aria-label="Search endorsements"
-                                            initial={{ opacity: 0, x: -8 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -8 }}
-                                            transition={{ duration: 0.16 }}
-                                        />
-                                    )}
-                                </AnimatePresence>
-                            </motion.div>
-                        </motion.div>
+                        {renderSearch()}
                     </motion.div>
                 </LayoutGroup>
             </motion.div>

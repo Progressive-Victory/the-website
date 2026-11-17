@@ -62,6 +62,22 @@ export function normalizeMaxDateTs(maxDate?: Date) {
     ).getTime()
 }
 
+function isStrictlyBetween(
+    value: number,
+    minTs: number | null,
+    maxTs: number | null
+): boolean {
+    return minTs != null && maxTs != null && value > minTs && value < maxTs
+}
+
+function isOutsideBounds(
+    value: number,
+    minTs: number | null,
+    maxTs: number | null
+): boolean {
+    return (maxTs != null && value > maxTs) || (minTs != null && value < minTs)
+}
+
 export function getMiniCalendarDayState(params: {
     day: Date
     currentMonthIdx: number
@@ -91,24 +107,17 @@ export function getMiniCalendarDayState(params: {
 
     const dayStart = getDayStartTs(day)
     const inMonth = day.getMonth() === currentMonthIdx
-    const disabled =
-        (maxTs != null && dayStart > maxTs) ||
-        (minTs != null && dayStart < minTs)
+    const disabled = isOutsideBounds(dayStart, minTs, maxTs)
     const isStart = startTs != null && dayStart === startTs
     const isEnd = endTs != null && dayStart === endTs
     const hasConfirmedRange =
         isRangeMode && startTs != null && endTs != null && startTs !== endTs
-    const inRange =
-        isRangeMode &&
-        startTs != null &&
-        endTs != null &&
-        dayStart > startTs &&
-        dayStart < endTs
-    const inPreviewRange =
-        previewRangeStartTs != null &&
-        previewRangeEndTs != null &&
-        dayStart > previewRangeStartTs &&
-        dayStart < previewRangeEndTs
+    const inRange = isStrictlyBetween(dayStart, startTs, endTs)
+    const inPreviewRange = isStrictlyBetween(
+        dayStart,
+        previewRangeStartTs,
+        previewRangeEndTs
+    )
     const isHoverAfterStart =
         hoveredDayTs != null && startTs != null && hoveredDayTs > startTs
     const isPreviewEdge =

@@ -129,48 +129,50 @@ export function Message({
         .filter(Boolean)
         .join(' ')
 
-    const imgPosition = imageProps?.position ?? 'center'
-    const imgZoom = imageProps?.zoom ?? 1
-    const imgOffsetX = imageProps?.offsetX ?? 0
-    const imgOffsetY = imageProps?.offsetY ?? 0
+    const resolveImage = () => ({
+        imgPosition: imageProps?.position ?? 'center',
+        imgZoom: imageProps?.zoom ?? 1,
+        imgOffsetX: imageProps?.offsetX ?? 0,
+        imgOffsetY: imageProps?.offsetY ?? 0,
+    })
+    const { imgPosition, imgZoom, imgOffsetX, imgOffsetY } = resolveImage()
 
-    const tiltDefaults: Required<
-        Pick<
-            TiltProps,
-            'disabled' | 'strength' | 'rotation' | 'scale' | 'buffer'
-        >
-    > = {
-        disabled: false,
-        strength: { amount: 1 },
-        rotation: { max: 10, z: -2.5 },
-        scale: { hover: 1.02 },
-        buffer: { outer: 28.8, inner: 12.8 },
+    const mergeTilt = (): TiltProps => {
+        const tiltDefaults: Required<
+            Pick<
+                TiltProps,
+                'disabled' | 'strength' | 'rotation' | 'scale' | 'buffer'
+            >
+        > = {
+            disabled: false,
+            strength: { amount: 1 },
+            rotation: { max: 10, z: -2.5 },
+            scale: { hover: 1.02 },
+            buffer: { outer: 28.8, inner: 12.8 },
+        }
+
+        return {
+            className: tiltProps?.className,
+            disabled: tiltProps?.disabled ?? tiltDefaults.disabled,
+            strength: {
+                ...tiltDefaults.strength,
+                ...(tiltProps?.strength ?? {}),
+            },
+            rotation: {
+                ...tiltDefaults.rotation,
+                ...(tiltProps?.rotation ?? {}),
+            },
+            scale: {
+                ...tiltDefaults.scale,
+                ...(tiltProps?.scale ?? {}),
+            },
+            buffer: {
+                ...tiltDefaults.buffer,
+                ...(tiltProps?.buffer ?? {}),
+            },
+        }
     }
-
-    const mergedTilt: TiltProps = {
-        className: tiltProps?.className,
-        disabled: tiltProps?.disabled ?? tiltDefaults.disabled,
-
-        strength: {
-            ...tiltDefaults.strength,
-            ...(tiltProps?.strength ?? {}),
-        },
-
-        rotation: {
-            ...tiltDefaults.rotation,
-            ...(tiltProps?.rotation ?? {}),
-        },
-
-        scale: {
-            ...tiltDefaults.scale,
-            ...(tiltProps?.scale ?? {}),
-        },
-
-        buffer: {
-            ...tiltDefaults.buffer,
-            ...(tiltProps?.buffer ?? {}),
-        },
-    }
+    const mergedTilt = mergeTilt()
 
     // Tilt
 
@@ -185,13 +187,24 @@ export function Message({
 
     const { mousePosition, handleMouseMove } = useMousePosition()
 
-    const disabled = mergedTilt.disabled ?? false
-    const strength = mergedTilt.strength?.amount ?? 1
-    const rotateMax = mergedTilt.rotation?.max ?? 10
-    const zRotate = mergedTilt.rotation?.z ?? -2.5
-    const hoverScale = mergedTilt.scale?.hover ?? 1.02
-    const outerBuffer = mergedTilt.buffer?.outer ?? 28.8
-    const innerBuffer = mergedTilt.buffer?.inner ?? 12.8
+    const resolveTiltValues = () => ({
+        disabled: mergedTilt.disabled ?? false,
+        strength: mergedTilt.strength?.amount ?? 1,
+        rotateMax: mergedTilt.rotation?.max ?? 10,
+        zRotate: mergedTilt.rotation?.z ?? -2.5,
+        hoverScale: mergedTilt.scale?.hover ?? 1.02,
+        outerBuffer: mergedTilt.buffer?.outer ?? 28.8,
+        innerBuffer: mergedTilt.buffer?.inner ?? 12.8,
+    })
+    const {
+        disabled,
+        strength,
+        rotateMax,
+        zRotate,
+        hoverScale,
+        outerBuffer,
+        innerBuffer,
+    } = resolveTiltValues()
 
     const tiltX = useSpring(0, { stiffness: 300, damping: 50 })
     const tiltY = useSpring(0, { stiffness: 300, damping: 50 })
@@ -243,6 +256,57 @@ export function Message({
     ])
 
     // End Tilt
+
+    const renderEllipsis = () =>
+        showEllipsis && (
+            <div className={styles.ellipsisLayout}>
+                {ctaHref && ctaLabel ? (
+                    <BaseButton
+                        label={ctaLabel}
+                        href={ctaHref}
+                        target={ctaTarget}
+                        rel={ctaRel}
+                        className={[styles.primary, ctaClassName]
+                            .filter(Boolean)
+                            .join(' ')}
+                    />
+                ) : null}
+
+                <button
+                    type="button"
+                    className={styles.ellipsisButton}
+                    aria-label="More options"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <HiOutlineEllipsisHorizontal
+                        className={styles.ellipsisIcon}
+                    />
+                </button>
+            </div>
+        )
+
+    const renderHeader = () => (
+        <div className={styles.header}>
+            <div className={styles.topRow}>
+                <div className={styles.userWrap}>
+                    <Image
+                        src={avatar}
+                        alt={username}
+                        className={cn(avatarRounded && styles.avatarRounded)}
+                        width={38}
+                        height={38}
+                        unoptimized
+                    />
+
+                    <p className={styles.username} style={{ color: nameColor }}>
+                        {username}
+                    </p>
+                </div>
+
+                {renderEllipsis()}
+            </div>
+        </div>
+    )
 
     const card = (
         <div>
@@ -298,68 +362,9 @@ export function Message({
                             }}
                         >
                             {/* Header */}
-                            <div className={styles.header}>
-                                <div className={styles.topRow}>
-                                    <div className={styles.userWrap}>
-                                        <Image
-                                            src={avatar}
-                                            alt={username}
-                                            className={cn(
-                                                avatarRounded &&
-                                                    styles.avatarRounded
-                                            )}
-                                            width={38}
-                                            height={38}
-                                            unoptimized
-                                        />
+                            {renderHeader()}
 
-                                        <p
-                                            className={styles.username}
-                                            style={{ color: nameColor }}
-                                        >
-                                            {username}
-                                        </p>
-                                    </div>
-
-                                    {showEllipsis && (
-                                        <div className={styles.ellipsisLayout}>
-                                            {ctaHref && ctaLabel ? (
-                                                <BaseButton
-                                                    label={ctaLabel}
-                                                    href={ctaHref}
-                                                    target={ctaTarget}
-                                                    rel={ctaRel}
-                                                    className={[
-                                                        styles.primary,
-                                                        ctaClassName,
-                                                    ]
-                                                        .filter(Boolean)
-                                                        .join(' ')}
-                                                />
-                                            ) : null}
-
-                                            <button
-                                                type="button"
-                                                className={
-                                                    styles.ellipsisButton
-                                                }
-                                                aria-label="More options"
-                                                onClick={(e) =>
-                                                    e.stopPropagation()
-                                                }
-                                            >
-                                                <HiOutlineEllipsisHorizontal
-                                                    className={
-                                                        styles.ellipsisIcon
-                                                    }
-                                                />
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className={styles.text}>{children}</div>
-                            </div>
+                            <div className={styles.text}>{children}</div>
 
                             {image && (
                                 <div className={styles.mediaWrap}>

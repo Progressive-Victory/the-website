@@ -259,7 +259,12 @@ export default function Page() {
 
     const formControls = useRef<FormControls>(null)
 
-    return (
+    const isSaving: boolean =
+        createMutation.isPending ||
+        updateMutation.isPending ||
+        deleteMutation.isPending
+
+    const renderWholePage = () => (
         <Panel
             includeSidebar
             largeTitle
@@ -325,11 +330,7 @@ export default function Page() {
                             ? 'New Position'
                             : (selectedPosition?.name ?? 'Position')
                     }
-                    saving={
-                        createMutation.isPending ||
-                        updateMutation.isPending ||
-                        deleteMutation.isPending
-                    }
+                    saving={isSaving}
                     onUpdate={setFormState}
                     onSave={handleSave}
                     onCreate={handleCreate}
@@ -397,6 +398,8 @@ export default function Page() {
             </div>
         </Panel>
     )
+
+    return renderWholePage()
 }
 
 function PermissionRows() {

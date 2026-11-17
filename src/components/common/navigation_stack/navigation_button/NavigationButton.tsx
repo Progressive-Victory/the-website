@@ -80,121 +80,115 @@ export function NavigationButton({
         toggle: handleGroupTagClick,
     } = useCollapse({ deps: [groupContent] })
 
-    return (
-        <div
-            className={cn(
-                styles.item,
-                isCardButton && styles.cardItem,
-                isAccountButton && styles.accountItem,
-                active ? styles.itemActive : styles.itemInactive,
-                active &&
-                    indicatorDirection === 'up' &&
-                    styles.itemActiveFromUp,
-                active &&
-                    indicatorDirection === 'down' &&
-                    styles.itemActiveFromDown,
-                className
-            )}
-            style={style}
-        >
-            <div className={styles.itemHeader}>
-                <Link
-                    aria-label={ariaLabel}
-                    aria-current={active ? 'page' : undefined}
-                    className={cn(
-                        isCardButton ? styles.cardLink : styles.link,
-                        isAccountButton && styles.accountLink,
-                        hasSubTags && styles.linkWithSubTags,
-                        classNames?.link
-                    )}
-                    data-indicator-target={
-                        showIndicator && hasActiveGroupChild && !isGroupOpen
-                            ? 'true'
-                            : undefined
-                    }
-                    data-show-indicator={showIndicator ? undefined : 'false'}
-                    href={href}
-                    onClick={onClick}
-                    title={label}
-                >
-                    {hasIcon && (
-                        <span
-                            className={cn(
-                                styles.iconSection,
-                                isAccountButton && styles.accountIconSection
-                            )}
-                            aria-hidden="true"
-                        >
-                            {IconComponent ? (
-                                <IconComponent size={isCardButton ? 20 : 19} />
-                            ) : (
-                                (icon as ReactNode)
-                            )}
-                        </span>
-                    )}
+    const getItemClassName = () =>
+        cn(
+            styles.item,
+            isCardButton && styles.cardItem,
+            isAccountButton && styles.accountItem,
+            active ? styles.itemActive : styles.itemInactive,
+            active && indicatorDirection === 'up' && styles.itemActiveFromUp,
+            active &&
+                indicatorDirection === 'down' &&
+                styles.itemActiveFromDown,
+            className
+        )
 
-                    <span
-                        className={cn(
-                            styles.labelSection,
-                            hasSubtitle &&
-                                !isAccountButton &&
-                                styles.labelSectionWithSubtitle,
-                            isAccountButton && styles.accountText,
-                            classNames?.label
-                        )}
-                    >
-                        <span className={styles.labelText}>{label}</span>
-                        {subtitle && (
-                            <span
-                                className={cn(
-                                    !isAccountButton && styles.subtitleSection,
-                                    isAccountButton && styles.accountSubtitle
-                                )}
-                            >
-                                {subtitle}
-                            </span>
-                        )}
-                        {labelPill && (
-                            <span className={styles.labelPill}>
-                                {labelPill}
-                            </span>
+    const getLinkClassName = () =>
+        cn(
+            isCardButton ? styles.cardLink : styles.link,
+            isAccountButton && styles.accountLink,
+            hasSubTags && styles.linkWithSubTags,
+            classNames?.link
+        )
+
+    const getIconClassName = () =>
+        cn(styles.iconSection, isAccountButton && styles.accountIconSection)
+
+    const renderItemHeader = () => (
+        <div className={styles.itemHeader}>
+            <Link
+                aria-label={ariaLabel}
+                aria-current={active ? 'page' : undefined}
+                className={getLinkClassName()}
+                data-indicator-target={
+                    showIndicator && hasActiveGroupChild && !isGroupOpen
+                        ? 'true'
+                        : undefined
+                }
+                data-show-indicator={showIndicator ? undefined : 'false'}
+                href={href}
+                onClick={onClick}
+                title={label}
+            >
+                {hasIcon && (
+                    <span className={getIconClassName()} aria-hidden="true">
+                        {IconComponent ? (
+                            <IconComponent size={isCardButton ? 20 : 19} />
+                        ) : (
+                            (icon as ReactNode)
                         )}
                     </span>
+                )}
 
-                    <TagSection
-                        buttonType={buttonType}
-                        tag={tag}
-                        isAccountButton={isAccountButton}
-                        isCardButton={isCardButton}
-                        hasActiveGroupChild={hasActiveGroupChild}
-                        isGroupOpen={isGroupOpen}
-                        onGroupTagClick={handleGroupTagClick}
-                    />
-
-                    {description && (
-                        <span className={styles.description}>
-                            {description}
+                <span
+                    className={cn(
+                        styles.labelSection,
+                        hasSubtitle &&
+                            !isAccountButton &&
+                            styles.labelSectionWithSubtitle,
+                        isAccountButton && styles.accountText,
+                        classNames?.label
+                    )}
+                >
+                    <span className={styles.labelText}>{label}</span>
+                    {subtitle && (
+                        <span
+                            className={cn(
+                                !isAccountButton && styles.subtitleSection,
+                                isAccountButton && styles.accountSubtitle
+                            )}
+                        >
+                            {subtitle}
                         </span>
                     )}
-
-                    {hasSubTags && (
-                        <span className={styles.subTagRow}>
-                            {subTags.map((subTag, index) => (
-                                <span
-                                    key={`${subTag.label}-${index}`}
-                                    className={cn(
-                                        styles.subTag,
-                                        subTag.className
-                                    )}
-                                >
-                                    {subTag.label}
-                                </span>
-                            ))}
-                        </span>
+                    {labelPill && (
+                        <span className={styles.labelPill}>{labelPill}</span>
                     )}
-                </Link>
-            </div>
+                </span>
 
+                <TagSection
+                    buttonType={buttonType}
+                    tag={tag}
+                    isAccountButton={isAccountButton}
+                    isCardButton={isCardButton}
+                    hasActiveGroupChild={hasActiveGroupChild}
+                    isGroupOpen={isGroupOpen}
+                    onGroupTagClick={handleGroupTagClick}
+                />
+
+                {description && (
+                    <span className={styles.description}>{description}</span>
+                )}
+
+                {hasSubTags && (
+                    <span className={styles.subTagRow}>
+                        {subTags.map((subTag, index) => (
+                            <span
+                                key={`${subTag.label}-${index}`}
+                                className={cn(styles.subTag, subTag.className)}
+                            >
+                                {subTag.label}
+                            </span>
+                        ))}
+                    </span>
+                )}
+            </Link>
+        </div>
+    )
+
+    const renderComponent = () => (
+        <div className={getItemClassName()} style={style}>
+            {renderItemHeader()}
             {buttonType === 'group' && shouldRenderGroupChildren && (
                 <div
                     className={styles.groupChildrenClip}
@@ -215,4 +209,6 @@ export function NavigationButton({
             )}
         </div>
     )
+
+    return renderComponent()
 }
