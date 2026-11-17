@@ -10,6 +10,7 @@ import {
     ActBlueDonor,
     Role,
     UpdateHistory,
+    UpdateHistoryType,
     User,
     zDiscordUser,
 } from 'pv-contracts/data'
@@ -24,60 +25,165 @@ export interface HistoryViewProps {
     makeTitle: (user: User) => string
 }
 
-interface HistoryEntry {
+interface HistoryEvent {
     key: string
     when: Date
     whoId: number | null
+    source: string | null
+    changes: string[]
     account?: UpdateHistory<User>
     donor?: UpdateHistory<ActBlueDonor>
 }
 
+interface HistoryEntry extends Omit<HistoryEvent, 'changes'> {
+    latest: Date
+    changes: Set<string>
+}
+
 const DAY_MS = 24 * 60 * 60 * 1000
 
-// One save can write account and donor history separately, a few requests apart
+// One save fans out into several API writes a few requests apart
 const SAME_CHANGE_WINDOW_MS = 5000
 
-function buildHistoryEntries(user: User) {
-    const updates = [
-        ...(user.history ?? []).map((account) => ({
-            update: account,
-            account,
-            donor: undefined,
-        })),
-        ...(user.donorHistory ?? []).map((donor) => ({
-            update: donor,
-            account: undefined,
-            donor,
-        })),
-    ].sort(
-        (a, b) =>
-            a.update.historyWhenUpdatedUtc.getTime() -
-            b.update.historyWhenUpdatedUtc.getTime()
+const HISTORY_META_KEYS = new Set([
+    'historyId',
+    'historyType',
+    'historyDataSource',
+    'historyWhoUpdatedId',
+    'historyWhenUpdatedUtc',
+])
+
+const isSystem = (whoId: number | null) => !whoId
+
+function snapshotOf(value: object, ignoredKeys: string[] = []) {
+    return JSON.stringify(
+        Object.entries(value).filter(
+            ([key]) => !HISTORY_META_KEYS.has(key) && !ignoredKeys.includes(key)
+        )
     )
+}
+
+function byTime<T extends { historyWhenUpdatedUtc: Date }>(updates: T[]) {
+    return updates
+        .slice()
+        .sort(
+            (a, b) =>
+                a.historyWhenUpdatedUtc.getTime() -
+                b.historyWhenUpdatedUtc.getTime()
+        )
+}
+
+function accountEvents(history: UpdateHistory<User>[]) {
+    let previous: string | undefined
+
+    return byTime(history).flatMap<HistoryEvent>((account) => {
+        const snapshot = snapshotOf(account)
+        if (snapshot === previous) return []
+        previous = snapshot
+
+        const created = account.historyType === UpdateHistoryType.Inserted
+        return {
+            key: `account-${account.historyId}`,
+            when: account.historyWhenUpdatedUtc,
+            whoId: account.historyWhoUpdatedId,
+            source: account.historyDataSource,
+            changes: [created ? 'created Account' : 'updated Account'],
+            account,
+        }
+    })
+}
+
+function describeDonorChange(
+    donor: UpdateHistory<ActBlueDonor>,
+    previous: UpdateHistory<ActBlueDonor> | undefined,
+    userId: number
+) {
+    const wasLinked = previous?.userId === userId
+    const isLinked = donor.userId === userId
+    const changes: string[] = []
+
+    if (isLinked && !wasLinked) changes.push('linked Donor')
+    if (wasLinked && !isLinked) changes.push('unlinked Donor')
+    if (!previous) return changes
+
+    const donorFields = ['membershipData', 'userId']
+    if (snapshotOf(donor, donorFields) !== snapshotOf(previous, donorFields))
+        changes.push('updated Donor')
+
+    const membershipChanged =
+        JSON.stringify(donor.membershipData ?? null) !==
+        JSON.stringify(previous.membershipData ?? null)
+    if (membershipChanged) changes.push('updated Membership')
+
+    return changes
+}
+
+function donorEvents(history: UpdateHistory<ActBlueDonor>[], userId: number) {
+    const previousByEmail = new Map<string, UpdateHistory<ActBlueDonor>>()
+
+    return byTime(history).flatMap<HistoryEvent>((donor) => {
+        const previous = previousByEmail.get(donor.email)
+        previousByEmail.set(donor.email, donor)
+
+        const changes = describeDonorChange(donor, previous, userId)
+        if (!changes.length) return []
+
+        // The API stamps membership writes onto a donor row without updating its source
+        const sourceIsReal =
+            previous &&
+            changes.some((change) => change !== 'updated Membership')
+
+        return {
+            key: `donor-${donor.historyId}`,
+            when: donor.historyWhenUpdatedUtc,
+            whoId: donor.historyWhoUpdatedId,
+            source: sourceIsReal ? donor.historyDataSource : null,
+            changes,
+            donor,
+        }
+    })
+}
+
+function canShareEntry(entry: HistoryEntry, event: HistoryEvent) {
+    const withinWindow =
+        event.when.getTime() - entry.latest.getTime() <= SAME_CHANGE_WINDOW_MS
+    const conflictingActors =
+        entry.whoId !== event.whoId &&
+        !isSystem(entry.whoId) &&
+        !isSystem(event.whoId)
+
+    return withinWindow && !conflictingActors
+}
+
+function buildHistoryEntries(user: User) {
+    const events = [
+        ...accountEvents(user.history ?? []),
+        ...donorEvents(user.donorHistory ?? [], user.id),
+    ].sort((a, b) => a.when.getTime() - b.when.getTime())
 
     const entries: HistoryEntry[] = []
 
-    for (const { update, account, donor } of updates) {
+    for (const event of events) {
         const last = entries.at(-1)
-        const when = update.historyWhenUpdatedUtc
 
-        if (
-            last?.whoId === update.historyWhoUpdatedId &&
-            when.getTime() - last.when.getTime() <= SAME_CHANGE_WINDOW_MS &&
-            !(account && last.account) &&
-            !(donor && last.donor)
-        ) {
-            last.account ??= account
-            last.donor ??= donor
+        if (last && canShareEntry(last, event)) {
+            if (isSystem(last.whoId) && !isSystem(event.whoId)) {
+                last.whoId = event.whoId
+                last.source = event.source
+            }
+            if (!isSystem(event.whoId)) last.source ??= event.source
+
+            event.changes.forEach((change) => last.changes.add(change))
+            last.latest = event.when
+            last.account = event.account ?? last.account
+            last.donor = event.donor ?? last.donor
             continue
         }
 
         entries.push({
-            key: `${account ? 'account' : 'donor'}-${update.historyId}`,
-            when,
-            whoId: update.historyWhoUpdatedId,
-            account,
-            donor,
+            ...event,
+            latest: event.when,
+            changes: new Set(event.changes),
         })
     }
 
@@ -167,7 +273,7 @@ export function HistoryView({
     const selected = entries.find((entry) => entry.key === selectedKey)
 
     const updaterIds = Array.from(
-        new Set(entries.flatMap((entry) => entry.whoId ?? []))
+        new Set(entries.flatMap((entry) => (entry.whoId ? [entry.whoId] : [])))
     )
 
     const updaterDiscordQueries = useQueries({
@@ -191,7 +297,7 @@ export function HistoryView({
     })
 
     const updateLabel = (historyWhoUpdatedId: number | null) => {
-        if (historyWhoUpdatedId == null) return 'Unknown'
+        if (!historyWhoUpdatedId) return 'System'
 
         const username = updaterUsernameById.get(historyWhoUpdatedId)
         if (username) return `@${username}`
@@ -199,25 +305,17 @@ export function HistoryView({
         return `User #${historyWhoUpdatedId}`
     }
 
-    const describeEntry = ({ whoId, account, donor }: HistoryEntry) => {
-        const targets = [account && 'Account', donor && 'Donor']
-            .filter(Boolean)
-            .join(' & ')
-        const source =
-            account?.historyDataSource ?? donor?.historyDataSource ?? null
-
-        return (
-            <>
-                <span className={styles.historyEntryActor}>
-                    {updateLabel(whoId)}
-                </span>
-                <span className={styles.historyEntryPrefix}>
-                    {` updated ${targets}`}
-                    {source && ` via ${source}`}
-                </span>
-            </>
-        )
-    }
+    const describeEntry = ({ whoId, source, changes }: HistoryEntry) => (
+        <>
+            <span className={styles.historyEntryActor}>
+                {updateLabel(whoId)}
+            </span>
+            <span className={styles.historyEntryPrefix}>
+                {` ${[...changes].join(', ')}`}
+                {source && ` via ${source}`}
+            </span>
+        </>
+    )
 
     if (isRefetching) return <HistoryMessage>Refreshing…</HistoryMessage>
     if (!entries.length)
