@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 'use client'
 
 import { MemberBanner } from './MemberBanner'
