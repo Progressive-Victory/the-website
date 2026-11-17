@@ -1,6 +1,6 @@
 'use client'
 
-import styles from './collapsibleSection.module.css'
+import styles from './CollapsibleSection.module.css'
 import { cn } from '@/util'
 import { useState } from 'react'
 import { FiChevronDown, FiChevronLeft } from 'react-icons/fi'
