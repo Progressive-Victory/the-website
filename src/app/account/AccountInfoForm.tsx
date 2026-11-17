@@ -60,8 +60,13 @@ export const AccountInfoForm = ({
     const [isEditing, setIsEditing] = useState(false)
 
     const handleFormSave = (user: User) => {
+        const hasFullName = Boolean(
+            normalizeText(user.firstName) && normalizeText(user.lastName)
+        )
+
         const normalizedUser = {
             ...user,
+            nameConfirmed: hasFullName ? true : user.nameConfirmed,
             address: {
                 ...user.address,
                 addressLine1:
@@ -74,7 +79,14 @@ export const AccountInfoForm = ({
             },
         }
 
-        void onSave(normalizedUser)
+        const confirmedUser = {
+            ...normalizedUser,
+            addressConfirmed: hasAddressForShipping(normalizedUser)
+                ? true
+                : normalizedUser.addressConfirmed,
+        }
+
+        void onSave(confirmedUser)
     }
 
     const showAddressLine2 =
@@ -93,7 +105,7 @@ export const AccountInfoForm = ({
         return trimmed.length ? trimmed : null
     }
 
-    return (
+    const renderWholePage = () => (
         <div className={styles.contentBackground}>
             <Form<User>
                 form={user}
@@ -309,4 +321,6 @@ export const AccountInfoForm = ({
             </Form>
         </div>
     )
+
+    return renderWholePage()
 }

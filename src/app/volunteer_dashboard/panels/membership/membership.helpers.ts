@@ -390,11 +390,79 @@ export const computeRecurringSummary = (
     }
 }
 
+const mapUserFields = ({ user }: MembershipsResponsePacket) => ({
+    userId: user?.id,
+    userFirstName: user?.firstName ?? undefined,
+    userLastName: user?.lastName ?? undefined,
+    userName:
+        joinName(user?.firstName, user?.lastName) ??
+        user?.preferredName ??
+        undefined,
+    userAddress: formatUserAddress(user?.address),
+    userAddressParts: user?.address,
+    userMatched: Boolean(user),
+})
+
+const mapDonorFields = ({ donor }: MembershipsResponsePacket) => ({
+    firstName: donor.firstname,
+    lastName: donor.lastname,
+    donorName: joinName(donor.firstname, donor.lastname),
+    address1: donor.addr1 ?? undefined,
+    city: donor.city ?? undefined,
+    state: donor.state ?? undefined,
+    zip: donor.zip ?? undefined,
+    country: donor.country ?? undefined,
+    donorAddress: formatDonorAddress(donor),
+    beganMembership: donor.contributions?.[0]?.createdAt
+        ?.toISOString()
+        .slice(0, 10),
+    numberOfContributions: donor.contributions?.length,
+})
+
+const mapContactFields = ({ donor, user }: MembershipsResponsePacket) => {
+    const discordUser = user?.discordUsers?.[0]
+    return {
+        discordUsername: discordUser?.username,
+        phone: user?.phone ?? donor.phone ?? undefined,
+        userPhone: user?.phone ?? undefined,
+        donorPhone: donor.phone ?? undefined,
+        email: user?.email ?? discordUser?.email ?? donor.email,
+        donorEmail: donor.email,
+        userEmail: user?.email ?? undefined,
+        discordEmail: discordUser?.email ?? undefined,
+    }
+}
+
+const mapMembershipFields = ({ donor }: MembershipsResponsePacket) => {
+    const membership = donor.membershipData
+    return {
+        shirtSize: membership?.shirtSize ?? undefined,
+        isMember: membership?.duesPayingMember,
+        eligibleForBenefits: membership?.membershipBenefitEligible,
+        cardPrinted: membership?.cardPrinted ?? false,
+        labelPrinted: membership?.labelPrinted ?? false,
+        cardPacked: membership?.itemsPackaged ?? false,
+        benefitShipped: membership?.benefitsShipped ?? false,
+    }
+}
+
+const mapConfirmationFields = ({ donor, user }: MembershipsResponsePacket) => {
+    const membership = donor.membershipData
+    return {
+        discordConfirmed:
+            membership?.discordConfirmed ?? Boolean(user?.discordUsers?.length),
+        nameConfirmed:
+            membership?.nameConfirmed ?? user?.nameConfirmed ?? false,
+        addressConfirmed:
+            membership?.addressConfirmed ?? user?.addressConfirmed ?? false,
+    }
+}
+
 export const mapPacketToMember = (
     packet: MembershipsResponsePacket,
     index: number
 ): Member => {
-    const { donor, user, customField } = packet
+    const { donor, customField } = packet
     const membership = donor.membershipData
     const cardStatus = membership?.membershipCardStatus
     const merchStatus = membership?.membershipMerchStatus
@@ -408,60 +476,21 @@ export const mapPacketToMember = (
     return {
         packet,
         id: index + 1,
-        userId: user?.id,
-        firstName: donor.firstname,
-        lastName: donor.lastname,
-        userFirstName: user?.firstName ?? undefined,
-        userLastName: user?.lastName ?? undefined,
-        userName:
-            joinName(user?.firstName, user?.lastName) ??
-            user?.preferredName ??
-            undefined,
-        donorName: joinName(donor.firstname, donor.lastname),
-        discordUsername: user?.discordUsers?.[0]?.username,
+        ...mapUserFields(packet),
+        ...mapDonorFields(packet),
+        ...mapContactFields(packet),
+        ...mapMembershipFields(packet),
+        ...mapConfirmationFields(packet),
         contributionDiscord:
             contributionDiscord === '' ? undefined : contributionDiscord,
-        phone: user?.phone ?? donor.phone ?? undefined,
-        userPhone: user?.phone ?? undefined,
-        donorPhone: donor.phone ?? undefined,
-        email: user?.email ?? user?.discordUsers?.[0]?.email ?? donor.email,
-        donorEmail: donor.email,
-        userEmail: user?.email ?? undefined,
-        discordEmail: user?.discordUsers?.[0]?.email ?? undefined,
-        address1: donor.addr1 ?? undefined,
-        city: donor.city ?? undefined,
-        state: donor.state ?? undefined,
-        zip: donor.zip ?? undefined,
-        country: donor.country ?? undefined,
-        userAddress: formatUserAddress(user?.address),
-        userAddressParts: user?.address,
-        donorAddress: formatDonorAddress(donor),
-        shirtSize: membership?.shirtSize ?? undefined,
-        isMember: membership?.duesPayingMember,
-        eligibleForBenefits: membership?.membershipBenefitEligible,
         membershipTier: membershipTiers.find(
             (tier) => tier === customField?.label
         ),
-        beganMembership: donor.contributions?.[0]?.createdAt
-            ?.toISOString()
-            .slice(0, 10),
-        numberOfContributions: donor.contributions?.length,
         contributionRecords,
         recurringSummary,
-        discordConfirmed:
-            membership?.discordConfirmed ?? Boolean(user?.discordUsers?.length),
-        nameConfirmed:
-            membership?.nameConfirmed ?? user?.nameConfirmed ?? false,
-        addressConfirmed:
-            membership?.addressConfirmed ?? user?.addressConfirmed ?? false,
-        cardPrinted: membership?.cardPrinted ?? false,
-        labelPrinted: membership?.labelPrinted ?? false,
-        cardPacked: membership?.itemsPackaged ?? false,
-        benefitShipped: membership?.benefitsShipped ?? false,
         membershipCardStatus: cardStatus,
         membershipMerchStatus: merchStatus,
         packageShipped: toPackageShipped(cardStatus),
-        userMatched: Boolean(user),
     }
 }
 
