@@ -305,8 +305,6 @@ export function Message({
 
                 {renderEllipsis()}
             </div>
-
-            <div className={styles.text}>{children}</div>
         </div>
     )
 
@@ -367,99 +365,105 @@ export function Message({
                             {renderHeader()}
 
                             <div className={styles.text}>{children}</div>
-                        </div>
 
-                        {image && (
-                            <div className={styles.mediaWrap}>
-                                <Image
-                                    src={image}
-                                    alt={username}
-                                    className={styles.media}
-                                    fill
-                                    sizes="100%"
-                                    style={{
-                                        objectPosition: imgPosition,
-                                        transform: `translate(${imgOffsetX}%, ${imgOffsetY}%) scale(${imgZoom})`,
-                                        transformOrigin: imgPosition,
-                                    }}
-                                />
-                            </div>
-                        )}
+                            {image && (
+                                <div className={styles.mediaWrap}>
+                                    <Image
+                                        src={image}
+                                        alt={username}
+                                        className={styles.media}
+                                        fill
+                                        sizes="100%"
+                                        style={{
+                                            objectPosition: imgPosition,
+                                            transform: `translate(${imgOffsetX}%, ${imgOffsetY}%) scale(${imgZoom})`,
+                                            transformOrigin: imgPosition,
+                                        }}
+                                    />
+                                </div>
+                            )}
 
-                        {botDivider && <hr className={styles.divider} />}
+                            {botDivider && <hr className={styles.divider} />}
 
-                        {/* Bottom Row */}
-                        <div className={styles.bottomRow}>
-                            <div className={styles.bottomLeft}>
-                                {botLeftContent && botLeftContent}
-                            </div>
+                            {/* Bottom Row */}
+                            <div className={styles.bottomRow}>
+                                <div className={styles.bottomLeft}>
+                                    {botLeftContent && botLeftContent}
+                                </div>
 
-                            <div className={styles.actions}>
-                                <button
-                                    type="button"
-                                    className={styles.action}
-                                    onClick={() => setClickedBubble((v) => !v)}
-                                    aria-pressed={clickedBubble}
-                                    aria-label="Comment"
-                                >
-                                    {clickedBubble ? (
-                                        <HiChatBubbleLeftRight
-                                            className={cn(
-                                                styles.iconSolid,
-                                                styles.bubbleActive,
-                                                styles.iconGrowPop
-                                            )}
-                                        />
-                                    ) : (
-                                        <HiOutlineChatBubbleLeftRight
-                                            className={styles.icon}
-                                        />
-                                    )}
-                                </button>
+                                <div className={styles.actions}>
+                                    <button
+                                        type="button"
+                                        className={styles.action}
+                                        onClick={() =>
+                                            setClickedBubble((v) => !v)
+                                        }
+                                        aria-pressed={clickedBubble}
+                                        aria-label="Comment"
+                                    >
+                                        {clickedBubble ? (
+                                            <HiChatBubbleLeftRight
+                                                className={cn(
+                                                    styles.iconSolid,
+                                                    styles.bubbleActive,
+                                                    styles.iconGrowPop
+                                                )}
+                                            />
+                                        ) : (
+                                            <HiOutlineChatBubbleLeftRight
+                                                className={styles.icon}
+                                            />
+                                        )}
+                                    </button>
 
-                                <button
-                                    type="button"
-                                    className={styles.action}
-                                    onClick={() => setClickedShare((v) => !v)}
-                                    aria-pressed={clickedShare}
-                                    aria-label="Share"
-                                >
-                                    {clickedShare ? (
-                                        <HiArrowUpOnSquare
-                                            className={cn(
-                                                styles.iconSolid,
-                                                styles.shareActive,
-                                                styles.iconGrowPop
-                                            )}
-                                        />
-                                    ) : (
-                                        <HiOutlineArrowUpOnSquare
-                                            className={styles.icon}
-                                        />
-                                    )}
-                                </button>
+                                    <button
+                                        type="button"
+                                        className={styles.action}
+                                        onClick={() =>
+                                            setClickedShare((v) => !v)
+                                        }
+                                        aria-pressed={clickedShare}
+                                        aria-label="Share"
+                                    >
+                                        {clickedShare ? (
+                                            <HiArrowUpOnSquare
+                                                className={cn(
+                                                    styles.iconSolid,
+                                                    styles.shareActive,
+                                                    styles.iconGrowPop
+                                                )}
+                                            />
+                                        ) : (
+                                            <HiOutlineArrowUpOnSquare
+                                                className={styles.icon}
+                                            />
+                                        )}
+                                    </button>
 
-                                <button
-                                    type="button"
-                                    className={styles.action}
-                                    onClick={() => setClickedHeart((v) => !v)}
-                                    aria-pressed={clickedHeart}
-                                    aria-label="Like"
-                                >
-                                    {clickedHeart ? (
-                                        <HiHeart
-                                            className={cn(
-                                                styles.iconSolid,
-                                                styles.heartActive,
-                                                styles.iconGrowPop
-                                            )}
-                                        />
-                                    ) : (
-                                        <HiOutlineHeart
-                                            className={styles.icon}
-                                        />
-                                    )}
-                                </button>
+                                    <button
+                                        type="button"
+                                        className={styles.action}
+                                        onClick={() =>
+                                            setClickedHeart((v) => !v)
+                                        }
+                                        aria-pressed={clickedHeart}
+                                        aria-label="Like"
+                                    >
+                                        {clickedHeart ? (
+                                            <HiHeart
+                                                className={cn(
+                                                    styles.iconSolid,
+                                                    styles.heartActive,
+                                                    styles.iconGrowPop
+                                                )}
+                                            />
+                                        ) : (
+                                            <HiOutlineHeart
+                                                className={styles.icon}
+                                            />
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
