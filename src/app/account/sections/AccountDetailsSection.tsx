@@ -13,7 +13,7 @@ import { useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
 import { User } from 'pv-contracts/data'
 import { zDiscordUserIsInServerResponse } from 'pv-contracts/responses'
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useMemo, useState } from 'react'
 import { IoClose } from 'react-icons/io5'
 
 interface AccountDetailsSectionProps {
@@ -39,7 +39,6 @@ export function AccountDetailsSection({
     onDonorLinkSubmit,
 }: AccountDetailsSectionProps) {
     const { ready, onGet } = useFetch()
-    const [updatedUser, setUpdatedUser] = useState(userData)
     const discordUserId = userData.discordUsers?.[0]?.id ?? null
 
     const isInServerResult = useQuery({
@@ -54,10 +53,6 @@ export function AccountDetailsSection({
                       )
                 : skipToken,
     })
-
-    useEffect(() => {
-        setUpdatedUser(userData)
-    }, [userData])
 
     const normalizeEmail = (value?: string | null) =>
         (value ?? '').trim().toLowerCase()
@@ -119,14 +114,18 @@ export function AccountDetailsSection({
     })
     const userHasDonor = !!userData.donors?.length
 
-    useEffect(() => {
-        if (!pendingLinkEmail) return
+    /**
+     * The pendingLinkEmail will be set for one render during which the 
+     * matchedDonor field can be populated from the donors list.
+     * Once populated, the address relevant state will update and the
+     * pendingLinkEmail will be cleared, thus clearing the matched donor.
+     * This will open the address modal.
+     * */
+    const matchedDonor = useMemo(() => (userData.donors?.find(
+        (donor) => normalizeEmail(donor.email) === pendingLinkEmail
+    )), [pendingLinkEmail, userData.donors])
 
-        const matchedDonor = userData.donors?.find(
-            (donor) => normalizeEmail(donor.email) === pendingLinkEmail
-        )
-        if (!matchedDonor) return
-
+    if (matchedDonor) {
         setAddressDraft({
             ...userData.address,
             addressLine1: matchedDonor.addr1 ?? userData.address.addressLine1,
@@ -138,7 +137,7 @@ export function AccountDetailsSection({
         setShowDonorLinkForm(false)
         setShowAddressConfirmModal(true)
         setPendingLinkEmail(null)
-    }, [pendingLinkEmail, userData.address, userData.donors])
+    }
 
     const handleChangeDonorEmail = (e: ChangeEvent<HTMLInputElement>) => {
         setDonorLinkForm({
@@ -569,28 +568,27 @@ export function AccountDetailsSection({
 
                     <div className={styles.detailsFormPanel}>
                         <AccountInfoForm
-                            user={updatedUser}
+                            user={userData}
                             onSave={onSave}
-                            onUpdateUser={setUpdatedUser}
                             hasMatchedDonor={userHasDonor}
                             subtitle={
-                                updatedUser.discordUsers?.[0]?.username
-                                    ? `@${updatedUser.discordUsers[0].username}`
+                                userData.discordUsers?.[0]?.username
+                                    ? `@${userData.discordUsers[0].username}`
                                     : undefined
                             }
                             avatar={
                                 <DiscordAvatar
                                     discordUserId={
-                                        updatedUser.discordUsers?.[0]?.id
+                                        userData.discordUsers?.[0]?.id
                                     }
                                     imageId={
-                                        updatedUser.discordUsers?.[0]?.image
+                                        userData.discordUsers?.[0]?.image
                                     }
                                     size={48}
                                 />
                             }
                             title={
-                                `${updatedUser.firstName ?? ''} ${updatedUser.lastName ?? ''}`.trim() ||
+                                `${userData.firstName ?? ''} ${userData.lastName ?? ''}`.trim() ||
                                 'Account'
                             }
                         />

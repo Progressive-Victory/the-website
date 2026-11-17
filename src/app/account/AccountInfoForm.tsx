@@ -15,7 +15,6 @@ import { useState } from 'react'
 interface AccountInfoFormProps {
     user: User
     onSave: (user: User) => void | Promise<void>
-    onUpdateUser: (user: User) => void
     subtitle?: string
     avatar?: React.ReactNode
     title?: string
@@ -53,7 +52,6 @@ const stateOptionsWithEmpty = [
 export const AccountInfoForm = ({
     user,
     onSave,
-    onUpdateUser,
     subtitle,
     avatar,
     title = 'Account Information',
@@ -76,7 +74,6 @@ export const AccountInfoForm = ({
             },
         }
 
-        onUpdateUser(normalizedUser)
         void onSave(normalizedUser)
     }
 

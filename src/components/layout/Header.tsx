@@ -697,9 +697,9 @@ export function Header() {
         return () => document.removeEventListener('keydown', onKeyDown)
     }, [])
 
-    useEffect(() => {
-        if (!isOpen) setMobileSubnavItem(null)
-    }, [isOpen])
+    if (!isOpen && mobileSubnavItem) { // Clear mobile subnav if closed.
+        setMobileSubnavItem(null)
+    }
 
     useEffect(() => {
         if (typeof window === 'undefined') return

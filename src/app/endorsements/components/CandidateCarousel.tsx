@@ -51,7 +51,7 @@ export function CandidateCarousel({
     }, [candidates, trackLength, visibleRange])
 
     useEffect(() => {
-        setMounted(true)
+        setMounted(true) // Problematic
         let last = performance.now()
         const speed = 0.1
 

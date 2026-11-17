@@ -281,9 +281,9 @@ export function SidebarListFooter({
         }
     }
 
-    useEffect(() => {
+    useEffect(() => { // This is problematic.
         setValue((page + 1).toString())
-    }, [page])
+    }, [page]) // When page changes, update the display value to be the new value + 1; (value is generally page+1, but can be manually set to change the page.)
 
     useEffect(() => {
         if (page < 0) onPageChange(0)

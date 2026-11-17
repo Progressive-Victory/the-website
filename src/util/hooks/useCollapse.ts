@@ -26,7 +26,6 @@ export function useCollapse(options: UseCollapseOptions = {}) {
 
     useLayoutEffect(() => {
         if (!shouldRender) {
-            setContentHeight(0)
             return
         }
 
@@ -76,6 +75,7 @@ export function useCollapse(options: UseCollapseOptions = {}) {
             setIsOpen(false)
             closeTimeoutRef.current = setTimeout(() => {
                 setShouldRender(false)
+                setContentHeight(0)
                 closeTimeoutRef.current = null
             }, animationMs)
             return
