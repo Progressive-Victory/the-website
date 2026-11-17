@@ -41,6 +41,8 @@ const eventSortFields: { value: keyof DiscordEvent; label: string }[] = [
     { value: 'name', label: 'Name' },
 ]
 
+// TODO: make it stop please
+// eslint-disable-next-line complexity
 export default function Page() {
     const navParams = useSearchParams()
     const eventQueries = useEventQueries()
@@ -126,8 +128,48 @@ export default function Page() {
         [DiscordEventStatus.Cancelled]: tagStyles.tagRed,
     }
 
-    const renderDetailsHeader = () =>
-        eventQuery.data && (
+    const renderDetailsHeader = () => {
+        if (!eventQuery.data) return
+
+        const userInfo = (
+            <div className={styles.userInfo}>
+                <h1 className={memberStyles.headerUserName}>
+                    {keyOccurrenceOf(eventQuery.data.event)?.name}
+                </h1>
+                <h2 className={memberStyles.headerUserUsername}>
+                    {keyOccurrenceOf(eventQuery.data.event)
+                        ?.scheduledStartUtc &&
+                        formatDate(
+                            keyOccurrenceOf(eventQuery.data.event)!
+                                .scheduledStartUtc
+                        )}
+                </h2>
+            </div>
+        )
+        const decoration = (
+            <div className={styles.detailsEventDecorationContainer}>
+                <span
+                    className={cn(
+                        tagStyles.tag,
+                        statusTag[
+                            keyOccurrenceOf(eventQuery.data.event)?.status ??
+                                'Unknown'
+                        ]
+                    )}
+                >
+                    {getStatusName(
+                        keyOccurrenceOf(eventQuery.data.event)?.status ?? null
+                    )}
+                </span>
+                {eventQuery.data.event.recurrent && (
+                    <span className={cn(tagStyles.tag, styles.recurrent)}>
+                        Recurring
+                    </span>
+                )}
+            </div>
+        )
+
+        return (
             <div className={styles.detailsHeader}>
                 {keyOccurrenceOf(eventQuery.data.event)?.thumbnailUrl ? (
                     <Image
@@ -149,44 +191,8 @@ export default function Page() {
                     />
                 )}
                 <div className={styles.headerTop}>
-                    <div className={styles.cardStyle}>
-                        <div className={styles.userInfo}>
-                            <h1 className={memberStyles.headerUserName}>
-                                {keyOccurrenceOf(eventQuery.data.event)?.name}
-                            </h1>
-                            <h2 className={memberStyles.headerUserUsername}>
-                                {keyOccurrenceOf(eventQuery.data.event)
-                                    ?.scheduledStartUtc &&
-                                    formatDate(
-                                        keyOccurrenceOf(eventQuery.data.event)!
-                                            .scheduledStartUtc
-                                    )}
-                            </h2>
-                        </div>
-                    </div>
-                    <div className={styles.detailsEventDecorationContainer}>
-                        <span
-                            className={cn(
-                                tagStyles.tag,
-                                statusTag[
-                                    keyOccurrenceOf(eventQuery.data.event)
-                                        ?.status ?? 'Unknown'
-                                ]
-                            )}
-                        >
-                            {getStatusName(
-                                keyOccurrenceOf(eventQuery.data.event)
-                                    ?.status ?? null
-                            )}
-                        </span>
-                        {eventQuery.data.event.recurrent && (
-                            <span
-                                className={cn(tagStyles.tag, styles.recurrent)}
-                            >
-                                Recurring
-                            </span>
-                        )}
-                    </div>
+                    <div className={styles.cardStyle}>{userInfo}</div>
+                    {decoration}
                     <TabBar
                         tabs={tabs}
                         value={selectedTab}
@@ -198,6 +204,7 @@ export default function Page() {
                 </div>
             </div>
         )
+    }
 
     const sidebarFilters: SidebarListFiltersProps = {
         search,
@@ -206,6 +213,105 @@ export default function Page() {
         showSort: true,
         showLimit: true,
     }
+
+    const sidebarBody = (
+        <>
+            <div className={styles.filterTagsWrapper}>
+                <FilterTags
+                    tags={eventFilterTags}
+                    activeTag={activeFilterTag}
+                    onChange={setActiveFilterTag}
+                />
+            </div>
+            <SidebarBody<DiscordEventWithOccurrences>
+                items={filteredEvents}
+                isLoading={eventsQuery.isPending}
+                error={eventsQuery.error}
+                selectedKey={selectedEventId}
+                renderItem={(event: DiscordEventWithOccurrences) => ({
+                    key: event.id,
+                    label: keyOccurrenceOf(event)?.name ?? `Event ${event.id}`,
+                    subtitle: `Scheduled: ${formatDiscordEventDate(event.createdAtUtc)}`,
+                    renderTag: (
+                        <div
+                            className={cn(
+                                styles.eventAttendeeCountTag,
+                                tagStyles.tag,
+                                statusTag[keyOccurrenceOf(event)?.status ?? 0]
+                            )}
+                        >
+                            <FaUsers size={18} />
+                            {event.userCount ?? 0}
+                        </div>
+                    ),
+                    href: `/volunteer_dashboard/panels/events?eventId=${event.id}`,
+                    onClick: (e) => {
+                        e.preventDefault()
+                        handleSelectEvent(event.id)
+                        if (!isDesktop) setSidebarMobileVisible(false)
+                    },
+                })}
+            />
+        </>
+    )
+
+    const detailsPane = (
+        <div className={styles.detailsPane}>
+            <MobileSidebarBackButton
+                label="Events"
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                onBack={() => setSidebarMobileVisible(true)}
+                className={styles.backButton}
+            />
+
+            {selectedEventId == null ? (
+                <div className={styles.emptyState}>No event selected</div>
+            ) : eventQuery.isPending ? (
+                <div className={styles.emptyState}>
+                    Loading event details...
+                </div>
+            ) : eventQuery.error ? (
+                <div className={cn(styles.emptyState, styles.errorText)}>
+                    Error: {parseErrorMessage(eventQuery.error)}
+                </div>
+            ) : (
+                eventQuery.data?.event && (
+                    <>
+                        {renderDetailsHeader()}
+                        {selectedTab === 'overview' ? (
+                            <DetailView
+                                key={selectedEventId}
+                                event={eventQuery.data?.event}
+                                keyOccurrence={keyOccurrenceOf(
+                                    eventQuery.data.event
+                                )}
+                                createdBy={eventQuery.data?.createdBy}
+                                title={
+                                    keyOccurrenceOf(eventQuery.data.event)
+                                        ?.name ?? 'Event'
+                                }
+
+                                className={styles.detailsContent}
+                            />
+                        ) : (
+                            selectedTab === 'occurrences' && (
+                                <OccurencesView
+                                    event={eventQuery.data?.event}
+                                    keyOccurrence={keyOccurrenceOf(
+                                        eventQuery.data.event
+                                    )}
+                                    title={
+                                        keyOccurrenceOf(eventQuery.data.event)
+                                            ?.name ?? 'Event'
+                                    }
+                                />
+                            )
+                        )}
+                    </>
+                )
+            )}
+        </div>
+    )
 
     return (
         <Panel
@@ -237,109 +343,9 @@ export default function Page() {
                 icon: <IoEllipsisVertical size={20} />,
                 menu: () => <SidebarListFilters {...sidebarFilters} />,
             }}
-            sidebarBody={
-                <>
-                    <div className={styles.filterTagsWrapper}>
-                        <FilterTags
-                            tags={eventFilterTags}
-                            activeTag={activeFilterTag}
-                            onChange={setActiveFilterTag}
-                        />
-                    </div>
-                    <SidebarBody<DiscordEventWithOccurrences>
-                        items={filteredEvents ?? []}
-                        isLoading={eventsQuery.isPending}
-                        error={eventsQuery.error}
-                        selectedKey={selectedEventId}
-                        renderItem={(event: DiscordEventWithOccurrences) => ({
-                            key: event.id,
-                            label:
-                                keyOccurrenceOf(event)?.name ??
-                                `Event ${event.id}`,
-                            subtitle: `Scheduled: ${formatDiscordEventDate(event.createdAtUtc)}`,
-                            renderTag: (
-                                <div
-                                    className={cn(
-                                        styles.eventAttendeeCountTag,
-                                        tagStyles.tag,
-                                        statusTag[
-                                            keyOccurrenceOf(event)?.status ?? 0
-                                        ]
-                                    )}
-                                >
-                                    <FaUsers size={18} />
-                                    {event.userCount ?? 0}
-                                </div>
-                            ),
-                            href: `/volunteer_dashboard/panels/events?eventId=${event.id}`,
-                            onClick: (e) => {
-                                e.preventDefault()
-                                handleSelectEvent(event.id ?? null)
-                                if (!isDesktop) setSidebarMobileVisible(false)
-                            },
-                        })}
-                    />
-                </>
-            }
+            sidebarBody={sidebarBody}
         >
-            <div className={styles.detailsPane}>
-                <MobileSidebarBackButton
-                    label="Events"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                    className={styles.backButton}
-                />
-
-                {selectedEventId == null && (
-                    <div className={styles.emptyState}>No event selected</div>
-                )}
-
-                {selectedEventId != null && eventQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading event details...
-                    </div>
-                )}
-
-                {selectedEventId != null && eventQuery.error && (
-                    <div className={cn(styles.emptyState, styles.errorText)}>
-                        Error: {parseErrorMessage(eventQuery.error)}
-                    </div>
-                )}
-
-                {selectedEventId != null && eventQuery.data?.event && (
-                    <>
-                        {renderDetailsHeader()}
-                        {selectedTab === 'overview' && (
-                            <DetailView
-                                key={selectedEventId}
-                                event={eventQuery.data?.event ?? null}
-                                keyOccurrence={keyOccurrenceOf(
-                                    eventQuery.data.event
-                                )}
-                                createdBy={eventQuery.data?.createdBy ?? null}
-                                title={
-                                    keyOccurrenceOf(eventQuery.data.event)
-                                        ?.name ?? 'Event'
-                                }
-
-                                className={styles.detailsContent}
-                            />
-                        )}
-                        {selectedTab === 'occurrences' && (
-                            <OccurencesView
-                                event={eventQuery.data?.event ?? null}
-                                keyOccurrence={keyOccurrenceOf(
-                                    eventQuery.data.event
-                                )}
-                                title={
-                                    keyOccurrenceOf(eventQuery.data.event)
-                                        ?.name ?? 'Event'
-                                }
-                            />
-                        )}
-                    </>
-                )}
-            </div>
+            {detailsPane}
         </Panel>
     )
 }
