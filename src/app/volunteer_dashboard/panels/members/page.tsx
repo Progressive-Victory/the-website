@@ -40,7 +40,6 @@ import {
     ActBlueDonor,
     Position,
     Role,
-    UpdateHistory,
     User,
     UserProfile,
     zActBlueDonor,
@@ -200,11 +199,6 @@ export default function Page() {
     const [selectedId, setSelectedId] = useState<number | null>(
         Number.isFinite(initialUserId) ? initialUserId : null
     )
-
-    const [selectedHistory, setSelectedHistory] =
-        useState<UpdateHistory<User> | null>(null)
-    const [selectedDonorHistory, setSelectedDonorHistory] =
-        useState<UpdateHistory<ActBlueDonor> | null>(null)
 
     const [formState, setFormState] = useState<FormState<User> | null>(null)
     const [pickingDonor, setPickingDonor] = useState<boolean>(false)
@@ -663,8 +657,6 @@ export default function Page() {
 
         setSelectedId(value.id)
 
-        setSelectedHistory(null)
-        setSelectedDonorHistory(null)
         setSelectedTab('overview')
     }
 
@@ -730,6 +722,10 @@ export default function Page() {
                 nameConfirmed: user.nameConfirmed,
                 addressConfirmed: user.addressConfirmed,
                 roles: user.roles?.map((role) => role.id),
+                metaData: {
+                    dataSource: 'Member Panel',
+                    userWhoUpdatedId: loggedInUser.data?.id,
+                },
             } satisfies UpdateUserRequest)
             if (addressIsDirty) request.address = address
 
@@ -768,6 +764,7 @@ export default function Page() {
             userQuery.data?.address,
             userQuery.data?.positions,
             positionHierarchy.data?.positions,
+            loggedInUser.data,
         ]
     )
 
@@ -778,21 +775,6 @@ export default function Page() {
         if (user.preferredName) return user.preferredName
         return user.email ?? ''
     }, [])
-
-    const normalizeMeridiem = useCallback((value: string) => {
-        return value.replace(/\s*([AP])M\b/g, (_, period: string) => {
-            return `${period.toLowerCase()}m`
-        })
-    }, [])
-
-    const makeHistoryFormTitle = useCallback(
-        (user: User | UserProfile) => {
-            const name = makeTitle(user)
-            if (!selectedHistory) return name
-            return `${name} @ ${normalizeMeridiem(selectedHistory.historyWhenUpdatedUtc.toLocaleString())}`
-        },
-        [makeTitle, normalizeMeridiem, selectedHistory]
-    )
 
     const renderDonorItem = useCallback(
         (item: ActBlueDonor, userId: number) => {
@@ -892,16 +874,12 @@ export default function Page() {
             case 'history':
                 return (
                     <HistoryView
-                        selectedId={selectedId}
+                        key={selectedId}
                         user={userQuery.data}
-                        selectedHistory={selectedHistory}
-                        onSelectHistory={setSelectedHistory}
-                        selectedDonorHistory={selectedDonorHistory}
-                        onSelectDonorHistory={setSelectedDonorHistory}
                         isRefetching={userQuery.isRefetching}
                         roles={roles}
                         positions={positionHierarchy.data?.positions ?? []}
-                        makeFormTitle={(u) => makeHistoryFormTitle(u)}
+                        makeTitle={makeTitle}
                     />
                 )
 
