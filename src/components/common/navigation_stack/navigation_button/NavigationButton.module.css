@@ -274,6 +274,25 @@
     white-space: nowrap;
 }
 
+.subtitleRow {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 0;
+    max-width: 100%;
+
+    & .subtitleSection,
+    & .accountSubtitle {
+        min-width: 0;
+    }
+
+    & .labelPill {
+        align-self: center;
+        flex-shrink: 0;
+        padding-inline: 0.3rem;
+    }
+}
+
 .subtitleSection {
     display: block;
     max-width: 100%;

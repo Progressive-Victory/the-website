@@ -1,29 +1,24 @@
 'use client'
 
 import styles from './HistoryView.module.css'
-import { MemberView } from './MemberView'
-import { CollapsibleSection } from '@/components/common'
-import { cn, DOT_SEPARATOR } from '@/util'
+import { List, ListRow, NavigationRow } from '@/components/common'
+import { BackButton } from '@/components/common/buttons'
+import { DOT_SEPARATOR } from '@/util'
 import { useFetch } from '@/util/hooks'
 import { useQueries } from '@tanstack/react-query'
 import {
     ActBlueDonor,
-    Position,
-    Role,
     UpdateHistory,
     UpdateHistoryType,
     User,
     zDiscordUser,
 } from 'pv-contracts/data'
-import { ReactNode, useState } from 'react'
+import { useState } from 'react'
 import z from 'zod'
 
 export interface HistoryViewProps {
     user: User
     isRefetching: boolean
-    roles: Role[]
-    positions: Position[]
-    makeTitle: (user: User) => string
 }
 
 interface HistoryEvent {
@@ -33,7 +28,9 @@ interface HistoryEvent {
     source: string | null
     changes: string[]
     account?: UpdateHistory<User>
+    previousAccount?: UpdateHistory<User>
     donor?: UpdateHistory<ActBlueDonor>
+    previousDonor?: UpdateHistory<ActBlueDonor>
 }
 
 interface HistoryEntry extends Omit<HistoryEvent, 'changes'> {
@@ -73,12 +70,16 @@ function byTime<T extends { historyWhenUpdatedUtc: Date }>(updates: T[]) {
 }
 
 function accountEvents(history: UpdateHistory<User>[]) {
-    let previous: string | undefined
+    let previous: UpdateHistory<User> | undefined
 
     return byTime(history).flatMap<HistoryEvent>((account) => {
-        const snapshot = snapshotOf(account)
-        if (snapshot === previous) return []
-        previous = snapshot
+        const previousAccount = previous
+        previous = account
+        if (
+            previousAccount &&
+            snapshotOf(account) === snapshotOf(previousAccount)
+        )
+            return []
 
         const created = account.historyType === UpdateHistoryType.Inserted
         return {
@@ -88,6 +89,7 @@ function accountEvents(history: UpdateHistory<User>[]) {
             source: account.historyDataSource,
             changes: [created ? 'created Account' : 'updated Account'],
             account,
+            previousAccount,
         }
     })
 }
@@ -139,6 +141,7 @@ function donorEvents(history: UpdateHistory<ActBlueDonor>[], userId: number) {
             source: sourceIsReal ? donor.historyDataSource : null,
             changes,
             donor,
+            previousDonor: previous,
         }
     })
 }
@@ -174,6 +177,10 @@ function buildHistoryEntries(user: User) {
 
             event.changes.forEach((change) => last.changes.add(change))
             last.latest = event.when
+            if (event.account && !last.account)
+                last.previousAccount = event.previousAccount
+            if (event.donor && !last.donor)
+                last.previousDonor = event.previousDonor
             last.account = event.account ?? last.account
             last.donor = event.donor ?? last.donor
             continue
@@ -187,6 +194,86 @@ function buildHistoryEntries(user: User) {
     }
 
     return entries.reverse()
+}
+
+// Internal ids, derived fields, and SMS verification codes
+const HIDDEN_FIELDS = new Set([
+    'id',
+    'userId',
+    'location',
+    'contributions',
+    'membershipData',
+    'lastSmsCode',
+    'lastSmsCodeSendTimeUtc',
+])
+
+interface FieldChange {
+    path: string
+    label: string
+    before?: string
+    after: string
+}
+
+function flattenFields(value: object, prefix = ''): [string, unknown][] {
+    const fields: [string, unknown][] = Object.entries(value)
+
+    return fields.flatMap<[string, unknown]>(([key, field]) => {
+        if (HISTORY_META_KEYS.has(key) || HIDDEN_FIELDS.has(key)) return []
+
+        const path = prefix ? `${prefix}.${key}` : key
+        const nested =
+            typeof field === 'object' &&
+            field != null &&
+            !(field instanceof Date) &&
+            !Array.isArray(field)
+
+        return nested ? flattenFields(field, path) : [[path, field]]
+    })
+}
+
+function fieldLabel(path: string) {
+    const words = (path.split('.').at(-1) ?? path).replace(
+        /([a-z])([A-Z0-9])/g,
+        '$1 $2'
+    )
+    return words.charAt(0).toUpperCase() + words.slice(1)
+}
+
+function formatListItem(item: unknown) {
+    const named =
+        typeof item === 'object' &&
+        item != null &&
+        'name' in item &&
+        typeof item.name === 'string'
+    return named ? item.name : formatValue(item)
+}
+
+function formatValue(value: unknown): string {
+    if (value == null || value === '') return 'None'
+    if (value instanceof Date) return value.toLocaleDateString()
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+    if (typeof value === 'string' || typeof value === 'number')
+        return String(value)
+
+    if (Array.isArray(value)) {
+        const items = (value as unknown[]).map(formatListItem)
+        return items.length ? items.join(', ') : 'None'
+    }
+
+    return JSON.stringify(value)
+}
+
+function diffFields(after: object, before?: object) {
+    const beforeFields = before && new Map(flattenFields(before))
+
+    return flattenFields(after).flatMap<FieldChange>(([path, value]) => {
+        const next = formatValue(value)
+        const previous = beforeFields && formatValue(beforeFields.get(path))
+        if (previous === next) return []
+        if (!beforeFields && next === 'None') return []
+
+        return { path, label: fieldLabel(path), before: previous, after: next }
+    })
 }
 
 function normalizeMeridiem(time: string) {
@@ -246,25 +333,116 @@ function formatFullHistoryTimestamp(value: Date) {
     )
 }
 
-function HistoryMessage({ children }: { children: ReactNode }) {
+function HistoryMessage({ message }: { message: string }) {
     return (
         <div className={styles.section}>
-            <div className={styles.historyContainer}>
-                <div className={cn(styles.historyEntry, styles.historyEntryUi)}>
-                    {children}
-                </div>
-            </div>
+            <List title="History">
+                <ListRow
+                    label={<span className={styles.message}>{message}</span>}
+                />
+            </List>
         </div>
     )
 }
 
-export function HistoryView({
-    user,
-    isRefetching,
-    roles,
-    positions,
-    makeTitle,
-}: HistoryViewProps) {
+function ChangeRows({ changes }: { changes: FieldChange[] }) {
+    return changes.map(({ path, label, before, after }) => (
+        <ListRow
+            key={path}
+            label={label}
+            value={
+                <>
+                    {before !== undefined && (
+                        <>
+                            <span className={styles.before}>{before}</span>
+                            {' → '}
+                        </>
+                    )}
+                    {after}
+                </>
+            }
+        />
+    ))
+}
+
+interface HistoryDetailProps {
+    entry: HistoryEntry
+    userId: number
+    actor: string
+    onBack: () => void
+}
+
+function HistoryDetail({ entry, userId, actor, onBack }: HistoryDetailProps) {
+    const { account, previousAccount, donor, previousDonor } = entry
+    const matchChanged =
+        donor != null &&
+        (previousDonor?.userId === userId) !== (donor.userId === userId)
+
+    const accountChanges = account ? diffFields(account, previousAccount) : []
+    const donorChanges =
+        donor && previousDonor ? diffFields(donor, previousDonor) : []
+    const membershipChanges = donor?.membershipData
+        ? diffFields(
+              donor.membershipData,
+              previousDonor && (previousDonor.membershipData ?? {})
+          )
+        : []
+
+    return (
+        <div className={styles.section}>
+            <BackButton
+                label="History"
+                onClick={onBack}
+                className={styles.backButton}
+            />
+
+            <List title="Change">
+                <ListRow label="By" value={actor} />
+                <ListRow
+                    label="When"
+                    value={formatFullHistoryTimestamp(entry.when)}
+                />
+                <ListRow
+                    label="Source"
+                    value={entry.source}
+                    emptyLabel="Unknown"
+                />
+            </List>
+
+            {accountChanges.length > 0 && (
+                <List title="Account Changes">
+                    <ChangeRows changes={accountChanges} />
+                </List>
+            )}
+
+            {donor && (matchChanged || donorChanges.length > 0) && (
+                <List title="Donor Changes">
+                    <ListRow
+                        label="Donor"
+                        value={`${donor.firstname} ${donor.lastname}`}
+                    />
+                    {matchChanged && (
+                        <ListRow
+                            label="Match"
+                            value={
+                                donor.userId === userId ? 'Linked' : 'Unlinked'
+                            }
+                        />
+                    )}
+                    <ChangeRows changes={donorChanges} />
+                </List>
+            )}
+
+            {membershipChanges.length > 0 && (
+                <List title="Membership Changes">
+                    <ChangeRows changes={membershipChanges} />
+                </List>
+            )}
+        </div>
+    )
+}
+
+export function HistoryView({ user, isRefetching }: HistoryViewProps) {
     const { ready, onGet } = useFetch()
     const [selectedKey, setSelectedKey] = useState<string | null>(null)
 
@@ -306,84 +484,48 @@ export function HistoryView({
 
     const describeEntry = ({ whoId, source, changes }: HistoryEntry) => (
         <>
-            <span className={styles.historyEntryActor}>
-                {updateLabel(whoId)}
-            </span>
-            <span className={styles.historyEntryPrefix}>
+            <span className={styles.actor}>{updateLabel(whoId)}</span>
+            <span className={styles.description}>
                 {` ${[...changes].join(', ')}`}
                 {source && ` via ${source}`}
             </span>
         </>
     )
 
-    if (isRefetching) return <HistoryMessage>Refreshing…</HistoryMessage>
-    if (!entries.length)
-        return <HistoryMessage>No history found</HistoryMessage>
+    if (isRefetching) return <HistoryMessage message="Refreshing…" />
+    if (!entries.length) return <HistoryMessage message="No history found" />
+
+    if (selected)
+        return (
+            <HistoryDetail
+                entry={selected}
+                userId={user.id}
+                actor={updateLabel(selected.whoId)}
+                onBack={() => setSelectedKey(null)}
+            />
+        )
 
     return (
         <div className={styles.section}>
-            <CollapsibleSection title="History" initialOpenState>
-                <div className={styles.historyContainer}>
-                    {entries.map((entry) => (
-                        <button
-                            key={entry.key}
-                            type="button"
-                            onClick={() =>
-                                setSelectedKey(
-                                    entry.key === selectedKey ? null : entry.key
-                                )
-                            }
-                            className={cn(
-                                styles.historyEntry,
-                                entry.key === selectedKey &&
-                                    styles.historyEntrySelected
-                            )}
-                        >
-                            <span className={styles.historyEntryMain}>
-                                {describeEntry(entry)}
-                            </span>
-
+            <List title="History">
+                {entries.map((entry) => (
+                    <NavigationRow
+                        key={entry.key}
+                        label={describeEntry(entry)}
+                        value={
                             <span
-                                className={styles.historyEntryDateTag}
+                                className={styles.dateTag}
                                 data-full-date={formatFullHistoryTimestamp(
                                     entry.when
                                 )}
                             >
                                 {formatHistoryTimestamp(entry.when)}
                             </span>
-                        </button>
-                    ))}
-                </div>
-            </CollapsibleSection>
-
-            {selected?.account && (
-                <div className={styles.snapshotWrap}>
-                    <MemberView
-                        selectedId={user.id}
-                        user={user}
-                        selectedHistory={selected.account}
-                        saving={false}
-                        editing={false}
-                        isInvalid={false}
-                        roles={roles}
-                        positions={positions}
-                        makeFormTitle={(u) =>
-                            `${makeTitle(u)} @ ${formatFullHistoryTimestamp(selected.when)}`
                         }
+                        onClick={() => setSelectedKey(entry.key)}
                     />
-                </div>
-            )}
-
-            {selected?.donor && (
-                <div className={styles.snapshotWrap}>
-                    <span>
-                        Donor:{' '}
-                        {`${selected.donor.firstname} ${selected.donor.lastname}`}
-                    </span>
-                    <br />
-                    <span>{selected.donor.userId ? 'Linked' : 'Unlinked'}</span>
-                </div>
-            )}
+                ))}
+            </List>
         </div>
     )
 }

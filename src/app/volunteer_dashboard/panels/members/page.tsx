@@ -707,6 +707,7 @@ export default function Page() {
             email: user.email,
             phone: user.phone,
             preferredName: user.preferredName,
+            preferredPronouns: user.preferredPronouns,
             firstName: user.firstName,
             lastName: user.lastName,
             birthdate: user.birthdate,
@@ -867,9 +868,6 @@ export default function Page() {
                         key={selectedId}
                         user={userQuery.data}
                         isRefetching={userQuery.isRefetching}
-                        roles={roles}
-                        positions={positionHierarchy.data?.positions ?? []}
-                        makeTitle={makeTitle}
                     />
                 )
 
@@ -984,11 +982,7 @@ export default function Page() {
                             subtitle: user.discordUsers?.[0]?.username
                                 ? `@${user.discordUsers[0].username}`
                                 : 'NOT FOUND',
-                            labelPill:
-                                'preferredPronouns' in user &&
-                                typeof user.preferredPronouns === 'string'
-                                    ? user.preferredPronouns.trim()
-                                    : '', // # TODO: Replace with actual pronouns when API supports it.
+                            labelPill: user.preferredPronouns?.trim() ?? '',
                             tagLabel:
                                 user.id === loggedInUser.data?.id
                                     ? 'You'

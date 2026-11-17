@@ -84,8 +84,6 @@ const accountDateFormat: Intl.DateTimeFormatOptions = {
     timeStyle: 'medium',
 }
 
-type MemberWithPronouns = User & { preferredPronouns?: string | null }
-
 export interface MemberViewProps {
     selectedId: number
     user: User
@@ -119,8 +117,7 @@ export function MemberView({
     makeFormTitle,
     handleSave,
 }: MemberViewProps) {
-    const existingPronouns = ((selectedHistory ?? user) as MemberWithPronouns)
-        .preferredPronouns
+    const existingPronouns = (selectedHistory ?? user).preferredPronouns
     const availablePronouns =
         existingPronouns &&
         !pronounOptions.some((option) => option.value === existingPronouns)
@@ -145,10 +142,7 @@ export function MemberView({
                 <NameRow label="Name" />
                 <PickerRow
                     label="Pronouns"
-                    indicator="unsupported"
-                    getter={(form: MemberWithPronouns) =>
-                        form.preferredPronouns ?? ''
-                    }
+                    getter={(form: User) => form.preferredPronouns ?? ''}
                     setter={(form: User, value) => ({
                         ...form,
                         preferredPronouns: value ? String(value) : null,
