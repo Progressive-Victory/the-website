@@ -9,6 +9,7 @@ import {
     MembershipTier,
     membershipTiers,
     MembershipSearchField,
+    membershipSearchColumns,
     PendingUpdate,
     RecurringSummary,
     TierSegment,
@@ -234,6 +235,10 @@ export const memberSearchValues = (
     member: Member,
     field: MembershipSearchField
 ): (string | undefined)[] => {
+    if (field === 'all')
+        return membershipSearchColumns.flatMap((column) =>
+            memberSearchValues(member, column)
+        )
     if (field === 'discord')
         return [member.discordUsername, member.contributionDiscord]
     if (field === 'email')
@@ -384,17 +389,92 @@ export const computeRecurringSummary = (
     return {
         monthsWithLineitems: monthKeys.size,
         earliestLineitemDate,
+        lastPaidDate,
         activeAmount,
         totalAmount: records.reduce((sum, record) => sum + record.amount, 0),
         tier: getMembershipTierForAmount(activeAmount),
     }
 }
 
+const mapUserFields = ({ user }: MembershipsResponsePacket) => ({
+    userId: user?.id,
+    userFirstName: user?.firstName ?? undefined,
+    userLastName: user?.lastName ?? undefined,
+    userName:
+        joinName(user?.firstName, user?.lastName) ??
+        user?.preferredName ??
+        undefined,
+    userAddress: formatUserAddress(user?.address),
+    userAddressParts: user?.address,
+    userMatched: Boolean(user),
+})
+
+const mapDonorFields = ({ donor }: MembershipsResponsePacket) => ({
+    firstName: donor.firstname,
+    lastName: donor.lastname,
+    donorName: joinName(donor.firstname, donor.lastname),
+    address1: donor.addr1 ?? undefined,
+    city: donor.city ?? undefined,
+    state: donor.state ?? undefined,
+    zip: donor.zip ?? undefined,
+    country: donor.country ?? undefined,
+    donorAddress: formatDonorAddress(donor),
+    beganMembership: donor.contributions?.[0]?.createdAt
+        ?.toISOString()
+        .slice(0, 10),
+    numberOfContributions: donor.contributions?.length,
+})
+
+const mapContactFields = ({ donor, user }: MembershipsResponsePacket) => {
+    const discordUser = user?.discordUsers?.[0]
+    return {
+        discordUsername: discordUser?.username,
+        phone: user?.phone ?? donor.phone ?? undefined,
+        userPhone: user?.phone ?? undefined,
+        donorPhone: donor.phone ?? undefined,
+        email: user?.email ?? discordUser?.email ?? donor.email,
+        donorEmail: donor.email,
+        userEmail: user?.email ?? undefined,
+        discordEmail: discordUser?.email ?? undefined,
+    }
+}
+
+const mapMembershipFields = ({ donor }: MembershipsResponsePacket) => {
+    const membership = donor.membershipData
+    return {
+        shirtSize: membership?.shirtSize ?? undefined,
+        isMember: membership?.duesPayingMember,
+        eligibleForBenefits: membership?.membershipBenefitEligible,
+        cardPrinted: membership?.cardPrinted ?? false,
+        labelPrinted: membership?.labelPrinted ?? false,
+        cardPacked: membership?.itemsPackaged ?? false,
+        benefitShipped: membership?.benefitsShipped ?? false,
+    }
+}
+
+const mapConfirmationFields = ({ donor, user }: MembershipsResponsePacket) => {
+    const membership = donor.membershipData
+    return {
+        discordConfirmed:
+            membership?.discordConfirmed ?? Boolean(user?.discordUsers?.length),
+        nameConfirmed:
+            membership?.nameConfirmed ?? user?.nameConfirmed ?? false,
+        addressConfirmed:
+            membership?.addressConfirmed ?? user?.addressConfirmed ?? false,
+    }
+}
+
+const ACTIVE_WINDOW_MS = 40 * 24 * 60 * 60 * 1000
+
+const paidWithinActiveWindow = (lastPaidDate?: string) =>
+    lastPaidDate != null &&
+    Date.now() - new Date(lastPaidDate).getTime() <= ACTIVE_WINDOW_MS
+
 export const mapPacketToMember = (
     packet: MembershipsResponsePacket,
     index: number
 ): Member => {
-    const { donor, user, customField } = packet
+    const { donor, customField } = packet
     const membership = donor.membershipData
     const cardStatus = membership?.membershipCardStatus
     const merchStatus = membership?.membershipMerchStatus
@@ -408,60 +488,24 @@ export const mapPacketToMember = (
     return {
         packet,
         id: index + 1,
-        userId: user?.id,
-        firstName: donor.firstname,
-        lastName: donor.lastname,
-        userFirstName: user?.firstName ?? undefined,
-        userLastName: user?.lastName ?? undefined,
-        userName:
-            joinName(user?.firstName, user?.lastName) ??
-            user?.preferredName ??
-            undefined,
-        donorName: joinName(donor.firstname, donor.lastname),
-        discordUsername: user?.discordUsers?.[0]?.username,
+        ...mapUserFields(packet),
+        ...mapDonorFields(packet),
+        ...mapContactFields(packet),
+        ...mapMembershipFields(packet),
+        ...mapConfirmationFields(packet),
         contributionDiscord:
             contributionDiscord === '' ? undefined : contributionDiscord,
-        phone: user?.phone ?? donor.phone ?? undefined,
-        userPhone: user?.phone ?? undefined,
-        donorPhone: donor.phone ?? undefined,
-        email: user?.email ?? user?.discordUsers?.[0]?.email ?? donor.email,
-        donorEmail: donor.email,
-        userEmail: user?.email ?? undefined,
-        discordEmail: user?.discordUsers?.[0]?.email ?? undefined,
-        address1: donor.addr1 ?? undefined,
-        city: donor.city ?? undefined,
-        state: donor.state ?? undefined,
-        zip: donor.zip ?? undefined,
-        country: donor.country ?? undefined,
-        userAddress: formatUserAddress(user?.address),
-        userAddressParts: user?.address,
-        donorAddress: formatDonorAddress(donor),
-        shirtSize: membership?.shirtSize ?? undefined,
-        isMember: membership?.duesPayingMember,
-        eligibleForBenefits: membership?.membershipBenefitEligible,
         membershipTier: membershipTiers.find(
             (tier) => tier === customField?.label
         ),
-        beganMembership: donor.contributions?.[0]?.createdAt
-            ?.toISOString()
-            .slice(0, 10),
-        numberOfContributions: donor.contributions?.length,
         contributionRecords,
         recurringSummary,
-        discordConfirmed:
-            membership?.discordConfirmed ?? Boolean(user?.discordUsers?.length),
-        nameConfirmed:
-            membership?.nameConfirmed ?? user?.nameConfirmed ?? false,
-        addressConfirmed:
-            membership?.addressConfirmed ?? user?.addressConfirmed ?? false,
-        cardPrinted: membership?.cardPrinted ?? false,
-        labelPrinted: membership?.labelPrinted ?? false,
-        cardPacked: membership?.itemsPackaged ?? false,
-        benefitShipped: membership?.benefitsShipped ?? false,
+        isActive:
+            Boolean(membership?.duesPayingMember) &&
+            paidWithinActiveWindow(recurringSummary.lastPaidDate),
         membershipCardStatus: cardStatus,
         membershipMerchStatus: merchStatus,
         packageShipped: toPackageShipped(cardStatus),
-        userMatched: Boolean(user),
     }
 }
 
@@ -640,6 +684,61 @@ export const buildPendingUpdates = (
             },
         ]
     })
+
+const pickChanges = <T extends object, K extends keyof T>(
+    source: T,
+    keys: readonly K[]
+) =>
+    Object.fromEntries(
+        keys.flatMap((key) =>
+            source[key] !== undefined ? [[key, source[key]]] : []
+        )
+    ) as { [P in K]?: Exclude<T[P], undefined> }
+
+const membershipChangeKeys = [
+    'shirtSize',
+    'nameConfirmed',
+    'discordConfirmed',
+    'addressConfirmed',
+    'membershipCardStatus',
+    'cardPrinted',
+    'labelPrinted',
+    'itemsPackaged',
+    'benefitsShipped',
+] as const
+
+export const applyPendingUpdate = (
+    packet: MembershipsResponsePacket,
+    { user, membership }: PendingUpdate
+): MembershipsResponsePacket => ({
+    ...packet,
+    user:
+        packet.user && user
+            ? {
+                  ...packet.user,
+                  ...pickChanges(user, [
+                      'email',
+                      'firstName',
+                      'lastName',
+                      'phone',
+                  ]),
+                  address: {
+                      ...packet.user.address,
+                      ...pickChanges(user.address ?? {}, addressFields),
+                  },
+              }
+            : packet.user,
+    donor:
+        membership && packet.donor.membershipData
+            ? {
+                  ...packet.donor,
+                  membershipData: {
+                      ...packet.donor.membershipData,
+                      ...pickChanges(membership, membershipChangeKeys),
+                  },
+              }
+            : packet.donor,
+})
 
 export const describeNameChange: DescribeChange = (update, previous) => {
     const action = previous ? 'Changed' : 'Set'

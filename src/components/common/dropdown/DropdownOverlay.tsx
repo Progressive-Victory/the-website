@@ -24,6 +24,7 @@ const DROPDOWN_OVERLAY_LAYOUT_CONFIG = {
     narrowBreakpointQuery: '(max-width: 53rem)',
     parentGrowthThreshold: 24,
     triggerBoundaryInset: 8,
+    overlayOffset: 6,
 } as const
 
 const INITIAL_OVERLAY_RESPONSIVE_STYLE: CSSProperties = {
@@ -43,6 +44,47 @@ interface RectLike {
     right: number
 }
 
+interface VerticalRectLike {
+    top: number
+    bottom: number
+}
+
+function getFlipBoundary(
+    anchor: HTMLElement
+): (RectLike & VerticalRectLike) | undefined {
+    const boundary = anchor.closest('[data-dropdown-boundary]')
+    if (!boundary) return undefined
+
+    const rect = boundary.getBoundingClientRect()
+    const header = boundary.querySelector('[data-dropdown-boundary-top]')
+    const firstContent =
+        header?.nextElementSibling ?? boundary.firstElementChild
+    const lastContent = boundary.lastElementChild
+
+    return {
+        left: rect.left,
+        right: rect.right,
+        top: firstContent?.getBoundingClientRect().top ?? rect.top,
+        bottom: lastContent?.getBoundingClientRect().bottom ?? rect.bottom,
+    }
+}
+
+function computeVerticalOverlayStyle(
+    anchorRect: VerticalRectLike,
+    boundary: VerticalRectLike,
+    overlayHeight: number
+): CSSProperties {
+    const { overlayOffset } = DROPDOWN_OVERLAY_LAYOUT_CONFIG
+    const spaceBelow = boundary.bottom - anchorRect.bottom
+    const spaceAbove = anchorRect.top - boundary.top
+    const openAbove =
+        overlayHeight + overlayOffset > spaceBelow && spaceAbove > spaceBelow
+
+    return openAbove
+        ? { top: 'auto', bottom: `calc(100% + ${overlayOffset}px)` }
+        : { bottom: undefined }
+}
+
 interface ComputeResponsiveOverlayStyleInput {
     narrowLayoutMode: DropdownOverlayNarrowLayoutMode
     align: DropdownOverlayAlign
@@ -52,7 +94,36 @@ interface ComputeResponsiveOverlayStyleInput {
     anchorRect: RectLike
     anchorWidth: number
     boundaryRect: RectLike
+    flipBoundaryRect?: RectLike
     overlayScrollWidth: number
+}
+
+function shouldAlignLeftWithinBoundary(
+    align: DropdownOverlayAlign,
+    anchorRect: RectLike,
+    boundaryRect: RectLike,
+    fitWidth: number,
+    viewportWidth: number
+) {
+    const { viewportPadding, triggerBoundaryInset } =
+        DROPDOWN_OVERLAY_LAYOUT_CONFIG
+    const minLeft = Math.max(
+        boundaryRect.left + triggerBoundaryInset,
+        viewportPadding
+    )
+    const maxRight = Math.min(
+        boundaryRect.right - triggerBoundaryInset,
+        viewportWidth - viewportPadding
+    )
+    const roomAlignedLeft = maxRight - anchorRect.left
+    const roomAlignedRight = anchorRect.right - minLeft
+    const preferLeft = align === 'start'
+
+    if (fitWidth <= (preferLeft ? roomAlignedLeft : roomAlignedRight))
+        return preferLeft
+    if (fitWidth <= (preferLeft ? roomAlignedRight : roomAlignedLeft))
+        return !preferLeft
+    return roomAlignedLeft >= roomAlignedRight
 }
 
 function computeResponsiveOverlayStyle({
@@ -64,6 +135,7 @@ function computeResponsiveOverlayStyle({
     anchorRect,
     anchorWidth,
     boundaryRect,
+    flipBoundaryRect,
     overlayScrollWidth,
 }: ComputeResponsiveOverlayStyleInput): CSSProperties {
     if (isNarrowLayout) {
@@ -119,8 +191,15 @@ function computeResponsiveOverlayStyle({
         rightAlignedStart < DROPDOWN_OVERLAY_LAYOUT_CONFIG.viewportPadding &&
         leftAlignedEnd <=
             viewportWidth - DROPDOWN_OVERLAY_LAYOUT_CONFIG.viewportPadding
-    const shouldAlignLeft =
-        align === 'start' || (align === 'auto' && fitsWhenAlignedLeft)
+    const shouldAlignLeft = flipBoundaryRect
+        ? shouldAlignLeftWithinBoundary(
+              align,
+              anchorRect,
+              flipBoundaryRect,
+              fitWidth,
+              viewportWidth
+          )
+        : align === 'start' || (align === 'auto' && fitsWhenAlignedLeft)
 
     return {
         position: undefined,
@@ -182,6 +261,45 @@ function useDropdownOverlayResponsiveStyle({
             return anchor
         }
 
+        const computeAnchoredStyle = (
+            overlay: HTMLElement,
+            anchor: HTMLElement,
+            viewportWidth: number,
+            viewportMaxWidth: number
+        ): CSSProperties => {
+            const isNarrowLayout = narrowLayoutMedia.matches
+            const anchorRect = anchor.getBoundingClientRect()
+            const flipBoundary = getFlipBoundary(anchor)
+            const style = computeResponsiveOverlayStyle({
+                narrowLayoutMode,
+                align,
+                isNarrowLayout,
+                viewportWidth,
+                viewportMaxWidth,
+                anchorRect,
+                anchorWidth: anchor.clientWidth,
+                boundaryRect:
+                    findResponsiveBoundary(anchor).getBoundingClientRect(),
+                flipBoundaryRect: flipBoundary,
+                overlayScrollWidth: overlay.scrollWidth,
+            })
+
+            if (
+                !flipBoundary ||
+                (isNarrowLayout && narrowLayoutMode === 'flow')
+            )
+                return style
+
+            return {
+                ...style,
+                ...computeVerticalOverlayStyle(
+                    anchorRect,
+                    flipBoundary,
+                    overlay.offsetHeight
+                ),
+            }
+        }
+
         const applyLayout = () => {
             const currentOverlay = overlayRef.current
             if (!currentOverlay) return
@@ -199,20 +317,12 @@ function useDropdownOverlayResponsiveStyle({
 
             const nextStyle: CSSProperties = !anchor
                 ? { maxWidth: `${Math.floor(viewportMaxWidth)}px` }
-                : computeResponsiveOverlayStyle({
-                      narrowLayoutMode,
-                      align,
-                      isNarrowLayout: narrowLayoutMedia.matches,
+                : computeAnchoredStyle(
+                      currentOverlay,
+                      anchor,
                       viewportWidth,
-                      viewportMaxWidth,
-                      anchorRect: anchor.getBoundingClientRect(),
-                      anchorWidth: anchor.clientWidth,
-                      boundaryRect:
-                          findResponsiveBoundary(
-                              anchor
-                          ).getBoundingClientRect(),
-                      overlayScrollWidth: currentOverlay.scrollWidth,
-                  })
+                      viewportMaxWidth
+                  )
 
             setResponsiveStyle((currentStyle) =>
                 areOverlayStylesEqual(currentStyle, nextStyle)
@@ -233,6 +343,8 @@ function useDropdownOverlayResponsiveStyle({
                 ? overlay.offsetParent
                 : null
         const boundary = anchor ? findResponsiveBoundary(anchor) : null
+        const repositionOnScroll =
+            anchor?.closest('[data-dropdown-boundary]') == null
 
         const resizeObserver = new ResizeObserver(scheduleLayout)
         resizeObserver.observe(overlay)
@@ -240,7 +352,8 @@ function useDropdownOverlayResponsiveStyle({
         if (boundary && boundary !== anchor) resizeObserver.observe(boundary)
 
         window.addEventListener('resize', scheduleLayout)
-        window.addEventListener('scroll', scheduleLayout, true)
+        if (repositionOnScroll)
+            window.addEventListener('scroll', scheduleLayout, true)
         narrowLayoutMedia.addEventListener('change', scheduleLayout)
 
         return () => {

@@ -13,6 +13,7 @@ import type { ReactNode } from 'react'
 export interface SidebarBodyItemConfig<T> {
     key: string | number
     label: string
+    labelPill?: string
     ariaLabel?: string
     subtitle?: string
     tagLabel?: string
@@ -75,6 +76,7 @@ export function SidebarBody<T>({
                 active={selectedKey === config.key}
                 href={config.href}
                 label={config.label}
+                labelPill={config.labelPill}
                 ariaLabel={config.ariaLabel}
                 subtitle={config.subtitle}
                 tag={

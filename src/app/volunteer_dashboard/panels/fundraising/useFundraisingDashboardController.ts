@@ -105,6 +105,18 @@ function formatFullLabel(
     })
 }
 
+function isChartViewOverrideActive(
+    override: { start: Date; end: Date } | null,
+    selectedStart: Date | null | undefined,
+    selectedEnd: Date | null | undefined
+): boolean {
+    if (!override) return false
+    return (
+        override.start.getTime() !== (selectedStart?.getTime() ?? NaN) ||
+        override.end.getTime() !== (selectedEnd?.getTime() ?? NaN)
+    )
+}
+
 export function useFundraisingDashboardController() {
     const actblueQueries = useActblueQueries()
 
@@ -423,12 +435,11 @@ export function useFundraisingDashboardController() {
         setChartViewOverrideRange(range)
     }
 
-    const chartViewOverrideActive =
-        chartViewOverrideRange != null &&
-        (chartViewOverrideRange.start.getTime() !==
-            (selectedChartStartDate?.getTime() ?? NaN) ||
-            chartViewOverrideRange.end.getTime() !==
-                (selectedChartEndDate?.getTime() ?? NaN))
+    const chartViewOverrideActive = isChartViewOverrideActive(
+        chartViewOverrideRange,
+        selectedChartStartDate,
+        selectedChartEndDate
+    )
 
     const resetChartViewToSelectedRange = () => {
         setChartViewOverrideRange(null)

@@ -45,6 +45,7 @@ export interface ContributionRecord {
 export interface RecurringSummary {
     monthsWithLineitems: number
     earliestLineitemDate?: string
+    lastPaidDate?: string
     activeAmount?: number
     totalAmount: number
     tier?: MembershipTier
@@ -93,6 +94,7 @@ export interface Member {
     shirtSize?: ShirtSize
 
     isMember?: boolean
+    isActive?: boolean
     eligibleForBenefits?: boolean
     beganMembership?: string
     membershipAmount?: number
@@ -117,6 +119,7 @@ export interface Member {
 }
 
 export const membershipSearchFields = [
+    { value: 'all', label: 'All' },
     { value: 'name', label: 'Name' },
     { value: 'discord', label: 'Discord' },
     { value: 'email', label: 'Email' },
@@ -124,6 +127,12 @@ export const membershipSearchFields = [
 
 export type MembershipSearchField =
     (typeof membershipSearchFields)[number]['value']
+export type MembershipSearchColumn = Exclude<MembershipSearchField, 'all'>
+export const membershipSearchColumns: MembershipSearchColumn[] = [
+    'name',
+    'discord',
+    'email',
+]
 export type MemberFlag =
     | 'nameConfirmed'
     | 'discordConfirmed'
@@ -187,6 +196,11 @@ export interface PendingUpdate {
     userId?: number
     user?: UpdateUserRequest
     membership?: UpdateMembershipRequest
+}
+
+export interface ChangeTarget {
+    donorEmail: string
+    columnKeys: string[]
 }
 
 export type UserHistoryEntry = NonNullable<User['history']>[number]

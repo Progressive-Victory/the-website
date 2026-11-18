@@ -40,7 +40,6 @@ import {
     ActBlueDonor,
     Position,
     Role,
-    UpdateHistory,
     User,
     UserProfile,
     zActBlueDonor,
@@ -199,11 +198,6 @@ export default function Page() {
         Number.isFinite(initialUserId) ? initialUserId : null
     )
 
-    const [selectedHistory, setSelectedHistory] =
-        useState<UpdateHistory<User> | null>(null)
-    const [selectedDonorHistory, setSelectedDonorHistory] =
-        useState<UpdateHistory<ActBlueDonor> | null>(null)
-
     const [formState, setFormState] = useState<FormState<User> | null>(null)
     const [pickingDonor, setPickingDonor] = useState<boolean>(false)
     const [selectedTab, setSelectedTab] = useState<MemberTabKey>('overview')
@@ -215,29 +209,34 @@ export default function Page() {
     const [selectedPosition, setSelectedPosition] = useState<Position>()
     const [selectedRole, setSelectedRole] = useState<Role>()
 
-    const selectedStateLabel = stateOptions.find(
-        (state) => state.value === selectedState
-    )?.label
-    const selectedFilterLabel =
-        [
-            selectedStateLabel,
-            selectedBirthYear,
-            selectedPosition?.name,
-            selectedRole?.name,
-        ]
-            .filter(Boolean)
-            .join(` ${DOT_SEPARATOR} `) || 'All Users'
-    const selectedFilterIcon = selectedState ? (
-        <FaMapMarkerAlt />
-    ) : selectedBirthYear ? (
-        <FaBirthdayCake />
-    ) : selectedPosition ? (
-        <FaSitemap />
-    ) : selectedRole ? (
-        <FaUserShield />
-    ) : (
-        <FaUsers />
-    )
+    const getFilterLabel = () => {
+        const selectedStateLabel = stateOptions.find(
+            (state) => state.value === selectedState
+        )?.label
+        return (
+            [
+                selectedStateLabel,
+                selectedBirthYear,
+                selectedPosition?.name,
+                selectedRole?.name,
+            ]
+                .filter(Boolean)
+                .join(` ${DOT_SEPARATOR} `) || 'All Users'
+        )
+    }
+
+    const renderFilterIcon = () =>
+        selectedState ? (
+            <FaMapMarkerAlt />
+        ) : selectedBirthYear ? (
+            <FaBirthdayCake />
+        ) : selectedPosition ? (
+            <FaSitemap />
+        ) : selectedRole ? (
+            <FaUserShield />
+        ) : (
+            <FaUsers />
+        )
 
     const memberFilterTags: FilterTag[] = [
         {
@@ -352,8 +351,8 @@ export default function Page() {
         },
         {
             key: 'all',
-            label: selectedFilterLabel,
-            icon: selectedFilterIcon,
+            label: getFilterLabel(),
+            icon: renderFilterIcon(),
             color: '#3A3A3C',
             width: '8.4rem',
             activeRedirect: 'members',
@@ -491,6 +490,10 @@ export default function Page() {
         onSearch,
     } = usePaginatedSearch('/users', zUserProfile, {
         search: { sort: SortDirection.DESC, sortField: 'created_at_utc' },
+        transformSearchRequest: (search) =>
+            search.searchField === 'phone' && search.query !== undefined
+                ? { ...search, query: search.query.replace(/\D/g, '') }
+                : search,
     })
 
     const { query: rolesQuery } = usePaginatedSearch('/roles', zRole, {
@@ -645,8 +648,6 @@ export default function Page() {
 
         setSelectedId(value.id)
 
-        setSelectedHistory(null)
-        setSelectedDonorHistory(null)
         setSelectedTab('overview')
     }
 
@@ -673,7 +674,7 @@ export default function Page() {
             const orNull = (value: string | null | undefined) =>
                 value?.length ? value : null
 
-            const address = {
+            const buildAddress = () => ({
                 addressLine1: orNull(user.address.addressLine1?.trim()),
                 addressLine2: orNull(user.address.addressLine2?.trim()),
                 city:
@@ -688,7 +689,8 @@ export default function Page() {
                 zip:
                     orNull(user.address.zip?.trim()) ??
                     locationQuery.data?.zip?.toString(),
-            }
+            })
+            const address = buildAddress()
 
             const oldAddress = userQuery.data?.address ?? null
             const addressIsDirty =
@@ -717,12 +719,21 @@ export default function Page() {
                 nameConfirmed: user.nameConfirmed,
                 addressConfirmed: user.addressConfirmed,
                 roles: user.roles?.map((role) => role.id),
+                metaData: {
+                    dataSource: 'Member Panel',
+                    userWhoUpdatedId: loggedInUser.data?.id,
+                },
             } satisfies UpdateUserRequest)
             if (addressIsDirty) request.address = address
 
             updateMutation.mutate({ id: user.id, user, request })
         },
-        [locationQuery.data, updateMutation, userQuery.data?.address]
+        [
+            locationQuery.data,
+            updateMutation,
+            userQuery.data?.address,
+            loggedInUser.data,
+        ]
     )
 
     const makeTitle = useCallback((user: User | UserProfile) => {
@@ -732,21 +743,6 @@ export default function Page() {
         if (user.preferredName) return user.preferredName
         return user.email ?? ''
     }, [])
-
-    const normalizeMeridiem = useCallback((value: string) => {
-        return value.replace(/\s*([AP])M\b/g, (_, period: string) => {
-            return `${period.toLowerCase()}m`
-        })
-    }, [])
-
-    const makeHistoryFormTitle = useCallback(
-        (user: User | UserProfile) => {
-            const name = makeTitle(user)
-            if (!selectedHistory) return name
-            return `${name} @ ${normalizeMeridiem(selectedHistory.historyWhenUpdatedUtc.toLocaleString())}`
-        },
-        [makeTitle, normalizeMeridiem, selectedHistory]
-    )
 
     const renderDonorItem = useCallback(
         (item: ActBlueDonor, userId: number) => {
@@ -833,16 +829,12 @@ export default function Page() {
             case 'history':
                 return (
                     <HistoryView
-                        selectedId={selectedId}
+                        key={selectedId}
                         user={userQuery.data}
-                        selectedHistory={selectedHistory}
-                        onSelectHistory={setSelectedHistory}
-                        selectedDonorHistory={selectedDonorHistory}
-                        onSelectDonorHistory={setSelectedDonorHistory}
                         isRefetching={userQuery.isRefetching}
                         roles={roles}
                         roleOptions={roleOptions}
-                        makeFormTitle={(u) => makeHistoryFormTitle(u)}
+                        makeTitle={makeTitle}
                     />
                 )
 
@@ -850,6 +842,50 @@ export default function Page() {
                 return null
         }
     }
+
+    const renderDetails = () => (
+        <div className={styles.detailsPane}>
+            <MobileSidebarBackButton
+                label="Members"
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                onBack={() => setSidebarMobileVisible(true)}
+                className={styles.backButton}
+            />
+
+            {selectedId == null && (
+                <div className={styles.emptyState}>No user selected</div>
+            )}
+
+            {selectedId != null && userQuery.isPending && (
+                <div className={styles.emptyState}>Loading user details...</div>
+            )}
+
+            {selectedId != null && userQuery.error && (
+                <div className={cn(styles.emptyState, styles.errorText)}>
+                    Error: {parseErrorMessage(userQuery.error)}
+                </div>
+            )}
+
+            {selectedId && userQuery.data && (
+                <>
+                    <div className={styles.detailsHeader}>
+                        <div className={styles.bannerCover} />
+                        <MemberBanner
+                            user={userQuery.data}
+                            makeTitle={makeTitle}
+                            selectedTab={selectedTab}
+                            tabs={tabs}
+                            onTabChange={(key) =>
+                                setSelectedTab(key as MemberTabKey)
+                            }
+                            positions={positionHierarchy.data?.positions}
+                        />
+                    </div>
+                    <div className={styles.detailsContent}>{renderPage()}</div>
+                </>
+            )}
+        </div>
+    )
 
     const sidebarFilters: SidebarListFiltersProps = {
         search,
@@ -859,6 +895,15 @@ export default function Page() {
         showSort: true,
         showLimit: true,
     }
+
+    const sidebarFooterProperties = () => ({
+        page: search.page ?? 0,
+        pageSize: search.limit ?? 25,
+        count: searchQuery.data?.count,
+        isPending: searchQuery.isPending,
+        onPageChange: (nextPage: number) =>
+            onSearch({ ...search, page: nextPage }),
+    })
 
     return (
         <Panel
@@ -876,14 +921,7 @@ export default function Page() {
             showScrollbar={false}
             sidebarList={{
                 search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: searchQuery.data?.count,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
+                footer: sidebarFooterProperties(),
                 filters: sidebarFilters,
             }}
             prominentHeaderButton={{
@@ -911,6 +949,7 @@ export default function Page() {
                             subtitle: user.discordUsers?.[0]?.username
                                 ? `@${user.discordUsers[0].username}`
                                 : 'NOT FOUND',
+                            labelPill: `${user.preferredPronouns ?? ''}`.trim(), // # TODO: Replace with actual pronouns when API supports it.
                             tagLabel:
                                 user.id === loggedInUser.data?.id
                                     ? 'You'
@@ -935,51 +974,7 @@ export default function Page() {
                 </>
             }
         >
-            <div className={styles.detailsPane}>
-                <MobileSidebarBackButton
-                    label="Members"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                    className={styles.backButton}
-                />
-
-                {selectedId == null && (
-                    <div className={styles.emptyState}>No user selected</div>
-                )}
-
-                {selectedId != null && userQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading user details...
-                    </div>
-                )}
-
-                {selectedId != null && userQuery.error && (
-                    <div className={cn(styles.emptyState, styles.errorText)}>
-                        Error: {parseErrorMessage(userQuery.error)}
-                    </div>
-                )}
-
-                {selectedId && userQuery.data && (
-                    <>
-                        <div className={styles.detailsHeader}>
-                            <div className={styles.bannerCover} />
-                            <MemberBanner
-                                user={userQuery.data}
-                                makeTitle={makeTitle}
-                                selectedTab={selectedTab}
-                                tabs={tabs}
-                                onTabChange={(key) =>
-                                    setSelectedTab(key as MemberTabKey)
-                                }
-                                positions={positionHierarchy.data?.positions}
-                            />
-                        </div>
-                        <div className={styles.detailsContent}>
-                            {renderPage()}
-                        </div>
-                    </>
-                )}
-            </div>
+            {renderDetails()}
         </Panel>
     )
 }
