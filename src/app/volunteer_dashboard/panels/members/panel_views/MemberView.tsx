@@ -14,6 +14,7 @@ import {
     ToggleRow,
 } from '@/components/common'
 import { Form, FormState } from '@/components/common/forms'
+import { pronounOptionsWith } from '@/models'
 import { dateService } from '@/services'
 import {
     Location,
@@ -32,15 +33,6 @@ const shirtSizeOptions = [
     { value: 'L', label: 'Large' },
     { value: 'XL', label: 'Extra Large' },
     { value: '2XL', label: 'Double XL' },
-]
-
-const pronounOptions = [
-    { value: '', label: 'None' },
-    { value: 'he/him', label: 'he/him' },
-    { value: 'she/her', label: 'she/her' },
-    { value: 'they/them', label: 'they/them' },
-    { value: 'any/all', label: 'any/all' },
-    { value: 'other', label: 'other' },
 ]
 
 const calcFutureDate = (
@@ -117,15 +109,9 @@ export function MemberView({
     makeFormTitle,
     handleSave,
 }: MemberViewProps) {
-    const existingPronouns = (selectedHistory ?? user).preferredPronouns
-    const availablePronouns =
-        existingPronouns &&
-        !pronounOptions.some((option) => option.value === existingPronouns)
-            ? [
-                  ...pronounOptions,
-                  { value: existingPronouns, label: existingPronouns },
-              ]
-            : pronounOptions
+    const availablePronouns = pronounOptionsWith(
+        (selectedHistory ?? user).preferredPronouns
+    )
 
     return (
         <Form<User>
