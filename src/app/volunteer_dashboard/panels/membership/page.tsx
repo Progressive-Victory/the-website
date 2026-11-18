@@ -5,16 +5,26 @@ import {
     usePendingUpdates,
     useSaveMemberships,
     useColumnOrder,
+    ActivityFilter,
+    BooleanTableOption,
+    EligibilityFilter,
     MembershipTableOptions,
 } from './hooks'
 import { matchesSearchQuery } from './membership.helpers'
 import {
+    ChangeTarget,
     EditController,
     Member,
     MembershipSearchField,
+    membershipSearchColumns,
     membershipSearchFields,
+    PendingUpdate,
 } from './membership.types'
-import { buildColumns, FULFILLMENT_CATEGORY } from './membershipColumns'
+import {
+    buildColumns,
+    changedColumnKeys,
+    FULFILLMENT_CATEGORY,
+} from './membershipColumns'
 import styles from './page.module.css'
 import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
 import {
@@ -32,12 +42,35 @@ import { usePaginatedSearch } from '@/util/hooks'
 import { useIsMutating } from '@tanstack/react-query'
 import { UserProfile, zUserProfile } from 'pv-contracts/data'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
-import { FaCog, FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
+import {
+    FaChevronDown,
+    FaChevronUp,
+    FaCog,
+    FaEdit,
+    FaSave,
+    FaTrashAlt,
+} from 'react-icons/fa'
 
 const showHideChoices = [
     { value: true, label: 'Show' },
     { value: false, label: 'Hide' },
 ]
+
+const enabledDisabledChoices = [
+    { value: true, label: 'Enabled' },
+    { value: false, label: 'Disabled' },
+]
+
+function estimatePlaceholderRows(
+    hasNextPage: boolean,
+    totalEntries: number | undefined,
+    loadedCount: number,
+    visibleCount: number
+) {
+    if (!hasNextPage || totalEntries == null || loadedCount === 0) return 0
+    const remaining = Math.max(0, totalEntries - loadedCount)
+    return Math.max(1, Math.round((remaining * visibleCount) / loadedCount))
+}
 
 function getUserDisplayName(user: UserProfile): string {
     if (user.preferredName) return user.preferredName
@@ -49,12 +82,15 @@ function getUserDisplayName(user: UserProfile): string {
     return `User ${user.id}`
 }
 
-const tableOptionRows: {
-    key: keyof MembershipTableOptions
+interface TableOptionRowConfig<T extends boolean | string> {
     label: string
     ariaLabel: string
-    choices: { value: boolean; label: string }[]
-}[] = [
+    choices: { value: T; label: string }[]
+}
+
+const tableOptionRows: (TableOptionRowConfig<boolean> & {
+    key: BooleanTableOption
+})[] = [
     {
         key: 'showRowNumber',
         label: 'Row column',
@@ -62,10 +98,10 @@ const tableOptionRows: {
         choices: showHideChoices,
     },
     {
-        key: 'showStatus',
-        label: 'Status columns',
-        ariaLabel: 'Member Eligibility Columns',
-        choices: showHideChoices,
+        key: 'showZebra',
+        label: 'Alternating Rows',
+        ariaLabel: 'Alternating Row Color',
+        choices: enabledDisabledChoices,
     },
     {
         key: 'showConfirmed',
@@ -75,14 +111,14 @@ const tableOptionRows: {
     },
     {
         key: 'showFulfilled',
-        label: 'Benefits fulfilled tag',
+        label: 'Benefits Fulfilled Bar',
         ariaLabel: 'Tag Groups',
-        choices: showHideChoices,
+        choices: enabledDisabledChoices,
     },
     {
-        key: 'showZebra',
-        label: 'Zebra striping',
-        ariaLabel: 'Zebra Striping',
+        key: 'showStatus',
+        label: 'Status columns',
+        ariaLabel: 'Member Eligibility Columns',
         choices: showHideChoices,
     },
     {
@@ -96,21 +132,63 @@ const tableOptionRows: {
     },
 ]
 
+const eligibilityOptionRow: TableOptionRowConfig<EligibilityFilter> = {
+    label: 'Eligibility',
+    ariaLabel: 'Eligibility Filter',
+    choices: [
+        { value: 'both', label: 'Both' },
+        { value: 'eligible', label: 'Eligible' },
+        { value: 'ineligible', label: 'Ineligible' },
+    ],
+}
+
+// # TODO Upon API being updated to include ActBlue Cancellations and Refunds Webhooks Replace Activity Toggle with a Members Toggle
+const activityOptionRow: TableOptionRowConfig<ActivityFilter> = {
+    label: 'Activity',
+    ariaLabel: 'Activity Filter',
+    choices: [
+        { value: 'both', label: 'Both' },
+        { value: 'active', label: 'Active' },
+        { value: 'inactive', label: 'Inactive' },
+    ],
+}
+
 function EditToolbar({
     members,
     editController,
     saveMutation,
     discardEdits,
+    onNavigateToChange,
 }: {
     members: Member[]
     editController: EditController
     saveMutation: ReturnType<typeof useSaveMemberships>
     discardEdits: () => void
+    onNavigateToChange: (update: PendingUpdate) => void
 }) {
     const { pendingUpdates, hasInvalidEdits } = usePendingUpdates(
         editController,
         members
     )
+    const [currentChange, setCurrentChange] = useState<string | null>(null)
+
+    const changedUpdates = useMemo(() => {
+        const byEmail = new Map(pendingUpdates.map((u) => [u.donorEmail, u]))
+        return members.flatMap(
+            ({ donorEmail }) => byEmail.get(donorEmail ?? '') ?? []
+        )
+    }, [members, pendingUpdates])
+
+    const navigateToChange = (step: 1 | -1) => {
+        const count = changedUpdates.length
+        const index = changedUpdates.findIndex(
+            (update) => update.donorEmail === currentChange
+        )
+        const base = index === -1 && step === -1 ? 0 : index
+        const next = changedUpdates[(((base + step) % count) + count) % count]
+        setCurrentChange(next.donorEmail)
+        onNavigateToChange(next)
+    }
 
     return (
         <>
@@ -121,6 +199,26 @@ function EditToolbar({
                       ? 'No changes'
                       : `${pendingUpdates.length} pending change${pendingUpdates.length === 1 ? '' : 's'}`}
             </span>
+            {changedUpdates.length > 0 && (
+                <span className={styles.changeNav}>
+                    <button
+                        type="button"
+                        className={styles.changeNavButton}
+                        aria-label="Previous change"
+                        onClick={() => navigateToChange(-1)}
+                    >
+                        <FaChevronUp />
+                    </button>
+                    <button
+                        type="button"
+                        className={styles.changeNavButton}
+                        aria-label="Next change"
+                        onClick={() => navigateToChange(1)}
+                    >
+                        <FaChevronDown />
+                    </button>
+                </span>
+            )}
             <button
                 type="button"
                 className={styles.toolbarButton}
@@ -145,29 +243,50 @@ function EditToolbar({
     )
 }
 
-type TableOptionRowConfig = (typeof tableOptionRows)[number]
-
-interface TableOptionRowProps {
-    config: TableOptionRowConfig
-    value: boolean
-    onChange: (value: boolean) => void
+interface TableOptionRowProps<T extends boolean | string> {
+    config: TableOptionRowConfig<T>
+    value: T
+    onChange: (value: T) => void
 }
 
-function TableOptionRow({
+function TableOptionRow<T extends boolean | string>({
     config: { label, ariaLabel, choices },
     value,
     onChange,
-}: TableOptionRowProps) {
+}: TableOptionRowProps<T>) {
     return (
         <div className={styles.tableOptionRow}>
             <span className={styles.tableOptionLabel}>{label}</span>
-            <ToggleGroup<boolean>
+            <ToggleGroup<T>
                 ariaLabel={ariaLabel}
                 orientation="horizontal"
                 value={value}
                 options={choices}
                 onChange={onChange}
             />
+        </div>
+    )
+}
+
+function MembershipCounts({
+    activeCount,
+    eligibleCount,
+    showingCount,
+    totalCount,
+}: {
+    activeCount?: number
+    eligibleCount?: number
+    showingCount: number
+    totalCount?: number
+}) {
+    return (
+        <div className={styles.panelTimestamp}>
+            {activeCount != null &&
+                `${activeCount.toLocaleString()} Active ${DOT_SEPARATOR} `}
+            {eligibleCount != null &&
+                `${eligibleCount.toLocaleString()} Eligible ${DOT_SEPARATOR} `}
+            Showing {showingCount.toLocaleString()}
+            {totalCount != null && ` of ${totalCount.toLocaleString()}`}
         </div>
     )
 }
@@ -196,14 +315,34 @@ function TableOptionsMenu({
                     label="Table Options"
                     onClose={closeDropdown}
                     bodyClassName={styles.tableOptionsBody}
-                    body={tableOptionRows.map((config) => (
-                        <TableOptionRow
-                            key={config.key}
-                            config={config}
-                            value={options[config.key]}
-                            onChange={(value) => setOption(config.key, value)}
-                        />
-                    ))}
+                    body={
+                        <>
+                            <TableOptionRow
+                                config={eligibilityOptionRow}
+                                value={options.eligibility}
+                                onChange={(value) =>
+                                    setOption('eligibility', value)
+                                }
+                            />
+                            <TableOptionRow
+                                config={activityOptionRow}
+                                value={options.activity}
+                                onChange={(value) =>
+                                    setOption('activity', value)
+                                }
+                            />
+                            {tableOptionRows.map((config) => (
+                                <TableOptionRow
+                                    key={config.key}
+                                    config={config}
+                                    value={options[config.key]}
+                                    onChange={(value) =>
+                                        setOption(config.key, value)
+                                    }
+                                />
+                            ))}
+                        </>
+                    }
                     footerButtonLabel="Restore Defaults"
                     footerButtonClassName={styles.restoreDefaultsButton}
                     footerButtonOnClick={() => {
@@ -220,9 +359,9 @@ export default function Page() {
     const [memberToMatch, setMemberToMatch] = useState<Member | null>(null)
     // not wired to the query yet
     const [searchDraft, setSearchDraft] = useState('')
-    const [searchField, setSearchField] =
-        useState<MembershipSearchField>('name')
+    const [searchField, setSearchField] = useState<MembershipSearchField>('all')
     const [scrollToMatchToken, setScrollToMatchToken] = useState(0)
+    const [changeTarget, setChangeTarget] = useState<ChangeTarget | null>(null)
     const { columnOrder, onColumnOrderChange, resetColumnOrder } =
         useColumnOrder()
     const linkMutation = useLinkDonorToUser('Membership Panel')
@@ -242,8 +381,7 @@ export default function Page() {
         saveMutation,
         discardEdits,
         hasNextPage,
-        isFetchingNextPage,
-        sentinelRef,
+        loadMore,
         isPending,
         error,
         refetch,
@@ -256,12 +394,14 @@ export default function Page() {
     } = usePaginatedSearch('/users', zUserProfile)
 
     const handleMatchUser = useCallback(
-        async (user: UserProfile) => {
+        (user: UserProfile) => {
             const donor = memberToMatch?.packet.donor
             if (donor == null) return
 
-            await linkMutation.mutateAsync({ donor, userId: user.id })
-            setMemberToMatch(null)
+            linkMutation.mutate(
+                { donor, userId: user.id },
+                { onSuccess: () => setMemberToMatch(null) }
+            )
         },
         [linkMutation, memberToMatch]
     )
@@ -285,8 +425,16 @@ export default function Page() {
                 onMatchUser: setMemberToMatch,
                 searchQuery: searchDraft,
                 searchField,
+                changeTarget: isEditing ? changeTarget : null,
             }),
-        [options, isEditing, editController, searchDraft, searchField]
+        [
+            options,
+            isEditing,
+            editController,
+            searchDraft,
+            searchField,
+            changeTarget,
+        ]
     )
 
     const collapsedCategories = useMemo(
@@ -304,14 +452,59 @@ export default function Page() {
         [searchDraft, searchField]
     )
 
-    const matchCount = useMemo(
-        () => members.filter(isSearchMatch).length,
-        [members, isSearchMatch]
+    const visibleMembers = useMemo(
+        () =>
+            options.activity === 'both'
+                ? members
+                : members.filter(
+                      (member) =>
+                          Boolean(member.isActive) ===
+                          (options.activity === 'active')
+                  ),
+        [members, options.activity]
     )
+
+    const matchCount = useMemo(
+        () => visibleMembers.filter(isSearchMatch).length,
+        [visibleMembers, isSearchMatch]
+    )
+
+    const activeMemberCount = useMemo(
+        () => members.filter((member) => member.isActive).length,
+        [members]
+    )
+
+    const searchColumnKeys = useMemo(() => {
+        if (searchField !== 'all') return searchField
+        const query = searchDraft.trim().toLowerCase()
+        const match = visibleMembers.find(isSearchMatch)
+        return membershipSearchColumns.filter(
+            (column) => match && matchesSearchQuery(match, query, column)
+        )
+    }, [visibleMembers, isSearchMatch, searchDraft, searchField])
+
+    const isScrollTarget = useMemo(
+        () =>
+            changeTarget == null
+                ? isSearchMatch
+                : (member: Member) =>
+                      member.donorEmail === changeTarget.donorEmail,
+        [changeTarget, isSearchMatch]
+    )
+
+    const navigateToChange = useCallback((update: PendingUpdate) => {
+        setChangeTarget({
+            donorEmail: update.donorEmail,
+            columnKeys: changedColumnKeys(update),
+        })
+        setScrollToMatchToken((token) => token + 1)
+    }, [])
 
     const renderUserPickerResults = () => {
         const { isPending, error, data } = userSearchQuery
         const results = data?.data ?? []
+        const linkingUserId =
+            linkMutation.isPending && linkMutation.variables.userId
 
         const renderContent = () => {
             if (isPending) return 'Loading...'
@@ -322,8 +515,12 @@ export default function Page() {
                 <button
                     key={user.id}
                     type="button"
-                    className={styles.userPickerItem}
-                    onClick={() => void handleMatchUser(user)}
+                    className={cn(
+                        styles.userPickerItem,
+                        user.id === linkingUserId && styles.linking
+                    )}
+                    disabled={linkMutation.isPending}
+                    onClick={() => handleMatchUser(user)}
                 >
                     <span className={styles.userPickerName}>
                         {getUserDisplayName(user)}
@@ -333,12 +530,23 @@ export default function Page() {
                             {user.email}
                         </span>
                     )}
+                    {user.id === linkingUserId && (
+                        <span className={styles.userPickerLinking}>
+                            <FaCog className={styles.savingSpinner} />
+                            Matching user…
+                        </span>
+                    )}
                 </button>
             ))
         }
 
         return (
             <div className={cn(styles.pickerStatus, error && styles.error)}>
+                {linkMutation.error && (
+                    <div className={styles.matchError} role="alert">
+                        Could not match user: {linkMutation.error.message}
+                    </div>
+                )}
                 {renderContent()}
             </div>
         )
@@ -350,13 +558,16 @@ export default function Page() {
             label="Membership"
             headerRight={
                 <div className={styles.panelHeaderRight}>
-                    <div className={styles.panelTimestamp}>
-                        {eligibleMemberCount != null &&
-                            `${eligibleMemberCount.toLocaleString()} Eligible ${DOT_SEPARATOR} `}
-                        Showing {members.length.toLocaleString()}
-                        {totalEntries != null &&
-                            ` of ${totalEntries.toLocaleString()}`}
-                    </div>
+                    <MembershipCounts
+                        activeCount={isPending ? undefined : activeMemberCount}
+                        eligibleCount={eligibleMemberCount}
+                        showingCount={visibleMembers.length}
+                        totalCount={
+                            options.activity === 'both'
+                                ? totalEntries
+                                : undefined
+                        }
+                    />
                     <SearchBar
                         placeholder="Search..."
                         searchbarStyle="pill"
@@ -369,6 +580,7 @@ export default function Page() {
                             if (event.key !== 'Enter' || matchCount === 0)
                                 return
                             event.preventDefault()
+                            setChangeTarget(null)
                             setScrollToMatchToken((token) => token + 1)
                         }}
                         filterLabel="Search column"
@@ -408,18 +620,18 @@ export default function Page() {
                                 />
                             )}
                             {isSaving && (
-                                <>
-                                    <span className={styles.editStatus}>
-                                        Saving changes…
-                                    </span>
-                                    <button
-                                        type="button"
-                                        className={styles.toolbarButton}
-                                        disabled
-                                    >
-                                        <FaSave /> Saving…
-                                    </button>
-                                </>
+                                <button
+                                    type="button"
+                                    className={styles.toolbarButton}
+                                    disabled
+                                >
+                                    <FaCog className={styles.savingSpinner} />{' '}
+                                    Saving {saveMutation.variables?.length}{' '}
+                                    Change
+                                    {saveMutation.variables?.length === 1
+                                        ? ''
+                                        : 's'}
+                                </button>
                             )}
                             {isEditing && !isSaving && (
                                 <EditToolbar
@@ -427,13 +639,17 @@ export default function Page() {
                                     editController={editController}
                                     saveMutation={saveMutation}
                                     discardEdits={discardEdits}
+                                    onNavigateToChange={navigateToChange}
                                 />
                             )}
-                            {!isEditing && (
+                            {!isEditing && !isSaving && (
                                 <button
                                     type="button"
                                     className={styles.toolbarButton}
-                                    onClick={() => setIsEditing(true)}
+                                    onClick={() => {
+                                        setChangeTarget(null)
+                                        setIsEditing(true)
+                                    }}
                                 >
                                     <FaEdit /> Edit
                                 </button>
@@ -450,10 +666,9 @@ export default function Page() {
                     </div>
 
                     <div
-                        className={cn(
-                            styles.tableWrapper,
-                            isSaving && styles.saving
-                        )}
+                        className={styles.tableWrapper}
+                        onWheel={() => setChangeTarget(null)}
+                        onTouchMove={() => setChangeTarget(null)}
                     >
                         {error ? (
                             <div className={styles.tableStatus} role="alert">
@@ -471,49 +686,43 @@ export default function Page() {
                                     Retry
                                 </button>
                             </div>
-                        ) : isPending ? (
-                            <div className={styles.tableStatus}>
-                                Loading membership records...
-                            </div>
                         ) : (
-                            <fieldset
-                                className={styles.tableFieldset}
-                                disabled={isSaving}
-                            >
-                                <Table
-                                    columns={columns}
-                                    data={members}
-                                    rowKey={(m) => m.id}
-                                    collapsedCategories={collapsedCategories}
-                                    options={{
-                                        editing: isEditing,
-                                        zebra: options.showZebra,
-                                        reorderable: isEditing && !isSaving,
-                                        entryOrder: columnOrder,
-                                        onEntryOrderChange: onColumnOrderChange,
-                                    }}
-                                    isScrollTarget={isSearchMatch}
-                                    scrollToColumnKey={searchField}
-                                    scrollToRowToken={scrollToMatchToken}
-                                    footer={
-                                        hasNextPage && (
-                                            <div
-                                                className={styles.loadMore}
-                                                ref={sentinelRef}
-                                            >
-                                                {isFetchingNextPage &&
-                                                    'Loading more membership records...'}
-                                            </div>
-                                        )
-                                    }
-                                />
-                            </fieldset>
+                            <Table
+                                columns={columns}
+                                data={visibleMembers}
+                                rowKey={(m) => m.id}
+                                loading={isPending}
+                                loadingLabel="Loading membership records"
+                                collapsedCategories={collapsedCategories}
+                                options={{
+                                    editing: isEditing,
+                                    zebra: options.showZebra,
+                                    reorderable: isEditing,
+                                    entryOrder: columnOrder,
+                                    onEntryOrderChange: onColumnOrderChange,
+                                }}
+                                isScrollTarget={isScrollTarget}
+                                scrollToColumnKey={
+                                    changeTarget?.columnKeys ?? searchColumnKeys
+                                }
+                                scrollToRowToken={scrollToMatchToken}
+                                placeholderRowCount={estimatePlaceholderRows(
+                                    hasNextPage,
+                                    totalEntries,
+                                    members.length,
+                                    visibleMembers.length
+                                )}
+                                onPlaceholderVisible={loadMore}
+                            />
                         )}
                     </div>
                 </div>
                 <SearchModal
                     open={memberToMatch != null}
-                    onClose={() => setMemberToMatch(null)}
+                    onClose={() => {
+                        setMemberToMatch(null)
+                        linkMutation.reset()
+                    }}
                     title="Match User"
                     subtitle="Search users and link one to this membership record."
                     searchValue={userSearch.query ?? ''}
