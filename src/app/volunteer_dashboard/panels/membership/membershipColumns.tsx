@@ -174,6 +174,7 @@ const flagColumn = (
     header: config.header,
     width: '5rem',
     allowOverflow: true,
+    skeleton: 'bool',
     sortValue: (m) => (m[config.key] ? 1 : 0),
     render: (m) => <BoolTag value={m[config.key]} />,
     renderEdit: (m) => <FlagEdit member={m} edit={edit} config={config} />,
@@ -187,6 +188,7 @@ const readOnlyBoolColumn = (
     key,
     header,
     width: '5rem',
+    skeleton: 'bool',
     sortValue: (m) => (m[key] ? 1 : 0),
     render: (m) => <BoolTag value={m[key]} />,
 })
@@ -343,6 +345,7 @@ export const buildColumns = ({
                 header: 'Tier',
                 width: '11rem',
                 allowOverflow: true,
+                skeleton: 'tag',
                 sortValue: (m) => {
                     const tier = m.recurringSummary?.tier
                     return tier ? membershipTierRank[tier] : 0
@@ -407,6 +410,7 @@ export const buildColumns = ({
                         header: 'Package Shipped',
                         width: '7rem',
                         allowOverflow: true,
+                        skeleton: 'tag',
                         sortValue: (m) => m.packageShipped ?? '',
                         render: (m) => <PackageShippedValue member={m} />,
                         renderEdit: (m) => (
@@ -457,6 +461,7 @@ export const buildColumns = ({
             {
                 key: 'beganMembership',
                 header: 'Member Since',
+                skeleton: 'tag',
                 sortValue: (m) =>
                     m.recurringSummary?.earliestLineitemDate ?? '',
                 render: (m) => {
@@ -514,6 +519,7 @@ export const buildColumns = ({
                 header: 'Shirt',
                 width: '5rem',
                 allowOverflow: true,
+                skeleton: 'bool',
                 sortValue: (m) =>
                     m.shirtSize
                         ? shirtSizeRank[m.shirtSize]
@@ -561,6 +567,7 @@ export const buildColumns = ({
                 key: 'userMatched',
                 header: 'User Matched',
                 width: '5rem',
+                skeleton: 'bool',
                 sortValue: (m) => (m.userMatched ? 1 : 0),
                 render: (m) => <BoolTag value={m.userMatched} />,
                 onCellClick: (m) => m.userId == null && onMatchUser(m),

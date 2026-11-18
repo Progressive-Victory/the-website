@@ -117,7 +117,10 @@ export interface Column<T> {
     menu?: (row: T, controls: { closeDropdown: () => void }) => React.ReactNode
     sortValue?: (row: T) => string | number | boolean | null | undefined
     reorderable?: boolean
+    skeleton?: SkeletonShape
 }
+
+export type SkeletonShape = 'text' | 'tag' | 'bool'
 
 export interface ColumnCategory<T> {
     key: string
@@ -159,7 +162,78 @@ export interface TableProps<T> {
     isScrollTarget?: (row: T) => boolean
     scrollToColumnKey?: string | string[]
     scrollToRowToken?: number
+    loading?: boolean
+    loadingLabel?: string
+    placeholderRowCount?: number
+    onPlaceholderVisible?: () => void
 }
+
+const SKELETON_ROW_COUNT = 12
+const SKELETON_TEXT_WIDTHS = ['70%', '55%', '85%', '40%', '65%', '50%', '75%']
+
+const skeletonShapeClass: Record<SkeletonShape, string | undefined> = {
+    text: undefined,
+    tag: styles.skeletonTag,
+    bool: styles.skeletonBool,
+}
+
+function TableSkeletonRowInner<T>({
+    index,
+    visibleEntries,
+    gridTemplateColumns,
+    zebra,
+    height,
+}: {
+    index: number
+    visibleEntries: VisibleEntry<T>[]
+    gridTemplateColumns: string
+    zebra: boolean
+    height?: number
+}) {
+    return (
+        <div
+            className={cn(
+                styles.row,
+                zebra && index % 2 === 1 && styles.rowAlt
+            )}
+            style={{ gridTemplateColumns, height }}
+        >
+            {visibleEntries.map((entry, column) => {
+                const shape =
+                    entry.type === 'group-collapsed'
+                        ? 'tag'
+                        : (entry.col?.skeleton ?? 'text')
+                return (
+                    <span
+                        key={entry.col?.key ?? `group-${entry.category?.key}`}
+                        className={styles.cell}
+                    >
+                        <span
+                            className={cn(
+                                styles.skeletonBar,
+                                skeletonShapeClass[shape]
+                            )}
+                            style={
+                                shape === 'text'
+                                    ? {
+                                          width: SKELETON_TEXT_WIDTHS[
+                                              (index + column * 3) %
+                                                  SKELETON_TEXT_WIDTHS.length
+                                          ],
+                                      }
+                                    : undefined
+                            }
+                        />
+                    </span>
+                )
+            })}
+        </div>
+    )
+}
+
+const TableSkeletonRow = React.memo(
+    TableSkeletonRowInner
+) as typeof TableSkeletonRowInner
 
 type OpenCellSetter = React.Dispatch<React.SetStateAction<string | null>>
 
@@ -453,6 +527,10 @@ export function Table<T>({
     isScrollTarget,
     scrollToColumnKey,
     scrollToRowToken,
+    loading = false,
+    loadingLabel = 'Loading',
+    placeholderRowCount = 0,
+    onPlaceholderVisible,
 }: TableProps<T>) {
     const {
         editing = false,
@@ -672,6 +750,9 @@ export function Table<T>({
 
     const rowCount = sortedData.length
     const hasRows = rowCount > 0
+    const loadedRowCount = loading ? 0 : rowCount
+    const totalRowCount =
+        loadedRowCount + (loading ? SKELETON_ROW_COUNT : placeholderRowCount)
 
     useLayoutEffect(() => {
         const row =
@@ -735,9 +816,34 @@ export function Table<T>({
     const { start, end } = useVirtualRange(
         containerRef,
         metrics,
-        rowCount,
-        metrics.rowHeight > 0 && rowCount > VIRTUALIZE_THRESHOLD
+        totalRowCount,
+        metrics.rowHeight > 0 && totalRowCount > VIRTUALIZE_THRESHOLD
     )
+
+    useEffect(() => {
+        const container = containerRef.current
+        if (
+            !container ||
+            !onPlaceholderVisible ||
+            loadedRowCount === totalRowCount ||
+            metrics.rowHeight <= 0
+        )
+            return
+
+        const placeholderTop =
+            metrics.headerHeight + loadedRowCount * metrics.rowHeight
+        const check = () => {
+            if (
+                container.scrollTop + container.clientHeight * 2 >=
+                placeholderTop
+            )
+                onPlaceholderVisible()
+        }
+
+        check()
+        container.addEventListener('scroll', check, { passive: true })
+        return () => container.removeEventListener('scroll', check)
+    }, [onPlaceholderVisible, loadedRowCount, totalRowCount, metrics])
 
     useLayoutEffect(() => {
         const header = headerRef.current
@@ -774,6 +880,9 @@ export function Table<T>({
             className={styles.container}
             data-table-editing={editing || undefined}
             data-dropdown-boundary
+            role={loading ? 'status' : undefined}
+            aria-busy={loading || undefined}
+            aria-label={loading ? loadingLabel : undefined}
             ref={containerRef}
         >
             <div
@@ -962,8 +1071,21 @@ export function Table<T>({
                 />
             )}
 
-            {sortedData.slice(start, end).map((row, offset) => {
+            {Array.from({ length: end - start }, (_, offset) => {
                 const index = start + offset
+                if (index >= loadedRowCount)
+                    return (
+                        <TableSkeletonRow
+                            key={`skeleton-${index}`}
+                            index={index}
+                            visibleEntries={visibleEntries}
+                            gridTemplateColumns={gridTemplateColumns}
+                            zebra={zebra}
+                            height={metrics.rowHeight || undefined}
+                        />
+                    )
+
+                const row = sortedData[index]
                 const rowId = rowKey(row, index)
                 const openPrefix = `${rowId}::`
 
@@ -989,13 +1111,15 @@ export function Table<T>({
                 )
             })}
 
-            {end < rowCount && (
+            {end < totalRowCount && (
                 <div
                     className={styles.spacer}
-                    style={{ height: (rowCount - end) * metrics.rowHeight }}
+                    style={{
+                        height: (totalRowCount - end) * metrics.rowHeight,
+                    }}
                 />
             )}
-            {footer}
+            {!loading && footer}
         </div>
     )
 }

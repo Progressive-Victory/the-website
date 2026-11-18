@@ -61,6 +61,17 @@ const enabledDisabledChoices = [
     { value: false, label: 'Disabled' },
 ]
 
+function estimatePlaceholderRows(
+    hasNextPage: boolean,
+    totalEntries: number | undefined,
+    loadedCount: number,
+    visibleCount: number
+) {
+    if (!hasNextPage || totalEntries == null || loadedCount === 0) return 0
+    const remaining = Math.max(0, totalEntries - loadedCount)
+    return Math.max(1, Math.round((remaining * visibleCount) / loadedCount))
+}
+
 function getUserDisplayName(user: UserProfile): string {
     if (user.preferredName) return user.preferredName
 
@@ -370,8 +381,7 @@ export default function Page() {
         saveMutation,
         discardEdits,
         hasNextPage,
-        isFetchingNextPage,
-        sentinelRef,
+        loadMore,
         isPending,
         error,
         refetch,
@@ -676,15 +686,13 @@ export default function Page() {
                                     Retry
                                 </button>
                             </div>
-                        ) : isPending ? (
-                            <div className={styles.tableStatus}>
-                                Loading membership records...
-                            </div>
                         ) : (
                             <Table
                                 columns={columns}
                                 data={visibleMembers}
                                 rowKey={(m) => m.id}
+                                loading={isPending}
+                                loadingLabel="Loading membership records"
                                 collapsedCategories={collapsedCategories}
                                 options={{
                                     editing: isEditing,
@@ -698,17 +706,13 @@ export default function Page() {
                                     changeTarget?.columnKeys ?? searchColumnKeys
                                 }
                                 scrollToRowToken={scrollToMatchToken}
-                                footer={
-                                    hasNextPage && (
-                                        <div
-                                            className={styles.loadMore}
-                                            ref={sentinelRef}
-                                        >
-                                            {isFetchingNextPage &&
-                                                'Loading more membership records...'}
-                                        </div>
-                                    )
-                                }
+                                placeholderRowCount={estimatePlaceholderRows(
+                                    hasNextPage,
+                                    totalEntries,
+                                    members.length,
+                                    visibleMembers.length
+                                )}
+                                onPlaceholderVisible={loadMore}
                             />
                         )}
                     </div>

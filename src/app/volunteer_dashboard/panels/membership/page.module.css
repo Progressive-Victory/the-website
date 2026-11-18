@@ -111,15 +111,6 @@
     }
 }
 
-.loadMore {
-    min-height: 1px;
-    padding: 0.75rem 0;
-    color: rgba(15, 23, 42, 0.55);
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-align: center;
-}
-
 .tableStatus {
     display: flex;
     flex-direction: column;

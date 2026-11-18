@@ -19,12 +19,7 @@ import {
     MemberEdits,
     PendingUpdate,
 } from './membership.types'
-import {
-    useCurrentUser,
-    useFetch,
-    useInfiniteScroll,
-    usePaginatedSearch,
-} from '@/util/hooks'
+import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
     InfiniteData,
     skipToken,
@@ -638,11 +633,9 @@ export function useMembershipPanel() {
     const error: Error | null = query.error
     const refetchQuery = query.refetch
     const refetch = useCallback(() => void refetchQuery(), [refetchQuery])
-    const { sentinelRef } = useInfiniteScroll<HTMLDivElement>({
-        hasNextPage,
-        isFetchingNextPage,
-        fetchNextPage,
-    })
+    const loadMore = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) void fetchNextPage()
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
     const stopEditing = useCallback(() => {
         clearEdits()
@@ -666,8 +659,7 @@ export function useMembershipPanel() {
         saveMutation,
         discardEdits: stopEditing,
         hasNextPage,
-        isFetchingNextPage,
-        sentinelRef,
+        loadMore,
         isPending,
         error,
         refetch,
