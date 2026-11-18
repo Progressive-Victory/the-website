@@ -157,7 +157,7 @@ export interface TableProps<T> {
     options?: TableOptions
     footer?: React.ReactNode
     isScrollTarget?: (row: T) => boolean
-    scrollToColumnKey?: string
+    scrollToColumnKey?: string | string[]
     scrollToRowToken?: number
 }
 
@@ -707,21 +707,20 @@ export function Table<T>({
         handledScrollToken.current = scrollToRowToken
         const top = index * metrics.rowHeight
 
-        const headerCell = headerRef.current?.querySelector<HTMLElement>(
-            `[data-column-key="${CSS.escape(scrollToColumnKey ?? '')}"]`
-        )
+        const columnSelector = [scrollToColumnKey ?? []]
+            .flat()
+            .map((key) => `[data-column-key="${CSS.escape(key)}"]`)
+            .join(', ')
+        const headerCell =
+            columnSelector !== ''
+                ? headerRef.current?.querySelector<HTMLElement>(columnSelector)
+                : undefined
         let left = container.scrollLeft
 
         if (headerCell) {
             const cellRect = headerCell.getBoundingClientRect()
             const headerRect = headerRef.current!.getBoundingClientRect()
-            const cellLeft = cellRect.left - headerRect.left
-            const cellRight = cellLeft + cellRect.width
-            const viewRight = left + container.clientWidth
-
-            if (cellLeft < left) left = cellLeft
-            else if (cellRight > viewRight)
-                left = cellRight - container.clientWidth
+            left = cellRect.left - headerRect.left
         }
 
         container.scrollTo({ top, left, behavior: 'smooth' })
@@ -774,11 +773,13 @@ export function Table<T>({
         <div
             className={styles.container}
             data-table-editing={editing || undefined}
+            data-dropdown-boundary
             ref={containerRef}
         >
             <div
                 className={styles.header}
                 style={{ gridTemplateColumns }}
+                data-dropdown-boundary-top
                 ref={headerRef}
             >
                 {visibleEntries.map((entry) => {
@@ -870,6 +871,7 @@ export function Table<T>({
                     const renderCollapsedHeader = () => (
                         <span
                             key={`group-${entry.category!.key}`}
+                            data-column-key={entry.category!.key}
                             data-entry-id={dragId}
                             className={cn(
                                 styles.collapsedHeader,
