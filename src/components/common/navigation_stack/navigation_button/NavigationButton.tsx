@@ -24,6 +24,7 @@ export interface NavigationButtonProps {
     ariaLabel?: string
     subtitle?: string
     tag?: TagProps
+    renderTag?: React.ReactNode
     subTags?: SubTagProps[]
     href: string
     icon?: IconType | ReactNode
@@ -51,6 +52,7 @@ export function NavigationButton({
     ariaLabel,
     subtitle,
     tag,
+    renderTag,
     subTags,
     href,
     icon,
@@ -130,6 +132,18 @@ export function NavigationButton({
                     </span>
                 )}
 
+                {renderTag && (
+                    <TagSection
+                        buttonType={buttonType}
+                        tag={tag}
+                        renderTag={renderTag}
+                        isAccountButton={isAccountButton}
+                        isCardButton={isCardButton}
+                        hasActiveGroupChild={hasActiveGroupChild}
+                        isGroupOpen={isGroupOpen}
+                        onGroupTagClick={handleGroupTagClick}
+                    />
+                )}
                 <span
                     className={cn(
                         styles.labelSection,

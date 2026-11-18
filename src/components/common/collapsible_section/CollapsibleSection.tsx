@@ -7,7 +7,7 @@ import { FiChevronDown, FiChevronLeft } from 'react-icons/fi'
 
 export interface CollapsibleSectionProps {
     children?: React.ReactNode
-    title?: string
+    title?: string | React.ReactNode
     subtitle?: string
     initialOpenState?: boolean
     subGroup?: boolean
@@ -22,24 +22,26 @@ export function CollapsibleSection({
 }: CollapsibleSectionProps) {
     const [isOpen, setIsOpen] = useState(initialOpenState)
 
+    const toRender = typeof title === 'string' ? <h2>{title}</h2> : <>{title}</>
+
     return (
         <section>
             {title && (
                 <div className={styles.header}>
-                    <h2
+                    <div
                         className={cn(
                             styles.title,
                             subGroup && styles.titleSub
                         )}
                     >
-                        {title}
+                        {toRender}
                         <button
                             className={styles.toggle}
                             onClick={() => setIsOpen(!isOpen)}
                         >
                             {isOpen ? <FiChevronDown /> : <FiChevronLeft />}
                         </button>
-                    </h2>
+                    </div>
                     {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
                 </div>
             )}
