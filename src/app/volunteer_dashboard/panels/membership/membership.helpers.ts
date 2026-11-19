@@ -9,6 +9,7 @@ import {
     MembershipTier,
     membershipTiers,
     MembershipSearchField,
+    membershipSearchColumns,
     PendingUpdate,
     RecurringSummary,
     TierSegment,
@@ -234,6 +235,10 @@ export const memberSearchValues = (
     member: Member,
     field: MembershipSearchField
 ): (string | undefined)[] => {
+    if (field === 'all')
+        return membershipSearchColumns.flatMap((column) =>
+            memberSearchValues(member, column)
+        )
     if (field === 'discord')
         return [member.discordUsername, member.contributionDiscord]
     if (field === 'email')
@@ -384,6 +389,7 @@ export const computeRecurringSummary = (
     return {
         monthsWithLineitems: monthKeys.size,
         earliestLineitemDate,
+        lastPaidDate,
         activeAmount,
         totalAmount: records.reduce((sum, record) => sum + record.amount, 0),
         tier: getMembershipTierForAmount(activeAmount),
@@ -458,6 +464,12 @@ const mapConfirmationFields = ({ donor, user }: MembershipsResponsePacket) => {
     }
 }
 
+const ACTIVE_WINDOW_MS = 40 * 24 * 60 * 60 * 1000
+
+const paidWithinActiveWindow = (lastPaidDate?: string) =>
+    lastPaidDate != null &&
+    Date.now() - new Date(lastPaidDate).getTime() <= ACTIVE_WINDOW_MS
+
 export const mapPacketToMember = (
     packet: MembershipsResponsePacket,
     index: number
@@ -488,6 +500,9 @@ export const mapPacketToMember = (
         ),
         contributionRecords,
         recurringSummary,
+        isActive:
+            Boolean(membership?.duesPayingMember) &&
+            paidWithinActiveWindow(recurringSummary.lastPaidDate),
         membershipCardStatus: cardStatus,
         membershipMerchStatus: merchStatus,
         packageShipped: toPackageShipped(cardStatus),
@@ -669,6 +684,61 @@ export const buildPendingUpdates = (
             },
         ]
     })
+
+const pickChanges = <T extends object, K extends keyof T>(
+    source: T,
+    keys: readonly K[]
+) =>
+    Object.fromEntries(
+        keys.flatMap((key) =>
+            source[key] !== undefined ? [[key, source[key]]] : []
+        )
+    ) as { [P in K]?: Exclude<T[P], undefined> }
+
+const membershipChangeKeys = [
+    'shirtSize',
+    'nameConfirmed',
+    'discordConfirmed',
+    'addressConfirmed',
+    'membershipCardStatus',
+    'cardPrinted',
+    'labelPrinted',
+    'itemsPackaged',
+    'benefitsShipped',
+] as const
+
+export const applyPendingUpdate = (
+    packet: MembershipsResponsePacket,
+    { user, membership }: PendingUpdate
+): MembershipsResponsePacket => ({
+    ...packet,
+    user:
+        packet.user && user
+            ? {
+                  ...packet.user,
+                  ...pickChanges(user, [
+                      'email',
+                      'firstName',
+                      'lastName',
+                      'phone',
+                  ]),
+                  address: {
+                      ...packet.user.address,
+                      ...pickChanges(user.address ?? {}, addressFields),
+                  },
+              }
+            : packet.user,
+    donor:
+        membership && packet.donor.membershipData
+            ? {
+                  ...packet.donor,
+                  membershipData: {
+                      ...packet.donor.membershipData,
+                      ...pickChanges(membership, membershipChangeKeys),
+                  },
+              }
+            : packet.donor,
+})
 
 export const describeNameChange: DescribeChange = (update, previous) => {
     const action = previous ? 'Changed' : 'Set'
