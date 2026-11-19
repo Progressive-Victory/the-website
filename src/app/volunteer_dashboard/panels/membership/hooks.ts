@@ -1,6 +1,7 @@
 'use client'
 
 import {
+    applyPendingUpdate,
     buildPendingUpdates,
     isValidAddressDraft,
     isValidPhone,
@@ -18,13 +19,9 @@ import {
     MemberEdits,
     PendingUpdate,
 } from './membership.types'
+import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
-    useCurrentUser,
-    useFetch,
-    useInfiniteScroll,
-    usePaginatedSearch,
-} from '@/util/hooks'
-import {
+    InfiniteData,
     skipToken,
     useInfiniteQuery,
     useMutation,
@@ -34,6 +31,7 @@ import {
 import { User, UserProfile, zUser, zUserProfile } from 'pv-contracts/data'
 import type { MembershipSearchRequest } from 'pv-contracts/requests'
 import {
+    MembershipsResponsePacket,
     zMembershipsResponsePacket,
     zPaginatedResponse,
 } from 'pv-contracts/responses'
@@ -50,6 +48,7 @@ const HISTORY_STALE_TIME = 5 * 60 * 1000
 const HISTORY_LIMIT = 5
 const USER_MATCH_LIMIT = 10
 const PAGE_SIZE = 250
+const MEMBERSHIPS_QUERY_KEY = ['/actblue/memberships', { limit: PAGE_SIZE }]
 // # TODO Make these part of API settings
 const COLUMN_ORDER_STORAGE_KEY = 'membership.columnOrder'
 const TABLE_OPTIONS_STORAGE_KEY = 'membership.tableOptions'
@@ -338,12 +337,47 @@ export function useUserByName(name?: string) {
     }
 }
 
-export function useSaveMemberships(onSaved: () => void) {
+export function useSaveMemberships(onSubmitted: () => void) {
     const { onPatch } = useFetch()
     const loggedInUser = useCurrentUser()
     const queryClient = useQueryClient()
 
     return useMutation({
+        onMutate: async (updates: PendingUpdate[]) => {
+            await queryClient.cancelQueries({
+                queryKey: MEMBERSHIPS_QUERY_KEY,
+            })
+            const previous = queryClient.getQueriesData({
+                queryKey: MEMBERSHIPS_QUERY_KEY,
+            })
+            const updatesByEmail = new Map(
+                updates.map((update) => [update.donorEmail, update])
+            )
+
+            queryClient.setQueriesData<
+                InfiniteData<{ data: MembershipsResponsePacket[] }>
+            >(
+                { queryKey: MEMBERSHIPS_QUERY_KEY },
+                (data) =>
+                    data && {
+                        ...data,
+                        pages: data.pages.map((page) => ({
+                            ...page,
+                            data: page.data.map((packet) => {
+                                const update = updatesByEmail.get(
+                                    packet.donor.email
+                                )
+                                return update
+                                    ? applyPendingUpdate(packet, update)
+                                    : packet
+                            }),
+                        })),
+                    }
+            )
+            onSubmitted()
+
+            return { previous }
+        },
         mutationFn: async (updates: PendingUpdate[]) => {
             const metaData = {
                 dataSource: 'Membership Panel',
@@ -370,20 +404,26 @@ export function useSaveMemberships(onSaved: () => void) {
                 }
             }
         },
-        onSuccess: async () => {
-            await Promise.all([
+        onError: (error, _updates, context) => {
+            context?.previous.forEach(([key, data]) =>
+                queryClient.setQueryData(key, data)
+            )
+            console.error(error)
+        },
+        onSettled: () =>
+            Promise.all([
                 queryClient.invalidateQueries({
                     queryKey: ['/actblue/memberships'],
                 }),
                 queryClient.invalidateQueries({
                     queryKey: ['/users/:userId'],
                 }),
-            ])
-            onSaved()
-        },
-        onError: (error) => console.error(error),
+            ]),
     })
 }
+
+export type EligibilityFilter = 'both' | 'eligible' | 'ineligible'
+export type ActivityFilter = 'both' | 'active' | 'inactive'
 
 export interface MembershipTableOptions {
     showRowNumber: boolean
@@ -392,16 +432,34 @@ export interface MembershipTableOptions {
     showFulfilled: boolean
     showZebra: boolean
     collapseFulfillment: boolean
+    eligibility: EligibilityFilter
+    activity: ActivityFilter
 }
+
+export type BooleanTableOption = Exclude<
+    keyof MembershipTableOptions,
+    'eligibility' | 'activity'
+>
 
 const defaultTableOptions: MembershipTableOptions = {
     showRowNumber: true,
     showStatus: false,
     showConfirmed: false,
     showFulfilled: true,
-    showZebra: false,
+    showZebra: true,
     collapseFulfillment: false,
+    eligibility: 'both',
+    activity: 'both',
 }
+
+const booleanTableOptions: BooleanTableOption[] = [
+    'showRowNumber',
+    'showStatus',
+    'showConfirmed',
+    'showFulfilled',
+    'showZebra',
+    'collapseFulfillment',
+]
 
 function useTableOptions() {
     const [options, setOptions] =
@@ -419,11 +477,10 @@ function useTableOptions() {
             const stored = parsed as Record<string, unknown>
             setOptions((current) => {
                 const next = { ...current }
-                for (const key of Object.keys(
-                    current
-                ) as (keyof MembershipTableOptions)[])
-                    if (typeof stored[key] === 'boolean')
-                        next[key] = stored[key]
+                for (const key of booleanTableOptions) {
+                    const value = stored[key]
+                    if (typeof value === 'boolean') next[key] = value
+                }
                 return next
             })
         } catch {
@@ -439,7 +496,7 @@ function useTableOptions() {
         try {
             window.localStorage.setItem(
                 TABLE_OPTIONS_STORAGE_KEY,
-                JSON.stringify(options)
+                JSON.stringify(options, booleanTableOptions)
             )
         } catch {
             console.error('Failed to save table options to localStorage')
@@ -472,7 +529,7 @@ const eligibleCountSearch: MembershipSearchRequest = {
     isBenefitEligible: true,
 }
 
-function useMembershipsQuery() {
+function useMembershipsQuery(eligibility: EligibilityFilter) {
     const { ready, onGet } = useFetch()
 
     const eligibleCountQuery = usePaginatedSearch(
@@ -482,7 +539,7 @@ function useMembershipsQuery() {
     ).query
 
     const query = useInfiniteQuery({
-        queryKey: ['/actblue/memberships', { limit: PAGE_SIZE }],
+        queryKey: ['/actblue/memberships', { limit: PAGE_SIZE, eligibility }],
         queryFn: ({ pageParam, signal }) =>
             onGet(
                 '/actblue/memberships',
@@ -492,6 +549,9 @@ function useMembershipsQuery() {
                         page: pageParam,
                         limit: PAGE_SIZE,
                         isMember: true,
+                        ...(eligibility !== 'both' && {
+                            isBenefitEligible: eligibility === 'eligible',
+                        }),
                     },
                     signal,
                 }
@@ -566,18 +626,16 @@ export function useMembershipPanel() {
     const [isEditing, setIsEditing] = useState(false)
     const { editController, clearEdits } = useMemberEdits()
     const { query, members, totalEntries, eligibleMemberCount } =
-        useMembershipsQuery()
+        useMembershipsQuery(options.eligibility)
 
     const { fetchNextPage, hasNextPage, isFetchingNextPage } = query
     const isPending: boolean = query.isPending
     const error: Error | null = query.error
     const refetchQuery = query.refetch
     const refetch = useCallback(() => void refetchQuery(), [refetchQuery])
-    const { sentinelRef } = useInfiniteScroll<HTMLDivElement>({
-        hasNextPage,
-        isFetchingNextPage,
-        fetchNextPage,
-    })
+    const loadMore = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) void fetchNextPage()
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
     const stopEditing = useCallback(() => {
         clearEdits()
@@ -601,8 +659,7 @@ export function useMembershipPanel() {
         saveMutation,
         discardEdits: stopEditing,
         hasNextPage,
-        isFetchingNextPage,
-        sentinelRef,
+        loadMore,
         isPending,
         error,
         refetch,

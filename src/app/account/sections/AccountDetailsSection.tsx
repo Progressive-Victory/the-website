@@ -215,13 +215,11 @@ export function AccountDetailsSection({
     const renderHeaderActions = () => (
         <div className={styles.headerActions}>
             {canAccessDashboard ? (
-                <div>
-                    <BaseButton
-                        label="Volunteer Dashboard"
-                        href="/volunteer_dashboard?from=welcome"
-                        className={styles.secondaryButton}
-                    />
-                </div>
+                <BaseButton
+                    label="Volunteer Dashboard"
+                    href="/volunteer_dashboard?from=welcome"
+                    className={styles.secondaryButton}
+                />
             ) : isInServerResult.data?.isInServer === false ? (
                 <BaseButton
                     label="Join Community"

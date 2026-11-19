@@ -18,6 +18,57 @@ export interface SubTagProps {
     className?: string
 }
 
+interface LabelSectionProps {
+    label: string
+    subtitle?: string
+    labelPill?: string
+    isAccountButton: boolean
+    className?: string
+}
+
+function LabelSection({
+    label,
+    subtitle,
+    labelPill,
+    isAccountButton,
+    className,
+}: LabelSectionProps) {
+    const hasSubtitle = subtitle != null && subtitle !== ''
+    const pill = labelPill && (
+        <span className={styles.labelPill}>{labelPill}</span>
+    )
+
+    return (
+        <span
+            className={cn(
+                styles.labelSection,
+                hasSubtitle &&
+                    !isAccountButton &&
+                    styles.labelSectionWithSubtitle,
+                isAccountButton && styles.accountText,
+                className
+            )}
+        >
+            <span className={styles.labelText}>{label}</span>
+            {hasSubtitle ? (
+                <span className={styles.subtitleRow}>
+                    <span
+                        className={cn(
+                            !isAccountButton && styles.subtitleSection,
+                            isAccountButton && styles.accountSubtitle
+                        )}
+                    >
+                        {subtitle}
+                    </span>
+                    {pill}
+                </span>
+            ) : (
+                pill
+            )}
+        </span>
+    )
+}
+
 export interface NavigationButtonProps {
     label: string
     labelPill?: string
@@ -70,7 +121,6 @@ export function NavigationButton({
     const hasIcon = icon != null
     const isCardButton = buttonType === 'card'
     const isAccountButton = buttonType === 'account'
-    const hasSubtitle = subtitle != null && subtitle !== ''
     const hasSubTags = !isAccountButton && !!subTags?.length
     const {
         isOpen: isGroupOpen,
@@ -130,31 +180,13 @@ export function NavigationButton({
                     </span>
                 )}
 
-                <span
-                    className={cn(
-                        styles.labelSection,
-                        hasSubtitle &&
-                            !isAccountButton &&
-                            styles.labelSectionWithSubtitle,
-                        isAccountButton && styles.accountText,
-                        classNames?.label
-                    )}
-                >
-                    <span className={styles.labelText}>{label}</span>
-                    {subtitle && (
-                        <span
-                            className={cn(
-                                !isAccountButton && styles.subtitleSection,
-                                isAccountButton && styles.accountSubtitle
-                            )}
-                        >
-                            {subtitle}
-                        </span>
-                    )}
-                    {labelPill && (
-                        <span className={styles.labelPill}>{labelPill}</span>
-                    )}
-                </span>
+                <LabelSection
+                    label={label}
+                    subtitle={subtitle}
+                    labelPill={labelPill}
+                    isAccountButton={isAccountButton}
+                    className={classNames?.label}
+                />
 
                 <TagSection
                     buttonType={buttonType}

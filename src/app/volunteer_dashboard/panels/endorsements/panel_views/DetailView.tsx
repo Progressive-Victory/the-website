@@ -2,29 +2,37 @@
 
 import { JurisdictionField } from '../components/JurisdictionField'
 import styles from './DetailView.module.css'
+import { Form, FormControls, FormState } from '@/components/common/forms'
 import {
-    CheckboxField,
-    DateField,
-    DropDownField,
-    Form,
-    FormControls,
-    FormField,
-    FormFieldProps,
-    FormGroup,
-    FormState,
-    TextField,
-    useConfigure,
-} from '@/components/common/forms'
-import formFieldStyles from '@/components/common/forms/FormField.module.css'
+    ButtonToggleRow,
+    DateRow,
+    DropdownRow,
+    List,
+    ListBreak,
+    LongTextRow,
+    ListRow,
+    PickerRow,
+    TextRow,
+    ToggleRow,
+    UploadRow,
+    type ListRowBaseProps,
+} from '@/components/common/list'
+import { useListEditing } from '@/components/common/list/ListContext'
+import longTextStyles from '@/components/common/list/rows/LongTextRow.module.css'
+import fields from '@/components/common/list/rows/fields.module.css'
+import {
+    useListField,
+    type ListRowFieldProps,
+} from '@/components/common/list/useListField'
 import {
     electionStatusOptions,
     endorsementLevelOptions,
     initiativeLevelOptions,
     stateOptions,
 } from '@/models'
-import { cn, parseErrorMessage } from '@/util'
+import { cn } from '@/util'
 import { BackgroundColor, Endorsement } from 'pv-contracts/data'
-import { ChangeEvent, useCallback, useState } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 
 const stateOptionsWithEmpty = [
     { value: '', label: 'No state selected' },
@@ -88,240 +96,273 @@ export function DetailView({
             deleteDisabledReason={deleteDisabledReason}
             onCancel={onCancel}
         >
-            <FormGroup title="Details">
-                <TextField label="Name" field="name" required />
-                <DropDownField<Endorsement>
+            <List title="Details">
+                <TextRow
+                    label="Name"
+                    field="name"
+                    indicator="required"
+                    placeholder="Enter Name"
+                />
+                <PickerRow
                     label="State"
                     field="state"
-                    required
+                    indicator="required"
                     options={stateOptionsWithEmpty}
                 />
-                <CheckboxField label="Incumbent" field="incumbent" />
-                <CheckboxField label="PV Member" field="isPvMember" />
-                <DropDownField<Endorsement>
-                    label="Avatar Background"
-                    getter={(form) => form.avatarBgColor}
-                    setter={(form, field) => ({
+                <ToggleRow label="Incumbent" field="incumbent" />
+                <ToggleRow label="PV Member" field="isPvMember" />
+                <ListBreak editingOnly />
+                <DropdownRow
+                    label="Background Color"
+                    getter={(form: Endorsement) => form.avatarBgColor}
+                    setter={(form: Endorsement, field) => ({
                         ...form,
                         avatarBgColor: Number(field),
                     })}
                     options={avatarBgColorOptions}
                 />
-                <ImageField
+                <UploadRow
                     label="Image"
                     field="imgHref"
-                    uploadImage={uploadImage}
+                    uploadFile={uploadImage}
+                    hidden
                 />
-            </FormGroup>
-            <FormGroup title="Election Information">
-                <DropDownField<Endorsement>
+            </List>
+            <List title="Election Information">
+                <DropdownRow
                     label="Election Status"
-                    getter={(form) => form.electionStatus}
-                    setter={(form, field) => ({
-                        ...form,
-                        electionStatus: Number(field),
-                    })}
+                    field="electionStatus"
                     options={electionStatusOptions}
                 />
                 <JurisdictionField label="Jurisdiction" field="jurisdiction" />
-                <DateField
+                <ListBreak />
+                <DateRow
                     label="General Election"
                     field="generalElectionDate"
-                    format={{ dateStyle: 'medium' }}
+                    dateFormat={{ dateStyle: 'medium' }}
                 />
-                <DateField
+                <DateRow
                     label="Primary Election"
                     field="primaryElectionDate"
-                    format={{ dateStyle: 'medium' }}
+                    dateFormat={{ dateStyle: 'medium' }}
                 />
-            </FormGroup>
-            <FormGroup title="Socials">
-                <HandleField label="Handle" />
-                <LinkField label="Social Link" field="handleHref" />
-                <LinkField label="Website Link" field="websiteHref" />
-                <LinkField label="Donate Link" field="donateHref" />
-            </FormGroup>
-            <FormGroup title="Endorsement Details">
-                <DropDownField<Endorsement>
+            </List>
+            <List title="Socials">
+                <HandleRow label="Handle" field="handle" />
+                <SocialLinkRow label="Social Link" field="handleHref" />
+                <SocialLinkRow label="Website Link" field="websiteHref" />
+                <SocialLinkRow label="Donate Link" field="donateHref" />
+            </List>
+            <List title="Endorsement Details">
+                <DropdownRow
                     label="Endorsement Tier"
-                    getter={(form) => form.endorsementLevel}
-                    setter={(form, field) => ({
+                    getter={(form: Endorsement) => form.endorsementLevel}
+                    setter={(form: Endorsement, field) => ({
                         ...form,
                         endorsementLevel: Number(field),
                     })}
                     options={endorsementLevelOptions}
                 />
-                <TextField label="Reason" field="endorsementReason" />
-                <DropDownField<Endorsement>
+                <LongTextRow
+                    label="Reason"
+                    field="endorsementReason"
+                    placeholder="Enter Reason"
+                />
+                <DropdownRow
                     label="Organizing Initiative"
-                    getter={(form) => form.initiativeLevel}
-                    setter={(form, field) => ({
+                    getter={(form: Endorsement) => form.initiativeLevel}
+                    setter={(form: Endorsement, field) => ({
                         ...form,
                         initiativeLevel: Number(field),
                     })}
                     options={initiativeLevelOptions}
                 />
-                <QuoteField label="Announcement Message" />
-                <CheckboxField
+                <QuoteRow label="Announcement Message" />
+                <ListBreak />
+                <ButtonToggleRow
                     label="Publish Endorsement"
                     field="endorsementPublished"
+                    enableLabel="Publish"
+                    disableLabel="Unpublish"
+                    enabledValueLabel="Published"
+                    disabledValueLabel="Not Published"
                 />
-            </FormGroup>
+            </List>
         </Form>
     )
 }
 
-function HandleField(
-    props: FormFieldProps<Endorsement, string | null | undefined>
-) {
-    return (
-        <TextField<Endorsement>
-            {...props}
-            readonly={!props.dynamic?.editing}
-            getter={(form) => {
-                if (!form.handle) return ''
-                if (props.dynamic?.editing) return form.handle
-                return `@${form.handle.replace(/^@+/, '')}`
-            }}
-            setter={(form, field) => ({
-                ...form,
-                handle: String(field ?? '').replace(/^@+/, '') || null,
-            })}
-        />
-    )
-}
+type SocialRowProps = ListRowBaseProps &
+    ListRowFieldProps<string | null | undefined>
 
-function QuoteField(
-    props: FormFieldProps<Endorsement, string | null | undefined>
-) {
-    return (
-        <TextField<Endorsement>
-            {...props}
-            getter={(form) => {
-                if (props.dynamic?.editing || !form.handle) return form.quote
-
-                const handle = `@${form.handle.replace(/^@+/, '')}`
-                return form.quote ? `${handle} ${form.quote}` : handle
-            }}
-            setter={(form, field) => ({
-                ...form,
-                quote: field ?? null,
-            })}
-        />
+function HandleRow({
+    label,
+    field,
+    getter,
+    setter,
+    validator,
+    ...rowProps
+}: SocialRowProps) {
+    const { value, onValueChange, invalid } = useListField<string | null>(
+        {
+            field,
+            getter,
+            setter,
+            validator,
+        },
+        {
+            required: rowProps.indicator === 'required',
+            isEmpty: (value) => !value?.trim(),
+            editing: rowProps.editing,
+        }
     )
-}
-
-function LinkField(
-    props: FormFieldProps<Endorsement, string | null | undefined>
-) {
-    const { getter, validator, onChange, readonly } = useConfigure(
-        props,
-        useCallback(
-            (field: string | null | undefined) =>
-                !props.required || !!field?.trim(),
-            [props.required]
-        )
-    )
-    const value = props.dynamic ? (getter(props.dynamic.form) ?? '') : ''
 
     return (
-        <FormField {...props}>
-            {readonly ? (
-                <>
-                    {value && (
-                        <a
-                            className={styles.linkValue}
-                            href={value}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            {value}
-                        </a>
-                    )}
-                </>
-            ) : (
+        <ListRow
+            {...rowProps}
+            label={label}
+            invalid={invalid}
+            value={value ? `@${value.replace(/^@+/, '')}` : undefined}
+            editor={(labelId) => (
                 <input
                     type="text"
-                    id={props.id}
-                    name={props.label}
-                    disabled={props.disabled ?? props.dynamic?.saving}
-                    required={props.required}
-                    value={value}
-                    onInput={(event) =>
-                        onChange((event.target as HTMLInputElement).value)
+                    aria-labelledby={labelId}
+                    value={value ?? ''}
+                    placeholder="Social Handle"
+                    onChange={(event) =>
+                        onValueChange(
+                            event.target.value.replace(/^@+/, '') || null
+                        )
                     }
-                    className={cn(
-                        formFieldStyles.textField,
-                        !validator(value) && formFieldStyles.invalid
-                    )}
+                    className={fields.textField}
                 />
             )}
-        </FormField>
+        />
     )
 }
 
-interface ImageFieldProps extends FormFieldProps<
-    Endorsement,
-    string | null | undefined
-> {
-    uploadImage: (image: File) => Promise<{ url: string }>
+interface QuoteRowValue {
+    handle: string | null
+    quote: string | null
 }
 
-function ImageField(props: ImageFieldProps) {
-    const { onChange, readonly } = useConfigure(
-        props,
-        useCallback(
-            (field: string | null | undefined) =>
-                !props.required || !!field?.trim(),
-            [props.required]
-        )
-    )
-    const [uploading, setUploading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-
-    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        event.target.value = ''
-        if (!file) return
-
-        setUploading(true)
-        setError(null)
-
-        try {
-            const { url } = await props.uploadImage(file)
-            onChange(url)
-        } catch (uploadError) {
-            setError(parseErrorMessage(uploadError, 'Failed to upload image'))
-        } finally {
-            setUploading(false)
+function QuoteRow({ label }: ListRowBaseProps) {
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const editing = useListEditing()
+    const { value, onValueChange, invalid } = useListField<QuoteRowValue>(
+        {
+            getter: (form: Endorsement) => ({
+                handle: form.handle,
+                quote: form.quote,
+            }),
+            setter: (form: Endorsement, next) => ({
+                ...form,
+                quote: next.quote,
+            }),
+        },
+        {
+            required: false,
+            isEmpty: (value) => !value?.quote?.trim(),
         }
-    }
+    )
+    const handle = value?.handle?.replace(/^@+/, '')
+    const displayValue = [handle && `@${handle}`, value?.quote?.trim()]
+        .filter(Boolean)
+        .join(' ')
 
-    if (!props.dynamic?.editing) return null
+    useLayoutEffect(() => {
+        const textarea = textareaRef.current
+        if (!textarea || !editing) return
 
-    const hasImage = !!props.dynamic.form.imgHref
+        textarea.style.height = 'auto'
+        const computedStyle = window.getComputedStyle(textarea)
+        const borderHeight =
+            Number.parseFloat(computedStyle.borderTopWidth) +
+            Number.parseFloat(computedStyle.borderBottomWidth)
+        textarea.style.height = `${textarea.scrollHeight + borderHeight}px`
+    }, [editing, value?.quote])
 
     return (
-        <FormField {...props}>
-            <div className={styles.imageField}>
-                {!readonly && (
-                    <label className={styles.uploadButton}>
-                        {uploading
-                            ? 'Uploading...'
-                            : hasImage
-                              ? 'Modify Image'
-                              : 'Upload Image'}
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(event) => void handleFileChange(event)}
-                            disabled={uploading}
-                            hidden
-                        />
-                    </label>
-                )}
-                {error && <span className={styles.uploadError}>{error}</span>}
-            </div>
-        </FormField>
+        <ListRow
+            label={label}
+            labelAlign="top"
+            className={longTextStyles.row}
+            invalid={invalid}
+            value={displayValue || undefined}
+            editor={(labelId) => (
+                <div className={longTextStyles.editor}>
+                    <textarea
+                        ref={textareaRef}
+                        aria-labelledby={labelId}
+                        value={value?.quote ?? ''}
+                        placeholder="Enter Public Statement"
+                        rows={3}
+                        onChange={(event) =>
+                            onValueChange({
+                                handle: value?.handle ?? null,
+                                quote: event.target.value || null,
+                            })
+                        }
+                        className={cn(
+                            fields.textField,
+                            longTextStyles.textarea
+                        )}
+                    />
+                </div>
+            )}
+        />
+    )
+}
+
+function SocialLinkRow({
+    label,
+    field,
+    getter,
+    setter,
+    validator,
+    ...rowProps
+}: SocialRowProps) {
+    const { value, onValueChange, invalid } = useListField<string | null>(
+        {
+            field,
+            getter,
+            setter,
+            validator,
+        },
+        {
+            required: rowProps.indicator === 'required',
+            isEmpty: (value) => !value?.trim(),
+            editing: rowProps.editing,
+        }
+    )
+
+    return (
+        <ListRow
+            {...rowProps}
+            label={label}
+            invalid={invalid}
+            value={
+                value && (
+                    <a
+                        className={styles.linkValue}
+                        href={value}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {value}
+                    </a>
+                )
+            }
+            editor={(labelId) => (
+                <input
+                    type="text"
+                    aria-labelledby={labelId}
+                    value={value ?? ''}
+                    placeholder="Paste Link"
+                    onChange={(event) => onValueChange(event.target.value)}
+                    className={fields.textField}
+                />
+            )}
+        />
     )
 }

@@ -1,0 +1,6 @@
+.options {
+    display: grid;
+    gap: 0.25rem;
+    max-height: 18rem;
+    overflow-y: auto;
+}
