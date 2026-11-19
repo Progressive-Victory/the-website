@@ -1,0 +1,163 @@
+.emptyRow {
+    padding: 0.75rem var(--list-padding-inline, 1.1rem);
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.itemRow {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem var(--list-padding-inline, 1.1rem);
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.85);
+    overflow: hidden;
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.itemLabel {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    transform: translateX(0);
+    transition: transform 280ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.itemAccessory {
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+.removeButton {
+    position: absolute;
+    left: calc(var(--list-padding-inline, 1.1rem) - 0.15rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #ef4444;
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.5);
+    pointer-events: none;
+    transition:
+        opacity 200ms cubic-bezier(0.25, 1, 0.5, 1),
+        transform 200ms cubic-bezier(0.25, 1, 0.5, 1);
+
+    &:hover {
+        background: #dc2626;
+    }
+
+    &:active {
+        transform: scale(0.9);
+    }
+}
+
+.itemRowEditing {
+    & .itemLabel {
+        padding-right: 2rem;
+        transform: translateX(2rem);
+    }
+
+    & .removeButton {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: auto;
+    }
+}
+
+.addRow {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.75rem var(--list-padding-inline, 1.1rem);
+    padding-left: calc(var(--list-padding-inline, 1.1rem) - 0.15rem);
+    border: none;
+    background: transparent;
+    font-size: 0.92rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.72);
+    cursor: pointer;
+    transition: background 140ms ease;
+
+    &:first-child {
+        border-top-left-radius: calc(var(--list-radius, 1rem) - 1px);
+        border-top-right-radius: calc(var(--list-radius, 1rem) - 1px);
+    }
+
+    &:last-child {
+        border-bottom-left-radius: calc(var(--list-radius, 1rem) - 1px);
+        border-bottom-right-radius: calc(var(--list-radius, 1rem) - 1px);
+    }
+
+    &:hover {
+        color: rgba(2, 132, 199, 1);
+        background: rgba(14, 165, 233, 0.14);
+    }
+}
+
+.pickerItem {
+    display: flex;
+    width: calc(100% - 0.5rem);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    margin: 0.25rem;
+    padding: 1rem;
+    border: none;
+    border-radius: 1rem;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #e5e7eb;
+    }
+}
+
+.pickerItemName {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.85);
+}
+
+.pickerItemSub {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.pickerEmpty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.addIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1;
+}

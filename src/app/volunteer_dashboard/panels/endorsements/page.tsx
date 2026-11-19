@@ -441,9 +441,7 @@ export default function Page() {
                     <DetailView
                         key={selectedEndorsement?.id ?? 'empty'}
                         beforeHeader={renderBanner(true)}
-                        endorsement={
-                            formState?.form ?? selectedEndorsement ?? null
-                        }
+                        endorsement={selectedEndorsement}
                         title={titleFormState}
                         saving={
                             createMutation.isPending || updateMutation.isPending

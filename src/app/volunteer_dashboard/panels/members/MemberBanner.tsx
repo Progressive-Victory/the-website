@@ -20,9 +20,9 @@ export function MemberBanner({
     onTabChange,
     positions,
 }: MemberBannerProps) {
-    const userPositions = (positions ?? []).filter((p) =>
-        p.userIds.includes(user.id)
-    )
+    const userPositions = (positions ?? [])
+        .filter((p) => p.userIds.includes(user.id))
+        .slice(0, 1)
 
     return (
         <div className={styles.headerTop}>

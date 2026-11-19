@@ -4,10 +4,11 @@ import {
     DateField,
     FormGroup,
     PhoneField,
+    PickerWheelField,
     TextField,
     DropDownField,
 } from '@/components/common/forms'
-import { stateOptions } from '@/models'
+import { pronounOptionsWith, stateOptions } from '@/models'
 import { dateService } from '@/services'
 import { ShirtSize, User } from 'pv-contracts/data'
 import { useState } from 'react'
@@ -135,9 +136,14 @@ export const AccountInfoForm = ({
                         <TextField label="Last Name" field="lastName" />
                     )}
                     {isEditing ? (
-                        <TextField
+                        <PickerWheelField<User>
                             label="Preferred Pronouns"
-                            field="preferredPronouns"
+                            getter={(user) => user.preferredPronouns ?? ''}
+                            setter={(user, value) => ({
+                                ...user,
+                                preferredPronouns: value ? String(value) : null,
+                            })}
+                            options={pronounOptionsWith(user.preferredPronouns)}
                         />
                     ) : `${user.preferredPronouns ?? ''}`.trim() ? (
                         <TextField<User>

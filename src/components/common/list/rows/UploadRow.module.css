@@ -1,0 +1,55 @@
+.editor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.9rem;
+    border: 0;
+    border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.72);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 140ms ease,
+        color 140ms ease;
+
+    &:hover:not(:disabled) {
+        color: rgba(2, 132, 199, 1);
+        background: rgba(14, 165, 233, 0.14);
+    }
+
+    &:focus-visible {
+        border-color: #0ea5e9;
+        outline: 2px solid rgba(14, 165, 233, 0.25);
+        outline-offset: 1px;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
+}
+
+.error {
+    flex-basis: 100%;
+    color: #dc2626;
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+[data-align='left'] > .editor {
+    justify-content: flex-start;
+}
+
+[data-align='center'] > .editor {
+    justify-content: center;
+}

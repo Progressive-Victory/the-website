@@ -77,6 +77,8 @@ import { MdVerified } from 'react-icons/md'
 import { useMediaQuery } from 'usehooks-ts'
 import z from 'zod'
 
+/* eslint-disable complexity */
+
 type MemberTabKey = 'overview' | 'donorMatching' | 'history'
 
 const tabs: TabSpec[] = [
@@ -514,14 +516,6 @@ export default function Page() {
     })
 
     const roles = rolesQuery.data?.data ?? []
-    const roleOptions = useMemo(
-        () =>
-            (rolesQuery.data?.data ?? []).map((role) => ({
-                value: role.id,
-                label: role.name,
-            })),
-        [rolesQuery.data]
-    )
 
     const userQuery = useQuery({
         queryKey: [`/users/${selectedId}`],
@@ -544,10 +538,22 @@ export default function Page() {
     const updateMutation = useMutation<
         User,
         FetchError,
-        { id: number; user: User; request: UpdateUserRequest },
+        {
+            id: number
+            user: User
+            request: UpdateUserRequest
+            positionUpdates?: { positionId: number; userIds: number[] }[]
+        },
         User | undefined
     >({
-        mutationFn: async ({ id, user, request }) => {
+        mutationFn: async ({ id, user, request, positionUpdates = [] }) => {
+            // Positions store their members, so membership changes are saved
+            // on each position before the user.
+            await Promise.all(
+                positionUpdates.map(({ positionId, userIds }) =>
+                    positionQueries.updatePosition(positionId, { userIds })
+                )
+            )
             const result = await onPatch('/users/:userId', request, zUser, {
                 params: { userId: id },
             })
@@ -616,6 +622,9 @@ export default function Page() {
                 queryClient.invalidateQueries({
                     queryKey: [`/users/${id}`],
                 }),
+                queryClient.invalidateQueries({
+                    queryKey: ['positionHierarchy'],
+                }),
             ]),
     })
 
@@ -654,7 +663,9 @@ export default function Page() {
     const locationQuery = useQuery({
         queryKey: [`/locations/${formState?.form?.address?.zip}`],
         queryFn:
-            ready && formState?.mode === 'edit' && formState.form.address?.zip
+            ready &&
+            formState?.mode === 'edit' &&
+            formState.form.address?.zip?.length === 5
                 ? async ({ signal }) => {
                       try {
                           return await onGet('/locations/:zip', zLocation, {
@@ -669,72 +680,84 @@ export default function Page() {
         placeholderData: keepPreviousData,
     })
 
-    const handleSave = useCallback(
-        (user: User) => {
-            const orNull = (value: string | null | undefined) =>
-                value?.length ? value : null
+    const handleSave = (user: User) => {
+        const orNull = (value: string | null | undefined) =>
+            value?.length ? value : null
 
-            const buildAddress = () => ({
-                addressLine1: orNull(user.address.addressLine1?.trim()),
-                addressLine2: orNull(user.address.addressLine2?.trim()),
-                city:
-                    orNull(user.address.city?.trim()) ??
-                    locationQuery.data?.city,
-                county:
-                    orNull(user.address.county?.trim()) ??
-                    locationQuery.data?.county,
-                state:
-                    orNull(user.address.state?.trim()) ??
-                    locationQuery.data?.state,
-                zip:
-                    orNull(user.address.zip?.trim()) ??
-                    locationQuery.data?.zip?.toString(),
+        const buildAddress = () => ({
+            addressLine1: orNull(user.address.addressLine1?.trim()),
+            addressLine2: orNull(user.address.addressLine2?.trim()),
+            city: orNull(user.address.city?.trim()),
+            county: orNull(user.address.county?.trim()),
+            state: orNull(user.address.state?.trim()),
+            zip: orNull(user.address.zip?.trim()),
+        })
+        const address = buildAddress()
+
+        const oldAddress = userQuery.data?.address ?? null
+        const addressIsDirty =
+            address.addressLine1 != oldAddress?.addressLine1 ||
+            address.addressLine2 != oldAddress?.addressLine2 ||
+            address.city != oldAddress?.city ||
+            address.county != oldAddress?.county ||
+            address.state != oldAddress?.state ||
+            address.zip != oldAddress?.zip
+
+        const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
+            email: user.email,
+            phone: user.phone,
+            preferredName: user.preferredName,
+            preferredPronouns: user.preferredPronouns,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            birthdate: user.birthdate,
+            aliases: Array.from(user.aliases ?? []),
+            membershipCardStatus: +user.membershipCardStatus,
+            membershipMerchStatus: +user.membershipMerchStatus,
+            shirtSize: user.shirtSize,
+            duesPayingMember: user.duesPayingMember,
+            membershipFulfillmentStatus: user.membershipFulfillmentStatus
+                ? +user.membershipFulfillmentStatus
+                : null,
+            nameConfirmed: user.nameConfirmed,
+            addressConfirmed: user.addressConfirmed,
+            roles: user.roles?.map((role) => role.id),
+            metaData: {
+                dataSource: 'Member Panel',
+                userWhoUpdatedId: loggedInUser.data?.id,
+            },
+        } satisfies UpdateUserRequest)
+        if (addressIsDirty) request.address = address
+
+        const before = new Set(
+            (userQuery.data?.positions ?? []).map((position) => position.id)
+        )
+        const after = new Set(
+            (user.positions ?? []).map((position) => position.id)
+        )
+        const positionUpdates = (positionHierarchy.data?.positions ?? [])
+            .filter(
+                (position) => before.has(position.id) !== after.has(position.id)
+            )
+            .map((position) => {
+                const others = position.userIds.filter(
+                    (userId) => userId !== user.id
+                )
+                return {
+                    positionId: position.id,
+                    userIds: after.has(position.id)
+                        ? [...others, user.id]
+                        : others,
+                }
             })
-            const address = buildAddress()
 
-            const oldAddress = userQuery.data?.address ?? null
-            const addressIsDirty =
-                address.addressLine1 != oldAddress?.addressLine1 ||
-                address.addressLine2 != oldAddress?.addressLine2 ||
-                address.city != oldAddress?.city ||
-                address.county != oldAddress?.county ||
-                address.state != oldAddress?.state ||
-                address.zip != oldAddress?.zip
-
-            const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
-                email: user.email,
-                phone: user.phone,
-                preferredName: user.preferredName,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                birthdate: user.birthdate,
-                aliases: Array.from(user.aliases ?? []),
-                membershipCardStatus: +user.membershipCardStatus,
-                membershipMerchStatus: +user.membershipMerchStatus,
-                shirtSize: user.shirtSize,
-                duesPayingMember: user.duesPayingMember,
-                membershipFulfillmentStatus: user.membershipFulfillmentStatus
-                    ? +user.membershipFulfillmentStatus
-                    : null,
-                nameConfirmed: user.nameConfirmed,
-                addressConfirmed: user.addressConfirmed,
-                roles: user.roles?.map((role) => role.id),
-                metaData: {
-                    dataSource: 'Member Panel',
-                    userWhoUpdatedId: loggedInUser.data?.id,
-                },
-            } satisfies UpdateUserRequest)
-            if (addressIsDirty) request.address = address
-
-            updateMutation.mutate({ id: user.id, user, request })
-        },
-        [
-            locationQuery.data,
-            updateMutation,
-            userQuery.data?.address,
-            loggedInUser.data,
-        ]
-    )
+        updateMutation.mutate({
+            id: user.id,
+            user,
+            request,
+            positionUpdates,
+        })
+    }
 
     const makeTitle = useCallback((user: User | UserProfile) => {
         if (user.firstName && user.lastName)
@@ -795,13 +818,26 @@ export default function Page() {
                         setFormState={setFormState}
                         saving={updateMutation.isPending}
                         editing={formState?.mode === 'edit'}
+                        location={
+                            locationQuery.isPlaceholderData
+                                ? null
+                                : locationQuery.data
+                        }
+                        invalidZip={
+                            !locationQuery.isPending &&
+                            !locationQuery.isPlaceholderData &&
+                            locationQuery.data == null
+                                ? formState?.form?.address?.zip
+                                : null
+                        }
                         isInvalid={
                             formState?.form?.address?.zip != null &&
                             (locationQuery.data == null ||
-                                locationQuery.isPending)
+                                locationQuery.isPending ||
+                                locationQuery.isPlaceholderData)
                         }
                         roles={roles}
-                        roleOptions={roleOptions}
+                        positions={positionHierarchy.data?.positions ?? []}
                         makeFormTitle={() => makeTitle(userQuery.data)}
                         handleSave={handleSave}
                     />
@@ -832,9 +868,6 @@ export default function Page() {
                         key={selectedId}
                         user={userQuery.data}
                         isRefetching={userQuery.isRefetching}
-                        roles={roles}
-                        roleOptions={roleOptions}
-                        makeTitle={makeTitle}
                     />
                 )
 
@@ -949,7 +982,7 @@ export default function Page() {
                             subtitle: user.discordUsers?.[0]?.username
                                 ? `@${user.discordUsers[0].username}`
                                 : 'NOT FOUND',
-                            labelPill: `${user.preferredPronouns ?? ''}`.trim(), // # TODO: Replace with actual pronouns when API supports it.
+                            labelPill: user.preferredPronouns?.trim() ?? '',
                             tagLabel:
                                 user.id === loggedInUser.data?.id
                                     ? 'You'
