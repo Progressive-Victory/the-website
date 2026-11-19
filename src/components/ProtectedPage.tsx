@@ -2,8 +2,7 @@ import styles from '../app/login/login.module.css'
 import { HalftoneBackground } from './halftone/HalftoneBackground'
 import { MainLayout } from './layout'
 import { AccessDenied } from '@/components/AccessDenied'
-import { hasPermission, useAuth, useCurrentUser } from '@/util/hooks'
-import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { ReactNode } from 'react'
 
 interface ProtectedPageProps {
@@ -11,41 +10,39 @@ interface ProtectedPageProps {
     requiredPermissions: number[]
 }
 
-export function ProtectedPage({
+export async function ProtectedPage({
     children,
     requiredPermissions = [],
 }: ProtectedPageProps) {
-    const { isSessionLoading, session } = useAuth()
-    const currentUser = useCurrentUser()
+    const cookieStore = await cookies()
+    const sessionCookies = cookieStore.getAll()
 
-    if (currentUser.isLoading || isSessionLoading) return null
-
-    if (!session) redirect('/login')
-
-    const isAccessDenied = () => {
-        const user = currentUser.data
-        if (!user || currentUser.error)
-            return (
-                <AccessDenied message="There was an error while checking your authentication." />
-            )
-
-        if (
-            !requiredPermissions.every((permissionId) =>
-                hasPermission(user, permissionId)
-            )
-        )
-            return (
-                <AccessDenied message="You lack sufficient permissions to view this page." />
-            )
-        return false
+    const url = new URL('/me/hasPermissions', process.env.PV_WEBSITE_API_URL)
+    requiredPermissions.forEach((perm) =>
+        url.searchParams.append('perms', `${perm}`)
+    )
+    const sessionCookiesStr = sessionCookies
+        .map((cookie) => `${encodeURI(cookie.name)}=${encodeURI(cookie.value)}`)
+        .join('; ')
+    const requestInit = {
+        headers: { Cookie: sessionCookiesStr },
+    } as RequestInit
+    console.log(requestInit)
+    console.log(url)
+    const { accessGranted } = (await (
+        await fetch(url, requestInit)
+    ).json()) as {
+        accessGranted: boolean
     }
-    const accessDenied = isAccessDenied()
+    console.log(accessGranted)
 
-    return accessDenied ? (
+    return !accessGranted ? (
         <MainLayout>
             <div className={styles.backgroundCover} />
             <HalftoneBackground />
-            <div className={styles.body}>{accessDenied}</div>
+            <div className={styles.body}>
+                <AccessDenied message="You lack sufficient permissions to view this page." />
+            </div>
         </MainLayout>
     ) : (
         children
