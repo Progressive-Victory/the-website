@@ -1,0 +1,32 @@
+@media (min-width: 768px) {
+    .body {
+        --post-grid-cols: 2;
+    }
+}
+
+@media (min-width: 1024px) {
+    .body {
+        --post-grid-cols: 3;
+    }
+}
+
+.body {
+    padding: 2.5rem;
+
+    background: #d4e6f5;
+}
+
+.title {
+    padding: 2.5rem;
+
+    text-align: center;
+    font-weight: 700;
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+}
+
+.postContainer {
+    display: grid;
+    grid-template-columns: repeat(var(--post-grid-cols), minmax(0, 1fr));
+    gap: 2.5rem;
+}

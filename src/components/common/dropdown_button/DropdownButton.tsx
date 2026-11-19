@@ -1,8 +1,8 @@
 'use client'
 
 import styles from './DropdownButton.module.css'
-import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
 import { forwardRef } from 'react'
+import { FaEllipsisVertical } from 'react-icons/fa6'
 import { FiChevronDown } from 'react-icons/fi'
 
 export interface DropdownButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -32,7 +32,7 @@ export const DropdownButton = forwardRef<
                     aria-expanded={isOpen}
                     {...props}
                 >
-                    <EllipsisVerticalIcon
+                    <FaEllipsisVertical
                         className={styles.shortIcon}
                         aria-hidden="true"
                     />

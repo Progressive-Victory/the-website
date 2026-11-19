@@ -71,10 +71,7 @@ export const DropdownMenu = Object.assign(
             (node: HTMLDivElement | null) => {
                 internalRef.current = node
                 if (typeof externalRef === 'function') externalRef(node)
-                else if (externalRef)
-                    (
-                        externalRef as React.MutableRefObject<HTMLDivElement | null>
-                    ).current = node
+                else if (externalRef) externalRef.current = node
             },
             [externalRef]
         )

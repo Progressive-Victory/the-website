@@ -2,7 +2,7 @@
 
 import type { BaseVisualProps } from '../Button'
 import buttonStyles from '@/components/common/buttons/Button.module.css'
-import cx from 'classnames'
+import { cn } from '@/util'
 import NextLink from 'next/link'
 
 export type NavButtonProps = BaseVisualProps & {
@@ -39,7 +39,7 @@ export function NavButton(props: NavButtonProps) {
         showChevron === true &&
         (buttonVariant === 'long' || showChevron === true)
 
-    const finalClassName = cx(
+    const finalClassName = cn(
         buttonStyles.buttonBase,
         buttonStyles.plain,
         className,

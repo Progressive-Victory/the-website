@@ -3,10 +3,10 @@
 import { useInfoBlockContext } from '../Block'
 import styles from './BlockField.module.css'
 import { DropdownMenu } from '@/components/common/dropdown_menu/DropdownMenu'
-import { User } from '@/contracts/data'
-import { InformationCircleIcon } from '@heroicons/react/24/outline'
+import { User } from 'pv-contracts/data'
 import type React from 'react'
 import { useRef, useState } from 'react'
+import { HiOutlineInformationCircle } from 'react-icons/hi2'
 
 export interface BlockFieldProps {
     label: string
@@ -44,16 +44,28 @@ export function FieldInfoPanel({
             {description && <p className={styles.fieldDesc}>{description}</p>}
             <div className={styles.fieldMeta}>
                 <div className={styles.fieldMetaItem}>
-                    <span className={styles.fieldMetaLabel}>{sourceLabel ?? 'Source'}</span>
-                    {sourceValue != null
-                        ? <span className={styles.fieldMetaValue}>{sourceValue}</span>
-                        : <span className={styles.fieldMetaSkel} />}
+                    <span className={styles.fieldMetaLabel}>
+                        {sourceLabel ?? 'Source'}
+                    </span>
+                    {sourceValue != null ? (
+                        <span className={styles.fieldMetaValue}>
+                            {sourceValue}
+                        </span>
+                    ) : (
+                        <span className={styles.fieldMetaSkel} />
+                    )}
                 </div>
                 <div className={styles.fieldMetaItem}>
-                    <span className={styles.fieldMetaLabel}>{lastUpdatedLabel ?? 'Last updated'}</span>
-                    {lastUpdatedValue != null
-                        ? <span className={styles.fieldMetaValue}>{lastUpdatedValue}</span>
-                        : <span className={styles.fieldMetaSkel} />}
+                    <span className={styles.fieldMetaLabel}>
+                        {lastUpdatedLabel ?? 'Last updated'}
+                    </span>
+                    {lastUpdatedValue != null ? (
+                        <span className={styles.fieldMetaValue}>
+                            {lastUpdatedValue}
+                        </span>
+                    ) : (
+                        <span className={styles.fieldMetaSkel} />
+                    )}
                 </div>
             </div>
             <div className={styles.fieldHistorySection}>
@@ -134,7 +146,7 @@ export function BlockField({
                             {displayValue ?? '-'}
                         </span>
                         {!isReadonlyInEdit && (
-                            <InformationCircleIcon
+                            <HiOutlineInformationCircle
                                 className={styles.infoBlockInfoIcon}
                             />
                         )}

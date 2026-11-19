@@ -1,0 +1,5 @@
+.linkValue {
+    color: rgba(2, 132, 199, 1);
+    text-decoration: underline;
+    overflow-wrap: anywhere;
+}

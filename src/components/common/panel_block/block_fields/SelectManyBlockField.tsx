@@ -4,7 +4,7 @@ import { useInfoBlockContext } from '../Block'
 import blockFieldStyles from './BlockField.module.css'
 import styles from './SelectManyBlockField.module.css'
 import { DropdownMenu } from '@/components/common'
-import { User } from '@/contracts/data'
+import { User } from 'pv-contracts/data'
 import { useRef, useState, type RefObject } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 

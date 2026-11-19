@@ -2,6 +2,7 @@
 
 import { DropdownQuestion } from '@/components/DropdownQuestion'
 import styles from '@/components/content_sections/ContentSections.module.css'
+import { cn } from '@/util'
 import type React from 'react'
 import { useState } from 'react'
 
@@ -118,7 +119,7 @@ export function ContentSection({
 
     return (
         <section className={styles.infoSection}>
-            <p className={`${styles.infoSectionTitle} ${alignmentClass}`}>
+            <p className={cn(styles.infoSectionTitle, alignmentClass)}>
                 {renderedTitle}
                 {subtitle && (
                     <>

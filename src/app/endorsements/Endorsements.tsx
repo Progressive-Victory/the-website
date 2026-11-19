@@ -1,191 +1,190 @@
 'use client'
 
-import { CANDIDATES, type CandidateConfig } from './endorsements.data'
-import styles from '@/app/endorsements/endorsement.module.css'
-import { Message } from '@/components/common'
-import { BaseButton } from '@/components/common/buttons/Button'
-import buttonStyles from '@/components/common/buttons/Button.module.css'
-import cardStyles from '@/components/common/twitter_card_element/Card.module.css'
-import React, { useMemo, useState } from 'react'
+import { CandidateDetails } from './components/CandidateDetails'
+import { CandidateGallery } from './components/CandidateGallery'
+import { FilterButtonRow } from './components/FilterButtonRow'
+import styles from './endorsement.module.css'
+import {
+    type FilterType,
+    type GalleryDisplayMode,
+    type SectionGroupingMode,
+    type SectionSortOrder,
+} from './endorsements.types'
+import { ContentPageFrame } from '@/components/content_sections/ContentSections'
+import { getRelevantElectionDate, getStateLabel } from '@/models'
+import { useEndorsementQueries } from '@/queries'
+import { useQuery } from '@tanstack/react-query'
+import {
+    EndorsementType,
+    InitiativeType,
+    type Endorsement,
+} from 'pv-contracts/data'
+import { useDeferredValue, useMemo, useState } from 'react'
 
-const avatarImage = '/images/PV_Pride_Logo.png'
-
-type FilterType = 'national' | 'state' | 'pledge' | 'member' | 'all'
-
-export function Endorsements() {
-    const [filter, setFilter] = useState<FilterType>('all')
-
-    const sortedCandidates = useMemo(() => {
-        return [...CANDIDATES].sort((a, b) => {
-            const aTime = a.electionDate?.getTime() ?? Infinity
-            const bTime = b.electionDate?.getTime() ?? Infinity
-            return aTime - bTime
-        })
-    }, [])
-
-    const filteredCandidates = useMemo(() => {
-        const predicates: Record<FilterType, (c: CandidateConfig) => boolean> =
-            {
-                all: () => true,
-                national: (c) => c.initiativeType === 'national',
-                state: (c) => c.initiativeType === 'state',
-                pledge: (c) => c.showPvPledge,
-                member: (c) => c.showPvMember,
-            }
-
-        return sortedCandidates.filter(predicates[filter])
-    }, [sortedCandidates, filter])
-
-    return (
-        <div className={styles.hero}>
-            <div className={styles.buttonRow}>
-                <BaseButton
-                    label="National Initiative"
-                    onClick={() => setFilter('national')}
-                    className={
-                        filter === 'national'
-                            ? styles.filterButtonActive
-                            : buttonStyles.minimalProminent
-                    }
-                />
-                <BaseButton
-                    label="State Initiative"
-                    onClick={() => setFilter('state')}
-                    className={
-                        filter === 'state'
-                            ? styles.filterButtonActive
-                            : buttonStyles.minimalProminent
-                    }
-                />
-                <BaseButton
-                    label="PV Pledge"
-                    onClick={() => setFilter('pledge')}
-                    className={
-                        filter === 'pledge'
-                            ? styles.filterButtonActive
-                            : buttonStyles.minimalProminent
-                    }
-                />
-                <BaseButton
-                    label="PV Member"
-                    onClick={() => setFilter('member')}
-                    className={
-                        filter === 'member'
-                            ? styles.filterButtonActive
-                            : buttonStyles.minimalProminent
-                    }
-                />
-                <BaseButton
-                    label="Show All"
-                    onClick={() => setFilter('all')}
-                    className={
-                        filter === 'all'
-                            ? styles.filterButtonActive
-                            : buttonStyles.minimalProminent
-                    }
-                />
-            </div>
-
-            <div className={styles.messages}>
-                {filteredCandidates.map((candidate) => {
-                    const handle = candidate.handle.startsWith('@')
-                        ? candidate.handle
-                        : `@${candidate.handle}`
-
-                    return (
-                        <Message
-                            key={candidate.id}
-                            className={styles.messageCard}
-                            username="Progressive Victory"
-                            nameColor="red"
-                            image={candidate.image}
-                            avatar={avatarImage}
-                            avatarRounded={false}
-                            motionProps={{
-                                initial: { rotate: 20, y: 50 },
-                                animate: { rotate: 0, y: 0 },
-                                transition: { delay: 0.15, duration: 0.65 },
-                            }}
-                            tiltProps={{
-                                className: styles.orderLastXlFirst,
-                                disabled: false,
-                                strength: { amount: 1 },
-                                rotation: { max: 10, z: 0 },
-                                scale: { hover: 1.025 },
-                            }}
-                            botDivider={true}
-                            ctaLabel="Learn More"
-                            ctaHref={candidate.learnMoreHref}
-                            ctaTarget="_blank"
-                            ctaRel="noopener noreferrer"
-                            botLeftContent={
-                                <CandidateButtons candidate={candidate} />
-                            }
-                            showEllipsis={false}
-                        >
-                            {candidate.handleHref ? (
-                                <a
-                                    href={candidate.handleHref}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={cardStyles.textHighlight}
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    {handle}
-                                </a>
-                            ) : (
-                                <span className={cardStyles.textHighlight}>
-                                    {handle}
-                                </span>
-                            )}
-
-                            <span className={cardStyles.textPart}>
-                                {candidate.bodyText}
-                            </span>
-                        </Message>
-                    )
-                })}
-            </div>
-        </div>
-    )
+const FILTER_PREDICATES: Record<FilterType, (c: Endorsement) => boolean> = {
+    national: (c) => c.initiativeLevel === InitiativeType.National,
+    state: (c) => c.initiativeLevel === InitiativeType.State,
+    pledge: (c) => c.endorsementLevel === EndorsementType.PVPledge,
+    member: (c) => c.isPvMember,
 }
 
-function CandidateButtons({ candidate }: { candidate: CandidateConfig }) {
-    const showAny =
-        candidate.initiativeType !== undefined ||
-        candidate.showPvPledge ||
-        candidate.showPvMember
+// Will update to not hardcode 2026 in next revision
+const DEFAULT_YEAR = 2026
 
-    if (!showAny) return null
+export function Endorsements() {
+    const { ready, getEndorsements } = useEndorsementQueries()
 
-    const initiativeClassName =
-        candidate.initiativeType === 'state'
-            ? styles.stateInitative
-            : styles.primary
+    const endorsementsQuery = useQuery({
+        queryKey: ['endorsements'],
+        queryFn: ({ signal }) => getEndorsements({ signal }),
+        enabled: ready,
+    })
+
+    const sortedCandidates = useMemo(
+        () =>
+            (endorsementsQuery.data ?? [])
+                .filter((candidate) => candidate.endorsementPublished)
+                .sort((a, b) => {
+                    const aTime =
+                        getRelevantElectionDate(a)?.getTime() ?? Infinity
+                    const bTime =
+                        getRelevantElectionDate(b)?.getTime() ?? Infinity
+                    return aTime - bTime
+                }),
+        [endorsementsQuery.data]
+    )
+
+    const availableYears = useMemo(() => {
+        const years = new Set<number>()
+        for (const candidate of sortedCandidates) {
+            if (candidate.primaryElectionDate) {
+                years.add(candidate.primaryElectionDate.getUTCFullYear())
+            }
+            if (candidate.generalElectionDate) {
+                years.add(candidate.generalElectionDate.getUTCFullYear())
+            }
+        }
+        return Array.from(years).sort((a, b) => b - a)
+    }, [sortedCandidates])
+
+    const defaultYear =
+        availableYears.find((year) => year === DEFAULT_YEAR) ??
+        availableYears[0] ??
+        DEFAULT_YEAR
+
+    const [filter, setFilter] = useState<FilterType | null>(null)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [displayMode, setDisplayMode] = useState<GalleryDisplayMode>('flat')
+    const [sectionMode, setSectionMode] =
+        useState<SectionGroupingMode>('status')
+    const [sectionSortOrder, setSectionSortOrder] =
+        useState<SectionSortOrder>('ascending')
+    const [selectedYear, setSelectedYear] = useState<number | null>(null)
+    const [selectedCandidate, setSelectedCandidate] =
+        useState<Endorsement | null>(null)
+
+    const year = selectedYear ?? defaultYear
+
+    const deferredSearchQuery = useDeferredValue(searchQuery)
+
+    const query = deferredSearchQuery.trim().toLowerCase()
+
+    const filteredCandidates = sortedCandidates.filter((candidate) => {
+        const primaryYear = candidate.primaryElectionDate?.getUTCFullYear()
+        const generalYear = candidate.generalElectionDate?.getUTCFullYear()
+        const matchesYear = primaryYear === year || generalYear === year
+
+        if (!matchesYear) {
+            return false
+        }
+
+        const matchesTagFilter =
+            filter === null ? true : FILTER_PREDICATES[filter](candidate)
+
+        if (!matchesTagFilter) {
+            return false
+        }
+
+        if (!query) {
+            return true
+        }
+
+        return (
+            candidate.name.toLowerCase().includes(query) ||
+            getStateLabel(candidate.state).toLowerCase().includes(query) ||
+            (candidate.handle?.toLowerCase().includes(query) ?? false)
+        )
+    })
 
     return (
-        <div className={styles.container}>
-            {candidate.initiativeType === 'national' && (
-                <BaseButton
-                    label="National Initiative"
-                    className={initiativeClassName}
-                />
-            )}
-
-            {candidate.initiativeType === 'state' && (
-                <BaseButton
-                    label="State Initiative"
-                    className={initiativeClassName}
-                />
-            )}
-
-            {candidate.showPvPledge && (
-                <BaseButton label="PV Pledge" className={styles.tertiary} />
-            )}
-
-            {candidate.showPvMember && (
-                <BaseButton label="PV Member" className={styles.secondary} />
-            )}
-        </div>
+        <>
+            <CandidateDetails
+                candidate={selectedCandidate}
+                onClose={() => setSelectedCandidate(null)}
+            />
+            <ContentPageFrame
+                heading={
+                    <div className={styles.headingWrap}>
+                        <p className={styles.heading}>
+                            Endorsements{' '}
+                            {/* Will update to not hardcode 2026 in next revision */}
+                            <span className={styles.headingHighlight}>
+                                for 2026
+                            </span>
+                        </p>
+                        <p className={styles.subheading}>
+                            Learn about each of the candidates we are
+                            supporting.
+                        </p>
+                    </div>
+                }
+            >
+                <div className={styles.hero}>
+                    {/* <CandidateCarousel
+                        gap={175}
+                        candidates={filteredCandidates.filter(
+                            (c) =>
+                                c.endorsementType === 'PV Pledge' &&
+                                (c.electionStatus === '' ||
+                                    c.electionStatus === 'Elected' ||
+                                    c.electionStatus === 'Won Primary')
+                        )}
+                    /> */}
+                    <FilterButtonRow
+                        filter={filter}
+                        setFilter={setFilter}
+                        displayMode={displayMode}
+                        setDisplayMode={setDisplayMode}
+                        sectionMode={sectionMode}
+                        setSectionMode={setSectionMode}
+                        sectionSortOrder={sectionSortOrder}
+                        setSectionSortOrder={setSectionSortOrder}
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        year={year}
+                        setYear={setSelectedYear}
+                        availableYears={availableYears}
+                    />
+                    {endorsementsQuery.error && (
+                        <p className={styles.subheading}>
+                            We couldn&apos;t load our endorsements right now.
+                            Please try again later.
+                        </p>
+                    )}
+                    {endorsementsQuery.isSuccess && (
+                        <CandidateGallery
+                            filteredCandidates={filteredCandidates}
+                            filter={filter}
+                            displayMode={displayMode}
+                            sectionMode={sectionMode}
+                            sectionSortOrder={sectionSortOrder}
+                            year={year}
+                            searchQuery={deferredSearchQuery}
+                            onSelectCandidate={setSelectedCandidate}
+                        />
+                    )}
+                </div>
+            </ContentPageFrame>
+        </>
     )
 }

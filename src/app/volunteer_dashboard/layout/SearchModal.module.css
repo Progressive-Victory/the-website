@@ -1,0 +1,164 @@
+.modalBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    background: rgba(2, 6, 23, 0.38);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    will-change: opacity, backdrop-filter;
+}
+
+.modal {
+    position: relative;
+    width: min(56rem, 100%);
+    height: min(80dvh, 48rem);
+    min-height: 18rem;
+    display: flex;
+    flex-direction: column;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 30px 80px rgba(15, 23, 42, 0.35);
+    overflow: hidden;
+    transform-origin: 50% 40%;
+    will-change: transform, opacity;
+}
+
+.modal::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.55),
+        rgba(255, 255, 255, 0) 22%
+    );
+    opacity: 0.35;
+}
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.1);
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.modalHeaderLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.modalTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.modalSubtitle {
+    font-size: 0.9rem;
+    color: #475569;
+    line-height: 1.25rem;
+}
+
+.modalHeaderRight {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-shrink: 0;
+}
+
+.modalBody {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.62);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    font-weight: 500;
+}
+
+.modalBody :global(.pinned),
+.modalBody :global(.elementList),
+.modalBody :global(.listStatus) {
+    padding: 0.9rem 1rem 1rem;
+}
+
+.modalBody :global(.listStatus) {
+    flex: 1;
+    min-height: 0;
+}
+
+.modalFooter {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid rgba(17, 24, 39, 0.1);
+    background: rgba(255, 255, 255, 0.6);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+}
+
+.modalFooterButton {
+    min-width: 7rem;
+    appearance: none;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.55);
+    color: #0f172a;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        transform 120ms ease,
+        background 120ms ease;
+}
+
+.modalFooterButton:hover {
+    background-color: #e5e7eb;
+}
+
+.modalSearch {
+    width: min(22rem, 52dvw);
+}
+
+.searchInputBare {
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+
+.searchInputBare > input {
+    width: 100%;
+    height: 2.35rem;
+    line-height: 2.35rem;
+    border-radius: 0.6rem;
+    border: 1px solid #d1d5db;
+    padding: 0 0.75rem;
+    background: rgba(255, 255, 255, 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .modalBackdrop {
+        will-change: auto;
+    }
+
+    .modal {
+        will-change: auto;
+    }
+}

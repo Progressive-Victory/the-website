@@ -146,8 +146,8 @@ export function Hero() {
                     }}
                 >
                     <span className={cardStyles.textPart}>
-                        Built by the internet, for America. Progressive Victory
-                        is a new kind of political institution: seamlessly
+                        Built by the internet for America. Progressive Victory
+                        is a new kind of political institution, seamlessly
                         marrying the electoral impact and volunteer power of
                         traditional progressive organizations with the culture
                         and community of digital third places.

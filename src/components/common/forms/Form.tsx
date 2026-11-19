@@ -1,9 +1,29 @@
 import styles from './Form.module.css'
 import { DynamicFormFieldProps, FieldConfiguration } from './FormField'
-import cx from 'classnames'
+import { HStack, Spacer, VStack } from '@/components/layout'
+import { cn } from '@/util'
 import deepEqual from 'deep-equal'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
+import React, {
+    useCallback,
+    useEffect,
+    useImperativeHandle,
+    useRef,
+    useState,
+} from 'react'
+import { FaPlus, FaEdit, FaSave, FaTrashAlt } from 'react-icons/fa'
+
+/**
+ * The current mode the form is in. It'll usually be in `read` mode unless
+ * you've started creating or editing something.
+ */
+export type FormMode = 'read' | 'create' | 'edit'
+
+/** Imperative handle for driving the form from outside, via `controlsRef`. */
+export interface FormControls {
+    create: () => void
+    edit: () => void
+    cancel: () => void
+}
 
 /**
  * Current internal state of the Form component. This is returned to the parent
@@ -13,8 +33,8 @@ export interface FormState<T> {
     /** The current state of the form's data. */
     form: T
 
-    /** Whether the form is currently being edited. */
-    editing: boolean
+    /** The current edit mode of the form. */
+    mode: FormMode
 
     /** Whether any field has been modified. Only set while editing. */
     dirty: boolean
@@ -26,7 +46,7 @@ export interface FormState<T> {
 /** Properties for the Form component. */
 export interface FormProps<T> {
     /** The data your form will operate on. */
-    form: T
+    form: T | null
 
     /** A title heading, listed above the form groups. */
     title: string
@@ -36,6 +56,12 @@ export interface FormProps<T> {
 
     /** An optional avatar element displayed in the header. */
     avatar?: React.ReactNode
+
+    /** Optional content displayed above the form header. */
+    beforeHeader?: React.ReactElement
+
+    /** Optional class name for the form element. */
+    className?: string
 
     /** If this is true, no 'Edit' button will be displayed. */
     readonly?: boolean
@@ -59,19 +85,40 @@ export interface FormProps<T> {
     onUpdate?: (state: FormState<T>) => void
 
     /** Callback to save form data. Should correspond to `saving`. */
-    onSave?: (form: T) => void
+    onSave?: (form: T) => void | boolean
+
+    /** Callback to create a new form value. */
+    onCreate?: () => T
+
+    /** Hides the built-in 'Create' buttons while keeping `onCreate` available. */
+    showCreateButton?: boolean
+
+    /** Exposes imperative controls so a parent can trigger create/edit/cancel. */
+    controlsRef?: React.Ref<FormControls>
+
+    /** Callback to delete a form value. */
+    onDelete?: (form: T) => void
+
+    /** Disables 'Edit' and shows this text as its tooltip. */
+    editDisabledReason?: string
+
+    /** Disables 'Delete' and shows this text as its tooltip. */
+    deleteDisabledReason?: string
+
+    /** Callback when editing is discarded. */
+    onCancel?: () => void
 }
 
 /**
  * Generalized component for creating forms. Supports custom fields, generic
- * data, and validation.
+ * data, and validation. You can also create and delete forms with it.
  *
  * To add fields, add a list of fields or FormGroups as children.
  *
  * See `FormGroup` and `FormField` for details.
  *
- * See `src/app/admin/members/page.tsx` for an example on using this
- * component.
+ * See `src/app/volunteer_dashboard/panels/members/page.tsx` for an example on
+ * using this component.
  *
  * IMPORTANT: This component will prefill `id` and override `dynamic`
  * properties of all direct children. If you're passing any component which
@@ -86,15 +133,30 @@ export function Form<T>({
     title,
     subtitle,
     avatar,
+    beforeHeader,
+    className,
     readonly = false,
     isInvalid = false,
     saving = false,
     children = [],
     onUpdate,
     onSave,
+    onCreate,
+    showCreateButton = true,
+    controlsRef,
+    onDelete,
+    editDisabledReason,
+    deleteDisabledReason,
+    onCancel,
 }: FormProps<T>) {
+    // Stores the initial state of the form while editing.
+    const [baseForm, setBaseForm] = useState<T | null>(null)
+
     // Stores the current state of the form while editing.
     const [editForm, setEditForm] = useState<T | null>(null)
+
+    // Stores the current editing mode of the form.
+    const [mode, setMode] = useState<FormMode>('read')
 
     // Stores a set of field ids which have values different than their
     // initial values.
@@ -105,36 +167,67 @@ export function Form<T>({
 
     // Stores field configuration callbacks without causing rerenders when
     // fields re-register the same config during render/effect cycles.
-    const configureMapRef = useRef<Record<string, FieldConfiguration<T, unknown>>>(
-        {}
-    )
+    const configureMapRef = useRef<
+        Record<string, FieldConfiguration<T, unknown>>
+    >({})
 
     // Current form state
     const form = editForm ?? initialForm
-    const editing = editForm != null
+    const editing = mode !== 'read'
     const dirty = dirtyMap.size > 0
     const invalid = isInvalid || invalidMap.size > 0
 
+    const reset = () => {
+        setEditForm(null)
+        setBaseForm(null)
+        setMode('read')
+        setDirtyMap(new Set<string>())
+        setInvalidMap(new Set<string>())
+    }
+
+    const beginEdit = (formToEdit: T, mode: 'create' | 'edit') => {
+        setBaseForm(formToEdit)
+        setEditForm(formToEdit)
+        setMode(mode)
+    }
+
     // Called when 'Edit' is pressed. Simply edits current form state.
     const handleEdit = () => {
-        setEditForm(initialForm)
+        if (!initialForm || editDisabledReason) return
+        beginEdit(initialForm, 'edit')
+    }
+
+    // Called when 'Create' is pressed. Asks the parent for a blank form and
+    // begins editing.
+    const handleCreate = () => {
+        if (!onCreate) return
+        beginEdit(onCreate(), 'create')
+    }
+
+    // Called when 'Delete' is pressed. Asks the parent to delete the form.
+    const handleDelete = () => {
+        if (!initialForm || deleteDisabledReason) return
+        onDelete?.(initialForm)
     }
 
     // Called when 'Save' is pressed. Asks the parent component to save, and
     // then clears edit state.
     const handleSave = () => {
-        if (editForm) onSave?.(editForm)
-        setEditForm(null)
-        setDirtyMap(new Set<string>())
-        setInvalidMap(new Set<string>())
+        const result = editForm ? onSave?.(editForm) : undefined
+        if (result !== false) reset()
     }
 
     // Called when 'Cancel' is pressed. Clears edit state.
     const handleCancel = () => {
-        setEditForm(null)
-        setDirtyMap(new Set<string>())
-        setInvalidMap(new Set<string>())
+        onCancel?.()
+        reset()
     }
+
+    useImperativeHandle(controlsRef, () => ({
+        create: handleCreate,
+        edit: handleEdit,
+        cancel: handleCancel,
+    }))
 
     // Called whenever the data in any field changes.
     const handleChange = useCallback(
@@ -144,14 +237,17 @@ export function Form<T>({
             const configuration = configureMapRef.current[id]
             if (!configuration) return
 
+            // Similarly, if the forms are null somehow, we'll just return.
+            if (!baseForm || !editForm) return
+
             const { getter, setter, validator } = configuration
 
             // Use the field's setter to update current form state.
-            const currForm = setter(form, field)
+            const currForm = setter(editForm, field)
             setEditForm(currForm)
 
             // Use the field's getter to update whether the field is dirty.
-            const init = getter(initialForm)
+            const init = getter(baseForm)
             const curr = getter(currForm)
             const clean = (!init && !curr) || deepEqual(init, curr)
             setDirtyMap((prev) => {
@@ -170,7 +266,7 @@ export function Form<T>({
                 return next
             })
         },
-        [form, initialForm]
+        [baseForm, editForm]
     )
 
     // Called whenever a field is configured (see `FormField`). Stores the
@@ -181,6 +277,34 @@ export function Form<T>({
         },
         []
     )
+
+    const renderCreateButton = (className?: string) =>
+        onCreate && showCreateButton ? (
+            <button onClick={handleCreate} className={className}>
+                <FaPlus /> Create
+            </button>
+        ) : null
+
+    // If anything changes, inform the parent component of the new state
+    useEffect(() => {
+        if (onUpdate && form != null) onUpdate({ form, mode, dirty, invalid })
+    }, [form, mode, dirty, invalid, onUpdate])
+
+    // If the form is null, display a blank area message.
+    if (form == null) {
+        return (
+            <div className={styles.emptyContainer}>
+                <HStack grow>
+                    <VStack grow gap>
+                        <Spacer />
+                        <span>{`No ${title} selected`}</span>
+                        {renderCreateButton(styles.button)}
+                        <Spacer />
+                    </VStack>
+                </HStack>
+            </div>
+        )
+    }
 
     // Dynamic state. This is populated automatically within each child to
     // allow them to have access to form state without the user needing to
@@ -193,79 +317,139 @@ export function Form<T>({
         onConfigure: handleConfigure,
     }
 
+    // Generates a function to hydrate a child element with props.
+    // Accepts an id prefix to ensure that nested elements still have
+    // unique id fields.
+    const hydrateChild =
+        (prefix = '') =>
+        // Hydrates an individual child element by populating its
+        // default id and dynamic data from the parent form element.
+        // Returns an array of React.ReactNode[].
+        (child: React.ReactNode, i: number): React.ReactNode[] => {
+            // If the node is a non-element or a builtin, change nothing.
+            if (!React.isValidElement(child) || typeof child.type == 'string')
+                return [child]
+            // If the node is a React fragment (<></>), recurse on its children.
+            else if (child.type === React.Fragment) {
+                const fragmentChildren = ((child.props as React.FragmentProps)
+                    .children ?? []) as React.ReactNode[]
+                return fragmentChildren.flatMap(
+                    hydrateChild(`${i.toString()}-`)
+                )
+            }
+
+            // Otherwise, default `id` if it's undefined, and override `dynamic`.
+            return [
+                {
+                    ...child,
+                    props: {
+                        id: `${prefix}${i.toString()}`,
+                        ...(child.props as object),
+                        dynamic,
+                    },
+                },
+            ]
+        }
+
     // Populate default id and dynamic data into the children. Only user-
     // defined components will be hydrated, but note that this includes
     // non-form-specific components.
-    const hydratedChildren = React.Children.map(children, (child, i) => {
-        // If the node is a non-element or a builtin, change nothing.
-        if (!React.isValidElement(child) || typeof child.type == 'string')
-            return child
+    const hydratedChildren = React.Children.map(
+        children,
+        hydrateChild()
+    )!.flat()
 
-        // Otherwise, default `id` if it's undefined, and override `dynamic`.
-        return {
-            ...child,
-            props: {
-                id: i.toString(),
-                ...(child.props as object),
-                dynamic,
-            },
-        }
-    })
-
-    // If anything changes, inform the parent component of the new state
-    useEffect(() => {
-        onUpdate?.({ form, editing, dirty, invalid })
-    }, [form, editing, dirty, invalid, onUpdate])
+    const hydratedBeforeHeader =
+        beforeHeader && React.isValidElement(beforeHeader)
+            ? {
+                  ...beforeHeader,
+                  props: {
+                      id: 'before-header',
+                      ...(beforeHeader.props as object),
+                      dynamic,
+                  },
+              }
+            : beforeHeader
 
     return (
-        <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
-            <header className={styles.header}>
-                <div className={styles.titleSection}>
-                    {avatar && <div className={styles.avatar}>{avatar}</div>}
-                    <div className={styles.titleContent}>
-                        <h1 className={styles.title}>{title}</h1>
-                        {subtitle && (
-                            <p className={styles.subtitle}>{subtitle}</p>
+        <>
+            {hydratedBeforeHeader}
+            <form
+                className={cn(styles.form, className)}
+                onSubmit={(e) => e.preventDefault()}
+            >
+                <header className={styles.header}>
+                    <div className={styles.titleSection}>
+                        {avatar && (
+                            <div className={styles.avatar}>{avatar}</div>
                         )}
+                        <div className={styles.titleContent}>
+                            <h1 className={styles.title}>{title}</h1>
+                            {subtitle && (
+                                <p className={styles.subtitle}>{subtitle}</p>
+                            )}
+                        </div>
                     </div>
-                </div>
 
-                {!readonly && (
-                    <div className={styles.buttonRow}>
-                        {editing ? (
-                            <>
-                                <button
-                                    onClick={handleSave}
-                                    disabled={!dirty || invalid}
-                                    className={styles.button}
-                                >
-                                    <FaSave /> Save Changes
-                                </button>
-                                <button
-                                    onClick={handleCancel}
-                                    className={cx(
-                                        styles.button,
-                                        styles.discardButton
+                    {!readonly && (
+                        <div className={styles.buttonRow}>
+                            {editing ? (
+                                <>
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={!dirty || invalid}
+                                        className={styles.button}
+                                    >
+                                        <FaSave /> Save Changes
+                                    </button>
+                                    <button
+                                        onClick={handleCancel}
+                                        className={cn(
+                                            styles.button,
+                                            styles.discardButton
+                                        )}
+                                    >
+                                        <FaTrashAlt /> Discard Changes
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    {renderCreateButton(styles.button)}
+                                    <button
+                                        onClick={handleEdit}
+                                        disabled={!!editDisabledReason}
+                                        title={editDisabledReason}
+                                        className={cn(
+                                            styles.button,
+                                            editDisabledReason &&
+                                                styles.unavailable
+                                        )}
+                                    >
+                                        <FaEdit /> Edit
+                                    </button>
+                                    {onDelete && (
+                                        <button
+                                            onClick={handleDelete}
+                                            disabled={!!deleteDisabledReason}
+                                            title={deleteDisabledReason}
+                                            className={cn(
+                                                styles.button,
+                                                styles.discardButton,
+                                                deleteDisabledReason &&
+                                                    styles.unavailable
+                                            )}
+                                        >
+                                            <FaTrashAlt /> Delete
+                                        </button>
                                     )}
-                                >
-                                    <FaTrashAlt /> Discard Changes
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <button
-                                    onClick={handleEdit}
-                                    className={styles.button}
-                                >
-                                    <FaEdit /> Edit
-                                </button>
-                            </>
-                        )}
-                    </div>
-                )}
-            </header>
+                                </>
+                            )}
+                        </div>
+                    )}
+                </header>
 
-            {hydratedChildren}
-        </form>
+                {hydratedChildren}
+            </form>
+        </>
     )
 }

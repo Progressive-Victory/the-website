@@ -1,7 +1,9 @@
 import { AccountPage } from './AccountPage'
+import { RedirectBanner } from './RedirectBanner'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { Metadata } from 'next'
+import { Suspense } from 'react'
 
 export const metadata: Metadata = {
     title: 'PV - Account',
@@ -19,6 +21,9 @@ export default function Page() {
     return (
         <MainLayout>
             <HalftoneBackground />
+            <Suspense>
+                <RedirectBanner />
+            </Suspense>
             <AccountPage />
         </MainLayout>
     )

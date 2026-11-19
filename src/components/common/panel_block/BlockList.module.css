@@ -137,7 +137,9 @@
     border-radius: 0.5rem;
     padding: 0.3rem;
     cursor: pointer;
-    transition: background 120ms ease, color 120ms ease;
+    transition:
+        background 120ms ease,
+        color 120ms ease;
     user-select: none;
 }
 
@@ -212,7 +214,6 @@
 .entryTag[data-tooltip='']::after {
     display: none;
 }
-
 
 /* Give the header its own padding since the parent padding is zeroed */
 .header {

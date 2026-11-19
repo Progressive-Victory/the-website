@@ -1,0 +1,56 @@
+.initiativeHeading {
+    width: 100%;
+    text-align: center;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: white;
+}
+
+.initiativeHeadingHighlight {
+    color: #09223a;
+}
+
+.initiativeBody {
+    font-size: 0.9rem;
+    text-align: left;
+    color: white;
+}
+
+.bulletList {
+    list-style-type: disc;
+    padding-inline: 1.25rem;
+    padding-top: 1.25rem;
+}
+
+.bulletList {
+    margin-top: 1rem;
+    font-weight: 500;
+    padding: 0;
+}
+
+.bulletListItem {
+    margin-left: 1rem;
+}
+
+.inlineLink {
+    text-decoration: underline;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #ce3728;
+}
+
+.actionLink {
+    text-decoration: underline;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2986cc;
+}
+
+.cardContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.membershipCardWrap {
+    margin: 1rem 0;
+}

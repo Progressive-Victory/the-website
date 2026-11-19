@@ -1,6 +1,6 @@
 import { BlockField, BlockFieldProps } from './BlockField'
-import { User } from '@/contracts/data'
 import phone from 'phone'
+import { User } from 'pv-contracts/data'
 
 function formatPhoneDisplay(phoneNumber: string): string {
     if (!phoneNumber) return ''

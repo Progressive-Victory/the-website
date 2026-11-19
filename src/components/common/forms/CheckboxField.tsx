@@ -1,6 +1,6 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
-import cx from 'classnames'
+import { cn } from '@/util'
 import { ChangeEvent, useCallback } from 'react'
 
 export function CheckboxField<T>(
@@ -23,7 +23,7 @@ export function CheckboxField<T>(
     return (
         <FormField {...props}>
             {readonly ? (
-                <div className={styles.readonly}>{value}</div>
+                <div className={styles.readonly}>{value ? 'Yes' : 'No'}</div>
             ) : (
                 <div className={styles.checkboxField}>
                     <input
@@ -34,7 +34,7 @@ export function CheckboxField<T>(
                         required={props.required}
                         checked={value}
                         onChange={handleChange}
-                        className={cx(!validator(value) && styles.invalid)}
+                        className={cn(!validator(value) && styles.invalid)}
                     />
                 </div>
             )}

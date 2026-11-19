@@ -53,6 +53,18 @@
     transform: translateY(0);
 }
 
+.labelTop {
+    align-self: start;
+}
+
+.labelCenter {
+    align-self: center;
+}
+
+.labelBottom {
+    align-self: end;
+}
+
 .required {
     margin-left: 0.25rem;
     color: #ef4444;
@@ -66,6 +78,10 @@
 
 .readonly {
     width: 100%;
+}
+
+.multiline {
+    white-space: pre-wrap;
 }
 
 .invalid {
@@ -113,4 +129,70 @@
     font-size: 0.75rem;
     line-height: 1rem;
     color: #ef4444;
+}
+
+.multiTextRoot {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.25rem;
+    padding-inline: 0.25rem;
+
+    &.textField {
+        border-radius: 0.66rem;
+        background-color: white;
+    }
+}
+
+.blendInput {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex-shrink: 1;
+    margin: 0.33rem;
+
+    &:active,
+    &:focus-within,
+    &:focus-visible,
+    &:focus {
+        border: none;
+        outline: none;
+        background: transparent;
+    }
+}
+
+.valueTagContainer {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.25rem;
+    padding: 0.25rem;
+}
+
+.valueTag {
+    position: relative;
+    max-width: 100%;
+
+    padding-inline: 1rem;
+    padding-block: 0.45rem;
+    border-radius: 9999px;
+
+    font-weight: 600;
+    font-size: 0.85rem;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: start;
+
+    transition: all 120ms linear;
+
+    &.mutable {
+        text-decoration: line-through;
+        text-decoration-inset: -0.25rem;
+        cursor: pointer;
+
+        &:hover {
+            background: rgba(255, 95, 75, 0.3);
+            color: rgba(177, 2, 2, 1);
+        }
+    }
 }

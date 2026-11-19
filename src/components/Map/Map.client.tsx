@@ -1,5 +1,6 @@
 'use client'
 
+import styles from './Map.client.module.css'
 import { OPEN_ATTR, OPEN_MAP_URI, US_CENTER } from './constants'
 import { StateDataFeatureCollection, statesData } from './stateData'
 import { zipToLatLong } from './util'
@@ -146,7 +147,7 @@ export const ClientMap = ({
             scrollWheelZoom={!disableInteraction}
             dragging={!disableInteraction}
             doubleClickZoom={!disableInteraction}
-            className="z-0 size-full rounded-md"
+            className={styles.container}
         >
             {children ?? (
                 <>

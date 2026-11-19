@@ -1,24 +1,17 @@
 'use client'
 
+import styles from './page.module.css'
 import {
+    BannedStage,
     CollectInfoStage,
     CompleteStage,
     IOnboardingForm,
     JoiningStage,
     PhoneVerifyStage,
     UnderageStage,
-} from '.'
+} from './stages'
 import { HalftoneBackground } from '@/components/halftone/HalftoneBackground'
 import { MainLayout } from '@/components/layout'
-import { OnboardingStage } from '@/contracts/data'
-import {
-    UserOnboardingCollectInfoRequest,
-    UserOnboardingVerifyRequest,
-} from '@/contracts/requests'
-import {
-    DiscordUserIsInServerResponse,
-    zDiscordUserIsInServerResponse,
-} from '@/contracts/responses'
 import { useAuth, useCurrentUser, useFetch } from '@/util/hooks'
 import {
     keepPreviousData,
@@ -27,6 +20,13 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { RedirectType, redirect } from 'next/navigation'
+import { OnboardingStage } from 'pv-contracts/data'
+import {
+    UserOnboardingCollectInfoRequest,
+    UserOnboardingVerifyRequest,
+} from 'pv-contracts/requests'
+import { zDiscordUserIsInServerResponse } from 'pv-contracts/responses'
 import { useEffect, useState } from 'react'
 
 export default function VolunteerPage() {
@@ -46,10 +46,10 @@ export default function VolunteerPage() {
         queryFn:
             ready && discordUserId != null
                 ? ({ signal }) =>
-                      onGet<DiscordUserIsInServerResponse>(
-                          `/discordUsers/${discordUserId}/isInServer`,
+                      onGet(
+                          '/discordUsers/:discordUserId/isInServer',
                           zDiscordUserIsInServerResponse,
-                          { signal }
+                          { params: { discordUserId }, signal }
                       )
                 : skipToken,
         placeholderData: keepPreviousData,
@@ -58,29 +58,46 @@ export default function VolunteerPage() {
     const collectInfoMutation = useMutation({
         mutationFn: async (obj: UserOnboardingCollectInfoRequest) => {
             if (!user.data) return
+
             await onPut(
-                `/users/${user.data?.id}/onboardingStages/collectInfo`,
-                obj
+                '/users/:userId/onboardingStages/collectInfo',
+                {
+                    ...obj,
+                    metaData: { dataSource: 'Intake Form' },
+                } satisfies UserOnboardingCollectInfoRequest,
+                null,
+                { params: { userId: user.data?.id } }
             )
         },
-        onSettled: () => {
+        onSettled: async () => {
             setOverrideStage(null)
-            return queryClient.invalidateQueries({
-                queryKey: ['/users/current'],
-            })
+            await user.onInvalidate()
         },
     })
 
     const ageUpMutation = useMutation({
         mutationFn: async () => {
             if (!user.data) return
-            await onPut(`/users/${user.data?.id}/onboardingStages/ageUp`, null)
-        },
-        onSettled: () => {
-            setOverrideStage(null)
-            return queryClient.invalidateQueries({
-                queryKey: ['/users/current'],
+            await onPut('/users/:userId/onboardingStages/ageUp', null, null, {
+                params: { userId: user.data?.id },
             })
+        },
+        onSettled: async () => {
+            setOverrideStage(null)
+            await user.onInvalidate()
+        },
+    })
+
+    const unbanMutation = useMutation({
+        mutationFn: async () => {
+            if (!user.data) return
+            await onPut('/users/:userId/onboardingStages/unban', null, null, {
+                params: { userId: user.data?.id },
+            })
+        },
+        onSettled: async () => {
+            setOverrideStage(null)
+            await user.onInvalidate()
         },
     })
 
@@ -88,28 +105,29 @@ export default function VolunteerPage() {
         mutationFn: async () => {
             if (!user.data) return
             await onPost(
-                `/users/${user.data?.id}/onboardingStages/sendVerificationCode`,
+                '/users/:userId/onboardingStages/sendVerificationCode',
                 null,
-                null
+                null,
+                { params: { userId: user.data?.id } }
             )
         },
-        onSettled: () => {
+        onSettled: async () => {
             setOverrideStage(null)
-            return queryClient.invalidateQueries({
-                queryKey: ['/users/current'],
-            })
+            await user.onInvalidate()
         },
     })
 
     const verifyMutation = useMutation({
         mutationFn: async (obj: UserOnboardingVerifyRequest) => {
             if (!user.data) return
-            await onPut(`/users/${user.data?.id}/onboardingStages/verify`, obj)
+            await onPut('/users/:userId/onboardingStages/verify', obj, null, {
+                params: { userId: user.data?.id },
+            })
         },
-        onSettled: () => {
+        onSettled: async () => {
             setOverrideStage(null)
-            return Promise.all([
-                queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
+            await Promise.all([
+                user.onInvalidate(),
                 queryClient.invalidateQueries({
                     queryKey: [`/discordUsers/${discordUserId}/isInServer`],
                 }),
@@ -120,14 +138,13 @@ export default function VolunteerPage() {
     const joinMutation = useMutation({
         mutationFn: async () => {
             if (!user.data) return
-            await onPost(
-                `/users/${user.data?.id}/onboardingStages/join`,
-                null,
-                null
-            )
+            await onPost('/users/:userId/onboardingStages/join', null, null, {
+                params: { userId: user.data?.id },
+            })
         },
-        onSettled: () =>
-            queryClient.invalidateQueries({ queryKey: ['/users/current'] }),
+        onSettled: async () => {
+            await user.onInvalidate()
+        },
     })
 
     const handleCollectInfoSuccess = (form: IOnboardingForm) => {
@@ -136,10 +153,25 @@ export default function VolunteerPage() {
             lastName: form.lastName,
             phone: form.phoneNumber,
             zipCode: +form.zipCode,
+            preferredPronouns: form.preferredPronouns,
             acceptedAlerts: form.getAlerts,
             birthdate: new Date(form.dateOfBirth),
+            usCitizen: form.usCitizen,
         })
     }
+
+    const getInitialForm = () => ({
+        firstName: user.data?.firstName ?? '',
+        lastName: user.data?.lastName ?? '',
+        dateOfBirth: user.data?.birthdate?.toISOString()?.split('T')?.[0] ?? '',
+        zipCode: user.data?.address?.zip ?? '',
+        preferredPronouns: user.data?.preferredPronouns ?? '',
+        phoneNumber: user.data?.phone ?? '',
+        getAlerts: user.data?.acceptedAlerts ?? false,
+        usCitizen: false,
+        privacyPolicy: false,
+        oneTimePasscode: false,
+    })
 
     const handleVerifySmsCode = (code: number) => {
         verifyMutation.mutate({ code })
@@ -172,47 +204,25 @@ export default function VolunteerPage() {
     if (isSessionLoading) return null
 
     if (!session) {
-        window.location.href = '/login?redirect=/volunteer'
+        redirect('/login?redirect=/volunteer', RedirectType.replace)
         return null
     }
 
     if (!user.data) return <MainLayout />
 
-    return (
+    const renderWholePage = () => (
         <MainLayout>
-            <div className="relative flex min-h-screen flex-col items-center justify-center">
-                <div
-                    className="absolute right-0 top-0 size-full lg:w-1/2 lg:translate-x-1/2"
-                    style={{
-                        backgroundImage: "url('/images/blend_test.png')",
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'right',
-                        mixBlendMode: 'lighten',
-                        transform: 'scaleX(-1)',
-                    }}
-                />
+            <div className={styles.container}>
+                <div className={styles.backgroundCover} />
                 <HalftoneBackground />
-                <div className="flex w-full justify-center">
+                <div className={styles.body}>
                     <form
                         onSubmit={(e) => e.preventDefault()}
-                        className="z-0 m-4 flex h-auto flex-col gap-y-4 rounded-lg bg-black-pearl-dark p-4 shadow-md md:m-8 md:p-6"
+                        className={styles.form}
                     >
                         {currentStage === OnboardingStage.NOT_STARTED && (
                             <CollectInfoStage
-                                initialForm={{
-                                    firstName: user.data?.firstName ?? '',
-                                    lastName: user.data?.lastName ?? '',
-                                    dateOfBirth:
-                                        user.data?.birthdate
-                                            ?.toISOString()
-                                            ?.split('T')?.[0] ?? '',
-                                    zipCode: user.data?.address?.zip ?? '',
-                                    phoneNumber: user.data?.phone ?? '',
-                                    getAlerts:
-                                        user.data?.acceptedAlerts ?? false,
-                                    usCitizen: false,
-                                    privacyPolicy: false,
-                                }}
+                                initialForm={getInitialForm()}
                                 isPending={collectInfoMutation.isPending}
                                 onSubmit={handleCollectInfoSuccess}
                             />
@@ -225,10 +235,17 @@ export default function VolunteerPage() {
                             />
                         )}
 
+                        {currentStage === OnboardingStage.BANNED && (
+                            <BannedStage
+                                isPending={unbanMutation.isPending}
+                                onUnban={unbanMutation.mutate}
+                            />
+                        )}
+
                         {currentStage === OnboardingStage.AWAITING_VERIFY && (
                             <PhoneVerifyStage
                                 lastSmsCodeSendTimeUtc={
-                                    user.data?.lastSmsCodeSendTimeUtc
+                                    user.data?.lastSmsCodeSendTimeUtc ?? null
                                 }
                                 requestIsPending={sendSmsCodeMutation.isPending}
                                 verifyIsPending={verifyMutation.isPending}
@@ -266,4 +283,5 @@ export default function VolunteerPage() {
             </div>
         </MainLayout>
     )
+    return renderWholePage()
 }

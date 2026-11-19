@@ -1,3 +1,7 @@
 export * from './Footer'
 export * from './Header'
+export * from './HStack'
 export * from './MainLayout'
+export * from './Spacer'
+export * from './VStack'
+export * from './ZStack'

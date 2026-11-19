@@ -1,21 +1,29 @@
 'use client'
 
-import { AccountInfoForm } from './AccountInfoForm'
+import {
+    AccountContributionsSection,
+    AccountDetailsSection,
+    ManualDonorLinkRequest,
+} from './sections/index'
+import { AccountLoading } from '@/app/account/AccountLoading'
 import styles from '@/app/account/account.module.css'
-import { User } from '@/contracts/data'
+import { PermissionIds } from '@/models'
 import { useUpdatedUser } from '@/queries/users.queries'
 import { hasPermission, useCurrentUser, useAuth } from '@/util/hooks'
-import { BaseButton } from '@/components/common/buttons/Button'
-import { DiscordAvatar } from '@/components/common'
+import { RedirectType, redirect } from 'next/navigation'
+import { OnboardingStage, User } from 'pv-contracts/data'
 import { useMemo } from 'react'
 
 export function AccountPage() {
     const { isSessionLoading, session, onLogout } = useAuth()
     const loggedInUser = useCurrentUser()
 
-    const canAccessAdminPanel = useMemo(() => {
+    const canAccessDashboard = useMemo(() => {
         return loggedInUser.data
-            ? hasPermission(loggedInUser.data, 'Admin Panel Access')
+            ? hasPermission(
+                  loggedInUser.data,
+                  PermissionIds.VOLUNTEER_DASHBOARD_ACCESS
+              )
             : false
     }, [loggedInUser.data])
 
@@ -23,17 +31,24 @@ export function AccountPage() {
         void onLogout()
     }
 
-    const updateMutation = useUpdatedUser({ loggedInUser: loggedInUser.data })
+    const { updateUser, linkUser } = useUpdatedUser({
+        loggedInUser: loggedInUser.data,
+    })
 
-    const onSave = (user: User) => {
-        updateMutation.mutate({
+    const onSave = async (user: User) => {
+        await updateUser.mutateAsync({
             id: user.id,
             user,
             request: {
+                metaData: {
+                    userWhoUpdatedId: user.id,
+                    dataSource: 'Account Page',
+                },
                 email: user.email,
                 phone: user.phone,
                 firstName: user.firstName,
                 lastName: user.lastName,
+                preferredPronouns: user.preferredPronouns,
                 birthdate: user.birthdate,
                 address: {
                     addressLine1: user.address.addressLine1,
@@ -43,66 +58,57 @@ export function AccountPage() {
                     state: user.address.state,
                     zip: user.address.zip,
                 },
+                shirtSize: user.shirtSize,
+                addressConfirmed: user.addressConfirmed,
+                nameConfirmed: user.nameConfirmed,
             },
         })
     }
 
-    if (isSessionLoading) return null
+    const onLinkFormSubmit = (donorLinkForm: ManualDonorLinkRequest) => {
+        if (!loggedInUser.data) return
 
-    if (!session) return null
+        linkUser.mutate({
+            id: loggedInUser.data.id,
+            user: loggedInUser.data,
+            donorLinkRequest: donorLinkForm,
+        })
+    }
+
+    if (isSessionLoading) return <AccountLoading />
+
+    if (!session) redirect('/login')
+
+    if (
+        loggedInUser.data &&
+        loggedInUser.data.onboardingStage != OnboardingStage.JOINED
+    ) {
+        redirect('/volunteer', RedirectType.replace)
+    }
 
     return (
         <div className={styles.root}>
             <div className={styles.main}>
-                <section className={styles.content}>
-                    <header className={styles.contentHeader}>
-                        <div className={styles.headerTopRow}>
-                            <div className={styles.headerTextBlock}>
-                                <p className={styles.pageTitle}>Account Dashboard</p>
-
-                                <p className={styles.pageSubtitle}>
-                                    View and update your personal account
-                                    information. We use this info to create and
-                                    ship membership cards.
-                                </p>
-                            </div>
-
-                            <div className={styles.headerActions}>
-                                {canAccessAdminPanel && (
-                                    <BaseButton
-                                        label="Admin Panel"
-                                        href="/admin"
-                                        className={styles.secondaryButton}
-                                    />
-                                )}
-
-                                <BaseButton
-                                    label="Sign Out"
-                                    onClick={handleSignOut}
-                                    className={styles.primaryButton}
-                                />
-                            </div>
-                        </div>
-                    </header>
-
-                    <div className={styles.contentPanel}>
-                        {loggedInUser.data && (
-                            <AccountInfoForm
+                {loggedInUser.data && (
+                    <>
+                        <AccountDetailsSection
+                            userData={loggedInUser.data}
+                            canAccessDashboard={canAccessDashboard}
+                            handleSignOut={handleSignOut}
+                            onSave={onSave}
+                            donorLinkError={linkUser.error}
+                            isLinking={linkUser.isPending}
+                            onDonorLinkSubmit={onLinkFormSubmit}
+                        />
+                        {!!loggedInUser.data.donors?.length && (
+                            <AccountContributionsSection
                                 user={loggedInUser.data}
-                                onSave={onSave}
-                                subtitle={loggedInUser.data.discordUsers?.[0]?.username ? `@${loggedInUser.data.discordUsers[0].username}` : undefined}
-                                avatar={
-                                    <DiscordAvatar
-                                        discordUserId={loggedInUser.data.discordUsers?.[0]?.id}
-                                        imageId={loggedInUser.data.discordUsers?.[0]?.image}
-                                        size={48}
-                                    />
-                                }
-                                title={`${loggedInUser.data.firstName ?? ''} ${loggedInUser.data.lastName ?? ''}`.trim() || 'Account'}
+                                error={linkUser.error}
+                                onSubmit={onLinkFormSubmit}
                             />
                         )}
-                    </div>
-                </section>
+                    </>
+                )}
             </div>
         </div>
     )

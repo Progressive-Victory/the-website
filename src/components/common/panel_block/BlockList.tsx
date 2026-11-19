@@ -2,8 +2,9 @@
 
 import blockStyles from './Block.module.css'
 import styles from './BlockList.module.css'
-import { DropdownButton, DropdownMenu } from '@/components/common'
-import cx from 'classnames'
+import { DropdownMenu } from '@/components/common'
+import { DropdownButton } from '@/components/common/dropdown_button/DropdownButton'
+import { cn } from '@/util'
 import {
     useEffect,
     useRef,
@@ -44,7 +45,12 @@ interface PaginationArrowProps {
     onClick: () => void
 }
 
-function PaginationArrow({ icon: Icon, title, enabled, onClick }: PaginationArrowProps) {
+function PaginationArrow({
+    icon: Icon,
+    title,
+    enabled,
+    onClick,
+}: PaginationArrowProps) {
     return (
         <button
             type="button"
@@ -52,7 +58,10 @@ function PaginationArrow({ icon: Icon, title, enabled, onClick }: PaginationArro
             aria-label={title}
             disabled={!enabled}
             onClick={onClick}
-            className={cx(styles.arrow, enabled ? styles.arrowEnabled : styles.arrowDisabled)}
+            className={cn(
+                styles.arrow,
+                enabled ? styles.arrowEnabled : styles.arrowDisabled
+            )}
         >
             <Icon size={15} />
         </button>
@@ -80,13 +89,20 @@ export function BlockList({
 
     const pageCount = Math.ceil(items.length / pageSize)
     const safePage = Math.min(page, Math.max(0, pageCount - 1))
-    const pageItems = items.slice(safePage * pageSize, (safePage + 1) * pageSize)
+    const pageItems = items.slice(
+        safePage * pageSize,
+        (safePage + 1) * pageSize
+    )
     const isPaginated = items.length > pageSize
 
     // Reset to page 0 when items change
-    useEffect(() => { setPage(0) }, [items])
+    useEffect(() => {
+        setPage(0)
+    }, [items])
 
-    useEffect(() => { isCollapsedRef.current = isCollapsed }, [isCollapsed])
+    useEffect(() => {
+        isCollapsedRef.current = isCollapsed
+    }, [isCollapsed])
 
     // Collapse / expand: re-enable transition, then animate
     useEffect(() => {
@@ -143,14 +159,14 @@ export function BlockList({
 
     return (
         <div
-            className={cx(
+            className={cn(
                 blockStyles.block,
                 styles.root,
                 isMenuOpen && blockStyles.blockMenuOpen,
                 className
             )}
         >
-            <div className={cx(blockStyles.header, styles.header)}>
+            <div className={cn(blockStyles.header, styles.header)}>
                 <div className={blockStyles.titleGroup}>
                     <h1 className={blockStyles.title}>{title}</h1>
                 </div>
@@ -196,7 +212,7 @@ export function BlockList({
             >
                 <div ref={bodyContentRef} className={styles.listContent}>
                     {items.length === 0 ? (
-                        <div className={cx(styles.entry, styles.entryUi)}>
+                        <div className={cn(styles.entry, styles.entryUi)}>
                             {emptyMessage ?? 'No items'}
                         </div>
                     ) : (
@@ -205,7 +221,7 @@ export function BlockList({
                                 key={item.key}
                                 type="button"
                                 onClick={item.onClick}
-                                className={cx(
+                                className={cn(
                                     styles.entry,
                                     item.selected && styles.entrySelected,
                                     !isPaginated && styles.entryLastRound
@@ -243,7 +259,8 @@ export function BlockList({
                             <span className={styles.footerPageLabel}>
                                 {safePage + 1}
                                 <span className={styles.footerPageOf}>
-                                    {' '}of {pageCount}
+                                    {' '}
+                                    of {pageCount}
                                 </span>
                             </span>
                             <PaginationArrow

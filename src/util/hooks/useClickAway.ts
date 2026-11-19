@@ -14,15 +14,15 @@ export function useClickAway<T extends Element>(
     useEffect(() => {
         const listener = (event: MouseEvent | TouchEvent) => {
             assertIsNode(event.target)
-            if (ref.current && !ref.current.contains(event.target))
-                callback(event.target)
+            const contains = ref.current && !ref.current.contains(event.target)
+            if (contains) callback(event.target)
         }
 
-        document.addEventListener('mousedown', listener)
-        document.addEventListener('touchstart', listener)
+        document.addEventListener('mouseup', listener)
+        document.addEventListener('touchend', listener)
         return () => {
-            document.removeEventListener('mousedown', listener)
-            document.removeEventListener('touchstart', listener)
+            document.removeEventListener('mouseup', listener)
+            document.removeEventListener('touchend', listener)
         }
     }, [ref, callback])
 

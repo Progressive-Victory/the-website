@@ -1,5 +1,27 @@
 import styles from './FormField.module.css'
-import { ReactElement, useEffect, useMemo } from 'react'
+import { cn } from '@/util'
+import {
+    ReactElement,
+    useCallback,
+    useEffect,
+    useMemo,
+    type MouseEvent,
+} from 'react'
+
+const INTERACTIVE_SELECTOR =
+    'input, select, textarea, button, a, [tabindex], [contenteditable]'
+
+const preventRowActivation = (event: MouseEvent<HTMLLabelElement>) => {
+    const control = (event.target as Element).closest(INTERACTIVE_SELECTOR)
+    if (!control || !event.currentTarget.contains(control))
+        event.preventDefault()
+}
+
+const labelAlignClasses = {
+    top: styles.labelTop,
+    center: styles.labelCenter,
+    bottom: styles.labelBottom,
+}
 
 /**
  * Properties for the FormField component. All form fields extend their
@@ -22,6 +44,8 @@ export interface FormFieldProps<FormType, FieldType = unknown> {
 
     /** Optional tooltip text shown when hovering the field label. */
     labelTooltip?: string
+
+    labelAlign?: 'top' | 'center' | 'bottom'
 
     /** Whether this field can be edited. */
     readonly?: boolean
@@ -117,7 +141,7 @@ export interface FieldConfiguration<FormType, FieldType> {
 /**
  * Dynamic properties populated automatically by the parent Form.
  *
- * Basically, the fields need to know what's goind on with the Form. We
+ * Basically, the fields need to know what's going on with the Form. We
  * could've had the user pass in FormState through every single field and
  * group, but that would've been awful and cluttered up the interface.
  * Instead, we populate it dynamically within Form so that the user doesn't
@@ -168,32 +192,39 @@ export function useConfigure<FormType, FieldType>(
     const id = props.id
     const onConfigure = props.dynamic?.onConfigure
 
+    // Props object changing will re-trigger Callback, so we need to grab the values beforehand
+    // So that we only regenerate on change
+    const propGetter = props.getter
+    const propSetter = props.setter
+    const propField = props.field
     // Use the provided getter if available, or default to `form[props.field]`.
     // If no field is provided either, be sad and return undefined.
-    const getter = useMemo(() => {
-        const getter = props.getter
-        if (getter) return getter
+    const getter = useCallback(
+        (form: FormType): FieldType | undefined => {
+            if (propGetter) return propGetter(form)
 
-        const key = props.field
-        if (key)
-            return (form: FormType) => (form as Record<string, FieldType>)[key]
+            if (!propField) return undefined
 
-        return () => undefined
-    }, [props.getter, props.field])
-
+            return (form as Record<string, FieldType>)[propField]
+        },
+        [propGetter, propField]
+    )
     // Use the provided setter if available, or default to `form[props.field]`.
     // If no field is provided either, be sad and return undefined.
-    const setter = useMemo(() => {
-        const setter = props.setter
-        if (setter) return setter
 
-        const key = props.field
-        if (key)
-            return (form: FormType, field: FieldType) =>
-                ({ ...form, [key]: field }) as FormType
+    const setter = useCallback(
+        (form: FormType, field: FieldType): FormType => {
+            if (propSetter) return propSetter(form, field)
 
-        return (form: FormType) => form
-    }, [props.setter, props.field])
+            if (!propField) return form
+
+            return {
+                ...form,
+                [propField]: field,
+            }
+        },
+        [propSetter, propField]
+    )
 
     // Use the provided validator if available, or default to the, well,
     // default one. We can't be sad here because it can't be undefined.
@@ -236,6 +267,7 @@ export function FormField<FormType, FieldType>({
     id,
     label,
     labelTooltip,
+    labelAlign = 'center',
     readonly,
     required,
     deprecated,
@@ -246,7 +278,9 @@ export function FormField<FormType, FieldType>({
 
     const content = (
         <>
-            <span className={styles.fieldLabel}>
+            <span
+                className={cn(styles.fieldLabel, labelAlignClasses[labelAlign])}
+            >
                 <span
                     className={styles.labelTooltipTrigger}
                     data-label-tooltip={labelTooltip}
@@ -274,7 +308,11 @@ export function FormField<FormType, FieldType>({
 
     if (isEditing)
         return (
-            <label key={id} className={styles.fieldHeader}>
+            <label
+                key={id}
+                className={styles.fieldHeader}
+                onClick={preventRowActivation}
+            >
                 {content}
             </label>
         )

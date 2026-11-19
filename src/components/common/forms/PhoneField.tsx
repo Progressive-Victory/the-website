@@ -1,13 +1,9 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
-import cx from 'classnames'
+import { cn } from '@/util'
 import phone from 'phone'
-import { ChangeEvent, useCallback } from 'react'
+import { useCallback } from 'react'
 
-/**
- * Formats a phone number string for display in readonly mode.
- * Accepts various formats and normalizes to "(XXX) XXX-XXXX" format.
- */
 export function formatPhoneDisplay(phoneNumber: string): string {
     if (!phoneNumber) return ''
 
@@ -18,10 +14,44 @@ export function formatPhoneDisplay(phoneNumber: string): string {
     return `(${digits.substring(0, 3)}) ${digits.substring(3, 6)}-${digits.substring(6, 10)}`
 }
 
-/**
- * Form field component for US phone number input with validation.
- * Uses the `phone` library for proper validation and E164 normalization.
- */
+export function isValidPhone(text: string): boolean {
+    const parsed = phone(text, {
+        country: 'US',
+        strictDetection: true,
+        validateMobilePrefix: true,
+    })
+
+    if (!parsed.isValid) return false
+
+    if (
+        [
+            '800',
+            '833',
+            '844',
+            '855',
+            '866',
+            '877',
+            '888',
+            '555',
+            '880',
+            '881',
+            '882',
+            '883',
+            '884',
+            '885',
+            '886',
+            '887',
+            '889',
+            '311',
+            '911',
+            '988',
+        ].includes(parsed.phoneNumber.substring(2, 5))
+    )
+        return false
+
+    return true
+}
+
 export function PhoneField<T>(
     props: FormFieldProps<T, string | null | undefined>
 ) {
@@ -30,15 +60,8 @@ export function PhoneField<T>(
         useCallback(
             (field: string | null | undefined) => {
                 const text = field ?? ''
-
                 if (!text.trim()) return !props.required
-
-                const parsed = phone(text, {
-                    country: 'US',
-                    strictDetection: true,
-                    validateMobilePrefix: true,
-                })
-                return parsed.isValid
+                return isValidPhone(text)
             },
             [props.required]
         )
@@ -49,12 +72,12 @@ export function PhoneField<T>(
         : ''
     const displayValue = storedValue.replace(/^\+1/, '').replace(/\D/g, '')
 
-    const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
-        const input = event.target.value
+    const handleInput = (event: React.InputEvent<HTMLInputElement>) => {
+        const input = event.currentTarget.value
         const digitsOnly = input.replace(/\D/g, '')
         const limitedDigits = digitsOnly.slice(0, 10)
 
-        event.target.value = limitedDigits
+        event.currentTarget.value = limitedDigits
         const e164Value =
             limitedDigits.length === 10 ? `+1${limitedDigits}` : limitedDigits
         onChange(e164Value)
@@ -78,7 +101,7 @@ export function PhoneField<T>(
                         onInput={handleInput}
                         placeholder="2345556789"
                         maxLength={10}
-                        className={cx(
+                        className={cn(
                             styles.textField,
                             storedValue?.trim() &&
                                 !validator(storedValue) &&

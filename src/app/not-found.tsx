@@ -41,7 +41,7 @@ const styles = {
 export default function NotFound() {
     return (
         <MainLayout>
-            <HalftoneBackground opacity={0.1} />
+            <HalftoneBackground />
 
             <ContentPageFrame
                 heading={

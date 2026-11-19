@@ -1,7 +1,7 @@
 import styles from './MultiSelect.module.css'
+import { cn } from '@/util'
 import { useClickAway } from '@/util/hooks'
-import cx from 'classnames'
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 
 export interface MultiSelectOption {
@@ -34,16 +34,15 @@ export function MultiSelect({
         if (!contains) setMenuOpen(false)
     })
 
-    const optionMap = useMemo(
-        () => new Map(options.map((option) => [option.value, option.label])),
-        [options]
+    const optionMap = new Map(
+        options.map((option) => [option.value, option.label])
     )
 
-    const available = useMemo(() => {
+    const available = (() => {
         const availableMap = new Map(optionMap.entries())
         for (const value of selected) availableMap.delete(value)
         return Array.from(availableMap.entries())
-    }, [optionMap, selected])
+    })()
 
     const handleToggleMenu = () => {
         setMenuOpen((open) => !open)
@@ -63,8 +62,9 @@ export function MultiSelect({
             {selected.map((value) => (
                 <button
                     type="button"
-                    key={value}
-                    className={cx(
+                    id={`remove-${value}`}
+                    key={`remove-${value}`}
+                    className={cn(
                         styles.option,
                         !readonly && styles.removeButton
                     )}
@@ -103,7 +103,8 @@ export function MultiSelect({
                             {available.map(([value, label]) => (
                                 <button
                                     type="button"
-                                    key={value}
+                                    id={`add-${value}`}
+                                    key={`add-${value}`}
                                     className={styles.addButton}
                                     onClick={(e) => {
                                         e.preventDefault()

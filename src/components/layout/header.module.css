@@ -336,3 +336,38 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+.mobileDonateButton {
+    @media (min-width: 1280px) {
+        display: none;
+    }
+    animation: fadeInUp 0.1s ease forwards;
+}
+
+.fadeOutTop {
+    animation: fadeOutUp 0.25s ease forwards;
+}
+
+@keyframes fadeOutUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,118 @@
+.values {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.25rem;
+}
+
+.editor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 24rem;
+    min-height: 1.75rem;
+    margin: 0.375rem auto;
+    padding: 0.125rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background: #fff;
+
+    &:focus-within {
+        border-color: #0ea5e9;
+    }
+}
+
+.row:has(.editor) > [data-align='top'] {
+    padding-top: calc(0.375rem + 0.125rem + 1px);
+}
+
+.invalid {
+    border-color: #ef4444;
+
+    &:focus-within {
+        border-color: #0ea5e9;
+    }
+}
+
+.tag,
+.tagDisplay {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    max-width: 100%;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    background: rgba(15, 23, 42, 0.07);
+    color: rgba(15, 23, 42, 0.78);
+    font-size: 0.8rem;
+    line-height: 1.25rem;
+    overflow-wrap: anywhere;
+}
+
+.tag {
+    border: 0;
+    color: inherit;
+    font: inherit;
+    font-size: 0.8rem;
+    line-height: 1.25rem;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover .tagLabel {
+        text-decoration: line-through;
+    }
+
+    &:focus-visible {
+        outline: 2px solid #0ea5e9;
+        outline-offset: 1px;
+    }
+}
+
+.tagDisplay {
+    color: rgba(15, 23, 42, 0.78);
+}
+
+.tagLabel {
+    overflow-wrap: anywhere;
+}
+
+.remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    pointer-events: none;
+
+    & svg {
+        width: 0.75rem;
+        height: 0.75rem;
+    }
+}
+
+.input {
+    flex: 1 1 6rem;
+    min-width: 4rem;
+    padding: 0.125rem 0.25rem;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+
+    &::placeholder {
+        color: rgba(15, 23, 42, 0.4);
+    }
+}
+
+[data-align='left'] > .editor {
+    margin-inline: 0 auto;
+}
+
+[data-align='center'] > .editor {
+    margin-inline: auto;
+}

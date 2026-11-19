@@ -1,8 +1,9 @@
 'use client'
 
 import styles from './Block.module.css'
-import { DropdownButton, DropdownMenu } from '@/components/common'
-import { User } from '@/contracts/data'
+import { DropdownMenu } from '@/components/common'
+import { DropdownButton } from '@/components/common/dropdown_button/DropdownButton'
+import { User } from 'pv-contracts/data'
 import {
     createContext,
     useContext,

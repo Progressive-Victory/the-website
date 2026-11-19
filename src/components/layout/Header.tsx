@@ -9,14 +9,15 @@ import { LoginButton } from '@/components/common/buttons/button_types/LoginButto
 import { NavButton } from '@/components/common/buttons/button_types/NavButton'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
-import { DiscordUser, TokenClaims, zDiscordUser } from '@/contracts/data'
+import { cn } from '@/util'
 import { useAuth, useFetch } from '@/util/hooks'
 import { skipToken, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import NextLink from 'next/link'
+import { TokenClaims, zDiscordUser } from 'pv-contracts/data'
 import type React from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import z from 'zod'
 
 /**
@@ -83,6 +84,15 @@ const navitems: NavItem[] = [
         href: '/endorsements',
         subnav: {
             columns: [
+                // {
+                //     title: 'Criteria',
+                //     items: [
+                //         {
+                //             name: 'PV Pledge',
+                //             href: 'https://www.progress.win/pledge',
+                //         },
+                //     ],
+                // },
                 {
                     title: 'Endorsements',
                     items: [
@@ -94,18 +104,22 @@ const navitems: NavItem[] = [
     },
     {
         name: 'More',
-        href: '/home',
+        href: '/',
         subnav: {
             columns: [
-                {
-                    title: 'Initiatives',
-                    items: [
-                        {
-                            name: 'Save Section 230',
-                            href: '/initiative',
-                        },
-                    ],
-                },
+                // {
+                //     title: 'Initiatives',
+                //     items: [
+                //         {
+                //             name: 'Section 230 Initiative',
+                //             href: '/initiatives/section-230',
+                //         },
+                //         {
+                //             name: 'Jackson Franklin Initiative',
+                //             href: '/initiatives/franklin',
+                //         },
+                //     ],
+                // },
                 {
                     title: 'Join',
                     items: [
@@ -121,7 +135,7 @@ const navitems: NavItem[] = [
                     items: [
                         {
                             name: 'Dues Paying Membership',
-                            href: 'https://secure.actblue.com/donate/pvmember',
+                            href: 'https://secure.actblue.com/donate/pvmember?refcode=Website%20Header',
                         },
                         {
                             name: 'Merch',
@@ -265,6 +279,7 @@ interface NavDrawerProps {
     navitems: NavItem[]
     mobileSubnavItem: NavItem | null
     setMobileSubnavItem: (item: NavItem | null) => void
+    isSessionLoading: boolean
     session: TokenClaims | null
     discordUserId: string | undefined
     avatarImageId: string | undefined
@@ -276,6 +291,7 @@ function NavDrawer({
     navitems,
     mobileSubnavItem,
     setMobileSubnavItem,
+    isSessionLoading,
     session,
     discordUserId,
     avatarImageId,
@@ -345,7 +361,11 @@ function NavDrawer({
                                                         rotateChevronOnHover={
                                                             false
                                                         }
-                                                        href={item.href}
+                                                        href={
+                                                            item.name == 'More'
+                                                                ? '#'
+                                                                : item.href
+                                                        }
                                                         renderContent={({
                                                             showNavChevron,
                                                         }) => (
@@ -430,7 +450,24 @@ function NavDrawer({
                                             />
                                         </motion.div>
 
-                                        {!session ? (
+                                        {isSessionLoading ? (
+                                            <motion.div
+                                                variants={itemVariants}
+                                                animate="visible"
+                                                exit="exit"
+                                            >
+                                                <AccountButton
+                                                    label="Account"
+                                                    href="/account"
+                                                    discordUserId={
+                                                        discordUserId
+                                                    }
+                                                    imageId={avatarImageId}
+                                                    buttonVariant="long"
+                                                    disabled
+                                                />
+                                            </motion.div>
+                                        ) : !session ? (
                                             <motion.div
                                                 variants={itemVariants}
                                                 animate="visible"
@@ -571,7 +608,7 @@ function NavDrawer({
 }
 
 export function Header() {
-    const { session, onLogin } = useAuth()
+    const { session, onLogin, isSessionLoading } = useAuth()
     const { ready, onGet } = useFetch()
 
     const [isOpen, setIsOpen] = useState(false)
@@ -584,14 +621,59 @@ export function Header() {
         queryKey: [`/discordUsers/${session?.userId}`],
         queryFn:
             session?.discordUserId != null && ready
-                ? async () => {
-                      return await onGet<DiscordUser[]>(
-                          `/discordUsers/${session?.userId}`,
-                          z.array(zDiscordUser)
+                ? ({ signal }) =>
+                      onGet(
+                          '/discordUsers/:discordUserId',
+                          z.array(zDiscordUser),
+                          { params: { discordUserId: session?.userId }, signal }
                       )
-                  }
                 : skipToken,
     })
+
+    const discordUserId = discordUsers?.[0]?.id
+    const avatarImageId = discordUsers?.[0]?.image
+
+    const resolvedNavitems = useMemo(() => {
+        const discordId = discordUsers?.[0]?.id
+        const volunteerHref = session ? '/account?redirect=true' : '/volunteer'
+
+        return navitems.map((item) => {
+            if (!item.subnav?.columns) return item
+
+            return {
+                ...item,
+                href: item.name === 'Volunteer' ? volunteerHref : item.href,
+                subnav: {
+                    ...item.subnav,
+                    columns: item.subnav.columns.map((col) => ({
+                        ...col,
+                        items: col.items.map((child) => {
+                            if (item.name === 'Volunteer') {
+                                return {
+                                    ...child,
+                                    href: volunteerHref,
+                                }
+                            }
+
+                            if (
+                                child.href.startsWith(
+                                    'https://secure.actblue.com/donate/pvmember'
+                                )
+                            ) {
+                                return {
+                                    ...child,
+                                    href: discordId
+                                        ? `${child.href}&refcode2=${discordId}`
+                                        : child.href,
+                                }
+                            }
+                            return child
+                        }),
+                    })),
+                },
+            }
+        })
+    }, [discordUsers, session])
 
     useEffect(() => {
         if (!isOpen) return
@@ -662,7 +744,7 @@ export function Header() {
 
     const isSubnavOpen = !!activeSubnav?.subnav?.columns?.length
 
-    return (
+    const returnHeader = () => (
         <>
             <AnimatePresence>
                 {isSubnavOpen ? (
@@ -730,7 +812,7 @@ export function Header() {
                     className={styles.headerCenterNav}
                     aria-label="Primary navigation"
                 >
-                    {navitems.map((item) => {
+                    {resolvedNavitems.map((item) => {
                         const hasChildren = !!item.subnav?.columns?.length
                         const isActive = activeSubnav?.name === item.name
                         const shouldDim = !!activeSubnav && !isActive
@@ -754,6 +836,7 @@ export function Header() {
                                     label={item.name}
                                     href={item.href}
                                     showChevron={item.name === 'More'}
+                                    disabled={item.name === 'More'}
                                     isSubnavOpen={isActive}
                                     onOpenSubnav={() => openSubnav(item)}
                                     className={
@@ -778,7 +861,15 @@ export function Header() {
                 <div className={styles.headerRightActions}>
                     <DonateButton label="Donate" />
 
-                    {!session ? (
+                    {isSessionLoading ? (
+                        <AccountButton
+                            label="Account"
+                            href="/account"
+                            discordUserId={discordUserId}
+                            imageId={avatarImageId}
+                            disabled
+                        />
+                    ) : !session ? (
                         <LoginButton
                             label="Log In"
                             onClick={() => void onLogin()}
@@ -787,35 +878,55 @@ export function Header() {
                         <AccountButton
                             label="Account"
                             href="/account"
-                            discordUserId={discordUsers?.[0]?.id}
-                            imageId={discordUsers?.[0]?.image}
+                            discordUserId={discordUserId}
+                            imageId={avatarImageId}
                         />
                     )}
                 </div>
 
-                <motion.button
-                    type="button"
-                    className={styles.headerMenuButton}
-                    onClick={() => {
-                        closeSubnav()
-                        setIsOpen((prev) => !prev)
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
                     }}
-                    initial={false}
-                    animate={isOpen ? 'open' : 'closed'}
-                    whileHover="hover"
-                    whileTap="tap"
-                    variants={menuButtonVariants}
-                    transition={{ type: 'spring', stiffness: 520, damping: 32 }}
-                    aria-label={
-                        isOpen
-                            ? 'Close navigation menu'
-                            : 'Open navigation menu'
-                    }
-                    aria-expanded={isOpen}
-                    aria-controls="site-nav-drawer"
                 >
-                    <HamburgerIcon isOpen={isOpen} />
-                </motion.button>
+                    <DonateButton
+                        label="Donate"
+                        className={cn(
+                            styles.mobileDonateButton,
+                            isOpen && styles.fadeOutTop
+                        )}
+                    />
+
+                    <motion.button
+                        type="button"
+                        className={styles.headerMenuButton}
+                        onClick={() => {
+                            closeSubnav()
+                            setIsOpen((prev) => !prev)
+                        }}
+                        initial={false}
+                        animate={isOpen ? 'open' : 'closed'}
+                        whileHover="hover"
+                        whileTap="tap"
+                        variants={menuButtonVariants}
+                        transition={{
+                            type: 'spring',
+                            stiffness: 520,
+                            damping: 32,
+                        }}
+                        aria-label={
+                            isOpen
+                                ? 'Close navigation menu'
+                                : 'Open navigation menu'
+                        }
+                        aria-expanded={isOpen}
+                        aria-controls="site-nav-drawer"
+                    >
+                        <HamburgerIcon isOpen={isOpen} />
+                    </motion.button>
+                </div>
             </header>
 
             <AnimatePresence>
@@ -882,14 +993,17 @@ export function Header() {
 
             <NavDrawer
                 isOpen={isOpen}
-                navitems={navitems}
+                navitems={resolvedNavitems}
                 mobileSubnavItem={mobileSubnavItem}
                 setMobileSubnavItem={setMobileSubnavItem}
+                isSessionLoading={isSessionLoading}
                 session={session}
-                discordUserId={discordUsers?.[0]?.id}
-                avatarImageId={discordUsers?.[0]?.image}
+                discordUserId={discordUserId}
+                avatarImageId={avatarImageId}
                 onLogin={onLogin}
             />
         </>
     )
+
+    return returnHeader()
 }

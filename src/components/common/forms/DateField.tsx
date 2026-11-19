@@ -1,7 +1,7 @@
 import { FormField, FormFieldProps, useConfigure } from './FormField'
 import styles from './FormField.module.css'
 import { dateService } from '@/services'
-import cx from 'classnames'
+import { cn } from '@/util'
 import { ChangeEvent, useCallback } from 'react'
 
 export interface DateFieldProps<T> extends FormFieldProps<
@@ -34,13 +34,10 @@ export function DateField<T>(props: DateFieldProps<T>) {
 
     const format = () => {
         if (!dateService.isValid(value)) return undefined
-        return Intl.DateTimeFormat(
-            'en-US',
-            props.format ?? {
-                dateStyle: 'long',
-                timeStyle: 'medium',
-            }
-        ).format(value!)
+        return Intl.DateTimeFormat('en-US', {
+            timeZone: 'UTC',
+            ...(props.format ?? { dateStyle: 'long', timeStyle: 'medium' }),
+        }).format(value!)
     }
 
     return (
@@ -61,7 +58,7 @@ export function DateField<T>(props: DateFieldProps<T>) {
                     }
                     onChange={handleChange}
                     onFocus={handleFocus}
-                    className={cx(
+                    className={cn(
                         styles.textField,
                         !validator(value) && styles.invalid
                     )}

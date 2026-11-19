@@ -1,0 +1,220 @@
+@media (min-width: 1024px) {
+    .inputContainer {
+        flex-wrap: nowrap !important;
+    }
+
+    .toggleLabelContainer {
+        gap: 0.5rem !important;
+    }
+
+    .tooltipContainer,
+    .tooltipIcon {
+        width: 1.125rem !important;
+        height: 1.125rem !important;
+    }
+
+    .toggleLabel {
+        font-size: 0.75rem !important;
+        line-height: 1rem !important;
+    }
+
+    .toggleInputContainer {
+        margin-inline: 0 0.5rem !important;
+    }
+}
+
+.fieldContainer {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: start;
+    gap: 0.375rem;
+    width: 100%;
+}
+
+.label {
+    display: inline-block;
+
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+
+    color: #d1d5db;
+}
+
+.requiredIndicator {
+    color: #ef4444;
+}
+
+.inputContainer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.input {
+    flex-grow: 1;
+    border-radius: 0.375rem;
+    background-color: white;
+    padding: 0.5rem 1rem;
+
+    &.error {
+        border: 0.125rem solid #ef4444;
+        color: currentColor;
+    }
+}
+
+.error {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: #ef4444;
+}
+
+/* Toggle */
+.toggleContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+
+    background-color: #374151;
+}
+
+.toggleLabelContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.375rem;
+    width: 100%;
+}
+
+.tooltipContainer {
+    position: relative;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+
+    &:hover,
+    &:focus {
+        & .tooltipElement {
+            transform: translateY(25px);
+            opacity: 75%;
+
+            transition:
+                opacity 100ms cubic-bezier(0.4, 0, 0.2, 1),
+                transform 100ms step-start;
+        }
+    }
+}
+
+.tooltipIcon {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+
+    background-color: white;
+
+    color: #4483c7;
+}
+
+.tooltipElement {
+    position: absolute;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+
+    padding: 0.5rem 1px;
+    border-radius: 0.375rem;
+
+    background-color: black;
+    opacity: 0;
+
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    text-align: center;
+    color: #374151;
+
+    pointer-events: none;
+
+    transition:
+        opacity 100ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 100ms step-end;
+}
+
+.tooltipContent {
+    min-width: 300px;
+
+    font-size: 0.75rem;
+    line-height: 1rem;
+    text-align: center;
+    color: white;
+}
+
+.toggleLabel {
+    width: 100%;
+    font-size: 0.625rem;
+    color: white;
+}
+
+.toggleInputContainer {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: middle;
+    width: 2.5rem;
+
+    margin-left: auto;
+
+    user-select: none;
+}
+
+.toggleInputLabel {
+    display: block;
+    overflow: hidden;
+    height: 1.5rem;
+
+    border-radius: 9999px;
+
+    background-color: #6b7280;
+
+    cursor: pointer;
+
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.selected {
+        background-color: #4483c7;
+    }
+}
+
+.toggleInput {
+    position: absolute;
+    opacity: 0;
+}
+
+/* in a toggle/switch, the `thumb` moves along the `track` */
+.toggleInputThumb {
+    position: absolute;
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+
+    border-radius: 9999px;
+
+    background-color: white;
+
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.selected {
+        transform: translateX(1rem);
+        box-shadow:
+            0 10px 15px -3px rgb(0 0 0 / 0.1),
+            0 4px 6px -4px rgb(0 0 0 0.1);
+    }
+}

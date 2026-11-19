@@ -4,18 +4,13 @@ import { useInfoBlockContext } from '../Block'
 import { FieldInfoPanel } from './BlockField'
 import styles from './BlockField.module.css'
 import { DropdownMenu } from '@/components/common/dropdown_menu/DropdownMenu'
-import { User } from '@/contracts/data'
 import { dateService } from '@/services'
-import { InformationCircleIcon } from '@heroicons/react/24/outline'
+import { User } from 'pv-contracts/data'
 import { useRef, useState } from 'react'
+import { HiOutlineInformationCircle } from 'react-icons/hi2'
 
 export type DateDisplayFormat =
-    | 'date'
-    | 'date-long'
-    | 'date-short'
-    | 'datetime'
-    | 'datetime-long'
-    | 'time'
+    'date' | 'date-long' | 'date-short' | 'datetime' | 'datetime-long' | 'time'
 
 const FORMAT_PRESETS: Record<DateDisplayFormat, Intl.DateTimeFormatOptions> = {
     date: { timeZone: 'UTC', dateStyle: 'medium' },
@@ -110,7 +105,7 @@ export function DateBlockField({
                             {displayValue}
                         </span>
                         {!isReadonlyInEdit && (
-                            <InformationCircleIcon
+                            <HiOutlineInformationCircle
                                 className={styles.infoBlockInfoIcon}
                             />
                         )}

@@ -1,6 +1,7 @@
 import { DynamicFormFieldProps } from './FormField'
 import styles from './FormGroup.module.css'
 import { CollapsibleSection } from '@/components/common'
+import { cn } from '@/util'
 import React from 'react'
 
 /** Properties for the FormGroup component. */
@@ -15,6 +16,11 @@ export interface FormGroupProps<T> {
 
     /** The group's title, displayed as a heading above the fields. */
     title: string
+
+    /** Optional subtitle displayed under the group's title. */
+    subtitle?: string
+
+    className?: string
 
     /** Whether the group is displayed as collapsed by default. */
     defaultCollapsed?: boolean
@@ -54,6 +60,8 @@ export interface FormGroupProps<T> {
 export function FormGroup<T>({
     id,
     title,
+    subtitle,
+    className,
     defaultCollapsed,
     wrapper,
     subGroup,
@@ -82,13 +90,16 @@ export function FormGroup<T>({
     return (
         <CollapsibleSection
             title={title}
+            subtitle={subtitle}
             initialOpenState={!defaultCollapsed}
             subGroup={subGroup}
         >
             {wrapper ? (
-                <div>{hydratedChildren}</div>
+                <div className={className}>{hydratedChildren}</div>
             ) : (
-                <div className={styles.group}>{hydratedChildren}</div>
+                <div className={cn(styles.group, className)}>
+                    {hydratedChildren}
+                </div>
             )}
         </CollapsibleSection>
     )

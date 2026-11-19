@@ -2,111 +2,181 @@ import { useAuth } from './useAuth'
 import { ApiError, FetchError } from '@/models'
 import z from 'zod'
 
-type QueryPrim = string | number | boolean | null
-type QueryParam = QueryPrim | QueryPrim[] | undefined
+type ParamPrim = string | number | boolean | Date | null | undefined
+type RouteParam = ParamPrim
+type QueryParam = ParamPrim | ParamPrim[]
 
+export type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
+export type RouteParams = Record<string, RouteParam>
 export type QueryParams = Record<string, QueryParam>
-export type ZodSchema = z.ZodObject | z.ZodArray
+export type ZodSchema = z.ZodObject | z.ZodArray | z.ZodRecord
 
 interface QueryOptions {
+    params?: RouteParams
     query?: QueryParams
     signal?: AbortSignal
 }
 
 export function useFetch() {
-    const { apiBaseUrl, session, onRefresh } = useAuth()
+    const { apiBaseUrl, onRefreshSession } = useAuth()
 
-    const queryToString = (query: QueryParam): string | undefined => {
-        if (query === undefined) return undefined
-        if (query === null) return 'null'
-        if (Array.isArray(query))
-            return query.map((item) => queryToString(item)).join(',')
-        return query.toString()
+    const serializeParam = (param: ParamPrim) => {
+        if (param === undefined) return null
+        if (param instanceof Date) return param.toISOString()
+        return String(param)
     }
 
-    async function onFetch<R = void>(
-        method: string,
-        url: string,
+    const serializeRouteParam = (params: RouteParams, key: string) => {
+        const value = serializeParam(params[key])
+        if (!value)
+            throw new Error(
+                `Invalid fetch! Substitution key :${key} does not exist in params (value ${value})`
+            )
+
+        return encodeURIComponent(value).replace(/%40/g, '@')
+    }
+
+    const addQueryParam = (url: URL, key: string, param: QueryParam) => {
+        if (Array.isArray(param)) {
+            param.forEach((elem) => {
+                addQueryParam(url, key, elem)
+            })
+        } else {
+            const value = serializeParam(param)
+            if (value) url.searchParams.append(key, value)
+        }
+    }
+
+    async function onFetch<S extends ZodSchema | null>(
+        method: HttpMethod,
+        route: string,
         body: object | null,
-        schema: ZodSchema | null,
+        schema: S,
         options?: QueryOptions
     ) {
-        const fullUrl = new URL(url, apiBaseUrl)
-        Object.entries(options?.query ?? {}).forEach(([key, value]) => {
-            const str = queryToString(value)
-            if (str != null) fullUrl.searchParams.set(key, str)
+        const { params = {}, query = {}, signal } = options ?? {}
+
+        if (!/^(?:\/:?[\w-]+)+$/.test(route))
+            throw new Error(
+                'Invalid fetch! Routes can only contain substitution keys or path identifiers'
+            )
+
+        const encodedRoute = route.replaceAll(/:([\w-]+)/g, (_, key: string) =>
+            serializeRouteParam(params, key)
+        )
+
+        const url = new URL(encodedRoute, apiBaseUrl)
+
+        Object.entries(query).forEach(([key, value]) => {
+            addQueryParam(url, key, value)
         })
 
         const req: RequestInit = {
             method,
+            // TODO: This should be same-origin on prod
             credentials: 'include',
-            signal: options?.signal,
+            signal,
         }
+        req.headers = {}
 
-        if (body != null && method != 'GET') {
+        if (body != null) {
+            if (!['POST', 'PATCH', 'PUT'].includes(method))
+                throw new Error(
+                    `Invalid fetch! HTTP ${method} cannot have a body`
+                )
+
             req.body = JSON.stringify(body)
-            req.headers ??= {}
             req.headers['Content-Type'] = 'application/json'
         }
 
-        let res = await fetch(fullUrl, req)
+        const request = async () => {
+            try {
+                return await fetch(url, req)
+            } catch (error) {
+                if (
+                    error instanceof DOMException &&
+                    error.name === 'AbortError'
+                )
+                    throw error
 
-        if (session && res.status === 401) {
-            await onRefresh()
-            res = await fetch(fullUrl, req)
+                const reason =
+                    error instanceof Error ? `: ${error.message}` : ''
+                throw new Error(
+                    `Request failed (${method} ${url.pathname})${reason}`,
+                    { cause: error }
+                )
+            }
         }
 
+        let res = await request()
+
+        if (res.status === 401 && (await onRefreshSession())) {
+            res = await request()
+        }
+
+        const text = await res.text()
+
         if (!res.ok) {
-            const error = (await res.json()) as ApiError
+            let error: ApiError = {
+                message: res.statusText || 'An error occurred',
+                error: '',
+            }
+            if (text.trim().length > 0) {
+                try {
+                    error = JSON.parse(text) as ApiError
+                } catch {
+                    error = { message: text, error: '' }
+                }
+            }
             throw new FetchError(error.message, res.status, error.error)
         }
 
-        if (res.status !== 204) {
-            const data = (await res.json()) as unknown
+        const content =
+            res.status === 204 || text.trim().length === 0
+                ? undefined
+                : (JSON.parse(text) as unknown)
 
-            if (!schema) return data as R
-            return z.parse(schema, data) as R
-        } else {
-            return {} as R
-        }
+        const parsed = z.parse(schema ?? z.undefined(), content)
+        return parsed as S extends null ? void : z.infer<S>
     }
 
-    async function onGet<R>(
+    async function onGet<S extends ZodSchema>(
         url: string,
-        schema: ZodSchema,
+        schema: S,
         options?: QueryOptions
     ) {
-        return await onFetch<R>('GET', url, null, schema, options)
+        return await onFetch<S>('GET', url, null, schema, options)
     }
 
-    async function onPut(
-        url: string,
-        body: object | null,
-        options?: QueryOptions
-    ) {
-        await onFetch('PUT', url, body, null, options)
-    }
-
-    async function onPost<R = void>(
+    async function onPut<S extends ZodSchema | null>(
         url: string,
         body: object | null,
-        schema: ZodSchema | null,
+        schema: S,
         options?: QueryOptions
     ) {
-        return await onFetch<R>('POST', url, body, schema, options)
+        await onFetch<S>('PUT', url, body, schema, options)
     }
 
-    async function onPatch<R = void>(
+    async function onPost<S extends ZodSchema | null>(
         url: string,
         body: object | null,
-        schema: ZodSchema | null,
+        schema: S,
         options?: QueryOptions
     ) {
-        return await onFetch<R>('PATCH', url, body, schema, options)
+        return await onFetch<S>('POST', url, body, schema, options)
+    }
+
+    async function onPatch<S extends ZodSchema | null>(
+        url: string,
+        body: object | null,
+        schema: S,
+        options?: QueryOptions
+    ) {
+        return await onFetch<S>('PATCH', url, body, schema, options)
     }
 
     async function onDelete(url: string, options?: QueryOptions) {
-        await onFetch('DELETE', url, null, null, options)
+        return await onFetch('DELETE', url, null, null, options)
     }
 
     return {

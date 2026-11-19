@@ -4,47 +4,119 @@ import {
     DateField,
     FormGroup,
     PhoneField,
+    PickerWheelField,
     TextField,
+    DropDownField,
 } from '@/components/common/forms'
-import { User } from '@/contracts/data'
+import { pronounOptionsWith, stateOptions } from '@/models'
 import { dateService } from '@/services'
+import { ShirtSize, User } from 'pv-contracts/data'
 import { useState } from 'react'
 
 interface AccountInfoFormProps {
     user: User
-    onSave: (user: User) => void
+    onSave: (user: User) => void | Promise<void>
+    onUpdateUser: (user: User) => void
     subtitle?: string
     avatar?: React.ReactNode
     title?: string
+    hasMatchedDonor?: boolean
 }
+
+//Need to move these to API
+const shirtSizeOptions = [
+    { value: '', label: 'No shirt size selected' },
+    { value: ShirtSize.ExtraSmall, label: 'Extra Small' },
+    { value: ShirtSize.Small, label: 'Small' },
+    { value: ShirtSize.Medium, label: 'Medium' },
+    { value: ShirtSize.Large, label: 'Large' },
+    { value: ShirtSize.ExtraLarge, label: 'Extra Large' },
+    { value: ShirtSize.DoubleExtraLarge, label: 'Double XL' },
+]
+
+const shirtSizeLabels: Record<ShirtSize, string> = {
+    [ShirtSize.ExtraSmall]: 'Extra Small',
+    [ShirtSize.Small]: 'Small',
+    [ShirtSize.Medium]: 'Medium',
+    [ShirtSize.Large]: 'Large',
+    [ShirtSize.ExtraLarge]: 'Extra Large',
+    [ShirtSize.DoubleExtraLarge]: 'Double XL',
+}
+
+const missingAddressInfoText = '*Info needed to ship card'
+const missingShirtSizeInfoText =
+    '*Info needed to ship Inner Circle merch bundle'
+const stateOptionsWithEmpty = [
+    { value: '', label: 'No state selected' },
+    ...stateOptions,
+]
 
 export const AccountInfoForm = ({
     user,
     onSave,
+    onUpdateUser,
     subtitle,
     avatar,
     title = 'Account Information',
+    hasMatchedDonor = false,
 }: AccountInfoFormProps) => {
-    const [updatedUser, setUpdatedUser] = useState<User>(user)
     const [isEditing, setIsEditing] = useState(false)
 
     const handleFormSave = (user: User) => {
-        setUpdatedUser(user)
+        const hasFullName = Boolean(
+            normalizeText(user.firstName) && normalizeText(user.lastName)
+        )
 
-        onSave(user)
+        const normalizedUser = {
+            ...user,
+            nameConfirmed: hasFullName ? true : user.nameConfirmed,
+            address: {
+                ...user.address,
+                addressLine1:
+                    normalizeText(user.address.addressLine1)?.slice(0, 100) ??
+                    null,
+                addressLine2:
+                    normalizeText(user.address.addressLine2)?.slice(0, 100) ??
+                    null,
+                city: normalizeText(user.address.city)?.slice(0, 50) ?? null,
+            },
+        }
+
+        const confirmedUser = {
+            ...normalizedUser,
+            addressConfirmed: hasAddressForShipping(normalizedUser)
+                ? true
+                : normalizedUser.addressConfirmed,
+        }
+
+        onUpdateUser(confirmedUser)
+        void onSave(confirmedUser)
     }
 
     const showAddressLine2 =
-        isEditing || Boolean(updatedUser.address.addressLine2?.trim()?.length)
+        isEditing || Boolean(user.address.addressLine2?.trim()?.length)
 
-    return (
-        <div className={styles.accountInfoBackground}>
+    const hasAddressForShipping = (user: User) =>
+        Boolean(
+            user.address.addressLine1?.trim() &&
+            user.address.city?.trim() &&
+            user.address.state?.trim() &&
+            user.address.zip?.trim()
+        )
+
+    const normalizeText = (value?: string | null) => {
+        const trimmed = value?.trim() ?? ''
+        return trimmed.length ? trimmed : null
+    }
+
+    const renderWholePage = () => (
+        <div className={styles.contentBackground}>
             <Form<User>
-                form={updatedUser}
+                form={user}
                 title={title}
                 subtitle={subtitle}
                 avatar={avatar}
-                onUpdate={(state) => setIsEditing(state.editing)}
+                onUpdate={(state) => setIsEditing(state.mode === 'edit')}
                 onSave={handleFormSave}
             >
                 <FormGroup title="">
@@ -63,6 +135,25 @@ export const AccountInfoForm = ({
                     {isEditing && (
                         <TextField label="Last Name" field="lastName" />
                     )}
+                    {isEditing ? (
+                        <PickerWheelField<User>
+                            label="Preferred Pronouns"
+                            getter={(user) => user.preferredPronouns ?? ''}
+                            setter={(user, value) => ({
+                                ...user,
+                                preferredPronouns: value ? String(value) : null,
+                            })}
+                            options={pronounOptionsWith(user.preferredPronouns)}
+                        />
+                    ) : `${user.preferredPronouns ?? ''}`.trim() ? (
+                        <TextField<User>
+                            label="Preferred Pronouns"
+                            getter={(user) =>
+                                `${user.preferredPronouns ?? ''}`.trim() || null
+                            }
+                            readonly
+                        />
+                    ) : null}
                     <TextField<User>
                         label="Discord Username"
                         getter={(user) =>
@@ -72,18 +163,12 @@ export const AccountInfoForm = ({
                         }
                         readonly
                     />
-                    <PhoneField label="Phone Number" field="phone" />
-                    <TextField label="Email" field="email" readonly />
+                    <PhoneField label="Phone Number" field="phone" required />
+                    <TextField label="Email" field="email" />
                     <DateField<User>
                         label="Date of Birth"
                         getter={(user) =>
-                            dateService.isValid(user.birthdate)
-                                ? new Date(
-                                      dateService.toISODateString(
-                                          user.birthdate
-                                      )!
-                                  )
-                                : null
+                            dateService.fromISODateString(user.birthdate)
                         }
                         field="birthdate"
                         format={{
@@ -91,18 +176,49 @@ export const AccountInfoForm = ({
                             dateStyle: 'medium',
                         }}
                     />
-                    <TextField<User>
-                        label={showAddressLine2 ? 'Address Line 1' : 'Address'}
-                        getter={(user) => user.address.addressLine1}
-                        setter={(user, field) => ({
-                            ...user,
-                            address: {
-                                ...user.address,
-                                addressLine1: field?.slice(0, 100) ?? null,
-                            },
-                        })}
-                    />
-                    {showAddressLine2 && (
+                    {!isEditing ? (
+                        <TextField<User>
+                            label="Address"
+                            getter={(user) =>
+                                hasAddressForShipping(user)
+                                    ? [
+                                          user.address.addressLine1,
+                                          user.address.addressLine2,
+                                          [
+                                              user.address.city,
+                                              user.address.state,
+                                              user.address.zip
+                                                  ?.padStart(5, '0')
+                                                  .slice(-5),
+                                          ]
+                                              .filter(Boolean)
+                                              .join(', '),
+                                      ]
+                                          .filter(Boolean)
+                                          .join(', ')
+                                    : missingAddressInfoText
+                            }
+                            readonly
+                            readonlyClassName={
+                                hasAddressForShipping(user)
+                                    ? undefined
+                                    : styles.shippingInfoWarningText
+                            }
+                        />
+                    ) : (
+                        <TextField<User>
+                            label="Address Line 1"
+                            getter={(user) => user.address.addressLine1}
+                            setter={(user, field) => ({
+                                ...user,
+                                address: {
+                                    ...user.address,
+                                    addressLine1: field?.slice(0, 100) ?? null,
+                                },
+                            })}
+                        />
+                    )}
+                    {isEditing && showAddressLine2 && (
                         <TextField<User>
                             label="Address Line 2"
                             getter={(user) => user.address.addressLine2}
@@ -115,53 +231,105 @@ export const AccountInfoForm = ({
                             })}
                         />
                     )}
-                    <TextField<User>
-                        label="Zip Code"
-                        getter={(user) =>
-                            user.address.zip
-                                ? user.address.zip.padStart(5, '0').slice(-5)
-                                : null
-                        }
-                        setter={(user, field) => ({
-                            ...user,
-                            address: {
-                                ...user.address,
-                                zip:
-                                    field
-                                        ?.replace(/[^\d]/, '')
-                                        ?.padStart(5, '0')
-                                        ?.slice(-5) ?? null,
-                            },
-                        })}
-                        validator={(field) => field?.length == 5}
-                    />
-                    <TextField<User>
-                        label="City"
-                        getter={(user) => user.address.city}
-                        setter={(user, field) => ({
-                            ...user,
-                            address: {
-                                ...user.address,
-                                city: field?.slice(0, 50) ?? null,
-                            },
-                        })}
-                    />
-                    <TextField<User>
-                        label="State"
-                        getter={(user) => user.address.state}
-                        setter={(user, field) => ({
-                            ...user,
-                            address: {
-                                ...user.address,
-                                state:
-                                    field?.trim()?.toUpperCase()?.slice(0, 2) ??
-                                    null,
-                            },
-                        })}
-                        validator={(field) => field?.length == 2}
-                    />
+                    {isEditing && (
+                        <TextField<User>
+                            label="City"
+                            getter={(user) => user.address.city}
+                            setter={(user, field) => ({
+                                ...user,
+                                address: {
+                                    ...user.address,
+                                    city: field?.slice(0, 50) ?? null,
+                                },
+                            })}
+                        />
+                    )}
+                    {isEditing && (
+                        <DropDownField<User>
+                            label="State"
+                            getter={(user) => user.address.state}
+                            setter={(user, field) => ({
+                                ...user,
+                                address: {
+                                    ...user.address,
+                                    state: (field as string) || null,
+                                },
+                            })}
+                            options={stateOptionsWithEmpty}
+                            required
+                        />
+                    )}
+                    {isEditing && (
+                        <TextField<User>
+                            label="Zip Code"
+                            getter={(user) =>
+                                user.address.zip
+                                    ? user.address.zip
+                                          .padStart(5, '0')
+                                          .slice(-5)
+                                    : null
+                            }
+                            setter={(user, field) => ({
+                                ...user,
+                                address: {
+                                    ...user.address,
+                                    zip: field?.trim().length
+                                        ? field
+                                              .replace(/[^\d]/g, '')
+                                              .padStart(5, '0')
+                                              .slice(-5)
+                                        : null,
+                                },
+                            })}
+                            validator={(field) =>
+                                !field?.length || field?.length == 5
+                            }
+                            required
+                        />
+                    )}
+                    {!isEditing && hasMatchedDonor && (
+                        <div
+                            aria-hidden="true"
+                            className={styles.shirtSizeSpacer}
+                        />
+                    )}
+                    {hasMatchedDonor &&
+                        (isEditing ? (
+                            <DropDownField<User>
+                                label="Shirt Size"
+                                getter={(user) => user.shirtSize ?? ''}
+                                setter={(user, field) => ({
+                                    ...user,
+                                    shirtSize: field
+                                        ? (field as ShirtSize)
+                                        : null,
+                                })}
+                                options={shirtSizeOptions}
+                            />
+                        ) : user.shirtSize ? (
+                            <TextField<User>
+                                label="Shirt Size"
+                                getter={(user) =>
+                                    user.shirtSize
+                                        ? shirtSizeLabels[user.shirtSize]
+                                        : null
+                                }
+                                readonly
+                            />
+                        ) : (
+                            <TextField<User>
+                                label="Shirt Size"
+                                getter={() => missingShirtSizeInfoText}
+                                readonly
+                                readonlyClassName={
+                                    styles.shippingInfoWarningText
+                                }
+                            />
+                        ))}
                 </FormGroup>
             </Form>
         </div>
     )
+
+    return renderWholePage()
 }

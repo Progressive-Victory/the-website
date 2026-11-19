@@ -1,6 +1,6 @@
 import { useInfoBlockContext } from '../Block'
 import blockFieldStyles from './BlockField.module.css'
-import { InformationCircleIcon } from '@heroicons/react/24/outline'
+import { HiOutlineInformationCircle } from 'react-icons/hi2'
 
 export function AddressBlockField() {
     const { user, draft, editing, onDraftChange } = useInfoBlockContext()
@@ -171,7 +171,7 @@ export function AddressBlockField() {
                             </span>
                         )}
                     </div>
-                    <InformationCircleIcon
+                    <HiOutlineInformationCircle
                         className={blockFieldStyles.infoBlockInfoIcon}
                     />
                 </button>

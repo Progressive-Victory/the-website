@@ -1,5 +1,4 @@
-import { TokenClaims } from '@/contracts/data'
-import { DiscordLoginResponse } from '@/contracts/responses'
+import { QUERY_STALE_TIME } from '.'
 import { ApiError, FetchError } from '@/models'
 import {
     keepPreviousData,
@@ -8,9 +7,17 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
+import { TokenClaims } from 'pv-contracts/data'
+import { DiscordLoginResponse } from 'pv-contracts/responses'
+import { useRef } from 'react'
 
 export function useAuth() {
     const queryClient = useQueryClient()
+
+    // Prevents refreshing on the first render so we don't hit refresh race
+    // conditions as often. They can still happen, but they'll be much less
+    // common.
+    const shouldRefresh = useRef(false)
 
     const settingsQuery = useQuery({
         queryKey: ['/api/settings'],
@@ -31,17 +38,17 @@ export function useAuth() {
         async mutationFn({ redirect }) {
             if (!apiBaseUrl) return
 
-            const redirectUri = redirect
-                ? `${window.location.origin}/${redirect}`
-                : encodeURIComponent(window.location.toString())
-            const errorUri = `${window.location.origin}/login`
-
-            const res = await fetch(
-                new URL(
-                    `/auth/discord/login?redirectUri=${redirectUri}&errorUri=${errorUri}`,
-                    apiBaseUrl
-                )
+            const url = new URL('/auth/discord/login', apiBaseUrl)
+            url.searchParams.append(
+                'redirectUri',
+                `${window.location.origin}${redirect ?? '/account'}`
             )
+            url.searchParams.append(
+                'errorUri',
+                `${window.location.origin}/login`
+            )
+
+            const res = await fetch(url)
 
             if (!res.ok) throw new Error('Failed to get login url from the API')
 
@@ -74,66 +81,71 @@ export function useAuth() {
         queryKey: ['/auth'],
         queryFn: apiBaseUrl
             ? async () => {
-                  const res = await fetch(new URL('/auth', apiBaseUrl), {
-                      credentials: 'include',
-                  })
+                  const request = () =>
+                      fetch(new URL('/auth', apiBaseUrl), {
+                          credentials: 'include',
+                      })
+                  let res = await request()
 
-                  if (!res.ok) {
-                      if (res.status == 404) return null
-
-                      await onLogout()
-
-                      const error = (await res.json()) as ApiError
-                      throw new FetchError(
-                          error.message,
-                          res.status,
-                          error.error
-                      )
+                  if (res.status == 401) {
+                      shouldRefresh.current = true
+                      await refreshQuery.refetch({ cancelRefetch: false })
+                      res = await request()
                   }
+                  // this will catch a 404 from the original request or the post-refresh request
+                  if (res.status == 404) return null
 
-                  return (await res.json()) as TokenClaims
+                  if (res.ok) return (await res.json()) as TokenClaims
+
+                  await onLogout()
+
+                  const error = (await res.json()) as ApiError
+                  throw new FetchError(error.message, res.status, error.error)
               }
             : skipToken,
+        staleTime: QUERY_STALE_TIME,
     })
 
     const isSessionLoading = sessionQuery.isLoading || sessionQuery.isPending
+
     const session = sessionQuery.data ?? null
+
+    const onRefreshSession = () =>
+        sessionQuery.refetch({ cancelRefetch: false })
 
     const refreshQuery = useQuery({
         queryKey: ['/auth/refresh'],
-        queryFn:
-            apiBaseUrl && session
-                ? async () => {
-                      const res = await fetch(
-                          new URL('/auth/refresh', apiBaseUrl),
-                          {
-                              method: 'POST',
-                              credentials: 'include',
-                          }
-                      )
-
-                      if (res.ok) {
-                          await queryClient.invalidateQueries({
-                              queryKey: ['/auth'],
-                          })
-                          return true
-                      }
-
-                      await onLogout()
-                      return false
+        queryFn: apiBaseUrl
+            ? async () => {
+                  if (!shouldRefresh.current) {
+                      shouldRefresh.current = true
+                      return true
                   }
-                : skipToken,
-        refetchInterval: 5 * 60 * 1000,
-    })
 
-    const onRefresh = refreshQuery.refetch
+                  const res = await fetch(
+                      new URL('/auth/refresh', apiBaseUrl),
+                      {
+                          method: 'POST',
+                          credentials: 'include',
+                      }
+                  )
+
+                  return res.ok
+              }
+            : skipToken,
+        refetchInterval: 5 * 60 * 1000,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        staleTime: QUERY_STALE_TIME,
+    })
 
     return {
         apiBaseUrl,
         isSessionLoading,
         session,
+        onRefreshSession,
         onLogin,
-        onRefresh,
         onLogout,
     }
 }

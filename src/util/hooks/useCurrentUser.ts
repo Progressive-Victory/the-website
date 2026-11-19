@@ -1,27 +1,25 @@
-import { useFetch } from './useFetch'
-import { User, zUser } from '@/contracts/data'
-import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
+import { QUERY_STALE_TIME } from '.'
+import { useUserQueries } from '@/queries'
+import {
+    keepPreviousData,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query'
+import { User } from 'pv-contracts/data'
 
-interface DataState {
-    data: User | undefined
-    isLoading: boolean
-    error: string | null
-    onRefetch: () => Promise<User | undefined>
-}
-
-export function useCurrentUser(): DataState {
-    const { ready, onGet } = useFetch()
+export function useCurrentUser() {
+    const queryClient = useQueryClient()
+    const { getCurrentUser } = useUserQueries()
 
     const user = useQuery({
         queryKey: ['/users/current'],
-        queryFn: ready
-            ? async () => {
-                  return onGet<User>('/users/current', zUser, {
-                      query: { includeDiscordUsers: true },
-                  })
-              }
-            : skipToken,
+        queryFn: getCurrentUser({
+            includeDiscordUsers: true,
+            includeDonors: true,
+            includePositions: true,
+        }),
         placeholderData: keepPreviousData,
+        staleTime: QUERY_STALE_TIME,
     })
 
     const handleRefetch = async () => {
@@ -29,18 +27,23 @@ export function useCurrentUser(): DataState {
         return res.data
     }
 
+    const handleInvalidate = async () => {
+        await queryClient.invalidateQueries({ queryKey: ['/users/current'] })
+    }
+
     return {
         data: user.data,
         isLoading: user.isLoading,
-        error: user.error?.message ?? null,
+        error: user.error,
         onRefetch: handleRefetch,
+        onInvalidate: handleInvalidate,
     }
 }
 
-export function hasPermission(user: User, permission: string): boolean {
+export function hasPermission(user: User, permissionId: number): boolean {
     return (
-        user.roles?.some((r) =>
-            r.permissions?.some((p) => p.name == permission)
+        user.positions?.some((position) =>
+            position.permissions.some((p) => p.id === permissionId)
         ) ?? false
     )
 }

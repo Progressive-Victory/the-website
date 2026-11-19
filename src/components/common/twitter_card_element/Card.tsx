@@ -2,17 +2,7 @@
 
 import styles from './Card.module.css'
 import { BaseButton } from '@/components/common/buttons/Button'
-import {
-    HeartIcon,
-    ChatBubbleLeftRightIcon,
-    ArrowUpOnSquareIcon,
-    EllipsisHorizontalIcon,
-} from '@heroicons/react/24/outline'
-import {
-    HeartIcon as SolidHeartIcon,
-    ChatBubbleLeftRightIcon as SolidChatBubbleLeftRightIcon,
-    ArrowUpOnSquareIcon as SolidArrowUpOnSquareIcon,
-} from '@heroicons/react/24/solid'
+import { cn } from '@/util'
 import {
     motion,
     useSpring,
@@ -22,7 +12,16 @@ import {
 } from 'motion/react'
 import Image from 'next/image'
 import type React from 'react'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import {
+    HiOutlineHeart,
+    HiOutlineChatBubbleLeftRight,
+    HiOutlineArrowUpOnSquare,
+    HiOutlineEllipsisHorizontal,
+    HiHeart,
+    HiChatBubbleLeftRight,
+    HiArrowUpOnSquare,
+} from 'react-icons/hi2'
 
 interface MotionProps {
     initial?: TargetAndTransition
@@ -53,6 +52,11 @@ export interface TiltProps {
     scale?: {
         hover?: number
     }
+
+    buffer?: {
+        outer?: number
+        inner?: number
+    }
 }
 
 interface MessageProps {
@@ -78,6 +82,16 @@ interface MessageProps {
     ctaClassName?: string
     ctaTarget?: React.HTMLAttributeAnchorTarget
     ctaRel?: string
+}
+
+function useMousePosition() {
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        setMousePosition({ x: e.clientX, y: e.clientY })
+    }
+
+    return { mousePosition, handleMouseMove }
 }
 
 export function Message({
@@ -108,204 +122,60 @@ export function Message({
     const [clickedShare, setClickedShare] = useState(false)
 
     const cardClassName = [styles.message, className].filter(Boolean).join(' ')
+    const cardMouseTrapName = [styles.mouseTrap, className]
+        .filter(Boolean)
+        .join(' ')
+    const cardInnerClassName = [styles.messageInner, className]
+        .filter(Boolean)
+        .join(' ')
 
-    const imgPosition = imageProps?.position ?? 'center'
-    const imgZoom = imageProps?.zoom ?? 1
-    const imgOffsetX = imageProps?.offsetX ?? 0
-    const imgOffsetY = imageProps?.offsetY ?? 0
+    const resolveImage = () => ({
+        imgPosition: imageProps?.position ?? 'center',
+        imgZoom: imageProps?.zoom ?? 1,
+        imgOffsetX: imageProps?.offsetX ?? 0,
+        imgOffsetY: imageProps?.offsetY ?? 0,
+    })
+    const { imgPosition, imgZoom, imgOffsetX, imgOffsetY } = resolveImage()
 
-    const tiltDefaults: Required<
-        Pick<TiltProps, 'disabled' | 'strength' | 'rotation' | 'scale'>
-    > = {
-        disabled: false,
-        strength: { amount: 1 },
-        rotation: { max: 10, z: -2.5 },
-        scale: { hover: 1.02 },
+    const mergeTilt = (): TiltProps => {
+        const tiltDefaults: Required<
+            Pick<
+                TiltProps,
+                'disabled' | 'strength' | 'rotation' | 'scale' | 'buffer'
+            >
+        > = {
+            disabled: false,
+            strength: { amount: 1 },
+            rotation: { max: 10, z: -2.5 },
+            scale: { hover: 1.02 },
+            buffer: { outer: 28.8, inner: 12.8 },
+        }
+
+        return {
+            className: tiltProps?.className,
+            disabled: tiltProps?.disabled ?? tiltDefaults.disabled,
+            strength: {
+                ...tiltDefaults.strength,
+                ...(tiltProps?.strength ?? {}),
+            },
+            rotation: {
+                ...tiltDefaults.rotation,
+                ...(tiltProps?.rotation ?? {}),
+            },
+            scale: {
+                ...tiltDefaults.scale,
+                ...(tiltProps?.scale ?? {}),
+            },
+            buffer: {
+                ...tiltDefaults.buffer,
+                ...(tiltProps?.buffer ?? {}),
+            },
+        }
     }
+    const mergedTilt = mergeTilt()
 
-    const mergedTilt: TiltProps = {
-        className: tiltProps?.className,
-        disabled: tiltProps?.disabled ?? tiltDefaults.disabled,
+    // Tilt
 
-        strength: {
-            ...tiltDefaults.strength,
-            ...(tiltProps?.strength ?? {}),
-        },
-
-        rotation: {
-            ...tiltDefaults.rotation,
-            ...(tiltProps?.rotation ?? {}),
-        },
-
-        scale: {
-            ...tiltDefaults.scale,
-            ...(tiltProps?.scale ?? {}),
-        },
-    }
-
-    const card = (
-        <motion.div
-            className={cardClassName}
-            style={{
-                willChange: 'opacity, transform',
-                transform: 'translateZ(0)',
-            }}
-            initial={{ opacity: 0, scale: 0, ...motionProps?.initial }}
-            animate={{ opacity: 1, scale: 1, ...motionProps?.animate }}
-            transition={{ ease: 'backInOut', ...motionProps?.transition }}
-        >
-            {/* Header */}
-            <div className={styles.header}>
-                <div className={styles.topRow}>
-                    <div className={styles.userWrap}>
-                        <Image
-                            src={avatar}
-                            alt={username}
-                            className={
-                                avatarRounded ? styles.avatarRounded : ''
-                            }
-                            width={38}
-                            height={38}
-                            unoptimized
-                        />
-
-                        <p
-                            className={styles.username}
-                            style={{ color: nameColor }}
-                        >
-                            {username}
-                        </p>
-                    </div>
-
-                    {showEllipsis && (
-                        <div className={styles.ellipsisLayout}>
-                            {ctaHref && ctaLabel ? (
-                                <BaseButton
-                                    label={ctaLabel}
-                                    href={ctaHref}
-                                    target={ctaTarget}
-                                    rel={ctaRel}
-                                    className={[styles.primary, ctaClassName]
-                                        .filter(Boolean)
-                                        .join(' ')}
-                                />
-                            ) : null}
-
-                            <button
-                                type="button"
-                                className={styles.ellipsisButton}
-                                aria-label="More options"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <EllipsisHorizontalIcon
-                                    className={styles.ellipsisIcon}
-                                />
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                <div className={styles.text}>{children}</div>
-            </div>
-
-            {image && (
-                <div className={styles.mediaWrap}>
-                    <Image
-                        src={image}
-                        alt={username}
-                        className={styles.media}
-                        fill
-                        sizes="100%"
-                        style={{
-                            objectPosition: imgPosition,
-                            transform: `translate(${imgOffsetX}%, ${imgOffsetY}%) scale(${imgZoom})`,
-                            transformOrigin: imgPosition,
-                        }}
-                    />
-                </div>
-            )}
-
-            {botDivider && <hr className={styles.divider} />}
-
-            {/* Bottom Row */}
-            <div className={styles.bottomRow}>
-                <div className={styles.bottomLeft}>
-                    {botLeftContent && botLeftContent}
-                </div>
-
-                <div className={styles.actions}>
-                    <button
-                        type="button"
-                        className={styles.action}
-                        onClick={() => setClickedBubble((v) => !v)}
-                        aria-pressed={clickedBubble}
-                        aria-label="Comment"
-                    >
-                        {clickedBubble ? (
-                            <SolidChatBubbleLeftRightIcon
-                                className={`${styles.iconSolid} ${styles.bubbleActive} ${styles.iconGrowPop}`}
-                            />
-                        ) : (
-                            <ChatBubbleLeftRightIcon className={styles.icon} />
-                        )}
-                    </button>
-
-                    <button
-                        type="button"
-                        className={styles.action}
-                        onClick={() => setClickedShare((v) => !v)}
-                        aria-pressed={clickedShare}
-                        aria-label="Share"
-                    >
-                        {clickedShare ? (
-                            <SolidArrowUpOnSquareIcon
-                                className={`${styles.iconSolid} ${styles.shareActive} ${styles.iconGrowPop}`}
-                            />
-                        ) : (
-                            <ArrowUpOnSquareIcon className={styles.icon} />
-                        )}
-                    </button>
-
-                    <button
-                        type="button"
-                        className={styles.action}
-                        onClick={() => setClickedHeart((v) => !v)}
-                        aria-pressed={clickedHeart}
-                        aria-label="Like"
-                    >
-                        {clickedHeart ? (
-                            <SolidHeartIcon
-                                className={`${styles.iconSolid} ${styles.heartActive} ${styles.iconGrowPop}`}
-                            />
-                        ) : (
-                            <HeartIcon className={styles.icon} />
-                        )}
-                    </button>
-                </div>
-            </div>
-        </motion.div>
-    )
-
-    return <TiltWrapper tiltProps={mergedTilt}>{card}</TiltWrapper>
-}
-
-function useMousePosition() {
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        setMousePosition({ x: e.clientX, y: e.clientY })
-    }
-
-    return { mousePosition, handleMouseMove }
-}
-
-function TiltWrapper({
-    children,
-    tiltProps,
-}: {
-    children: React.ReactNode
-    tiltProps: TiltProps
-}) {
     const [isHovered, setIsHovered] = useState(false)
     const [canTilt, setCanTilt] = useState(false)
     const [elementPosition, setElementPosition] = useState({
@@ -317,11 +187,24 @@ function TiltWrapper({
 
     const { mousePosition, handleMouseMove } = useMousePosition()
 
-    const disabled = tiltProps.disabled ?? false
-    const strength = tiltProps.strength?.amount ?? 1
-    const rotateMax = tiltProps.rotation?.max ?? 10
-    const zRotate = tiltProps.rotation?.z ?? -2.5
-    const hoverScale = tiltProps.scale?.hover ?? 1.02
+    const resolveTiltValues = () => ({
+        disabled: mergedTilt.disabled ?? false,
+        strength: mergedTilt.strength?.amount ?? 1,
+        rotateMax: mergedTilt.rotation?.max ?? 10,
+        zRotate: mergedTilt.rotation?.z ?? -2.5,
+        hoverScale: mergedTilt.scale?.hover ?? 1.02,
+        outerBuffer: mergedTilt.buffer?.outer ?? 28.8,
+        innerBuffer: mergedTilt.buffer?.inner ?? 12.8,
+    })
+    const {
+        disabled,
+        strength,
+        rotateMax,
+        zRotate,
+        hoverScale,
+        outerBuffer,
+        innerBuffer,
+    } = resolveTiltValues()
 
     const tiltX = useSpring(0, { stiffness: 300, damping: 50 })
     const tiltY = useSpring(0, { stiffness: 300, damping: 50 })
@@ -332,6 +215,7 @@ function TiltWrapper({
     const handleMouseEnter = (e: React.MouseEvent) => {
         if (disabled) return
         setIsHovered(true)
+
         const rect = e.currentTarget.getBoundingClientRect()
         setElementPosition({
             left: rect.left,
@@ -344,44 +228,249 @@ function TiltWrapper({
     const handleMouseLeave = () => {
         if (disabled) return
         setIsHovered(false)
+
         setCanTilt(false)
         tiltX.set(0)
         tiltY.set(0)
     }
 
-    if (!disabled && isHovered && canTilt) {
-        const x =
-            (mousePosition.x - elementPosition.left) / elementPosition.width
-        const y =
-            (mousePosition.y - elementPosition.top) / elementPosition.height
+    useMemo(() => {
+        if (!disabled && isHovered && canTilt) {
+            const x =
+                (mousePosition.x - elementPosition.left) / elementPosition.width
+            const y =
+                (mousePosition.y - elementPosition.top) / elementPosition.height
 
-        tiltX.set((x - 0.5) * 0.5 * strength)
-        tiltY.set((y - 0.5) * -0.5 * strength)
-    }
+            tiltX.set((x - 0.5) * 0.5 * strength)
+            tiltY.set((y - 0.5) * -0.5 * strength)
+        }
+    }, [
+        strength,
+        disabled,
+        tiltX,
+        tiltY,
+        isHovered,
+        canTilt,
+        mousePosition,
+        elementPosition,
+    ])
 
-    return (
-        <motion.div
-            className={[styles.tilt, tiltProps.className]
-                .filter(Boolean)
-                .join(' ')}
-            style={{
-                rotateX: disabled ? 0 : rotateX,
-                rotateY: disabled ? 0 : rotateY,
-                transformPerspective: 1000,
-            }}
-            animate={{
-                rotateZ: disabled ? 0 : isHovered ? zRotate : 0,
-                scale: disabled ? 1 : isHovered ? hoverScale : 1,
-            }}
-            transition={{ duration: 0.2 }}
-            onAnimationComplete={() => {
-                if (!disabled && isHovered) setCanTilt(true)
-            }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onMouseMove={disabled ? undefined : handleMouseMove}
-        >
-            {children}
-        </motion.div>
+    // End Tilt
+
+    const renderEllipsis = () =>
+        showEllipsis && (
+            <div className={styles.ellipsisLayout}>
+                {ctaHref && ctaLabel ? (
+                    <BaseButton
+                        label={ctaLabel}
+                        href={ctaHref}
+                        target={ctaTarget}
+                        rel={ctaRel}
+                        className={[styles.primary, ctaClassName]
+                            .filter(Boolean)
+                            .join(' ')}
+                    />
+                ) : null}
+
+                <button
+                    type="button"
+                    className={styles.ellipsisButton}
+                    aria-label="More options"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <HiOutlineEllipsisHorizontal
+                        className={styles.ellipsisIcon}
+                    />
+                </button>
+            </div>
+        )
+
+    const renderHeader = () => (
+        <div className={styles.header}>
+            <div className={styles.topRow}>
+                <div className={styles.userWrap}>
+                    <Image
+                        src={avatar}
+                        alt={username}
+                        className={cn(avatarRounded && styles.avatarRounded)}
+                        width={38}
+                        height={38}
+                        unoptimized
+                    />
+
+                    <p className={styles.username} style={{ color: nameColor }}>
+                        {username}
+                    </p>
+                </div>
+
+                {renderEllipsis()}
+            </div>
+        </div>
     )
+
+    const card = (
+        <div>
+            <motion.div // Tilt
+                className={[styles.tilt, mergedTilt.className]
+                    .filter(Boolean)
+                    .join(' ')}
+                style={{
+                    rotateX: disabled ? 0 : rotateX,
+                    rotateY: disabled ? 0 : rotateY,
+                    transformPerspective: 1000,
+                }}
+                animate={{
+                    rotateZ: disabled ? 0 : isHovered ? zRotate : 0,
+                    scale: disabled ? 1 : isHovered ? hoverScale : 1,
+                }}
+                transition={{ duration: 0.2 }}
+                onAnimationComplete={() => {
+                    if (!disabled && isHovered) setCanTilt(true)
+                }}
+            >
+                <motion.div // Rotate
+                    className={cardClassName}
+                    style={{
+                        willChange: 'opacity, transform',
+                        transform: 'translateZ(0)',
+                    }}
+                    initial={{ opacity: 0, scale: 0, ...motionProps?.initial }}
+                    animate={{ opacity: 1, scale: 1, ...motionProps?.animate }}
+                    transition={{
+                        ease: 'backInOut',
+                        ...motionProps?.transition,
+                    }}
+                >
+                    {/* A minimally styled div that will have the margin/padding
+                        changing to catch the mouse without changing the style.
+                      */}
+                    <div
+                        className={cardMouseTrapName}
+                        onMouseLeave={handleMouseLeave}
+                        onMouseMove={disabled ? undefined : handleMouseMove}
+                        style={{
+                            padding: outerBuffer + 'px',
+                            margin: -outerBuffer + 'px',
+                        }}
+                    >
+                        <div
+                            className={cardInnerClassName}
+                            onMouseEnter={handleMouseEnter}
+                            style={{
+                                padding: innerBuffer + 'px',
+                                margin: -innerBuffer + 'px',
+                            }}
+                        >
+                            {/* Header */}
+                            {renderHeader()}
+
+                            <div className={styles.text}>{children}</div>
+
+                            {image && (
+                                <div className={styles.mediaWrap}>
+                                    <Image
+                                        src={image}
+                                        alt={username}
+                                        className={styles.media}
+                                        fill
+                                        sizes="100%"
+                                        style={{
+                                            objectPosition: imgPosition,
+                                            transform: `translate(${imgOffsetX}%, ${imgOffsetY}%) scale(${imgZoom})`,
+                                            transformOrigin: imgPosition,
+                                        }}
+                                    />
+                                </div>
+                            )}
+
+                            {botDivider && <hr className={styles.divider} />}
+
+                            {/* Bottom Row */}
+                            <div className={styles.bottomRow}>
+                                <div className={styles.bottomLeft}>
+                                    {botLeftContent && botLeftContent}
+                                </div>
+
+                                <div className={styles.actions}>
+                                    <button
+                                        type="button"
+                                        className={styles.action}
+                                        onClick={() =>
+                                            setClickedBubble((v) => !v)
+                                        }
+                                        aria-pressed={clickedBubble}
+                                        aria-label="Comment"
+                                    >
+                                        {clickedBubble ? (
+                                            <HiChatBubbleLeftRight
+                                                className={cn(
+                                                    styles.iconSolid,
+                                                    styles.bubbleActive,
+                                                    styles.iconGrowPop
+                                                )}
+                                            />
+                                        ) : (
+                                            <HiOutlineChatBubbleLeftRight
+                                                className={styles.icon}
+                                            />
+                                        )}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className={styles.action}
+                                        onClick={() =>
+                                            setClickedShare((v) => !v)
+                                        }
+                                        aria-pressed={clickedShare}
+                                        aria-label="Share"
+                                    >
+                                        {clickedShare ? (
+                                            <HiArrowUpOnSquare
+                                                className={cn(
+                                                    styles.iconSolid,
+                                                    styles.shareActive,
+                                                    styles.iconGrowPop
+                                                )}
+                                            />
+                                        ) : (
+                                            <HiOutlineArrowUpOnSquare
+                                                className={styles.icon}
+                                            />
+                                        )}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className={styles.action}
+                                        onClick={() =>
+                                            setClickedHeart((v) => !v)
+                                        }
+                                        aria-pressed={clickedHeart}
+                                        aria-label="Like"
+                                    >
+                                        {clickedHeart ? (
+                                            <HiHeart
+                                                className={cn(
+                                                    styles.iconSolid,
+                                                    styles.heartActive,
+                                                    styles.iconGrowPop
+                                                )}
+                                            />
+                                        ) : (
+                                            <HiOutlineHeart
+                                                className={styles.icon}
+                                            />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            </motion.div>
+        </div>
+    )
+
+    return card
 }

@@ -1,5 +1,6 @@
 export * from './Button'
 
+export * from './button_types/BackButton'
 export * from './button_types/NavButton'
 export * from './button_types/SubNavButton'
 export * from './button_types/MobileNavButton'
