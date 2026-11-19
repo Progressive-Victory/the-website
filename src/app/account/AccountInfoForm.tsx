@@ -4,10 +4,11 @@ import {
     DateField,
     FormGroup,
     PhoneField,
+    PickerWheelField,
     TextField,
     DropDownField,
 } from '@/components/common/forms'
-import { stateOptions } from '@/models'
+import { pronounOptionsWith, stateOptions } from '@/models'
 import { dateService } from '@/services'
 import { ShirtSize, User } from 'pv-contracts/data'
 import { useState } from 'react'
@@ -62,8 +63,13 @@ export const AccountInfoForm = ({
     const [isEditing, setIsEditing] = useState(false)
 
     const handleFormSave = (user: User) => {
+        const hasFullName = Boolean(
+            normalizeText(user.firstName) && normalizeText(user.lastName)
+        )
+
         const normalizedUser = {
             ...user,
+            nameConfirmed: hasFullName ? true : user.nameConfirmed,
             address: {
                 ...user.address,
                 addressLine1:
@@ -76,8 +82,15 @@ export const AccountInfoForm = ({
             },
         }
 
-        onUpdateUser(normalizedUser)
-        void onSave(normalizedUser)
+        const confirmedUser = {
+            ...normalizedUser,
+            addressConfirmed: hasAddressForShipping(normalizedUser)
+                ? true
+                : normalizedUser.addressConfirmed,
+        }
+
+        onUpdateUser(confirmedUser)
+        void onSave(confirmedUser)
     }
 
     const showAddressLine2 =
@@ -96,7 +109,7 @@ export const AccountInfoForm = ({
         return trimmed.length ? trimmed : null
     }
 
-    return (
+    const renderWholePage = () => (
         <div className={styles.contentBackground}>
             <Form<User>
                 form={user}
@@ -122,6 +135,25 @@ export const AccountInfoForm = ({
                     {isEditing && (
                         <TextField label="Last Name" field="lastName" />
                     )}
+                    {isEditing ? (
+                        <PickerWheelField<User>
+                            label="Preferred Pronouns"
+                            getter={(user) => user.preferredPronouns ?? ''}
+                            setter={(user, value) => ({
+                                ...user,
+                                preferredPronouns: value ? String(value) : null,
+                            })}
+                            options={pronounOptionsWith(user.preferredPronouns)}
+                        />
+                    ) : `${user.preferredPronouns ?? ''}`.trim() ? (
+                        <TextField<User>
+                            label="Preferred Pronouns"
+                            getter={(user) =>
+                                `${user.preferredPronouns ?? ''}`.trim() || null
+                            }
+                            readonly
+                        />
+                    ) : null}
                     <TextField<User>
                         label="Discord Username"
                         getter={(user) =>
@@ -224,6 +256,7 @@ export const AccountInfoForm = ({
                                 },
                             })}
                             options={stateOptionsWithEmpty}
+                            required
                         />
                     )}
                     {isEditing && (
@@ -251,6 +284,7 @@ export const AccountInfoForm = ({
                             validator={(field) =>
                                 !field?.length || field?.length == 5
                             }
+                            required
                         />
                     )}
                     {!isEditing && hasMatchedDonor && (
@@ -296,4 +330,6 @@ export const AccountInfoForm = ({
             </Form>
         </div>
     )
+
+    return renderWholePage()
 }

@@ -3,12 +3,14 @@
 import { MyPermissions, MyPermissionsSidebarItem } from './MyPermissions'
 import styles from './page.module.css'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
+import { Form, FormState } from '@/components/common/forms'
 import {
-    Form,
-    FormGroup,
-    FormState,
-    TextField,
-} from '@/components/common/forms'
+    List,
+    ListBreak,
+    ListRow,
+    NavigationRow,
+    TextRow,
+} from '@/components/common/list'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import {
@@ -17,15 +19,13 @@ import {
 } from '@/components/common/panel/sidebar_list/SidebarList'
 import { FetchError } from '@/models'
 import { usePositionQueries } from '@/queries'
-import { cn, parseErrorMessage } from '@/util'
+import { parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import Link from 'next/link'
 import { Permission, zPermission } from 'pv-contracts/data'
 import { SortDirection, UpdatePermissionRequest } from 'pv-contracts/requests'
 import { PaginatedResponse } from 'pv-contracts/responses'
 import { useState } from 'react'
-import { FiChevronRight } from 'react-icons/fi'
 import { IoEllipsisVertical } from 'react-icons/io5'
 import { useMediaQuery } from 'usehooks-ts'
 
@@ -239,76 +239,66 @@ export default function Page() {
                         onUpdate={setFormState}
                         onSave={handleSave}
                     >
-                        <FormGroup
-                            title="Details"
-                            className={cn(
-                                styles.permissionList,
-                                styles.permissionCards
-                            )}
-                        >
-                            <TextField label="Name" field="name" />
+                        <List title="Details">
+                            <TextRow label="Name" field="name" />
                             {/* # TODO: use the real field once the API adds permission descriptions. */}
-                            <TextField<Permission>
+                            <TextRow
                                 label="Description"
-                                getter={() => 'No description yet'}
-                                readonlyClassName={styles.secondaryValue}
-                                readonly
+                                value="No description yet"
+                                readOnly
+                                muted
                             />
-                            <div className={styles.cardBreak} />
-                            <TextField<Permission>
+                            <ListBreak />
+                            <TextRow
                                 label="ID"
-                                getter={(permission) => String(permission.id)}
-                                readonlyClassName={styles.secondaryValue}
-                                readonly
+                                getter={(permission: Permission) =>
+                                    String(permission.id)
+                                }
+                                readOnly
+                                muted
                             />
-                        </FormGroup>
-                        <FormGroup
-                            title="Positions"
-                            className={styles.permissionList}
-                        >
+                        </List>
+                        <List title="Positions">
                             {positionHierarchy.isPending ? (
-                                <div>
-                                    <span className={styles.secondaryValue}>
-                                        Loading positions...
-                                    </span>
-                                </div>
+                                <ListRow
+                                    label={
+                                        <span className={styles.secondaryValue}>
+                                            Loading positions...
+                                        </span>
+                                    }
+                                />
                             ) : positionHierarchy.error ? (
-                                <div role="alert">
-                                    <span className={styles.secondaryValue}>
-                                        Error:{' '}
-                                        {parseErrorMessage(
-                                            positionHierarchy.error
-                                        )}
-                                    </span>
-                                </div>
+                                <ListRow
+                                    label={
+                                        <span
+                                            role="alert"
+                                            className={styles.secondaryValue}
+                                        >
+                                            Error:{' '}
+                                            {parseErrorMessage(
+                                                positionHierarchy.error
+                                            )}
+                                        </span>
+                                    }
+                                />
                             ) : assignedPositions.length === 0 ? (
-                                <div>
-                                    <span className={styles.secondaryValue}>
-                                        No positions grant this permission
-                                    </span>
-                                </div>
+                                <ListRow
+                                    label={
+                                        <span className={styles.secondaryValue}>
+                                            No positions grant this permission
+                                        </span>
+                                    }
+                                />
                             ) : (
                                 assignedPositions.map((position) => (
-                                    <div
+                                    <NavigationRow
                                         key={position.id}
-                                        className={styles.linkRow}
-                                    >
-                                        <Link
-                                            href={`/volunteer_dashboard/panels/positions?positionId=${position.id}`}
-                                            className={styles.rowLink}
-                                        >
-                                            <span>{position.name}</span>
-                                            <FiChevronRight
-                                                aria-hidden="true"
-                                                className={
-                                                    styles.secondaryValue
-                                                }
-                                            />
-                                        </Link>
-                                    </div>
+                                        label={position.name}
+                                        href={`/volunteer_dashboard/panels/positions?positionId=${position.id}`}
+                                    />
                                 ))
                             )}
-                        </FormGroup>
+                        </List>
                     </Form>
                 )}
             </div>

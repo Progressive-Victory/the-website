@@ -1,0 +1,47 @@
+.textField {
+    width: 100%;
+    max-width: 24rem;
+    padding: 0.125rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+
+    &:focus {
+        border-color: #0ea5e9;
+        outline: none;
+    }
+}
+
+.dropdownTrigger.dropdownTrigger {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 24rem;
+    min-width: 0;
+    margin-left: auto;
+    gap: 0.25rem;
+    padding: 0.125rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background: #fff;
+    box-shadow: none;
+    font-size: inherit;
+    font-weight: 500;
+    line-height: inherit;
+
+    &:focus-visible,
+    &[aria-expanded='true'] {
+        border-color: #0ea5e9;
+        outline: none;
+    }
+
+    & :global(svg) {
+        width: 0.75rem;
+        height: 0.75rem;
+    }
+}
+
+.dropdownOverlay.dropdownOverlay {
+    width: max-content;
+    min-width: 14rem;
+    z-index: 10;
+    text-align: start;
+}

@@ -8,6 +8,18 @@
     flex: 0 2 50%;
 }
 
+.labelTop {
+    align-self: start;
+}
+
+.labelCenter {
+    align-self: center;
+}
+
+.labelBottom {
+    align-self: end;
+}
+
 .required {
     margin-left: 0.25rem;
     color: #ef4444;
@@ -21,6 +33,10 @@
 
 .readonly {
     width: 100%;
+}
+
+.multiline {
+    white-space: pre-wrap;
 }
 
 .invalid {

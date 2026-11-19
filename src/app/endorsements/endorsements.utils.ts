@@ -114,6 +114,13 @@ export function getSectionLabel(
     }
 }
 
+export function getSectionTime(candidates: Endorsement[]): number {
+    const first = candidates[0]
+    return first
+        ? (getRelevantElectionDate(first)?.getTime() ?? Infinity)
+        : Infinity
+}
+
 export function compareSectionEntries(
     [labelA, candidatesA]: [string, Endorsement[]],
     [labelB, candidatesB]: [string, Endorsement[]],
@@ -131,12 +138,8 @@ export function compareSectionEntries(
     let comparison = 0
 
     if (sectionMode === 'electionDate') {
-        const timeA = candidatesA[0]
-            ? (getRelevantElectionDate(candidatesA[0])?.getTime() ?? Infinity)
-            : Infinity
-        const timeB = candidatesB[0]
-            ? (getRelevantElectionDate(candidatesB[0])?.getTime() ?? Infinity)
-            : Infinity
+        const timeA = getSectionTime(candidatesA)
+        const timeB = getSectionTime(candidatesB)
         comparison = timeA - timeB || labelA.localeCompare(labelB)
     } else {
         switch (sectionMode) {

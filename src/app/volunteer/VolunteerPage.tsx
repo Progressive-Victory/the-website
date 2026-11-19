@@ -153,11 +153,25 @@ export default function VolunteerPage() {
             lastName: form.lastName,
             phone: form.phoneNumber,
             zipCode: +form.zipCode,
+            preferredPronouns: form.preferredPronouns,
             acceptedAlerts: form.getAlerts,
             birthdate: new Date(form.dateOfBirth),
             usCitizen: form.usCitizen,
         })
     }
+
+    const getInitialForm = () => ({
+        firstName: user.data?.firstName ?? '',
+        lastName: user.data?.lastName ?? '',
+        dateOfBirth: user.data?.birthdate?.toISOString()?.split('T')?.[0] ?? '',
+        zipCode: user.data?.address?.zip ?? '',
+        preferredPronouns: user.data?.preferredPronouns ?? '',
+        phoneNumber: user.data?.phone ?? '',
+        getAlerts: user.data?.acceptedAlerts ?? false,
+        usCitizen: false,
+        privacyPolicy: false,
+        oneTimePasscode: false,
+    })
 
     const handleVerifySmsCode = (code: number) => {
         verifyMutation.mutate({ code })
@@ -196,7 +210,7 @@ export default function VolunteerPage() {
 
     if (!user.data) return <MainLayout />
 
-    return (
+    const renderWholePage = () => (
         <MainLayout>
             <div className={styles.container}>
                 <div className={styles.backgroundCover} />
@@ -208,21 +222,7 @@ export default function VolunteerPage() {
                     >
                         {currentStage === OnboardingStage.NOT_STARTED && (
                             <CollectInfoStage
-                                initialForm={{
-                                    firstName: user.data?.firstName ?? '',
-                                    lastName: user.data?.lastName ?? '',
-                                    dateOfBirth:
-                                        user.data?.birthdate
-                                            ?.toISOString()
-                                            ?.split('T')?.[0] ?? '',
-                                    zipCode: user.data?.address?.zip ?? '',
-                                    phoneNumber: user.data?.phone ?? '',
-                                    getAlerts:
-                                        user.data?.acceptedAlerts ?? false,
-                                    usCitizen: false,
-                                    privacyPolicy: false,
-                                    oneTimePasscode: false,
-                                }}
+                                initialForm={getInitialForm()}
                                 isPending={collectInfoMutation.isPending}
                                 onSubmit={handleCollectInfoSuccess}
                             />
@@ -245,7 +245,7 @@ export default function VolunteerPage() {
                         {currentStage === OnboardingStage.AWAITING_VERIFY && (
                             <PhoneVerifyStage
                                 lastSmsCodeSendTimeUtc={
-                                    user.data?.lastSmsCodeSendTimeUtc
+                                    user.data?.lastSmsCodeSendTimeUtc ?? null
                                 }
                                 requestIsPending={sendSmsCodeMutation.isPending}
                                 verifyIsPending={verifyMutation.isPending}
@@ -283,4 +283,5 @@ export default function VolunteerPage() {
             </div>
         </MainLayout>
     )
+    return renderWholePage()
 }

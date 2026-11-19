@@ -254,12 +254,43 @@
     line-height: 1.15;
 }
 
+.labelPill {
+    align-self: flex-start;
+    font-size: 0.6rem;
+    font-weight: 600;
+    padding-inline: 0.15rem;
+    padding-block: 0.1rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
 .labelText {
     display: block;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.subtitleRow {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 0;
+    max-width: 100%;
+
+    & .subtitleSection,
+    & .accountSubtitle {
+        min-width: 0;
+    }
+
+    & .labelPill {
+        align-self: center;
+        flex-shrink: 0;
+        padding-inline: 0.3rem;
+    }
 }
 
 .subtitleSection {
@@ -278,7 +309,7 @@
     flex-direction: column;
     gap: 0.03rem;
     min-width: 0;
-    max-height: 2.2rem;
+    max-height: 4rem;
     overflow: hidden;
     font-size: 0.8rem;
     font-weight: 700;

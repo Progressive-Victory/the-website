@@ -40,7 +40,6 @@ import {
     ActBlueDonor,
     Position,
     Role,
-    UpdateHistory,
     User,
     UserProfile,
     zActBlueDonor,
@@ -77,6 +76,8 @@ import { IoEllipsisVertical } from 'react-icons/io5'
 import { MdVerified } from 'react-icons/md'
 import { useMediaQuery } from 'usehooks-ts'
 import z from 'zod'
+
+/* eslint-disable complexity */
 
 type MemberTabKey = 'overview' | 'donorMatching' | 'history'
 
@@ -199,11 +200,6 @@ export default function Page() {
         Number.isFinite(initialUserId) ? initialUserId : null
     )
 
-    const [selectedHistory, setSelectedHistory] =
-        useState<UpdateHistory<User> | null>(null)
-    const [selectedDonorHistory, setSelectedDonorHistory] =
-        useState<UpdateHistory<ActBlueDonor> | null>(null)
-
     const [formState, setFormState] = useState<FormState<User> | null>(null)
     const [pickingDonor, setPickingDonor] = useState<boolean>(false)
     const [selectedTab, setSelectedTab] = useState<MemberTabKey>('overview')
@@ -215,29 +211,34 @@ export default function Page() {
     const [selectedPosition, setSelectedPosition] = useState<Position>()
     const [selectedRole, setSelectedRole] = useState<Role>()
 
-    const selectedStateLabel = stateOptions.find(
-        (state) => state.value === selectedState
-    )?.label
-    const selectedFilterLabel =
-        [
-            selectedStateLabel,
-            selectedBirthYear,
-            selectedPosition?.name,
-            selectedRole?.name,
-        ]
-            .filter(Boolean)
-            .join(` ${DOT_SEPARATOR} `) || 'All Users'
-    const selectedFilterIcon = selectedState ? (
-        <FaMapMarkerAlt />
-    ) : selectedBirthYear ? (
-        <FaBirthdayCake />
-    ) : selectedPosition ? (
-        <FaSitemap />
-    ) : selectedRole ? (
-        <FaUserShield />
-    ) : (
-        <FaUsers />
-    )
+    const getFilterLabel = () => {
+        const selectedStateLabel = stateOptions.find(
+            (state) => state.value === selectedState
+        )?.label
+        return (
+            [
+                selectedStateLabel,
+                selectedBirthYear,
+                selectedPosition?.name,
+                selectedRole?.name,
+            ]
+                .filter(Boolean)
+                .join(` ${DOT_SEPARATOR} `) || 'All Users'
+        )
+    }
+
+    const renderFilterIcon = () =>
+        selectedState ? (
+            <FaMapMarkerAlt />
+        ) : selectedBirthYear ? (
+            <FaBirthdayCake />
+        ) : selectedPosition ? (
+            <FaSitemap />
+        ) : selectedRole ? (
+            <FaUserShield />
+        ) : (
+            <FaUsers />
+        )
 
     const memberFilterTags: FilterTag[] = [
         {
@@ -352,8 +353,8 @@ export default function Page() {
         },
         {
             key: 'all',
-            label: selectedFilterLabel,
-            icon: selectedFilterIcon,
+            label: getFilterLabel(),
+            icon: renderFilterIcon(),
             color: '#3A3A3C',
             width: '8.4rem',
             activeRedirect: 'members',
@@ -491,6 +492,10 @@ export default function Page() {
         onSearch,
     } = usePaginatedSearch('/users', zUserProfile, {
         search: { sort: SortDirection.DESC, sortField: 'created_at_utc' },
+        transformSearchRequest: (search) =>
+            search.searchField === 'phone' && search.query !== undefined
+                ? { ...search, query: search.query.replace(/\D/g, '') }
+                : search,
     })
 
     const { query: rolesQuery } = usePaginatedSearch('/roles', zRole, {
@@ -511,14 +516,6 @@ export default function Page() {
     })
 
     const roles = rolesQuery.data?.data ?? []
-    const roleOptions = useMemo(
-        () =>
-            (rolesQuery.data?.data ?? []).map((role) => ({
-                value: role.id,
-                label: role.name,
-            })),
-        [rolesQuery.data]
-    )
 
     const userQuery = useQuery({
         queryKey: [`/users/${selectedId}`],
@@ -541,10 +538,22 @@ export default function Page() {
     const updateMutation = useMutation<
         User,
         FetchError,
-        { id: number; user: User; request: UpdateUserRequest },
+        {
+            id: number
+            user: User
+            request: UpdateUserRequest
+            positionUpdates?: { positionId: number; userIds: number[] }[]
+        },
         User | undefined
     >({
-        mutationFn: async ({ id, user, request }) => {
+        mutationFn: async ({ id, user, request, positionUpdates = [] }) => {
+            // Positions store their members, so membership changes are saved
+            // on each position before the user.
+            await Promise.all(
+                positionUpdates.map(({ positionId, userIds }) =>
+                    positionQueries.updatePosition(positionId, { userIds })
+                )
+            )
             const result = await onPatch('/users/:userId', request, zUser, {
                 params: { userId: id },
             })
@@ -613,6 +622,9 @@ export default function Page() {
                 queryClient.invalidateQueries({
                     queryKey: [`/users/${id}`],
                 }),
+                queryClient.invalidateQueries({
+                    queryKey: ['positionHierarchy'],
+                }),
             ]),
     })
 
@@ -645,15 +657,15 @@ export default function Page() {
 
         setSelectedId(value.id)
 
-        setSelectedHistory(null)
-        setSelectedDonorHistory(null)
         setSelectedTab('overview')
     }
 
     const locationQuery = useQuery({
         queryKey: [`/locations/${formState?.form?.address?.zip}`],
         queryFn:
-            ready && formState?.mode === 'edit' && formState.form.address?.zip
+            ready &&
+            formState?.mode === 'edit' &&
+            formState.form.address?.zip?.length === 5
                 ? async ({ signal }) => {
                       try {
                           return await onGet('/locations/:zip', zLocation, {
@@ -668,62 +680,84 @@ export default function Page() {
         placeholderData: keepPreviousData,
     })
 
-    const handleSave = useCallback(
-        (user: User) => {
-            const orNull = (value: string | null | undefined) =>
-                value?.length ? value : null
+    const handleSave = (user: User) => {
+        const orNull = (value: string | null | undefined) =>
+            value?.length ? value : null
 
-            const address = {
-                addressLine1: orNull(user.address.addressLine1?.trim()),
-                addressLine2: orNull(user.address.addressLine2?.trim()),
-                city:
-                    orNull(user.address.city?.trim()) ??
-                    locationQuery.data?.city,
-                county:
-                    orNull(user.address.county?.trim()) ??
-                    locationQuery.data?.county,
-                state:
-                    orNull(user.address.state?.trim()) ??
-                    locationQuery.data?.state,
-                zip:
-                    orNull(user.address.zip?.trim()) ??
-                    locationQuery.data?.zip?.toString(),
-            }
+        const buildAddress = () => ({
+            addressLine1: orNull(user.address.addressLine1?.trim()),
+            addressLine2: orNull(user.address.addressLine2?.trim()),
+            city: orNull(user.address.city?.trim()),
+            county: orNull(user.address.county?.trim()),
+            state: orNull(user.address.state?.trim()),
+            zip: orNull(user.address.zip?.trim()),
+        })
+        const address = buildAddress()
 
-            const oldAddress = userQuery.data?.address ?? null
-            const addressIsDirty =
-                address.addressLine1 != oldAddress?.addressLine1 ||
-                address.addressLine2 != oldAddress?.addressLine2 ||
-                address.city != oldAddress?.city ||
-                address.county != oldAddress?.county ||
-                address.state != oldAddress?.state ||
-                address.zip != oldAddress?.zip
+        const oldAddress = userQuery.data?.address ?? null
+        const addressIsDirty =
+            address.addressLine1 != oldAddress?.addressLine1 ||
+            address.addressLine2 != oldAddress?.addressLine2 ||
+            address.city != oldAddress?.city ||
+            address.county != oldAddress?.county ||
+            address.state != oldAddress?.state ||
+            address.zip != oldAddress?.zip
 
-            const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
-                email: user.email,
-                phone: user.phone,
-                preferredName: user.preferredName,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                birthdate: user.birthdate,
-                aliases: Array.from(user.aliases ?? []),
-                membershipCardStatus: +user.membershipCardStatus,
-                membershipMerchStatus: +user.membershipMerchStatus,
-                shirtSize: user.shirtSize,
-                duesPayingMember: user.duesPayingMember,
-                membershipFulfillmentStatus: user.membershipFulfillmentStatus
-                    ? +user.membershipFulfillmentStatus
-                    : null,
-                nameConfirmed: user.nameConfirmed,
-                addressConfirmed: user.addressConfirmed,
-                roles: user.roles?.map((role) => role.id),
-            } satisfies UpdateUserRequest)
-            if (addressIsDirty) request.address = address
+        const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
+            email: user.email,
+            phone: user.phone,
+            preferredName: user.preferredName,
+            preferredPronouns: user.preferredPronouns,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            birthdate: user.birthdate,
+            aliases: Array.from(user.aliases ?? []),
+            membershipCardStatus: +user.membershipCardStatus,
+            membershipMerchStatus: +user.membershipMerchStatus,
+            shirtSize: user.shirtSize,
+            duesPayingMember: user.duesPayingMember,
+            membershipFulfillmentStatus: user.membershipFulfillmentStatus
+                ? +user.membershipFulfillmentStatus
+                : null,
+            nameConfirmed: user.nameConfirmed,
+            addressConfirmed: user.addressConfirmed,
+            roles: user.roles?.map((role) => role.id),
+            metaData: {
+                dataSource: 'Member Panel',
+                userWhoUpdatedId: loggedInUser.data?.id,
+            },
+        } satisfies UpdateUserRequest)
+        if (addressIsDirty) request.address = address
 
-            updateMutation.mutate({ id: user.id, user, request })
-        },
-        [locationQuery.data, updateMutation, userQuery.data?.address]
-    )
+        const before = new Set(
+            (userQuery.data?.positions ?? []).map((position) => position.id)
+        )
+        const after = new Set(
+            (user.positions ?? []).map((position) => position.id)
+        )
+        const positionUpdates = (positionHierarchy.data?.positions ?? [])
+            .filter(
+                (position) => before.has(position.id) !== after.has(position.id)
+            )
+            .map((position) => {
+                const others = position.userIds.filter(
+                    (userId) => userId !== user.id
+                )
+                return {
+                    positionId: position.id,
+                    userIds: after.has(position.id)
+                        ? [...others, user.id]
+                        : others,
+                }
+            })
+
+        updateMutation.mutate({
+            id: user.id,
+            user,
+            request,
+            positionUpdates,
+        })
+    }
 
     const makeTitle = useCallback((user: User | UserProfile) => {
         if (user.firstName && user.lastName)
@@ -732,21 +766,6 @@ export default function Page() {
         if (user.preferredName) return user.preferredName
         return user.email ?? ''
     }, [])
-
-    const normalizeMeridiem = useCallback((value: string) => {
-        return value.replace(/\s*([AP])M\b/g, (_, period: string) => {
-            return `${period.toLowerCase()}m`
-        })
-    }, [])
-
-    const makeHistoryFormTitle = useCallback(
-        (user: User | UserProfile) => {
-            const name = makeTitle(user)
-            if (!selectedHistory) return name
-            return `${name} @ ${normalizeMeridiem(selectedHistory.historyWhenUpdatedUtc.toLocaleString())}`
-        },
-        [makeTitle, normalizeMeridiem, selectedHistory]
-    )
 
     const renderDonorItem = useCallback(
         (item: ActBlueDonor, userId: number) => {
@@ -799,13 +818,26 @@ export default function Page() {
                         setFormState={setFormState}
                         saving={updateMutation.isPending}
                         editing={formState?.mode === 'edit'}
+                        location={
+                            locationQuery.isPlaceholderData
+                                ? null
+                                : locationQuery.data
+                        }
+                        invalidZip={
+                            !locationQuery.isPending &&
+                            !locationQuery.isPlaceholderData &&
+                            locationQuery.data == null
+                                ? formState?.form?.address?.zip
+                                : null
+                        }
                         isInvalid={
                             formState?.form?.address?.zip != null &&
                             (locationQuery.data == null ||
-                                locationQuery.isPending)
+                                locationQuery.isPending ||
+                                locationQuery.isPlaceholderData)
                         }
                         roles={roles}
-                        roleOptions={roleOptions}
+                        positions={positionHierarchy.data?.positions ?? []}
                         makeFormTitle={() => makeTitle(userQuery.data)}
                         handleSave={handleSave}
                     />
@@ -833,16 +865,9 @@ export default function Page() {
             case 'history':
                 return (
                     <HistoryView
-                        selectedId={selectedId}
+                        key={selectedId}
                         user={userQuery.data}
-                        selectedHistory={selectedHistory}
-                        onSelectHistory={setSelectedHistory}
-                        selectedDonorHistory={selectedDonorHistory}
-                        onSelectDonorHistory={setSelectedDonorHistory}
                         isRefetching={userQuery.isRefetching}
-                        roles={roles}
-                        roleOptions={roleOptions}
-                        makeFormTitle={(u) => makeHistoryFormTitle(u)}
                     />
                 )
 
@@ -850,6 +875,50 @@ export default function Page() {
                 return null
         }
     }
+
+    const renderDetails = () => (
+        <div className={styles.detailsPane}>
+            <MobileSidebarBackButton
+                label="Members"
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                onBack={() => setSidebarMobileVisible(true)}
+                className={styles.backButton}
+            />
+
+            {selectedId == null && (
+                <div className={styles.emptyState}>No user selected</div>
+            )}
+
+            {selectedId != null && userQuery.isPending && (
+                <div className={styles.emptyState}>Loading user details...</div>
+            )}
+
+            {selectedId != null && userQuery.error && (
+                <div className={cn(styles.emptyState, styles.errorText)}>
+                    Error: {parseErrorMessage(userQuery.error)}
+                </div>
+            )}
+
+            {selectedId && userQuery.data && (
+                <>
+                    <div className={styles.detailsHeader}>
+                        <div className={styles.bannerCover} />
+                        <MemberBanner
+                            user={userQuery.data}
+                            makeTitle={makeTitle}
+                            selectedTab={selectedTab}
+                            tabs={tabs}
+                            onTabChange={(key) =>
+                                setSelectedTab(key as MemberTabKey)
+                            }
+                            positions={positionHierarchy.data?.positions}
+                        />
+                    </div>
+                    <div className={styles.detailsContent}>{renderPage()}</div>
+                </>
+            )}
+        </div>
+    )
 
     const sidebarFilters: SidebarListFiltersProps = {
         search,
@@ -859,6 +928,15 @@ export default function Page() {
         showSort: true,
         showLimit: true,
     }
+
+    const sidebarFooterProperties = () => ({
+        page: search.page ?? 0,
+        pageSize: search.limit ?? 25,
+        count: searchQuery.data?.count,
+        isPending: searchQuery.isPending,
+        onPageChange: (nextPage: number) =>
+            onSearch({ ...search, page: nextPage }),
+    })
 
     return (
         <Panel
@@ -876,14 +954,7 @@ export default function Page() {
             showScrollbar={false}
             sidebarList={{
                 search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: searchQuery.data?.count,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
+                footer: sidebarFooterProperties(),
                 filters: sidebarFilters,
             }}
             prominentHeaderButton={{
@@ -911,6 +982,7 @@ export default function Page() {
                             subtitle: user.discordUsers?.[0]?.username
                                 ? `@${user.discordUsers[0].username}`
                                 : 'NOT FOUND',
+                            labelPill: user.preferredPronouns?.trim() ?? '',
                             tagLabel:
                                 user.id === loggedInUser.data?.id
                                     ? 'You'
@@ -935,51 +1007,7 @@ export default function Page() {
                 </>
             }
         >
-            <div className={styles.detailsPane}>
-                <MobileSidebarBackButton
-                    label="Members"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                    className={styles.backButton}
-                />
-
-                {selectedId == null && (
-                    <div className={styles.emptyState}>No user selected</div>
-                )}
-
-                {selectedId != null && userQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading user details...
-                    </div>
-                )}
-
-                {selectedId != null && userQuery.error && (
-                    <div className={cn(styles.emptyState, styles.errorText)}>
-                        Error: {parseErrorMessage(userQuery.error)}
-                    </div>
-                )}
-
-                {selectedId && userQuery.data && (
-                    <>
-                        <div className={styles.detailsHeader}>
-                            <div className={styles.bannerCover} />
-                            <MemberBanner
-                                user={userQuery.data}
-                                makeTitle={makeTitle}
-                                selectedTab={selectedTab}
-                                tabs={tabs}
-                                onTabChange={(key) =>
-                                    setSelectedTab(key as MemberTabKey)
-                                }
-                                positions={positionHierarchy.data?.positions}
-                            />
-                        </div>
-                        <div className={styles.detailsContent}>
-                            {renderPage()}
-                        </div>
-                    </>
-                )}
-            </div>
+            {renderDetails()}
         </Panel>
     )
 }

@@ -7,6 +7,7 @@ import {
     TierHistoryMenu,
     AmountHistoryMenu,
 } from './components/TierHistoryMenu'
+import { MatchedUserMenu } from './components/UserMatch'
 import { MembershipTableOptions, useMemberDraft } from './hooks'
 import {
     hasAddressDraftChange,
@@ -15,6 +16,7 @@ import {
     matchesSearchQuery,
 } from './membership.helpers'
 import {
+    ChangeTarget,
     EditController,
     Member,
     MemberEdits,
@@ -22,7 +24,9 @@ import {
     MemberFlag,
     MembershipTier,
     MembershipSearchField,
+    MembershipSearchColumn,
     PackageShipped,
+    PendingUpdate,
 } from './membership.types'
 import {
     AddressEdit,
@@ -49,7 +53,6 @@ import {
 import styles from './page.module.css'
 import { Column, ColumnEntry } from '@/components/common/table'
 import { cn } from '@/util'
-import Link from 'next/link'
 import { ShirtSize } from 'pv-contracts/data'
 
 const monthAbbreviations = [
@@ -171,6 +174,7 @@ const flagColumn = (
     header: config.header,
     width: '5rem',
     allowOverflow: true,
+    skeleton: 'bool',
     sortValue: (m) => (m[config.key] ? 1 : 0),
     render: (m) => <BoolTag value={m[config.key]} />,
     renderEdit: (m) => <FlagEdit member={m} edit={edit} config={config} />,
@@ -178,12 +182,13 @@ const flagColumn = (
 })
 
 const readOnlyBoolColumn = (
-    key: 'eligibleForBenefits' | 'isMember',
+    key: 'eligibleForBenefits' | 'isMember' | 'isActive',
     header: string
 ): Column<Member> => ({
     key,
     header,
     width: '5rem',
+    skeleton: 'bool',
     sortValue: (m) => (m[key] ? 1 : 0),
     render: (m) => <BoolTag value={m[key]} />,
 })
@@ -225,7 +230,9 @@ const fulfillmentColumnConfigs: FlagColumnConfig[] = [
 
 const statusColumns: Column<Member>[] = [
     readOnlyBoolColumn('eligibleForBenefits', 'Eligible'),
-    readOnlyBoolColumn('isMember', 'Member'),
+    // # TODO Upon API being updated to include ActBlue Cancellations and Refunds Webhooks Remove Active Column and restore Members
+    // readOnlyBoolColumn('isMember', 'Member'),
+    readOnlyBoolColumn('isActive', 'Active'),
 ]
 
 const rowNumberColumn: Column<Member> = {
@@ -249,6 +256,54 @@ const isFullyFulfilled = (m: Member, requireConfirmations: boolean) =>
 
 export const FULFILLMENT_CATEGORY = 'Fulfillment'
 
+const changedFieldColumns: Partial<Record<string, string[]>> = {
+    firstName: ['name'],
+    lastName: ['name'],
+    email: ['email'],
+    phone: ['phone'],
+    address: ['address'],
+    shirtSize: ['shirtSize'],
+    nameConfirmed: ['nameConfirmed', FULFILLMENT_CATEGORY],
+    discordConfirmed: ['discordConfirmed', FULFILLMENT_CATEGORY],
+    addressConfirmed: ['addressConfirmed', FULFILLMENT_CATEGORY],
+    cardPrinted: ['cardPrinted', FULFILLMENT_CATEGORY],
+    labelPrinted: ['labelPrinted', FULFILLMENT_CATEGORY],
+    itemsPackaged: ['cardPacked', FULFILLMENT_CATEGORY],
+    benefitsShipped: ['benefitShipped', FULFILLMENT_CATEGORY],
+    membershipCardStatus: ['packageShipped', FULFILLMENT_CATEGORY],
+}
+
+export const changedColumnKeys = ({ user, membership }: PendingUpdate) =>
+    [...Object.keys(user ?? {}), ...Object.keys(membership ?? {})].flatMap(
+        (field) => changedFieldColumns[field] ?? []
+    )
+
+const highlightChanges = (
+    entries: ColumnEntry<Member>[],
+    target?: ChangeTarget | null
+): ColumnEntry<Member>[] => {
+    if (target == null) return entries
+
+    const highlight = (col: Column<Member>): Column<Member> =>
+        target.columnKeys.includes(col.key)
+            ? {
+                  ...col,
+                  cellClassName: (m, index) =>
+                      cn(
+                          col.cellClassName?.(m, index),
+                          m.donorEmail === target.donorEmail &&
+                              styles.nameCellMatch
+                      ),
+              }
+            : col
+
+    return entries.map((entry) =>
+        'columns' in entry
+            ? { ...entry, columns: entry.columns.map(highlight) }
+            : highlight(entry)
+    )
+}
+
 export interface BuildColumnsArgs {
     options: MembershipTableOptions
     isEditing: boolean
@@ -256,6 +311,7 @@ export interface BuildColumnsArgs {
     onMatchUser: (member: Member) => void
     searchQuery?: string
     searchField?: MembershipSearchField
+    changeTarget?: ChangeTarget | null
 }
 
 export const buildColumns = ({
@@ -264,250 +320,266 @@ export const buildColumns = ({
     edit,
     onMatchUser,
     searchQuery = '',
-    searchField = 'name',
+    searchField = 'all',
+    changeTarget,
 }: BuildColumnsArgs): ColumnEntry<Member>[] => {
     const { showConfirmed, showStatus, showRowNumber } = options
     const showFulfilledTag = options.showFulfilled && !isEditing
     const normalizedQuery = searchQuery.trim().toLowerCase()
-    const nameQuery = searchField === 'name' ? normalizedQuery : ''
-    const discordQuery = searchField === 'discord' ? normalizedQuery : ''
-    const emailQuery = searchField === 'email' ? normalizedQuery : ''
-    const matchesSearch = (m: Member) =>
-        matchesSearchQuery(m, normalizedQuery, searchField)
-    const searchCellClass = (field: MembershipSearchField) => (m: Member) =>
-        searchField === field && matchesSearch(m)
+    const queryFor = (field: MembershipSearchColumn) =>
+        [field, 'all'].includes(searchField) ? normalizedQuery : ''
+    const nameQuery = queryFor('name')
+    const discordQuery = queryFor('discord')
+    const emailQuery = queryFor('email')
+    const searchCellClass = (field: MembershipSearchColumn) => (m: Member) =>
+        matchesSearchQuery(m, queryFor(field), field)
             ? styles.nameCellMatch
             : undefined
 
-    return [
-        ...(showRowNumber ? [rowNumberColumn] : []),
-        ...(showStatus ? statusColumns : []),
-        {
-            key: 'membershipTier',
-            header: 'Tier',
-            width: '11rem',
-            allowOverflow: true,
-            sortValue: (m) => {
-                const tier = m.recurringSummary?.tier
-                return tier ? membershipTierRank[tier] : 0
-            },
-            menu: (m, { closeDropdown }) => (
-                <TierHistoryMenu member={m} closeDropdown={closeDropdown} />
-            ),
-            render: (m) => {
-                const tier = m.recurringSummary?.tier
-                return tier ? (
-                    <span
-                        className={cn(
-                            tags.tag,
-                            tags.tagTier,
-                            membershipTierClass[tier]
-                        )}
-                    >
-                        {tier}
-                    </span>
-                ) : (
-                    <span className={cn(tags.tag, tags.tagTier, tags.tagGhost)}>
-                        Not A Member
-                    </span>
-                )
-            },
-        },
-        {
-            key: FULFILLMENT_CATEGORY,
-            collapsedWidth: '6rem',
-            dotColor: statusDotColor,
-            rowRender: showFulfilledTag
-                ? (m) =>
-                      isFullyFulfilled(m, showConfirmed) ? (
-                          <span
-                              className={cn(
-                                  tags.tag,
-                                  tags.tagGreen,
-                                  tags.tagFulfilled
-                              )}
-                          >
-                              Benefits Fulfilled
-                          </span>
-                      ) : null
-                : undefined,
-            columns: [
-                ...(showConfirmed
-                    ? confirmedColumnConfigs.map((config) =>
-                          flagColumn(edit, config)
-                      )
-                    : []),
-                ...fulfillmentColumnConfigs.map((config) =>
-                    flagColumn(edit, config)
-                ),
-                {
-                    key: 'packageShipped',
-                    header: 'Package Shipped',
-                    width: '7rem',
-                    allowOverflow: true,
-                    sortValue: (m) => m.packageShipped ?? '',
-                    render: (m) => <PackageShippedValue member={m} />,
-                    renderEdit: (m) => (
-                        <PackageShippedEdit member={m} edit={edit} />
-                    ),
+    return highlightChanges(
+        [
+            ...(showRowNumber ? [rowNumberColumn] : []),
+            ...(showStatus ? statusColumns : []),
+            {
+                key: 'membershipTier',
+                header: 'Tier',
+                width: '11rem',
+                allowOverflow: true,
+                skeleton: 'tag',
+                sortValue: (m) => {
+                    const tier = m.recurringSummary?.tier
+                    return tier ? membershipTierRank[tier] : 0
                 },
-            ],
-        },
-        {
-            key: 'name',
-            header: 'Name',
-            width: '11rem',
-            allowOverflow: true,
-            sortValue: (m) => m.userName ?? m.donorName ?? '',
-            render: (m) => <NameValue member={m} searchQuery={nameQuery} />,
-            cellClassName: searchCellClass('name'),
-            renderEdit: (m) => <NameEdit member={m} edit={edit} />,
-            menu: (m, { closeDropdown }) => (
-                <NameMenu member={m} closeDropdown={closeDropdown} />
-            ),
-        },
-        {
-            key: 'discord',
-            header: 'Discord',
-            width: '11rem',
-            allowOverflow: true,
-            sortValue: (m) => m.discordUsername ?? '',
-            render: (m) => (
-                <DiscordValue member={m} searchQuery={discordQuery} />
-            ),
-            cellClassName: searchCellClass('discord'),
-            menu: (m, { closeDropdown }) => (
-                <DiscordMenu member={m} closeDropdown={closeDropdown} />
-            ),
-        },
-        {
-            key: 'address',
-            header: 'Address',
-            width: '40rem',
-            allowOverflow: true,
-            sortValue: (m) => m.userAddress ?? m.donorAddress ?? '',
-            render: (m) => <AddressValue member={m} />,
-            renderEdit: (m) => <AddressEdit member={m} edit={edit} />,
-            menu: (m, { closeDropdown }) => (
-                <AddressMenu member={m} closeDropdown={closeDropdown} />
-            ),
-        },
-        {
-            key: 'beganMembership',
-            header: 'Member Since',
-            sortValue: (m) => m.recurringSummary?.earliestLineitemDate ?? '',
-            render: (m) => {
-                const date = m.recurringSummary?.earliestLineitemDate
-                if (!date)
-                    return (
+                menu: (m, { closeDropdown }) => (
+                    <TierHistoryMenu member={m} closeDropdown={closeDropdown} />
+                ),
+                render: (m) => {
+                    const tier = m.recurringSummary?.tier
+                    return tier ? (
                         <span
                             className={cn(
                                 tags.tag,
-                                tags.tagWide,
+                                tags.tagTier,
+                                membershipTierClass[tier]
+                            )}
+                        >
+                            {tier}
+                        </span>
+                    ) : (
+                        <span
+                            className={cn(
+                                tags.tag,
+                                tags.tagTier,
                                 tags.tagGhost
                             )}
                         >
                             Not A Member
                         </span>
                     )
-                return (
-                    <span className={cn(tags.tag, tags.tagWide, tags.tagGray)}>
-                        {formatOrdinalDate(date)}
-                    </span>
-                )
+                },
             },
-        },
-        {
-            key: 'phone',
-            header: 'Phone',
-            width: '11rem',
-            allowOverflow: true,
-            sortValue: (m) => m.phone ?? '',
-            render: (m) => <PhoneValue member={m} />,
-            renderEdit: (m) => <PhoneEdit member={m} edit={edit} />,
-            menu: (m, { closeDropdown }) => (
-                <PhoneMenu member={m} closeDropdown={closeDropdown} />
-            ),
-        },
-        {
-            key: 'email',
-            header: 'Email',
-            width: '14rem',
-            allowOverflow: true,
-            sortValue: (m) => m.email ?? '',
-            render: (m) => <EmailValue member={m} searchQuery={emailQuery} />,
-            cellClassName: searchCellClass('email'),
-            renderEdit: (m) => <EmailEdit member={m} edit={edit} />,
-            menu: (m, { closeDropdown }) => (
-                <EmailMenu member={m} closeDropdown={closeDropdown} />
-            ),
-        },
-        {
-            key: 'shirtSize',
-            header: 'Shirt',
-            width: '5rem',
-            allowOverflow: true,
-            sortValue: (m) =>
-                m.shirtSize ? shirtSizeRank[m.shirtSize] : NO_SHIRT_SIZE_RANK,
-            render: (m) => <ShirtSizeValue member={m} />,
-            renderEdit: (m) => <ShirtSizeEdit member={m} edit={edit} />,
-        },
-        {
-            key: 'membershipAmount',
-            header: 'Amount',
-            width: '6rem',
-            allowOverflow: true,
-            sortValue: (m) => m.recurringSummary?.activeAmount ?? 0,
-            render: (m) => <AmountValue member={m} />,
-            menu: (m, { closeDropdown }) => (
-                <AmountHistoryMenu member={m} closeDropdown={closeDropdown} />
-            ),
-        },
-        {
-            key: 'totalAmount',
-            header: 'Total Amount',
-            width: '7rem',
-            sortValue: (m) => m.recurringSummary?.totalAmount ?? 0,
-            render: (m) => <TotalAmountValue member={m} />,
-        },
-        {
-            key: 'contributionsReal',
-            header: 'Contributions',
-            width: '6rem',
-            sortValue: (m) => m.recurringSummary?.monthsWithLineitems ?? 0,
-            render: (m) =>
-                (m.recurringSummary?.monthsWithLineitems ?? 0).toString(),
-            menu: (m, { closeDropdown }) => (
-                <ContributionsMenu
-                    member={m}
-                    closeDropdown={closeDropdown}
-                    onlyRecurring
-                />
-            ),
-        },
-        {
-            key: 'userMatched',
-            header: 'User Matched',
-            width: '5rem',
-            sortValue: (m) => (m.userMatched ? 1 : 0),
-            render: (m) =>
-                m.userId != null ? (
-                    <Link
-                        href={`/volunteer_dashboard/panels/members?userId=${m.userId}`}
-                        className={styles.userMatchedLink}
-                    >
-                        <BoolTag value={m.userMatched} />
-                    </Link>
-                ) : (
-                    <button
-                        type="button"
-                        className={styles.userMatchedLink}
-                        aria-label="Match user"
-                        onClick={() => onMatchUser(m)}
-                    >
-                        <BoolTag value={m.userMatched} />
-                    </button>
+            {
+                key: FULFILLMENT_CATEGORY,
+                collapsedWidth: '6rem',
+                dotColor: statusDotColor,
+                rowRender: showFulfilledTag
+                    ? (m) =>
+                          isFullyFulfilled(m, showConfirmed) ? (
+                              <span
+                                  className={cn(
+                                      tags.tag,
+                                      tags.tagGreen,
+                                      tags.tagFulfilled
+                                  )}
+                              >
+                                  Benefits Fulfilled
+                              </span>
+                          ) : null
+                    : undefined,
+                columns: [
+                    ...(showConfirmed
+                        ? confirmedColumnConfigs.map((config) =>
+                              flagColumn(edit, config)
+                          )
+                        : []),
+                    ...fulfillmentColumnConfigs.map((config) =>
+                        flagColumn(edit, config)
+                    ),
+                    {
+                        key: 'packageShipped',
+                        header: 'Package Shipped',
+                        width: '7rem',
+                        allowOverflow: true,
+                        skeleton: 'tag',
+                        sortValue: (m) => m.packageShipped ?? '',
+                        render: (m) => <PackageShippedValue member={m} />,
+                        renderEdit: (m) => (
+                            <PackageShippedEdit member={m} edit={edit} />
+                        ),
+                    },
+                ],
+            },
+            {
+                key: 'name',
+                header: 'Name',
+                width: '11rem',
+                allowOverflow: true,
+                sortValue: (m) => m.userName ?? m.donorName ?? '',
+                render: (m) => <NameValue member={m} searchQuery={nameQuery} />,
+                cellClassName: searchCellClass('name'),
+                renderEdit: (m) => <NameEdit member={m} edit={edit} />,
+                menu: (m, { closeDropdown }) => (
+                    <NameMenu member={m} closeDropdown={closeDropdown} />
                 ),
-        },
-    ]
+            },
+            {
+                key: 'discord',
+                header: 'Discord',
+                width: '11rem',
+                allowOverflow: true,
+                sortValue: (m) => m.discordUsername ?? '',
+                render: (m) => (
+                    <DiscordValue member={m} searchQuery={discordQuery} />
+                ),
+                cellClassName: searchCellClass('discord'),
+                menu: (m, { closeDropdown }) => (
+                    <DiscordMenu member={m} closeDropdown={closeDropdown} />
+                ),
+            },
+            {
+                key: 'address',
+                header: 'Address',
+                width: '40rem',
+                allowOverflow: true,
+                sortValue: (m) => m.userAddress ?? m.donorAddress ?? '',
+                render: (m) => <AddressValue member={m} />,
+                renderEdit: (m) => <AddressEdit member={m} edit={edit} />,
+                menu: (m, { closeDropdown }) => (
+                    <AddressMenu member={m} closeDropdown={closeDropdown} />
+                ),
+            },
+            {
+                key: 'beganMembership',
+                header: 'Member Since',
+                skeleton: 'tag',
+                sortValue: (m) =>
+                    m.recurringSummary?.earliestLineitemDate ?? '',
+                render: (m) => {
+                    const date = m.recurringSummary?.earliestLineitemDate
+                    if (!date)
+                        return (
+                            <span
+                                className={cn(
+                                    tags.tag,
+                                    tags.tagWide,
+                                    tags.tagGhost
+                                )}
+                            >
+                                Not A Member
+                            </span>
+                        )
+                    return (
+                        <span
+                            className={cn(tags.tag, tags.tagWide, tags.tagGray)}
+                        >
+                            {formatOrdinalDate(date)}
+                        </span>
+                    )
+                },
+            },
+            {
+                key: 'phone',
+                header: 'Phone',
+                width: '11rem',
+                allowOverflow: true,
+                sortValue: (m) => m.phone ?? '',
+                render: (m) => <PhoneValue member={m} />,
+                renderEdit: (m) => <PhoneEdit member={m} edit={edit} />,
+                menu: (m, { closeDropdown }) => (
+                    <PhoneMenu member={m} closeDropdown={closeDropdown} />
+                ),
+            },
+            {
+                key: 'email',
+                header: 'Email',
+                width: '14rem',
+                allowOverflow: true,
+                sortValue: (m) => m.email ?? '',
+                render: (m) => (
+                    <EmailValue member={m} searchQuery={emailQuery} />
+                ),
+                cellClassName: searchCellClass('email'),
+                renderEdit: (m) => <EmailEdit member={m} edit={edit} />,
+                menu: (m, { closeDropdown }) => (
+                    <EmailMenu member={m} closeDropdown={closeDropdown} />
+                ),
+            },
+            {
+                key: 'shirtSize',
+                header: 'Shirt',
+                width: '5rem',
+                allowOverflow: true,
+                skeleton: 'bool',
+                sortValue: (m) =>
+                    m.shirtSize
+                        ? shirtSizeRank[m.shirtSize]
+                        : NO_SHIRT_SIZE_RANK,
+                render: (m) => <ShirtSizeValue member={m} />,
+                renderEdit: (m) => <ShirtSizeEdit member={m} edit={edit} />,
+            },
+            {
+                key: 'membershipAmount',
+                header: 'Amount',
+                width: '6rem',
+                allowOverflow: true,
+                sortValue: (m) => m.recurringSummary?.activeAmount ?? 0,
+                render: (m) => <AmountValue member={m} />,
+                menu: (m, { closeDropdown }) => (
+                    <AmountHistoryMenu
+                        member={m}
+                        closeDropdown={closeDropdown}
+                    />
+                ),
+            },
+            {
+                key: 'totalAmount',
+                header: 'Total Amount',
+                width: '7rem',
+                sortValue: (m) => m.recurringSummary?.totalAmount ?? 0,
+                render: (m) => <TotalAmountValue member={m} />,
+            },
+            {
+                key: 'contributionsReal',
+                header: 'Contributions',
+                width: '6rem',
+                sortValue: (m) => m.recurringSummary?.monthsWithLineitems ?? 0,
+                render: (m) =>
+                    (m.recurringSummary?.monthsWithLineitems ?? 0).toString(),
+                menu: (m, { closeDropdown }) => (
+                    <ContributionsMenu
+                        member={m}
+                        closeDropdown={closeDropdown}
+                        onlyRecurring
+                    />
+                ),
+            },
+            {
+                key: 'userMatched',
+                header: 'User Matched',
+                width: '5rem',
+                skeleton: 'bool',
+                sortValue: (m) => (m.userMatched ? 1 : 0),
+                render: (m) => <BoolTag value={m.userMatched} />,
+                onCellClick: (m) => m.userId == null && onMatchUser(m),
+                menu: (m, { closeDropdown }) =>
+                    m.userId != null && (
+                        <MatchedUserMenu
+                            member={m}
+                            closeDropdown={closeDropdown}
+                        />
+                    ),
+            },
+        ],
+        changeTarget
+    )
 }
