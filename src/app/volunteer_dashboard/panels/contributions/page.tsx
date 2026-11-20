@@ -2,12 +2,7 @@
 
 import styles from './page.module.css'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
-import {
-    FormGroup,
-    TextField,
-    Form,
-    DateField,
-} from '@/components/common/forms'
+import { FormGroup, TextField, Form } from '@/components/common/forms'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
@@ -76,6 +71,15 @@ export default function Page() {
                       )
                 : skipToken,
         placeholderData: keepPreviousData,
+        select: (data) => {
+            return {
+                ...data,
+                paidAtFormatted: data.paidAt.toLocaleString('en-US', {
+                    dateStyle: 'long',
+                    timeStyle: 'medium',
+                }),
+            }
+        },
     })
 
     useEffect(() => {
@@ -207,7 +211,10 @@ export default function Page() {
                         <FormGroup title="Lineitem Info">
                             <TextField label="Lineitem Id" field="lineitemId" />
                             <TextField label="Sequence" field="sequence" />
-                            <DateField label="Paid At" field="paidAt" />
+                            <TextField
+                                label="Paid At"
+                                field="paidAtFormatted"
+                            />
                             <TextField label="Amount" field="amount" />
                             <TextField<ActBlueDonationPacket>
                                 label="Recurring Amount"
