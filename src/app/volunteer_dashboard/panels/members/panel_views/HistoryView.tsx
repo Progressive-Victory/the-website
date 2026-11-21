@@ -1,5 +1,6 @@
 'use client'
 
+import { UpdaterAvatar } from '../UpdaterAvatar'
 import styles from './HistoryView.module.css'
 import { List, ListRow, NavigationRow } from '@/components/common'
 import { BackButton } from '@/components/common/buttons'
@@ -276,7 +277,7 @@ function diffFields(after: object, before?: object) {
     })
 }
 
-function normalizeMeridiem(time: string) {
+export function normalizeMeridiem(time: string) {
     return time.replace(/\s*([AP])M\b/g, (_, period: string) => {
         return `${period.toLowerCase()}m`
     })
@@ -483,13 +484,16 @@ export function HistoryView({ user, isRefetching }: HistoryViewProps) {
     }
 
     const describeEntry = ({ whoId, source, changes }: HistoryEntry) => (
-        <>
-            <span className={styles.actor}>{updateLabel(whoId)}</span>
-            <span className={styles.description}>
-                {` ${[...changes].join(', ')}`}
-                {source && ` via ${source}`}
+        <span className={styles.entry}>
+            <UpdaterAvatar whoId={whoId} />
+            <span>
+                <span className={styles.actor}>{updateLabel(whoId)}</span>
+                <span className={styles.description}>
+                    {` ${[...changes].join(', ')}`}
+                    {source && ` via ${source}`}
+                </span>
             </span>
-        </>
+        </span>
     )
 
     if (isRefetching) return <HistoryMessage message="Refreshing…" />

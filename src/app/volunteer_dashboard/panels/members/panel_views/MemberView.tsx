@@ -1,5 +1,7 @@
 'use client'
 
+import * as Info from '../info'
+// import styles from '../page.module.css'
 import {
     AddList,
     AddressRow,
@@ -16,6 +18,8 @@ import {
 import { Form, FormState } from '@/components/common/forms'
 import { pronounOptionsWith } from '@/models'
 import { dateService } from '@/services'
+import { useFetch } from '@/util/hooks'
+import { skipToken, useQuery } from '@tanstack/react-query'
 import {
     Location,
     Position,
@@ -24,6 +28,8 @@ import {
     UpdateHistory,
     User,
 } from 'pv-contracts/data'
+import { zDiscordUserIsInServerResponse } from 'pv-contracts/responses'
+import type { ComponentType } from 'react'
 
 const shirtSizeOptions = [
     { value: '', label: 'None' },
@@ -113,6 +119,29 @@ export function MemberView({
         (selectedHistory ?? user).preferredPronouns
     )
 
+    const { ready, onGet } = useFetch()
+    const discordUserId = user.discordUsers?.[0]?.id ?? null
+    const isInServerQuery = useQuery({
+        queryKey: [`/discordUsers/${discordUserId}/isInServer`],
+        queryFn:
+            ready && discordUserId != null
+                ? ({ signal }) =>
+                      onGet(
+                          '/discordUsers/:discordUserId/isInServer',
+                          zDiscordUserIsInServerResponse,
+                          { params: { discordUserId }, signal }
+                      )
+                : skipToken,
+    })
+
+    const infoDetails = (
+        Details: ComponentType<Info.InfoProps>,
+        value?: string
+    ) =>
+        function InfoDetails({ closeDropdown }: { closeDropdown: () => void }) {
+            return <Details user={user} value={value} onSave={closeDropdown} />
+        }
+
     return (
         <Form<User>
             key={selectedId}
@@ -125,7 +154,7 @@ export function MemberView({
             onSave={handleSave}
         >
             <List title="Member Details">
-                <NameRow label="Name" />
+                <NameRow label="Name" details={infoDetails(Info.NameInfo)} />
                 <PickerRow
                     label="Pronouns"
                     getter={(form: User) => form.preferredPronouns ?? ''}
@@ -134,6 +163,7 @@ export function MemberView({
                         preferredPronouns: value ? String(value) : null,
                     })}
                     options={availablePronouns}
+                    details={infoDetails(Info.PronounsInfo)}
                 />
                 <ListBreak />
                 <TextRow
@@ -144,9 +174,20 @@ export function MemberView({
                             .join(', ')
                     }
                     readOnly
+                    details={infoDetails(Info.DiscordInfo)}
                 />
-                <PhoneRow label="Phone" field="phone" indicator="required" />
-                <TextRow label="Email" field="email" indicator="required" />
+                <PhoneRow
+                    label="Phone"
+                    field="phone"
+                    indicator="required"
+                    details={infoDetails(Info.PhoneInfo)}
+                />
+                <TextRow
+                    label="Email"
+                    field="email"
+                    indicator="required"
+                    details={infoDetails(Info.EmailInfo)}
+                />
                 <ListBreak />
                 <AddressRow
                     label="Address"
@@ -162,6 +203,7 @@ export function MemberView({
                     validator={(address) =>
                         !!address?.state?.trim() || address?.zip?.length === 5
                     }
+                    details={infoDetails(Info.AddressInfo)}
                 />
                 <ListBreak />
                 <DateRow
@@ -173,6 +215,7 @@ export function MemberView({
                         ...form,
                         birthdate: date,
                     })}
+                    details={infoDetails(Info.DateOfBirthInfo)}
                 />
                 <TextRow
                     label="Age"
@@ -182,6 +225,7 @@ export function MemberView({
                             : null
                     }
                     readOnly
+                    details={infoDetails(Info.AgeInfo)}
                 />
                 <ListBreak />
                 <DateRow
@@ -189,12 +233,14 @@ export function MemberView({
                     field="createdAtUtc"
                     dateFormat={accountDateFormat}
                     readOnly
+                    details={infoDetails(Info.AccountCreatedInfo)}
                 />
                 <ListBreak />
                 <MultiSelectRow
                     label="Aliases"
                     field="aliases"
                     indicator="unsupported"
+                    details={infoDetails(Info.AliasesInfo)}
                 />
             </List>
 
@@ -225,6 +271,11 @@ export function MemberView({
                     readOnly
                 />
                 <ListBreak />
+                <ToggleRow
+                    label="Currently In Server"
+                    value={isInServerQuery.data?.isInServer}
+                    readOnly
+                />
                 <DateRow
                     label="Joined Server"
                     field="joinedAtUtc"
@@ -316,7 +367,12 @@ export function MemberView({
                                 ? `${position.userIds.length} assigned`
                                 : `${position.userIds.length} of ${position.seats} seats filled`,
                     }))}
-                getter={(form: User) => (form.positions ?? []).map(toListItem)}
+                getter={(form: User) =>
+                    (form.positions ?? []).map((position) => ({
+                        ...toListItem(position),
+                        href: `/volunteer_dashboard/panels/positions?positionId=${position.id}`,
+                    }))
+                }
                 setter={(form: User, items) => ({
                     ...form,
                     positions: items

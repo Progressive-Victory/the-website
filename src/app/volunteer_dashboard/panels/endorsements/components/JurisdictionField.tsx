@@ -148,8 +148,8 @@ export function JurisdictionField({
             readOnly={rowProps.readOnly}
             value={jurisdiction}
             onValueChange={(next) => onValueChange(String(next))}
-            placeholder="Select jurisdiction"
-            triggerLabel={jurisdiction || 'Select jurisdiction'}
+            placeholder="Select"
+            triggerLabel={jurisdiction || 'Select'}
             onTriggerClick={syncToJurisdiction}
             validator={(next) =>
                 validator ? validator(String(next ?? '')) : true

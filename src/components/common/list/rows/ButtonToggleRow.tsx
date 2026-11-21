@@ -3,11 +3,12 @@
 import { ListRow, type ListRowBaseProps } from '../ListRow'
 import { useListField, type ListRowFieldProps } from '../useListField'
 import styles from './ButtonToggleRow.module.css'
+import type { ReactNode } from 'react'
 
 export interface ButtonToggleRowProps
     extends ListRowBaseProps, ListRowFieldProps<boolean> {
-    enableLabel?: string
-    disableLabel?: string
+    enableLabel?: ReactNode
+    disableLabel?: ReactNode
     enabledValueLabel?: string
     disabledValueLabel?: string
 }

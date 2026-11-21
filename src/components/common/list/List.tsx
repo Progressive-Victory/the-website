@@ -45,7 +45,9 @@ export interface ListProps {
     title?: ReactNode
     disclaimer?: string
     defaultCollapsed?: boolean
+    collapsible?: boolean
     editing?: boolean
+    loading?: boolean
     valueAlign?: ListRowValueAlign
     className?: string
     children?: ReactNode
@@ -57,7 +59,9 @@ export function List({
     title,
     disclaimer,
     defaultCollapsed,
+    collapsible = true,
     editing,
+    loading,
     valueAlign,
     className,
     children,
@@ -66,18 +70,20 @@ export function List({
     const parent = useContext(ListContext)
     const formState = dynamic ?? parent.formState
     const isEditing = editing ?? dynamic?.editing ?? parent.editing
+    const isLoading = loading ?? parent.loading
     const rowValueAlign = valueAlign ?? parent.valueAlign
     const context = useMemo(
         () => ({
             editing: isEditing,
+            loading: isLoading,
             valueAlign: rowValueAlign,
             formState,
         }),
-        [isEditing, rowValueAlign, formState]
+        [isEditing, isLoading, rowValueAlign, formState]
     )
     const { isOpen, shouldRender, contentHeight, contentRef, toggle } =
         useCollapse({
-            initialOpen: !defaultCollapsed,
+            initialOpen: !(collapsible && defaultCollapsed),
             animationMs: ANIMATION_MS + UNMOUNT_BUFFER_MS,
         })
     const [animating, setAnimating] = useState(false)
@@ -96,15 +102,17 @@ export function List({
             {title && (
                 <div className={styles.header}>
                     <h3 className={styles.title}>{title}</h3>
-                    <button
-                        type="button"
-                        className={styles.toggle}
-                        aria-expanded={isOpen}
-                        aria-label={isOpen ? 'Collapse' : 'Expand'}
-                        onClick={handleToggle}
-                    >
-                        <span className={styles.chevron} />
-                    </button>
+                    {collapsible && (
+                        <button
+                            type="button"
+                            className={styles.toggle}
+                            aria-expanded={isOpen}
+                            aria-label={isOpen ? 'Collapse' : 'Expand'}
+                            onClick={handleToggle}
+                        >
+                            <span className={styles.chevron} />
+                        </button>
+                    )}
                 </div>
             )}
             {shouldRender && (

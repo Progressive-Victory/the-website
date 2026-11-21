@@ -3,7 +3,8 @@
 import styles from './ImageWithFallback.module.css'
 import { cn } from '@/util'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useState, type CSSProperties } from 'react'
+import { FaUser } from 'react-icons/fa'
 
 export interface ImageWithFallbackProps {
     src: string
@@ -11,9 +12,12 @@ export interface ImageWithFallbackProps {
     width: number
     height: number
     useFallback?: boolean
+    pending?: boolean
+    skeletonDelay?: number
     className?: string
     loading?: 'lazy' | 'eager'
     priority?: boolean
+    onReady?: () => void
 }
 
 export function ImageWithFallback({
@@ -22,30 +26,57 @@ export function ImageWithFallback({
     width,
     height,
     useFallback = false,
+    pending = false,
+    skeletonDelay = 0,
     className,
     loading = 'lazy',
     priority = false,
+    onReady,
 }: ImageWithFallbackProps) {
-    const [hasErrored, setHasErrored] = useState(false)
-
-    useEffect(() => {
-        setHasErrored(false)
-    }, [src, useFallback])
+    const [erroredSrc, setErroredSrc] = useState<string>()
+    const [loadedSrc, setLoadedSrc] = useState<string>()
+    const showFallback = useFallback || erroredSrc === src
+    const showImage = !pending && !showFallback
+    const loaded = showImage && loadedSrc === src
 
     return (
-        <Image
-            src={
-                hasErrored || useFallback
-                    ? 'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
-                    : src
+        <span
+            role={showImage ? undefined : 'img'}
+            aria-label={showImage ? undefined : alt}
+            aria-busy={pending}
+            data-pending={pending}
+            data-loaded={loaded}
+            data-waiting={showImage && !loaded}
+            className={cn(styles.image, styles.fallback, className)}
+            style={
+                {
+                    width,
+                    height,
+                    '--skeleton-delay': `${skeletonDelay}ms`,
+                } as CSSProperties
             }
-            alt={alt}
-            width={width}
-            height={height}
-            className={cn(styles.image, className)}
-            onError={() => setHasErrored(true)}
-            loading={priority ? undefined : loading}
-            priority={priority}
-        />
+        >
+            <FaUser className={styles.fallbackIcon} />
+            {showImage && (
+                <Image
+                    key={src}
+                    src={src}
+                    alt={alt}
+                    width={width}
+                    height={height}
+                    className={styles.photo}
+                    onLoad={() => {
+                        setLoadedSrc(src)
+                        onReady?.()
+                    }}
+                    onError={() => {
+                        setErroredSrc(src)
+                        onReady?.()
+                    }}
+                    loading={priority ? undefined : loading}
+                    priority={priority}
+                />
+            )}
+        </span>
     )
 }

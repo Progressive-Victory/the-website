@@ -3,3 +3,111 @@
     object-fit: cover;
     border-radius: 9999px;
 }
+
+.fallback {
+    --avatar-ease: cubic-bezier(0.2, 0, 0, 1);
+    --avatar-reveal: 140ms;
+
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    max-width: 100%;
+    max-height: 100%;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(15, 23, 42, 0.08);
+
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(
+            135deg,
+            transparent 35%,
+            rgba(15, 23, 42, 0.06) 50%,
+            transparent 65%
+        );
+        background-size: 300% 300%;
+        animation: shimmer 1.4s ease-in-out infinite;
+        opacity: 0;
+        transition: opacity 100ms ease-out;
+    }
+
+    &[data-pending='true']::after {
+        opacity: 1;
+    }
+
+    &[data-waiting='true'] {
+        animation: revealSkeleton 0s var(--skeleton-delay, 0ms) backwards;
+
+        & .fallbackIcon {
+            animation: revealSkeletonIcon 0s var(--skeleton-delay, 0ms)
+                backwards;
+        }
+    }
+
+    &[data-loaded='true'] {
+        background-color: transparent;
+        transition: background-color 0s var(--avatar-reveal);
+
+        & .fallbackIcon {
+            visibility: hidden;
+            transition: visibility 0s var(--avatar-reveal);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &::after {
+            animation: none;
+        }
+    }
+}
+
+.fallbackIcon {
+    position: relative;
+    z-index: 1;
+    width: 55%;
+    height: 55%;
+    color: rgba(15, 23, 42, 0.16);
+}
+
+.photo {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity var(--avatar-reveal) var(--avatar-ease);
+
+    [data-loaded='true'] > & {
+        opacity: 1;
+    }
+}
+
+@keyframes revealSkeleton {
+    from {
+        background-color: transparent;
+    }
+}
+
+@keyframes revealSkeletonIcon {
+    from {
+        visibility: hidden;
+    }
+}
+
+@keyframes shimmer {
+    from {
+        background-position: 100% 100%;
+    }
+
+    to {
+        background-position: 0% 0%;
+    }
+}
