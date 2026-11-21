@@ -1,10 +1,10 @@
 'use client'
 
 import { NavItem, SubnavColumn } from '../types'
+import { PANEL_TRANSITION, itemVariants } from './headerAnimations'
 import { SubNavButton } from '@/components/common/buttons/button_types/SubNavButton'
 import styles from '@/components/layout/header.module.css'
 import { motion } from 'motion/react'
-import { PANEL_TRANSITION, itemVariants } from './headerAnimations'
 
 function MobileBackButton({ onClick }: { onClick: () => void }) {
     return (

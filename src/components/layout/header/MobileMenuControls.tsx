@@ -1,11 +1,11 @@
 'use client'
 
+import { HamburgerIcon } from './HamburgerIcon'
+import { menuButtonVariants } from './headerAnimations'
 import { DonateButton } from '@/components/common/buttons/button_types/DonateButton'
 import styles from '@/components/layout/header.module.css'
 import { cn } from '@/util'
 import { motion } from 'motion/react'
-import { HamburgerIcon } from './HamburgerIcon'
-import { menuButtonVariants } from './headerAnimations'
 
 interface MobileMenuControlsProps {
     isOpen: boolean
