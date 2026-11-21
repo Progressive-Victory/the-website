@@ -1,7 +1,7 @@
 'use client'
 
 import * as Info from '../info'
-import styles from '../page.module.css'
+// import styles from '../page.module.css'
 import {
     AddList,
     AddressRow,
