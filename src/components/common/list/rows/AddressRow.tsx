@@ -18,6 +18,7 @@ export interface ListRowAddress {
     county?: string | null
     state?: string | null
     zip?: string | null
+    country?: string | null
 }
 
 const ZIP_LENGTH = 5
@@ -32,13 +33,19 @@ const isAddressEmpty = (address?: ListRowAddress | null) =>
         address?.county,
         address?.state,
         address?.zip,
+        address?.country,
     ].some((part) => part?.trim())
 
 export function formatAddress(address?: ListRowAddress | null) {
     if (!address) return ''
     const stateZip = [address.state, address.zip].filter(Boolean).join('  ')
     const cityStateZip = [address.city, stateZip].filter(Boolean).join(', ')
-    return [address.addressLine1, address.addressLine2, cityStateZip]
+    return [
+        address.addressLine1,
+        address.addressLine2,
+        cityStateZip,
+        address.country,
+    ]
         .filter(Boolean)
         .join('\n')
 }
@@ -49,6 +56,7 @@ interface AddressEditorProps {
     onValueChange?: (value: ListRowAddress) => void
     location?: ZipLocation | null
     invalidZip?: string | null
+    showCountry: boolean
     onClearedCountyChange: (county: string) => void
 }
 
@@ -114,7 +122,7 @@ function getZipError(
 }
 
 interface AddressInputProps {
-    field: 'addressLine1' | 'addressLine2' | 'city'
+    field: 'addressLine1' | 'addressLine2' | 'city' | 'country'
     label: string
     autoComplete: string
     maxLength: number
@@ -208,6 +216,7 @@ function AddressEditor({
     onValueChange,
     location,
     invalidZip,
+    showCountry,
     onClearedCountyChange,
 }: AddressEditorProps) {
     const [cleared, setCleared] = useState<ListRowAddress>({})
@@ -387,6 +396,18 @@ function AddressEditor({
                     onValueChange={changeZip}
                 />
             </div>
+            {showCountry && (
+                <AddressInput
+                    field="country"
+                    label="Country"
+                    autoComplete="country-name"
+                    maxLength={60}
+                    value={value}
+                    cleared={cleared}
+                    partial={false}
+                    onValueChange={updateOther}
+                />
+            )}
         </div>
     )
 }
@@ -396,6 +417,7 @@ export interface AddressRowProps
     location?: ZipLocation | null
     invalidZip?: string | null
     showCounty?: boolean
+    showCountry?: boolean
 }
 
 export function AddressRow({
@@ -408,6 +430,7 @@ export function AddressRow({
     location,
     invalidZip,
     showCounty = false,
+    showCountry = false,
     labelAlign = 'top',
     className,
     ...rowProps
@@ -435,6 +458,7 @@ export function AddressRow({
                 {...rowProps}
                 invalid={invalid && isAddressEmpty(value)}
                 labelAlign={labelAlign}
+                skeletonLines={3}
                 className={cn(styles.row, className)}
                 value={
                     formattedAddress && (
@@ -450,6 +474,7 @@ export function AddressRow({
                         onValueChange={onValueChange}
                         location={location}
                         invalidZip={invalidZip}
+                        showCountry={showCountry}
                         onClearedCountyChange={setClearedCounty}
                     />
                 )}

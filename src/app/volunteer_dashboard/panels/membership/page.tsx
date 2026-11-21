@@ -9,6 +9,8 @@ import {
     BooleanTableOption,
     EligibilityFilter,
     MembershipTableOptions,
+    MatchedFilter,
+    TierFilter,
 } from './hooks'
 import { matchesSearchQuery } from './membership.helpers'
 import {
@@ -144,12 +146,35 @@ const eligibilityOptionRow: TableOptionRowConfig<EligibilityFilter> = {
 
 // # TODO Upon API being updated to include ActBlue Cancellations and Refunds Webhooks Replace Activity Toggle with a Members Toggle
 const activityOptionRow: TableOptionRowConfig<ActivityFilter> = {
-    label: 'Activity',
-    ariaLabel: 'Activity Filter',
+    label: 'Membership Status',
+    ariaLabel: 'Membership Status Filter',
     choices: [
         { value: 'both', label: 'Both' },
         { value: 'active', label: 'Active' },
         { value: 'inactive', label: 'Inactive' },
+    ],
+}
+
+const tierOptionRow: TableOptionRowConfig<TierFilter> = {
+    label: 'Tier',
+    ariaLabel: 'Tier Filter',
+    choices: [
+        { value: 'all', label: 'All' },
+        { value: 'Dues Paying Member', label: 'Dues' },
+        { value: 'Premium Member', label: 'Premium' },
+        { value: 'Signature Member', label: 'Signature' },
+        { value: 'Inner Circle Member', label: 'Inner Circle' },
+        { value: 'none', label: 'None' },
+    ],
+}
+
+const matchedOptionRow: TableOptionRowConfig<MatchedFilter> = {
+    label: 'User Matched',
+    ariaLabel: 'User Matched Filter',
+    choices: [
+        { value: 'both', label: 'Both' },
+        { value: 'matched', label: 'Matched' },
+        { value: 'unmatched', label: 'Unmatched' },
     ],
 }
 
@@ -247,15 +272,17 @@ interface TableOptionRowProps<T extends boolean | string> {
     config: TableOptionRowConfig<T>
     value: T
     onChange: (value: T) => void
+    className?: string
 }
 
 function TableOptionRow<T extends boolean | string>({
     config: { label, ariaLabel, choices },
     value,
     onChange,
+    className,
 }: TableOptionRowProps<T>) {
     return (
-        <div className={styles.tableOptionRow}>
+        <div className={cn(styles.tableOptionRow, className)}>
             <span className={styles.tableOptionLabel}>{label}</span>
             <ToggleGroup<T>
                 ariaLabel={ariaLabel}
@@ -329,6 +356,19 @@ function TableOptionsMenu({
                                 value={options.activity}
                                 onChange={(value) =>
                                     setOption('activity', value)
+                                }
+                            />
+                            <TableOptionRow
+                                config={tierOptionRow}
+                                value={options.tier}
+                                onChange={(value) => setOption('tier', value)}
+                                className={styles.tableOptionRowWide}
+                            />
+                            <TableOptionRow
+                                config={matchedOptionRow}
+                                value={options.matched}
+                                onChange={(value) =>
+                                    setOption('matched', value)
                                 }
                             />
                             {tableOptionRows.map((config) => (
@@ -454,14 +494,17 @@ export default function Page() {
 
     const visibleMembers = useMemo(
         () =>
-            options.activity === 'both'
-                ? members
-                : members.filter(
-                      (member) =>
-                          Boolean(member.isActive) ===
-                          (options.activity === 'active')
-                  ),
-        [members, options.activity]
+            members.filter((member) => {
+                const activity = member.isActive ? 'active' : 'inactive'
+                const tier = member.recurringSummary?.tier ?? 'none'
+                const matched = member.userMatched ? 'matched' : 'unmatched'
+                return (
+                    ['both', activity].includes(options.activity) &&
+                    ['all', tier].includes(options.tier) &&
+                    ['both', matched].includes(options.matched)
+                )
+            }),
+        [members, options.activity, options.tier, options.matched]
     )
 
     const matchCount = useMemo(
@@ -563,7 +606,9 @@ export default function Page() {
                         eligibleCount={eligibleMemberCount}
                         showingCount={visibleMembers.length}
                         totalCount={
-                            options.activity === 'both'
+                            options.activity === 'both' &&
+                            options.tier === 'all' &&
+                            options.matched === 'both'
                                 ? totalEntries
                                 : undefined
                         }

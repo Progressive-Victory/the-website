@@ -25,6 +25,12 @@
     font-weight: 600;
 }
 
+.entry {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
 .dateTag {
     position: relative;
     margin-left: auto;

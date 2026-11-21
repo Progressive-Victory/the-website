@@ -78,6 +78,21 @@
     background: rgba(14, 165, 233, 0.18);
 }
 
+.clearIcon {
+    display: none;
+    color: rgba(9, 34, 58, 0.88);
+}
+
+.button:hover .clearable {
+    & .checkIcon {
+        display: none;
+    }
+
+    & .clearIcon {
+        display: block;
+    }
+}
+
 .icon,
 .trailing {
     display: inline-flex;

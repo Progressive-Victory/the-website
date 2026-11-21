@@ -19,11 +19,59 @@
     &.editing {
         padding-block: 0;
     }
+
+    &:has(> .menuButton) {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+        column-gap: 0.5rem;
+
+        & > .label {
+            margin-right: 0.5rem;
+        }
+    }
+}
+
+.menuButton {
+    display: flex;
+    align-items: center;
+    margin-block: -0.5rem;
+}
+
+.menuTrigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -0.25rem;
+    padding: 0.25rem;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: rgba(15, 23, 42, 0.45);
+    cursor: pointer;
+    transition:
+        color 140ms ease,
+        opacity 140ms ease;
+
+    &:hover,
+    &[aria-expanded='true'] {
+        color: rgba(15, 23, 42, 0.85);
+    }
+
+    &:active {
+        opacity: 0.6;
+    }
 }
 
 .label {
     min-width: 0;
     overflow-wrap: anywhere;
+}
+
+.sublabel {
+    display: block;
+    margin-top: 0.1rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.5);
 }
 
 .required {
@@ -39,6 +87,65 @@
 .unsupported {
     margin-left: 0.25rem;
     color: #2986cc;
+}
+
+.indicator {
+    position: relative;
+    cursor: help;
+    outline: none;
+
+    &:hover .legend,
+    &:focus-visible .legend {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        transition:
+            opacity 120ms ease-out,
+            transform 120ms ease-out;
+    }
+}
+
+.legend {
+    position: absolute;
+    bottom: calc(100% + 0.4rem);
+    left: -0.6rem;
+    z-index: 30;
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 0.6rem;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.6);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(2px);
+    transition:
+        opacity 120ms ease-in,
+        transform 120ms ease-in,
+        visibility 0s 120ms;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.legendItemActive {
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.9);
+}
+
+.legendSymbol.legendSymbol {
+    min-width: 1rem;
+    margin-left: 0;
+    font-weight: 700;
 }
 
 .labelTop {
@@ -90,6 +197,11 @@
 
 .muted {
     color: rgba(15, 23, 42, 0.45);
+}
+
+.skeletonLines {
+    display: grid;
+    gap: 0.45rem;
 }
 
 .row.invalid .value :is(input, button[aria-expanded]) {

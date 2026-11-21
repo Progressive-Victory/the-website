@@ -15,7 +15,7 @@ import {
     useState,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { FiCheck, FiChevronRight } from 'react-icons/fi'
+import { FiCheck, FiChevronRight, FiX } from 'react-icons/fi'
 
 type DropdownOverlayButtonMenu =
     ReactNode | ((controls: { closeMenu: () => void }) => ReactNode)
@@ -29,6 +29,30 @@ export interface DropdownOverlayButtonProps extends ButtonHTMLAttributes<HTMLBut
         event: MouseEvent<HTMLButtonElement>
     ) => void
     menu?: DropdownOverlayButtonMenu
+    clearable?: boolean
+}
+
+function CheckmarkTrailing({
+    checked,
+    clearable,
+}: {
+    checked?: boolean
+    clearable: boolean
+}) {
+    return (
+        <span
+            className={cn(
+                styles.trailing,
+                clearable && checked && styles.clearable
+            )}
+            aria-hidden="true"
+        >
+            {checked && <FiCheck size={14} className={styles.checkIcon} />}
+            {clearable && checked && (
+                <FiX size={14} className={styles.clearIcon} />
+            )}
+        </span>
+    )
 }
 
 export function DropdownOverlayButton({
@@ -36,6 +60,7 @@ export function DropdownOverlayButton({
     selected,
     checked,
     menu,
+    clearable = false,
     className,
     children,
     onClick,
@@ -246,9 +271,10 @@ export function DropdownOverlayButton({
                     </span>
                 ) : (
                     hasCheckmark && (
-                        <span className={styles.trailing} aria-hidden="true">
-                            {checked && <FiCheck size={14} />}
-                        </span>
+                        <CheckmarkTrailing
+                            checked={checked}
+                            clearable={clearable}
+                        />
                     )
                 )}
             </button>
