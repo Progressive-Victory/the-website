@@ -10,6 +10,7 @@ import {
     FilterTag,
 } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
+import { ProtectedPage } from '@/components/ProtectedPage'
 import { DiscordAvatar } from '@/components/common'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
 import { FormState } from '@/components/common/forms'
@@ -20,7 +21,7 @@ import {
     type SidebarListFiltersProps,
 } from '@/components/common/panel/sidebar_list/SidebarList'
 import { TabSpec } from '@/components/common/tab_bar/TabBar'
-import { FetchError, stateOptions } from '@/models'
+import { FetchError, PermissionIds, stateOptions } from '@/models'
 import {
     useLinkDonorToUser,
     usePositionQueries,
@@ -939,75 +940,79 @@ export default function Page() {
     })
 
     return (
-        <Panel
-            includeSidebar
-            collapsedSidebarMode="compact"
-            sidebarTogglePlacement="header"
-            showSidebarFooterWhenCollapsed={false}
-            showSidebarBorderWhenCollapsed
-            largeTitle
-            sidebarWidth="25.5rem"
-            collapsedSidebarWidth="5rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-            label="Members"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: sidebarFooterProperties(),
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <IoEllipsisVertical size={20} />,
-                menu: () => <SidebarListFilters {...sidebarFilters} />,
-            }}
-            sidebarBody={
-                <>
-                    <div className={styles.filterTagsWrapper}>
-                        <FilterTags
-                            tags={memberFilterTags}
-                            activeTag={activeFilterTag}
-                            onChange={handleFilterTagChange}
+        <ProtectedPage requiredPermissions={[PermissionIds.VIEW_MEMBER_PANEL]}>
+            <Panel
+                includeSidebar
+                collapsedSidebarMode="compact"
+                sidebarTogglePlacement="header"
+                showSidebarFooterWhenCollapsed={false}
+                showSidebarBorderWhenCollapsed
+                largeTitle
+                sidebarWidth="25.5rem"
+                collapsedSidebarWidth="5rem"
+                sidebarClassName={styles.sidebarBg}
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                label="Members"
+                showScrollbar={false}
+                sidebarList={{
+                    search: { search, onSearch },
+                    footer: sidebarFooterProperties(),
+                    filters: sidebarFilters,
+                }}
+                prominentHeaderButton={{
+                    icon: <IoEllipsisVertical size={20} />,
+                    menu: () => <SidebarListFilters {...sidebarFilters} />,
+                }}
+                sidebarBody={
+                    <>
+                        <div className={styles.filterTagsWrapper}>
+                            <FilterTags
+                                tags={memberFilterTags}
+                                activeTag={activeFilterTag}
+                                onChange={handleFilterTagChange}
+                            />
+                        </div>
+                        <SidebarBody<User | UserProfile>
+                            items={users}
+                            pinnedItems={pinnedUsers}
+                            isLoading={searchQuery.isPending}
+                            error={searchQuery.error}
+                            selectedKey={selectedId}
+                            renderItem={(user) => ({
+                                key: user.id,
+                                label: makeTitle(user),
+                                subtitle: user.discordUsers?.[0]?.username
+                                    ? `@${user.discordUsers[0].username}`
+                                    : 'NOT FOUND',
+                                labelPill: user.preferredPronouns?.trim() ?? '',
+                                tagLabel:
+                                    user.id === loggedInUser.data?.id
+                                        ? 'You'
+                                        : undefined,
+                                icon: (
+                                    <DiscordAvatar
+                                        discordUserId={
+                                            user.discordUsers?.[0]?.id
+                                        }
+                                        imageId={user.discordUsers?.[0]?.image}
+                                        size={40}
+                                    />
+                                ),
+                                href: `/volunteer_dashboard/panels/members?userId=${user.id}`,
+                                onClick: (event) => {
+                                    event.preventDefault()
+                                    handleSelectItem(user)
+                                    if (!isDesktop) {
+                                        setSidebarMobileVisible(false)
+                                    }
+                                },
+                            })}
                         />
-                    </div>
-                    <SidebarBody<User | UserProfile>
-                        items={users}
-                        pinnedItems={pinnedUsers}
-                        isLoading={searchQuery.isPending}
-                        error={searchQuery.error}
-                        selectedKey={selectedId}
-                        renderItem={(user) => ({
-                            key: user.id,
-                            label: makeTitle(user),
-                            subtitle: user.discordUsers?.[0]?.username
-                                ? `@${user.discordUsers[0].username}`
-                                : 'NOT FOUND',
-                            labelPill: user.preferredPronouns?.trim() ?? '',
-                            tagLabel:
-                                user.id === loggedInUser.data?.id
-                                    ? 'You'
-                                    : undefined,
-                            icon: (
-                                <DiscordAvatar
-                                    discordUserId={user.discordUsers?.[0]?.id}
-                                    imageId={user.discordUsers?.[0]?.image}
-                                    size={40}
-                                />
-                            ),
-                            href: `/volunteer_dashboard/panels/members?userId=${user.id}`,
-                            onClick: (event) => {
-                                event.preventDefault()
-                                handleSelectItem(user)
-                                if (!isDesktop) {
-                                    setSidebarMobileVisible(false)
-                                }
-                            },
-                        })}
-                    />
-                </>
-            }
-        >
-            {renderDetails()}
-        </Panel>
+                    </>
+                }
+            >
+                {renderDetails()}
+            </Panel>
+        </ProtectedPage>
     )
 }

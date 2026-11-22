@@ -2,6 +2,7 @@
 
 import styles from './page.module.css'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
+import { ProtectedPage } from '@/components/ProtectedPage'
 import {
     FormState,
     Form,
@@ -16,6 +17,7 @@ import {
     SidebarListFilters,
     type SidebarListFiltersProps,
 } from '@/components/common/panel/sidebar_list/SidebarList'
+import { PermissionIds } from '@/models'
 import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
@@ -175,238 +177,260 @@ export default function Page() {
     }
 
     return (
-        <Panel
-            includeSidebar
-            largeTitle
-            sidebarWidth="24rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-            label="Donors"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: resultCount,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <IoEllipsisVertical size={20} />,
-                menu: () => <SidebarListFilters {...sidebarFilters} />,
-            }}
-            sidebarBody={
-                <SidebarBody<ActBlueDonor>
-                    items={donors}
-                    isLoading={searchQuery.isPending}
-                    error={searchQuery.error}
-                    selectedKey={selectedEmail}
-                    renderItem={(donor) => ({
-                        key: donor.email,
-                        label: makeTitle(donor),
-                        href: `/volunteer_dashboard/panels/donors?email=${donor.email}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            handleSelectItem(donor)
-                            if (!isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
-                        },
-                    })}
-                />
-            }
-        >
-            <div className={styles.detailPane}>
-                <MobileSidebarBackButton
-                    label="Donors"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                />
-                {selectedEmail == null && (
-                    <div className={styles.emptyState}>No donor selected</div>
-                )}
-                {selectedEmail && donorQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading donor details...
-                    </div>
-                )}
-                {selectedEmail && donorQuery.error && (
-                    <div className={cn(styles.emptyState, styles.errorState)}>
-                        Error: {parseErrorMessage(donorQuery.error)}
-                    </div>
-                )}
-                {selectedEmail && donorQuery.data && (
-                    <Form<ActBlueDonor>
-                        key={selectedEmail}
-                        form={donorQuery.data}
-                        title={makeTitle(donorQuery.data)}
-                        readonly={true}
-                        saving={false}
-                        isInvalid={false}
-                        onUpdate={setFormState}
-                        onSave={() => {
-                            return
-                        }}
-                    >
-                        <FormGroup title="Contact Info">
-                            <TextField
-                                label="First Name"
-                                field="firstname"
-                                required
-                            />
-                            <TextField
-                                label="Last Name"
-                                field="lastname"
-                                required
-                            />
-                            <TextField label="Email" field="email" readonly />
-                            <TextField label="Phone Number" field="phone" />
-                        </FormGroup>
-                        <FormGroup title="Address">
-                            <TextField label="Street Address" field="addr1" />
-                            <TextField label="City" field="city" />
-                            <TextField label="State" field="state" />
-                            <TextField label="Zip Code" field="zip" />
-                            <TextField label="Country" field="country" />
-                        </FormGroup>
-                        <FormGroup title="Employer Info">
-                            <TextField<ActBlueDonor>
-                                label="Employer Name"
-                                getter={(form) =>
-                                    form.employerData?.employer ?? 'N/A'
+        <ProtectedPage requiredPermissions={[PermissionIds.VIEW_DONORS_PANEL]}>
+            <Panel
+                includeSidebar
+                largeTitle
+                sidebarWidth="24rem"
+                sidebarClassName={styles.sidebarBg}
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                label="Donors"
+                showScrollbar={false}
+                sidebarList={{
+                    search: { search, onSearch },
+                    footer: {
+                        page: search.page ?? 0,
+                        pageSize: search.limit ?? 25,
+                        count: resultCount,
+                        isPending: searchQuery.isPending,
+                        onPageChange: (nextPage: number) =>
+                            onSearch({ ...search, page: nextPage }),
+                    },
+                    filters: sidebarFilters,
+                }}
+                prominentHeaderButton={{
+                    icon: <IoEllipsisVertical size={20} />,
+                    menu: () => <SidebarListFilters {...sidebarFilters} />,
+                }}
+                sidebarBody={
+                    <SidebarBody<ActBlueDonor>
+                        items={donors}
+                        isLoading={searchQuery.isPending}
+                        error={searchQuery.error}
+                        selectedKey={selectedEmail}
+                        renderItem={(donor) => ({
+                            key: donor.email,
+                            label: makeTitle(donor),
+                            href: `/volunteer_dashboard/panels/donors?email=${donor.email}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                handleSelectItem(donor)
+                                if (!isDesktop) {
+                                    setSidebarMobileVisible(false)
                                 }
-                            />
-                            <TextField<ActBlueDonor>
-                                label="Occupation"
-                                getter={(form) =>
-                                    form.employerData?.occupation ?? 'N/A'
-                                }
-                            />
-                            <TextField<ActBlueDonor>
-                                label="Employer Street Address"
-                                getter={(form) =>
-                                    form.employerData?.employerAddr1 ?? 'N/A'
-                                }
-                            />
-                            <TextField<ActBlueDonor>
-                                label="Employer City"
-                                getter={(form) =>
-                                    form.employerData?.employerCity ?? 'N/A'
-                                }
-                            />
-                            <TextField<ActBlueDonor>
-                                label="Employer State"
-                                getter={(form) =>
-                                    form.employerData?.employerState ?? 'N/A'
-                                }
-                            />
-                            <TextField<ActBlueDonor>
-                                label="Employer Zip Code"
-                                getter={(form) =>
-                                    `${form.employerData?.employerZip ?? 'N/A'}`
-                                }
-                            />
-                            <TextField<ActBlueDonor>
-                                label="Employer Country"
-                                getter={(form) =>
-                                    form.employerData?.employerCountry ?? 'N/A'
-                                }
-                            />
-                        </FormGroup>
-                        <FormGroup title="Contributions" wrapper>
-                            <FormGroup title="All Time Stats" subGroup>
-                                <TextField<ActBlueDonor>
-                                    label="Total Dollar Donations"
-                                    getter={() => `$${contributionData.total}`}
+                            },
+                        })}
+                    />
+                }
+            >
+                <div className={styles.detailPane}>
+                    <MobileSidebarBackButton
+                        label="Donors"
+                        sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                        onBack={() => setSidebarMobileVisible(true)}
+                    />
+                    {selectedEmail == null && (
+                        <div className={styles.emptyState}>
+                            No donor selected
+                        </div>
+                    )}
+                    {selectedEmail && donorQuery.isPending && (
+                        <div className={styles.emptyState}>
+                            Loading donor details...
+                        </div>
+                    )}
+                    {selectedEmail && donorQuery.error && (
+                        <div
+                            className={cn(styles.emptyState, styles.errorState)}
+                        >
+                            Error: {parseErrorMessage(donorQuery.error)}
+                        </div>
+                    )}
+                    {selectedEmail && donorQuery.data && (
+                        <Form<ActBlueDonor>
+                            key={selectedEmail}
+                            form={donorQuery.data}
+                            title={makeTitle(donorQuery.data)}
+                            readonly={true}
+                            saving={false}
+                            isInvalid={false}
+                            onUpdate={setFormState}
+                            onSave={() => {
+                                return
+                            }}
+                        >
+                            <FormGroup title="Contact Info">
+                                <TextField
+                                    label="First Name"
+                                    field="firstname"
+                                    required
                                 />
+                                <TextField
+                                    label="Last Name"
+                                    field="lastname"
+                                    required
+                                />
+                                <TextField
+                                    label="Email"
+                                    field="email"
+                                    readonly
+                                />
+                                <TextField label="Phone Number" field="phone" />
+                            </FormGroup>
+                            <FormGroup title="Address">
+                                <TextField
+                                    label="Street Address"
+                                    field="addr1"
+                                />
+                                <TextField label="City" field="city" />
+                                <TextField label="State" field="state" />
+                                <TextField label="Zip Code" field="zip" />
+                                <TextField label="Country" field="country" />
+                            </FormGroup>
+                            <FormGroup title="Employer Info">
                                 <TextField<ActBlueDonor>
-                                    label="Currently Has a Recurring Donation"
-                                    getter={() =>
-                                        `${contributionData.hasActiveRecurring}`
+                                    label="Employer Name"
+                                    getter={(form) =>
+                                        form.employerData?.employer ?? 'N/A'
                                     }
                                 />
                                 <TextField<ActBlueDonor>
-                                    label="Total Contributions"
-                                    getter={() =>
-                                        `${contributionData.lineitems.length}`
+                                    label="Occupation"
+                                    getter={(form) =>
+                                        form.employerData?.occupation ?? 'N/A'
+                                    }
+                                />
+                                <TextField<ActBlueDonor>
+                                    label="Employer Street Address"
+                                    getter={(form) =>
+                                        form.employerData?.employerAddr1 ??
+                                        'N/A'
+                                    }
+                                />
+                                <TextField<ActBlueDonor>
+                                    label="Employer City"
+                                    getter={(form) =>
+                                        form.employerData?.employerCity ?? 'N/A'
+                                    }
+                                />
+                                <TextField<ActBlueDonor>
+                                    label="Employer State"
+                                    getter={(form) =>
+                                        form.employerData?.employerState ??
+                                        'N/A'
+                                    }
+                                />
+                                <TextField<ActBlueDonor>
+                                    label="Employer Zip Code"
+                                    getter={(form) =>
+                                        `${form.employerData?.employerZip ?? 'N/A'}`
+                                    }
+                                />
+                                <TextField<ActBlueDonor>
+                                    label="Employer Country"
+                                    getter={(form) =>
+                                        form.employerData?.employerCountry ??
+                                        'N/A'
                                     }
                                 />
                             </FormGroup>
-                            {(contributionData.lineitems ?? []).map(
-                                (lineitem) => (
-                                    <FormGroup
-                                        title={`Donated $${lineitem.amount}`}
-                                        subtitle={formatLineitemDate(
-                                            lineitem.paidAt
-                                        )}
-                                        key={lineitem.lineitemId}
-                                        defaultCollapsed
-                                        subGroup
-                                    >
-                                        <DateField<ActBlueDonor>
-                                            label="Paid At"
-                                            getter={() => lineitem.paidAt}
-                                        />
-                                        <TextField<ActBlueDonor>
-                                            label="Sequence"
-                                            getter={() =>
-                                                `${lineitem.sequence}`
-                                            }
-                                        />
-                                        <TextField<ActBlueDonor>
-                                            label="Amount"
-                                            getter={() => `$${lineitem.amount}`}
-                                        />
-                                        <TextField<ActBlueDonor>
-                                            label="Recurring Amount"
-                                            getter={() =>
-                                                `$${lineitem.recurringAmount}`
-                                            }
-                                        />
-                                        <TextField<ActBlueDonor>
-                                            label="Amount Less AB Fees"
-                                            getter={() =>
-                                                `$${lineitem.amountLessAbFees}`
-                                            }
-                                        />
-                                        {contributionData.customFields?.map(
-                                            (customField) => (
-                                                <TextField
-                                                    key={customField.id}
-                                                    label={customField.label}
-                                                    getter={() =>
-                                                        customField.answer
-                                                    }
-                                                />
-                                            )
-                                        )}
-                                        <NavigationButton
-                                            className={
-                                                styles.detailsNavigationButton
-                                            }
-                                            href={`/volunteer_dashboard/panels/contributions?lineitemId=${lineitem.lineitemId}`}
-                                            label="Full Details"
-                                            trackPanelHistory
-                                            classNames={{
-                                                link: styles.detailsNavigationLink,
-                                                label: styles.detailsNavigationLabel,
-                                            }}
-                                            tag={{
-                                                className:
-                                                    styles.detailsNavigationTagSection,
-                                            }}
-                                        />
-                                    </FormGroup>
-                                )
-                            )}
-                        </FormGroup>
-                    </Form>
-                )}
-            </div>
-        </Panel>
+                            <FormGroup title="Contributions" wrapper>
+                                <FormGroup title="All Time Stats" subGroup>
+                                    <TextField<ActBlueDonor>
+                                        label="Total Dollar Donations"
+                                        getter={() =>
+                                            `$${contributionData.total}`
+                                        }
+                                    />
+                                    <TextField<ActBlueDonor>
+                                        label="Currently Has a Recurring Donation"
+                                        getter={() =>
+                                            `${contributionData.hasActiveRecurring}`
+                                        }
+                                    />
+                                    <TextField<ActBlueDonor>
+                                        label="Total Contributions"
+                                        getter={() =>
+                                            `${contributionData.lineitems.length}`
+                                        }
+                                    />
+                                </FormGroup>
+                                {(contributionData.lineitems ?? []).map(
+                                    (lineitem) => (
+                                        <FormGroup
+                                            title={`Donated $${lineitem.amount}`}
+                                            subtitle={formatLineitemDate(
+                                                lineitem.paidAt
+                                            )}
+                                            key={lineitem.lineitemId}
+                                            defaultCollapsed
+                                            subGroup
+                                        >
+                                            <DateField<ActBlueDonor>
+                                                label="Paid At"
+                                                getter={() => lineitem.paidAt}
+                                            />
+                                            <TextField<ActBlueDonor>
+                                                label="Sequence"
+                                                getter={() =>
+                                                    `${lineitem.sequence}`
+                                                }
+                                            />
+                                            <TextField<ActBlueDonor>
+                                                label="Amount"
+                                                getter={() =>
+                                                    `$${lineitem.amount}`
+                                                }
+                                            />
+                                            <TextField<ActBlueDonor>
+                                                label="Recurring Amount"
+                                                getter={() =>
+                                                    `$${lineitem.recurringAmount}`
+                                                }
+                                            />
+                                            <TextField<ActBlueDonor>
+                                                label="Amount Less AB Fees"
+                                                getter={() =>
+                                                    `$${lineitem.amountLessAbFees}`
+                                                }
+                                            />
+                                            {contributionData.customFields?.map(
+                                                (customField) => (
+                                                    <TextField
+                                                        key={customField.id}
+                                                        label={
+                                                            customField.label
+                                                        }
+                                                        getter={() =>
+                                                            customField.answer
+                                                        }
+                                                    />
+                                                )
+                                            )}
+                                            <NavigationButton
+                                                className={
+                                                    styles.detailsNavigationButton
+                                                }
+                                                href={`/volunteer_dashboard/panels/contributions?lineitemId=${lineitem.lineitemId}`}
+                                                label="Full Details"
+                                                trackPanelHistory
+                                                classNames={{
+                                                    link: styles.detailsNavigationLink,
+                                                    label: styles.detailsNavigationLabel,
+                                                }}
+                                                tag={{
+                                                    className:
+                                                        styles.detailsNavigationTagSection,
+                                                }}
+                                            />
+                                        </FormGroup>
+                                    )
+                                )}
+                            </FormGroup>
+                        </Form>
+                    )}
+                </div>
+            </Panel>
+        </ProtectedPage>
     )
 }

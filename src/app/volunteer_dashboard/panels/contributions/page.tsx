@@ -2,6 +2,7 @@
 
 import styles from './page.module.css'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
+import { ProtectedPage } from '@/components/ProtectedPage'
 import {
     FormGroup,
     TextField,
@@ -15,6 +16,7 @@ import {
     SidebarListFilters,
     type SidebarListFiltersProps,
 } from '@/components/common/panel/sidebar_list/SidebarList'
+import { PermissionIds } from '@/models'
 import { dateService } from '@/services'
 import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
@@ -119,170 +121,183 @@ export default function Page() {
     }
 
     return (
-        <Panel
-            includeSidebar
-            largeTitle
-            sidebarWidth="24rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-            label="Contributions"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: resultCount,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <IoEllipsisVertical size={20} />,
-                menu: () => <SidebarListFilters {...sidebarFilters} />,
-            }}
-            sidebarBody={
-                <SidebarBody<ActBlueDonationPacket>
-                    items={contributions}
-                    isLoading={searchQuery.isPending}
-                    error={searchQuery.error}
-                    selectedKey={selectedLineitemId}
-                    renderItem={(contribution) => ({
-                        key: contribution.lineitemId,
-                        label: makeTitle(contribution),
-                        subtitle: formatDate(contribution.paidAt),
-                        tagLabel: contribution.isRecurring
-                            ? 'Recurring'
-                            : undefined,
-                        href: `/volunteer_dashboard/panels/contributions?lineitemId=${contribution.lineitemId}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            setSelectedLineitemId(contribution.lineitemId)
-                            if (!isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
-                        },
-                    })}
-                />
-            }
+        <ProtectedPage
+            requiredPermissions={[PermissionIds.VIEW_CONTRIBUTIONS_PANEL]}
         >
-            <div className={styles.detailsPane}>
-                <MobileSidebarBackButton
-                    label="Contributions"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                />
-
-                {selectedLineitemId == null && (
-                    <div className={styles.emptyState}>
-                        No contribution selected
-                    </div>
-                )}
-
-                {selectedLineitemId != null && contributionQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading contribution details...
-                    </div>
-                )}
-
-                {selectedLineitemId != null && contributionQuery.error && (
-                    <div className={cn(styles.emptyState, styles.errorState)}>
-                        Error: {parseErrorMessage(contributionQuery.error)}
-                    </div>
-                )}
-
-                {selectedLineitemId != null && contributionQuery.data && (
-                    <Form<ActBlueDonationPacket>
-                        key={selectedLineitemId}
-                        form={contributionQuery.data}
-                        title={makeTitle(contributionQuery.data)}
-                        readonly={true}
-                        saving={false}
-                        isInvalid={false}
-                        onUpdate={() => undefined}
-                        onSave={() => undefined}
-                    >
-                        <FormGroup title="Lineitem Info">
-                            <TextField label="Lineitem Id" field="lineitemId" />
-                            <TextField label="Sequence" field="sequence" />
-                            <DateField label="Paid At" field="paidAt" />
-                            <TextField label="Amount" field="amount" />
-                            <TextField<ActBlueDonationPacket>
-                                label="Recurring Amount"
-                                getter={(form) =>
-                                    form.recurringAmount == null
-                                        ? 'N/A'
-                                        : `$${form.recurringAmount}`
+            <Panel
+                includeSidebar
+                largeTitle
+                sidebarWidth="24rem"
+                sidebarClassName={styles.sidebarBg}
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                label="Contributions"
+                showScrollbar={false}
+                sidebarList={{
+                    search: { search, onSearch },
+                    footer: {
+                        page: search.page ?? 0,
+                        pageSize: search.limit ?? 25,
+                        count: resultCount,
+                        isPending: searchQuery.isPending,
+                        onPageChange: (nextPage: number) =>
+                            onSearch({ ...search, page: nextPage }),
+                    },
+                    filters: sidebarFilters,
+                }}
+                prominentHeaderButton={{
+                    icon: <IoEllipsisVertical size={20} />,
+                    menu: () => <SidebarListFilters {...sidebarFilters} />,
+                }}
+                sidebarBody={
+                    <SidebarBody<ActBlueDonationPacket>
+                        items={contributions}
+                        isLoading={searchQuery.isPending}
+                        error={searchQuery.error}
+                        selectedKey={selectedLineitemId}
+                        renderItem={(contribution) => ({
+                            key: contribution.lineitemId,
+                            label: makeTitle(contribution),
+                            subtitle: formatDate(contribution.paidAt),
+                            tagLabel: contribution.isRecurring
+                                ? 'Recurring'
+                                : undefined,
+                            href: `/volunteer_dashboard/panels/contributions?lineitemId=${contribution.lineitemId}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                setSelectedLineitemId(contribution.lineitemId)
+                                if (!isDesktop) {
+                                    setSidebarMobileVisible(false)
                                 }
-                            />
-                            <TextField
-                                label="Amount Minus Ab Fees"
-                                field="amountLessAbFees"
-                            />
-                        </FormGroup>
-                        <FormGroup title="Contribution Info">
-                            <TextField
-                                label="Order Number"
-                                field="orderNumber"
-                            />
-                            <TextField<ActBlueDonationPacket>
-                                label="Is Paypal"
-                                getter={(form) => `${form.isPaypal}`}
-                            />
-                            <TextField<ActBlueDonationPacket>
-                                label="Is Mobile"
-                                getter={(form) => `${form.isMobile}`}
-                            />
-                            <TextField<ActBlueDonationPacket>
-                                label="Is Express"
-                                getter={(form) => `${form.isExpress}`}
-                            />
-                            <TextField<ActBlueDonationPacket>
-                                label="Is Recurring"
-                                getter={(form) => `${form.isRecurring}`}
-                            />
-                            <TextField
-                                label="Recurring Period"
-                                field="recurringPeriod"
-                            />
-                            <TextField
-                                label="Recurring Duration"
-                                field="recurringDuration"
-                            />
-                        </FormGroup>
-                        <FormGroup title="Donor Info">
-                            <TextField label="First Name" field="firstName" />
-                            <TextField label="Last Name" field="lastName" />
-                            <TextField label="State" field="state" />
-                            <TextField label="Email" field="email" />
-                            <NavigationButton
-                                className={styles.detailsNavigationButton}
-                                href={`/volunteer_dashboard/panels/donors?email=${encodeURIComponent(contributionQuery.data.email)}`}
-                                label="Full Details"
-                                trackPanelHistory
-                            />
-                        </FormGroup>
-                        <FormGroup title="Contribution Form">
-                            <TextField
-                                label="Form Name"
-                                field="contributionForm"
-                            />
-                            <TextField label="Form Kind" field="kind" />
-                            {contributionQuery.data?.customFields?.map(
-                                (field) => (
-                                    <TextField
-                                        key={field.id ?? field.label}
-                                        label={field.label}
-                                        getter={() => field.answer}
-                                    />
-                                )
-                            )}
-                        </FormGroup>
-                    </Form>
-                )}
-            </div>
-        </Panel>
+                            },
+                        })}
+                    />
+                }
+            >
+                <div className={styles.detailsPane}>
+                    <MobileSidebarBackButton
+                        label="Contributions"
+                        sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                        onBack={() => setSidebarMobileVisible(true)}
+                    />
+
+                    {selectedLineitemId == null && (
+                        <div className={styles.emptyState}>
+                            No contribution selected
+                        </div>
+                    )}
+
+                    {selectedLineitemId != null &&
+                        contributionQuery.isPending && (
+                            <div className={styles.emptyState}>
+                                Loading contribution details...
+                            </div>
+                        )}
+
+                    {selectedLineitemId != null && contributionQuery.error && (
+                        <div
+                            className={cn(styles.emptyState, styles.errorState)}
+                        >
+                            Error: {parseErrorMessage(contributionQuery.error)}
+                        </div>
+                    )}
+
+                    {selectedLineitemId != null && contributionQuery.data && (
+                        <Form<ActBlueDonationPacket>
+                            key={selectedLineitemId}
+                            form={contributionQuery.data}
+                            title={makeTitle(contributionQuery.data)}
+                            readonly={true}
+                            saving={false}
+                            isInvalid={false}
+                            onUpdate={() => undefined}
+                            onSave={() => undefined}
+                        >
+                            <FormGroup title="Lineitem Info">
+                                <TextField
+                                    label="Lineitem Id"
+                                    field="lineitemId"
+                                />
+                                <TextField label="Sequence" field="sequence" />
+                                <DateField label="Paid At" field="paidAt" />
+                                <TextField label="Amount" field="amount" />
+                                <TextField<ActBlueDonationPacket>
+                                    label="Recurring Amount"
+                                    getter={(form) =>
+                                        form.recurringAmount == null
+                                            ? 'N/A'
+                                            : `$${form.recurringAmount}`
+                                    }
+                                />
+                                <TextField
+                                    label="Amount Minus Ab Fees"
+                                    field="amountLessAbFees"
+                                />
+                            </FormGroup>
+                            <FormGroup title="Contribution Info">
+                                <TextField
+                                    label="Order Number"
+                                    field="orderNumber"
+                                />
+                                <TextField<ActBlueDonationPacket>
+                                    label="Is Paypal"
+                                    getter={(form) => `${form.isPaypal}`}
+                                />
+                                <TextField<ActBlueDonationPacket>
+                                    label="Is Mobile"
+                                    getter={(form) => `${form.isMobile}`}
+                                />
+                                <TextField<ActBlueDonationPacket>
+                                    label="Is Express"
+                                    getter={(form) => `${form.isExpress}`}
+                                />
+                                <TextField<ActBlueDonationPacket>
+                                    label="Is Recurring"
+                                    getter={(form) => `${form.isRecurring}`}
+                                />
+                                <TextField
+                                    label="Recurring Period"
+                                    field="recurringPeriod"
+                                />
+                                <TextField
+                                    label="Recurring Duration"
+                                    field="recurringDuration"
+                                />
+                            </FormGroup>
+                            <FormGroup title="Donor Info">
+                                <TextField
+                                    label="First Name"
+                                    field="firstName"
+                                />
+                                <TextField label="Last Name" field="lastName" />
+                                <TextField label="State" field="state" />
+                                <TextField label="Email" field="email" />
+                                <NavigationButton
+                                    className={styles.detailsNavigationButton}
+                                    href={`/volunteer_dashboard/panels/donors?email=${encodeURIComponent(contributionQuery.data.email)}`}
+                                    label="Full Details"
+                                    trackPanelHistory
+                                />
+                            </FormGroup>
+                            <FormGroup title="Contribution Form">
+                                <TextField
+                                    label="Form Name"
+                                    field="contributionForm"
+                                />
+                                <TextField label="Form Kind" field="kind" />
+                                {contributionQuery.data?.customFields?.map(
+                                    (field) => (
+                                        <TextField
+                                            key={field.id ?? field.label}
+                                            label={field.label}
+                                            getter={() => field.answer}
+                                        />
+                                    )
+                                )}
+                            </FormGroup>
+                        </Form>
+                    )}
+                </div>
+            </Panel>
+        </ProtectedPage>
     )
 }

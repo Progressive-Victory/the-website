@@ -10,6 +10,7 @@ import {
 } from './positions.utils'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
+import { ProtectedPage } from '@/components/ProtectedPage'
 import { Form, FormControls, FormState } from '@/components/common/forms'
 import {
     FormFieldProps,
@@ -28,6 +29,7 @@ import {
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { type SidebarListFiltersProps } from '@/components/common/panel/sidebar_list/SidebarList'
+import { PermissionIds } from '@/models'
 import { usePositionQueries } from '@/queries'
 import { parseErrorMessage } from '@/util'
 import {
@@ -265,138 +267,143 @@ export default function Page() {
         deleteMutation.isPending
 
     const renderWholePage = () => (
-        <Panel
-            includeSidebar
-            largeTitle
-            sidebarWidth="24rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-            label="Positions"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <FaRegPenToSquare size={20} />,
-                label: 'Create Position',
-                onClick: () => formControls.current?.create(),
-            }}
-            sidebarBody={
-                <SidebarBody<Position>
-                    items={positions}
-                    isLoading={positionHierarchy.isPending}
-                    error={positionHierarchy.error}
-                    selectedKey={selectedPosition?.id}
-                    renderItem={(position) => ({
-                        key: position.id,
-                        label: position.name,
-                        subtitle: positionTypeLabels[position.type],
-                        tagCount:
-                            position.type === PositionTypes.GROUP
-                                ? undefined
-                                : (position.seats ?? position.userIds.length),
-                        buttonType:
-                            position.type === PositionTypes.GROUP
-                                ? 'group'
-                                : 'default',
-                        children: position.childRelationships
-                            .map(({ id }) => positionById.get(id))
-                            .filter((child) => child != null)
-                            .sort((a, b) => a.name.localeCompare(b.name)),
-                        href: `/volunteer_dashboard/panels/positions?positionId=${position.id}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            const selected = handleSelectItem(position)
-                            if (selected && !isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
-                        },
-                    })}
-                />
-            }
+        <ProtectedPage
+            requiredPermissions={[PermissionIds.VIEW_POSITIONS_PANEL]}
         >
-            <div className={styles.detailPane}>
-                <MobileSidebarBackButton
-                    label="Positions"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                />
-                <Form<Position>
-                    key={selectedPosition?.id}
-                    form={selectedPosition}
-                    title={
-                        formState?.mode == 'create'
-                            ? 'New Position'
-                            : (selectedPosition?.name ?? 'Position')
-                    }
-                    saving={isSaving}
-                    onUpdate={setFormState}
-                    onSave={handleSave}
-                    onCreate={handleCreate}
-                    showCreateButton={false}
-                    controlsRef={formControls}
-                    onDelete={handleDelete}
-                >
-                    <List title="Details">
-                        <TextRow
-                            label="Name"
-                            field="name"
-                            indicator="required"
-                        />
-                        <DropdownRow
-                            label="Type"
-                            getter={(form: Position) => form.type}
-                            setter={(form: Position, value) => ({
-                                ...form,
-                                type: Number(value),
-                            })}
-                            options={positionTypeOptions}
-                        />
-                        <StepperRow
-                            label="Seats"
-                            field="seats"
-                            min={0}
-                            nullLabel="Uncapped"
-                            nullIcon={<FaInfinity aria-hidden="true" />}
-                            setter={(form: Position, value) => ({
-                                ...form,
-                                seats: value === 0 ? null : (value ?? null),
-                            })}
-                        />
-                    </List>
-                    {formState?.mode !== 'create' && selectedPosition && (
-                        <>
-                            {(seats == null || seats > 0) && (
-                                <OccupantsField
-                                    label="People"
-                                    field="userIds"
-                                    allUsers={
-                                        positionHierarchy.data?.users ?? []
-                                    }
-                                    userSearchQuery={userSearchQuery}
-                                    userSearch={userSearch}
-                                    onUserSearch={onUserSearch}
-                                />
-                            )}
-                            <SubordinatesField
-                                label="Subordinates"
-                                field="childRelationships"
-                                positionById={positionById}
-                                allPositions={
-                                    positionHierarchy.data?.positions ?? []
+            <Panel
+                includeSidebar
+                largeTitle
+                sidebarWidth="24rem"
+                sidebarClassName={styles.sidebarBg}
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                label="Positions"
+                showScrollbar={false}
+                sidebarList={{
+                    search: { search, onSearch },
+                    filters: sidebarFilters,
+                }}
+                prominentHeaderButton={{
+                    icon: <FaRegPenToSquare size={20} />,
+                    label: 'Create Position',
+                    onClick: () => formControls.current?.create(),
+                }}
+                sidebarBody={
+                    <SidebarBody<Position>
+                        items={positions}
+                        isLoading={positionHierarchy.isPending}
+                        error={positionHierarchy.error}
+                        selectedKey={selectedPosition?.id}
+                        renderItem={(position) => ({
+                            key: position.id,
+                            label: position.name,
+                            subtitle: positionTypeLabels[position.type],
+                            tagCount:
+                                position.type === PositionTypes.GROUP
+                                    ? undefined
+                                    : (position.seats ??
+                                      position.userIds.length),
+                            buttonType:
+                                position.type === PositionTypes.GROUP
+                                    ? 'group'
+                                    : 'default',
+                            children: position.childRelationships
+                                .map(({ id }) => positionById.get(id))
+                                .filter((child) => child != null)
+                                .sort((a, b) => a.name.localeCompare(b.name)),
+                            href: `/volunteer_dashboard/panels/positions?positionId=${position.id}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                const selected = handleSelectItem(position)
+                                if (selected && !isDesktop) {
+                                    setSidebarMobileVisible(false)
                                 }
-                                currentPositionId={selectedPosition.id}
-                                userMap={pageUserMap}
+                            },
+                        })}
+                    />
+                }
+            >
+                <div className={styles.detailPane}>
+                    <MobileSidebarBackButton
+                        label="Positions"
+                        sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                        onBack={() => setSidebarMobileVisible(true)}
+                    />
+                    <Form<Position>
+                        key={selectedPosition?.id}
+                        form={selectedPosition}
+                        title={
+                            formState?.mode == 'create'
+                                ? 'New Position'
+                                : (selectedPosition?.name ?? 'Position')
+                        }
+                        saving={isSaving}
+                        onUpdate={setFormState}
+                        onSave={handleSave}
+                        onCreate={handleCreate}
+                        showCreateButton={false}
+                        controlsRef={formControls}
+                        onDelete={handleDelete}
+                    >
+                        <List title="Details">
+                            <TextRow
+                                label="Name"
+                                field="name"
+                                indicator="required"
                             />
-                            <List title="Permissions">
-                                <PermissionRows />
-                            </List>
-                        </>
-                    )}
-                </Form>
-            </div>
-        </Panel>
+                            <DropdownRow
+                                label="Type"
+                                getter={(form: Position) => form.type}
+                                setter={(form: Position, value) => ({
+                                    ...form,
+                                    type: Number(value),
+                                })}
+                                options={positionTypeOptions}
+                            />
+                            <StepperRow
+                                label="Seats"
+                                field="seats"
+                                min={0}
+                                nullLabel="Uncapped"
+                                nullIcon={<FaInfinity aria-hidden="true" />}
+                                setter={(form: Position, value) => ({
+                                    ...form,
+                                    seats: value === 0 ? null : (value ?? null),
+                                })}
+                            />
+                        </List>
+                        {formState?.mode !== 'create' && selectedPosition && (
+                            <>
+                                {(seats == null || seats > 0) && (
+                                    <OccupantsField
+                                        label="People"
+                                        field="userIds"
+                                        allUsers={
+                                            positionHierarchy.data?.users ?? []
+                                        }
+                                        userSearchQuery={userSearchQuery}
+                                        userSearch={userSearch}
+                                        onUserSearch={onUserSearch}
+                                    />
+                                )}
+                                <SubordinatesField
+                                    label="Subordinates"
+                                    field="childRelationships"
+                                    positionById={positionById}
+                                    allPositions={
+                                        positionHierarchy.data?.positions ?? []
+                                    }
+                                    currentPositionId={selectedPosition.id}
+                                    userMap={pageUserMap}
+                                />
+                                <List title="Permissions">
+                                    <PermissionRows />
+                                </List>
+                            </>
+                        )}
+                    </Form>
+                </div>
+            </Panel>
+        </ProtectedPage>
     )
 
     return renderWholePage()
