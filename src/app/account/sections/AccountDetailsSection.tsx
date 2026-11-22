@@ -379,13 +379,17 @@ export function AccountDetailsSection({
         if (showLinkForm) return renderLinkPanel()
         return (
             <>
-                {renderMembershipCta()}
-                <div className={styles.cardColumnInner}>
-                    <InteractiveThreeCard
-                        dynamic
-                        backImage="/images/membercard_back.png"
-                    />
-                </div>
+                {userHasDonor && hasActiveRecurringContribution ? null : (
+                    <>
+                        {renderMembershipCta()}
+                        <div className={styles.cardColumnInner}>
+                            <InteractiveThreeCard
+                                dynamic
+                                backImage="/images/membercard_back.png"
+                            />
+                        </div>
+                    </>
+                )}
                 {userHasDonor ? renderMembershipStatus() : renderConnectCta()}
             </>
         )
