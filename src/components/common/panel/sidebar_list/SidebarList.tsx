@@ -1,13 +1,20 @@
 import styles from './SidebarList.module.css'
 import {
-    MultiSelect,
+    DropdownOverlayButton,
     SearchBar,
     type MultiSelectOption,
     type SearchBarFilterContent,
 } from '@/components/common'
 import { cn } from '@/util'
 import { type SearchRequest, SortDirection } from 'pv-contracts/requests'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import {
+    FaArrowDownWideShort,
+    FaArrowsUpDown,
+    FaFilter,
+    FaListUl,
+    FaMagnifyingGlass,
+} from 'react-icons/fa6'
 import {
     FiChevronLeft,
     FiChevronRight,
@@ -101,104 +108,164 @@ export function SidebarListFilters({
     }
 
     return (
-        <div className={styles.controls}>
-            {searchFieldOptions && searchFieldOptions.length > 0 && (
-                <label className={styles.select}>
-                    <span>Search Field:</span>
-                    <select
-                        defaultValue={searchField ?? 'all'}
-                        onChange={(event) => {
-                            const value = event.target.value
+        <div className={styles.filterMenu}>
+            {!!searchFieldOptions?.length && (
+                <FilterSubmenu
+                    label="Search"
+                    icon={<FaMagnifyingGlass />}
+                    active={false}
+                    valueSet={searchField != null}
+                    items={searchFieldOptions.map((option) => ({
+                        key: option.value,
+                        label: option.label,
+                        checked: searchField === option.value,
+                        clearable: true,
+                        onSelect: () =>
                             handleChangeSearchField(
-                                value === 'all' ? undefined : value
-                            )
-                        }}
-                    >
-                        <option value="all">All</option>
-                        {searchFieldOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
-                </label>
+                                searchField === option.value
+                                    ? undefined
+                                    : option.value
+                            ),
+                    }))}
+                />
             )}
 
-            {sortFieldOptions && sortFieldOptions.length > 0 && (
-                <label className={styles.select}>
-                    <span>Sort Field:</span>
-                    <select
-                        defaultValue={sortField ?? 'all'}
-                        onChange={(event) => {
-                            const value = event.target.value
+            {!!sortFieldOptions?.length && (
+                <FilterSubmenu
+                    label="Sort"
+                    icon={<FaArrowDownWideShort />}
+                    active={false}
+                    valueSet={sortField != null}
+                    items={sortFieldOptions.map((option) => ({
+                        key: option.value,
+                        label: option.label,
+                        checked: sortField === option.value,
+                        clearable: true,
+                        onSelect: () =>
                             handleChangeSortField(
-                                value === 'all' ? undefined : value
-                            )
-                        }}
-                    >
-                        <option value="all">All</option>
-                        {sortFieldOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-            )}
-
-            {showLimit && (
-                <label className={styles.select}>
-                    <span>Items:</span>
-                    <select
-                        defaultValue={limit ?? 25}
-                        onChange={(event) =>
-                            handleChangeLimit(+event.target.value)
-                        }
-                    >
-                        {limitOptions.map((option) => (
-                            <option key={option} value={option}>
-                                {option}
-                            </option>
-                        ))}
-                    </select>
-                </label>
+                                sortField === option.value
+                                    ? undefined
+                                    : option.value
+                            ),
+                    }))}
+                />
             )}
 
             {showSort && (
-                <label className={styles.select}>
-                    <span>Sort:</span>
-                    <select
-                        defaultValue={sort ?? SortDirection.DESC}
-                        onChange={(event) =>
-                            handleChangeSort(
-                                event.target.value as SortDirection
-                            )
-                        }
-                    >
-                        <option value={SortDirection.DESC}>Descending</option>
-                        <option value={SortDirection.ASC}>Ascending</option>
-                    </select>
-                </label>
+                <FilterSubmenu
+                    label={
+                        sort === SortDirection.ASC ? 'Ascending' : 'Descending'
+                    }
+                    icon={<FaArrowsUpDown />}
+                    active={false}
+                    items={[
+                        { direction: SortDirection.ASC, label: 'Ascending' },
+                        { direction: SortDirection.DESC, label: 'Descending' },
+                    ].map(({ direction, label }) => ({
+                        key: direction,
+                        label,
+                        checked: (sort ?? SortDirection.DESC) === direction,
+                        onSelect: () => handleChangeSort(direction),
+                    }))}
+                />
             )}
 
-            {options.map((option) => (
-                <div key={option.label} className={styles.filterSelect}>
-                    <strong>{option.label}:</strong>
-                    <MultiSelect
-                        name={option.label}
-                        options={option.options}
-                        selected={
-                            ((activeFilters as Record<string, unknown>)[
-                                option.value
-                            ] as (string | number)[]) ?? []
-                        }
-                        onUpdate={(selected) =>
-                            handleChangeFilter(option.value, selected)
-                        }
+            {showLimit && (
+                <FilterSubmenu
+                    label={`${limit ?? 25} per page`}
+                    icon={<FaListUl />}
+                    active={false}
+                    items={limitOptions.map((option) => ({
+                        key: String(option),
+                        label: `${option} per page`,
+                        checked: (limit ?? 25) === option,
+                        onSelect: () => handleChangeLimit(option),
+                    }))}
+                />
+            )}
+
+            {options.map((option) => {
+                const selected =
+                    ((activeFilters as Record<string, unknown>)[
+                        option.value
+                    ] as (string | number)[] | undefined) ?? []
+
+                return (
+                    <FilterSubmenu
+                        key={option.value}
+                        label={option.label}
+                        icon={<FaFilter />}
+                        active={selected.length > 0}
+                        keepOpen
+                        items={option.options.map((item) => ({
+                            key: String(item.value),
+                            label: item.label,
+                            checked: selected.includes(item.value),
+                            onSelect: () =>
+                                handleChangeFilter(
+                                    option.value,
+                                    selected.includes(item.value)
+                                        ? selected.filter(
+                                              (value) => value !== item.value
+                                          )
+                                        : [...selected, item.value]
+                                ),
+                        }))}
                     />
-                </div>
-            ))}
+                )
+            })}
         </div>
+    )
+}
+
+interface FilterSubmenuItem {
+    key: string
+    label: ReactNode
+    checked: boolean
+    clearable?: boolean
+    onSelect: () => void
+}
+
+function FilterSubmenu({
+    label,
+    icon,
+    active,
+    items,
+    keepOpen = false,
+    valueSet = false,
+}: {
+    label: ReactNode
+    icon: ReactNode
+    active: boolean
+    items: FilterSubmenuItem[]
+    keepOpen?: boolean
+    valueSet?: boolean
+}) {
+    return (
+        <DropdownOverlayButton
+            icon={icon}
+            selected={active}
+            className={cn(valueSet && styles.filterValueSet)}
+            menu={({ closeMenu }) => (
+                <div className={styles.filterMenu}>
+                    {items.map((item) => (
+                        <DropdownOverlayButton
+                            key={item.key}
+                            checked={item.checked}
+                            clearable={item.clearable}
+                            onCheckedChange={() => {
+                                item.onSelect()
+                                if (!keepOpen) closeMenu()
+                            }}
+                        >
+                            {item.label}
+                        </DropdownOverlayButton>
+                    ))}
+                </div>
+            )}
+        >
+            {label}
+        </DropdownOverlayButton>
     )
 }
 

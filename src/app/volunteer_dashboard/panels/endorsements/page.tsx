@@ -13,7 +13,7 @@ import { FormControls, FormState } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { type SidebarListFiltersProps } from '@/components/common/panel/sidebar_list/SidebarList'
-import { TabSpec } from '@/components/common/tab_bar/TabBar'
+import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ENDORSEMENT_TYPE_LABELS,
     INITIATIVE_TYPE_LABELS,
@@ -330,11 +330,15 @@ export default function Page() {
                     formState?.mode === 'edit' || formState?.mode === 'create'
                 }
                 saving={createMutation.isPending || updateMutation.isPending}
-                containerClassName={styles.detailsHeader}
-                coverClassName={styles.bannerCover}
-                selectedTab={selectedTab}
-                tabs={endorsementTabs}
-                onTabChange={(key) => setSelectedTab(key as EndorsementTabKey)}
+                tabBar={
+                    <TabBar
+                        tabs={endorsementTabs}
+                        value={selectedTab}
+                        onChange={(key) =>
+                            setSelectedTab(key as EndorsementTabKey)
+                        }
+                    />
+                }
             />
         ) : undefined
 
@@ -416,6 +420,7 @@ export default function Page() {
                                         endorsement={item}
                                         size={40}
                                         badgeTooltipPosition="bottom"
+                                        skeletonDelay={1000}
                                         className={styles.listAvatar}
                                     />
                                 ),

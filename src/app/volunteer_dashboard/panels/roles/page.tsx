@@ -4,13 +4,13 @@ import styles from './page.module.css'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { ProtectedPage } from '@/components/ProtectedPage'
 import { MultiSelectOption } from '@/components/common'
+import { Form, FormState } from '@/components/common/forms'
 import {
-    Form,
-    FormGroup,
-    FormState,
-    SelectManyField,
-    TextField,
-} from '@/components/common/forms'
+    AddListEmptyRow,
+    List,
+    TextRow,
+    ToggleRow,
+} from '@/components/common/list'
 import Panel from '@/components/common/panel/Panel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import {
@@ -27,7 +27,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { Role, zPermission, zRole } from 'pv-contracts/data'
+import { Permission, Role, zPermission, zRole } from 'pv-contracts/data'
 import { SortDirection, UpdateRoleRequest } from 'pv-contracts/requests'
 import { PaginatedResponse } from 'pv-contracts/responses'
 import { useMemo, useState } from 'react'
@@ -269,30 +269,20 @@ export default function Page() {
                             onUpdate={setFormState}
                             onSave={handleSave}
                         >
-                            <FormGroup title="Details">
-                                <TextField label="Name" field="name" required />
-                                <SelectManyField<Role>
-                                    label="Permissions"
-                                    options={permissionOptions}
-                                    getter={(form) =>
-                                        (form.permissions ?? []).map(
-                                            (permission) => permission.id
-                                        )
-                                    }
-                                    setter={(form, field) => ({
-                                        ...form,
-                                        permissions:
-                                            field != null
-                                                ? permissions.filter(
-                                                      (permission) =>
-                                                          field.includes(
-                                                              permission.id
-                                                          )
-                                                  )
-                                                : form.permissions,
-                                    })}
+                            <List title="Details">
+                                <TextRow
+                                    label="Name"
+                                    field="name"
+                                    indicator="required"
                                 />
-                            </FormGroup>
+                            </List>
+                            <List title="Permissions">
+                                <PermissionRows
+                                    permissions={permissions}
+                                    isPending={permissionsQuery.isPending}
+                                    error={permissionsQuery.error}
+                                />
+                            </List>
                         </Form>
                     ) : (
                         <div className={styles.emptyState}>
@@ -309,4 +299,48 @@ interface FilterOption {
     value: string
     label: string
     options: MultiSelectOption[]
+}
+
+function PermissionRows({
+    permissions,
+    isPending,
+    error,
+}: {
+    permissions: Permission[]
+    isPending: boolean
+    error: Error | null
+}) {
+    if (isPending)
+        return <AddListEmptyRow>Loading permissions...</AddListEmptyRow>
+    if (error)
+        return (
+            <AddListEmptyRow>
+                <span role="alert">Error: {parseErrorMessage(error)}</span>
+            </AddListEmptyRow>
+        )
+    if (permissions.length === 0)
+        return <AddListEmptyRow>No permissions</AddListEmptyRow>
+
+    return permissions
+        .toSorted((a, b) => a.id - b.id)
+        .map((permission) => (
+            <ToggleRow
+                key={permission.id}
+                label={permission.name}
+                getter={(form: Role) =>
+                    (form.permissions ?? []).some(
+                        (assigned) => assigned.id === permission.id
+                    )
+                }
+                setter={(form: Role, checked) => {
+                    const others = (form.permissions ?? []).filter(
+                        (assigned) => assigned.id !== permission.id
+                    )
+                    return {
+                        ...form,
+                        permissions: checked ? [...others, permission] : others,
+                    }
+                }}
+            />
+        ))
 }

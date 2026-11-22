@@ -20,6 +20,7 @@ export interface ListFormState {
 
 export interface ListContextValue {
     editing: boolean
+    loading?: boolean
     valueAlign?: ListRowValueAlign
     formState?: ListFormState
 }
@@ -29,6 +30,10 @@ export const ListContext = createContext<ListContextValue>({ editing: false })
 export function useListEditing(override?: boolean) {
     const { editing } = useContext(ListContext)
     return override ?? editing
+}
+
+export function useListLoading() {
+    return useContext(ListContext).loading ?? false
 }
 
 export function useListValueAlign(override?: ListRowValueAlign) {
