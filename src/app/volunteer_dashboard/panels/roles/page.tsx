@@ -3,20 +3,21 @@
 import styles from './page.module.css'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { MultiSelectOption } from '@/components/common'
+import { Form, FormState } from '@/components/common/forms'
 import {
-    Form,
-    FormGroup,
-    FormState,
-    SelectManyField,
-    TextField,
-} from '@/components/common/forms'
+    AddListEmptyRow,
+    List,
+    TextRow,
+    ToggleRow,
+} from '@/components/common/list'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import {
     SidebarListFilters,
     type SidebarListFiltersProps,
 } from '@/components/common/panel/sidebar_list/SidebarList'
-import { FetchError } from '@/models'
+import { FetchError, PermissionIds } from '@/models'
 import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
@@ -26,7 +27,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query'
-import { Role, zPermission, zRole } from 'pv-contracts/data'
+import { Permission, Role, zPermission, zRole } from 'pv-contracts/data'
 import { SortDirection, UpdateRoleRequest } from 'pv-contracts/requests'
 import { PaginatedResponse } from 'pv-contracts/responses'
 import { useMemo, useState } from 'react'
@@ -190,106 +191,110 @@ export default function Page() {
     }
 
     return (
-        <Panel
-            includeSidebar
-            largeTitle
-            sidebarWidth="24rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+        <ProtectedPanel
             label="Roles"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: resultCount,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <IoEllipsisVertical size={20} />,
-                menu: () => <SidebarListFilters {...sidebarFilters} />,
-            }}
-            sidebarBody={
-                <SidebarBody<Role>
-                    items={roles}
-                    isLoading={searchQuery.isPending}
-                    error={searchQuery.error}
-                    selectedKey={selectedId}
-                    renderItem={(role) => ({
-                        key: role.id,
-                        label: role.name,
-                        href: `/volunteer_dashboard/panels/roles?roleId=${role.id}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            handleSelectItem(role)
-                            if (!isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
-                        },
-                    })}
-                />
-            }
+            requiredPermissions={[PermissionIds.VIEW_ROLES_PANEL]}
         >
-            <div className={styles.detailPane}>
-                <MobileSidebarBackButton
-                    label="Roles"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                />
-                {selectedId == null && (
-                    <div className={styles.emptyState}>No role selected</div>
-                )}
-                {selectedId != null && roleQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading role details...
-                    </div>
-                )}
-                {selectedId != null && roleQuery.error && (
-                    <div className={cn(styles.emptyState, styles.errorState)}>
-                        Error: {parseErrorMessage(roleQuery.error)}
-                    </div>
-                )}
-                {selectedId != null && roleQuery.data ? (
-                    <Form<Role>
-                        key={selectedId}
-                        form={roleQuery.data}
-                        title={roleQuery.data.name}
-                        saving={updateMutation.isPending}
-                        onUpdate={setFormState}
-                        onSave={handleSave}
-                    >
-                        <FormGroup title="Details">
-                            <TextField label="Name" field="name" required />
-                            <SelectManyField<Role>
-                                label="Permissions"
-                                options={permissionOptions}
-                                getter={(form) =>
-                                    (form.permissions ?? []).map(
-                                        (permission) => permission.id
-                                    )
+            <Panel
+                includeSidebar
+                largeTitle
+                sidebarWidth="24rem"
+                sidebarClassName={styles.sidebarBg}
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                label="Roles"
+                showScrollbar={false}
+                sidebarList={{
+                    search: { search, onSearch },
+                    footer: {
+                        page: search.page ?? 0,
+                        pageSize: search.limit ?? 25,
+                        count: resultCount,
+                        isPending: searchQuery.isPending,
+                        onPageChange: (nextPage: number) =>
+                            onSearch({ ...search, page: nextPage }),
+                    },
+                    filters: sidebarFilters,
+                }}
+                prominentHeaderButton={{
+                    icon: <IoEllipsisVertical size={20} />,
+                    menu: () => <SidebarListFilters {...sidebarFilters} />,
+                }}
+                sidebarBody={
+                    <SidebarBody<Role>
+                        items={roles}
+                        isLoading={searchQuery.isPending}
+                        error={searchQuery.error}
+                        selectedKey={selectedId}
+                        renderItem={(role) => ({
+                            key: role.id,
+                            label: role.name,
+                            href: `/volunteer_dashboard/panels/roles?roleId=${role.id}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                handleSelectItem(role)
+                                if (!isDesktop) {
+                                    setSidebarMobileVisible(false)
                                 }
-                                setter={(form, field) => ({
-                                    ...form,
-                                    permissions:
-                                        field != null
-                                            ? permissions.filter((permission) =>
-                                                  field.includes(permission.id)
-                                              )
-                                            : form.permissions,
-                                })}
-                            />
-                        </FormGroup>
-                    </Form>
-                ) : (
-                    <div className={styles.emptyState}>No role selected</div>
-                )}
-            </div>
-        </Panel>
+                            },
+                        })}
+                    />
+                }
+            >
+                <div className={styles.detailPane}>
+                    <MobileSidebarBackButton
+                        label="Roles"
+                        sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                        onBack={() => setSidebarMobileVisible(true)}
+                    />
+                    {selectedId == null && (
+                        <div className={styles.emptyState}>
+                            No role selected
+                        </div>
+                    )}
+                    {selectedId != null && roleQuery.isPending && (
+                        <div className={styles.emptyState}>
+                            Loading role details...
+                        </div>
+                    )}
+                    {selectedId != null && roleQuery.error && (
+                        <div
+                            className={cn(styles.emptyState, styles.errorState)}
+                        >
+                            Error: {parseErrorMessage(roleQuery.error)}
+                        </div>
+                    )}
+                    {selectedId != null && roleQuery.data ? (
+                        <Form<Role>
+                            key={selectedId}
+                            form={roleQuery.data}
+                            title={roleQuery.data.name}
+                            saving={updateMutation.isPending}
+                            onUpdate={setFormState}
+                            onSave={handleSave}
+                        >
+                            <List title="Details">
+                                <TextRow
+                                    label="Name"
+                                    field="name"
+                                    indicator="required"
+                                />
+                            </List>
+                            <List title="Permissions">
+                                <PermissionRows
+                                    permissions={permissions}
+                                    isPending={permissionsQuery.isPending}
+                                    error={permissionsQuery.error}
+                                />
+                            </List>
+                        </Form>
+                    ) : (
+                        <div className={styles.emptyState}>
+                            No role selected
+                        </div>
+                    )}
+                </div>
+            </Panel>
+        </ProtectedPanel>
     )
 }
 
@@ -297,4 +302,48 @@ interface FilterOption {
     value: string
     label: string
     options: MultiSelectOption[]
+}
+
+function PermissionRows({
+    permissions,
+    isPending,
+    error,
+}: {
+    permissions: Permission[]
+    isPending: boolean
+    error: Error | null
+}) {
+    if (isPending)
+        return <AddListEmptyRow>Loading permissions...</AddListEmptyRow>
+    if (error)
+        return (
+            <AddListEmptyRow>
+                <span role="alert">Error: {parseErrorMessage(error)}</span>
+            </AddListEmptyRow>
+        )
+    if (permissions.length === 0)
+        return <AddListEmptyRow>No permissions</AddListEmptyRow>
+
+    return permissions
+        .toSorted((a, b) => a.id - b.id)
+        .map((permission) => (
+            <ToggleRow
+                key={permission.id}
+                label={permission.name}
+                getter={(form: Role) =>
+                    (form.permissions ?? []).some(
+                        (assigned) => assigned.id === permission.id
+                    )
+                }
+                setter={(form: Role, checked) => {
+                    const others = (form.permissions ?? []).filter(
+                        (assigned) => assigned.id !== permission.id
+                    )
+                    return {
+                        ...form,
+                        permissions: checked ? [...others, permission] : others,
+                    }
+                }}
+            />
+        ))
 }

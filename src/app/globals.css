@@ -79,6 +79,9 @@ input::placeholder {
     color: #a9a9a9;
 }
 
-input[type='date'][data-empty='true'] {
+input[type='date'][data-empty='true']::-webkit-datetime-edit-month-field,
+input[type='date'][data-empty='true']::-webkit-datetime-edit-day-field,
+input[type='date'][data-empty='true']::-webkit-datetime-edit-year-field {
     color: #a9a9a9;
+    -webkit-text-fill-color: #a9a9a9;
 }

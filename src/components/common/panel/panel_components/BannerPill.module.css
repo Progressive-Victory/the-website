@@ -1,0 +1,43 @@
+.pill {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding-inline: 1rem;
+    padding-block: 0.45rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+}
+
+.default {
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.red {
+    background: rgba(255, 95, 75, 0.3);
+    color: rgba(177, 2, 2, 1);
+}
+
+.orange {
+    background: rgba(255, 72, 0, 0.3);
+    color: rgba(117, 56, 0, 1);
+}
+
+.green {
+    background: rgba(112, 195, 32, 0.3);
+    color: rgba(17, 115, 75, 1);
+}
+
+.blue {
+    background: rgba(42, 155, 225, 0.3);
+    color: rgba(10, 83, 168, 1);
+}
+
+.purple {
+    background: rgba(172, 95, 212, 0.3);
+    color: rgba(90, 50, 134, 1);
+}
+
+.darkRed {
+    background: rgba(177, 2, 2, 1);
+    color: rgba(255, 207, 201, 1);
+}

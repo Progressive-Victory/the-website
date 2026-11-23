@@ -11,7 +11,7 @@ import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { Header } from '@/components/layout/Header'
 import { PermissionIds } from '@/models'
 import { useEndorsementQueries, usePositionQueries } from '@/queries'
-import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
+import { hasPermission, usePaginatedSearch, useCurrentUser } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
 import { usePathname, useSearchParams } from 'next/navigation'
 import {
@@ -43,6 +43,7 @@ interface DashboardGroupChildConfigItem {
     href: `/volunteer_dashboard/panels/${string}`
     icon?: IconType
     count?: number
+    permission?: number
 }
 
 interface DashboardPanelConfigItem {
@@ -51,6 +52,7 @@ interface DashboardPanelConfigItem {
     label: string
     icon: IconType
     count?: number
+    permission?: number
     buttonType?: 'default' | 'group'
     groupChildren?: DashboardGroupChildConfigItem[]
 }
@@ -122,8 +124,11 @@ function LayoutContent({ children }: { children: ReactNode }) {
 
     const displayName = buildDisplayName()
 
-    const displayPronouns =
-        `${currentUser.data?.preferredPronouns ?? ''}`.trim()
+    const canView = (permission?: number) => {
+        if (permission == null) return true
+        const user = currentUser.data
+        return user != null && hasPermission(user, permission)
+    }
 
     const dashboardPanelConfig: DashboardPanelConfigItem[] = [
         {
@@ -132,12 +137,14 @@ function LayoutContent({ children }: { children: ReactNode }) {
             href: '/volunteer_dashboard/panels/members',
             icon: FaUsers,
             count: users.query.data?.count,
+            permission: PermissionIds.VIEW_MEMBER_PANEL,
         },
         {
             key: 'fundraising',
             label: 'Fundraising',
             href: '/volunteer_dashboard/panels/fundraising',
             icon: FaDonate,
+            permission: PermissionIds.VIEW_FUNDRAISING_PANEL,
             buttonType: 'group',
             groupChildren: [
                 {
@@ -146,6 +153,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                     href: '/volunteer_dashboard/panels/donors',
                     icon: FaDollarSign,
                     count: donors.query.data?.count,
+                    permission: PermissionIds.VIEW_DONORS_PANEL,
                 },
                 {
                     key: 'contributions',
@@ -153,6 +161,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                     href: '/volunteer_dashboard/panels/contributions',
                     icon: FaMoneyBills,
                     count: contributions.query.data?.count,
+                    permission: PermissionIds.VIEW_CONTRIBUTIONS_PANEL,
                 },
                 {
                     key: 'membership',
@@ -160,6 +169,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                     href: '/volunteer_dashboard/panels/membership',
                     icon: FaMoneyCheckDollar,
                     count: memberships.query.data?.count,
+                    permission: PermissionIds.VIEW_MEMBERSHIPS_PANEL,
                 },
             ],
         },
@@ -169,6 +179,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
             href: '/volunteer_dashboard/panels/positions',
             icon: FaClipboardUser,
             count: positionCount,
+            permission: PermissionIds.VIEW_POSITIONS_PANEL,
         },
         {
             key: 'roles',
@@ -176,6 +187,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
             href: '/volunteer_dashboard/panels/roles',
             icon: FaUserTag,
             count: roles.query.data?.count,
+            permission: PermissionIds.VIEW_ROLES_PANEL,
         },
         {
             key: 'permissions',
@@ -190,6 +202,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
             href: '/volunteer_dashboard/panels/endorsements',
             icon: FaCheckToSlot,
             count: endorsements.data?.length,
+            permission: PermissionIds.VIEW_ENDORSEMENT_PANEL,
         },
     ]
 
@@ -264,7 +277,6 @@ function LayoutContent({ children }: { children: ReactNode }) {
                             ? `@${discordUser.username}`
                             : undefined
                     }
-                    labelPill={displayPronouns}
                 />
             }
         >
@@ -277,6 +289,10 @@ function LayoutContent({ children }: { children: ReactNode }) {
                     icon={panel.icon}
                     tag={{ count: panel.count }}
                     buttonType={panel.buttonType}
+                    disabled={!canView(panel.permission)}
+                    locked={panel.groupChildren?.every(
+                        (groupChild) => !canView(groupChild.permission)
+                    )}
                     indicatorDirection={
                         pathname === panel.href &&
                         currentTopLevelIndex !== -1 &&
@@ -302,6 +318,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                             tag={{
                                 count: groupChild.count,
                             }}
+                            disabled={!canView(groupChild.permission)}
                             resetPanelHistoryOnClick
                         />
                     ))}
@@ -346,6 +363,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                         permissionCount: permissions.query.data?.count,
                         positionCount,
                         endorsementCount: endorsements.data?.length,
+                        canView,
                     })}
                 />
             </div>

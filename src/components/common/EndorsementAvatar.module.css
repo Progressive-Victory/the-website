@@ -4,17 +4,35 @@
     justify-content: center;
     flex-shrink: 0;
     position: relative;
+    isolation: isolate;
     border-radius: 9999px;
     overflow: visible;
-    background-repeat: no-repeat;
     box-sizing: border-box;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        background-image: var(--avatar-bg);
+        background-repeat: no-repeat;
+        transition: opacity 140ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    &[data-waiting='true']::before {
+        opacity: 0;
+    }
 }
 
 .ring {
     border: 3px solid #fff;
     box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
-    background-position: center;
-    background-size: cover;
+
+    &::before {
+        background-position: center;
+        background-size: cover;
+    }
 
     &.thinBorder {
         border-width: 2px;
@@ -22,8 +40,10 @@
 }
 
 .tile {
-    background-position: -8px -20px;
-    background-size: 110%;
+    &::before {
+        background-position: -8px -20px;
+        background-size: 110%;
+    }
 
     & .image {
         border: 2px solid #fff;
@@ -32,11 +52,11 @@
 }
 
 .blue {
-    background-image: url('/images/endorsement_images/background_blue.png');
+    --avatar-bg: url('/images/endorsement_images/background_blue.png');
 }
 
 .yellow {
-    background-image: url('/images/endorsement_images/background_yellow.png');
+    --avatar-bg: url('/images/endorsement_images/background_yellow.png');
 }
 
 .image {

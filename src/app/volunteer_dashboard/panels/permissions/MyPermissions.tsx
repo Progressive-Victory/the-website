@@ -1,9 +1,10 @@
 'use client'
 
 import styles from './page.module.css'
-import { Form, FormGroup, TextField } from '@/components/common/forms'
+import { Form } from '@/components/common/forms'
+import { List, ToggleRow } from '@/components/common/list'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
-import { cn, parseErrorMessage } from '@/util'
+import { parseErrorMessage } from '@/util'
 import { useCurrentUser, usePaginatedSearch } from '@/util/hooks'
 import { zPermission } from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
@@ -71,24 +72,16 @@ export function MyPermissions() {
 
     return (
         <Form form={permissions} title="My Permissions" readonly>
-            <FormGroup title="Permissions" className={styles.permissionList}>
+            <List title="Permissions">
                 {permissions.map((permission) => (
-                    <TextField
+                    <ToggleRow
                         key={permission.id}
                         label={permission.name}
-                        getter={() =>
-                            grantedPermissionIds.has(permission.id)
-                                ? 'Yes'
-                                : 'No'
-                        }
-                        readonlyClassName={cn(
-                            styles.permissionStatus,
-                            grantedPermissionIds.has(permission.id) &&
-                                styles.permissionStatusEnabled
-                        )}
+                        value={grantedPermissionIds.has(permission.id)}
+                        readOnly
                     />
                 ))}
-            </FormGroup>
+            </List>
         </Form>
     )
 }
