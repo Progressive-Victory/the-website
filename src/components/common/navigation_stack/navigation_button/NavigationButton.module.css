@@ -498,3 +498,28 @@
 :global([data-sidebar-collapsed='true']) .groupChildrenClip {
     display: none;
 }
+
+.itemHeader > .linkDisabled {
+    cursor: not-allowed;
+    color: rgba(15, 23, 42, 0.4);
+
+    &:hover {
+        background: transparent;
+    }
+
+    &:active {
+        transform: none;
+    }
+
+    &.cardLink {
+        opacity: 0.55;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.74);
+            transform: none;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.75) inset,
+                0 22px 55px rgba(15, 23, 42, 0.12);
+        }
+    }
+}

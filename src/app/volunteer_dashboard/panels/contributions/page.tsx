@@ -12,11 +12,13 @@ import {
 } from '@/components/common'
 import { Form } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import {
     SidebarListFilters,
     type SidebarListFiltersProps,
 } from '@/components/common/panel/sidebar_list/SidebarList'
+import { PermissionIds } from '@/models'
 import { dateService } from '@/services'
 import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
@@ -195,95 +197,103 @@ export default function Page() {
     }
 
     return (
-        <Panel
-            includeSidebar
-            largeTitle
-            sidebarWidth="24rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+        <ProtectedPanel
             label="Contributions"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: resultCount,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <IoEllipsisVertical size={20} />,
-                menu: () => <SidebarListFilters {...sidebarFilters} />,
-            }}
-            sidebarBody={
-                <SidebarBody<ActBlueDonationPacket>
-                    items={contributions}
-                    isLoading={searchQuery.isPending}
-                    error={searchQuery.error}
-                    selectedKey={selectedLineitemId}
-                    renderItem={(contribution) => ({
-                        key: contribution.lineitemId,
-                        label: makeTitle(contribution),
-                        subtitle: formatDate(contribution.paidAt),
-                        tagLabel: contribution.isRecurring
-                            ? 'Recurring'
-                            : undefined,
-                        href: `/volunteer_dashboard/panels/contributions?lineitemId=${contribution.lineitemId}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            setSelectedLineitemId(contribution.lineitemId)
-                            if (!isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
-                        },
-                    })}
-                />
-            }
+            requiredPermissions={[PermissionIds.VIEW_CONTRIBUTIONS_PANEL]}
         >
-            <div className={styles.detailsPane}>
-                <MobileSidebarBackButton
-                    label="Contributions"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                />
+            <Panel
+                includeSidebar
+                largeTitle
+                sidebarWidth="24rem"
+                sidebarClassName={styles.sidebarBg}
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                label="Contributions"
+                showScrollbar={false}
+                sidebarList={{
+                    search: { search, onSearch },
+                    footer: {
+                        page: search.page ?? 0,
+                        pageSize: search.limit ?? 25,
+                        count: resultCount,
+                        isPending: searchQuery.isPending,
+                        onPageChange: (nextPage: number) =>
+                            onSearch({ ...search, page: nextPage }),
+                    },
+                    filters: sidebarFilters,
+                }}
+                prominentHeaderButton={{
+                    icon: <IoEllipsisVertical size={20} />,
+                    menu: () => <SidebarListFilters {...sidebarFilters} />,
+                }}
+                sidebarBody={
+                    <SidebarBody<ActBlueDonationPacket>
+                        items={contributions}
+                        isLoading={searchQuery.isPending}
+                        error={searchQuery.error}
+                        selectedKey={selectedLineitemId}
+                        renderItem={(contribution) => ({
+                            key: contribution.lineitemId,
+                            label: makeTitle(contribution),
+                            subtitle: formatDate(contribution.paidAt),
+                            tagLabel: contribution.isRecurring
+                                ? 'Recurring'
+                                : undefined,
+                            href: `/volunteer_dashboard/panels/contributions?lineitemId=${contribution.lineitemId}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                setSelectedLineitemId(contribution.lineitemId)
+                                if (!isDesktop) {
+                                    setSidebarMobileVisible(false)
+                                }
+                            },
+                        })}
+                    />
+                }
+            >
+                <div className={styles.detailsPane}>
+                    <MobileSidebarBackButton
+                        label="Contributions"
+                        sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                        onBack={() => setSidebarMobileVisible(true)}
+                    />
 
-                {selectedLineitemId == null && (
-                    <div className={styles.emptyState}>
-                        No contribution selected
-                    </div>
-                )}
+                    {selectedLineitemId == null && (
+                        <div className={styles.emptyState}>
+                            No contribution selected
+                        </div>
+                    )}
 
-                {selectedLineitemId != null && contributionQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading contribution details...
-                    </div>
-                )}
+                    {selectedLineitemId != null &&
+                        contributionQuery.isPending && (
+                            <div className={styles.emptyState}>
+                                Loading contribution details...
+                            </div>
+                        )}
 
-                {selectedLineitemId != null && contributionQuery.error && (
-                    <div className={cn(styles.emptyState, styles.errorState)}>
-                        Error: {parseErrorMessage(contributionQuery.error)}
-                    </div>
-                )}
+                    {selectedLineitemId != null && contributionQuery.error && (
+                        <div
+                            className={cn(styles.emptyState, styles.errorState)}
+                        >
+                            Error: {parseErrorMessage(contributionQuery.error)}
+                        </div>
+                    )}
 
-                {selectedLineitemId != null && contributionQuery.data && (
-                    <Form<ActBlueDonationPacket>
-                        key={selectedLineitemId}
-                        form={contributionQuery.data}
-                        title={makeTitle(contributionQuery.data)}
-                        readonly={true}
-                        saving={false}
-                        isInvalid={false}
-                        onUpdate={() => undefined}
-                        onSave={() => undefined}
-                    >
-                        {contributionDetailLists(contributionQuery.data)}
-                    </Form>
-                )}
-            </div>
-        </Panel>
+                    {selectedLineitemId != null && contributionQuery.data && (
+                        <Form<ActBlueDonationPacket>
+                            key={selectedLineitemId}
+                            form={contributionQuery.data}
+                            title={makeTitle(contributionQuery.data)}
+                            readonly={true}
+                            saving={false}
+                            isInvalid={false}
+                            onUpdate={() => undefined}
+                            onSave={() => undefined}
+                        >
+                            {contributionDetailLists(contributionQuery.data)}
+                        </Form>
+                    )}
+                </div>
+            </Panel>
+        </ProtectedPanel>
     )
 }

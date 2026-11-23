@@ -11,12 +11,13 @@ import {
     ToggleRow,
 } from '@/components/common/list'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import {
     SidebarListFilters,
     type SidebarListFiltersProps,
 } from '@/components/common/panel/sidebar_list/SidebarList'
-import { FetchError } from '@/models'
+import { FetchError, PermissionIds } from '@/models'
 import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import {
@@ -190,99 +191,110 @@ export default function Page() {
     }
 
     return (
-        <Panel
-            includeSidebar
-            largeTitle
-            sidebarWidth="24rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+        <ProtectedPanel
             label="Roles"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: resultCount,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <IoEllipsisVertical size={20} />,
-                menu: () => <SidebarListFilters {...sidebarFilters} />,
-            }}
-            sidebarBody={
-                <SidebarBody<Role>
-                    items={roles}
-                    isLoading={searchQuery.isPending}
-                    error={searchQuery.error}
-                    selectedKey={selectedId}
-                    renderItem={(role) => ({
-                        key: role.id,
-                        label: role.name,
-                        href: `/volunteer_dashboard/panels/roles?roleId=${role.id}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            handleSelectItem(role)
-                            if (!isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
-                        },
-                    })}
-                />
-            }
+            requiredPermissions={[PermissionIds.VIEW_ROLES_PANEL]}
         >
-            <div className={styles.detailPane}>
-                <MobileSidebarBackButton
-                    label="Roles"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                />
-                {selectedId == null && (
-                    <div className={styles.emptyState}>No role selected</div>
-                )}
-                {selectedId != null && roleQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading role details...
-                    </div>
-                )}
-                {selectedId != null && roleQuery.error && (
-                    <div className={cn(styles.emptyState, styles.errorState)}>
-                        Error: {parseErrorMessage(roleQuery.error)}
-                    </div>
-                )}
-                {selectedId != null && roleQuery.data ? (
-                    <Form<Role>
-                        key={selectedId}
-                        form={roleQuery.data}
-                        title={roleQuery.data.name}
-                        saving={updateMutation.isPending}
-                        onUpdate={setFormState}
-                        onSave={handleSave}
-                    >
-                        <List title="Details">
-                            <TextRow
-                                label="Name"
-                                field="name"
-                                indicator="required"
-                            />
-                        </List>
-                        <List title="Permissions">
-                            <PermissionRows
-                                permissions={permissions}
-                                isPending={permissionsQuery.isPending}
-                                error={permissionsQuery.error}
-                            />
-                        </List>
-                    </Form>
-                ) : (
-                    <div className={styles.emptyState}>No role selected</div>
-                )}
-            </div>
-        </Panel>
+            <Panel
+                includeSidebar
+                largeTitle
+                sidebarWidth="24rem"
+                sidebarClassName={styles.sidebarBg}
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                label="Roles"
+                showScrollbar={false}
+                sidebarList={{
+                    search: { search, onSearch },
+                    footer: {
+                        page: search.page ?? 0,
+                        pageSize: search.limit ?? 25,
+                        count: resultCount,
+                        isPending: searchQuery.isPending,
+                        onPageChange: (nextPage: number) =>
+                            onSearch({ ...search, page: nextPage }),
+                    },
+                    filters: sidebarFilters,
+                }}
+                prominentHeaderButton={{
+                    icon: <IoEllipsisVertical size={20} />,
+                    menu: () => <SidebarListFilters {...sidebarFilters} />,
+                }}
+                sidebarBody={
+                    <SidebarBody<Role>
+                        items={roles}
+                        isLoading={searchQuery.isPending}
+                        error={searchQuery.error}
+                        selectedKey={selectedId}
+                        renderItem={(role) => ({
+                            key: role.id,
+                            label: role.name,
+                            href: `/volunteer_dashboard/panels/roles?roleId=${role.id}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                handleSelectItem(role)
+                                if (!isDesktop) {
+                                    setSidebarMobileVisible(false)
+                                }
+                            },
+                        })}
+                    />
+                }
+            >
+                <div className={styles.detailPane}>
+                    <MobileSidebarBackButton
+                        label="Roles"
+                        sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                        onBack={() => setSidebarMobileVisible(true)}
+                    />
+                    {selectedId == null && (
+                        <div className={styles.emptyState}>
+                            No role selected
+                        </div>
+                    )}
+                    {selectedId != null && roleQuery.isPending && (
+                        <div className={styles.emptyState}>
+                            Loading role details...
+                        </div>
+                    )}
+                    {selectedId != null && roleQuery.error && (
+                        <div
+                            className={cn(styles.emptyState, styles.errorState)}
+                        >
+                            Error: {parseErrorMessage(roleQuery.error)}
+                        </div>
+                    )}
+                    {selectedId != null && roleQuery.data ? (
+                        <Form<Role>
+                            key={selectedId}
+                            form={roleQuery.data}
+                            title={roleQuery.data.name}
+                            saving={updateMutation.isPending}
+                            onUpdate={setFormState}
+                            onSave={handleSave}
+                        >
+                            <List title="Details">
+                                <TextRow
+                                    label="Name"
+                                    field="name"
+                                    indicator="required"
+                                />
+                            </List>
+                            <List title="Permissions">
+                                <PermissionRows
+                                    permissions={permissions}
+                                    isPending={permissionsQuery.isPending}
+                                    error={permissionsQuery.error}
+                                />
+                            </List>
+                        </Form>
+                    ) : (
+                        <div className={styles.emptyState}>
+                            No role selected
+                        </div>
+                    )}
+                </div>
+            </Panel>
+        </ProtectedPanel>
     )
 }
 

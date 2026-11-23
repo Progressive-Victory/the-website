@@ -5,11 +5,13 @@ import styles from './page.module.css'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { FormState, Form } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import {
     SidebarListFilters,
     type SidebarListFiltersProps,
 } from '@/components/common/panel/sidebar_list/SidebarList'
+import { PermissionIds } from '@/models'
 import { cn, parseErrorMessage } from '@/util'
 import { useFetch, usePaginatedSearch } from '@/util/hooks'
 import { keepPreviousData, skipToken, useQuery } from '@tanstack/react-query'
@@ -97,87 +99,96 @@ export default function Page() {
     }
 
     return (
-        <Panel
-            includeSidebar
-            largeTitle
-            sidebarWidth="24rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+        <ProtectedPanel
             label="Donors"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: resultCount,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <IoEllipsisVertical size={20} />,
-                menu: () => <SidebarListFilters {...sidebarFilters} />,
-            }}
-            sidebarBody={
-                <SidebarBody<ActBlueDonor>
-                    items={donors}
-                    isLoading={searchQuery.isPending}
-                    error={searchQuery.error}
-                    selectedKey={selectedEmail}
-                    renderItem={(donor) => ({
-                        key: donor.email,
-                        label: makeTitle(donor),
-                        href: `/volunteer_dashboard/panels/donors?email=${donor.email}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            handleSelectItem(donor)
-                            if (!isDesktop) {
-                                setSidebarMobileVisible(false)
-                            }
-                        },
-                    })}
-                />
-            }
+            requiredPermissions={[PermissionIds.VIEW_DONORS_PANEL]}
         >
-            <div className={styles.detailPane}>
-                <MobileSidebarBackButton
-                    label="Donors"
-                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                />
-                {selectedEmail == null && (
-                    <div className={styles.emptyState}>No donor selected</div>
-                )}
-                {selectedEmail && donorQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading donor details...
-                    </div>
-                )}
-                {selectedEmail && donorQuery.error && (
-                    <div className={cn(styles.emptyState, styles.errorState)}>
-                        Error: {parseErrorMessage(donorQuery.error)}
-                    </div>
-                )}
-                {selectedEmail && donorQuery.data && (
-                    <Form<ActBlueDonor>
-                        key={selectedEmail}
-                        form={donorQuery.data}
-                        title={makeTitle(donorQuery.data)}
-                        readonly={true}
-                        saving={false}
-                        isInvalid={false}
-                        onUpdate={setFormState}
-                        onSave={() => {
-                            return
-                        }}
-                    >
-                        {donorDetailLists(donorQuery.data)}
-                    </Form>
-                )}
-            </div>
-        </Panel>
+            <Panel
+                includeSidebar
+                largeTitle
+                sidebarWidth="24rem"
+                sidebarClassName={styles.sidebarBg}
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                label="Donors"
+                showScrollbar={false}
+                sidebarList={{
+                    search: { search, onSearch },
+                    footer: {
+                        page: search.page ?? 0,
+                        pageSize: search.limit ?? 25,
+                        count: resultCount,
+                        isPending: searchQuery.isPending,
+                        onPageChange: (nextPage: number) =>
+                            onSearch({ ...search, page: nextPage }),
+                    },
+                    filters: sidebarFilters,
+                }}
+                prominentHeaderButton={{
+                    icon: <IoEllipsisVertical size={20} />,
+                    menu: () => <SidebarListFilters {...sidebarFilters} />,
+                }}
+                sidebarBody={
+                    <SidebarBody<ActBlueDonor>
+                        items={donors}
+                        isLoading={searchQuery.isPending}
+                        error={searchQuery.error}
+                        selectedKey={selectedEmail}
+                        renderItem={(donor) => ({
+                            key: donor.email,
+                            label: makeTitle(donor),
+                            href: `/volunteer_dashboard/panels/donors?email=${donor.email}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                handleSelectItem(donor)
+                                if (!isDesktop) {
+                                    setSidebarMobileVisible(false)
+                                }
+                            },
+                        })}
+                    />
+                }
+            >
+                <div className={styles.detailPane}>
+                    <MobileSidebarBackButton
+                        label="Donors"
+                        sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                        onBack={() => setSidebarMobileVisible(true)}
+                    />
+                    {selectedEmail == null && (
+                        <div className={styles.emptyState}>
+                            No donor selected
+                        </div>
+                    )}
+                    {selectedEmail && donorQuery.isPending && (
+                        <div className={styles.emptyState}>
+                            Loading donor details...
+                        </div>
+                    )}
+                    {selectedEmail && donorQuery.error && (
+                        <div
+                            className={cn(styles.emptyState, styles.errorState)}
+                        >
+                            Error: {parseErrorMessage(donorQuery.error)}
+                        </div>
+                    )}
+                    {selectedEmail && donorQuery.data && (
+                        <Form<ActBlueDonor>
+                            key={selectedEmail}
+                            form={donorQuery.data}
+                            title={makeTitle(donorQuery.data)}
+                            readonly={true}
+                            saving={false}
+                            isInvalid={false}
+                            onUpdate={setFormState}
+                            onSave={() => {
+                                return
+                            }}
+                        >
+                            {donorDetailLists(donorQuery.data)}
+                        </Form>
+                    )}
+                </div>
+            </Panel>
+        </ProtectedPanel>
     )
 }
