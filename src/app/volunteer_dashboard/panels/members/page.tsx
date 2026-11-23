@@ -1,6 +1,5 @@
 'use client'
 
-import { MemberBanner } from './MemberBanner'
 import styles from './page.module.css'
 import { DonorView } from './panel_views/DonorView'
 import { HistoryView } from './panel_views/HistoryView'
@@ -10,17 +9,21 @@ import {
     FilterTag,
 } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
-import { DiscordAvatar } from '@/components/common'
+import { useActiveMatchedUsers } from '@/app/volunteer_dashboard/panels/membership/hooks'
+import { MembershipTier } from '@/app/volunteer_dashboard/panels/membership/membership.types'
+import { DiscordAvatar, ListContext } from '@/components/common'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
 import { FormState } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
+import { PanelBanner } from '@/components/common/panel/panel_components/PanelBanner'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import {
     SidebarListFilters,
     type SidebarListFiltersProps,
 } from '@/components/common/panel/sidebar_list/SidebarList'
-import { TabSpec } from '@/components/common/tab_bar/TabBar'
-import { FetchError, stateOptions } from '@/models'
+import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
+import { FetchError, PermissionIds, stateOptions } from '@/models'
 import {
     useLinkDonorToUser,
     usePositionQueries,
@@ -70,6 +73,8 @@ import {
     FaMapMarkerAlt,
     FaSitemap,
     FaUserShield,
+    FaLayerGroup,
+    FaUserClock,
 } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign, FaAddressCard } from 'react-icons/fa6'
 import { IoEllipsisVertical } from 'react-icons/io5'
@@ -86,6 +91,8 @@ const tabs: TabSpec[] = [
     { key: 'donorMatching', label: 'Donations' },
     { key: 'history', label: 'History' },
 ]
+
+const LOADING_USER = {} as User
 
 const MEMBER_FIELD_OPTIONS = [
     { value: 'email', label: 'Email' },
@@ -120,12 +127,16 @@ const userFilterOptions = [
     { key: 'verified', label: 'Verified', icon: <MdVerified /> },
 ]
 
-// # TODO: Behavior is pending API support for membership tiers.
-const MEMBERSHIP_TIER_OPTIONS = [
-    { value: 'dues_paying', label: 'Dues Paying Members' },
-    { value: 'premium', label: 'Premium Members' },
-    { value: 'signature', label: 'Signature Members' },
-    { value: 'inner_circle', label: 'Inner Circle Members' },
+const MEMBERSHIP_TIER_OPTIONS: { value: MembershipTier; label: string }[] = [
+    { value: 'Dues Paying Member', label: 'Dues Paying Members' },
+    { value: 'Premium Member', label: 'Premium Members' },
+    { value: 'Signature Member', label: 'Signature Members' },
+    { value: 'Inner Circle Member', label: 'Inner Circle Members' },
+]
+
+const LAPSED_ELIGIBILITY_OPTIONS = [
+    { value: true, label: 'Eligible' },
+    { value: false, label: 'Ineligible' },
 ]
 
 const currentYear = new Date().getFullYear()
@@ -205,7 +216,9 @@ export default function Page() {
     const [selectedTab, setSelectedTab] = useState<MemberTabKey>('overview')
     const [activeFilterTag, setActiveFilterTag] = useState<string>('all')
     const [selectedMembershipTier, setSelectedMembershipTier] =
-        useState<string>()
+        useState<MembershipTier>()
+    const [selectedLapsedEligibility, setSelectedLapsedEligibility] =
+        useState<boolean>()
     const [selectedState, setSelectedState] = useState<string>()
     const [selectedBirthYear, setSelectedBirthYear] = useState<number>()
     const [selectedPosition, setSelectedPosition] = useState<Position>()
@@ -306,7 +319,11 @@ export default function Page() {
             label:
                 MEMBERSHIP_TIER_OPTIONS.find(
                     (option) => option.value === selectedMembershipTier
-                )?.label ?? 'Membership',
+                )?.label ??
+                LAPSED_ELIGIBILITY_OPTIONS.find(
+                    (option) => option.value === selectedLapsedEligibility
+                )?.label ??
+                'Membership',
             icon: <FaAddressCard />,
             color: '#C65882',
             width: '11.65rem',
@@ -322,30 +339,53 @@ export default function Page() {
                     body={
                         <div className={styles.filterMenu}>
                             <DropdownOverlayButton
-                                checked={selectedMembershipTier === undefined}
+                                checked={
+                                    selectedMembershipTier === undefined &&
+                                    selectedLapsedEligibility === undefined
+                                }
                                 onClick={() => {
                                     setSelectedMembershipTier(undefined)
+                                    setSelectedLapsedEligibility(undefined)
+                                    onSearch({ ...search, page: 0 })
                                     closeDropdown()
                                 }}
                             >
                                 All
                             </DropdownOverlayButton>
-                            {MEMBERSHIP_TIER_OPTIONS.map((option) => (
-                                <DropdownOverlayButton
-                                    key={option.value}
-                                    checked={
-                                        selectedMembershipTier === option.value
-                                    }
-                                    onCheckedChange={(checked) => {
-                                        setSelectedMembershipTier(
-                                            checked ? option.value : undefined
-                                        )
-                                        closeDropdown()
-                                    }}
-                                >
-                                    {option.label}
-                                </DropdownOverlayButton>
-                            ))}
+                            <FilterSubmenu
+                                label="Tier"
+                                icon={<FaLayerGroup />}
+                                active={selectedMembershipTier !== undefined}
+                                options={MEMBERSHIP_TIER_OPTIONS}
+                                optionKey={(tier) => tier.value}
+                                optionLabel={(tier) => tier.label}
+                                isSelected={(tier) =>
+                                    selectedMembershipTier === tier.value
+                                }
+                                onSelect={(tier) => {
+                                    setSelectedLapsedEligibility(undefined)
+                                    setSelectedMembershipTier(tier?.value)
+                                    onSearch({ ...search, page: 0 })
+                                }}
+                                closeDropdown={closeDropdown}
+                            />
+                            <FilterSubmenu
+                                label="Eligibility"
+                                icon={<FaUserClock />}
+                                active={selectedLapsedEligibility !== undefined}
+                                options={LAPSED_ELIGIBILITY_OPTIONS}
+                                optionKey={(option) => String(option.value)}
+                                optionLabel={(option) => option.label}
+                                isSelected={(option) =>
+                                    selectedLapsedEligibility === option.value
+                                }
+                                onSelect={(option) => {
+                                    setSelectedMembershipTier(undefined)
+                                    setSelectedLapsedEligibility(option?.value)
+                                    onSearch({ ...search, page: 0 })
+                                }}
+                                closeDropdown={closeDropdown}
+                            />
                         </div>
                     }
                 />
@@ -516,6 +556,23 @@ export default function Page() {
     })
 
     const roles = rolesQuery.data?.data ?? []
+
+    const isMembershipTag = activeFilterTag === 'dues'
+    const activeMembers = useActiveMatchedUsers(isMembershipTag, {
+        tier: selectedMembershipTier,
+        eligible: selectedLapsedEligibility,
+    })
+    const listQuery = isMembershipTag
+        ? {
+              isPending: activeMembers.isPending,
+              error: activeMembers.error,
+              count: activeMembers.users.length,
+          }
+        : {
+              isPending: searchQuery.isPending || searchQuery.isPlaceholderData,
+              error: searchQuery.error,
+              count: searchQuery.data?.count,
+          }
 
     const userQuery = useQuery({
         queryKey: [`/users/${selectedId}`],
@@ -788,14 +845,15 @@ export default function Page() {
         return currentUser ? [currentUser] : []
     }, [loggedInUser.data])
 
-    const users = useMemo(() => {
-        const fetchedUsers = searchQuery.data?.data ?? []
-        const currentUser = loggedInUser.data
-
-        if (!currentUser) return fetchedUsers
-
-        return fetchedUsers.filter((user) => user.id !== currentUser.id)
-    }, [searchQuery.data?.data, loggedInUser.data])
+    const listPage = search.page ?? 0
+    const listLimit = search.limit ?? 25
+    const listUsers: (User | UserProfile)[] = isMembershipTag
+        ? activeMembers.users.slice(
+              listPage * listLimit,
+              (listPage + 1) * listLimit
+          )
+        : (searchQuery.data?.data ?? [])
+    const users = listUsers.filter((user) => user.id !== loggedInUser.data?.id)
 
     useEffect(() => {
         if (navUserId == null) return
@@ -806,14 +864,16 @@ export default function Page() {
     }, [navUserId])
 
     const renderPage = () => {
-        if (!selectedId || !userQuery.data) return null
+        if (!selectedId) return null
+
+        const user = userQuery.data ?? LOADING_USER
 
         switch (selectedTab) {
             case 'overview':
                 return (
                     <MemberView
                         selectedId={selectedId}
-                        user={userQuery.data}
+                        user={user}
                         selectedHistory={null}
                         setFormState={setFormState}
                         saving={updateMutation.isPending}
@@ -838,7 +898,7 @@ export default function Page() {
                         }
                         roles={roles}
                         positions={positionHierarchy.data?.positions ?? []}
-                        makeFormTitle={() => makeTitle(userQuery.data)}
+                        makeFormTitle={() => makeTitle(user)}
                         handleSave={handleSave}
                     />
                 )
@@ -846,12 +906,13 @@ export default function Page() {
             case 'donorMatching':
                 return (
                     <DonorView
-                        key={userQuery.data.id}
+                        key={user.id}
                         selectedId={selectedId}
-                        user={userQuery.data}
+                        user={user}
                         pickingDonor={pickingDonor}
                         setPickingDonor={setPickingDonor}
                         isRefetching={userQuery.isRefetching}
+                        linking={linkDonor.isPending}
                         donorSearch={donorSearch}
                         donorSearchQuery={donorSearchQuery}
                         onDonorSearch={onDonorSearch}
@@ -866,7 +927,7 @@ export default function Page() {
                 return (
                     <HistoryView
                         key={selectedId}
-                        user={userQuery.data}
+                        user={user}
                         isRefetching={userQuery.isRefetching}
                     />
                 )
@@ -876,49 +937,92 @@ export default function Page() {
         }
     }
 
-    const renderDetails = () => (
-        <div className={styles.detailsPane}>
-            <MobileSidebarBackButton
-                label="Members"
-                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                onBack={() => setSidebarMobileVisible(true)}
-                className={styles.backButton}
+    const renderDetails = () => {
+        const loadingUser =
+            selectedId != null &&
+            (userQuery.isPending || userQuery.isPlaceholderData)
+        const user = userQuery.data ?? LOADING_USER
+        const tabBar = (
+            <TabBar
+                tabs={tabs}
+                value={selectedTab}
+                onChange={(key) => setSelectedTab(key as MemberTabKey)}
             />
+        )
 
-            {selectedId == null && (
-                <div className={styles.emptyState}>No user selected</div>
-            )}
+        return (
+            <div className={styles.detailsPane}>
+                <MobileSidebarBackButton
+                    label="Members"
+                    sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                    onBack={() => setSidebarMobileVisible(true)}
+                    className={styles.backButton}
+                />
 
-            {selectedId != null && userQuery.isPending && (
-                <div className={styles.emptyState}>Loading user details...</div>
-            )}
+                {selectedId == null && (
+                    <div className={styles.emptyState}>No user selected</div>
+                )}
 
-            {selectedId != null && userQuery.error && (
-                <div className={cn(styles.emptyState, styles.errorText)}>
-                    Error: {parseErrorMessage(userQuery.error)}
-                </div>
-            )}
-
-            {selectedId && userQuery.data && (
-                <>
-                    <div className={styles.detailsHeader}>
-                        <div className={styles.bannerCover} />
-                        <MemberBanner
-                            user={userQuery.data}
-                            makeTitle={makeTitle}
-                            selectedTab={selectedTab}
-                            tabs={tabs}
-                            onTabChange={(key) =>
-                                setSelectedTab(key as MemberTabKey)
-                            }
-                            positions={positionHierarchy.data?.positions}
-                        />
+                {selectedId != null && userQuery.error && (
+                    <div className={cn(styles.emptyState, styles.errorText)}>
+                        Error: {parseErrorMessage(userQuery.error)}
                     </div>
-                    <div className={styles.detailsContent}>{renderPage()}</div>
-                </>
-            )}
-        </div>
-    )
+                )}
+
+                {selectedId != null && !userQuery.error && (
+                    <>
+                        <PanelBanner
+                            cover
+                            loading={loadingUser}
+                            avatar={{
+                                framed: true,
+                                image: (
+                                    <DiscordAvatar
+                                        discordUserId={
+                                            user.discordUsers?.[0]?.id
+                                        }
+                                        imageId={user.discordUsers?.[0]?.image}
+                                        size={64}
+                                        loading={loadingUser}
+                                    />
+                                ),
+                            }}
+                            title={makeTitle(user)}
+                            subtitle={
+                                user.discordUsers?.[0]?.username
+                                    ? `@${user.discordUsers[0].username}`
+                                    : 'NOT FOUND'
+                            }
+                            statusPill={{
+                                label:
+                                    positionHierarchy.data?.positions.find(
+                                        (position) =>
+                                            position.userIds.includes(user.id)
+                                    )?.name ?? 'Community Member',
+                            }}
+                            // menuButton={{
+                            //     menu: (
+                            //         <div className={styles.filterMenu}>
+                            //             <p className={styles.emptyFilterMenu}>
+                            //                 No actions yet
+                            //             </p>
+                            //         </div>
+                            //     ),
+                            // }}
+                            tabBar={tabBar}
+                        />
+                        <div className={styles.detailsContent}>
+                            <ListContext.Provider
+                                value={{ editing: false, loading: loadingUser }}
+                            >
+                                {renderPage()}
+                            </ListContext.Provider>
+                        </div>
+                    </>
+                )}
+            </div>
+        )
+    }
 
     const sidebarFilters: SidebarListFiltersProps = {
         search,
@@ -932,82 +1036,100 @@ export default function Page() {
     const sidebarFooterProperties = () => ({
         page: search.page ?? 0,
         pageSize: search.limit ?? 25,
-        count: searchQuery.data?.count,
-        isPending: searchQuery.isPending,
+        count: listQuery.count,
+        isPending: listQuery.isPending,
         onPageChange: (nextPage: number) =>
             onSearch({ ...search, page: nextPage }),
     })
 
     return (
-        <Panel
-            includeSidebar
-            collapsedSidebarMode="compact"
-            sidebarTogglePlacement="header"
-            showSidebarFooterWhenCollapsed={false}
-            showSidebarBorderWhenCollapsed
-            largeTitle
-            sidebarWidth="25.5rem"
-            collapsedSidebarWidth="5rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+        <ProtectedPanel
             label="Members"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: sidebarFooterProperties(),
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <IoEllipsisVertical size={20} />,
-                menu: () => <SidebarListFilters {...sidebarFilters} />,
-            }}
-            sidebarBody={
-                <>
-                    <div className={styles.filterTagsWrapper}>
-                        <FilterTags
-                            tags={memberFilterTags}
-                            activeTag={activeFilterTag}
-                            onChange={handleFilterTagChange}
-                        />
-                    </div>
-                    <SidebarBody<User | UserProfile>
-                        items={users}
-                        pinnedItems={pinnedUsers}
-                        isLoading={searchQuery.isPending}
-                        error={searchQuery.error}
-                        selectedKey={selectedId}
-                        renderItem={(user) => ({
-                            key: user.id,
-                            label: makeTitle(user),
-                            subtitle: user.discordUsers?.[0]?.username
-                                ? `@${user.discordUsers[0].username}`
-                                : 'NOT FOUND',
-                            labelPill: user.preferredPronouns?.trim() ?? '',
-                            tagLabel:
-                                user.id === loggedInUser.data?.id
-                                    ? 'You'
-                                    : undefined,
-                            icon: (
-                                <DiscordAvatar
-                                    discordUserId={user.discordUsers?.[0]?.id}
-                                    imageId={user.discordUsers?.[0]?.image}
-                                    size={40}
-                                />
-                            ),
-                            href: `/volunteer_dashboard/panels/members?userId=${user.id}`,
-                            onClick: (event) => {
-                                event.preventDefault()
-                                handleSelectItem(user)
-                                if (!isDesktop) {
-                                    setSidebarMobileVisible(false)
-                                }
-                            },
-                        })}
-                    />
-                </>
-            }
+            requiredPermissions={[PermissionIds.VIEW_MEMBER_PANEL]}
         >
-            {renderDetails()}
-        </Panel>
+            <Panel
+                includeSidebar
+                collapsedSidebarMode="compact"
+                sidebarTogglePlacement="header"
+                showSidebarFooterWhenCollapsed={false}
+                showSidebarBorderWhenCollapsed
+                largeTitle
+                sidebarWidth="25.5rem"
+                collapsedSidebarWidth="5rem"
+                sidebarClassName={styles.sidebarBg}
+                sidebarMobileVisible={isDesktop || sidebarMobileVisible}
+                label="Members"
+                showScrollbar={false}
+                sidebarList={{
+                    search: { search, onSearch },
+                    footer: sidebarFooterProperties(),
+                    filters: sidebarFilters,
+                }}
+                prominentHeaderButton={{
+                    icon: <IoEllipsisVertical size={20} />,
+                    menu: () => <SidebarListFilters {...sidebarFilters} />,
+                }}
+                sidebarBody={
+                    <>
+                        <div className={styles.filterTagsWrapper}>
+                            <FilterTags
+                                tags={memberFilterTags}
+                                activeTag={activeFilterTag}
+                                onChange={handleFilterTagChange}
+                            />
+                        </div>
+                        <SidebarBody<User | UserProfile>
+                            items={users}
+                            pinnedItems={pinnedUsers}
+                            isLoading={listQuery.isPending}
+                            skeleton={{
+                                icon: (
+                                    <DiscordAvatar
+                                        discordUserId={undefined}
+                                        imageId={undefined}
+                                        size={40}
+                                        loading
+                                    />
+                                ),
+                                subtitle: true,
+                            }}
+                            error={listQuery.error}
+                            selectedKey={selectedId}
+                            renderItem={(user) => ({
+                                key: user.id,
+                                label: makeTitle(user),
+                                subtitle: user.discordUsers?.[0]?.username
+                                    ? `@${user.discordUsers[0].username}`
+                                    : 'NOT FOUND',
+                                labelPill: user.preferredPronouns?.trim() ?? '',
+                                tagLabel:
+                                    user.id === loggedInUser.data?.id
+                                        ? 'You'
+                                        : undefined,
+                                icon: (
+                                    <DiscordAvatar
+                                        discordUserId={
+                                            user.discordUsers?.[0]?.id
+                                        }
+                                        imageId={user.discordUsers?.[0]?.image}
+                                        size={40}
+                                    />
+                                ),
+                                href: `/volunteer_dashboard/panels/members?userId=${user.id}`,
+                                onClick: (event) => {
+                                    event.preventDefault()
+                                    handleSelectItem(user)
+                                    if (!isDesktop) {
+                                        setSidebarMobileVisible(false)
+                                    }
+                                },
+                            })}
+                        />
+                    </>
+                }
+            >
+                {renderDetails()}
+            </Panel>
+        </ProtectedPanel>
     )
 }

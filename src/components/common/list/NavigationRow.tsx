@@ -1,11 +1,16 @@
 'use client'
 
-import { ListRowLabel, type ListRowLabelProps } from './ListRow'
+import { useListLoading } from './ListContext'
+import {
+    ListRowLabel,
+    ListRowSkeletonBar,
+    type ListRowLabelProps,
+} from './ListRow'
 import rowStyles from './ListRow.module.css'
 import styles from './NavigationRow.module.css'
 import { cn } from '@/util'
 import Link from 'next/link'
-import type { MouseEventHandler, ReactNode } from 'react'
+import { useId, type MouseEventHandler, type ReactNode } from 'react'
 import { FiChevronRight } from 'react-icons/fi'
 
 export interface NavigationRowProps extends Omit<ListRowLabelProps, 'id'> {
@@ -16,6 +21,7 @@ export interface NavigationRowProps extends Omit<ListRowLabelProps, 'id'> {
 
 export function NavigationRow({
     label,
+    sublabel,
     value,
     indicator,
     labelAlign,
@@ -23,10 +29,21 @@ export function NavigationRow({
     onClick,
     className,
 }: NavigationRowProps) {
+    const seed = useId()
+    const loading = useListLoading()
+
+    if (loading)
+        return (
+            <div className={cn(rowStyles.row, className)}>
+                <ListRowLabel label={<ListRowSkeletonBar seed={seed} />} />
+            </div>
+        )
+
     const content = (
         <>
             <ListRowLabel
                 label={label}
+                sublabel={sublabel}
                 indicator={indicator}
                 labelAlign={labelAlign}
                 className={styles.label}

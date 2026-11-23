@@ -9,6 +9,8 @@ import {
     BooleanTableOption,
     EligibilityFilter,
     MembershipTableOptions,
+    MatchedFilter,
+    TierFilter,
 } from './hooks'
 import { matchesSearchQuery } from './membership.helpers'
 import {
@@ -35,7 +37,9 @@ import {
     ToggleGroup,
 } from '@/components/common'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { Table } from '@/components/common/table'
+import { PermissionIds } from '@/models'
 import { DONOR_LINK_MUTATION_KEY, useLinkDonorToUser } from '@/queries'
 import { cn, DOT_SEPARATOR } from '@/util'
 import { usePaginatedSearch } from '@/util/hooks'
@@ -144,12 +148,35 @@ const eligibilityOptionRow: TableOptionRowConfig<EligibilityFilter> = {
 
 // # TODO Upon API being updated to include ActBlue Cancellations and Refunds Webhooks Replace Activity Toggle with a Members Toggle
 const activityOptionRow: TableOptionRowConfig<ActivityFilter> = {
-    label: 'Activity',
-    ariaLabel: 'Activity Filter',
+    label: 'Membership Status',
+    ariaLabel: 'Membership Status Filter',
     choices: [
         { value: 'both', label: 'Both' },
         { value: 'active', label: 'Active' },
         { value: 'inactive', label: 'Inactive' },
+    ],
+}
+
+const tierOptionRow: TableOptionRowConfig<TierFilter> = {
+    label: 'Tier',
+    ariaLabel: 'Tier Filter',
+    choices: [
+        { value: 'all', label: 'All' },
+        { value: 'Dues Paying Member', label: 'Dues' },
+        { value: 'Premium Member', label: 'Premium' },
+        { value: 'Signature Member', label: 'Signature' },
+        { value: 'Inner Circle Member', label: 'Inner Circle' },
+        { value: 'none', label: 'None' },
+    ],
+}
+
+const matchedOptionRow: TableOptionRowConfig<MatchedFilter> = {
+    label: 'User Matched',
+    ariaLabel: 'User Matched Filter',
+    choices: [
+        { value: 'both', label: 'Both' },
+        { value: 'matched', label: 'Matched' },
+        { value: 'unmatched', label: 'Unmatched' },
     ],
 }
 
@@ -247,15 +274,17 @@ interface TableOptionRowProps<T extends boolean | string> {
     config: TableOptionRowConfig<T>
     value: T
     onChange: (value: T) => void
+    className?: string
 }
 
 function TableOptionRow<T extends boolean | string>({
     config: { label, ariaLabel, choices },
     value,
     onChange,
+    className,
 }: TableOptionRowProps<T>) {
     return (
-        <div className={styles.tableOptionRow}>
+        <div className={cn(styles.tableOptionRow, className)}>
             <span className={styles.tableOptionLabel}>{label}</span>
             <ToggleGroup<T>
                 ariaLabel={ariaLabel}
@@ -329,6 +358,19 @@ function TableOptionsMenu({
                                 value={options.activity}
                                 onChange={(value) =>
                                     setOption('activity', value)
+                                }
+                            />
+                            <TableOptionRow
+                                config={tierOptionRow}
+                                value={options.tier}
+                                onChange={(value) => setOption('tier', value)}
+                                className={styles.tableOptionRowWide}
+                            />
+                            <TableOptionRow
+                                config={matchedOptionRow}
+                                value={options.matched}
+                                onChange={(value) =>
+                                    setOption('matched', value)
                                 }
                             />
                             {tableOptionRows.map((config) => (
@@ -454,14 +496,17 @@ export default function Page() {
 
     const visibleMembers = useMemo(
         () =>
-            options.activity === 'both'
-                ? members
-                : members.filter(
-                      (member) =>
-                          Boolean(member.isActive) ===
-                          (options.activity === 'active')
-                  ),
-        [members, options.activity]
+            members.filter((member) => {
+                const activity = member.isActive ? 'active' : 'inactive'
+                const tier = member.recurringSummary?.tier ?? 'none'
+                const matched = member.userMatched ? 'matched' : 'unmatched'
+                return (
+                    ['both', activity].includes(options.activity) &&
+                    ['all', tier].includes(options.tier) &&
+                    ['both', matched].includes(options.matched)
+                )
+            }),
+        [members, options.activity, options.tier, options.matched]
     )
 
     const matchCount = useMemo(
@@ -553,184 +598,203 @@ export default function Page() {
     }
 
     return (
-        <Panel
-            includeHeader
+        <ProtectedPanel
             label="Membership"
-            headerRight={
-                <div className={styles.panelHeaderRight}>
-                    <MembershipCounts
-                        activeCount={isPending ? undefined : activeMemberCount}
-                        eligibleCount={eligibleMemberCount}
-                        showingCount={visibleMembers.length}
-                        totalCount={
-                            options.activity === 'both'
-                                ? totalEntries
-                                : undefined
-                        }
-                    />
-                    <SearchBar
-                        placeholder="Search..."
-                        searchbarStyle="pill"
-                        aria-label="Search memberships"
-                        value={searchDraft}
-                        resultCount={matchCount}
-                        onChange={(event) => setSearchDraft(event.target.value)}
-                        onClear={() => setSearchDraft('')}
-                        onKeyDown={(event) => {
-                            if (event.key !== 'Enter' || matchCount === 0)
-                                return
-                            event.preventDefault()
-                            setChangeTarget(null)
-                            setScrollToMatchToken((token) => token + 1)
-                        }}
-                        filterLabel="Search column"
-                        filterContent={({ close }) =>
-                            membershipSearchFields.map((field) => (
-                                <DropdownOverlayButton
-                                    key={field.value}
-                                    selected={searchField === field.value}
-                                    onClick={() => {
-                                        setSearchField(field.value)
-                                        close()
-                                    }}
-                                >
-                                    {field.label}
-                                </DropdownOverlayButton>
-                            ))
-                        }
-                    />
-                </div>
-            }
+            requiredPermissions={[PermissionIds.VIEW_MEMBERSHIPS_PANEL]}
         >
-            <div className={styles.panelContents}>
-                <div className={styles.scrollView}>
-                    <div className={styles.galleryHeader}>
-                        <div className={styles.galleryHeading}>
-                            <h1 className={styles.galleryTitle}>Membership</h1>
-                            <p className={styles.gallerySubTitle}>
-                                Manage membership records and details.
-                            </p>
-                        </div>
-
-                        <div className={styles.tableToolbar}>
-                            {isLinking && (
-                                <FaCog
-                                    className={styles.linkingSpinner}
-                                    aria-label="Updating user match"
-                                />
-                            )}
-                            {isSaving && (
-                                <button
-                                    type="button"
-                                    className={styles.toolbarButton}
-                                    disabled
-                                >
-                                    <FaCog className={styles.savingSpinner} />{' '}
-                                    Saving {saveMutation.variables?.length}{' '}
-                                    Change
-                                    {saveMutation.variables?.length === 1
-                                        ? ''
-                                        : 's'}
-                                </button>
-                            )}
-                            {isEditing && !isSaving && (
-                                <EditToolbar
-                                    members={members}
-                                    editController={editController}
-                                    saveMutation={saveMutation}
-                                    discardEdits={discardEdits}
-                                    onNavigateToChange={navigateToChange}
-                                />
-                            )}
-                            {!isEditing && !isSaving && (
-                                <button
-                                    type="button"
-                                    className={styles.toolbarButton}
-                                    onClick={() => {
-                                        setChangeTarget(null)
-                                        setIsEditing(true)
-                                    }}
-                                >
-                                    <FaEdit /> Edit
-                                </button>
-                            )}
-                            <TableOptionsMenu
-                                options={options}
-                                setOption={setOption}
-                                onRestoreDefaults={() => {
-                                    resetOptions()
-                                    resetColumnOrder()
-                                }}
-                            />
-                        </div>
+            <Panel
+                includeHeader
+                label="Membership"
+                headerRight={
+                    <div className={styles.panelHeaderRight}>
+                        <MembershipCounts
+                            activeCount={
+                                isPending ? undefined : activeMemberCount
+                            }
+                            eligibleCount={eligibleMemberCount}
+                            showingCount={visibleMembers.length}
+                            totalCount={
+                                options.activity === 'both' &&
+                                options.tier === 'all' &&
+                                options.matched === 'both'
+                                    ? totalEntries
+                                    : undefined
+                            }
+                        />
+                        <SearchBar
+                            placeholder="Search..."
+                            searchbarStyle="pill"
+                            aria-label="Search memberships"
+                            value={searchDraft}
+                            resultCount={matchCount}
+                            onChange={(event) =>
+                                setSearchDraft(event.target.value)
+                            }
+                            onClear={() => setSearchDraft('')}
+                            onKeyDown={(event) => {
+                                if (event.key !== 'Enter' || matchCount === 0)
+                                    return
+                                event.preventDefault()
+                                setChangeTarget(null)
+                                setScrollToMatchToken((token) => token + 1)
+                            }}
+                            filterLabel="Search column"
+                            filterContent={({ close }) =>
+                                membershipSearchFields.map((field) => (
+                                    <DropdownOverlayButton
+                                        key={field.value}
+                                        selected={searchField === field.value}
+                                        onClick={() => {
+                                            setSearchField(field.value)
+                                            close()
+                                        }}
+                                    >
+                                        {field.label}
+                                    </DropdownOverlayButton>
+                                ))
+                            }
+                        />
                     </div>
-
-                    <div
-                        className={styles.tableWrapper}
-                        onWheel={() => setChangeTarget(null)}
-                        onTouchMove={() => setChangeTarget(null)}
-                    >
-                        {error ? (
-                            <div className={styles.tableStatus} role="alert">
-                                <p className={styles.tableStatusTitle}>
-                                    Could not load membership records.
+                }
+            >
+                <div className={styles.panelContents}>
+                    <div className={styles.scrollView}>
+                        <div className={styles.galleryHeader}>
+                            <div className={styles.galleryHeading}>
+                                <h1 className={styles.galleryTitle}>
+                                    Membership
+                                </h1>
+                                <p className={styles.gallerySubTitle}>
+                                    Manage membership records and details.
                                 </p>
-                                <p className={styles.tableStatusDetail}>
-                                    {error.message}
-                                </p>
-                                <button
-                                    type="button"
-                                    className={styles.toolbarButton}
-                                    onClick={refetch}
-                                >
-                                    Retry
-                                </button>
                             </div>
-                        ) : (
-                            <Table
-                                columns={columns}
-                                data={visibleMembers}
-                                rowKey={(m) => m.id}
-                                loading={isPending}
-                                loadingLabel="Loading membership records"
-                                collapsedCategories={collapsedCategories}
-                                options={{
-                                    editing: isEditing,
-                                    zebra: options.showZebra,
-                                    reorderable: isEditing,
-                                    entryOrder: columnOrder,
-                                    onEntryOrderChange: onColumnOrderChange,
-                                }}
-                                isScrollTarget={isScrollTarget}
-                                scrollToColumnKey={
-                                    changeTarget?.columnKeys ?? searchColumnKeys
-                                }
-                                scrollToRowToken={scrollToMatchToken}
-                                placeholderRowCount={estimatePlaceholderRows(
-                                    hasNextPage,
-                                    totalEntries,
-                                    members.length,
-                                    visibleMembers.length
+
+                            <div className={styles.tableToolbar}>
+                                {isLinking && (
+                                    <FaCog
+                                        className={styles.linkingSpinner}
+                                        aria-label="Updating user match"
+                                    />
                                 )}
-                                onPlaceholderVisible={loadMore}
-                            />
-                        )}
+                                {isSaving && (
+                                    <button
+                                        type="button"
+                                        className={styles.toolbarButton}
+                                        disabled
+                                    >
+                                        <FaCog
+                                            className={styles.savingSpinner}
+                                        />{' '}
+                                        Saving {saveMutation.variables?.length}{' '}
+                                        Change
+                                        {saveMutation.variables?.length === 1
+                                            ? ''
+                                            : 's'}
+                                    </button>
+                                )}
+                                {isEditing && !isSaving && (
+                                    <EditToolbar
+                                        members={members}
+                                        editController={editController}
+                                        saveMutation={saveMutation}
+                                        discardEdits={discardEdits}
+                                        onNavigateToChange={navigateToChange}
+                                    />
+                                )}
+                                {!isEditing && !isSaving && (
+                                    <button
+                                        type="button"
+                                        className={styles.toolbarButton}
+                                        onClick={() => {
+                                            setChangeTarget(null)
+                                            setIsEditing(true)
+                                        }}
+                                    >
+                                        <FaEdit /> Edit
+                                    </button>
+                                )}
+                                <TableOptionsMenu
+                                    options={options}
+                                    setOption={setOption}
+                                    onRestoreDefaults={() => {
+                                        resetOptions()
+                                        resetColumnOrder()
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        <div
+                            className={styles.tableWrapper}
+                            onWheel={() => setChangeTarget(null)}
+                            onTouchMove={() => setChangeTarget(null)}
+                        >
+                            {error ? (
+                                <div
+                                    className={styles.tableStatus}
+                                    role="alert"
+                                >
+                                    <p className={styles.tableStatusTitle}>
+                                        Could not load membership records.
+                                    </p>
+                                    <p className={styles.tableStatusDetail}>
+                                        {error.message}
+                                    </p>
+                                    <button
+                                        type="button"
+                                        className={styles.toolbarButton}
+                                        onClick={refetch}
+                                    >
+                                        Retry
+                                    </button>
+                                </div>
+                            ) : (
+                                <Table
+                                    columns={columns}
+                                    data={visibleMembers}
+                                    rowKey={(m) => m.id}
+                                    loading={isPending}
+                                    loadingLabel="Loading membership records"
+                                    collapsedCategories={collapsedCategories}
+                                    options={{
+                                        editing: isEditing,
+                                        zebra: options.showZebra,
+                                        reorderable: isEditing,
+                                        entryOrder: columnOrder,
+                                        onEntryOrderChange: onColumnOrderChange,
+                                    }}
+                                    isScrollTarget={isScrollTarget}
+                                    scrollToColumnKey={
+                                        changeTarget?.columnKeys ??
+                                        searchColumnKeys
+                                    }
+                                    scrollToRowToken={scrollToMatchToken}
+                                    placeholderRowCount={estimatePlaceholderRows(
+                                        hasNextPage,
+                                        totalEntries,
+                                        members.length,
+                                        visibleMembers.length
+                                    )}
+                                    onPlaceholderVisible={loadMore}
+                                />
+                            )}
+                        </div>
                     </div>
+                    <SearchModal
+                        open={memberToMatch != null}
+                        onClose={() => {
+                            setMemberToMatch(null)
+                            linkMutation.reset()
+                        }}
+                        title="Match User"
+                        subtitle="Search users and link one to this membership record."
+                        searchValue={userSearch.query ?? ''}
+                        onSearchChange={handleUserSearch}
+                    >
+                        {renderUserPickerResults()}
+                    </SearchModal>
                 </div>
-                <SearchModal
-                    open={memberToMatch != null}
-                    onClose={() => {
-                        setMemberToMatch(null)
-                        linkMutation.reset()
-                    }}
-                    title="Match User"
-                    subtitle="Search users and link one to this membership record."
-                    searchValue={userSearch.query ?? ''}
-                    onSearchChange={handleUserSearch}
-                >
-                    {renderUserPickerResults()}
-                </SearchModal>
-            </div>
-        </Panel>
+            </Panel>
+        </ProtectedPanel>
     )
 }

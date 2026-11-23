@@ -224,6 +224,20 @@ export function CandidateDetails({
                                     {getStateLabel(lastCandidate.state)}
                                 </span>
                             </VStack>
+                            {lastCandidate.office && (
+                                <VStack
+                                    align="left"
+                                    gap={0}
+                                    className={styles.infoItem}
+                                >
+                                    <span className={styles.infoLabel}>
+                                        Office
+                                    </span>
+                                    <span className={styles.infoValue}>
+                                        {lastCandidate.office}
+                                    </span>
+                                </VStack>
+                            )}
                             {showJurisdiction && (
                                 <VStack
                                     align="left"

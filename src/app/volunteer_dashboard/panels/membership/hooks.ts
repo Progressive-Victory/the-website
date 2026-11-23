@@ -17,6 +17,7 @@ import {
     HistoryEntry,
     Member,
     MemberEdits,
+    MembershipTier,
     PendingUpdate,
 } from './membership.types'
 import { useCurrentUser, useFetch, usePaginatedSearch } from '@/util/hooks'
@@ -424,6 +425,8 @@ export function useSaveMemberships(onSubmitted: () => void) {
 
 export type EligibilityFilter = 'both' | 'eligible' | 'ineligible'
 export type ActivityFilter = 'both' | 'active' | 'inactive'
+export type TierFilter = 'all' | 'none' | MembershipTier
+export type MatchedFilter = 'both' | 'matched' | 'unmatched'
 
 export interface MembershipTableOptions {
     showRowNumber: boolean
@@ -434,11 +437,13 @@ export interface MembershipTableOptions {
     collapseFulfillment: boolean
     eligibility: EligibilityFilter
     activity: ActivityFilter
+    tier: TierFilter
+    matched: MatchedFilter
 }
 
 export type BooleanTableOption = Exclude<
     keyof MembershipTableOptions,
-    'eligibility' | 'activity'
+    'eligibility' | 'activity' | 'tier' | 'matched'
 >
 
 const defaultTableOptions: MembershipTableOptions = {
@@ -450,6 +455,8 @@ const defaultTableOptions: MembershipTableOptions = {
     collapseFulfillment: false,
     eligibility: 'both',
     activity: 'both',
+    tier: 'all',
+    matched: 'both',
 }
 
 const booleanTableOptions: BooleanTableOption[] = [
@@ -584,6 +591,71 @@ function useMembershipsQuery(eligibility: EligibilityFilter) {
     const eligibleMemberCount = eligibleCountQuery.data?.count
 
     return { query, members, totalEntries, eligibleMemberCount }
+}
+
+export function useActiveMatchedUsers(
+    enabled: boolean,
+    filters: { tier?: MembershipTier; eligible?: boolean } = {}
+) {
+    const { ready, onGet } = useFetch()
+
+    const query = useQuery({
+        queryKey: ['/actblue/memberships', { isMember: true, all: true }],
+        queryFn:
+            ready && enabled
+                ? async ({ signal }: { signal: AbortSignal }) => {
+                      const fetchPage = (page: number) =>
+                          onGet(
+                              '/actblue/memberships',
+                              zPaginatedResponse(zMembershipsResponsePacket),
+                              {
+                                  query: {
+                                      page,
+                                      limit: PAGE_SIZE,
+                                      isMember: true,
+                                  },
+                                  signal,
+                              }
+                          )
+                      const first = await fetchPage(0)
+                      const pageCount = Math.ceil(first.count / PAGE_SIZE)
+                      const rest = await Promise.all(
+                          Array.from({ length: pageCount - 1 }, (_, index) =>
+                              fetchPage(index + 1)
+                          )
+                      )
+                      return [first, ...rest].flatMap((page) => page.data)
+                  }
+                : skipToken,
+    })
+
+    const users = useMemo(() => {
+        const matched = (query.data ?? [])
+            .map(mapPacketToMember)
+            .flatMap(
+                ({
+                    isActive,
+                    userMatched,
+                    packet,
+                    recurringSummary,
+                    eligibleForBenefits,
+                }) =>
+                    isActive &&
+                    userMatched &&
+                    packet.user &&
+                    [undefined, recurringSummary?.tier].includes(
+                        filters.tier
+                    ) &&
+                    [undefined, Boolean(eligibleForBenefits)].includes(
+                        filters.eligible
+                    )
+                        ? [packet.user]
+                        : []
+            )
+        return [...new Map(matched.map((user) => [user.id, user])).values()]
+    }, [query.data, filters.tier, filters.eligible])
+
+    return { users, isPending: query.isPending, error: query.error }
 }
 
 export function usePendingUpdates(edit: EditController, members: Member[]) {

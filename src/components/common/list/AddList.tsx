@@ -2,7 +2,9 @@
 
 import styles from './AddList.module.css'
 import { List, type ListProps } from './List'
-import { useListEditing } from './ListContext'
+import { useListEditing, useListLoading } from './ListContext'
+import { ListRowSkeletonBar } from './ListRow'
+import { NavigationRow } from './NavigationRow'
 import { useListField, type ListRowFieldProps } from './useListField'
 import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
 import { cn } from '@/util'
@@ -14,6 +16,7 @@ export interface ListItem {
     label: ReactNode
     searchText?: string
     description?: ReactNode
+    href?: string
 }
 
 export interface AddListProps
@@ -109,6 +112,7 @@ function AddListItems({
     onRemove,
 }: AddListItemsProps) {
     const editing = useListEditing()
+    const loading = useListLoading()
     const { value, onValueChange } = useListField<ListItem[]>(
         {
             value: items,
@@ -122,23 +126,42 @@ function AddListItems({
     )
     const current = value ?? []
 
+    if (loading)
+        return Array.from(
+            { length: Math.max(current.length, 1) },
+            (_, index) => (
+                <AddListItem
+                    key={index}
+                    label={<ListRowSkeletonBar seed={String(index)} />}
+                />
+            )
+        )
+
     return (
         <>
             {!current.length && !editing && (
                 <AddListEmptyRow>{emptyLabel}</AddListEmptyRow>
             )}
-            {current.map((item) => (
-                <AddListItem
-                    key={item.id}
-                    label={item.label}
-                    onRemove={() => {
-                        onRemove?.(item.id)
-                        onValueChange(
-                            current.filter((other) => other.id !== item.id)
-                        )
-                    }}
-                />
-            ))}
+            {current.map((item) =>
+                !editing && item.href ? (
+                    <NavigationRow
+                        key={item.id}
+                        label={item.label}
+                        href={item.href}
+                    />
+                ) : (
+                    <AddListItem
+                        key={item.id}
+                        label={item.label}
+                        onRemove={() => {
+                            onRemove?.(item.id)
+                            onValueChange(
+                                current.filter((other) => other.id !== item.id)
+                            )
+                        }}
+                    />
+                )
+            )}
             {editing &&
                 (options ? (
                     <AddListPicker

@@ -1,6 +1,7 @@
 'use client'
 
 import { JurisdictionField } from '../components/JurisdictionField'
+import { OfficeField } from '../components/OfficeField'
 import styles from './DetailView.module.css'
 import { Form, FormControls, FormState } from '@/components/common/forms'
 import {
@@ -134,6 +135,11 @@ export function DetailView({
                     field="electionStatus"
                     options={electionStatusOptions}
                 />
+                <OfficeField
+                    label="Office"
+                    field="office"
+                    indicator="unsupported"
+                />
                 <JurisdictionField label="Jurisdiction" field="jurisdiction" />
                 <ListBreak />
                 <DateRow
@@ -152,6 +158,22 @@ export function DetailView({
                 <SocialLinkRow label="Social Link" field="handleHref" />
                 <SocialLinkRow label="Website Link" field="websiteHref" />
                 <SocialLinkRow label="Donate Link" field="donateHref" />
+                <ListBreak />
+                <SocialLinkRow
+                    label="Twitter Post"
+                    field="twitterPostHref"
+                    indicator="unsupported"
+                />
+                <SocialLinkRow
+                    label="Instagram Post"
+                    field="instagramPostHref"
+                    indicator="unsupported"
+                />
+                <SocialLinkRow
+                    label="Bluesky Post"
+                    field="bluskyPostHref"
+                    indicator="unsupported"
+                />
             </List>
             <List title="Endorsement Details">
                 <DropdownRow
@@ -178,7 +200,17 @@ export function DetailView({
                     options={initiativeLevelOptions}
                 />
                 <QuoteRow label="Announcement Message" />
+                <SocialLinkRow
+                    label="One Pager"
+                    field="onePagerHref"
+                    indicator="unsupported"
+                />
                 <ListBreak />
+                <DateRow
+                    label="Endorsement Date"
+                    field="endorsementDate"
+                    dateFormat={{ dateStyle: 'medium' }}
+                />
                 <ButtonToggleRow
                     label="Publish Endorsement"
                     field="endorsementPublished"

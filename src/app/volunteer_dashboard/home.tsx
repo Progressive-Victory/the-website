@@ -2,6 +2,7 @@ import styles from './page.module.css'
 import { DiscordAvatar } from '@/components/common'
 import { Detail } from '@/components/common/navigation_stack/detail/Detail'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
+import { PermissionIds } from '@/models'
 import { cn } from '@/util'
 import type { ReactElement } from 'react'
 import { FaDonate, FaUserShield, FaUserTag, FaUsers } from 'react-icons/fa'
@@ -39,6 +40,7 @@ export interface VolunteerDashboardUnselectedDetailProps {
     permissionCount?: number
     positionCount?: number
     endorsementCount?: number
+    canView: (permission?: number) => boolean
 }
 
 export function renderVolunteerDashboardUnselectedDetail({
@@ -55,6 +57,7 @@ export function renderVolunteerDashboardUnselectedDetail({
     permissionCount,
     positionCount,
     endorsementCount,
+    canView,
 }: VolunteerDashboardUnselectedDetailProps): ReactElement {
     const displayName = currentUserName?.trim()
         ? currentUserName
@@ -105,6 +108,7 @@ export function renderVolunteerDashboardUnselectedDetail({
                             icon={FaUsers}
                             tag={{ count: userCount }}
                             buttonType="card"
+                            disabled={!canView(PermissionIds.VIEW_MEMBER_PANEL)}
                             resetPanelHistoryOnClick
                         />
                         <NavigationButton
@@ -114,6 +118,9 @@ export function renderVolunteerDashboardUnselectedDetail({
                             icon={FaCheckToSlot}
                             tag={{ count: endorsementCount }}
                             buttonType="card"
+                            disabled={
+                                !canView(PermissionIds.VIEW_ENDORSEMENT_PANEL)
+                            }
                             resetPanelHistoryOnClick
                         />
                     </div>
@@ -125,6 +132,9 @@ export function renderVolunteerDashboardUnselectedDetail({
                             href="/volunteer_dashboard/panels/fundraising"
                             icon={FaDonate}
                             buttonType="card"
+                            disabled={
+                                !canView(PermissionIds.VIEW_FUNDRAISING_PANEL)
+                            }
                             resetPanelHistoryOnClick
                         />
                         <NavigationButton
@@ -134,6 +144,9 @@ export function renderVolunteerDashboardUnselectedDetail({
                             icon={FaMoneyCheckDollar}
                             tag={{ count: membershipCount }}
                             buttonType="card"
+                            disabled={
+                                !canView(PermissionIds.VIEW_MEMBERSHIPS_PANEL)
+                            }
                             resetPanelHistoryOnClick
                         />
                         <NavigationButton
@@ -143,6 +156,7 @@ export function renderVolunteerDashboardUnselectedDetail({
                             icon={FaDollarSign}
                             tag={{ count: donorCount }}
                             buttonType="card"
+                            disabled={!canView(PermissionIds.VIEW_DONORS_PANEL)}
                             resetPanelHistoryOnClick
                         />
                         <NavigationButton
@@ -152,6 +166,9 @@ export function renderVolunteerDashboardUnselectedDetail({
                             icon={FaMoneyBills}
                             tag={{ count: contributionCount }}
                             buttonType="card"
+                            disabled={
+                                !canView(PermissionIds.VIEW_CONTRIBUTIONS_PANEL)
+                            }
                             resetPanelHistoryOnClick
                         />
                     </div>
@@ -164,6 +181,7 @@ export function renderVolunteerDashboardUnselectedDetail({
                             icon={FaUserTag}
                             tag={{ count: roleCount }}
                             buttonType="card"
+                            disabled={!canView(PermissionIds.VIEW_ROLES_PANEL)}
                             resetPanelHistoryOnClick
                         />
                         <NavigationButton
@@ -182,6 +200,9 @@ export function renderVolunteerDashboardUnselectedDetail({
                             icon={FaClipboardUser}
                             tag={{ count: positionCount }}
                             buttonType="card"
+                            disabled={
+                                !canView(PermissionIds.VIEW_POSITIONS_PANEL)
+                            }
                             resetPanelHistoryOnClick
                         />
                     </div>

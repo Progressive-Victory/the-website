@@ -44,6 +44,16 @@
     margin: 0;
 }
 
+.skeletonTitle {
+    width: 12rem;
+    height: 1.1rem;
+}
+
+.skeletonSubtitle {
+    width: 6rem;
+    height: 0.6rem;
+}
+
 .buttonRow {
     display: flex;
     align-items: center;

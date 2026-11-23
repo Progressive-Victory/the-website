@@ -1,41 +1,12 @@
-.controls {
+.filterMenu {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.15rem;
+    min-width: 12rem;
 }
 
-.select {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-
-    & > span {
-        font-weight: 500;
-        letter-spacing: -0.01em;
-        color: rgba(15, 23, 42, 0.7);
-    }
-
-    & > select {
-        border-radius: 0.85rem;
-        border: 1px solid rgba(17, 24, 39, 0.12);
-        background: rgba(255, 255, 255, 0.75);
-        padding: 0.35rem 0.55rem;
-        color: rgba(15, 23, 42, 0.8);
-        outline: none;
-    }
-}
-
-.filterSelect {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-
-    & > strong {
-        font-weight: 500;
-        color: rgba(15, 23, 42, 0.75);
-    }
+.filterValueSet.filterValueSet {
+    color: rgba(2, 132, 199, 1);
 }
 
 .searchInput {
@@ -50,7 +21,7 @@
     }
 }
 
-.sidebarSearchInput {
+.sidebarSearchInput.sidebarSearchInput {
     width: 100%;
     max-width: none;
     padding-block: 0.25rem;
