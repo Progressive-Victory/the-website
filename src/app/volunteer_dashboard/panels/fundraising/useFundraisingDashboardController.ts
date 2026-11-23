@@ -87,6 +87,48 @@ function computeFundraisingStats(
     }
 }
 
+function getMonthRanges() {
+    const now = new Date()
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const lastMonthEnd = new Date(thisMonthStart.getTime() - 1000)
+    return { thisMonthStart, lastMonthStart, lastMonthEnd }
+}
+
+function computeRecurringRevenueSummary(
+    contributions: ActBlueDonationPacket[],
+    {
+        thisMonthStart,
+        lastMonthStart,
+        lastMonthEnd,
+    }: ReturnType<typeof getMonthRanges>
+) {
+    const lastMonthStats = computeFundraisingStats(
+        contributions.filter((contribution) =>
+            isWithinRange(contribution.paidAt, lastMonthStart, lastMonthEnd)
+        )
+    )
+    const newRecurring = contributions.filter(
+        (contribution) =>
+            contribution.isRecurring &&
+            contribution.sequence === 0 &&
+            isWithinRange(contribution.paidAt, thisMonthStart, null)
+    )
+    const newThisMonthTotal = newRecurring.reduce(
+        (sum, contribution) => sum + contribution.amount,
+        0
+    )
+
+    return {
+        lastMonthTotal: lastMonthStats.recurringDollarsRaised,
+        lastMonthCount: lastMonthStats.recurringContributionCount,
+        newThisMonthTotal,
+        newThisMonthCount: newRecurring.length,
+        projectedTotal:
+            lastMonthStats.recurringDollarsRaised + newThisMonthTotal,
+    }
+}
+
 function findBucketIndex(buckets: { start: Date; end: Date }[], paidAt: Date) {
     const time = paidAt.getTime()
     let low = 0
@@ -222,6 +264,7 @@ export function useFundraisingDashboardController() {
         start: Date
         end: Date
     } | null>(null)
+    const [monthRanges] = useState(getMonthRanges)
 
     const isAllTime = !startDate && !endDate
 
@@ -350,9 +393,10 @@ export function useFundraisingDashboardController() {
             startDate,
             previousPeriodRange?.start,
             chartBuckets[0]?.start,
+            monthRanges.lastMonthStart,
         ].filter((date): date is Date => date != null)
         return new Date(Math.min(...starts.map((date) => date.getTime())))
-    }, [startDate, previousPeriodRange, chartBuckets])
+    }, [startDate, previousPeriodRange, chartBuckets, monthRanges])
 
     const contributionsQuery = useQuery({
         queryKey: [
@@ -430,6 +474,13 @@ export function useFundraisingDashboardController() {
     )
 
     const statsQuery = { data: currentStats }
+
+    const recurringRevenue = useMemo<
+        Partial<ReturnType<typeof computeRecurringRevenueSummary>>
+    >(() => {
+        if (!contributions) return {}
+        return computeRecurringRevenueSummary(contributions, monthRanges)
+    }, [contributions, monthRanges])
 
     const recurringPct = useMemo(() => {
         if (!currentStats) return null
@@ -584,6 +635,7 @@ export function useFundraisingDashboardController() {
         isAwaitingDraftEndDate,
         canApplyCustomRange,
         statsQuery,
+        recurringRevenue,
         allTimeStatsQuery,
         membershipCountQuery,
         contributionCountQuery,

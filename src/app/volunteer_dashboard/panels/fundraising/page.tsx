@@ -67,6 +67,7 @@ export default function Page() {
         canApplyCustomRange,
         isAwaitingDraftEndDate,
         statsQuery,
+        recurringRevenue,
         allTimeStatsQuery,
         membershipCountQuery,
         contributionCountQuery,
@@ -668,6 +669,36 @@ export default function Page() {
                                 stat2={`One-Time ${formatCount(
                                     stats.oneTimeContributionCount
                                 )}`}
+                            />
+                        </div>
+
+                        <div className={styles.recurringGrid}>
+                            <DashboardWidget
+                                title="Last Month Recurring"
+                                value={formatCurrency(
+                                    recurringRevenue.lastMonthTotal
+                                )}
+                                stat1={formatDonationCountLabel(
+                                    recurringRevenue.lastMonthCount
+                                )}
+                            />
+
+                            <DashboardWidget
+                                title="New Recurring This Month"
+                                value={formatCurrency(
+                                    recurringRevenue.newThisMonthTotal
+                                )}
+                                stat1={formatDonationCountLabel(
+                                    recurringRevenue.newThisMonthCount
+                                )}
+                            />
+
+                            <DashboardWidget
+                                title="Projected Recurring"
+                                value={formatCurrency(
+                                    recurringRevenue.projectedTotal
+                                )}
+                                stat1="Last month + new this month"
                             />
                         </div>
 
