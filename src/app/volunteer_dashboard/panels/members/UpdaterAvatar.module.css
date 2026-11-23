@@ -1,0 +1,48 @@
+.avatar {
+    flex-shrink: 0;
+    border-radius: 9999px;
+}
+
+.system {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    color: rgba(2, 132, 199, 1);
+    background: rgba(2, 132, 199, 0.1);
+}
+
+.gear.gear.gear {
+    width: 55%;
+    height: 55%;
+}
+
+.named {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.tooltip {
+    position: fixed;
+    z-index: 1000;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.45rem;
+    white-space: nowrap;
+    font-size: 0.7rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: rgba(241, 245, 249, 0.95);
+    background: rgba(15, 23, 42, 0.92);
+    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.28);
+    pointer-events: none;
+    transform: translate(calc(-100% - 0.4rem), -50%);
+    animation: tooltipIn 100ms ease;
+}
+
+@keyframes tooltipIn {
+    from {
+        opacity: 0;
+        transform: translate(calc(-100% - 0.4rem + 3px), -50%);
+    }
+}

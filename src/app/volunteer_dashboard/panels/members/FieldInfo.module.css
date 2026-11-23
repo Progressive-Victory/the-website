@@ -1,0 +1,309 @@
+.stack {
+    --stack-motion:
+        transform 380ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 380ms cubic-bezier(0.32, 0.72, 0, 1);
+
+    display: grid;
+    width: 20rem;
+    max-width: 100%;
+    overflow: hidden;
+
+    & > .page {
+        grid-area: 1 / 1;
+        align-self: start;
+        transition:
+            var(--stack-motion),
+            visibility 0s;
+    }
+
+    & > .detail {
+        visibility: hidden;
+        transform: translateX(100%);
+        transition:
+            var(--stack-motion),
+            visibility 0s linear 380ms;
+    }
+
+    &[data-pushed='true'] {
+        & > .root {
+            visibility: hidden;
+            transform: translateX(-30%);
+            opacity: 0;
+            transition:
+                var(--stack-motion),
+                visibility 0s linear 380ms;
+        }
+
+        & > .detail {
+            visibility: visible;
+            transform: none;
+            transition:
+                var(--stack-motion),
+                visibility 0s;
+        }
+    }
+}
+
+.page {
+    --field-accent: rgba(2, 132, 199, 1);
+
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    padding: 0.25rem;
+}
+
+.header {
+    display: flex;
+    margin-bottom: -0.5rem;
+}
+
+.backButton.backButton {
+    gap: 0.15rem;
+    padding: 0.35rem 0.45rem 0.35rem 0.15rem;
+    font-size: 0.8rem;
+    border-radius: 0.55rem;
+
+    & svg {
+        width: 0.95rem;
+        height: 0.95rem;
+    }
+}
+
+.compare.compare.compare {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.6rem 0.7rem;
+}
+
+.compareValue {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 0.72rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: rgba(15, 23, 42, 0.5);
+
+    &[data-current='true'] {
+        font-weight: 600;
+        text-align: right;
+        color: rgba(15, 23, 42, 0.85);
+    }
+
+    &[data-empty='true'] {
+        font-style: italic;
+        color: rgba(15, 23, 42, 0.4);
+    }
+}
+
+.compareArrow.compareArrow.compareArrow {
+    flex-shrink: 0;
+    width: 0.6rem;
+    height: 0.6rem;
+    color: rgba(15, 23, 42, 0.35);
+}
+
+.section {
+    display: grid;
+    gap: 0.35rem;
+
+    & > section {
+        margin-block: 0;
+
+        & h3 {
+            flex: 1;
+            font-size: 0.85rem;
+            line-height: 1.2rem;
+        }
+
+        & p {
+            padding-inline: 0.75rem;
+            font-size: 0.68rem;
+            line-height: 1.4;
+        }
+    }
+}
+
+.title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.editButton {
+    position: relative;
+    top: -1px;
+    min-width: 3.5rem;
+    padding: 0.1rem 0.5rem;
+    text-align: center;
+    border: none;
+    border-radius: 9999px;
+    font: inherit;
+    font-size: 0.62rem;
+    font-weight: 600;
+    line-height: 1rem;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+    cursor: pointer;
+    transition:
+        background-color 120ms ease,
+        color 120ms ease;
+
+    &:hover {
+        background: rgba(15, 23, 42, 0.1);
+    }
+
+    &[data-editing='false'],
+    &[data-primary='true'] {
+        color: var(--field-accent);
+        background: transparent;
+
+        &:hover {
+            background: rgba(2, 132, 199, 0.1);
+        }
+    }
+
+    &:disabled,
+    &:disabled:hover {
+        color: rgba(15, 23, 42, 0.3);
+        background: transparent;
+        cursor: default;
+    }
+}
+
+.row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.4rem;
+    padding: 0 0.75rem;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 0.82rem;
+    text-align: left;
+    color: rgba(15, 23, 42, 0.9);
+
+    &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0.75rem;
+        height: 1px;
+        background: rgba(15, 23, 42, 0.08);
+    }
+
+    &:is(button) {
+        cursor: pointer;
+        transition: background-color 120ms ease;
+
+        &:hover:not(:disabled) {
+            background: rgba(15, 23, 42, 0.04);
+        }
+
+        &:disabled {
+            cursor: default;
+        }
+
+        &[data-empty='true'] .rowLabel {
+            color: rgba(15, 23, 42, 0.4);
+        }
+    }
+}
+
+.rowLabel {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.rowValue {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: rgba(15, 23, 42, 0.5);
+}
+
+.check {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    color: var(--field-accent);
+    visibility: hidden;
+
+    &[data-visible='true'] {
+        visibility: visible;
+    }
+}
+
+.list.list {
+    --list-radius: 0.75rem;
+
+    margin-top: -0.7rem;
+
+    & > div > * {
+        gap: 0.6rem;
+        min-height: 0;
+        padding: 0.45rem 0.7rem;
+        font-size: 0.78rem;
+    }
+
+    & svg {
+        width: 0.85rem;
+        height: 0.85rem;
+    }
+
+    & .check {
+        width: 0.6rem;
+        height: 0.6rem;
+        margin-inline: 0.125rem;
+    }
+
+    & > div > button {
+        border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+
+        &::after {
+            display: none;
+        }
+
+        &:first-child {
+            border-top-left-radius: calc(var(--list-radius) - 1px);
+            border-top-right-radius: calc(var(--list-radius) - 1px);
+        }
+
+        &:last-child {
+            border-bottom: 0;
+            border-bottom-left-radius: calc(var(--list-radius) - 1px);
+            border-bottom-right-radius: calc(var(--list-radius) - 1px);
+        }
+    }
+}
+
+.historyEntry {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.historyDetail {
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.62);
+}
+
+.dateTag {
+    position: relative;
+    white-space: nowrap;
+    padding: 0.1rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.06);
+}

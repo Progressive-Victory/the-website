@@ -47,6 +47,33 @@
     font-weight: 500;
 }
 
+.skeletonItem {
+    cursor: default;
+    pointer-events: none;
+
+    &:nth-child(3n + 1) .skeletonLabel {
+        width: 8.5rem;
+    }
+
+    &:nth-child(3n + 2) .skeletonLabel {
+        width: 6rem;
+    }
+
+    &:nth-child(3n + 2) .skeletonSubtitle {
+        width: 3.5rem;
+    }
+}
+
+.skeletonLabel {
+    width: 7rem;
+    height: 0.75rem;
+}
+
+.skeletonSubtitle {
+    width: 4.5rem;
+    height: 0.55rem;
+}
+
 .accountItem {
     margin-top: 0;
     flex-shrink: 0;
@@ -272,6 +299,25 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.subtitleRow {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 0;
+    max-width: 100%;
+
+    & .subtitleSection,
+    & .accountSubtitle {
+        min-width: 0;
+    }
+
+    & .labelPill {
+        align-self: center;
+        flex-shrink: 0;
+        padding-inline: 0.3rem;
+    }
 }
 
 .subtitleSection {

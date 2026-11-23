@@ -13,13 +13,18 @@ const DEFAULT_ANIMATION_MS = 220
 
 interface UseCollapseOptions {
     animationMs?: number
+    initialOpen?: boolean
     deps?: DependencyList
 }
 
 export function useCollapse(options: UseCollapseOptions = {}) {
-    const { animationMs = DEFAULT_ANIMATION_MS, deps = [] } = options
-    const [isOpen, setIsOpen] = useState(false)
-    const [shouldRender, setShouldRender] = useState(false)
+    const {
+        animationMs = DEFAULT_ANIMATION_MS,
+        initialOpen = false,
+        deps = [],
+    } = options
+    const [isOpen, setIsOpen] = useState(initialOpen)
+    const [shouldRender, setShouldRender] = useState(initialOpen)
     const [contentHeight, setContentHeight] = useState(0)
     const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const contentRef = useRef<HTMLDivElement | null>(null)

@@ -1,0 +1,209 @@
+.row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem;
+    box-sizing: border-box;
+    min-height: calc(1lh + 1.5rem + 1px);
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.85);
+
+    &:last-child {
+        min-height: calc(1lh + 1.5rem);
+        border-bottom: 0;
+    }
+
+    &.editing {
+        padding-block: 0;
+    }
+
+    &:has(> .menuButton) {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+        column-gap: 0.5rem;
+
+        & > .label {
+            margin-right: 0.5rem;
+        }
+    }
+}
+
+.menuButton {
+    display: flex;
+    align-items: center;
+    margin-block: -0.5rem;
+}
+
+.menuTrigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -0.25rem;
+    padding: 0.25rem;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: rgba(15, 23, 42, 0.45);
+    cursor: pointer;
+    transition:
+        color 140ms ease,
+        opacity 140ms ease;
+
+    &:hover,
+    &[aria-expanded='true'] {
+        color: rgba(15, 23, 42, 0.85);
+    }
+
+    &:active {
+        opacity: 0.6;
+    }
+}
+
+.label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.sublabel {
+    display: block;
+    margin-top: 0.1rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.5);
+}
+
+.required {
+    margin-left: 0.25rem;
+    color: #ef4444;
+}
+
+.deprecated {
+    margin-left: 0.25rem;
+    color: #eab308;
+}
+
+.unsupported {
+    margin-left: 0.25rem;
+    color: #2986cc;
+}
+
+.indicator {
+    position: relative;
+    cursor: help;
+    outline: none;
+
+    &:hover .legend,
+    &:focus-visible .legend {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        transition:
+            opacity 120ms ease-out,
+            transform 120ms ease-out;
+    }
+}
+
+.legend {
+    position: absolute;
+    bottom: calc(100% + 0.4rem);
+    left: -0.6rem;
+    z-index: 30;
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 0.6rem;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.6);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(2px);
+    transition:
+        opacity 120ms ease-in,
+        transform 120ms ease-in,
+        visibility 0s 120ms;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.legendItemActive {
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.9);
+}
+
+.legendSymbol.legendSymbol {
+    min-width: 1rem;
+    margin-left: 0;
+    font-weight: 700;
+}
+
+.labelTop {
+    align-self: start;
+}
+
+.labelCenter {
+    align-self: center;
+}
+
+.labelBottom {
+    align-self: end;
+}
+
+.value {
+    min-width: 0;
+    overflow-wrap: anywhere;
+
+    & input,
+    & select {
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+}
+
+.valueLeft {
+    text-align: left;
+}
+
+.valueCenter {
+    text-align: center;
+}
+
+.valueRight {
+    text-align: right;
+}
+
+.value[data-align='left'] :is(input, button[aria-expanded]) {
+    margin-inline: 0 auto;
+}
+
+.value[data-align='center'] :is(input, button[aria-expanded]) {
+    margin-inline: auto;
+}
+
+.value[data-align='right'] :is(input, button[aria-expanded]) {
+    margin-inline: auto 0;
+}
+
+.muted {
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.skeletonLines {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.row.invalid .value :is(input, button[aria-expanded]) {
+    border-color: #ef4444;
+}

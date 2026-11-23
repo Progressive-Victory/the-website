@@ -165,6 +165,11 @@ export const DropdownButton = forwardRef<
         const onDocumentMouseDown = (event: MouseEvent) => {
             const container = containerRef.current
             if (!container) return
+            if (
+                event.target instanceof Element &&
+                event.target.closest('[data-dropdown-overlay-portal]')
+            )
+                return
 
             if (!container.contains(event.target as Node)) {
                 closeDropdown()

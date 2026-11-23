@@ -15,6 +15,7 @@ import {
     type SidebarHeaderButtonConfig,
 } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { SidebarToggleButton } from '@/components/common/navigation_stack/sidebar/SidebarToggleButton'
+import type { SearchBarFilterContent } from '@/components/common/searchbar'
 import { cn } from '@/util'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
@@ -140,15 +141,11 @@ export function Panel({
             (sidebarList?.footer && (
                 <SidebarListFooter {...sidebarList.footer} />
             ))
-        const resolvedSidebarFilterContent =
-            sidebarFilterContent ??
-            (sidebarList?.filters && (
-                <SidebarListFilters {...sidebarList.filters} />
-            ))
-        const searchFilterContent =
+        const listFilters = sidebarList?.filters
+        const searchFilterContent: SearchBarFilterContent | undefined =
             sidebarList?.search?.filterContent ??
-            (resolvedSidebarFilterContent &&
-                (() => resolvedSidebarFilterContent))
+            sidebarFilterContent ??
+            (listFilters && <SidebarListFilters {...listFilters} />)
         const resolvedSidebarSearch =
             sidebarSearch ??
             (sidebarList?.search && (
