@@ -51,7 +51,7 @@ import {
     PaginatedResponse,
     PositionHierarchyResponse,
 } from 'pv-contracts/responses'
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, useCallback, useRef, useState } from 'react'
 import { FaInfinity } from 'react-icons/fa'
 import { FaRegPenToSquare } from 'react-icons/fa6'
 import { useMediaQuery } from 'usehooks-ts'
@@ -83,20 +83,26 @@ export default function Page() {
         enabled: positionQueries.ready,
     })
 
+    // Support direct navigation to a position with /positions?positionId=##
     const navPositionId = Number(useSearchParams().get('positionId')) || null
-    const appliedNavPositionId = useRef<number | null>(null)
+    const [appliedNavPositionId, setAppliedNavPositionId] = useState<
+        number | null
+    >(null)
 
-    useEffect(() => {
-        if (!navPositionId || appliedNavPositionId.current === navPositionId)
-            return
-        const position = positionHierarchy.data?.positions.find(
-            (p) => p.id === navPositionId
-        )
-        if (!position) return
-        appliedNavPositionId.current = navPositionId
-        setSelectedPosition(position)
+    // Find the url specified position if it hasn't been used yet.
+    const navPosition =
+        !navPositionId || appliedNavPositionId === navPositionId
+            ? null
+            : positionHierarchy.data?.positions.find(
+                  (p) => p.id === navPositionId
+              )
+
+    // Logic to apply position by id from the url query. (only applies once)
+    if (navPosition && !selectedPosition && !appliedNavPositionId) {
+        setAppliedNavPositionId(navPositionId)
+        setSelectedPosition(navPosition)
         setSidebarMobileVisible(false)
-    }, [navPositionId, positionHierarchy.data])
+    }
 
     const {
         query: userSearchQuery,
@@ -319,7 +325,10 @@ export default function Page() {
                 <MobileSidebarBackButton
                     label="Positions"
                     sidebarMobileVisible={isDesktop || sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
+                    onBack={() => {
+                        setSidebarMobileVisible(true)
+                        setSelectedPosition(null)
+                    }}
                 />
                 <Form<Position>
                     key={selectedPosition?.id}

@@ -20,7 +20,7 @@ import { zActBlueDonationPacket } from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
 import type { MembershipSearchRequest } from 'pv-contracts/requests'
 import { zMembershipsResponsePacket } from 'pv-contracts/responses'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 type ChartBarDisplayMode = 'grouped' | 'stacked'
 
@@ -119,12 +119,32 @@ function isChartViewOverrideActive(
 
 export function useFundraisingDashboardController() {
     const actblueQueries = useActblueQueries()
+    const [chartViewOverrideRange, setChartViewOverrideRange] = useState<{
+        start: Date
+        end: Date
+    } | null>(null)
 
-    const [startDate, setStartDate] = useState(() => getPresetRange('Today')[0])
-    const [endDate, setEndDate] = useState(() => getPresetRange('Today')[1])
-    const [committedPreset, setCommittedPreset] = useState<Preset | null>(
+    const [startDate, updateStartDate] = useState(
+        () => getPresetRange('Today')[0]
+    )
+    const setStartDate = (update: Date | null) => {
+        // clear chart range on update
+        updateStartDate(update)
+        setChartViewOverrideRange(null)
+    }
+    const [endDate, updateEndDate] = useState(() => getPresetRange('Today')[1])
+    const setEndDate = (update: Date | null) => {
+        updateEndDate(update)
+        setChartViewOverrideRange(null)
+    }
+    const [committedPreset, updateCommittedPreset] = useState<Preset | null>(
         'Today'
     )
+    const setCommittedPreset = (update: Preset | null) => {
+        updateCommittedPreset(update)
+        setChartViewOverrideRange(null)
+    }
+
     const [draftPreset, setDraftPreset] = useState<Preset | null>('Today')
 
     const [draftStartDate, setDraftStartDate] = useState(startDate)
@@ -135,14 +155,17 @@ export function useFundraisingDashboardController() {
     const [showDonationsLine, setShowDonationsLine] = useState(true)
     const [chartBarDisplayMode, setChartBarDisplayMode] =
         useState<ChartBarDisplayMode>('grouped')
-    const [zoomEnabled, setZoomEnabled] = useState(true)
+    const [zoomEnabled, updateZoomEnabled] = useState(true)
+    // chartViewOverrideRange is linked to zoomEnabled (set to null when setting to false).
+    const setZoomEnabled = (value: boolean) => {
+        updateZoomEnabled(value)
+        if (!value) {
+            setChartViewOverrideRange(null)
+        }
+    }
     const [showFullXToDateSpan, setShowFullXToDateSpan] = useState(false)
     const [granularityMode, setGranularityMode] =
         useState<ChartGranularityMode>('auto')
-    const [chartViewOverrideRange, setChartViewOverrideRange] = useState<{
-        start: Date
-        end: Date
-    } | null>(null)
 
     const isAllTime = !startDate && !endDate
 
@@ -324,16 +347,6 @@ export function useFundraisingDashboardController() {
         ]
     )
 
-    useEffect(() => {
-        setChartViewOverrideRange(null)
-    }, [startDate, endDate, committedPreset])
-
-    useEffect(() => {
-        if (!zoomEnabled) {
-            setChartViewOverrideRange(null)
-        }
-    }, [zoomEnabled])
-
     const chartBucketQueries = useQueries({
         queries: chartBuckets.map((bucket) => ({
             queryKey: [
@@ -373,11 +386,12 @@ export function useFundraisingDashboardController() {
         })
     }, [chartBuckets, chartBucketQueries])
 
-    useEffect(() => {
-        if (!validGranularityModes.includes(granularityMode)) {
-            setGranularityMode('auto')
-        }
-    }, [validGranularityModes, granularityMode])
+    if (
+        granularityMode != 'auto' &&
+        !validGranularityModes.includes(granularityMode)
+    ) {
+        setGranularityMode('auto')
+    }
 
     const selectedRangeLabel = useMemo(
         () => getSelectedRangeLabel(committedPreset, startDate, endDate),

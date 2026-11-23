@@ -115,15 +115,19 @@ export function AccountDetailsSection({
     const userHasDonor = !!userData.donors?.length
 
     /**
-     * The pendingLinkEmail will be set for one render during which the 
+     * The pendingLinkEmail will be set for one render during which the
      * matchedDonor field can be populated from the donors list.
      * Once populated, the address relevant state will update and the
      * pendingLinkEmail will be cleared, thus clearing the matched donor.
      * This will open the address modal.
      * */
-    const matchedDonor = useMemo(() => (userData.donors?.find(
-        (donor) => normalizeEmail(donor.email) === pendingLinkEmail
-    )), [pendingLinkEmail, userData.donors])
+    const matchedDonor = useMemo(
+        () =>
+            userData.donors?.find(
+                (donor) => normalizeEmail(donor.email) === pendingLinkEmail
+            ),
+        [pendingLinkEmail, userData.donors]
+    )
 
     if (matchedDonor) {
         setAddressDraft({

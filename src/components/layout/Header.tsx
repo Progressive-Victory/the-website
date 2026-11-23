@@ -700,7 +700,8 @@ export function Header() {
         return () => document.removeEventListener('keydown', onKeyDown)
     }, [])
 
-    if (!isOpen && mobileSubnavItem) { // Clear mobile subnav if closed.
+    if (!isOpen && mobileSubnavItem) {
+        // Clear mobile subnav if closed.
         setMobileSubnavItem(null)
     }
 

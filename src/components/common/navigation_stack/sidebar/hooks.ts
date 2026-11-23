@@ -32,9 +32,10 @@ export function useSelectionIndicator(
 
     if (!enabled) {
         if (indicatorLayoutSyncing) setIndicatorLayoutSyncing(false)
-        if (indicatorStyle.visible) setIndicatorStyle((previous) =>
-            previous.visible ? { ...previous, visible: false } : previous
-        )
+        if (indicatorStyle.visible)
+            setIndicatorStyle((previous) =>
+                previous.visible ? { ...previous, visible: false } : previous
+            )
     }
 
     useEffect(() => {

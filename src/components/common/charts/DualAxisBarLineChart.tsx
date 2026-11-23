@@ -212,6 +212,10 @@ export function Chart({
     const [dragCurrentIdx, setDragCurrentIdx] = useState<number | null>(null)
     const [dragPointerId, setDragPointerId] = useState<number | null>(null)
 
+    if (tooltipPos && (hoverIdx == null || !hoverPos)) {
+        setTooltipPos(null)
+    }
+
     useEffect(() => {
         const node = wrapRef.current
         if (!node) return
@@ -245,7 +249,6 @@ export function Chart({
 
     useLayoutEffect(() => {
         if (hoverIdx == null || !hoverPos) {
-            setTooltipPos(null)
             return
         }
 

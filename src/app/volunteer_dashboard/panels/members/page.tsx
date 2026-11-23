@@ -57,7 +57,6 @@ import {
 import { PaginatedResponse } from 'pv-contracts/responses'
 import {
     useCallback,
-    useEffect,
     useMemo,
     useState,
     type Key,
@@ -191,9 +190,7 @@ function FilterSubmenu<T>({
 export default function Page() {
     const queryClient = useQueryClient()
     const { ready, onGet, onPatch } = useFetch()
-    const navParams = useSearchParams()
-    const navUserId = navParams.get('userId')
-
+    const navUserId = useSearchParams().get('userId')
     const initialUserId = navUserId ? Number(navUserId) : null
     const [selectedId, setSelectedId] = useState<number | null>(
         Number.isFinite(initialUserId) ? initialUserId : null
@@ -787,14 +784,6 @@ export default function Page() {
 
         return fetchedUsers.filter((user) => user.id !== currentUser.id)
     }, [searchQuery.data?.data, loggedInUser.data])
-
-    useEffect(() => {
-        if (navUserId == null) return
-
-        const nextSelectedId = Number(navUserId)
-
-        setSelectedId(Number.isFinite(nextSelectedId) ? nextSelectedId : null)
-    }, [navUserId])
 
     const renderPage = () => {
         if (!selectedId || !userQuery.data) return null

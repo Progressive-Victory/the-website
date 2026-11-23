@@ -57,23 +57,23 @@ const EMPTY_DRAFT: MemberEdits = {}
 const noopUnsubscribe = () => undefined
 
 export function useColumnOrder() {
-    const [columnOrder, setColumnOrder] = useState<string[]>([])
-
-    useEffect(() => {
+    const [columnOrder, setColumnOrder] = useState<string[]>(() => {
         try {
             const raw = window.localStorage.getItem(COLUMN_ORDER_STORAGE_KEY)
-            if (raw == null) return
-
-            const parsed: unknown = JSON.parse(raw)
-            if (
-                Array.isArray(parsed) &&
-                parsed.every((id) => typeof id === 'string')
-            )
-                setColumnOrder(parsed)
+            if (raw != null) {
+                const parsed: unknown = JSON.parse(raw)
+                if (
+                    Array.isArray(parsed) &&
+                    parsed.every((id) => typeof id === 'string')
+                )
+                    return parsed
+            }
+            return []
         } catch {
             console.error('Failed to parse column order from localStorage')
+            return []
         }
-    }, [])
+    })
 
     const onColumnOrderChange = useCallback((order: string[]) => {
         setColumnOrder(order)
@@ -404,38 +404,32 @@ const defaultTableOptions: MembershipTableOptions = {
 }
 
 function useTableOptions() {
-    const [options, setOptions] =
-        useState<MembershipTableOptions>(defaultTableOptions)
-    const hydrated = useRef(false)
-
-    useEffect(() => {
+    const [options, setOptions] = useState<MembershipTableOptions>(() => {
         try {
             const raw = window.localStorage.getItem(TABLE_OPTIONS_STORAGE_KEY)
-            if (raw == null) return
+            if (raw != null) {
+                const parsed: unknown = JSON.parse(raw)
+                if (parsed == null || typeof parsed !== 'object')
+                    return defaultTableOptions
 
-            const parsed: unknown = JSON.parse(raw)
-            if (parsed == null || typeof parsed !== 'object') return
-
-            const stored = parsed as Record<string, unknown>
-            setOptions((current) => {
-                const next = { ...current }
+                const stored = parsed as Record<string, unknown>
+                const updatedTableOptions = { ...defaultTableOptions }
                 for (const key of Object.keys(
-                    current
+                    defaultTableOptions
                 ) as (keyof MembershipTableOptions)[])
                     if (typeof stored[key] === 'boolean')
-                        next[key] = stored[key]
-                return next
-            })
+                        updatedTableOptions[key] = stored[key]
+                return updatedTableOptions
+            } else {
+                return defaultTableOptions
+            }
         } catch {
             console.error('Failed to parse table options from localStorage')
+            return defaultTableOptions
         }
-    }, [])
+    })
 
     useEffect(() => {
-        if (!hydrated.current) {
-            hydrated.current = true
-            return
-        }
         try {
             window.localStorage.setItem(
                 TABLE_OPTIONS_STORAGE_KEY,
