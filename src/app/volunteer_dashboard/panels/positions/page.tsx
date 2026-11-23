@@ -10,7 +10,6 @@ import {
 } from './positions.utils'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
-import { ProtectedPage } from '@/components/ProtectedPage'
 import { Form, FormControls, FormState } from '@/components/common/forms'
 import {
     FormFieldProps,
@@ -27,6 +26,7 @@ import {
     ToggleRow,
 } from '@/components/common/list'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { type SidebarListFiltersProps } from '@/components/common/panel/sidebar_list/SidebarList'
 import { PermissionIds } from '@/models'
@@ -267,7 +267,8 @@ export default function Page() {
         deleteMutation.isPending
 
     const renderWholePage = () => (
-        <ProtectedPage
+        <ProtectedPanel
+            label="Positions"
             requiredPermissions={[PermissionIds.VIEW_POSITIONS_PANEL]}
         >
             <Panel
@@ -403,7 +404,7 @@ export default function Page() {
                     </Form>
                 </div>
             </Panel>
-        </ProtectedPage>
+        </ProtectedPanel>
     )
 
     return renderWholePage()

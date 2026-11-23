@@ -2,7 +2,6 @@
 
 import styles from './page.module.css'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
-import { ProtectedPage } from '@/components/ProtectedPage'
 import {
     List,
     ListBreak,
@@ -13,6 +12,7 @@ import {
 } from '@/components/common'
 import { Form } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import {
     SidebarListFilters,
@@ -197,7 +197,8 @@ export default function Page() {
     }
 
     return (
-        <ProtectedPage
+        <ProtectedPanel
+            label="Contributions"
             requiredPermissions={[PermissionIds.VIEW_CONTRIBUTIONS_PANEL]}
         >
             <Panel
@@ -293,6 +294,6 @@ export default function Page() {
                     )}
                 </div>
             </Panel>
-        </ProtectedPage>
+        </ProtectedPanel>
     )
 }

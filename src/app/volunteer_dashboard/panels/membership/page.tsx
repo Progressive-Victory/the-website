@@ -29,7 +29,6 @@ import {
 } from './membershipColumns'
 import styles from './page.module.css'
 import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
-import { ProtectedPage } from '@/components/ProtectedPage'
 import {
     DropdownButton,
     DropdownOverlay,
@@ -38,6 +37,7 @@ import {
     ToggleGroup,
 } from '@/components/common'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { Table } from '@/components/common/table'
 import { PermissionIds } from '@/models'
 import { DONOR_LINK_MUTATION_KEY, useLinkDonorToUser } from '@/queries'
@@ -598,7 +598,8 @@ export default function Page() {
     }
 
     return (
-        <ProtectedPage
+        <ProtectedPanel
+            label="Membership"
             requiredPermissions={[PermissionIds.VIEW_MEMBERSHIPS_PANEL]}
         >
             <Panel
@@ -794,6 +795,6 @@ export default function Page() {
                     </SearchModal>
                 </div>
             </Panel>
-        </ProtectedPage>
+        </ProtectedPanel>
     )
 }

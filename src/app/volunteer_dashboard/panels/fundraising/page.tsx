@@ -14,7 +14,6 @@ import {
 } from './fundraising.helpers'
 import styles from './page.module.css'
 import { useFundraisingDashboardController } from './useFundraisingDashboardController'
-import { ProtectedPage } from '@/components/ProtectedPage'
 import {
     DashboardWidget,
     DropdownButton,
@@ -27,6 +26,7 @@ import { Chart } from '@/components/common/charts/DualAxisBarLineChart'
 import { type ChartGranularityMode } from '@/components/common/charts/timeBuckets'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { PermissionIds } from '@/models'
 import { useEffect, useRef, useState } from 'react'
 import { FaDollarSign, FaMoneyCheckDollar, FaMoneyBills } from 'react-icons/fa6'
@@ -537,7 +537,8 @@ export default function Page() {
     }
 
     return (
-        <ProtectedPage
+        <ProtectedPanel
+            label="Fundraising"
             requiredPermissions={[PermissionIds.VIEW_FUNDRAISING_PANEL]}
         >
             <Panel includeHeader label="Fundraising">
@@ -742,6 +743,6 @@ export default function Page() {
                     </div>
                 </div>
             </Panel>
-        </ProtectedPage>
+        </ProtectedPanel>
     )
 }

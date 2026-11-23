@@ -11,11 +11,11 @@ import {
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { useActiveMatchedUsers } from '@/app/volunteer_dashboard/panels/membership/hooks'
 import { MembershipTier } from '@/app/volunteer_dashboard/panels/membership/membership.types'
-import { ProtectedPage } from '@/components/ProtectedPage'
 import { DiscordAvatar, ListContext } from '@/components/common'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
 import { FormState } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { PanelBanner } from '@/components/common/panel/panel_components/PanelBanner'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import {
@@ -1043,7 +1043,10 @@ export default function Page() {
     })
 
     return (
-        <ProtectedPage requiredPermissions={[PermissionIds.VIEW_MEMBER_PANEL]}>
+        <ProtectedPanel
+            label="Members"
+            requiredPermissions={[PermissionIds.VIEW_MEMBER_PANEL]}
+        >
             <Panel
                 includeSidebar
                 collapsedSidebarMode="compact"
@@ -1127,6 +1130,6 @@ export default function Page() {
             >
                 {renderDetails()}
             </Panel>
-        </ProtectedPage>
+        </ProtectedPanel>
     )
 }

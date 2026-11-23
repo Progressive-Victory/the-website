@@ -7,10 +7,10 @@ import { DetailView } from './panel_views/DetailView'
 import { HistoryView } from './panel_views/HistoryView'
 import { FilterTags } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
-import { ProtectedPage } from '@/components/ProtectedPage'
 import { EndorsementAvatar } from '@/components/common'
 import { FormControls, FormState } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { type SidebarListFiltersProps } from '@/components/common/panel/sidebar_list/SidebarList'
 import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
@@ -358,7 +358,8 @@ export default function Page() {
               'Endorsement')
 
     const renderWholePage = () => (
-        <ProtectedPage
+        <ProtectedPanel
+            label="Endorsements"
             requiredPermissions={[PermissionIds.VIEW_ENDORSEMENT_PANEL]}
         >
             <Panel
@@ -482,7 +483,7 @@ export default function Page() {
                     )}
                 </div>
             </Panel>
-        </ProtectedPage>
+        </ProtectedPanel>
     )
 
     return renderWholePage()
