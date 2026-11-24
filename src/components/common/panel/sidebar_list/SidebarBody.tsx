@@ -34,22 +34,40 @@ export interface SidebarBodyProps<T> {
     items: T[]
     pinnedItems?: T[]
     isLoading?: boolean
+    skeleton?: { icon?: ReactNode; subtitle?: boolean }
     error?: unknown
     selectedKey?: string | number | null
     renderItem: (item: T) => SidebarBodyItemConfig<T>
+}
+
+const SKELETON_COUNT = 10
+
+function SidebarSkeletonItems({
+    skeleton,
+}: Pick<SidebarBodyProps<unknown>, 'skeleton'>) {
+    return Array.from({ length: SKELETON_COUNT }, (_, index) => (
+        <NavigationButton
+            key={index}
+            loading
+            label=""
+            href=""
+            icon={skeleton?.icon}
+            subtitle={skeleton?.subtitle ? '' : undefined}
+            className={styles.sidebarNavigationButton}
+        />
+    ))
 }
 
 export function SidebarBody<T>({
     items,
     pinnedItems,
     isLoading = false,
+    skeleton,
     error = null,
     selectedKey = null,
     renderItem,
 }: SidebarBodyProps<T>) {
-    if (isLoading) return <div className={styles.sidebarState}>Loading...</div>
-
-    if (error) {
+    if (error && !isLoading) {
         const message = parseErrorMessage(error)
 
         return (
@@ -59,7 +77,7 @@ export function SidebarBody<T>({
         )
     }
 
-    if (items.length === 0 && !pinnedItems?.length) {
+    if (!isLoading && items.length === 0 && !pinnedItems?.length) {
         return <div className={styles.sidebarState}>No items found</div>
     }
 
@@ -120,7 +138,11 @@ export function SidebarBody<T>({
                     {pinnedItems.map((item) => renderItemButton(item))}
                 </div>
             )}
-            {items.map((item) => renderItemButton(item))}
+            {isLoading ? (
+                <SidebarSkeletonItems skeleton={skeleton} />
+            ) : (
+                items.map((item) => renderItemButton(item))
+            )}
         </>
     )
 }

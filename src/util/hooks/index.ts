@@ -12,3 +12,5 @@ export * from './useOptimisticMutation'
 export * from './usePaginatedSearch'
 export * from './usePanelBackNavigation'
 export * from './useUnpaginatedSearch'
+
+export const QUERY_STALE_TIME = 300000 // 5 mins

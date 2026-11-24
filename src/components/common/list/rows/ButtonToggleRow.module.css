@@ -1,0 +1,57 @@
+.valuePill {
+    display: inline-flex;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 3.25rem;
+    padding: 0.12rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+
+    &[data-enabled='true'] {
+        color: rgba(17, 115, 75, 1);
+        background: rgba(112, 195, 32, 0.3);
+    }
+
+    &[data-enabled='false'] {
+        color: rgba(177, 2, 2, 1);
+        background: rgba(255, 95, 75, 0.3);
+    }
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.9rem;
+    border: 0;
+    border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.72);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 140ms ease,
+        color 140ms ease;
+
+    &:hover:not(:disabled) {
+        color: rgba(2, 132, 199, 1);
+        background: rgba(14, 165, 233, 0.14);
+    }
+
+    &[data-action='disable'] {
+        color: #b91c1c;
+        background: rgba(239, 68, 68, 0.12);
+
+        &:hover:not(:disabled) {
+            color: rgba(255, 207, 201, 1);
+            background: rgba(177, 2, 2, 1);
+        }
+    }
+
+    &:focus-visible {
+        outline: 2px solid rgba(14, 165, 233, 0.25);
+        outline-offset: 1px;
+    }
+}

@@ -83,7 +83,21 @@
 
 @container navigation-stack (max-width: 63.999rem) {
     .detail[data-mobile-visible='true'] {
+        position: relative;
+        z-index: 1;
         display: flex;
+        transition:
+            transform 380ms cubic-bezier(0.32, 0.72, 0, 1),
+            visibility 0s;
+    }
+
+    [data-mobile-visible='true'] ~ .detail[data-mobile-visible='true'] {
+        visibility: hidden;
+        transform: translateX(100%);
+        pointer-events: none;
+        transition:
+            transform 380ms cubic-bezier(0.32, 0.72, 0, 1),
+            visibility 0s linear 380ms;
     }
 }
 
@@ -94,5 +108,11 @@
 
     .detail {
         display: flex;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .detail.detail[data-mobile-visible] {
+        transition: none;
     }
 }

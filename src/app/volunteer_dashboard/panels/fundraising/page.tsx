@@ -26,6 +26,8 @@ import { Chart } from '@/components/common/charts/DualAxisBarLineChart'
 import { type ChartGranularityMode } from '@/components/common/charts/timeBuckets'
 import { NavigationButton } from '@/components/common/navigation_stack/navigation_button/NavigationButton'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
+import { PermissionIds } from '@/models'
 import { useEffect, useRef, useState } from 'react'
 import { FaDollarSign, FaMoneyCheckDollar, FaMoneyBills } from 'react-icons/fa6'
 import { FiCheck } from 'react-icons/fi'
@@ -86,6 +88,8 @@ export default function Page() {
         applyChartViewOverrideRange,
         resetChartViewToSelectedRange,
     } = useFundraisingDashboardController()
+
+    const stats: Partial<typeof statsQuery.data> = statsQuery.data ?? {}
 
     const recurringChangeAmount =
         typeof recurringDollarsChange === 'number' &&
@@ -533,203 +537,212 @@ export default function Page() {
     }
 
     return (
-        <Panel includeHeader label="Fundraising">
-            <div className={styles.panelContents}>
-                <div className={styles.scrollView}>
-                    <div className={styles.galleryHeader}>
-                        <h1 className={styles.galleryTitle}>Fundraising</h1>
-                        <p className={styles.gallerySubTitle}>
-                            Manage ActBlue donors and contribution records.
-                        </p>
-                    </div>
+        <ProtectedPanel
+            label="Fundraising"
+            requiredPermissions={[PermissionIds.VIEW_FUNDRAISING_PANEL]}
+        >
+            <Panel includeHeader label="Fundraising">
+                <div className={styles.panelContents}>
+                    <div className={styles.scrollView}>
+                        <div className={styles.galleryHeader}>
+                            <h1 className={styles.galleryTitle}>Fundraising</h1>
+                            <p className={styles.gallerySubTitle}>
+                                Manage ActBlue donors and contribution records.
+                            </p>
+                        </div>
 
-                    <div className={styles.dashboard}>
-                        <div className={styles.dashboardTopRow}>
-                            <div className={styles.dashboardSummaryGroup}>
-                                <div className={styles.dashboardKicker}>
-                                    {raisedKickerLabel}
+                        <div className={styles.dashboard}>
+                            <div className={styles.dashboardTopRow}>
+                                <div className={styles.dashboardSummaryGroup}>
+                                    <div className={styles.dashboardKicker}>
+                                        {raisedKickerLabel}
+                                    </div>
+                                    <div className={styles.heroValue}>
+                                        {formatCurrency(
+                                            stats.totalDollarsRaised
+                                        )}
+                                    </div>
                                 </div>
-                                <div className={styles.heroValue}>
-                                    {formatCurrency(
-                                        statsQuery.data?.totalDollarsRaised
-                                    )}
-                                </div>
-                            </div>
 
-                            <div className={styles.dashboardDateGroup}>
-                                <div className={styles.dateContainer}>
-                                    <div className={styles.dateFilterControls}>
-                                        <label
-                                            htmlFor="fundraising-date-range-trigger"
-                                            className={styles.dateFilterLabel}
-                                        >
-                                            Date Range
-                                        </label>
-
-                                        <DropdownButton
-                                            id="fundraising-date-range-trigger"
-                                            type="button"
-                                            ref={dateRangeTriggerRef}
+                                <div className={styles.dashboardDateGroup}>
+                                    <div className={styles.dateContainer}>
+                                        <div
                                             className={
-                                                styles.dateRangeTriggerButton
+                                                styles.dateFilterControls
                                             }
-                                            buttonVariant="long"
-                                            label={selectedRangeLabel}
-                                            onClick={() => {
-                                                setDraftStartDate(startDate)
-                                                setDraftEndDate(endDate)
-                                                setDraftPreset(committedPreset)
-                                            }}
-                                            menu={({ closeDropdown }) =>
-                                                renderDropdownMenu(
-                                                    closeDropdown
-                                                )
-                                            }
-                                        />
+                                        >
+                                            <label
+                                                htmlFor="fundraising-date-range-trigger"
+                                                className={
+                                                    styles.dateFilterLabel
+                                                }
+                                            >
+                                                Date Range
+                                            </label>
+
+                                            <DropdownButton
+                                                id="fundraising-date-range-trigger"
+                                                type="button"
+                                                ref={dateRangeTriggerRef}
+                                                className={
+                                                    styles.dateRangeTriggerButton
+                                                }
+                                                buttonVariant="long"
+                                                label={selectedRangeLabel}
+                                                onClick={() => {
+                                                    setDraftStartDate(startDate)
+                                                    setDraftEndDate(endDate)
+                                                    setDraftPreset(
+                                                        committedPreset
+                                                    )
+                                                }}
+                                                menu={({ closeDropdown }) =>
+                                                    renderDropdownMenu(
+                                                        closeDropdown
+                                                    )
+                                                }
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <div className={styles.metricGrid}>
+                                <DashboardWidget
+                                    title="Recurring"
+                                    value={formatCurrency(
+                                        stats.recurringDollarsRaised
+                                    )}
+                                    valueChange={
+                                        recurringChangeLabel != null && (
+                                            <span
+                                                className={
+                                                    recurringChangeAmount !=
+                                                        null &&
+                                                    recurringChangeAmount < 0
+                                                        ? styles.metricChangeNegative
+                                                        : styles.metricChangePositive
+                                                }
+                                            >
+                                                {recurringChangeLabel}
+                                            </span>
+                                        )
+                                    }
+                                    stat1={
+                                        recurringPct != null &&
+                                        stats.recurringContributionCount != null
+                                            ? `${recurringPct}% of total`
+                                            : '—'
+                                    }
+                                    stat2={
+                                        stats.recurringContributionCount != null
+                                            ? formatDonationCountLabel(
+                                                  stats.recurringContributionCount
+                                              )
+                                            : '—'
+                                    }
+                                />
+
+                                <DashboardWidget
+                                    title="One-Time"
+                                    value={formatCurrency(
+                                        stats.oneTimeDollarsRaised
+                                    )}
+                                    stat1={
+                                        oneTimePct != null &&
+                                        stats.oneTimeContributionCount != null
+                                            ? `${oneTimePct}% of total`
+                                            : '—'
+                                    }
+                                    stat2={
+                                        stats.oneTimeContributionCount != null
+                                            ? formatDonationCountLabel(
+                                                  stats.oneTimeContributionCount
+                                              )
+                                            : '—'
+                                    }
+                                />
+
+                                <DashboardWidget
+                                    title="Donors"
+                                    value={formatCount(stats.totalDonorCount)}
+                                    stat1={`Recurring ${formatCount(
+                                        stats.recurringDonorCount
+                                    )}`}
+                                    stat2={`One-Time ${formatCount(
+                                        stats.oneTimeDonorCount
+                                    )}`}
+                                />
+
+                                <DashboardWidget
+                                    title="Contributions"
+                                    value={formatCount(
+                                        stats.totalContributionCount
+                                    )}
+                                    stat1={`Recurring ${formatCount(
+                                        stats.recurringContributionCount
+                                    )}`}
+                                    stat2={`One-Time ${formatCount(
+                                        stats.oneTimeContributionCount
+                                    )}`}
+                                />
+                            </div>
+
+                            {renderChart()}
+
+                            <ProgressBar
+                                label="One-Time Share"
+                                value={oneTimePct}
+                                fill="linear-gradient(90deg, #9fb9e1 0%, #7f9fd4 52%, #6d95d1 100%)"
+                            />
+                            <ProgressBar
+                                label="Recurring Share"
+                                value={recurringPct}
+                                fill="linear-gradient(90deg, #b8da72 0%, #94c92d 48%, #7fb800 100%)"
+                            />
                         </div>
 
-                        <div className={styles.metricGrid}>
-                            <DashboardWidget
-                                title="Recurring"
-                                value={formatCurrency(
-                                    statsQuery.data?.recurringDollarsRaised
-                                )}
-                                valueChange={
-                                    recurringChangeLabel != null && (
-                                        <span
-                                            className={
-                                                recurringChangeAmount != null &&
-                                                recurringChangeAmount < 0
-                                                    ? styles.metricChangeNegative
-                                                    : styles.metricChangePositive
-                                            }
-                                        >
-                                            {recurringChangeLabel}
-                                        </span>
-                                    )
-                                }
-                                stat1={
-                                    recurringPct != null &&
-                                    statsQuery.data
-                                        ?.recurringContributionCount != null
-                                        ? `${recurringPct}% of total`
-                                        : '—'
-                                }
-                                stat2={
-                                    statsQuery.data
-                                        ?.recurringContributionCount != null
-                                        ? formatDonationCountLabel(
-                                              statsQuery.data
-                                                  .recurringContributionCount
-                                          )
-                                        : '—'
-                                }
+                        <div className={styles.grid}>
+                            <NavigationButton
+                                label="Donors"
+                                description="ActBlue donors, totals, and donor records."
+                                href="/volunteer_dashboard/panels/donors"
+                                icon={FaDollarSign}
+                                tag={{
+                                    count: allTimeStatsQuery.data
+                                        ?.totalDonorCount,
+                                }}
+                                buttonType="card"
+                                trackPanelHistory
                             />
 
-                            <DashboardWidget
-                                title="One-Time"
-                                value={formatCurrency(
-                                    statsQuery.data?.oneTimeDollarsRaised
-                                )}
-                                stat1={
-                                    oneTimePct != null &&
-                                    statsQuery.data?.oneTimeContributionCount !=
-                                        null
-                                        ? `${oneTimePct}% of total`
-                                        : '—'
-                                }
-                                stat2={
-                                    statsQuery.data?.oneTimeContributionCount !=
-                                    null
-                                        ? formatDonationCountLabel(
-                                              statsQuery.data
-                                                  .oneTimeContributionCount
-                                          )
-                                        : '—'
-                                }
+                            <NavigationButton
+                                label="Contributions"
+                                description="Contribution lineitems, payment info, and details."
+                                href="/volunteer_dashboard/panels/contributions"
+                                icon={FaMoneyBills}
+                                tag={{
+                                    count: contributionCountQuery.data?.count,
+                                }}
+                                buttonType="card"
+                                trackPanelHistory
                             />
 
-                            <DashboardWidget
-                                title="Donors"
-                                value={formatCount(
-                                    statsQuery.data?.totalDonorCount
-                                )}
-                                stat1={`Recurring ${formatCount(
-                                    statsQuery.data?.recurringDonorCount
-                                )}`}
-                                stat2={`One-Time ${formatCount(
-                                    statsQuery.data?.oneTimeDonorCount
-                                )}`}
-                            />
-
-                            <DashboardWidget
-                                title="Contributions"
-                                value={formatCount(
-                                    statsQuery.data?.totalContributionCount
-                                )}
-                                stat1={`Recurring ${formatCount(
-                                    statsQuery.data?.recurringContributionCount
-                                )}`}
-                                stat2={`One-Time ${formatCount(
-                                    statsQuery.data?.oneTimeContributionCount
-                                )}`}
+                            <NavigationButton
+                                label="Membership"
+                                description="Dues Paying Membership switchboard."
+                                href="/volunteer_dashboard/panels/membership"
+                                icon={FaMoneyCheckDollar}
+                                tag={{
+                                    count: membershipCountQuery.data?.count,
+                                }}
+                                buttonType="card"
+                                trackPanelHistory
                             />
                         </div>
-
-                        {renderChart()}
-
-                        <ProgressBar
-                            label="One-Time Share"
-                            value={oneTimePct}
-                            fill="linear-gradient(90deg, #9fb9e1 0%, #7f9fd4 52%, #6d95d1 100%)"
-                        />
-                        <ProgressBar
-                            label="Recurring Share"
-                            value={recurringPct}
-                            fill="linear-gradient(90deg, #b8da72 0%, #94c92d 48%, #7fb800 100%)"
-                        />
-                    </div>
-
-                    <div className={styles.grid}>
-                        <NavigationButton
-                            label="Donors"
-                            description="ActBlue donors, totals, and donor records."
-                            href="/volunteer_dashboard/panels/donors"
-                            icon={FaDollarSign}
-                            tag={{
-                                count: allTimeStatsQuery.data?.totalDonorCount,
-                            }}
-                            buttonType="card"
-                            trackPanelHistory
-                        />
-
-                        <NavigationButton
-                            label="Contributions"
-                            description="Contribution lineitems, payment info, and details."
-                            href="/volunteer_dashboard/panels/contributions"
-                            icon={FaMoneyBills}
-                            tag={{
-                                count: contributionCountQuery.data?.count,
-                            }}
-                            buttonType="card"
-                            trackPanelHistory
-                        />
-
-                        <NavigationButton
-                            label="Membership"
-                            description="Dues Paying Membership switchboard."
-                            href="/volunteer_dashboard/panels/membership"
-                            icon={FaMoneyCheckDollar}
-                            tag={{ count: membershipCountQuery.data?.count }}
-                            buttonType="card"
-                            trackPanelHistory
-                        />
                     </div>
                 </div>
-            </div>
-        </Panel>
+            </Panel>
+        </ProtectedPanel>
     )
 }

@@ -1,0 +1,147 @@
+.pickerWheel {
+    position: relative;
+    width: 100%;
+    height: calc(var(--picker-item-height) * var(--picker-visible-count));
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    background: #fff;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset-inline: 0.25rem;
+        top: calc(50% - var(--picker-item-height) / 2);
+        height: var(--picker-item-height);
+        border-radius: 0.5rem;
+        background: rgba(118, 118, 128, 0.12);
+        pointer-events: none;
+    }
+
+    &:focus-within {
+        border-color: #2986cc;
+    }
+
+    &.disabled {
+        opacity: 0.5;
+
+        & .list {
+            overflow: hidden;
+            pointer-events: none;
+        }
+    }
+}
+
+.list {
+    position: relative;
+    height: 100%;
+    padding-block: calc(
+        var(--picker-item-height) * (var(--picker-visible-count) - 1) / 2
+    );
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+    outline: none;
+    mask-image: linear-gradient(
+        to bottom,
+        transparent,
+        #000 30%,
+        #000 70%,
+        transparent
+    );
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.item {
+    --picker-max-angle: calc((var(--picker-visible-count) + 1) / 2 * 22deg);
+
+    display: grid;
+    height: var(--picker-item-height);
+    scroll-snap-align: center;
+    backface-visibility: hidden;
+    cursor: pointer;
+    user-select: none;
+    animation: tilt linear both;
+    animation-timeline: view();
+}
+
+.label,
+.boldLabel {
+    grid-area: 1 / 1;
+    padding-inline: 0.75rem;
+    line-height: var(--picker-item-height);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.label {
+    color: rgba(15, 23, 42, 0.85);
+    animation: regularSplit linear both;
+    animation-timeline: view();
+    animation-range: cover calc(50% - var(--picker-item-height)) cover
+        calc(50% + var(--picker-item-height));
+}
+
+.boldLabel {
+    font-weight: 600;
+    color: #000;
+    animation: boldSplit linear both;
+    animation-timeline: view();
+    animation-range: cover calc(50% - var(--picker-item-height)) cover
+        calc(50% + var(--picker-item-height));
+}
+
+@keyframes tilt {
+    from {
+        transform: perspective(400px)
+            rotateX(calc(var(--picker-max-angle) * -1));
+    }
+    to {
+        transform: perspective(400px) rotateX(var(--picker-max-angle));
+    }
+}
+
+@keyframes boldSplit {
+    0% {
+        clip-path: inset(0 0 100% 0);
+    }
+    50% {
+        clip-path: inset(0);
+    }
+    100% {
+        clip-path: inset(100% 0 0 0);
+    }
+}
+
+@keyframes regularSplit {
+    0% {
+        clip-path: inset(0);
+    }
+    50% {
+        clip-path: inset(100% 0 0 0);
+    }
+    50.01% {
+        clip-path: inset(0 0 100% 0);
+    }
+    100% {
+        clip-path: inset(0);
+    }
+}
+
+@supports not (animation-timeline: view()) {
+    .boldLabel {
+        display: none;
+    }
+
+    .item[aria-selected='true'] .label {
+        font-weight: 600;
+        color: #000;
+    }
+}

@@ -1,6 +1,5 @@
 'use client'
 
-import { MemberBanner } from './MemberBanner'
 import styles from './page.module.css'
 import { DonorView } from './panel_views/DonorView'
 import { HistoryView } from './panel_views/HistoryView'
@@ -10,17 +9,21 @@ import {
     FilterTag,
 } from '@/app/volunteer_dashboard/layout/FilterTags'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
-import { DiscordAvatar } from '@/components/common'
+import { useActiveMatchedUsers } from '@/app/volunteer_dashboard/panels/membership/hooks'
+import { MembershipTier } from '@/app/volunteer_dashboard/panels/membership/membership.types'
+import { DiscordAvatar, ListContext } from '@/components/common'
 import { DropdownOverlay, DropdownOverlayButton } from '@/components/common'
 import { FormState } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
+import { PanelBanner } from '@/components/common/panel/panel_components/PanelBanner'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import {
     SidebarListFilters,
     type SidebarListFiltersProps,
 } from '@/components/common/panel/sidebar_list/SidebarList'
-import { TabSpec } from '@/components/common/tab_bar/TabBar'
-import { FetchError, stateOptions } from '@/models'
+import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
+import { FetchError, PermissionIds, stateOptions } from '@/models'
 import {
     useLinkDonorToUser,
     usePositionQueries,
@@ -40,7 +43,6 @@ import {
     ActBlueDonor,
     Position,
     Role,
-    UpdateHistory,
     User,
     UserProfile,
     zActBlueDonor,
@@ -71,11 +73,15 @@ import {
     FaMapMarkerAlt,
     FaSitemap,
     FaUserShield,
+    FaLayerGroup,
+    FaUserClock,
 } from 'react-icons/fa'
 import { FaClipboardUser, FaDollarSign, FaAddressCard } from 'react-icons/fa6'
 import { IoEllipsisVertical } from 'react-icons/io5'
 import { MdVerified } from 'react-icons/md'
 import z from 'zod'
+
+/* eslint-disable complexity */
 
 type MemberTabKey = 'overview' | 'donorMatching' | 'history'
 
@@ -84,6 +90,8 @@ const tabs: TabSpec[] = [
     { key: 'donorMatching', label: 'Donations' },
     { key: 'history', label: 'History' },
 ]
+
+const LOADING_USER = {} as User
 
 const MEMBER_FIELD_OPTIONS = [
     { value: 'email', label: 'Email' },
@@ -118,12 +126,16 @@ const userFilterOptions = [
     { key: 'verified', label: 'Verified', icon: <MdVerified /> },
 ]
 
-// # TODO: Behavior is pending API support for membership tiers.
-const MEMBERSHIP_TIER_OPTIONS = [
-    { value: 'dues_paying', label: 'Dues Paying Members' },
-    { value: 'premium', label: 'Premium Members' },
-    { value: 'signature', label: 'Signature Members' },
-    { value: 'inner_circle', label: 'Inner Circle Members' },
+const MEMBERSHIP_TIER_OPTIONS: { value: MembershipTier; label: string }[] = [
+    { value: 'Dues Paying Member', label: 'Dues Paying Members' },
+    { value: 'Premium Member', label: 'Premium Members' },
+    { value: 'Signature Member', label: 'Signature Members' },
+    { value: 'Inner Circle Member', label: 'Inner Circle Members' },
+]
+
+const LAPSED_ELIGIBILITY_OPTIONS = [
+    { value: true, label: 'Eligible' },
+    { value: false, label: 'Ineligible' },
 ]
 
 const currentYear = new Date().getFullYear()
@@ -198,45 +210,47 @@ export default function Page() {
         Number.isFinite(initialUserId) ? initialUserId : null
     )
 
-    const [selectedHistory, setSelectedHistory] =
-        useState<UpdateHistory<User> | null>(null)
-    const [selectedDonorHistory, setSelectedDonorHistory] =
-        useState<UpdateHistory<ActBlueDonor> | null>(null)
-
     const [formState, setFormState] = useState<FormState<User> | null>(null)
     const [pickingDonor, setPickingDonor] = useState<boolean>(false)
     const [selectedTab, setSelectedTab] = useState<MemberTabKey>('overview')
     const [activeFilterTag, setActiveFilterTag] = useState<string>('all')
     const [selectedMembershipTier, setSelectedMembershipTier] =
-        useState<string>()
+        useState<MembershipTier>()
+    const [selectedLapsedEligibility, setSelectedLapsedEligibility] =
+        useState<boolean>()
     const [selectedState, setSelectedState] = useState<string>()
     const [selectedBirthYear, setSelectedBirthYear] = useState<number>()
     const [selectedPosition, setSelectedPosition] = useState<Position>()
     const [selectedRole, setSelectedRole] = useState<Role>()
 
-    const selectedStateLabel = stateOptions.find(
-        (state) => state.value === selectedState
-    )?.label
-    const selectedFilterLabel =
-        [
-            selectedStateLabel,
-            selectedBirthYear,
-            selectedPosition?.name,
-            selectedRole?.name,
-        ]
-            .filter(Boolean)
-            .join(` ${DOT_SEPARATOR} `) || 'All Users'
-    const selectedFilterIcon = selectedState ? (
-        <FaMapMarkerAlt />
-    ) : selectedBirthYear ? (
-        <FaBirthdayCake />
-    ) : selectedPosition ? (
-        <FaSitemap />
-    ) : selectedRole ? (
-        <FaUserShield />
-    ) : (
-        <FaUsers />
-    )
+    const getFilterLabel = () => {
+        const selectedStateLabel = stateOptions.find(
+            (state) => state.value === selectedState
+        )?.label
+        return (
+            [
+                selectedStateLabel,
+                selectedBirthYear,
+                selectedPosition?.name,
+                selectedRole?.name,
+            ]
+                .filter(Boolean)
+                .join(` ${DOT_SEPARATOR} `) || 'All Users'
+        )
+    }
+
+    const renderFilterIcon = () =>
+        selectedState ? (
+            <FaMapMarkerAlt />
+        ) : selectedBirthYear ? (
+            <FaBirthdayCake />
+        ) : selectedPosition ? (
+            <FaSitemap />
+        ) : selectedRole ? (
+            <FaUserShield />
+        ) : (
+            <FaUsers />
+        )
 
     const memberFilterTags: FilterTag[] = [
         {
@@ -304,7 +318,11 @@ export default function Page() {
             label:
                 MEMBERSHIP_TIER_OPTIONS.find(
                     (option) => option.value === selectedMembershipTier
-                )?.label ?? 'Membership',
+                )?.label ??
+                LAPSED_ELIGIBILITY_OPTIONS.find(
+                    (option) => option.value === selectedLapsedEligibility
+                )?.label ??
+                'Membership',
             icon: <FaAddressCard />,
             color: '#C65882',
             width: '11.65rem',
@@ -320,30 +338,53 @@ export default function Page() {
                     body={
                         <div className={styles.filterMenu}>
                             <DropdownOverlayButton
-                                checked={selectedMembershipTier === undefined}
+                                checked={
+                                    selectedMembershipTier === undefined &&
+                                    selectedLapsedEligibility === undefined
+                                }
                                 onClick={() => {
                                     setSelectedMembershipTier(undefined)
+                                    setSelectedLapsedEligibility(undefined)
+                                    onSearch({ ...search, page: 0 })
                                     closeDropdown()
                                 }}
                             >
                                 All
                             </DropdownOverlayButton>
-                            {MEMBERSHIP_TIER_OPTIONS.map((option) => (
-                                <DropdownOverlayButton
-                                    key={option.value}
-                                    checked={
-                                        selectedMembershipTier === option.value
-                                    }
-                                    onCheckedChange={(checked) => {
-                                        setSelectedMembershipTier(
-                                            checked ? option.value : undefined
-                                        )
-                                        closeDropdown()
-                                    }}
-                                >
-                                    {option.label}
-                                </DropdownOverlayButton>
-                            ))}
+                            <FilterSubmenu
+                                label="Tier"
+                                icon={<FaLayerGroup />}
+                                active={selectedMembershipTier !== undefined}
+                                options={MEMBERSHIP_TIER_OPTIONS}
+                                optionKey={(tier) => tier.value}
+                                optionLabel={(tier) => tier.label}
+                                isSelected={(tier) =>
+                                    selectedMembershipTier === tier.value
+                                }
+                                onSelect={(tier) => {
+                                    setSelectedLapsedEligibility(undefined)
+                                    setSelectedMembershipTier(tier?.value)
+                                    onSearch({ ...search, page: 0 })
+                                }}
+                                closeDropdown={closeDropdown}
+                            />
+                            <FilterSubmenu
+                                label="Eligibility"
+                                icon={<FaUserClock />}
+                                active={selectedLapsedEligibility !== undefined}
+                                options={LAPSED_ELIGIBILITY_OPTIONS}
+                                optionKey={(option) => String(option.value)}
+                                optionLabel={(option) => option.label}
+                                isSelected={(option) =>
+                                    selectedLapsedEligibility === option.value
+                                }
+                                onSelect={(option) => {
+                                    setSelectedMembershipTier(undefined)
+                                    setSelectedLapsedEligibility(option?.value)
+                                    onSearch({ ...search, page: 0 })
+                                }}
+                                closeDropdown={closeDropdown}
+                            />
                         </div>
                     }
                 />
@@ -351,8 +392,8 @@ export default function Page() {
         },
         {
             key: 'all',
-            label: selectedFilterLabel,
-            icon: selectedFilterIcon,
+            label: getFilterLabel(),
+            icon: renderFilterIcon(),
             color: '#3A3A3C',
             width: '8.4rem',
             activeRedirect: 'members',
@@ -513,14 +554,23 @@ export default function Page() {
     })
 
     const roles = rolesQuery.data?.data ?? []
-    const roleOptions = useMemo(
-        () =>
-            (rolesQuery.data?.data ?? []).map((role) => ({
-                value: role.id,
-                label: role.name,
-            })),
-        [rolesQuery.data]
-    )
+
+    const isMembershipTag = activeFilterTag === 'dues'
+    const activeMembers = useActiveMatchedUsers(isMembershipTag, {
+        tier: selectedMembershipTier,
+        eligible: selectedLapsedEligibility,
+    })
+    const listQuery = isMembershipTag
+        ? {
+              isPending: activeMembers.isPending,
+              error: activeMembers.error,
+              count: activeMembers.users.length,
+          }
+        : {
+              isPending: searchQuery.isPending || searchQuery.isPlaceholderData,
+              error: searchQuery.error,
+              count: searchQuery.data?.count,
+          }
 
     const userQuery = useQuery({
         queryKey: [`/users/${selectedId}`],
@@ -543,10 +593,22 @@ export default function Page() {
     const updateMutation = useMutation<
         User,
         FetchError,
-        { id: number; user: User; request: UpdateUserRequest },
+        {
+            id: number
+            user: User
+            request: UpdateUserRequest
+            positionUpdates?: { positionId: number; userIds: number[] }[]
+        },
         User | undefined
     >({
-        mutationFn: async ({ id, user, request }) => {
+        mutationFn: async ({ id, user, request, positionUpdates = [] }) => {
+            // Positions store their members, so membership changes are saved
+            // on each position before the user.
+            await Promise.all(
+                positionUpdates.map(({ positionId, userIds }) =>
+                    positionQueries.updatePosition(positionId, { userIds })
+                )
+            )
             const result = await onPatch('/users/:userId', request, zUser, {
                 params: { userId: id },
             })
@@ -615,6 +677,9 @@ export default function Page() {
                 queryClient.invalidateQueries({
                     queryKey: [`/users/${id}`],
                 }),
+                queryClient.invalidateQueries({
+                    queryKey: ['positionHierarchy'],
+                }),
             ]),
     })
 
@@ -647,15 +712,15 @@ export default function Page() {
 
         setSelectedId(value.id)
 
-        setSelectedHistory(null)
-        setSelectedDonorHistory(null)
         setSelectedTab('overview')
     }
 
     const locationQuery = useQuery({
         queryKey: [`/locations/${formState?.form?.address?.zip}`],
         queryFn:
-            ready && formState?.mode === 'edit' && formState.form.address?.zip
+            ready &&
+            formState?.mode === 'edit' &&
+            formState.form.address?.zip?.length === 5
                 ? async ({ signal }) => {
                       try {
                           return await onGet('/locations/:zip', zLocation, {
@@ -670,62 +735,84 @@ export default function Page() {
         placeholderData: keepPreviousData,
     })
 
-    const handleSave = useCallback(
-        (user: User) => {
-            const orNull = (value: string | null | undefined) =>
-                value?.length ? value : null
+    const handleSave = (user: User) => {
+        const orNull = (value: string | null | undefined) =>
+            value?.length ? value : null
 
-            const address = {
-                addressLine1: orNull(user.address.addressLine1?.trim()),
-                addressLine2: orNull(user.address.addressLine2?.trim()),
-                city:
-                    orNull(user.address.city?.trim()) ??
-                    locationQuery.data?.city,
-                county:
-                    orNull(user.address.county?.trim()) ??
-                    locationQuery.data?.county,
-                state:
-                    orNull(user.address.state?.trim()) ??
-                    locationQuery.data?.state,
-                zip:
-                    orNull(user.address.zip?.trim()) ??
-                    locationQuery.data?.zip?.toString(),
-            }
+        const buildAddress = () => ({
+            addressLine1: orNull(user.address.addressLine1?.trim()),
+            addressLine2: orNull(user.address.addressLine2?.trim()),
+            city: orNull(user.address.city?.trim()),
+            county: orNull(user.address.county?.trim()),
+            state: orNull(user.address.state?.trim()),
+            zip: orNull(user.address.zip?.trim()),
+        })
+        const address = buildAddress()
 
-            const oldAddress = userQuery.data?.address ?? null
-            const addressIsDirty =
-                address.addressLine1 != oldAddress?.addressLine1 ||
-                address.addressLine2 != oldAddress?.addressLine2 ||
-                address.city != oldAddress?.city ||
-                address.county != oldAddress?.county ||
-                address.state != oldAddress?.state ||
-                address.zip != oldAddress?.zip
+        const oldAddress = userQuery.data?.address ?? null
+        const addressIsDirty =
+            address.addressLine1 != oldAddress?.addressLine1 ||
+            address.addressLine2 != oldAddress?.addressLine2 ||
+            address.city != oldAddress?.city ||
+            address.county != oldAddress?.county ||
+            address.state != oldAddress?.state ||
+            address.zip != oldAddress?.zip
 
-            const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
-                email: user.email,
-                phone: user.phone,
-                preferredName: user.preferredName,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                birthdate: user.birthdate,
-                aliases: Array.from(user.aliases ?? []),
-                membershipCardStatus: +user.membershipCardStatus,
-                membershipMerchStatus: +user.membershipMerchStatus,
-                shirtSize: user.shirtSize,
-                duesPayingMember: user.duesPayingMember,
-                membershipFulfillmentStatus: user.membershipFulfillmentStatus
-                    ? +user.membershipFulfillmentStatus
-                    : null,
-                nameConfirmed: user.nameConfirmed,
-                addressConfirmed: user.addressConfirmed,
-                roles: user.roles?.map((role) => role.id),
-            } satisfies UpdateUserRequest)
-            if (addressIsDirty) request.address = address
+        const request: UpdateUserRequest = z.parse(zUpdateUserRequest, {
+            email: user.email,
+            phone: user.phone,
+            preferredName: user.preferredName,
+            preferredPronouns: user.preferredPronouns,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            birthdate: user.birthdate,
+            aliases: Array.from(user.aliases ?? []),
+            membershipCardStatus: +user.membershipCardStatus,
+            membershipMerchStatus: +user.membershipMerchStatus,
+            shirtSize: user.shirtSize,
+            duesPayingMember: user.duesPayingMember,
+            membershipFulfillmentStatus: user.membershipFulfillmentStatus
+                ? +user.membershipFulfillmentStatus
+                : null,
+            nameConfirmed: user.nameConfirmed,
+            addressConfirmed: user.addressConfirmed,
+            roles: user.roles?.map((role) => role.id),
+            metaData: {
+                dataSource: 'Member Panel',
+                userWhoUpdatedId: loggedInUser.data?.id,
+            },
+        } satisfies UpdateUserRequest)
+        if (addressIsDirty) request.address = address
 
-            updateMutation.mutate({ id: user.id, user, request })
-        },
-        [locationQuery.data, updateMutation, userQuery.data?.address]
-    )
+        const before = new Set(
+            (userQuery.data?.positions ?? []).map((position) => position.id)
+        )
+        const after = new Set(
+            (user.positions ?? []).map((position) => position.id)
+        )
+        const positionUpdates = (positionHierarchy.data?.positions ?? [])
+            .filter(
+                (position) => before.has(position.id) !== after.has(position.id)
+            )
+            .map((position) => {
+                const others = position.userIds.filter(
+                    (userId) => userId !== user.id
+                )
+                return {
+                    positionId: position.id,
+                    userIds: after.has(position.id)
+                        ? [...others, user.id]
+                        : others,
+                }
+            })
+
+        updateMutation.mutate({
+            id: user.id,
+            user,
+            request,
+            positionUpdates,
+        })
+    }
 
     const makeTitle = useCallback((user: User | UserProfile) => {
         if (user.firstName && user.lastName)
@@ -734,21 +821,6 @@ export default function Page() {
         if (user.preferredName) return user.preferredName
         return user.email ?? ''
     }, [])
-
-    const normalizeMeridiem = useCallback((value: string) => {
-        return value.replace(/\s*([AP])M\b/g, (_, period: string) => {
-            return `${period.toLowerCase()}m`
-        })
-    }, [])
-
-    const makeHistoryFormTitle = useCallback(
-        (user: User | UserProfile) => {
-            const name = makeTitle(user)
-            if (!selectedHistory) return name
-            return `${name} @ ${normalizeMeridiem(selectedHistory.historyWhenUpdatedUtc.toLocaleString())}`
-        },
-        [makeTitle, normalizeMeridiem, selectedHistory]
-    )
 
     const renderDonorItem = useCallback(
         (item: ActBlueDonor, userId: number) => {
@@ -771,14 +843,15 @@ export default function Page() {
         return currentUser ? [currentUser] : []
     }, [loggedInUser.data])
 
-    const users = useMemo(() => {
-        const fetchedUsers = searchQuery.data?.data ?? []
-        const currentUser = loggedInUser.data
-
-        if (!currentUser) return fetchedUsers
-
-        return fetchedUsers.filter((user) => user.id !== currentUser.id)
-    }, [searchQuery.data?.data, loggedInUser.data])
+    const listPage = search.page ?? 0
+    const listLimit = search.limit ?? 25
+    const listUsers: (User | UserProfile)[] = isMembershipTag
+        ? activeMembers.users.slice(
+              listPage * listLimit,
+              (listPage + 1) * listLimit
+          )
+        : (searchQuery.data?.data ?? [])
+    const users = listUsers.filter((user) => user.id !== loggedInUser.data?.id)
 
     useEffect(() => {
         if (navUserId == null) return
@@ -789,26 +862,41 @@ export default function Page() {
     }, [navUserId])
 
     const renderPage = () => {
-        if (!selectedId || !userQuery.data) return null
+        if (!selectedId) return null
+
+        const user = userQuery.data ?? LOADING_USER
 
         switch (selectedTab) {
             case 'overview':
                 return (
                     <MemberView
                         selectedId={selectedId}
-                        user={userQuery.data}
+                        user={user}
                         selectedHistory={null}
                         setFormState={setFormState}
                         saving={updateMutation.isPending}
                         editing={formState?.mode === 'edit'}
+                        location={
+                            locationQuery.isPlaceholderData
+                                ? null
+                                : locationQuery.data
+                        }
+                        invalidZip={
+                            !locationQuery.isPending &&
+                            !locationQuery.isPlaceholderData &&
+                            locationQuery.data == null
+                                ? formState?.form?.address?.zip
+                                : null
+                        }
                         isInvalid={
                             formState?.form?.address?.zip != null &&
                             (locationQuery.data == null ||
-                                locationQuery.isPending)
+                                locationQuery.isPending ||
+                                locationQuery.isPlaceholderData)
                         }
                         roles={roles}
-                        roleOptions={roleOptions}
-                        makeFormTitle={() => makeTitle(userQuery.data)}
+                        positions={positionHierarchy.data?.positions ?? []}
+                        makeFormTitle={() => makeTitle(user)}
                         handleSave={handleSave}
                     />
                 )
@@ -816,12 +904,13 @@ export default function Page() {
             case 'donorMatching':
                 return (
                     <DonorView
-                        key={userQuery.data.id}
+                        key={user.id}
                         selectedId={selectedId}
-                        user={userQuery.data}
+                        user={user}
                         pickingDonor={pickingDonor}
                         setPickingDonor={setPickingDonor}
                         isRefetching={userQuery.isRefetching}
+                        linking={linkDonor.isPending}
                         donorSearch={donorSearch}
                         donorSearchQuery={donorSearchQuery}
                         onDonorSearch={onDonorSearch}
@@ -835,16 +924,9 @@ export default function Page() {
             case 'history':
                 return (
                     <HistoryView
-                        selectedId={selectedId}
-                        user={userQuery.data}
-                        selectedHistory={selectedHistory}
-                        onSelectHistory={setSelectedHistory}
-                        selectedDonorHistory={selectedDonorHistory}
-                        onSelectDonorHistory={setSelectedDonorHistory}
+                        key={selectedId}
+                        user={user}
                         isRefetching={userQuery.isRefetching}
-                        roles={roles}
-                        roleOptions={roleOptions}
-                        makeFormTitle={(u) => makeHistoryFormTitle(u)}
                     />
                 )
 
@@ -853,89 +935,20 @@ export default function Page() {
         }
     }
 
-    const sidebarFilters: SidebarListFiltersProps = {
-        search,
-        onSearch,
-        searchFieldOptions: MEMBER_FIELD_OPTIONS,
-        sortFieldOptions: MEMBER_SORT_FIELD_OPTIONS,
-        showSort: true,
-        showLimit: true,
-    }
+    const renderDetails = () => {
+        const loadingUser =
+            selectedId != null &&
+            (userQuery.isPending || userQuery.isPlaceholderData)
+        const user = userQuery.data ?? LOADING_USER
+        const tabBar = (
+            <TabBar
+                tabs={tabs}
+                value={selectedTab}
+                onChange={(key) => setSelectedTab(key as MemberTabKey)}
+            />
+        )
 
-    return (
-        <Panel
-            includeSidebar
-            collapsedSidebarMode="compact"
-            sidebarTogglePlacement="header"
-            showSidebarFooterWhenCollapsed={false}
-            showSidebarBorderWhenCollapsed
-            largeTitle
-            sidebarWidth="25.5rem"
-            collapsedSidebarWidth="5rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={sidebarMobileVisible}
-            label="Members"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: searchQuery.data?.count,
-                    isPending: searchQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <IoEllipsisVertical size={20} />,
-                menu: () => <SidebarListFilters {...sidebarFilters} />,
-            }}
-            sidebarBody={
-                <>
-                    <div className={styles.filterTagsWrapper}>
-                        <FilterTags
-                            tags={memberFilterTags}
-                            activeTag={activeFilterTag}
-                            onChange={handleFilterTagChange}
-                        />
-                    </div>
-                    <SidebarBody<User | UserProfile>
-                        items={users}
-                        pinnedItems={pinnedUsers}
-                        isLoading={searchQuery.isPending}
-                        error={searchQuery.error}
-                        selectedKey={selectedId}
-                        renderItem={(user) => ({
-                            key: user.id,
-                            label: makeTitle(user),
-                            subtitle: user.discordUsers?.[0]?.username
-                                ? `@${user.discordUsers[0].username}`
-                                : 'NOT FOUND',
-                            labelPill: `${user.preferredPronouns ?? ''}`.trim(), // # TODO: Replace with actual pronouns when API supports it.
-                            tagLabel:
-                                user.id === loggedInUser.data?.id
-                                    ? 'You'
-                                    : undefined,
-                            icon: (
-                                <DiscordAvatar
-                                    discordUserId={user.discordUsers?.[0]?.id}
-                                    imageId={user.discordUsers?.[0]?.image}
-                                    size={40}
-                                />
-                            ),
-                            href: `/volunteer_dashboard/panels/members?userId=${user.id}`,
-                            onClick: (event) => {
-                                event.preventDefault()
-                                handleSelectItem(user)
-                                setSidebarMobileVisible(false)
-                            },
-                        })}
-                    />
-                </>
-            }
-        >
+        return (
             <div className={styles.detailsPane}>
                 <MobileSidebarBackButton
                     label="Members"
@@ -948,39 +961,171 @@ export default function Page() {
                     <div className={styles.emptyState}>No user selected</div>
                 )}
 
-                {selectedId != null && userQuery.isPending && (
-                    <div className={styles.emptyState}>
-                        Loading user details...
-                    </div>
-                )}
-
                 {selectedId != null && userQuery.error && (
                     <div className={cn(styles.emptyState, styles.errorText)}>
                         Error: {parseErrorMessage(userQuery.error)}
                     </div>
                 )}
 
-                {selectedId && userQuery.data && (
+                {selectedId != null && !userQuery.error && (
                     <>
-                        <div className={styles.detailsHeader}>
-                            <div className={styles.bannerCover} />
-                            <MemberBanner
-                                user={userQuery.data}
-                                makeTitle={makeTitle}
-                                selectedTab={selectedTab}
-                                tabs={tabs}
-                                onTabChange={(key) =>
-                                    setSelectedTab(key as MemberTabKey)
-                                }
-                                positions={positionHierarchy.data?.positions}
-                            />
-                        </div>
+                        <PanelBanner
+                            cover
+                            loading={loadingUser}
+                            avatar={{
+                                framed: true,
+                                image: (
+                                    <DiscordAvatar
+                                        discordUserId={
+                                            user.discordUsers?.[0]?.id
+                                        }
+                                        imageId={user.discordUsers?.[0]?.image}
+                                        size={64}
+                                        loading={loadingUser}
+                                    />
+                                ),
+                            }}
+                            title={makeTitle(user)}
+                            subtitle={
+                                user.discordUsers?.[0]?.username
+                                    ? `@${user.discordUsers[0].username}`
+                                    : 'NOT FOUND'
+                            }
+                            statusPill={{
+                                label:
+                                    positionHierarchy.data?.positions.find(
+                                        (position) =>
+                                            position.userIds.includes(user.id)
+                                    )?.name ?? 'Community Member',
+                            }}
+                            // menuButton={{
+                            //     menu: (
+                            //         <div className={styles.filterMenu}>
+                            //             <p className={styles.emptyFilterMenu}>
+                            //                 No actions yet
+                            //             </p>
+                            //         </div>
+                            //     ),
+                            // }}
+                            tabBar={tabBar}
+                        />
                         <div className={styles.detailsContent}>
-                            {renderPage()}
+                            <ListContext.Provider
+                                value={{ editing: false, loading: loadingUser }}
+                            >
+                                {renderPage()}
+                            </ListContext.Provider>
                         </div>
                     </>
                 )}
             </div>
-        </Panel>
+        )
+    }
+
+    const sidebarFilters: SidebarListFiltersProps = {
+        search,
+        onSearch,
+        searchFieldOptions: MEMBER_FIELD_OPTIONS,
+        sortFieldOptions: MEMBER_SORT_FIELD_OPTIONS,
+        showSort: true,
+        showLimit: true,
+    }
+
+    const sidebarFooterProperties = () => ({
+        page: search.page ?? 0,
+        pageSize: search.limit ?? 25,
+        count: listQuery.count,
+        isPending: listQuery.isPending,
+        onPageChange: (nextPage: number) =>
+            onSearch({ ...search, page: nextPage }),
+    })
+
+    return (
+        <ProtectedPanel
+            label="Members"
+            requiredPermissions={[PermissionIds.VIEW_MEMBER_PANEL]}
+        >
+            <Panel
+                includeSidebar
+                collapsedSidebarMode="compact"
+                sidebarTogglePlacement="header"
+                showSidebarFooterWhenCollapsed={false}
+                showSidebarBorderWhenCollapsed
+                largeTitle
+                sidebarWidth="25.5rem"
+                collapsedSidebarWidth="5rem"
+                sidebarClassName={styles.sidebarBg}
+                sidebarMobileVisible={sidebarMobileVisible}
+                label="Members"
+                showScrollbar={false}
+                sidebarList={{
+                    search: { search, onSearch },
+                    footer: sidebarFooterProperties(),
+                    filters: sidebarFilters,
+                }}
+                prominentHeaderButton={{
+                    icon: <IoEllipsisVertical size={20} />,
+                    menu: () => <SidebarListFilters {...sidebarFilters} />,
+                }}
+                sidebarBody={
+                    <>
+                        <div className={styles.filterTagsWrapper}>
+                            <FilterTags
+                                tags={memberFilterTags}
+                                activeTag={activeFilterTag}
+                                onChange={handleFilterTagChange}
+                            />
+                        </div>
+                        <SidebarBody<User | UserProfile>
+                            items={users}
+                            pinnedItems={pinnedUsers}
+                            isLoading={listQuery.isPending}
+                            skeleton={{
+                                icon: (
+                                    <DiscordAvatar
+                                        discordUserId={undefined}
+                                        imageId={undefined}
+                                        size={40}
+                                        loading
+                                    />
+                                ),
+                                subtitle: true,
+                            }}
+                            error={listQuery.error}
+                            selectedKey={selectedId}
+                            renderItem={(user) => ({
+                                key: user.id,
+                                label: makeTitle(user),
+                                subtitle: user.discordUsers?.[0]?.username
+                                    ? `@${user.discordUsers[0].username}`
+                                    : 'NOT FOUND',
+                                labelPill: user.preferredPronouns?.trim() ?? '',
+                                tagLabel:
+                                    user.id === loggedInUser.data?.id
+                                        ? 'You'
+                                        : undefined,
+                                icon: (
+                                    <DiscordAvatar
+                                        discordUserId={
+                                            user.discordUsers?.[0]?.id
+                                        }
+                                        imageId={user.discordUsers?.[0]?.image}
+                                        size={40}
+                                    />
+                                ),
+                                href: `/volunteer_dashboard/panels/members?userId=${user.id}`,
+                                onClick: (event) => {
+                                    event.preventDefault()
+                                    handleSelectItem(user)
+                                    setSidebarMobileVisible(false)
+                                },
+                            })}
+                        />
+                    </>
+                }
+            >
+                {renderDetails()}
+            </Panel>
+        </ProtectedPanel>
     )
 }

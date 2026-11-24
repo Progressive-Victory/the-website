@@ -10,9 +10,10 @@ import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/Mobile
 import { EndorsementAvatar } from '@/components/common'
 import { FormControls, FormState } from '@/components/common/forms'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { type SidebarListFiltersProps } from '@/components/common/panel/sidebar_list/SidebarList'
-import { TabSpec } from '@/components/common/tab_bar/TabBar'
+import { TabBar, TabSpec } from '@/components/common/tab_bar/TabBar'
 import {
     ENDORSEMENT_TYPE_LABELS,
     INITIATIVE_TYPE_LABELS,
@@ -327,11 +328,15 @@ export default function Page() {
                     formState?.mode === 'edit' || formState?.mode === 'create'
                 }
                 saving={createMutation.isPending || updateMutation.isPending}
-                containerClassName={styles.detailsHeader}
-                coverClassName={styles.bannerCover}
-                selectedTab={selectedTab}
-                tabs={endorsementTabs}
-                onTabChange={(key) => setSelectedTab(key as EndorsementTabKey)}
+                tabBar={
+                    <TabBar
+                        tabs={endorsementTabs}
+                        value={selectedTab}
+                        onChange={(key) =>
+                            setSelectedTab(key as EndorsementTabKey)
+                        }
+                    />
+                }
             />
         ) : undefined
 
@@ -343,134 +348,141 @@ export default function Page() {
         showLimit: true,
     }
 
-    return (
-        <Panel
-            includeSidebar
-            collapsedSidebarMode="compact"
-            sidebarTogglePlacement="header"
-            showSidebarFooterWhenCollapsed={false}
-            showSidebarBorderWhenCollapsed
-            largeTitle
-            sidebarWidth="25.5rem"
-            collapsedSidebarWidth="5rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={sidebarMobileVisible}
-            label="Endorsements"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                footer: {
-                    page: search.page ?? 0,
-                    pageSize: search.limit ?? 25,
-                    count: endorsementCount,
-                    isPending: endorsementsQuery.isPending,
-                    onPageChange: (nextPage: number) =>
-                        onSearch({ ...search, page: nextPage }),
-                },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <FaRegPenToSquare size={20} />,
-                label: canEditEndorsements
-                    ? 'Create Endorsement'
-                    : 'Not Allowed To Create Endorsements',
-                disabled: !canEditEndorsements,
-                onClick: () => formControls.current?.create(),
-            }}
-            sidebarBody={
-                <>
-                    <div className={styles.filterTagsWrapper}>
-                        <FilterTags
-                            tags={endorsementFilterTags}
-                            activeTag={activeFilterTag}
-                            onChange={setActiveFilterTag}
-                        />
-                    </div>
-                    <SidebarBody<Endorsement>
-                        items={endorsements}
-                        isLoading={endorsementsQuery.isPending}
-                        error={endorsementsQuery.error}
-                        selectedKey={selectedEndorsement?.id}
-                        renderItem={(item) => ({
-                            key: item.id,
-                            label: `${item.name}${item.incumbent ? '*' : ''}`,
-                            subtitle: getStateLabel(item.state),
-                            tagLabel: makeDateTag(item),
-                            tagClassName: styles.dateTag,
-                            subTags: makeLevelTags(item),
-                            icon: (
-                                <EndorsementAvatar
-                                    endorsement={item}
-                                    size={40}
-                                    badgeTooltipPosition="bottom"
-                                    className={styles.listAvatar}
-                                />
-                            ),
-                            href: `/volunteer_dashboard/panels/endorsements?endorsementId=${item.id}`,
-                            onClick: (event) => {
-                                event.preventDefault()
-                                const selected = handleSelectItem(item)
-                                if (selected) {
-                                    setSidebarMobileVisible(false)
-                                }
-                            },
-                        })}
-                    />
-                </>
-            }
-        >
-            <div className={styles.detailsPane}>
-                <MobileSidebarBackButton
-                    label="Endorsements"
-                    sidebarMobileVisible={sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                    className={styles.backButton}
-                />
+    const titleFormState =
+        formState?.mode === 'create'
+            ? formState.form.name || 'Create New Endorsement'
+            : (formState?.form?.name ??
+              selectedEndorsement?.name ??
+              'Endorsement')
 
-                {selectedTab !== 'detail' && renderBanner(false)}
-                {selectedTab === 'detail' && (
-                    <DetailView
-                        key={selectedEndorsement?.id ?? 'empty'}
-                        beforeHeader={renderBanner(true)}
-                        endorsement={
-                            formState?.form ?? selectedEndorsement ?? null
-                        }
-                        title={
-                            formState?.mode === 'create'
-                                ? formState.form.name ||
-                                  'Create New Endorsement'
-                                : (formState?.form?.name ??
-                                  selectedEndorsement?.name ??
-                                  'Endorsement')
-                        }
-                        saving={
-                            createMutation.isPending || updateMutation.isPending
-                        }
-                        onUpdate={setFormState}
-                        onSave={handleSave}
-                        onCreate={handleCreate}
-                        showCreateButton={false}
-                        controlsRef={formControls}
-                        onDelete={handleDelete}
-                        editDisabledReason={
-                            canEditEndorsements
-                                ? undefined
-                                : 'Not Allowed To Edit Endorsements'
-                        }
-                        deleteDisabledReason={
-                            canEditEndorsements
-                                ? undefined
-                                : 'Not Allowed To Delete Endorsements'
-                        }
-                        onCancel={handleCancel}
-                        uploadImage={endorsementQueries.uploadImage}
-                        className={styles.detailsContent}
+    const renderWholePage = () => (
+        <ProtectedPanel
+            label="Endorsements"
+            requiredPermissions={[PermissionIds.VIEW_ENDORSEMENT_PANEL]}
+        >
+            <Panel
+                includeSidebar
+                collapsedSidebarMode="compact"
+                sidebarTogglePlacement="header"
+                showSidebarFooterWhenCollapsed={false}
+                showSidebarBorderWhenCollapsed
+                largeTitle
+                sidebarWidth="25.5rem"
+                collapsedSidebarWidth="5rem"
+                sidebarClassName={styles.sidebarBg}
+                sidebarMobileVisible={sidebarMobileVisible}
+                label="Endorsements"
+                showScrollbar={false}
+                sidebarList={{
+                    search: { search, onSearch },
+                    footer: {
+                        page: search.page ?? 0,
+                        pageSize: search.limit ?? 25,
+                        count: endorsementCount,
+                        isPending: endorsementsQuery.isPending,
+                        onPageChange: (nextPage: number) =>
+                            onSearch({ ...search, page: nextPage }),
+                    },
+                    filters: sidebarFilters,
+                }}
+                prominentHeaderButton={{
+                    icon: <FaRegPenToSquare size={20} />,
+                    label: canEditEndorsements
+                        ? 'Create Endorsement'
+                        : 'Not Allowed To Create Endorsements',
+                    disabled: !canEditEndorsements,
+                    onClick: () => formControls.current?.create(),
+                }}
+                sidebarBody={
+                    <>
+                        <div className={styles.filterTagsWrapper}>
+                            <FilterTags
+                                tags={endorsementFilterTags}
+                                activeTag={activeFilterTag}
+                                onChange={setActiveFilterTag}
+                            />
+                        </div>
+                        <SidebarBody<Endorsement>
+                            items={endorsements}
+                            isLoading={endorsementsQuery.isPending}
+                            error={endorsementsQuery.error}
+                            selectedKey={selectedEndorsement?.id}
+                            renderItem={(item) => ({
+                                key: item.id,
+                                label: `${item.name}${item.incumbent ? '*' : ''}`,
+                                subtitle: getStateLabel(item.state),
+                                tagLabel: makeDateTag(item),
+                                tagClassName: styles.dateTag,
+                                subTags: makeLevelTags(item),
+                                icon: (
+                                    <EndorsementAvatar
+                                        endorsement={item}
+                                        size={40}
+                                        badgeTooltipPosition="bottom"
+                                        skeletonDelay={1000}
+                                        className={styles.listAvatar}
+                                    />
+                                ),
+                                href: `/volunteer_dashboard/panels/endorsements?endorsementId=${item.id}`,
+                                onClick: (event) => {
+                                    event.preventDefault()
+                                    const selected = handleSelectItem(item)
+                                    if (selected) {
+                                        setSidebarMobileVisible(false)
+                                    }
+                                },
+                            })}
+                        />
+                    </>
+                }
+            >
+                <div className={styles.detailsPane}>
+                    <MobileSidebarBackButton
+                        label="Endorsements"
+                        sidebarMobileVisible={sidebarMobileVisible}
+                        onBack={() => setSidebarMobileVisible(true)}
+                        className={styles.backButton}
                     />
-                )}
-                {selectedEndorsement && selectedTab === 'history' && (
-                    <HistoryView />
-                )}
-            </div>
-        </Panel>
+
+                    {selectedTab !== 'detail' && renderBanner(false)}
+                    {selectedTab === 'detail' && (
+                        <DetailView
+                            key={selectedEndorsement?.id ?? 'empty'}
+                            beforeHeader={renderBanner(true)}
+                            endorsement={selectedEndorsement}
+                            title={titleFormState}
+                            saving={
+                                createMutation.isPending ||
+                                updateMutation.isPending
+                            }
+                            onUpdate={setFormState}
+                            onSave={handleSave}
+                            onCreate={handleCreate}
+                            showCreateButton={false}
+                            controlsRef={formControls}
+                            onDelete={handleDelete}
+                            editDisabledReason={
+                                canEditEndorsements
+                                    ? undefined
+                                    : 'Not Allowed To Edit Endorsements'
+                            }
+                            deleteDisabledReason={
+                                canEditEndorsements
+                                    ? undefined
+                                    : 'Not Allowed To Delete Endorsements'
+                            }
+                            onCancel={handleCancel}
+                            uploadImage={endorsementQueries.uploadImage}
+                            className={styles.detailsContent}
+                        />
+                    )}
+                    {selectedEndorsement && selectedTab === 'history' && (
+                        <HistoryView />
+                    )}
+                </div>
+            </Panel>
+        </ProtectedPanel>
     )
+
+    return renderWholePage()
 }

@@ -4,11 +4,7 @@ import { cn } from '@/util'
 import phone from 'phone'
 import { useCallback } from 'react'
 
-/**
- * Formats a phone number string for display in readonly mode.
- * Accepts various formats and normalizes to "(XXX) XXX-XXXX" format.
- */
-function formatPhoneDisplay(phoneNumber: string): string {
+export function formatPhoneDisplay(phoneNumber: string): string {
     if (!phoneNumber) return ''
 
     const parsed = phone(phoneNumber, { country: 'US' })
@@ -18,10 +14,44 @@ function formatPhoneDisplay(phoneNumber: string): string {
     return `(${digits.substring(0, 3)}) ${digits.substring(3, 6)}-${digits.substring(6, 10)}`
 }
 
-/**
- * Form field component for US phone number input with validation.
- * Uses the `phone` library for proper validation and E164 normalization.
- */
+export function isValidPhone(text: string): boolean {
+    const parsed = phone(text, {
+        country: 'US',
+        strictDetection: true,
+        validateMobilePrefix: true,
+    })
+
+    if (!parsed.isValid) return false
+
+    if (
+        [
+            '800',
+            '833',
+            '844',
+            '855',
+            '866',
+            '877',
+            '888',
+            '555',
+            '880',
+            '881',
+            '882',
+            '883',
+            '884',
+            '885',
+            '886',
+            '887',
+            '889',
+            '311',
+            '911',
+            '988',
+        ].includes(parsed.phoneNumber.substring(2, 5))
+    )
+        return false
+
+    return true
+}
+
 export function PhoneField<T>(
     props: FormFieldProps<T, string | null | undefined>
 ) {
@@ -30,44 +60,8 @@ export function PhoneField<T>(
         useCallback(
             (field: string | null | undefined) => {
                 const text = field ?? ''
-
                 if (!text.trim()) return !props.required
-
-                const parsed = phone(text, {
-                    country: 'US',
-                    strictDetection: true,
-                    validateMobilePrefix: true,
-                })
-
-                if (!parsed.isValid) return false
-
-                if (
-                    [
-                        '800',
-                        '833',
-                        '844',
-                        '855',
-                        '866',
-                        '877',
-                        '888',
-                        '555',
-                        '880',
-                        '881',
-                        '882',
-                        '883',
-                        '884',
-                        '885',
-                        '886',
-                        '887',
-                        '889',
-                        '311',
-                        '911',
-                        '988',
-                    ].includes(parsed.phoneNumber.substring(2, 5))
-                )
-                    return false
-
-                return true
+                return isValidPhone(text)
             },
             [props.required]
         )

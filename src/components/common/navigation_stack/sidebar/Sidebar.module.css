@@ -106,9 +106,14 @@
 
 @container navigation-stack (max-width: 63.999rem) {
     .sidebar {
+        position: absolute;
+        inset: 0;
         width: 100%;
         min-width: 0;
-        flex: 1 1 100%;
+        transition:
+            transform 380ms cubic-bezier(0.32, 0.72, 0, 1),
+            opacity 380ms cubic-bezier(0.32, 0.72, 0, 1),
+            visibility 0s;
     }
 
     .sidebarMinimal,
@@ -120,7 +125,14 @@
     }
 
     .sidebar[data-mobile-visible='false'] {
-        display: none;
+        visibility: hidden;
+        opacity: 0;
+        transform: translateX(-30%);
+        pointer-events: none;
+        transition:
+            transform 380ms cubic-bezier(0.32, 0.72, 0, 1),
+            opacity 380ms cubic-bezier(0.32, 0.72, 0, 1),
+            visibility 0s linear 380ms;
     }
 }
 
@@ -550,6 +562,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .sidebar[data-mobile-visible],
     .largeTitle,
     .largeTitleSearch,
     .prominentBreadcrumb[data-large-title='true'] {

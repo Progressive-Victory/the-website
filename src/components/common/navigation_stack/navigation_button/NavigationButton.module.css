@@ -47,6 +47,33 @@
     font-weight: 500;
 }
 
+.skeletonItem {
+    cursor: default;
+    pointer-events: none;
+
+    &:nth-child(3n + 1) .skeletonLabel {
+        width: 8.5rem;
+    }
+
+    &:nth-child(3n + 2) .skeletonLabel {
+        width: 6rem;
+    }
+
+    &:nth-child(3n + 2) .skeletonSubtitle {
+        width: 3.5rem;
+    }
+}
+
+.skeletonLabel {
+    width: 7rem;
+    height: 0.75rem;
+}
+
+.skeletonSubtitle {
+    width: 4.5rem;
+    height: 0.55rem;
+}
+
 .accountItem {
     margin-top: 0;
     flex-shrink: 0;
@@ -274,6 +301,25 @@
     white-space: nowrap;
 }
 
+.subtitleRow {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 0;
+    max-width: 100%;
+
+    & .subtitleSection,
+    & .accountSubtitle {
+        min-width: 0;
+    }
+
+    & .labelPill {
+        align-self: center;
+        flex-shrink: 0;
+        padding-inline: 0.3rem;
+    }
+}
+
 .subtitleSection {
     display: block;
     max-width: 100%;
@@ -451,4 +497,29 @@
 
 :global([data-sidebar-collapsed='true']) .groupChildrenClip {
     display: none;
+}
+
+.itemHeader > .linkDisabled {
+    cursor: not-allowed;
+    color: rgba(15, 23, 42, 0.4);
+
+    &:hover {
+        background: transparent;
+    }
+
+    &:active {
+        transform: none;
+    }
+
+    &.cardLink {
+        opacity: 0.55;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.74);
+            transform: none;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.75) inset,
+                0 22px 55px rgba(15, 23, 42, 0.12);
+        }
+    }
 }

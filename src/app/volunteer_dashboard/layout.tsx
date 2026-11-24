@@ -11,7 +11,7 @@ import { Sidebar } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { Header } from '@/components/layout/Header'
 import { PermissionIds } from '@/models'
 import { useEndorsementQueries, usePositionQueries } from '@/queries'
-import { usePaginatedSearch, useCurrentUser } from '@/util/hooks'
+import { hasPermission, usePaginatedSearch, useCurrentUser } from '@/util/hooks'
 import { useQuery } from '@tanstack/react-query'
 import { usePathname, useSearchParams } from 'next/navigation'
 import {
@@ -43,6 +43,7 @@ interface DashboardGroupChildConfigItem {
     href: `/volunteer_dashboard/panels/${string}`
     icon?: IconType
     count?: number
+    permission?: number
 }
 
 interface DashboardPanelConfigItem {
@@ -51,6 +52,7 @@ interface DashboardPanelConfigItem {
     label: string
     icon: IconType
     count?: number
+    permission?: number
     buttonType?: 'default' | 'group'
     groupChildren?: DashboardGroupChildConfigItem[]
 }
@@ -112,11 +114,21 @@ function LayoutContent({ children }: { children: ReactNode }) {
     const currentUser = useCurrentUser()
     const isDesktop = useMediaQuery('(min-width: 64rem)')
     const discordUser = currentUser.data?.discordUsers?.[0]
-    const displayName =
-        `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim() ||
-        (discordUser?.username ? `@${discordUser.username}` : 'User')
-    const displayPronouns =
-        `${currentUser.data?.preferredPronouns ?? ''}`.trim()
+
+    function buildDisplayName(): string {
+        return (
+            `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim() ||
+            (discordUser?.username ? `@${discordUser.username}` : 'User')
+        )
+    }
+
+    const displayName = buildDisplayName()
+
+    const canView = (permission?: number) => {
+        if (permission == null) return true
+        const user = currentUser.data
+        return user != null && hasPermission(user, permission)
+    }
 
     const dashboardPanelConfig: DashboardPanelConfigItem[] = [
         {
@@ -125,12 +137,14 @@ function LayoutContent({ children }: { children: ReactNode }) {
             href: '/volunteer_dashboard/panels/members',
             icon: FaUsers,
             count: users.query.data?.count,
+            permission: PermissionIds.VIEW_MEMBER_PANEL,
         },
         {
             key: 'fundraising',
             label: 'Fundraising',
             href: '/volunteer_dashboard/panels/fundraising',
             icon: FaDonate,
+            permission: PermissionIds.VIEW_FUNDRAISING_PANEL,
             buttonType: 'group',
             groupChildren: [
                 {
@@ -139,6 +153,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                     href: '/volunteer_dashboard/panels/donors',
                     icon: FaDollarSign,
                     count: donors.query.data?.count,
+                    permission: PermissionIds.VIEW_DONORS_PANEL,
                 },
                 {
                     key: 'contributions',
@@ -146,6 +161,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                     href: '/volunteer_dashboard/panels/contributions',
                     icon: FaMoneyBills,
                     count: contributions.query.data?.count,
+                    permission: PermissionIds.VIEW_CONTRIBUTIONS_PANEL,
                 },
                 {
                     key: 'membership',
@@ -153,8 +169,17 @@ function LayoutContent({ children }: { children: ReactNode }) {
                     href: '/volunteer_dashboard/panels/membership',
                     icon: FaMoneyCheckDollar,
                     count: memberships.query.data?.count,
+                    permission: PermissionIds.VIEW_MEMBERSHIPS_PANEL,
                 },
             ],
+        },
+        {
+            key: 'positions',
+            label: 'Positions',
+            href: '/volunteer_dashboard/panels/positions',
+            icon: FaClipboardUser,
+            count: positionCount,
+            permission: PermissionIds.VIEW_POSITIONS_PANEL,
         },
         {
             key: 'roles',
@@ -162,6 +187,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
             href: '/volunteer_dashboard/panels/roles',
             icon: FaUserTag,
             count: roles.query.data?.count,
+            permission: PermissionIds.VIEW_ROLES_PANEL,
         },
         {
             key: 'permissions',
@@ -171,17 +197,11 @@ function LayoutContent({ children }: { children: ReactNode }) {
             count: permissions.query.data?.count,
         },
         {
-            key: 'positions',
-            label: 'Positions',
-            href: '/volunteer_dashboard/panels/positions',
-            icon: FaClipboardUser,
-            count: positionCount,
-        },
-        {
             key: 'chart',
             label: 'Chart',
             href: '/volunteer_dashboard/panels/chart',
             icon: FaSitemap,
+            permission: PermissionIds.VIEW_POSITIONS_PANEL,
         },
         {
             key: 'endorsements',
@@ -189,6 +209,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
             href: '/volunteer_dashboard/panels/endorsements',
             icon: FaCheckToSlot,
             count: endorsements.data?.length,
+            permission: PermissionIds.VIEW_ENDORSEMENT_PANEL,
         },
     ]
 
@@ -234,7 +255,87 @@ function LayoutContent({ children }: { children: ReactNode }) {
 
     const isPanelSelected = pathname.startsWith('/volunteer_dashboard/panels/')
 
-    return (
+    const renderSidebar = () => (
+        <Sidebar
+            className={styles.sidebar}
+            variant="minimal"
+            showScrollbar={false}
+            showSelectionIndicator
+            label="Volunteer Dashboard"
+            featured={
+                <NavigationButton
+                    buttonType="account"
+                    href={
+                        isDesktop
+                            ? '/volunteer_dashboard'
+                            : '/volunteer_dashboard/panels/members'
+                    }
+                    icon={
+                        <DiscordAvatar
+                            discordUserId={discordUser?.id}
+                            imageId={discordUser?.image}
+                            size={40}
+                        />
+                    }
+                    label={displayName}
+                    resetPanelHistoryOnClick={!isDesktop}
+                    subtitle={
+                        discordUser?.username
+                            ? `@${discordUser.username}`
+                            : undefined
+                    }
+                />
+            }
+        >
+            {dashboardPanelConfig.map((panel) => (
+                <NavigationButton
+                    key={panel.key}
+                    active={pathname === panel.href}
+                    href={panel.href}
+                    label={panel.label}
+                    icon={panel.icon}
+                    tag={{ count: panel.count }}
+                    buttonType={panel.buttonType}
+                    disabled={!canView(panel.permission)}
+                    locked={panel.groupChildren?.every(
+                        (groupChild) => !canView(groupChild.permission)
+                    )}
+                    indicatorDirection={
+                        pathname === panel.href &&
+                        currentTopLevelIndex !== -1 &&
+                        previousTopLevelIndex !== -1 &&
+                        previousPathName !== pathname
+                            ? currentTopLevelIndex > previousTopLevelIndex
+                                ? 'down'
+                                : 'up'
+                            : 'none'
+                    }
+                    hasActiveGroupChild={Boolean(
+                        panel.groupChildren?.some(
+                            (groupChild) => pathname === groupChild.href
+                        )
+                    )}
+                    groupContent={panel.groupChildren?.map((groupChild) => (
+                        <NavigationButton
+                            key={groupChild.key}
+                            active={pathname === groupChild.href}
+                            href={groupChild.href}
+                            label={groupChild.label}
+                            icon={groupChild.icon}
+                            tag={{
+                                count: groupChild.count,
+                            }}
+                            disabled={!canView(groupChild.permission)}
+                            resetPanelHistoryOnClick
+                        />
+                    ))}
+                    resetPanelHistoryOnClick
+                />
+            ))}
+        </Sidebar>
+    )
+
+    const renderWholePage = () => (
         <ProtectedPage
             requiredPermissions={[PermissionIds.VOLUNTEER_DASHBOARD_ACCESS]}
         >
@@ -244,87 +345,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                 <NavigationStack
                     className={styles.navigationStack}
                     isSelected={isPanelSelected}
-                    sidebar={
-                        <Sidebar
-                            className={styles.sidebar}
-                            variant="minimal"
-                            showScrollbar={false}
-                            showSelectionIndicator
-                            label="Volunteer Dashboard"
-                            featured={
-                                <NavigationButton
-                                    buttonType="account"
-                                    href={
-                                        isDesktop
-                                            ? '/volunteer_dashboard'
-                                            : '/volunteer_dashboard/panels/members'
-                                    }
-                                    icon={
-                                        <DiscordAvatar
-                                            discordUserId={discordUser?.id}
-                                            imageId={discordUser?.image}
-                                            size={40}
-                                        />
-                                    }
-                                    label={displayName}
-                                    resetPanelHistoryOnClick={!isDesktop}
-                                    subtitle={
-                                        discordUser?.username
-                                            ? `@${discordUser.username}`
-                                            : undefined
-                                    }
-                                    labelPill={displayPronouns}
-                                />
-                            }
-                        >
-                            {dashboardPanelConfig.map((panel) => (
-                                <NavigationButton
-                                    key={panel.key}
-                                    active={pathname === panel.href}
-                                    href={panel.href}
-                                    label={panel.label}
-                                    icon={panel.icon}
-                                    tag={{ count: panel.count }}
-                                    buttonType={panel.buttonType}
-                                    indicatorDirection={
-                                        pathname === panel.href &&
-                                        currentTopLevelIndex !== -1 &&
-                                        previousTopLevelIndex !== -1 &&
-                                        previousPathName !== pathname
-                                            ? currentTopLevelIndex >
-                                              previousTopLevelIndex
-                                                ? 'down'
-                                                : 'up'
-                                            : 'none'
-                                    }
-                                    hasActiveGroupChild={Boolean(
-                                        panel.groupChildren?.some(
-                                            (groupChild) =>
-                                                pathname === groupChild.href
-                                        )
-                                    )}
-                                    groupContent={panel.groupChildren?.map(
-                                        (groupChild) => (
-                                            <NavigationButton
-                                                key={groupChild.key}
-                                                active={
-                                                    pathname === groupChild.href
-                                                }
-                                                href={groupChild.href}
-                                                label={groupChild.label}
-                                                icon={groupChild.icon}
-                                                tag={{
-                                                    count: groupChild.count,
-                                                }}
-                                                resetPanelHistoryOnClick
-                                            />
-                                        )
-                                    )}
-                                    resetPanelHistoryOnClick
-                                />
-                            ))}
-                        </Sidebar>
-                    }
+                    sidebar={renderSidebar()}
                     detail={
                         <Detail
                             bodyType="panel"
@@ -334,8 +355,7 @@ function LayoutContent({ children }: { children: ReactNode }) {
                     }
                     unselected={renderVolunteerDashboardUnselectedDetail({
                         showWelcome,
-                        currentUserName:
-                            `${currentUser.data?.firstName ?? ''} ${currentUser.data?.lastName ?? ''}`.trim(),
+                        currentUserName: displayName,
                         currentUserHandle:
                             currentUser.data?.discordUsers?.[0]?.username,
                         currentUserDiscordId:
@@ -350,9 +370,12 @@ function LayoutContent({ children }: { children: ReactNode }) {
                         permissionCount: permissions.query.data?.count,
                         positionCount,
                         endorsementCount: endorsements.data?.length,
+                        canView,
                     })}
                 />
             </div>
         </ProtectedPage>
     )
+
+    return renderWholePage()
 }

@@ -1,5 +1,28 @@
 import styles from './FormField.module.css'
-import { ReactElement, ReactNode, useEffect, useMemo } from 'react'
+import { cn } from '@/util'
+import {
+    ReactElement,
+    ReactNode,
+    useCallback,
+    useEffect,
+    useMemo,
+    type MouseEvent,
+} from 'react'
+
+const INTERACTIVE_SELECTOR =
+    'input, select, textarea, button, a, [tabindex], [contenteditable]'
+
+const preventRowActivation = (event: MouseEvent<HTMLLabelElement>) => {
+    const control = (event.target as Element).closest(INTERACTIVE_SELECTOR)
+    if (!control || !event.currentTarget.contains(control))
+        event.preventDefault()
+}
+
+const labelAlignClasses = {
+    top: styles.labelTop,
+    center: styles.labelCenter,
+    bottom: styles.labelBottom,
+}
 
 /**
  * Properties for the FormField component. All form fields extend their
@@ -22,6 +45,8 @@ export interface FormFieldProps<FormType, FieldType = unknown> {
 
     /** Optional content rendered after the label, e.g. a status marker. */
     labelIcon?: ReactNode
+
+    labelAlign?: 'top' | 'center' | 'bottom'
 
     /** Whether this field can be edited. */
     readonly?: boolean
@@ -168,34 +193,39 @@ export function useConfigure<FormType, FieldType>(
     const id = props.id
     const onConfigure = props.dynamic?.onConfigure
 
+    // Props object changing will re-trigger Callback, so we need to grab the values beforehand
+    // So that we only regenerate on change
+    const propGetter = props.getter
+    const propSetter = props.setter
+    const propField = props.field
     // Use the provided getter if available, or default to `form[props.field]`.
     // If no field is provided either, be sad and return undefined.
-    const getter = useMemo(() => {
-        const getter = props.getter
-        if (getter) return getter
+    const getter = useCallback(
+        (form: FormType): FieldType | undefined => {
+            if (propGetter) return propGetter(form)
 
-        const key = props.field
-        if (key)
-            return (form: FormType) => (form as Record<string, FieldType>)[key]
+            if (!propField) return undefined
 
-        return () => undefined
-    }, [props.getter, props.field])
-
+            return (form as Record<string, FieldType>)[propField]
+        },
+        [propGetter, propField]
+    )
     // Use the provided setter if available, or default to `form[props.field]`.
     // If no field is provided either, be sad and return undefined.
-    const setter = useMemo(() => {
-        const setter = props.setter
-        if (setter) return setter
 
-        const key = props.field
-        if (key)
-            return (form: FormType, field: FieldType) => ({
+    const setter = useCallback(
+        (form: FormType, field: FieldType): FormType => {
+            if (propSetter) return propSetter(form, field)
+
+            if (!propField) return form
+
+            return {
                 ...form,
-                [key]: field,
-            })
-
-        return (form: FormType) => form
-    }, [props.setter, props.field])
+                [propField]: field,
+            }
+        },
+        [propSetter, propField]
+    )
 
     // Use the provided validator if available, or default to the, well,
     // default one. We can't be sad here because it can't be undefined.
@@ -238,6 +268,7 @@ export function FormField<FormType, FieldType>({
     id,
     label,
     labelIcon,
+    labelAlign = 'center',
     readonly,
     required,
     deprecated,
@@ -248,7 +279,9 @@ export function FormField<FormType, FieldType>({
 
     const content = (
         <>
-            <span className={styles.fieldLabel}>
+            <span
+                className={cn(styles.fieldLabel, labelAlignClasses[labelAlign])}
+            >
                 {label}
                 {labelIcon}
                 {required && (
@@ -271,7 +304,11 @@ export function FormField<FormType, FieldType>({
 
     if (isEditing)
         return (
-            <label key={id} className={styles.fieldHeader}>
+            <label
+                key={id}
+                className={styles.fieldHeader}
+                onClick={preventRowActivation}
+            >
                 {content}
             </label>
         )

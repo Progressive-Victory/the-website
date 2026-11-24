@@ -10,25 +10,28 @@ import {
 } from './positions.utils'
 import { MobileSidebarBackButton } from '@/app/volunteer_dashboard/layout/MobileSidebarBackButton'
 import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
-import {
-    Form,
-    FormControls,
-    FormGroup,
-    FormState,
-    DropDownField,
-    TextField,
-} from '@/components/common/forms'
+import { Form, FormControls, FormState } from '@/components/common/forms'
 import {
     FormFieldProps,
     useConfigure,
 } from '@/components/common/forms/FormField'
-import { StepperField } from '@/components/common/forms/StepperField'
+import {
+    AddListButton,
+    AddListEmptyRow,
+    AddListItem,
+    DropdownRow,
+    List,
+    StepperRow,
+    TextRow,
+    ToggleRow,
+} from '@/components/common/list'
 import Panel from '@/components/common/panel/Panel'
+import { ProtectedPanel } from '@/components/common/panel/ProtectedPanel'
 import { SidebarBody } from '@/components/common/panel/sidebar_list/SidebarBody'
 import { type SidebarListFiltersProps } from '@/components/common/panel/sidebar_list/SidebarList'
-import { Switch } from '@/components/common/switch/Switch'
+import { PermissionIds } from '@/models'
 import { usePositionQueries } from '@/queries'
-import { cn, parseErrorMessage } from '@/util'
+import { parseErrorMessage } from '@/util'
 import {
     useOptimisticDelete,
     useOptimisticUpdate,
@@ -256,122 +259,125 @@ export default function Page() {
 
     const formControls = useRef<FormControls>(null)
 
-    return (
-        <Panel
-            includeSidebar
-            largeTitle
-            sidebarWidth="24rem"
-            sidebarClassName={styles.sidebarBg}
-            sidebarMobileVisible={sidebarMobileVisible}
+    const isSaving: boolean =
+        createMutation.isPending ||
+        updateMutation.isPending ||
+        deleteMutation.isPending
+
+    const renderWholePage = () => (
+        <ProtectedPanel
             label="Positions"
-            showScrollbar={false}
-            sidebarList={{
-                search: { search, onSearch },
-                filters: sidebarFilters,
-            }}
-            prominentHeaderButton={{
-                icon: <FaRegPenToSquare size={20} />,
-                label: 'Create Position',
-                onClick: () => {
-                    formControls.current?.create()
-                    setSidebarMobileVisible(false)
-                },
-            }}
-            sidebarBody={
-                <SidebarBody<Position>
-                    items={positions}
-                    isLoading={positionHierarchy.isPending}
-                    error={positionHierarchy.error}
-                    selectedKey={selectedPosition?.id}
-                    renderItem={(position) => ({
-                        key: position.id,
-                        label: position.name,
-                        subtitle: positionTypeLabels[position.type],
-                        tagCount:
-                            position.type === PositionTypes.GROUP
-                                ? undefined
-                                : (position.seats ?? position.userIds.length),
-                        buttonType:
-                            position.type === PositionTypes.GROUP
-                                ? 'group'
-                                : 'default',
-                        children: position.childRelationships
-                            .map(({ id }) => positionById.get(id))
-                            .filter((child) => child != null)
-                            .sort((a, b) => a.name.localeCompare(b.name)),
-                        href: `/volunteer_dashboard/panels/positions?positionId=${position.id}`,
-                        onClick: (event) => {
-                            event.preventDefault()
-                            const selected = handleSelectItem(position)
-                            if (selected) {
-                                setSidebarMobileVisible(false)
-                            }
-                        },
-                    })}
-                />
-            }
+            requiredPermissions={[PermissionIds.VIEW_POSITIONS_PANEL]}
         >
-            <div className={styles.detailPane}>
-                <MobileSidebarBackButton
-                    label="Positions"
-                    sidebarMobileVisible={sidebarMobileVisible}
-                    onBack={() => setSidebarMobileVisible(true)}
-                />
-                <Form<Position>
-                    key={selectedPosition?.id}
-                    className={styles.positionForm}
-                    form={selectedPosition}
-                    title={
-                        formState?.mode == 'create'
-                            ? 'New Position'
-                            : (selectedPosition?.name ?? 'Position')
-                    }
-                    saving={
-                        createMutation.isPending ||
-                        updateMutation.isPending ||
-                        deleteMutation.isPending
-                    }
-                    onUpdate={setFormState}
-                    onSave={handleSave}
-                    onCreate={handleCreate}
-                    showCreateButton={false}
-                    controlsRef={formControls}
-                    onDelete={handleDelete}
-                    deleteInEditMode
-                >
-                    <FormGroup
-                        title="Details"
-                        className={cn(
-                            styles.subPositionsContainer,
-                            styles.detailsFields
-                        )}
+            <Panel
+                includeSidebar
+                largeTitle
+                sidebarWidth="24rem"
+                sidebarClassName={styles.sidebarBg}
+                sidebarMobileVisible={sidebarMobileVisible}
+                label="Positions"
+                showScrollbar={false}
+                sidebarList={{
+                    search: { search, onSearch },
+                    filters: sidebarFilters,
+                }}
+                prominentHeaderButton={{
+                    icon: <FaRegPenToSquare size={20} />,
+                    label: 'Create Position',
+                    onClick: () => {
+                        formControls.current?.create()
+                        setSidebarMobileVisible(false)
+                    },
+                }}
+                sidebarBody={
+                    <SidebarBody<Position>
+                        items={positions}
+                        isLoading={positionHierarchy.isPending}
+                        error={positionHierarchy.error}
+                        selectedKey={selectedPosition?.id}
+                        renderItem={(position) => ({
+                            key: position.id,
+                            label: position.name,
+                            subtitle: positionTypeLabels[position.type],
+                            tagCount:
+                                position.type === PositionTypes.GROUP
+                                    ? undefined
+                                    : (position.seats ??
+                                      position.userIds.length),
+                            buttonType:
+                                position.type === PositionTypes.GROUP
+                                    ? 'group'
+                                    : 'default',
+                            children: position.childRelationships
+                                .map(({ id }) => positionById.get(id))
+                                .filter((child) => child != null)
+                                .sort((a, b) => a.name.localeCompare(b.name)),
+                            href: `/volunteer_dashboard/panels/positions?positionId=${position.id}`,
+                            onClick: (event) => {
+                                event.preventDefault()
+                                const selected = handleSelectItem(position)
+                                if (selected) {
+                                    setSidebarMobileVisible(false)
+                                }
+                            },
+                        })}
+                    />
+                }
+            >
+                <div className={styles.detailPane}>
+                    <MobileSidebarBackButton
+                        label="Positions"
+                        sidebarMobileVisible={sidebarMobileVisible}
+                        onBack={() => setSidebarMobileVisible(true)}
+                    />
+                    <Form<Position>
+                        key={selectedPosition?.id}
+                        className={styles.positionForm}
+                        form={selectedPosition}
+                        title={
+                            formState?.mode == 'create'
+                                ? 'New Position'
+                                : (selectedPosition?.name ?? 'Position')
+                        }
+                        saving={isSaving}
+                        onUpdate={setFormState}
+                        onSave={handleSave}
+                        onCreate={handleCreate}
+                        showCreateButton={false}
+                        controlsRef={formControls}
+                        onDelete={handleDelete}
+                        deleteInEditMode
                     >
-                        <TextField label="Name" field="name" required />
-                        <DropDownField<Position>
-                            label="Type"
-                            getter={(form) => form.type}
-                            setter={(form, field) => ({
-                                ...form,
-                                type: Number(field),
-                            })}
-                            options={positionTypeOptions}
-                        />
-                        <StepperField<Position>
-                            label="Seats"
-                            field="seats"
-                            min={0}
-                            nullLabel="Uncapped"
-                            nullIcon={<FaInfinity aria-hidden="true" />}
-                            setter={(form, value) => ({
-                                ...form,
-                                seats: value === 0 ? null : (value ?? null),
-                            })}
-                        />
-                    </FormGroup>
-                    {formState?.mode !== 'create' && selectedPosition && (
-                        <>
-                            {(seats == null || seats > 0) && (
-                                <FormGroup title="People">
+                        <List title="Details">
+                            <TextRow
+                                label="Name"
+                                field="name"
+                                indicator="required"
+                            />
+                            <DropdownRow
+                                label="Type"
+                                getter={(form: Position) => form.type}
+                                setter={(form: Position, value) => ({
+                                    ...form,
+                                    type: Number(value),
+                                })}
+                                options={positionTypeOptions}
+                            />
+                            <StepperRow
+                                label="Seats"
+                                field="seats"
+                                min={0}
+                                nullLabel="Uncapped"
+                                nullIcon={<FaInfinity aria-hidden="true" />}
+                                setter={(form: Position, value) => ({
+                                    ...form,
+                                    seats: value === 0 ? null : (value ?? null),
+                                })}
+                            />
+                        </List>
+                        {formState?.mode !== 'create' && selectedPosition && (
+                            <>
+                                {(seats == null || seats > 0) && (
                                     <OccupantsField
                                         label="People"
                                         field="userIds"
@@ -381,11 +387,8 @@ export default function Page() {
                                         userSearchQuery={userSearchQuery}
                                         userSearch={userSearch}
                                         onUserSearch={onUserSearch}
-                                        editing={formState?.mode === 'edit'}
                                     />
-                                </FormGroup>
-                            )}
-                            <FormGroup title="Subordinates">
+                                )}
                                 <SubordinatesField
                                     label="Subordinates"
                                     field="childRelationships"
@@ -394,31 +397,23 @@ export default function Page() {
                                         positionHierarchy.data?.positions ?? []
                                     }
                                     currentPositionId={selectedPosition.id}
-                                    editing={formState?.mode === 'edit'}
                                     userMap={pageUserMap}
                                 />
-                            </FormGroup>
-                            <FormGroup title="Permissions">
-                                <PermissionsField
-                                    label="Permissions"
-                                    field="permissions"
-                                />
-                            </FormGroup>
-                        </>
-                    )}
-                </Form>
-            </div>
-        </Panel>
+                                <List title="Permissions">
+                                    <PermissionRows />
+                                </List>
+                            </>
+                        )}
+                    </Form>
+                </div>
+            </Panel>
+        </ProtectedPanel>
     )
+
+    return renderWholePage()
 }
 
-function PermissionsField(
-    props: FormFieldProps<Position, Position['permissions']>
-) {
-    const { getter, onChange, readonly, disabled } = useConfigure(
-        props,
-        useCallback(() => true, [])
-    )
+function PermissionRows() {
     const { query } = usePaginatedSearch('/permissions', zPermission, {
         all: true,
         search: { sort: SortDirection.ASC, limit: 100 },
@@ -427,86 +422,43 @@ function PermissionsField(
     const permissions = [...(query.data?.data ?? [])].sort(
         (a, b) => a.id - b.id
     )
-    const assignedPermissions = getter(props.dynamic!.form) ?? []
-    const assignedPermissionIds = new Set(
-        assignedPermissions.map((permission) => permission.id)
-    )
 
-    return (
-        <div className={styles.subPositions}>
-            <div className={styles.subPositionsContainer}>
-                {query.isPending ? (
-                    <div className={styles.subPositionEntryEmpty}>
-                        Loading permissions...
-                    </div>
-                ) : query.error ? (
-                    <div className={styles.subPositionEntryEmpty}>
-                        Error: {parseErrorMessage(query.error)}
-                    </div>
-                ) : (
-                    <>
-                        {permissions.length === 0 && (
-                            <div className={styles.subPositionEntryEmpty}>
-                                No permissions
-                            </div>
-                        )}
-                        {permissions.map((permission) => (
-                            <div
-                                key={permission.id}
-                                className={cn(
-                                    styles.subPositionEntry,
-                                    styles.permissionEntry
-                                )}
-                            >
-                                <span className={styles.subPositionEntryText}>
-                                    {permission.name}
-                                </span>
-                                {!readonly ? (
-                                    <Switch
-                                        type="long"
-                                        ariaLabel={permission.name}
-                                        checked={assignedPermissionIds.has(
-                                            permission.id
-                                        )}
-                                        disabled={disabled}
-                                        onCheckedChange={(checked) => {
-                                            onChange(
-                                                checked
-                                                    ? [
-                                                          ...assignedPermissions,
-                                                          permission,
-                                                      ]
-                                                    : assignedPermissions.filter(
-                                                          (assigned) =>
-                                                              assigned.id !==
-                                                              permission.id
-                                                      )
-                                            )
-                                        }}
-                                    />
-                                ) : (
-                                    <span className={styles.subPositionTags}>
-                                        <span
-                                            className={styles.subPositionTag}
-                                            data-enabled={assignedPermissionIds.has(
-                                                permission.id
-                                            )}
-                                        >
-                                            {assignedPermissionIds.has(
-                                                permission.id
-                                            )
-                                                ? 'Yes'
-                                                : 'No'}
-                                        </span>
-                                    </span>
-                                )}
-                            </div>
-                        ))}
-                    </>
-                )}
-            </div>
-        </div>
-    )
+    if (query.isPending)
+        return <AddListEmptyRow>Loading permissions...</AddListEmptyRow>
+    if (query.error)
+        return (
+            <AddListEmptyRow>
+                <span role="alert">
+                    Error: {parseErrorMessage(query.error)}
+                </span>
+            </AddListEmptyRow>
+        )
+    if (permissions.length === 0)
+        return <AddListEmptyRow>No permissions</AddListEmptyRow>
+
+    return permissions.map((permission) => (
+        <ToggleRow
+            key={permission.id}
+            label={permission.name}
+            getter={(form: Position) =>
+                form.permissions.some(
+                    (assigned) => assigned.id === permission.id
+                )
+            }
+            setter={(form: Position, checked) => ({
+                ...form,
+                permissions: checked
+                    ? form.permissions.some(
+                          (assigned) => assigned.id === permission.id
+                      )
+                        ? form.permissions
+                        : [...form.permissions, permission]
+                    : form.permissions.filter(
+                          (assigned) => assigned.id !== permission.id
+                      ),
+            })}
+        />
+    ))
 }
 
 interface SubordinatesFieldProps extends FormFieldProps<
@@ -516,7 +468,6 @@ interface SubordinatesFieldProps extends FormFieldProps<
     positionById: Map<number, Position>
     allPositions: Position[]
     currentPositionId: number
-    editing: boolean
     userMap: Map<number, UserProfile>
 }
 
@@ -526,6 +477,7 @@ function SubordinatesField(props: SubordinatesFieldProps) {
         useCallback(() => true, [])
     )
 
+    const editing = props.dynamic?.editing ?? false
     const childRelationships = getter(props.dynamic!.form) ?? []
     const [pickerOpen, setPickerOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
@@ -568,96 +520,82 @@ function SubordinatesField(props: SubordinatesFieldProps) {
     })()
 
     return (
-        <div className={styles.subPositions}>
-            <div className={styles.subPositionsContainer}>
-                {childRelationships.length === 0 && !props.editing && (
-                    <div className={styles.subPositionEntryEmpty}>
-                        No subordinates
-                    </div>
+        <>
+            <List title="Subordinates" editing={editing}>
+                {childRelationships.length === 0 && !editing && (
+                    <AddListEmptyRow>No subordinates</AddListEmptyRow>
                 )}
                 {childRelationships.map(({ id, type }) => {
+                    const name =
+                        props.positionById.get(id)?.name ?? `Unknown (${id})`
                     const pos = props.allPositions.find((p) => p.id === id)
                     const assignedUsers = (pos?.userIds ?? [])
                         .map((uid) => props.userMap.get(uid))
                         .filter(Boolean)
                     return (
-                        <div
+                        <AddListItem
                             key={id}
-                            className={cn(
-                                styles.subPositionEntry,
-                                props.editing && styles.subPositionEntryEditing
-                            )}
-                        >
-                            <button
-                                type="button"
-                                className={styles.deleteButton}
-                                onClick={() => handleRemove(id)}
-                                aria-label={`Remove ${props.positionById.get(id)?.name ?? 'position'}`}
-                            >
-                                −
-                            </button>
-                            <span className={styles.subPositionEntryText}>
-                                {props.positionById.get(id)?.name ??
-                                    `Unknown (${id})`}
-                            </span>
-                            <span className={styles.subPositionTags}>
-                                {props.editing ? (
-                                    <select
-                                        className={styles.relationshipSelect}
-                                        value={type}
-                                        aria-label={`Relationship type for ${props.positionById.get(id)?.name ?? 'position'}`}
-                                        onChange={(event) =>
-                                            handleChangeType(
-                                                id,
-                                                Number(event.target.value)
-                                            )
-                                        }
-                                    >
-                                        {relationshipTypeOptions.map(
-                                            (option) => (
-                                                <option
-                                                    key={option.value}
-                                                    value={option.value}
-                                                >
-                                                    {option.label}
-                                                </option>
-                                            )
-                                        )}
-                                    </select>
-                                ) : (
-                                    <span className={styles.subPositionTag}>
-                                        {relationshipTypeLabels[type]}
-                                    </span>
-                                )}
-                                {assignedUsers.length > 0 ? (
-                                    assignedUsers.map((u) => (
-                                        <span
-                                            key={u!.id}
-                                            className={styles.subPositionTag}
+                            label={name}
+                            onRemove={() => handleRemove(id)}
+                            accessory={
+                                <span className={styles.subPositionTags}>
+                                    {editing ? (
+                                        <select
+                                            className={
+                                                styles.relationshipSelect
+                                            }
+                                            value={type}
+                                            aria-label={`Relationship type for ${name}`}
+                                            onChange={(event) =>
+                                                handleChangeType(
+                                                    id,
+                                                    Number(event.target.value)
+                                                )
+                                            }
                                         >
-                                            {getUserDisplayName(u)}
+                                            {relationshipTypeOptions.map(
+                                                (option) => (
+                                                    <option
+                                                        key={option.value}
+                                                        value={option.value}
+                                                    >
+                                                        {option.label}
+                                                    </option>
+                                                )
+                                            )}
+                                        </select>
+                                    ) : (
+                                        <span className={styles.subPositionTag}>
+                                            {relationshipTypeLabels[type]}
                                         </span>
-                                    ))
-                                ) : (
-                                    <span className={styles.subPositionTag}>
-                                        Unfilled
-                                    </span>
-                                )}
-                            </span>
-                        </div>
+                                    )}
+                                    {assignedUsers.length > 0 ? (
+                                        assignedUsers.map((u) => (
+                                            <span
+                                                key={u!.id}
+                                                className={
+                                                    styles.subPositionTag
+                                                }
+                                            >
+                                                {getUserDisplayName(u)}
+                                            </span>
+                                        ))
+                                    ) : (
+                                        <span className={styles.subPositionTag}>
+                                            Unfilled
+                                        </span>
+                                    )}
+                                </span>
+                            }
+                        />
                     )
                 })}
-                {props.editing && (
-                    <button
-                        type="button"
-                        className={styles.addRow}
-                        onClick={() => setPickerOpen(true)}
-                    >
-                        <span className={styles.addIcon}>+</span>
+                {editing && (
+                    <AddListButton onClick={() => setPickerOpen(true)}>
                         Add Subordinate Positions
-                    </button>
+                    </AddListButton>
                 )}
-            </div>
+            </List>
 
             <SearchModal
                 open={pickerOpen}
@@ -688,7 +626,7 @@ function SubordinatesField(props: SubordinatesFieldProps) {
                     </div>
                 )}
             </SearchModal>
-        </div>
+        </>
     )
 }
 
@@ -700,7 +638,6 @@ interface OccupantsFieldProps extends FormFieldProps<Position, number[]> {
     }
     userSearch: SearchRequest
     onUserSearch: (req: SearchRequest) => void
-    editing: boolean
 }
 
 function OccupantsField(props: OccupantsFieldProps) {
@@ -709,11 +646,12 @@ function OccupantsField(props: OccupantsFieldProps) {
         useCallback(() => true, [])
     )
 
+    const editing = props.dynamic?.editing ?? false
     const userIds = getter(props.dynamic!.form) ?? []
     const seats = props.dynamic!.form.seats
     const openSeats = seats === null ? 0 : Math.max(seats - userIds.length, 0)
     const atCapacity = seats !== null && openSeats === 0
-    const assignmentRows = seats === null ? Number(props.editing) : openSeats
+    const assignmentRows = seats === null ? Number(editing) : openSeats
     const [pickerOpen, setPickerOpen] = useState(false)
 
     const userMap = new Map<number, UserProfile>()
@@ -748,62 +686,50 @@ function OccupantsField(props: OccupantsFieldProps) {
     }
 
     return (
-        <div className={styles.subPositions}>
-            <div className={styles.subPositionsContainer}>
-                {seats === null && userIds.length === 0 && !props.editing && (
-                    <div className={styles.subPositionEntryEmpty}>
-                        No people assigned
-                    </div>
+        <>
+            <List title="People" editing={editing}>
+                {seats === null && userIds.length === 0 && !editing && (
+                    <AddListEmptyRow>No people assigned</AddListEmptyRow>
                 )}
-                {userIds.map((id) => (
-                    <div
-                        key={id}
-                        className={cn(
-                            styles.subPositionEntry,
-                            props.editing && styles.subPositionEntryEditing
-                        )}
-                    >
-                        <button
-                            type="button"
-                            className={styles.deleteButton}
-                            onClick={() => handleRemove(id)}
-                            aria-label={`Remove ${getUserDisplayName(userMap.get(id))}`}
-                        >
-                            −
-                        </button>
-                        <span
-                            className={
-                                userMap.get(id)?.firstName &&
-                                userMap.get(id)?.lastName
-                                    ? styles.subPositionEntryText
-                                    : styles.subPositionEntryTextSub
+                {userIds.map((id) => {
+                    const user = userMap.get(id)
+                    const name = getUserDisplayName(user)
+                    return (
+                        <AddListItem
+                            key={id}
+                            label={
+                                user?.firstName && user?.lastName ? (
+                                    name
+                                ) : (
+                                    <span
+                                        className={
+                                            styles.subPositionEntryTextSub
+                                        }
+                                    >
+                                        {name}
+                                    </span>
+                                )
                             }
-                        >
-                            {getUserDisplayName(userMap.get(id))}
-                        </span>
-                    </div>
-                ))}
+                            removeLabel={name}
+                            onRemove={() => handleRemove(id)}
+                        />
+                    )
+                })}
                 {Array.from({ length: assignmentRows }, (_, index) =>
-                    props.editing ? (
-                        <button
+                    editing ? (
+                        <AddListButton
                             key={`open-seat-${index}`}
-                            type="button"
-                            className={styles.addRow}
                             onClick={() => setPickerOpen(true)}
                         >
-                            <span className={styles.addIcon}>+</span>
                             Assign Member
-                        </button>
+                        </AddListButton>
                     ) : (
-                        <div
-                            key={`open-seat-${index}`}
-                            className={styles.subPositionEntryEmpty}
-                        >
+                        <AddListEmptyRow key={`open-seat-${index}`}>
                             Unfilled Seat
-                        </div>
+                        </AddListEmptyRow>
                     )
                 )}
-            </div>
+            </List>
 
             <SearchModal
                 open={pickerOpen}
@@ -849,6 +775,6 @@ function OccupantsField(props: OccupantsFieldProps) {
                     <div className={styles.pickerEmpty}>Loading...</div>
                 )}
             </SearchModal>
-        </div>
+        </>
     )
 }

@@ -20,6 +20,7 @@ import {
     type SidebarHeaderButtonConfig,
 } from '@/components/common/navigation_stack/sidebar/Sidebar'
 import { SidebarToggleButton } from '@/components/common/navigation_stack/sidebar/SidebarToggleButton'
+import type { SearchBarFilterContent } from '@/components/common/searchbar'
 import { cn } from '@/util'
 import type { ReactNode } from 'react'
 import { useRef, useState } from 'react'
@@ -99,48 +100,75 @@ export function Panel({
     const contentWidth = useElementWidth(contentRef)
     const isDesktop = useIsContainerDesktop(contentWidth)
     const showHeader = includeHeader
-    const resolvedSidebarTogglePlacement =
-        sidebarTogglePlacement ??
-        (collapsedSidebarMode === 'hidden' ? 'header' : 'footer')
-    const showOverlaySidebarToggle =
-        includeSidebar &&
-        resolvedSidebarTogglePlacement === 'header' &&
-        isDesktop
-    const shiftHeaderLeftForToggle = showOverlaySidebarToggle && !isSidebarOpen
-    // Back button: in prominent header on mobile with sidebar, otherwise in detail header
-    const mobileSidebar = includeSidebar && !isDesktop
-    const defaultHeaderLead = mobileSidebar ? null : includeSidebar ? (
-        <PanelBackButton showOnDesktop />
-    ) : (
-        <PanelBackButton />
-    )
-    const resolvedHeaderLead = headerLead ?? defaultHeaderLead
-    const resolvedProminentHeaderLeft =
-        prominentHeaderLeft ?? (mobileSidebar ? <PanelBackButton /> : undefined)
-    const resolvedSidebarFooter =
-        sidebarFooter ??
-        (sidebarList?.footer && <SidebarListFooter {...sidebarList.footer} />)
-    const resolvedSidebarFilterContent =
-        sidebarFilterContent ??
-        (sidebarList?.filters && (
-            <SidebarListFilters {...sidebarList.filters} />
-        ))
-    const searchFilterContent =
-        sidebarList?.search?.filterContent ??
-        (resolvedSidebarFilterContent && (() => resolvedSidebarFilterContent))
-    const resolvedSidebarSearch =
-        sidebarSearch ??
-        (sidebarList?.search && (
-            <SidebarListSearch
-                {...sidebarList.search}
-                resultCount={
-                    sidebarList.search.resultCount ?? sidebarList.footer?.count
-                }
-                filterContent={searchFilterContent}
-            />
-        ))
 
-    return (
+    const resolveSidebarToggle = () => {
+        const resolvedSidebarTogglePlacement =
+            sidebarTogglePlacement ??
+            (collapsedSidebarMode === 'hidden' ? 'header' : 'footer')
+        const showOverlaySidebarToggle =
+            includeSidebar &&
+            resolvedSidebarTogglePlacement === 'header' &&
+            isDesktop
+        const shiftHeaderLeftForToggle =
+            showOverlaySidebarToggle && !isSidebarOpen
+        return {
+            resolvedSidebarTogglePlacement,
+            showOverlaySidebarToggle,
+            shiftHeaderLeftForToggle,
+        }
+    }
+    const {
+        resolvedSidebarTogglePlacement,
+        showOverlaySidebarToggle,
+        shiftHeaderLeftForToggle,
+    } = resolveSidebarToggle()
+
+    const resolveHeaderSlots = () => {
+        // Back button: in prominent header on mobile with sidebar, otherwise in detail header
+        const mobileSidebar = includeSidebar && !isDesktop
+        const defaultHeaderLead = mobileSidebar ? null : includeSidebar ? (
+            <PanelBackButton showOnDesktop />
+        ) : (
+            <PanelBackButton />
+        )
+        return {
+            resolvedHeaderLead: headerLead ?? defaultHeaderLead,
+            resolvedProminentHeaderLeft:
+                prominentHeaderLeft ??
+                (mobileSidebar ? <PanelBackButton /> : undefined),
+        }
+    }
+    const { resolvedHeaderLead, resolvedProminentHeaderLeft } =
+        resolveHeaderSlots()
+
+    const resolveSidebarSlots = () => {
+        const resolvedSidebarFooter =
+            sidebarFooter ??
+            (sidebarList?.footer && (
+                <SidebarListFooter {...sidebarList.footer} />
+            ))
+        const listFilters = sidebarList?.filters
+        const searchFilterContent: SearchBarFilterContent | undefined =
+            sidebarList?.search?.filterContent ??
+            sidebarFilterContent ??
+            (listFilters && <SidebarListFilters {...listFilters} />)
+        const resolvedSidebarSearch =
+            sidebarSearch ??
+            (sidebarList?.search && (
+                <SidebarListSearch
+                    {...sidebarList.search}
+                    resultCount={
+                        sidebarList.search.resultCount ??
+                        sidebarList.footer?.count
+                    }
+                    filterContent={searchFilterContent}
+                />
+            ))
+        return { resolvedSidebarFooter, resolvedSidebarSearch }
+    }
+    const { resolvedSidebarFooter, resolvedSidebarSearch } =
+        resolveSidebarSlots()
+    const renderPanel = () => (
         <NavigationStackWidthContext.Provider value={contentWidth}>
             <div
                 ref={contentRef}
@@ -249,6 +277,8 @@ export function Panel({
             </div>
         </NavigationStackWidthContext.Provider>
     )
+
+    return renderPanel()
 }
 
 export default Panel

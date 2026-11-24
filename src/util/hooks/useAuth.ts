@@ -1,3 +1,4 @@
+import { QUERY_STALE_TIME } from '.'
 import { ApiError, FetchError } from '@/models'
 import {
     keepPreviousData,
@@ -102,6 +103,7 @@ export function useAuth() {
                   throw new FetchError(error.message, res.status, error.error)
               }
             : skipToken,
+        staleTime: QUERY_STALE_TIME,
     })
 
     const isSessionLoading = sessionQuery.isLoading || sessionQuery.isPending
@@ -135,6 +137,7 @@ export function useAuth() {
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
+        staleTime: QUERY_STALE_TIME,
     })
 
     return {

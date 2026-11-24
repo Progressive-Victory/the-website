@@ -1,5 +1,7 @@
 import styles from './Form.module.css'
 import { DynamicFormFieldProps, FieldConfiguration } from './FormField'
+import skeleton from '@/components/common/Skeleton.module.css'
+import { useListLoading } from '@/components/common/list/ListContext'
 import { HStack, Spacer, VStack } from '@/components/layout'
 import { cn } from '@/util'
 import deepEqual from 'deep-equal'
@@ -125,6 +127,42 @@ export interface FormProps<T> {
     onCancel?: () => void
 }
 
+function FormTitle({
+    title,
+    subtitle,
+    loading,
+}: {
+    title: string
+    subtitle?: string
+    loading: boolean
+}) {
+    return (
+        <div className={styles.titleContent}>
+            <h1 className={styles.title}>
+                {loading ? (
+                    <span className={cn(skeleton.bar, styles.skeletonTitle)} />
+                ) : (
+                    title
+                )}
+            </h1>
+            {subtitle && (
+                <p className={styles.subtitle}>
+                    {loading ? (
+                        <span
+                            className={cn(
+                                skeleton.bar,
+                                styles.skeletonSubtitle
+                            )}
+                        />
+                    ) : (
+                        subtitle
+                    )}
+                </p>
+            )}
+        </div>
+    )
+}
+
 /**
  * Generalized component for creating forms. Supports custom fields, generic
  * data, and validation. You can also create and delete forms with it.
@@ -197,6 +235,7 @@ export function Form<T>({
     >({})
 
     // Current form state
+    const loading = useListLoading()
     const form = editForm ?? initialForm
     const editing = mode !== 'read'
     const dirty = dirtyMap.size > 0
@@ -220,6 +259,7 @@ export function Form<T>({
     // Called when 'Edit' is pressed. Simply edits current form state.
     const handleEdit = () => {
         if (!initialForm || editDisabledReason) return
+        if (loading) return
         beginEdit(initialForm, 'edit')
     }
 
@@ -320,6 +360,13 @@ export function Form<T>({
         )
     }, [restoringSession, editForm, configureMap])
 
+    const renderCreateButton = (className?: string) =>
+        onCreate && showCreateButton ? (
+            <button onClick={handleCreate} className={className}>
+                <FaPlus /> Create
+            </button>
+        ) : null
+
     // If anything changes, inform the parent component of the new state
     useEffect(() => {
         if (onUpdate && form != null) onUpdate({ form, mode, dirty, invalid })
@@ -333,14 +380,7 @@ export function Form<T>({
                     <VStack grow gap>
                         <Spacer />
                         <span>{`No ${title} selected`}</span>
-                        {onCreate && showCreateButton && (
-                            <button
-                                onClick={handleCreate}
-                                className={cn(styles.button)}
-                            >
-                                <FaPlus /> Create
-                            </button>
-                        )}
+                        {renderCreateButton(styles.button)}
                         <Spacer />
                     </VStack>
                 </HStack>
@@ -425,12 +465,11 @@ export function Form<T>({
                         {avatar && (
                             <div className={styles.avatar}>{avatar}</div>
                         )}
-                        <div className={styles.titleContent}>
-                            <h1 className={styles.title}>{title}</h1>
-                            {subtitle && (
-                                <p className={styles.subtitle}>{subtitle}</p>
-                            )}
-                        </div>
+                        <FormTitle
+                            title={title}
+                            subtitle={subtitle}
+                            loading={loading}
+                        />
                     </div>
 
                     {!readonly &&
@@ -482,14 +521,7 @@ export function Form<T>({
                                     </>
                                 ) : (
                                     <>
-                                        {onCreate && showCreateButton && (
-                                            <button
-                                                onClick={handleCreate}
-                                                className={styles.button}
-                                            >
-                                                <FaPlus /> Create
-                                            </button>
-                                        )}
+                                        {renderCreateButton(styles.button)}
                                         {!hideEditButton && (
                                             <button
                                                 onClick={handleEdit}
