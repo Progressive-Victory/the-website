@@ -3,7 +3,7 @@
 import styles from './ImageWithFallback.module.css'
 import { cn } from '@/util'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 export interface ImageWithFallbackProps {
     src: string
@@ -26,24 +26,20 @@ export function ImageWithFallback({
     loading = 'lazy',
     priority = false,
 }: ImageWithFallbackProps) {
-    const [hasErrored, setHasErrored] = useState(false)
+    const [erroredSrc, setErroredSrc] = useState<string | null>(null)
 
-    useEffect(() => {
-        setHasErrored(false)
-    }, [src, useFallback])
+    const fallbackSrc =
+        'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
+    const finalSrc = useFallback || erroredSrc === src ? fallbackSrc : src
 
     return (
         <Image
-            src={
-                hasErrored || useFallback
-                    ? 'https://dummyjson.com/image/100x100/e8e0e0/d0c8c8?text=!&fontFamily=Poppins'
-                    : src
-            }
+            src={finalSrc}
             alt={alt}
             width={width}
             height={height}
             className={cn(styles.image, className)}
-            onError={() => setHasErrored(true)}
+            onError={() => setErroredSrc(src)}
             loading={priority ? undefined : loading}
             priority={priority}
         />

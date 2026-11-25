@@ -2,7 +2,7 @@ import { Field } from './components'
 import styles from './stages.module.css'
 import { cn } from '@/util'
 import { useInit } from '@/util/hooks'
-import { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useCallback, useState } from 'react'
 import { PulseLoader } from 'react-spinners'
 
 export interface PhoneVerifyProps {
@@ -27,16 +27,17 @@ export function PhoneVerifyStage({
     onCancelVerify,
 }: PhoneVerifyProps) {
     useInit(() => onRequest())
-
     const getCodeTime = useCallback(() => {
         if (!lastSmsCodeSendTimeUtc) return 0
         const elapsed = Date.now() - lastSmsCodeSendTimeUtc.getTime()
         const remaining = 1000 * 60 - elapsed
         return Math.ceil(remaining / 1000)
     }, [lastSmsCodeSendTimeUtc])
-
     const [securityCode, setSecurityCode] = useState('')
-    const [codeTimer, setCodeTimer] = useState(0)
+    const [codeTimer, setCodeTimer] = useState(getCodeTime())
+    const [prevSendTime, setPrevSendTime] = useState<Date | null>(
+        lastSmsCodeSendTimeUtc
+    )
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
@@ -50,8 +51,12 @@ export function PhoneVerifyStage({
         if (securityCode.length === 6) onVerify(+securityCode)
     }
 
-    useEffect(() => {
+    if (lastSmsCodeSendTimeUtc && prevSendTime !== lastSmsCodeSendTimeUtc) {
         setCodeTimer(getCodeTime())
+        setPrevSendTime(lastSmsCodeSendTimeUtc)
+    }
+
+    useEffect(() => {
         const interval = setInterval(() => {
             setCodeTimer(getCodeTime())
         }, 200)

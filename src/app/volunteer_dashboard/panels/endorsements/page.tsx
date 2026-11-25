@@ -316,6 +316,9 @@ export default function Page() {
             setFormState(null)
             setSelectedEndorsement(null)
         }
+        if (formState?.mode === 'edit') {
+            setFormState(null)
+        }
     }
 
     const renderBanner = (formConnected: boolean) =>

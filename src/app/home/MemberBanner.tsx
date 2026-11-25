@@ -185,13 +185,11 @@ export function MemberBanner() {
         }
     }, [observe])
 
-    useEffect(() => {
-        try {
-            if (inView) setVisible(true)
-        } catch (err) {
-            safeLogError(err, 'inView effect error:')
-        }
-    }, [inView])
+    try {
+        if (inView && !visible) setVisible(true)
+    } catch (err) {
+        safeLogError(err, 'inView effect error:')
+    }
 
     return (
         <div className={styles.section}>

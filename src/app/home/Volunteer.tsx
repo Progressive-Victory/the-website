@@ -35,9 +35,7 @@ export function Volunteer() {
         if (divRef.current) observe(divRef.current)
     }, [observe])
 
-    useEffect(() => {
-        if (inView) setVisible(true)
-    }, [inView])
+    if (inView && !visible) setVisible(true)
 
     return (
         <div className={styles.container}>

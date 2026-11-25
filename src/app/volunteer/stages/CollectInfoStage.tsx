@@ -7,7 +7,7 @@ import Link from 'next/link'
 import phone from 'phone'
 import { Country, isValidCountryPostalCode } from 'postal-code-validator'
 import { zLocation } from 'pv-contracts/data'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 export interface IOnboardingForm {
     firstName: string
@@ -53,12 +53,20 @@ export function CollectInfoStage({
     )
     const [zipCodeError, setZipCodeError] = useState(false)
 
-    const parsePhone = (number: string) =>
-        phone(number, {
+    const parsePhone = (number: string) => {
+        const p = phone(number, {
             country: 'US',
             strictDetection: true,
             validateMobilePrefix: true,
         })
+
+        if (p.isValid)
+            setForm((f) => ({
+                ...f,
+                phoneNumber: p.phoneNumber.substring(2),
+            }))
+        return p
+    }
     const parsedPhone = useMemo(() => parsePhone(phoneNumber), [phoneNumber])
 
     const setFormattedPhoneNumber = (number: string) => {
@@ -101,14 +109,6 @@ export function CollectInfoStage({
         form.oneTimePasscode
 
     useInit(() => setFormattedPhoneNumber(initialForm.phoneNumber))
-
-    useEffect(() => {
-        if (parsedPhone.isValid)
-            setForm((f) => ({
-                ...f,
-                phoneNumber: parsedPhone.phoneNumber.substring(2),
-            }))
-    }, [parsedPhone])
 
     return (
         <div>

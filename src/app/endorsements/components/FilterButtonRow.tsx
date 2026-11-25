@@ -205,11 +205,17 @@ export function FilterButtonRow({
         }
     }, [])
 
+    if (
+        !isMobile &&
+        (mobileSearchWidth || singleColumnLayout || showSearchLabel)
+    ) {
+        setMobileSearchWidth(null)
+        setSingleColumnLayout(false)
+        setShowSearchLabel(false)
+    }
+
     useLayoutEffect(() => {
         if (!isMobile) {
-            setMobileSearchWidth(null)
-            setSingleColumnLayout(false)
-            setShowSearchLabel(false)
             return
         }
 

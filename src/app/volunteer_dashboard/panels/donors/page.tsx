@@ -28,7 +28,7 @@ import {
     ActBlueContributionCustomField,
 } from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { IoEllipsisVertical } from 'react-icons/io5'
 import { useMediaQuery } from 'usehooks-ts'
 
@@ -82,10 +82,6 @@ export default function Page() {
                 : skipToken,
         placeholderData: keepPreviousData,
     })
-
-    useEffect(() => {
-        setSelectedEmail(navEmail)
-    }, [navEmail])
 
     const calcFutureDate = (
         initialTime: Date,

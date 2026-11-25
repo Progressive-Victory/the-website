@@ -25,7 +25,7 @@ import {
     zActBlueDonationPacket,
 } from 'pv-contracts/data'
 import { SortDirection } from 'pv-contracts/requests'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { IoEllipsisVertical } from 'react-icons/io5'
 import { useMediaQuery } from 'usehooks-ts'
 
@@ -77,20 +77,6 @@ export default function Page() {
                 : skipToken,
         placeholderData: keepPreviousData,
     })
-
-    useEffect(() => {
-        if (navVal == null) {
-            return
-        }
-
-        const nextSelectedLineitemId = Number(navVal)
-
-        setSelectedLineitemId(
-            Number.isFinite(nextSelectedLineitemId)
-                ? nextSelectedLineitemId
-                : null
-        )
-    }, [navVal])
 
     const formatDate = (value: Date) => {
         if (!dateService.isValid(value)) {

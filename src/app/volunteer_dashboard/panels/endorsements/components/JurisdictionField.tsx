@@ -19,7 +19,6 @@ import {
     RefObject,
     SetStateAction,
     useCallback,
-    useEffect,
     useRef,
     useState,
 } from 'react'
@@ -103,8 +102,6 @@ export function JurisdictionField(
         setSelectedType(selection.type)
         setDistrictValue(selection.districtValue)
     }, [jurisdiction])
-
-    useEffect(syncToJurisdiction, [syncToJurisdiction])
 
     const confirm = (closeDropdown: () => void) => {
         if (!draftJurisdiction || !hasChange) return

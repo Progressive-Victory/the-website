@@ -2,7 +2,7 @@
 
 import styles from './SearchModal.module.css'
 import { motion } from 'motion/react'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, useState } from 'react'
 
 export interface SearchModalProps {
     open: boolean
@@ -60,14 +60,12 @@ export function SearchModal({
     const [mounted, setMounted] = useState(false)
     const [animateOpen, setAnimateOpen] = useState(false)
 
-    useEffect(() => {
-        if (open) {
-            setMounted(true)
-            requestAnimationFrame(() => setAnimateOpen(true))
-        } else if (mounted) {
-            setAnimateOpen(false)
-        }
-    }, [open, mounted])
+    if (open && !mounted) {
+        setMounted(true)
+        requestAnimationFrame(() => setAnimateOpen(true))
+    } else if (mounted && animateOpen) {
+        setAnimateOpen(false)
+    }
 
     if (!mounted) return null
 

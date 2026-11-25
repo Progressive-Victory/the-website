@@ -193,17 +193,18 @@ function LayoutContent({ children }: { children: ReactNode }) {
         },
     ]
 
-    useEffect(() => {
+    if (pathname !== previousPathName) {
         setPreviousPathName(pathname)
-    }, [pathname])
+    }
+
+    if (pathname !== '/volunteer_dashboard' && showWelcome) {
+        setShowWelcome(false)
+    }
 
     useEffect(() => {
-        if (pathname !== '/volunteer_dashboard') {
-            setShowWelcome(false)
+        if (pathname !== '/volunteer_dashboard' || !welcomeParam) {
             return
         }
-
-        if (!welcomeParam) return
 
         const cleanSearchParams = new URLSearchParams(searchParams.toString())
         cleanSearchParams.delete('from')
