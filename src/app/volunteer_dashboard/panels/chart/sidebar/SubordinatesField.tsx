@@ -8,8 +8,12 @@ import { lineEndpoints, resolveLineSources } from '../api/domain/lineGraph'
 import { canSetParentGroup } from '../canvas/positions.connections'
 import styles from '../page.module.css'
 import { SearchModal } from '@/app/volunteer_dashboard/layout/SearchModal'
-import { FormGroup } from '@/components/common/forms/FormGroup'
-import { cn } from '@/util'
+import {
+    AddListButton,
+    AddListEmptyRow,
+    AddListItem,
+    List,
+} from '@/components/common/list'
 import { useState } from 'react'
 
 export function SubordinatesField({
@@ -56,51 +60,26 @@ export function SubordinatesField({
             item.name.toLowerCase().includes(search.toLowerCase())
     )
     return (
-        <section aria-label={title} className={styles.subPositions}>
-            <FormGroup title={title}>
-                <div className={styles.subPositionsContainer}>
-                    {members.length === 0 && !editing && (
-                        <div className={styles.subPositionEntryEmpty}>None</div>
-                    )}
-                    {members.map((member) => (
-                        <div
-                            key={member.id}
-                            className={cn(
-                                styles.subPositionEntry,
-                                editing && styles.subPositionEntryEditing
-                            )}
-                        >
-                            {editing && (
-                                <button
-                                    type="button"
-                                    className={styles.deleteButton}
-                                    disabled={disabled}
-                                    aria-label={`Remove ${member.name}`}
-                                    onClick={() => onRemove(member.id)}
-                                >
-                                    −
-                                </button>
-                            )}
-                            <span className={styles.subPositionEntryText}>
-                                {member.name || 'New Position'}
-                            </span>
-                        </div>
-                    ))}
-                    {editing && (
-                        <button
-                            type="button"
-                            className={styles.addRow}
-                            disabled={disabled}
-                            onClick={() => setPickerOpen(true)}
-                        >
-                            <span className={styles.addIcon}>+</span>
-                            {group
-                                ? 'Add Group Members'
-                                : 'Add Subordinate Positions'}
-                        </button>
-                    )}
-                </div>
-            </FormGroup>
+        <>
+            <List title={title} editing={editing}>
+                {members.length === 0 && !editing && (
+                    <AddListEmptyRow>None</AddListEmptyRow>
+                )}
+                {members.map((member) => (
+                    <AddListItem
+                        key={member.id}
+                        label={member.name || 'New Position'}
+                        onRemove={() => onRemove(member.id)}
+                    />
+                ))}
+                {editing && (
+                    <AddListButton onClick={() => setPickerOpen(true)}>
+                        {group
+                            ? 'Add Group Members'
+                            : 'Add Subordinate Positions'}
+                    </AddListButton>
+                )}
+            </List>
             <ChartModalPortal>
                 <SearchModal
                     open={pickerOpen && editing}
@@ -139,6 +118,6 @@ export function SubordinatesField({
                     )}
                 </SearchModal>
             </ChartModalPortal>
-        </section>
+        </>
     )
 }

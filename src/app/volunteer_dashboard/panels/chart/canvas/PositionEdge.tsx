@@ -1,20 +1,31 @@
 'use client'
 
-import { type Line } from '../api/domain/chart.types'
+import { type Line, type LinePointData } from '../api/domain/chart.types'
 import {
     incomingLineCount,
     isMovablePoint,
     resolveLinePoints,
 } from '../api/domain/lineGraph'
+import { AngleGuides } from './AngleGuides'
 import { BranchConnectionHandle } from './BranchConnectionHandle'
 import { LineEditingContext } from './LineEditingContext'
 import styles from './LinePoint.module.css'
+import {
+    angleNeighbors,
+    guidesAt,
+    snapToAngles,
+    type AngleGuideSet,
+} from './angleSnap'
 import {
     closestSegment,
     insertLinePoint,
     lineHitboxOutline,
     lineVertices,
+    pointOnSegment,
 } from './linePoints'
+import { LINE_POINT_GRID } from './positions.placement'
+import type { FlowAnchor } from './tooltip/ChartTooltip'
+import { cn } from '@/util'
 import {
     BaseEdge,
     ViewportPortal,
@@ -27,12 +38,44 @@ import {
     useEffect,
     useId,
     useRef,
+    useState,
     type MouseEvent,
     type PointerEvent,
 } from 'react'
 
 const LINE_HITBOX_WIDTH = 20
 const POINT_HITBOX_RADIUS = 10
+const ANGLE_SNAP_PX = 8
+const HALO_EXTENT = { waypoint: 2 + 6, branchpoint: 4 + 6 }
+
+const midpointAnchor = (vertices: { x: number; y: number }[]): FlowAnchor => {
+    const segments = vertices
+        .slice(1)
+        .map(
+            (
+                end,
+                index
+            ): [{ x: number; y: number }, { x: number; y: number }] => [
+                vertices[index],
+                end,
+            ]
+        )
+    const [start, end] = segments.reduce((best, segment) =>
+        Math.hypot(segment[1].x - segment[0].x, segment[1].y - segment[0].y) >
+        Math.hypot(best[1].x - best[0].x, best[1].y - best[0].y)
+            ? segment
+            : best
+    )
+    return {
+        x: (start.x + end.x) / 2,
+        y: (start.y + end.y) / 2,
+        orientation:
+            Math.abs(end.x - start.x) >= Math.abs(end.y - start.y)
+                ? 'horizontal'
+                : 'vertical',
+        avoid: segments.filter((segment) => segment[0] !== start),
+    }
+}
 
 export function PositionEdge({
     id,
@@ -71,11 +114,71 @@ export function PositionEdge({
         branchPoints = [],
         onChangeBranchPoint,
         lines,
+        groupAt,
+        selectedPointIds,
+        renderLineTooltip,
+        tooltipPointId,
+        renderPointTooltip,
+        placingPointLineId,
+        onPointPlaced,
     } = useContext(LineEditingContext)
-    const { screenToFlowPosition } = useReactFlow()
+    const { screenToFlowPosition, getZoom, getInternalNode } = useReactFlow()
+    const anchorCoordinates = (positionId: number, handleId: string) => {
+        const internal = getInternalNode(String(positionId))
+        const bounds = internal?.internals.handleBounds
+        const handle = [
+            ...(bounds?.source ?? []),
+            ...(bounds?.target ?? []),
+        ].find(({ id }) => id === handleId)
+        if (!internal || !handle) return undefined
+        const { x, y } = internal.internals.positionAbsolute
+        return {
+            x:
+                x +
+                handle.x +
+                (handleId === 'left'
+                    ? 0
+                    : handleId === 'right'
+                      ? handle.width
+                      : handle.width / 2),
+            y:
+                y +
+                handle.y +
+                (handleId === 'top'
+                    ? 0
+                    : handleId === 'bottom'
+                      ? handle.height
+                      : handle.height / 2),
+        }
+    }
+    const coordinatesOf = (point: LinePointData) =>
+        point.kind === 'waypoint'
+            ? point.coordinates
+            : point.kind === 'branchpoint'
+              ? branchPoints.find(({ id }) => id === point.id)?.coordinates
+              : (anchorCoordinates(point.positionId, point.handle) ??
+                pointCoordinates?.[point.id])
     const activePointer = useRef<number | null>(null)
     const dragStart = useRef<{ x: number; y: number } | null>(null)
     const pointDragged = useRef(false)
+    const [angleGuides, setAngleGuides] = useState<{
+        guides: AngleGuideSet
+        halo: number
+    } | null>(null)
+    const placing = editing && placingPointLineId === id
+    const [placementPreview, setPlacementPreview] = useState<{
+        segment: number
+        x: number
+        y: number
+        settling?: boolean
+    } | null>(null)
+    const commitPlacement = () => {
+        if (!placementPreview || !line || !onChange) return
+        const { segment, x, y } = placementPreview
+        onChange(insertLinePoint(line, segment, { x, y }, groupAt?.({ x, y })))
+        setPlacementPreview(null)
+        onPointPlaced?.()
+    }
     const selectedMarkerId = useId()
     const pointColor = selected
         ? 'var(--xy-edge-stroke-selected, var(--xy-edge-stroke-selected-default))'
@@ -83,6 +186,10 @@ export function PositionEdge({
           'var(--xy-edge-stroke, var(--xy-edge-stroke-default))')
     const line = lines ? lines.find((line) => line.id === id) : data?.line
     const resolved = line ? resolveLinePoints(line, branchPoints) : undefined
+    const tooltipPoint = resolved?.points
+        .slice(1)
+        .filter(isMovablePoint)
+        .find((point) => point.id === tooltipPointId)
     const sourcePointId = line?.points[0]?.id
     const targetPointId = line?.points.at(-1)?.id
     useEffect(() => {
@@ -142,6 +249,39 @@ export function PositionEdge({
             <g
                 className={styles.lineHitboxGroup}
                 data-hitbox-hovered={data?.hitboxHovered}
+                style={placing ? { cursor: 'crosshair' } : undefined}
+                onPointerMove={(event) => {
+                    if (!placing || placementPreview?.settling) return
+                    const cursor = screenToFlowPosition(
+                        { x: event.clientX, y: event.clientY },
+                        { snapToGrid: false }
+                    )
+                    const segment = closestSegment(vertices, cursor)
+                    const { x, y } = pointOnSegment(vertices, segment, cursor)
+                    setPlacementPreview({
+                        segment,
+                        x: Math.round(x / LINE_POINT_GRID) * LINE_POINT_GRID,
+                        y: Math.round(y / LINE_POINT_GRID) * LINE_POINT_GRID,
+                    })
+                }}
+                onPointerLeave={() => {
+                    if (!placementPreview?.settling) setPlacementPreview(null)
+                }}
+                onClick={(event) => {
+                    if (!placing || !placementPreview) return
+                    event.stopPropagation()
+                    if (placementPreview.settling) return
+                    if (
+                        window.matchMedia('(prefers-reduced-motion: reduce)')
+                            .matches
+                    )
+                        commitPlacement()
+                    else
+                        setPlacementPreview({
+                            ...placementPreview,
+                            settling: true,
+                        })
+                }}
                 onDoubleClick={(event) => {
                     if (!editing || !line || !onChange) return
                     event.stopPropagation()
@@ -153,7 +293,8 @@ export function PositionEdge({
                         insertLinePoint(
                             line,
                             closestSegment(vertices, coordinates),
-                            coordinates
+                            coordinates,
+                            groupAt?.(coordinates)
                         )
                     )
                 }}
@@ -179,6 +320,22 @@ export function PositionEdge({
                     }
                     markerStart={markerStart}
                 />
+                {placing && placementPreview && (
+                    <rect
+                        data-testid="line-point-placement"
+                        className={cn(
+                            styles.placementDiamond,
+                            placementPreview.settling &&
+                                styles.placementSettling
+                        )}
+                        x={placementPreview.x - 2}
+                        y={placementPreview.y - 2}
+                        width={4}
+                        height={4}
+                        pointerEvents="none"
+                        onAnimationEnd={commitPlacement}
+                    />
+                )}
             </g>
             {directionChevrons !== 'none' && (
                 <g pointerEvents="none" aria-hidden="true">
@@ -251,7 +408,7 @@ export function PositionEdge({
                         )}
                 </g>
             )}
-            {!editing && line && resolved && onSelectPoint && (
+            {!(editing && selected) && line && resolved && onSelectPoint && (
                 <ViewportPortal>
                     <svg
                         className={styles.selectedPointLayer}
@@ -280,7 +437,7 @@ export function PositionEdge({
                                         role="button"
                                         aria-label={`View line point ${index + 1}`}
                                         tabIndex={0}
-                                        className="nodrag nopan"
+                                        className={`nodrag nopan ${styles.pointButton}`}
                                         cx={point.coordinates.x}
                                         cy={point.coordinates.y}
                                         r={POINT_HITBOX_RADIUS}
@@ -354,10 +511,7 @@ export function PositionEdge({
                                 cy: point.coordinates.y,
                                 r: POINT_HITBOX_RADIUS,
                             }
-                            const adjacentSnapTarget = (coordinates: {
-                                x: number
-                                y: number
-                            }) => {
+                            const adjacentNeighbors = () => {
                                 const neighbors: {
                                     id: string
                                     x: number
@@ -401,9 +555,13 @@ export function PositionEdge({
                                                                 id ===
                                                                 neighbor.id
                                                         )?.coordinates
-                                                      : pointCoordinates?.[
+                                                      : (anchorCoordinates(
+                                                            neighbor.positionId,
+                                                            neighbor.handle
+                                                        ) ??
+                                                        pointCoordinates?.[
                                                             neighbor.id
-                                                        ]
+                                                        ])
                                             if (coordinates)
                                                 neighbors.push({
                                                     id: neighbor.id,
@@ -412,11 +570,17 @@ export function PositionEdge({
                                         }
                                     }
                                 }
+                                return neighbors
+                            }
+                            const adjacentSnapTarget = (coordinates: {
+                                x: number
+                                y: number
+                            }) => {
                                 let target:
                                     | { id: string; x: number; y: number }
                                     | undefined
                                 let distance = hitboxProps.r * 2
-                                for (const neighbor of neighbors) {
+                                for (const neighbor of adjacentNeighbors()) {
                                     if (!neighbor) continue
                                     const nextDistance = Math.hypot(
                                         coordinates.x - neighbor.x,
@@ -433,6 +597,9 @@ export function PositionEdge({
                                 <g
                                     key={point.id}
                                     className={styles.splitCircle}
+                                    data-selected={selectedPointIds?.has(
+                                        point.id
+                                    )}
                                 >
                                     <circle
                                         data-testid="line-point-hitbox"
@@ -451,7 +618,7 @@ export function PositionEdge({
                                     />
                                     <circle
                                         role="button"
-                                        className="nodrag nopan"
+                                        className={`nodrag nopan ${styles.pointButton}`}
                                         aria-label={`Drag line point ${index + 1}`}
                                         tabIndex={0}
                                         {...hitboxProps}
@@ -523,22 +690,51 @@ export function PositionEdge({
                                                 )
                                             const target =
                                                 adjacentSnapTarget(coordinates)
+                                            const neighbors = angleNeighbors(
+                                                lines ?? [line],
+                                                point,
+                                                coordinatesOf
+                                            )
+                                            const angled = target
+                                                ? undefined
+                                                : snapToAngles(
+                                                      coordinates,
+                                                      neighbors,
+                                                      ANGLE_SNAP_PX / getZoom()
+                                                  )
                                             const snapped = target
                                                 ? { x: target.x, y: target.y }
-                                                : {
+                                                : (angled ?? {
                                                       x:
                                                           Math.round(
-                                                              coordinates.x / 5
-                                                          ) * 5,
+                                                              coordinates.x /
+                                                                  LINE_POINT_GRID
+                                                          ) * LINE_POINT_GRID,
                                                       y:
                                                           Math.round(
-                                                              coordinates.y / 5
-                                                          ) * 5,
-                                                  }
+                                                              coordinates.y /
+                                                                  LINE_POINT_GRID
+                                                          ) * LINE_POINT_GRID,
+                                                  })
+                                            setAngleGuides(
+                                                target
+                                                    ? null
+                                                    : {
+                                                          guides: guidesAt(
+                                                              snapped,
+                                                              neighbors
+                                                          ),
+                                                          halo: HALO_EXTENT[
+                                                              point.kind
+                                                          ],
+                                                      }
+                                            )
                                             if (point.kind === 'branchpoint') {
                                                 onChangeBranchPoint?.({
                                                     id: point.id,
                                                     coordinates: snapped,
+                                                    parentGroupId:
+                                                        groupAt?.(snapped),
                                                 })
                                                 return
                                             }
@@ -551,6 +747,10 @@ export function PositionEdge({
                                                                   ...point,
                                                                   coordinates:
                                                                       snapped,
+                                                                  parentGroupId:
+                                                                      groupAt?.(
+                                                                          snapped
+                                                                      ),
                                                               }
                                                             : item
                                                 ),
@@ -566,6 +766,7 @@ export function PositionEdge({
                                                 return
                                             event.stopPropagation()
                                             activePointer.current = null
+                                            setAngleGuides(null)
                                             event.currentTarget.releasePointerCapture(
                                                 event.pointerId
                                             )
@@ -605,11 +806,13 @@ export function PositionEdge({
                                             activePointer.current = null
                                             dragStart.current = null
                                             pointDragged.current = false
+                                            setAngleGuides(null)
                                         }}
                                         onLostPointerCapture={() => {
                                             activePointer.current = null
                                             dragStart.current = null
                                             pointDragged.current = false
+                                            setAngleGuides(null)
                                         }}
                                     />
                                     <Shape
@@ -629,9 +832,33 @@ export function PositionEdge({
                                 </g>
                             )
                         })}
+                        {angleGuides && (
+                            <AngleGuides
+                                guides={angleGuides.guides}
+                                minSquareSize={angleGuides.halo}
+                            />
+                        )}
                     </svg>
                 </ViewportPortal>
             )}
+            {data?.directlySelected &&
+                line &&
+                !angleGuides &&
+                !line.points.some(({ id }) => selectedPointIds?.has(id)) &&
+                renderLineTooltip?.(id, midpointAnchor(vertices))}
+            {data?.directlySelected &&
+                line &&
+                tooltipPoint &&
+                !angleGuides &&
+                renderPointTooltip?.(id, tooltipPoint.id, {
+                    ...tooltipPoint.coordinates,
+                    orientation: 'point',
+                    avoid: angleNeighbors(
+                        lines ?? [line],
+                        tooltipPoint,
+                        coordinatesOf
+                    ).map((neighbor) => [neighbor, tooltipPoint.coordinates]),
+                })}
         </>
     )
 }

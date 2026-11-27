@@ -1,4 +1,11 @@
+import {
+    equalSpacingGuides,
+    findEqualSpacing,
+    type Box,
+    type SpacingGuide,
+} from './equalSpacing'
 import { linePointNodeType } from './linePointNodes'
+import { GROUP_INSET } from './positions.placement'
 import type { Node } from '@xyflow/react'
 
 export interface AlignmentGuide {
@@ -9,9 +16,80 @@ export interface AlignmentGuide {
 export interface AlignmentGuides {
     horizontal?: AlignmentGuide
     vertical?: AlignmentGuide
+    spacing?: SpacingGuide[]
 }
 
 const SNAP_RADIUS = 10
+
+interface AxisMatch {
+    delta: number
+    guide?: AlignmentGuide
+    gap?: number
+}
+
+// Equal spacing wins an axis when it needs a smaller nudge than edge/center alignment.
+function preferSpacing(
+    alignment: AxisMatch | undefined,
+    selection: Box,
+    siblings: Box[],
+    axis: 'x' | 'y'
+): AxisMatch | undefined {
+    const spacing = findEqualSpacing(selection, siblings, axis, SNAP_RADIUS)
+    if (!spacing) return alignment
+    if (alignment && Math.abs(alignment.delta) < Math.abs(spacing.delta))
+        return alignment
+    return { delta: spacing.delta, gap: spacing.gap }
+}
+
+const nodeSize = (node: Node) => ({
+    width: node.measured?.width ?? node.width ?? Number(node.style?.width ?? 0),
+    height:
+        node.measured?.height ?? node.height ?? Number(node.style?.height ?? 0),
+})
+
+// Drops a snap that would push a grouped node past its parent's inner edge.
+function keepInsideParents(
+    match: AxisMatch | undefined,
+    roots: Node[],
+    byId: ReadonlyMap<string, Node>,
+    axis: 'x' | 'y'
+): AxisMatch | undefined {
+    if (!match) return match
+    const extent = axis === 'x' ? 'width' : 'height'
+    for (const node of roots) {
+        const parent = node.parentId ? byId.get(node.parentId) : undefined
+        if (!parent) continue
+        const next = node.position[axis] + match.delta
+        if (
+            next < GROUP_INSET ||
+            next + nodeSize(node)[extent] >
+                nodeSize(parent)[extent] - GROUP_INSET
+        )
+            return undefined
+    }
+    return match
+}
+
+function spacingGuides(
+    selection: Box,
+    siblings: Box[],
+    xMatch: AxisMatch | undefined,
+    yMatch: AxisMatch | undefined
+): SpacingGuide[] {
+    const snapped = {
+        ...selection,
+        x: selection.x + (xMatch?.delta ?? 0),
+        y: selection.y + (yMatch?.delta ?? 0),
+    }
+    return [
+        ...(xMatch?.gap === undefined
+            ? []
+            : equalSpacingGuides(snapped, siblings, 'x', xMatch.gap)),
+        ...(yMatch?.gap === undefined
+            ? []
+            : equalSpacingGuides(snapped, siblings, 'y', yMatch.gap)),
+    ]
+}
 
 export function alignDraggedNodes(
     nodes: Node[],
@@ -31,16 +109,7 @@ export function alignDraggedNodes(
         origins.set(node.id, result)
         return result
     }
-    const size = (node: Node) => ({
-        width:
-            node.measured?.width ??
-            node.width ??
-            Number(node.style?.width ?? 0),
-        height:
-            node.measured?.height ??
-            node.height ??
-            Number(node.style?.height ?? 0),
-    })
+    const size = nodeSize
     const movesWithSelection = (node: Node): boolean =>
         movedIds.has(node.id) ||
         Boolean(
@@ -72,8 +141,8 @@ export function alignDraggedNodes(
                   { position: end, center: false },
                   { position: (start + end) / 2, center: true },
               ]
-    let xMatch: { delta: number; guide: AlignmentGuide } | undefined
-    let yMatch: { delta: number; guide: AlignmentGuide } | undefined
+    let xMatch: AxisMatch | undefined
+    let yMatch: AxisMatch | undefined
     const match = (
         sources: AlignmentGuide[],
         targets: AlignmentGuide[],
@@ -108,27 +177,39 @@ export function alignDraggedNodes(
         )
     }
 
-    for (const node of roots) {
-        const parent = node.parentId ? byId.get(node.parentId) : undefined
-        if (!parent || node.extent !== 'parent') continue
-        const parentSize = size(parent)
-        const nodeSize = size(node)
-        if (
-            xMatch &&
-            (node.position.x + xMatch.delta < 0 ||
-                node.position.x + xMatch.delta + nodeSize.width >
-                    parentSize.width)
-        )
-            xMatch = undefined
-        if (
-            yMatch &&
-            (node.position.y + yMatch.delta < 0 ||
-                node.position.y + yMatch.delta + nodeSize.height >
-                    parentSize.height)
-        )
-            yMatch = undefined
+    const selection = {
+        x: left,
+        y: top,
+        width: right - left,
+        height: bottom - top,
     }
+    const parentId = roots[0].parentId
+    const siblings: Box[] =
+        pointsOnly || roots.some((node) => node.parentId !== parentId)
+            ? []
+            : nodes
+                  .filter(
+                      (node) =>
+                          !node.hidden &&
+                          node.parentId === parentId &&
+                          node.type !== linePointNodeType &&
+                          !movesWithSelection(node)
+                  )
+                  .map((node) => ({ ...origin(node), ...size(node) }))
+    xMatch = keepInsideParents(
+        preferSpacing(xMatch, selection, siblings, 'x'),
+        roots,
+        byId,
+        'x'
+    )
+    yMatch = keepInsideParents(
+        preferSpacing(yMatch, selection, siblings, 'y'),
+        roots,
+        byId,
+        'y'
+    )
     const rootIds = new Set(roots.map(({ id }) => id))
+    const spacing = spacingGuides(selection, siblings, xMatch, yMatch)
     return {
         nodes: nodes.map((node) =>
             rootIds.has(node.id) && (xMatch?.delta || yMatch?.delta)
@@ -141,6 +222,10 @@ export function alignDraggedNodes(
                   }
                 : node
         ),
-        guides: { vertical: xMatch?.guide, horizontal: yMatch?.guide },
+        guides: {
+            vertical: xMatch?.guide,
+            horizontal: yMatch?.guide,
+            ...(spacing.length > 0 && { spacing }),
+        },
     }
 }

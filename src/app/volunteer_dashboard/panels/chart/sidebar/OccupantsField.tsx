@@ -14,7 +14,13 @@ import {
     FormFieldProps,
     useConfigure,
 } from '@/components/common/forms/FormField'
-import { cn, parseErrorMessage } from '@/util'
+import {
+    AddListButton,
+    AddListEmptyRow,
+    AddListItem,
+    List,
+} from '@/components/common/list'
+import { parseErrorMessage } from '@/util'
 import { ChangeEvent, useCallback, useState } from 'react'
 
 interface OccupantsFieldProps extends FormFieldProps<Position, number[]> {
@@ -72,62 +78,50 @@ export function OccupantsField(props: OccupantsFieldProps) {
         props.onUserSearch({ ...props.userSearch, query: e.target.value })
     }
     return (
-        <div className={styles.subPositions}>
-            <div className={styles.subPositionsContainer}>
+        <>
+            <List title="People" editing={props.editing}>
                 {seats === null && userIds.length === 0 && !props.editing && (
-                    <div className={styles.subPositionEntryEmpty}>
-                        No people assigned
-                    </div>
+                    <AddListEmptyRow>No people assigned</AddListEmptyRow>
                 )}
-                {userIds.map((id) => (
-                    <div
-                        key={id}
-                        className={cn(
-                            styles.subPositionEntry,
-                            props.editing && styles.subPositionEntryEditing
-                        )}
-                    >
-                        <button
-                            type="button"
-                            className={styles.deleteButton}
-                            onClick={() => handleRemove(id)}
-                            aria-label={`Remove ${getUserDisplayName(userMap.get(id))}`}
-                        >
-                            −
-                        </button>
-                        <span
-                            className={
-                                userMap.get(id)?.firstName &&
-                                userMap.get(id)?.lastName
-                                    ? styles.subPositionEntryText
-                                    : styles.subPositionEntryTextSub
+                {userIds.map((id) => {
+                    const user = userMap.get(id)
+                    const name = getUserDisplayName(user)
+                    return (
+                        <AddListItem
+                            key={id}
+                            label={
+                                user?.firstName && user?.lastName ? (
+                                    name
+                                ) : (
+                                    <span
+                                        className={
+                                            styles.subPositionEntryTextSub
+                                        }
+                                    >
+                                        {name}
+                                    </span>
+                                )
                             }
-                        >
-                            {getUserDisplayName(userMap.get(id))}
-                        </span>
-                    </div>
-                ))}
+                            removeLabel={name}
+                            onRemove={() => handleRemove(id)}
+                        />
+                    )
+                })}
                 {Array.from({ length: assignmentRows }, (_, index) =>
                     props.editing ? (
-                        <button
+                        <AddListButton
                             key={`open-seat-${index}`}
-                            type="button"
-                            className={styles.addRow}
                             onClick={() => setPickerOpen(true)}
                         >
-                            <span className={styles.addIcon}>+</span>
                             Assign Member
-                        </button>
+                        </AddListButton>
                     ) : (
-                        <div
-                            key={`open-seat-${index}`}
-                            className={styles.subPositionEntryEmpty}
-                        >
+                        <AddListEmptyRow key={`open-seat-${index}`}>
                             Unfilled Seat
-                        </div>
+                        </AddListEmptyRow>
                     )
                 )}
-            </div>
+            </List>
 
             <ChartModalPortal>
                 <SearchModal
@@ -192,6 +186,6 @@ export function OccupantsField(props: OccupantsFieldProps) {
                     )}
                 </SearchModal>
             </ChartModalPortal>
-        </div>
+        </>
     )
 }

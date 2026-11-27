@@ -25,12 +25,14 @@ export function lineVertices(
 export function insertLinePoint(
     line: Line,
     segmentIndex: number,
-    coordinates: Point
+    coordinates: Point,
+    parentGroupId?: number
 ): Line {
     const point: Waypoint = {
         id: crypto.randomUUID(),
         kind: 'waypoint',
         coordinates,
+        ...(parentGroupId !== undefined && { parentGroupId }),
     }
     const points = [...line.points]
     points.splice(segmentIndex + 1, 0, point)
@@ -68,6 +70,31 @@ export function closestSegment(vertices: Point[], coordinates: Point): number {
         }
     }
     return nearest
+}
+
+export function pointOnSegment(
+    vertices: Point[],
+    index: number,
+    coordinates: Point
+): Point {
+    const start = vertices[index]
+    const end = vertices[index + 1] ?? start
+    const dx = end.x - start.x
+    const dy = end.y - start.y
+    const lengthSquared = dx * dx + dy * dy
+    const t =
+        lengthSquared === 0
+            ? 0
+            : Math.max(
+                  0,
+                  Math.min(
+                      1,
+                      ((coordinates.x - start.x) * dx +
+                          (coordinates.y - start.y) * dy) /
+                          lengthSquared
+                  )
+              )
+    return { x: start.x + t * dx, y: start.y + t * dy }
 }
 
 export function lineHitboxOutline(vertices: Point[], width: number): string {

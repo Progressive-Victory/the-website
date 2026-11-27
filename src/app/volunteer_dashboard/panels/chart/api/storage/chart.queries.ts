@@ -21,20 +21,42 @@ export function useOrgChartQueries() {
     const { ready, onGet, onPut } = useFetch()
     const { apiBaseUrl } = useAuth()
 
-    const getOrgChart = async (options?: {
-        signal?: AbortSignal
-    }): Promise<ChartDocument> => {
-        const file = await onGet(
-            '/orgChart/:versionNumber',
-            zOrgChartFileResponse,
-            {
-                params: { versionNumber: ORG_CHART_VERSION },
-                signal: options?.signal,
-            }
-        ).catch((error: unknown) => {
+    const getVersion = (versionNumber: number, signal?: AbortSignal) =>
+        onGet('/orgChart/:versionNumber', zOrgChartFileResponse, {
+            params: { versionNumber },
+            signal,
+        }).catch((error: unknown) => {
             if (error instanceof FetchError && error.status === 404) return null
             throw error
         })
+
+    // Every save creates a new version and the API has no "latest" route.
+    const getLatestVersion = async (signal?: AbortSignal) => {
+        let latest = await getVersion(1, signal)
+        if (!latest) return null
+        let missing = 2
+        let next = await getVersion(missing, signal)
+        while (next) {
+            latest = next
+            missing *= 2
+            next = await getVersion(missing, signal)
+        }
+        let found = latest.versionNumber
+        while (missing - found > 1) {
+            const middle = Math.floor((found + missing) / 2)
+            const file = await getVersion(middle, signal)
+            if (file) {
+                latest = file
+                found = middle
+            } else missing = middle
+        }
+        return latest
+    }
+
+    const getOrgChart = async (options?: {
+        signal?: AbortSignal
+    }): Promise<ChartDocument> => {
+        const file = await getLatestVersion(options?.signal)
         if (!file) return EMPTY_CHART
 
         const res = await fetch(new URL(file.fileHref, apiBaseUrl), {

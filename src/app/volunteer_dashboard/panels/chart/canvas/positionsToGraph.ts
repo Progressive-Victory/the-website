@@ -11,6 +11,7 @@ import {
     getUserDisplayName,
     positionTypeLabels,
 } from '../sidebar/positions.list'
+import { GROUP_INSET } from './positions.placement'
 import { MarkerType, type Edge, type Node } from '@xyflow/react'
 
 const GROUP_HEADER_GAP = 52
@@ -119,7 +120,7 @@ export function positionsToGraph(
                   .map(makeNode)
             : []
         const savedBounds = isGroup ? position.groupBounds : undefined
-        const padding = savedBounds ? 0 : 30
+        const padding = savedBounds ? GROUP_INSET : 30
         const boundsOffset = {
             x: Math.min(
                 savedBounds?.x ?? 0,
@@ -130,7 +131,9 @@ export function positionsToGraph(
                 ...children.map(
                     (child) =>
                         child.position.y -
-                        (savedBounds ? 0 : titleHeight + GROUP_HEADER_GAP)
+                        (savedBounds
+                            ? GROUP_INSET
+                            : titleHeight + GROUP_HEADER_GAP)
                 )
             ),
         }
@@ -175,7 +178,6 @@ export function positionsToGraph(
             },
             ...(parentId !== undefined && {
                 parentId: String(parentId),
-                extent: 'parent' as const,
             }),
             style: { width: nodeWidth, height: nodeHeight },
             ...(!isGroup && { zIndex: positionNodeZIndex }),

@@ -44,6 +44,12 @@ export type ChartEditorAction =
           savedBranchPoints: BranchPoint[]
       }
     | {
+          type: 'pointGroupsChanged'
+          groups: Record<string, number | undefined>
+          savedLines: Line[]
+          savedBranchPoints: BranchPoint[]
+      }
+    | {
           type: 'linePointsMoved'
           coordinates: Record<string, { x: number; y: number }>
           savedLines: Line[]
@@ -73,6 +79,34 @@ function clearDrafts(state: ChartEditorState): ChartEditorState {
         deletedPositionIds: new Set(),
         isEditing: false,
         editRevision: state.editRevision + 1,
+    }
+}
+
+function applyPointGroups(
+    state: ChartEditorState,
+    {
+        groups,
+        savedLines,
+        savedBranchPoints,
+    }: Extract<ChartEditorAction, { type: 'pointGroupsChanged' }>
+): ChartEditorState {
+    const regroup = <T extends { id: string; parentGroupId?: number }>(
+        point: T
+    ): T =>
+        point.id in groups
+            ? { ...point, parentGroupId: groups[point.id] }
+            : point
+    return {
+        ...state,
+        lineDrafts: (state.lineDrafts ?? savedLines).map((line) => ({
+            ...line,
+            points: line.points.map((point) =>
+                point.kind === 'waypoint' ? regroup(point) : point
+            ),
+        })),
+        branchPointDrafts: (state.branchPointDrafts ?? savedBranchPoints).map(
+            regroup
+        ),
     }
 }
 
@@ -223,9 +257,13 @@ export function chartEditorReducer(
                 branchPointDrafts: (
                     state.branchPointDrafts ?? action.savedBranchPoints
                 ).map((point) =>
-                    point.id === action.point.id ? action.point : point
+                    point.id === action.point.id
+                        ? { ...point, ...action.point }
+                        : point
                 ),
             }
+        case 'pointGroupsChanged':
+            return applyPointGroups(state, action)
         case 'linePointsMoved':
             return {
                 ...state,

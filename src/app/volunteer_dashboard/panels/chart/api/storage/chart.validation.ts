@@ -45,6 +45,7 @@ export const zWaypoint = z.strictObject({
         x: z.number().finite(),
         y: z.number().finite(),
     }),
+    parentGroupId: z.number().int().positive().optional(),
 })
 
 const zBranchPointReference = z.strictObject({
@@ -58,6 +59,7 @@ const zBranchPoint = z.strictObject({
         x: z.number().finite(),
         y: z.number().finite(),
     }),
+    parentGroupId: z.number().int().positive().optional(),
 })
 
 const zLine = z.strictObject({

@@ -6,6 +6,7 @@ import {
 } from '../../canvas/chartClipboard'
 import {
     EMPTY_CHART,
+    PositionTypes,
     type ChartDocument,
     type Position,
     type Line,
@@ -32,12 +33,18 @@ import { usePositionQueries } from '@/queries'
 import { parseErrorMessage } from '@/util'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import deepEqual from 'deep-equal'
+import {
+    RelationshipTypes,
+    type Position as ApiPosition,
+    type Relationship,
+} from 'pv-contracts/data'
 import type { PositionHierarchyResponse } from 'pv-contracts/responses'
 import { useCallback, useMemo, useRef, useReducer } from 'react'
 
 export interface SavedChart {
     document: ChartDocument
     createdIds: ReadonlyMap<number, number>
+    childRelationships: ReadonlyMap<number, Relationship[]>
 }
 
 interface ChartEditorOptions {
@@ -61,6 +68,41 @@ const positionRecord = ({
     userIds,
     permissions,
 })
+
+const sameRelationships = (a: Relationship[], b: Relationship[]) =>
+    a.length === b.length &&
+    a.every(({ id, type }) =>
+        b.some((other) => other.id === id && other.type === type)
+    )
+
+// Group membership lives in the API as the group's childRelationships.
+function groupRelationships(
+    positions: Position[],
+    remote: ReadonlyMap<number, ApiPosition>
+): Map<number, Relationship[]> {
+    const changed = new Map<number, Relationship[]>()
+    for (const position of positions) {
+        const current = remote.get(position.id)
+        const isGroup = position.type === PositionTypes.GROUP
+        if (!isGroup && current?.type !== PositionTypes.GROUP) continue
+        const existing = current?.childRelationships ?? []
+        const next = isGroup
+            ? positions
+                  .filter(({ parentGroupId }) => parentGroupId === position.id)
+                  .map(
+                      ({ id }) =>
+                          existing.find(
+                              (relationship) => relationship.id === id
+                          ) ?? {
+                              id,
+                              type: RelationshipTypes.GROUP,
+                          }
+                  )
+            : []
+        if (!sameRelationships(next, existing)) changed.set(position.id, next)
+    }
+    return changed
+}
 
 export function useChartEditor({
     onSaved,
@@ -168,6 +210,15 @@ export function useChartEditor({
             dispatch({ type: 'lineGraphChanged', lines, branchPoints }),
         []
     )
+    const changePointGroups = (groups: Record<string, number | undefined>) => {
+        if (!isEditing || saveDrafts.isPending) return
+        dispatch({
+            type: 'pointGroupsChanged',
+            groups,
+            savedLines: allLines,
+            savedBranchPoints: allBranchPoints,
+        })
+    }
     const updatePositionDraft = useCallback(
         (form: FormState<Position>) =>
             dispatch({ type: 'positionChanged', form }),
@@ -224,6 +275,21 @@ export function useChartEditor({
         onDiscard(allPositions)
     }
 
+    // The API does not cascade a position's permissions, users or relationships on delete.
+    const clearAndDeletePosition = async (position: ApiPosition) => {
+        if (
+            position.permissions.length ||
+            position.userIds.length ||
+            position.childRelationships.length
+        )
+            await positionQueries.updatePosition(position.id, {
+                permissions: [],
+                userIds: [],
+                childRelationships: [],
+            })
+        await positionQueries.deletePosition(position.id)
+    }
+
     const saveDrafts = useMutation({
         mutationFn: async (): Promise<SavedChart> => {
             if (loadError) throw loadError
@@ -258,17 +324,24 @@ export function useChartEditor({
             )
             const remote = new Map(
                 [
-                    ...saved.positions,
+                    ...(hierarchyQuery.data?.positions ?? []),
                     ...created.map(({ record }) => record),
-                ].map((position) => [position.id, positionRecord(position)])
+                ].map((position) => [position.id, position])
+            )
+            const childRelationships = groupRelationships(
+                document.positions,
+                remote
             )
             await Promise.all(
                 document.positions
                     .filter(
                         (position) =>
+                            childRelationships.has(position.id) ||
                             !deepEqual(
                                 positionRecord(position),
-                                remote.get(position.id)
+                                remote.has(position.id)
+                                    ? positionRecord(remote.get(position.id)!)
+                                    : undefined
                             )
                     )
                     .map(({ id, name, type, seats, userIds, permissions }) =>
@@ -278,16 +351,38 @@ export function useChartEditor({
                             seats,
                             userIds,
                             permissions,
+                            childRelationships: childRelationships.get(id),
                         })
                     )
             )
             await Promise.all(
-                [...deletedPositionIds]
-                    .filter((id) => remote.has(id))
-                    .map((id) => positionQueries.deletePosition(id))
+                [...remote.values()]
+                    .filter(
+                        (position) =>
+                            !deletedPositionIds.has(position.id) &&
+                            !childRelationships.has(position.id) &&
+                            position.childRelationships.some(({ id }) =>
+                                deletedPositionIds.has(id)
+                            )
+                    )
+                    .map((position) =>
+                        positionQueries.updatePosition(position.id, {
+                            childRelationships:
+                                position.childRelationships.filter(
+                                    ({ id }) => !deletedPositionIds.has(id)
+                                ),
+                        })
+                    )
+            )
+            await Promise.all(
+                [...deletedPositionIds].flatMap((id) => {
+                    const position = remote.get(id)
+                    if (!position) return []
+                    return [clearAndDeletePosition(position)]
+                })
             )
             await saveOrgChart(document)
-            return { document, createdIds }
+            return { document, createdIds, childRelationships }
         },
         onSuccess: (result) => {
             queryClient.setQueryData(ORG_CHART_QUERY_KEY, result.document)
@@ -312,9 +407,11 @@ export function useChartEditor({
                                 userIds,
                                 permissions,
                                 childRelationships:
+                                    result.childRelationships.get(id) ??
                                     res.positions.find(
                                         (position) => position.id === id
-                                    )?.childRelationships ?? [],
+                                    )?.childRelationships ??
+                                    [],
                             })
                         ),
                     }
@@ -400,6 +497,7 @@ export function useChartEditor({
         replaceLines,
         addLine,
         changeBranchPoint,
+        changePointGroups,
         moveLinePoints,
         pasteSelection,
         movePosition,

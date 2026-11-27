@@ -29,6 +29,7 @@ export function linePointNodes(
                 },
                 data: {
                     pointId: point.id,
+                    parentGroupId: point.parentGroupId,
                     label:
                         point.kind === 'waypoint' ? 'Waypoint' : 'Branchpoint',
                 },

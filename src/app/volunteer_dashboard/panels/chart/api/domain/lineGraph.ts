@@ -20,7 +20,11 @@ export function resolveLinePoints(
             if (point.kind !== 'branchpoint') return point
             const branch = byId.get(point.id)
             if (!branch) throw new Error(`Unknown branchpoint ${point.id}`)
-            return { ...point, coordinates: branch.coordinates }
+            return {
+                ...point,
+                coordinates: branch.coordinates,
+                parentGroupId: branch.parentGroupId,
+            }
         }),
     }
 }
@@ -92,6 +96,30 @@ export function resolveLineSources(line: Line, lines: Line[]): AnchorPoint[] {
         else pending.push(...parentLines(current, lines))
     }
     return [...sources.values()]
+}
+
+export function connectedBranchTargets(
+    line: Line,
+    lines: Line[]
+): { positionIds: Set<number>; branchPointIds: Set<string> } {
+    const sources = new Set(
+        resolveLineSources(line, lines).map(({ positionId }) => positionId)
+    )
+    const positionIds = new Set(sources)
+    const branchPointIds = new Set<string>()
+    for (const other of lines) {
+        if (
+            !resolveLineSources(other, lines).some(({ positionId }) =>
+                sources.has(positionId)
+            )
+        )
+            continue
+        const target = other.points.at(-1)
+        if (target?.kind === 'anchorpoint') positionIds.add(target.positionId)
+        for (const point of other.points)
+            if (point.kind === 'branchpoint') branchPointIds.add(point.id)
+    }
+    return { positionIds, branchPointIds }
 }
 
 export function exclusiveSourceLines(

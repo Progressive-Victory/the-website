@@ -34,11 +34,13 @@ export interface Waypoint {
     id: string
     kind: 'waypoint'
     coordinates: { x: number; y: number }
+    parentGroupId?: number
 }
 
 export interface BranchPoint {
     id: string
     coordinates: { x: number; y: number }
+    parentGroupId?: number
 }
 
 export interface BranchPointReference {
@@ -49,7 +51,7 @@ export interface BranchPointReference {
 export type LinePointData = AnchorPoint | Waypoint | BranchPointReference
 
 export type ResolvedBranchPoint = BranchPointReference &
-    Pick<BranchPoint, 'coordinates'>
+    Pick<BranchPoint, 'coordinates' | 'parentGroupId'>
 
 export type ResolvedLine = Omit<Line, 'points'> & {
     points: (AnchorPoint | Waypoint | ResolvedBranchPoint)[]

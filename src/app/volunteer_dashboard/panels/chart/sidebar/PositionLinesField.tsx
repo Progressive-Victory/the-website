@@ -1,10 +1,8 @@
 import type { Line, Position } from '../api/domain/chart.types'
 import { childLines, parentLines } from '../api/domain/lineGraph'
 import styles from '../page.module.css'
-import { FormGroup } from '@/components/common/forms/FormGroup'
-import { cn } from '@/util'
+import { AddListEmptyRow, List, NavigationRow } from '@/components/common/list'
 import { FaArrowLeftLong, FaArrowRightLong } from 'react-icons/fa6'
-import { FiChevronRight } from 'react-icons/fi'
 
 export function PositionLinesField({
     position,
@@ -62,91 +60,37 @@ export function PositionLinesField({
         }
     })
     return (
-        <section aria-label="Lines">
-            <FormGroup title="Lines">
-                <div className={styles.subPositionsContainer}>
-                    {connected.length === 0 && (
-                        <div className={styles.subPositionEntryEmpty}>
-                            No lines
-                        </div>
-                    )}
-                    {connected.map(
-                        ({ key, lineId, outgoing, label, pointCount }) => {
-                            const direction = outgoing ? 'Outgoing' : 'Incoming'
-                            const DirectionIcon = outgoing
-                                ? FaArrowRightLong
-                                : FaArrowLeftLong
-                            return (
-                                <div
-                                    key={key}
-                                    role="group"
-                                    aria-label={`${direction} line ${label}`}
-                                    className={cn(
-                                        styles.subPositionEntry,
-                                        styles.linePointEntry,
-                                        styles.linePointRow
-                                    )}
-                                >
-                                    <div
-                                        className={cn(
-                                            styles.subPositionEntryText,
-                                            styles.linePointText
-                                        )}
+        <List title="Lines">
+            {connected.length === 0 && (
+                <AddListEmptyRow>No lines</AddListEmptyRow>
+            )}
+            {connected.map(({ key, lineId, outgoing, label, pointCount }) => {
+                const direction = outgoing ? 'Outgoing' : 'Incoming'
+                const DirectionIcon = outgoing
+                    ? FaArrowRightLong
+                    : FaArrowLeftLong
+                return (
+                    <NavigationRow
+                        key={key}
+                        label={
+                            <span className={styles.linePointLabel}>
+                                <span className={styles.linePointTypeIcon}>
+                                    <span
+                                        role="img"
+                                        aria-label={direction}
+                                        title={direction}
                                     >
-                                        <div className={styles.linePointMain}>
-                                            <span
-                                                className={
-                                                    styles.linePointLabel
-                                                }
-                                            >
-                                                <span
-                                                    className={
-                                                        styles.linePointTypeIcon
-                                                    }
-                                                >
-                                                    <span
-                                                        role="img"
-                                                        aria-label={direction}
-                                                        title={direction}
-                                                    >
-                                                        <DirectionIcon aria-hidden="true" />
-                                                    </span>
-                                                </span>
-                                                <span>{label}</span>
-                                            </span>
-                                            <div
-                                                className={
-                                                    styles.linePointValues
-                                                }
-                                            >
-                                                <span
-                                                    className={
-                                                        styles.linePointCoordinates
-                                                    }
-                                                >
-                                                    {pointCount}
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    className={
-                                                        styles.linePointOpen
-                                                    }
-                                                    aria-label={`View ${direction.toLowerCase()} line ${label}`}
-                                                    onClick={() =>
-                                                        onSelectLine(lineId)
-                                                    }
-                                                >
-                                                    <FiChevronRight aria-hidden="true" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )
+                                        <DirectionIcon aria-hidden="true" />
+                                    </span>
+                                </span>
+                                <span>{label}</span>
+                            </span>
                         }
-                    )}
-                </div>
-            </FormGroup>
-        </section>
+                        value={pointCount}
+                        onClick={() => onSelectLine(lineId)}
+                    />
+                )
+            })}
+        </List>
     )
 }

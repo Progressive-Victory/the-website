@@ -1,8 +1,9 @@
 import type { HandleSide } from '../api/domain/chart.types'
+import { connectedBranchTargets } from '../api/domain/lineGraph'
 import { LineEditingContext } from './LineEditingContext'
 import styles from './LinePoint.module.css'
-import { useReactFlow, useStoreApi } from '@xyflow/react'
-import { useContext, useRef, useState } from 'react'
+import { useReactFlow, useStore, useStoreApi } from '@xyflow/react'
+import { useContext, useEffect, useRef, useState } from 'react'
 
 export function BranchConnectionHandle({
     lineId,
@@ -13,25 +14,29 @@ export function BranchConnectionHandle({
     pointId: string
     coordinates: { x: number; y: number }
 }) {
-    const { editing, onBranch, onMergeBranch, branchPoints } =
-        useContext(LineEditingContext)
+    const {
+        editing,
+        onBranch,
+        onMergeBranch,
+        branchPoints,
+        lines = [],
+        drawingBranchPointId,
+        onBranchDrawn,
+    } = useContext(LineEditingContext)
     const { screenToFlowPosition } = useReactFlow()
     const store = useStoreApi()
-    const pointer = useRef<number | null>(null)
+    const chart = useStore((state) => state.domNode)
     const [preview, setPreview] = useState<{ x: number; y: number } | null>(
         null
     )
-    if (!editing || !onBranch) return null
-    const cancel = () => {
-        pointer.current = null
-        setPreview(null)
-    }
-    const findTarget = (
-        element: SVGElement,
-        clientX: number,
-        clientY: number
-    ) => {
-        const chart = element.closest('.react-flow')
+    const active = editing && !!onBranch && drawingBranchPointId === pointId
+    const line = lines.find(({ id }) => id === lineId)
+    const blocked =
+        active && line ? connectedBranchTargets(line, lines) : undefined
+    const mergeTargets = (branchPoints ?? []).filter(
+        ({ id }) => id !== pointId && !blocked?.branchPointIds.has(id)
+    )
+    const findTarget = (clientX: number, clientY: number) => {
         const cursor = screenToFlowPosition(
             { x: clientX, y: clientY },
             { snapToGrid: false }
@@ -54,6 +59,7 @@ export function BranchConnectionHandle({
             const id = nodeId ? Number(nodeId) : NaN
             if (
                 !Number.isInteger(id) ||
+                blocked?.positionIds.has(id) ||
                 (side !== 'top' &&
                     side !== 'right' &&
                     side !== 'bottom' &&
@@ -78,8 +84,7 @@ export function BranchConnectionHandle({
             }
         }
         if (onMergeBranch)
-            for (const branch of branchPoints ?? []) {
-                if (branch.id === pointId) continue
+            for (const branch of mergeTargets) {
                 const candidateDistance = Math.hypot(
                     cursor.x - branch.coordinates.x,
                     cursor.y - branch.coordinates.y
@@ -94,89 +99,98 @@ export function BranchConnectionHandle({
             }
         return { cursor, nearest }
     }
+    const latest = useRef({
+        findTarget,
+        onBranch,
+        onMergeBranch,
+        onBranchDrawn,
+    })
+    useEffect(() => {
+        latest.current = { findTarget, onBranch, onMergeBranch, onBranchDrawn }
+    })
+    useEffect(() => {
+        if (!active || !chart) return
+        const inChart = (event: Event) =>
+            event.target instanceof Node && chart.contains(event.target)
+        const swallow = (event: Event) => {
+            if (inChart(event)) event.stopPropagation()
+        }
+        const finish = (completed: boolean) => {
+            setPreview(null)
+            latest.current.onBranchDrawn?.(completed)
+        }
+        const move = (event: PointerEvent) => {
+            const { cursor, nearest } = latest.current.findTarget(
+                event.clientX,
+                event.clientY
+            )
+            setPreview(nearest?.coordinates ?? cursor)
+        }
+        const down = (event: PointerEvent) => {
+            if (event.button !== 0 || !inChart(event)) return
+            event.preventDefault()
+            event.stopPropagation()
+            for (const type of ['mousedown', 'mouseup', 'click'])
+                window.addEventListener(type, swallow, {
+                    capture: true,
+                    once: true,
+                })
+            const { nearest } = latest.current.findTarget(
+                event.clientX,
+                event.clientY
+            )
+            if (nearest && 'pointId' in nearest)
+                latest.current.onMergeBranch?.(lineId, pointId, nearest.pointId)
+            else if (nearest)
+                latest.current.onBranch?.(
+                    lineId,
+                    pointId,
+                    nearest.id,
+                    nearest.side
+                )
+            finish(!!nearest)
+        }
+        const key = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') finish(false)
+        }
+        window.addEventListener('pointermove', move)
+        window.addEventListener('pointerdown', down, true)
+        window.addEventListener('keydown', key)
+        chart.classList.add(styles.drawingBranch)
+        return () => {
+            chart.classList.remove(styles.drawingBranch)
+            window.removeEventListener('pointermove', move)
+            window.removeEventListener('pointerdown', down, true)
+            window.removeEventListener('keydown', key)
+        }
+    }, [active, chart, lineId, pointId])
+    const shown = active ? (preview ?? coordinates) : null
+    if (!shown) return null
     return (
         <g>
-            {preview &&
-                onMergeBranch &&
-                branchPoints
-                    ?.filter((branch) => branch.id !== pointId)
-                    .map((branch) => (
-                        <circle
-                            key={branch.id}
-                            data-testid="branch-merge-target"
-                            cx={branch.coordinates.x}
-                            cy={branch.coordinates.y}
-                            r={6}
-                            fill="none"
-                            stroke="#0284c7"
-                            strokeWidth={1.5}
-                            pointerEvents="none"
-                        />
-                    ))}
-            {preview && (
-                <path
-                    d={`M ${coordinates.x},${coordinates.y} L ${preview.x},${preview.y}`}
-                    fill="none"
-                    stroke="#0284c7"
-                    strokeWidth={1.5}
-                    strokeDasharray="4 3"
-                    pointerEvents="none"
-                />
-            )}
-            <rect
-                role="button"
-                aria-label="Create child line"
-                className={`nodrag nopan ${styles.branchConnection}`}
-                x={coordinates.x + 9}
-                y={coordinates.y - 4}
-                width={8}
-                height={8}
-                pointerEvents="all"
-                onClick={(event) => event.stopPropagation()}
-                onDoubleClick={(event) => event.stopPropagation()}
-                onPointerDown={(event) => {
-                    if (event.button !== 0) return
-                    event.stopPropagation()
-                    pointer.current = event.pointerId
-                    event.currentTarget.setPointerCapture(event.pointerId)
-                    setPreview(coordinates)
-                }}
-                onPointerMove={(event) => {
-                    if (pointer.current !== event.pointerId) return
-                    event.stopPropagation()
-                    const { cursor, nearest } = findTarget(
-                        event.currentTarget,
-                        event.clientX,
-                        event.clientY
-                    )
-                    setPreview(nearest?.coordinates ?? cursor)
-                }}
-                onPointerUp={(event) => {
-                    if (pointer.current !== event.pointerId) return
-                    event.stopPropagation()
-                    const { nearest } = findTarget(
-                        event.currentTarget,
-                        event.clientX,
-                        event.clientY
-                    )
-                    cancel()
-                    event.currentTarget.releasePointerCapture(event.pointerId)
-                    if (nearest && 'pointId' in nearest)
-                        onMergeBranch?.(lineId, pointId, nearest.pointId)
-                    else if (nearest)
-                        onBranch(lineId, pointId, nearest.id, nearest.side)
-                }}
-                onPointerCancel={cancel}
-                onLostPointerCapture={cancel}
-                onKeyDown={(event) => {
-                    if (event.key === 'Escape') cancel()
-                }}
-                tabIndex={0}
-            >
-                <title>
-                    Drag to a node handle or branchpoint to create a child line
-                </title>
-            </rect>
+            {onMergeBranch &&
+                mergeTargets.map((branch) => (
+                    <circle
+                        key={branch.id}
+                        data-testid="branch-merge-target"
+                        cx={branch.coordinates.x}
+                        cy={branch.coordinates.y}
+                        r={6}
+                        fill="none"
+                        stroke="#0284c7"
+                        strokeWidth={1.5}
+                        pointerEvents="none"
+                    />
+                ))}
+            <path
+                data-testid="branch-draw-preview"
+                d={`M ${coordinates.x},${coordinates.y} L ${shown.x},${shown.y}`}
+                fill="none"
+                stroke="#0284c7"
+                strokeWidth={1.5}
+                strokeDasharray="4 3"
+                pointerEvents="none"
+            />
         </g>
     )
 }

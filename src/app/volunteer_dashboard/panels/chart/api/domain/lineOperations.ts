@@ -4,8 +4,19 @@ import type {
     BranchPoint,
     BranchPointReference,
     Line,
+    Waypoint,
 } from './chart.types'
 import { incomingLineCount, hasLineCycle, usedBranchPoints } from './lineGraph'
+
+const toBranchPoint = ({
+    id,
+    coordinates,
+    parentGroupId,
+}: Waypoint): BranchPoint => ({
+    id,
+    coordinates,
+    ...(parentGroupId !== undefined && { parentGroupId }),
+})
 
 export function createLine(
     source: { positionId: number; handle: HandleSide },
@@ -222,6 +233,9 @@ export function simplifyLines(
                     ...junction,
                     kind: 'waypoint',
                     coordinates: branch.coordinates,
+                    ...(branch.parentGroupId !== undefined && {
+                        parentGroupId: branch.parentGroupId,
+                    }),
                 },
                 ...outgoing.points.slice(1),
             ],
@@ -249,6 +263,40 @@ export function deleteBranch(
         positionIds,
         branchPoints
     )
+}
+
+export function convertLinePoint(
+    owner: Line,
+    pointId: string,
+    kind: 'waypoint' | 'branchpoint',
+    branchPoints: BranchPoint[]
+): { line: Line; branchPoints: BranchPoint[] } {
+    const point = owner.points.find(({ id }) => id === pointId)
+    if (!point || point.kind === 'anchorpoint')
+        throw new Error('The selected point cannot be converted.')
+    const existing =
+        point.kind === 'waypoint'
+            ? point
+            : branchPoints.find(({ id }) => id === point.id)
+    if (!existing) throw new Error(`Missing coordinates for point ${pointId}`)
+    const { coordinates, parentGroupId } = existing
+    const group = parentGroupId !== undefined && { parentGroupId }
+    const next: Waypoint | BranchPointReference =
+        kind === 'branchpoint'
+            ? { id: pointId, kind }
+            : { id: pointId, kind, coordinates, ...group }
+    return {
+        line: {
+            ...owner,
+            points: owner.points.map((item) =>
+                item.id === pointId ? next : item
+            ),
+        },
+        branchPoints:
+            kind === 'branchpoint'
+                ? [...branchPoints, { id: pointId, coordinates, ...group }]
+                : branchPoints.filter(({ id }) => id !== pointId),
+    }
 }
 
 export function deleteBranchPoint(
@@ -291,9 +339,7 @@ export function deleteBranchPoint(
                 : { id: target.id, kind: 'branchpoint' }
         const nextBranches = [
             ...branchPoints.filter(({ id }) => id !== pointId),
-            ...(target.kind === 'waypoint'
-                ? [{ id: target.id, coordinates: target.coordinates }]
-                : []),
+            ...(target.kind === 'waypoint' ? [toBranchPoint(target)] : []),
         ]
         const outgoingIds = new Set(outgoing.map(({ id }) => id))
         const nextLines = lines.flatMap((line): Line[] => {
@@ -337,10 +383,7 @@ export function deleteBranchPoint(
         )
     } else {
         if (upstream.kind === 'waypoint')
-            nextBranches = [
-                ...nextBranches,
-                { id: upstream.id, coordinates: upstream.coordinates },
-            ]
+            nextBranches = [...nextBranches, toBranchPoint(upstream)]
         const origin: AnchorPoint | BranchPointReference =
             upstream.kind === 'anchorpoint'
                 ? upstream

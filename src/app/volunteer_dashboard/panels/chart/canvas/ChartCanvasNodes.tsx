@@ -1,14 +1,17 @@
 'use client'
 
 import styles from '../page.module.css'
+import { DragPill, useDragAttributes } from './DragPill'
 import { LineEditingContext } from './LineEditingContext'
 import { linePointNodeType } from './linePointNodes'
 import type { Seat } from './positionsToGraph'
 import { DiscordAvatar } from '@/components/common/DiscordAvatar'
 import {
     Handle,
+    NodeResizer,
     Position as HandlePosition,
     type NodeProps,
+    type ResizeParams,
 } from '@xyflow/react'
 import type { Node } from '@xyflow/react'
 import {
@@ -24,6 +27,10 @@ export const connectionRadius = 20
 export const TitleHeightContext = createContext<
     (id: string, height: number) => void
 >(() => undefined)
+
+export const GroupResizeContext = createContext<
+    ((id: string, box: ResizeParams) => void) | null
+>(null)
 
 type PositionNode = Node<{
     label: string
@@ -123,9 +130,27 @@ function SeatRows({ seats }: { seats: Seat[] }) {
     )
 }
 
-function PositionGroup({ id, data, selected }: NodeProps<PositionNode>) {
+function PositionGroup({
+    id,
+    data,
+    selected,
+    dragging,
+}: NodeProps<PositionNode>) {
+    const { editing } = useContext(LineEditingContext)
+    const onResizeEnd = useContext(GroupResizeContext)
     return (
-        <div className={styles.group} data-selected={selected}>
+        <div
+            className={styles.group}
+            data-selected={selected}
+            {...useDragAttributes(id, dragging)}
+        >
+            <DragPill id={id} />
+            <NodeResizer
+                isVisible={editing && selected && !!onResizeEnd}
+                minWidth={240}
+                minHeight={140}
+                onResizeEnd={(_, box) => onResizeEnd?.(id, box)}
+            />
             <PositionHandle side="top" />
             <PositionHandle side="left" />
             <PositionHandle side="right" />
@@ -136,9 +161,19 @@ function PositionGroup({ id, data, selected }: NodeProps<PositionNode>) {
     )
 }
 
-function PositionSeats({ id, data, selected }: NodeProps<PositionNode>) {
+function PositionSeats({
+    id,
+    data,
+    selected,
+    dragging,
+}: NodeProps<PositionNode>) {
     return (
-        <div className={styles.positionNode} data-selected={selected}>
+        <div
+            className={styles.positionNode}
+            data-selected={selected}
+            {...useDragAttributes(id, dragging)}
+        >
+            <DragPill id={id} />
             <PositionHandle side="top" />
             <PositionHandle side="left" />
             <PositionHandle side="right" />
@@ -149,9 +184,11 @@ function PositionSeats({ id, data, selected }: NodeProps<PositionNode>) {
     )
 }
 
-function LinePointSelection({ selected }: NodeProps) {
+function LinePointSelection({ id, selected }: NodeProps) {
     return (
-        <div className={styles.linePointSelection} data-selected={selected} />
+        <div className={styles.linePointSelection} data-selected={selected}>
+            <DragPill id={id} />
+        </div>
     )
 }
 

@@ -33,18 +33,81 @@
     z-index: 20000;
 }
 
-.branchConnection {
-    fill: #fff;
-    stroke: #0284c7;
-    stroke-width: 1.5px;
-    cursor: crosshair;
-    touch-action: none;
+.pointButton {
+    outline: none;
+}
 
-    &:hover,
-    &:focus-visible {
-        fill: #bae6fd;
-        outline: none;
+.placementDiamond {
+    fill: #fff;
+    stroke: rgba(2, 132, 199, 1);
+    stroke-width: 2px;
+    paint-order: stroke fill;
+    filter: drop-shadow(0 4px 5px rgba(15, 23, 42, 0.28));
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: rotate(-45deg) scale(1.25);
+    opacity: 0.55;
+
+    &.placementSettling {
+        animation: placementSettle 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
+}
+
+@keyframes placementSettle {
+    0% {
+        transform: rotate(-45deg) scale(1.25);
+        filter: drop-shadow(0 4px 5px rgba(15, 23, 42, 0.28));
+        opacity: 0.55;
+    }
+    70% {
+        transform: rotate(5deg) scale(0.94);
+        opacity: 1;
+    }
+    100% {
+        transform: rotate(0deg) scale(1);
+        filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.2));
+        opacity: 1;
+    }
+}
+
+.angleGuide {
+    color: rgba(100, 116, 139, 0.85);
+
+    &.angleSnapped {
+        color: #0284c7;
+    }
+}
+
+.angleBaseline,
+.angleRay,
+.angleArc {
+    fill: none;
+    stroke: currentColor;
+}
+
+.angleBaseline {
+    opacity: 0.6;
+}
+
+.angleSquare {
+    stroke: rgba(100, 116, 139, 0.85);
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.angleLabel {
+    fill: currentColor;
+    stroke: #fff;
+    paint-order: stroke fill;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+.drawingBranch,
+.drawingBranch * {
+    cursor: crosshair !important;
 }
 
 .splitHandle {
@@ -59,7 +122,8 @@
         stroke-width 150ms ease-in-out,
         filter 150ms ease-in-out;
 
-    .splitCircle:hover & {
+    .splitCircle:hover &,
+    .splitCircle[data-selected='true'] & {
         fill: rgba(2, 132, 199, 1);
     }
 }
@@ -69,6 +133,10 @@
     stroke: rgba(14, 165, 233, 0.25);
     stroke-width: 0;
     transition: stroke-width 150ms ease-in-out;
+}
+
+.splitCircle[data-selected='true'] .haloEditable {
+    stroke-width: 6px;
 }
 
 .splitCircle:hover .haloEditable {

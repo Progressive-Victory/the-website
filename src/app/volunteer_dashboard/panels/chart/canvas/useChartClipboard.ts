@@ -11,6 +11,8 @@ import { parseErrorMessage } from '@/util'
 import type { Node, ReactFlowInstance } from '@xyflow/react'
 import { useState, type KeyboardEvent, type RefObject } from 'react'
 
+const duplicateOffset = 40
+
 interface ChartClipboardOptions {
     positions: Position[]
     lines: Line[]
@@ -36,6 +38,7 @@ interface ChartClipboardOptions {
     ) => ChartClipboard
     onCutSelection?: (ids: number[]) => void
     onSelectLine?: (id: string | null) => void
+    onStartEditing?: () => void
 }
 
 export function useChartClipboard({
@@ -57,14 +60,18 @@ export function useChartClipboard({
     onPasteSelection,
     onCutSelection,
     onSelectLine,
+    onStartEditing,
 }: ChartClipboardOptions) {
     const [clipboard, setClipboard] = useState<ChartClipboard | null>(null)
     const canCopy = nodes.some(
         (node) => node.selected && node.type !== linePointNodeType
     )
-    const canEdit = isEditing && !disabled
+    const canEdit = !disabled && (isEditing || !!onStartEditing)
+    const startEditing = () => {
+        if (!isEditing) onStartEditing?.()
+    }
 
-    const copySelection = () => {
+    const snapshotSelection = () => {
         const snapshot = positions.map((position) => {
             const node = nodes.find(({ id }) => id === String(position.id))
             if (!node) throw new Error('The selected node is not available.')
@@ -79,7 +86,7 @@ export function useChartClipboard({
                     groupBounds.get(position.id) ?? position.groupBounds,
             }
         })
-        const copied = copyChartSelection(
+        return copyChartSelection(
             { positions: snapshot, lines, branchPoints },
             new Set(
                 nodes
@@ -90,12 +97,43 @@ export function useChartClipboard({
                     .map(({ id }) => Number(id))
             )
         )
+    }
+
+    const copySelection = () => {
+        const copied = snapshotSelection()
         setClipboard(copied)
         return copied
     }
 
-    const clipboardAction = (action: 'copy' | 'cut' | 'paste') => {
+    const finishPaste = (pasted: ChartClipboard) => {
+        selectPastedNodes(pastedSelectionIds(pasted))
+        clearSelectedEdges()
+        onSelectLine?.(null)
+    }
+
+    const clipboardAction = (
+        action: 'copy' | 'cut' | 'paste' | 'duplicate'
+    ) => {
         try {
+            if (action === 'duplicate') {
+                if (disabled || !canCopy || !onPasteSelection) return
+                const copied = snapshotSelection()
+                const roots = copied.positions.filter(
+                    ({ parentGroupId }) => parentGroupId === undefined
+                )
+                const corner = (axis: 'x' | 'y') =>
+                    Math.min(
+                        ...roots.map(
+                            (position) =>
+                                (position.coordinates?.[axis] ?? 0) +
+                                (position.groupBounds?.[axis] ?? 0)
+                        )
+                    ) + duplicateOffset
+                finishPaste(
+                    onPasteSelection(copied, { x: corner('x'), y: corner('y') })
+                )
+                return
+            }
             if (action === 'paste') {
                 if (!canEdit || !clipboard || !onPasteSelection) return
                 const flow = flowRef.current
@@ -109,19 +147,20 @@ export function useChartClipboard({
                     },
                     { snapToGrid: false }
                 )
-                const pasted = onPasteSelection(clipboard, {
-                    x: Math.round(at.x / 5) * 5,
-                    y: Math.round(at.y / 5) * 5,
-                })
-                selectPastedNodes(pastedSelectionIds(pasted))
-                clearSelectedEdges()
-                onSelectLine?.(null)
+                startEditing()
+                finishPaste(
+                    onPasteSelection(clipboard, {
+                        x: Math.round(at.x / 5) * 5,
+                        y: Math.round(at.y / 5) * 5,
+                    })
+                )
                 return
             }
             if (!canCopy || (action === 'cut' && (!canEdit || !onCutSelection)))
                 return
             const copied = copySelection()
             if (action === 'cut') {
+                startEditing()
                 onCutSelection?.(copied.positions.map(({ id }) => id))
                 clearNodeSelection()
             }

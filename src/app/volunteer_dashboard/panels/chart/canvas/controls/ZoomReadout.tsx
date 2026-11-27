@@ -17,6 +17,8 @@ export default function ZoomReadout() {
     )
     const [isZooming, setIsZooming] = useState(false)
     const lastZoom = useRef(zoom)
+    const rounded = Math.round(percent)
+    const label = rounded === 100 ? 'Max' : `${rounded}%`
 
     useEffect(() => {
         if (lastZoom.current === zoom) return
@@ -30,9 +32,7 @@ export default function ZoomReadout() {
     return (
         <div className={styles.wrapper} data-visible={isZooming}>
             <ControlGroup>
-                <output className={styles.readout}>
-                    {Math.round(percent)}%
-                </output>
+                <output className={styles.readout}>{label}</output>
             </ControlGroup>
         </div>
     )

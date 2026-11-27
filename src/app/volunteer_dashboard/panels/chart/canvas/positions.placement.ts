@@ -1,10 +1,84 @@
+import { linePointNodeType } from './linePointNodes'
 import type { Node } from '@xyflow/react'
+
+// Matches the group's border width so children stop at its inner edge.
+export const GROUP_INSET = 2
+
+export const POSITION_GRID = 5
+export const LINE_POINT_GRID = 1
+
+const gridFor = (node: Node) =>
+    node.type === linePointNodeType ? LINE_POINT_GRID : POSITION_GRID
+
+const nodeSize = (node: Node) => ({
+    width: node.measured?.width ?? Number(node.style?.width ?? 0),
+    height: node.measured?.height ?? Number(node.style?.height ?? 0),
+})
+
+const clampToParent = (
+    position: { x: number; y: number },
+    node: Node,
+    parent: Node | undefined
+) => {
+    if (!parent) return position
+    const own = nodeSize(node)
+    const bounds = nodeSize(parent)
+    const clamp = (value: number, size: number, parentSize: number) =>
+        Math.max(GROUP_INSET, Math.min(value, parentSize - size - GROUP_INSET))
+    return {
+        x: clamp(position.x, own.width, bounds.width),
+        y: clamp(position.y, own.height, bounds.height),
+    }
+}
+
+// Multi-node drags snap one anchor and shift every node by the same amount, keeping them aligned.
+function sharedSnapDelta(
+    nodes: Node[],
+    movedIds: ReadonlySet<string>,
+    byId: ReadonlyMap<string, Node>
+): { x: number; y: number } | undefined {
+    if (movedIds.size < 2) return undefined
+    const moved = nodes.filter(({ id }) => movedIds.has(id))
+    const anchor =
+        moved.find(({ type }) => type !== linePointNodeType) ?? moved[0]
+    if (!anchor) return undefined
+    let { x, y } = anchor.position
+    const visited = new Set([anchor.id])
+    let parent = anchor.parentId ? byId.get(anchor.parentId) : undefined
+    while (parent && !visited.has(parent.id)) {
+        visited.add(parent.id)
+        x += parent.position.x
+        y += parent.position.y
+        parent = parent.parentId ? byId.get(parent.parentId) : undefined
+    }
+    const { width, height } = nodeSize(anchor)
+    const grid = gridFor(anchor)
+    const snap = (value: number) => Math.round(value / grid) * grid - value
+    return { x: snap(x + width / 2), y: snap(y + height / 2) }
+}
 
 export function snapNodeCenters(
     nodes: Node[],
     movedIds: ReadonlySet<string>
 ): Node[] {
     const byId = new Map(nodes.map((node) => [node.id, node]))
+    const shared = sharedSnapDelta(nodes, movedIds, byId)
+    if (shared)
+        return nodes.map((node) => {
+            if (!movedIds.has(node.id)) return node
+            const parent = node.parentId ? byId.get(node.parentId) : undefined
+            return {
+                ...node,
+                position: clampToParent(
+                    {
+                        x: node.position.x + shared.x,
+                        y: node.position.y + shared.y,
+                    },
+                    node,
+                    parent
+                ),
+            }
+        })
     const result = new Map<string, Node>()
     const snap = (node: Node): Node => {
         const cached = result.get(node.id)
@@ -30,6 +104,7 @@ export function snapNodeCenters(
             const width = node.measured?.width ?? Number(node.style?.width ?? 0)
             const height =
                 node.measured?.height ?? Number(node.style?.height ?? 0)
+            const grid = gridFor(node)
             const snapAxis = (
                 value: number,
                 offset: number,
@@ -37,12 +112,15 @@ export function snapNodeCenters(
                 parentSize?: number
             ) => {
                 const snapped =
-                    Math.round((offset + value + size / 2) / 5) * 5 -
+                    Math.round((offset + value + size / 2) / grid) * grid -
                     offset -
                     size / 2
                 return parentSize === undefined
                     ? snapped
-                    : Math.max(0, Math.min(snapped, parentSize - size))
+                    : Math.max(
+                          GROUP_INSET,
+                          Math.min(snapped, parentSize - size - GROUP_INSET)
+                      )
             }
             const position = {
                 x: snapAxis(

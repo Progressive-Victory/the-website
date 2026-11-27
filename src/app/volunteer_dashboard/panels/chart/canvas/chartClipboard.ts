@@ -123,6 +123,8 @@ export function pasteChartSelection(
         x: x + offset.x,
         y: y + offset.y,
     })
+    const pastedGroup = (parentGroupId: number | undefined) =>
+        parentGroupId === undefined ? undefined : positionIds.get(parentGroupId)
     const positions: Position[] = clipboard.positions.map((position) => ({
         ...structuredClone(position),
         id: positionIds.get(position.id)!,
@@ -152,6 +154,7 @@ export function pasteChartSelection(
                         ...point,
                         id,
                         coordinates: translate(point.coordinates),
+                        parentGroupId: pastedGroup(point.parentGroupId),
                     }
                 return { ...point, id }
             }),
@@ -159,6 +162,7 @@ export function pasteChartSelection(
         branchPoints: clipboard.branchPoints.map((point) => ({
             id: pointId(point.id),
             coordinates: translate(point.coordinates),
+            parentGroupId: pastedGroup(point.parentGroupId),
         })),
     }
 }
