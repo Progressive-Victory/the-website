@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
+/**
+ * A helper function that returns a value (true/false)
+ * that indicates if its parent component has been
+ * mounted on screen.
+ * */
 export function useHydration() {
-    const [hydrated, setHydrated] = useState(false)
-
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setHydrated(true)
-    }, [])
-
-    return hydrated
+    return useSyncExternalStore(
+        () => () => null,
+        () => true,
+        () => false
+    )
 }

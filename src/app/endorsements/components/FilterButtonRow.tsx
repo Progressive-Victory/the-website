@@ -167,6 +167,17 @@ export function FilterButtonRow({
         }
     }
 
+    const updateMobileState = () => {
+        if (
+            !isMobile &&
+            (mobileSearchWidth || singleColumnLayout || showSearchLabel)
+        ) {
+            setMobileSearchWidth(null)
+            setSingleColumnLayout(false)
+            setShowSearchLabel(false)
+        }
+    }
+
     useEffect(() => {
         if (!isSearchOpen || isMobile) return
 
@@ -205,14 +216,7 @@ export function FilterButtonRow({
         }
     }, [])
 
-    if (
-        !isMobile &&
-        (mobileSearchWidth || singleColumnLayout || showSearchLabel)
-    ) {
-        setMobileSearchWidth(null)
-        setSingleColumnLayout(false)
-        setShowSearchLabel(false)
-    }
+    updateMobileState()
 
     useLayoutEffect(() => {
         if (!isMobile) {

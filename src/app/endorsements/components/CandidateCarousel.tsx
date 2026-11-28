@@ -1,3 +1,4 @@
+import { useHydration } from '../../../util/hooks/useHydration'
 import { waveListVariants } from '../endorsements.motion'
 import styles from './CandidateCarousel.module.css'
 import { EndorsementAvatar, PersonCard } from '@/components/common'
@@ -31,7 +32,7 @@ export function CandidateCarousel({
 }: CandidateCarouselProps) {
     const visibleRange = 800
     const [scrollOffset, setScrollOffset] = useState(0)
-    const [mounted, setMounted] = useState(false)
+    const hydrated = useHydration()
     const rafRef = useRef<number>(0)
 
     const trackLength = candidates.length * gap
@@ -51,7 +52,6 @@ export function CandidateCarousel({
     }, [candidates, trackLength, visibleRange])
 
     useEffect(() => {
-        setMounted(true) // Problematic
         let last = performance.now()
         const speed = 0.1
 
@@ -65,7 +65,7 @@ export function CandidateCarousel({
         return () => cancelAnimationFrame(rafRef.current)
     }, [])
 
-    if (!mounted) return <div className={styles.carousel} />
+    if (!hydrated) return <div className={styles.carousel} />
 
     return (
         <motion.div

@@ -129,20 +129,6 @@ export function AccountDetailsSection({
         [pendingLinkEmail, userData.donors]
     )
 
-    if (matchedDonor) {
-        setAddressDraft({
-            ...userData.address,
-            addressLine1: matchedDonor.addr1 ?? userData.address.addressLine1,
-            city: matchedDonor.city ?? userData.address.city,
-            state: matchedDonor.state ?? userData.address.state,
-            zip: matchedDonor.zip ?? userData.address.zip,
-        })
-        setMatchedDonorEmail(matchedDonor.email)
-        setShowDonorLinkForm(false)
-        setShowAddressConfirmModal(true)
-        setPendingLinkEmail(null)
-    }
-
     const handleChangeDonorEmail = (e: ChangeEvent<HTMLInputElement>) => {
         setDonorLinkForm({
             ...donorLinkForm,
@@ -155,6 +141,23 @@ export function AccountDetailsSection({
             ...donorLinkForm,
             orderId: e.target.value,
         })
+    }
+
+    const matchedDonorUpdate = () => {
+        if (matchedDonor) {
+            setAddressDraft({
+                ...userData.address,
+                addressLine1:
+                    matchedDonor.addr1 ?? userData.address.addressLine1,
+                city: matchedDonor.city ?? userData.address.city,
+                state: matchedDonor.state ?? userData.address.state,
+                zip: matchedDonor.zip ?? userData.address.zip,
+            })
+            setMatchedDonorEmail(matchedDonor.email)
+            setShowDonorLinkForm(false)
+            setShowAddressConfirmModal(true)
+            setPendingLinkEmail(null)
+        }
     }
 
     const submitLinkForm = (e: FormEvent) => {
@@ -462,6 +465,8 @@ export function AccountDetailsSection({
         setShowAddressConfirmModal(false)
         setMatchedDonorEmail(null)
     }
+
+    matchedDonorUpdate()
 
     return (
         <section className={styles.content}>

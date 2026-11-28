@@ -1,5 +1,6 @@
 'use client'
 
+// import { CandidateCarousel } from './components/CandidateCarousel'
 import { CandidateDetails } from './components/CandidateDetails'
 import { CandidateGallery } from './components/CandidateGallery'
 import { FilterButtonRow } from './components/FilterButtonRow'

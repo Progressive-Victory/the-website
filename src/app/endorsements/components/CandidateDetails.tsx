@@ -77,14 +77,18 @@ export function CandidateDetails({
     const [mounted, setMounted] = useState(false)
     const [lastCandidate, setLastCandidate] = useState<Endorsement | null>(null)
 
+    if (candidateProp && candidateProp != lastCandidate) {
+        setLastCandidate(candidateProp)
+        setMounted(true)
+        requestAnimationFrame(() => setVisible(true))
+    } else if (!candidateProp && visible) {
+        setVisible(false)
+    }
+
     useEffect(() => {
         if (candidateProp) {
-            setLastCandidate(candidateProp)
-            setMounted(true)
-            requestAnimationFrame(() => setVisible(true))
             document.body.style.overflow = 'hidden'
         } else {
-            setVisible(false)
             document.body.style.overflow = ''
         }
     }, [candidateProp])

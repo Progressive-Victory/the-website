@@ -188,16 +188,20 @@ export default function VolunteerPage() {
 
     const currentStage = overrideStage ?? user.data?.onboardingStage
 
-    if (
-        currentStage === OnboardingStage.JOINED &&
-        (!user.data?.firstName ||
-            !user.data?.lastName ||
-            !user.data?.birthdate ||
-            !user.data?.address?.zip ||
-            !user.data?.phone)
-    ) {
-        setOverrideStage(OnboardingStage.NOT_STARTED)
+    const checkResetStage = () => {
+        if (
+            currentStage === OnboardingStage.JOINED &&
+            (!user.data?.firstName ||
+                !user.data?.lastName ||
+                !user.data?.birthdate ||
+                !user.data?.address?.zip ||
+                !user.data?.phone)
+        ) {
+            setOverrideStage(OnboardingStage.NOT_STARTED)
+        }
     }
+
+    checkResetStage()
 
     if (isSessionLoading) return null
 
